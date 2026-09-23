@@ -7,6 +7,7 @@ import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
 import { shareJson } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
+import { avisar } from '../modal.js';
 
 let S;
 const name = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return `grimorio-${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}.json`; };
@@ -25,7 +26,7 @@ export function loadBackup(text) {
     invalidateItems(); closeSheet($('#backupDlg'));
     toast(`Hoja antigua añadida como <b>${esc(nombre)}</b>.`, [undoBtn(S, h)]); return;
   }
-  alert('Eso no es una copia válida del grimorio. Usa el archivo o el texto completo tal como se guardó.');
+  avisar({ titulo: 'Esa copia no se puede leer', texto: 'No es una copia válida del grimorio. Usa el archivo o el texto completo tal como se guardó.', icono: 'save' });
 }
 export function init(store) {
   S = store;

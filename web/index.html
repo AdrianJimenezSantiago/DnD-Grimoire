@@ -12,9 +12,11 @@
 </head>
 <body>
 
+<section id="landing" class="landing" hidden aria-label="Inicio"></section>
+
 <header class="appbar" id="appbar">
   <div class="bar">
-    <button type="button" class="who-chip" data-cmd="chars" id="whoChip" aria-label="Cambiar de personaje"></button>
+    <button type="button" class="who-chip" data-cmd="home" id="whoChip" aria-label="Inicio: cambiar de personaje"></button>
     <span class="spacer"></span>
     <span class="act">
       <button type="button" data-cmd="rest" id="bRest"></button>
@@ -56,6 +58,25 @@
 <dialog id="spellDlg" class="tall" aria-labelledby="spTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="spTitle"></h2><div class="dsub" id="spSub"></div></div>
   <div class="dbody" id="spBody"></div><div class="dfoot" id="spFoot"></div>
+</dialog>
+
+<dialog id="rollDlg" class="tall" aria-labelledby="rlTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="rlTitle"></h2><div class="dsub" id="rlSub"></div></div>
+  <div class="dbody" id="rlBody"></div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="termDlg" aria-labelledby="tmTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="tmTitle"></h2><div class="dsub" id="tmSub"></div></div>
+  <div class="dbody" id="tmBody"></div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="glosDlg" class="tall" aria-labelledby="glTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="glTitle">Glosario de reglas</h2><div class="dsub">Estados, acciones y reglas del Manual del Jugador. Los estados aparecen enlazados en las descripciones de los conjuros.</div></div>
+  <div class="pickbar" style="grid-template-columns:1fr"><input type="search" id="glQ" placeholder="Buscar término" aria-label="Buscar término" autocomplete="off"></div>
+  <div class="dbody" id="glList"></div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
 </dialog>
 
 <dialog id="charsDlg" class="tall" aria-labelledby="charsTitle"><div class="grip"></div>
@@ -134,7 +155,7 @@
 <dialog id="manualDlg" class="tall" aria-labelledby="mnTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="mnTitle">Manual del jugador</h2><div class="dsub">Descripciones completas de los conjuros desde tu propio PDF.</div></div>
   <div class="dbody">
-    <p class="note">Elige el PDF de tu Manual del Jugador (2024, en español). La app lee el capítulo de conjuros en este dispositivo y guarda las descripciones aquí: no se suben a ningún sitio ni van en las copias de seguridad. Tarda entre unos segundos y un minuto, según el móvil.</p>
+    <p class="note">Elige el PDF de tu Manual del Jugador (2024, en español). La app lee el capítulo de conjuros y el glosario de reglas en este dispositivo y guarda las descripciones aquí: no se suben a ningún sitio ni van en las copias de seguridad. Tarda entre unos segundos y un minuto, según el móvil.</p>
     <div id="mnEstado"></div>
     <label class="chk-line"><input type="checkbox" id="mnOficial" checked> Poner a mis conjuros los nombres y datos técnicos oficiales del manual</label>
     <p class="note">Por ejemplo, «Contraconjuro» pasa a «Contrahechizo». Tus resúmenes y textos propios no se tocan, y se puede deshacer.</p>
@@ -151,7 +172,7 @@
     <p class="note">Hoja de conjuros para Crónicas de La Argos, con las reglas del Manual del Jugador de 2024.</p>
     <p class="note">Este trabajo incluye material del System Reference Document 5.2 («SRD 5.2») de Wizards of the Coast LLC, disponible en https://www.dndbeyond.com/srd. El SRD 5.2 tiene licencia Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/legalcode). Los datos del SRD llegan a través de Open5e. Los nombres en español y los datos técnicos siguen el Manual del Jugador 2024; las descripciones del manual solo aparecen si importas tu propio PDF, y se quedan en tu dispositivo.</p>
     <p class="note">This work includes material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0 International License.</p>
-    <p class="note">Fuentes Alegreya y Alegreya Sans, SIL Open Font License 1.1.</p>
+    <p class="note">Fuentes Alegreya y Alegreya Sans, SIL Open Font License 1.1. Iconos temáticos de game-icons.net (Lorc, Delapouite y otros), licencia CC BY 3.0.</p>
   </div>
   <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
 </dialog>

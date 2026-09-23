@@ -52,7 +52,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .who-chip { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 3px 12px 3px 3px; border-radius: var(--r-pill);
   background: var(--surface); border: 1px solid var(--line); max-width: 60vw; }
 .monogram { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  font: 700 18px / 1 var(--serif); color: #1b1406; background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--candle-mid) 55%, var(--candle-edge)); box-shadow: 0 0 14px var(--glow); }
+  font: 700 18px / 1 var(--serif); color: hsl(var(--acc-h) 60% 12%); background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--candle-mid) 55%, var(--candle-edge)); box-shadow: 0 0 14px var(--glow); }
 .who-chip .nm { font: 500 var(--fs-l) / 1.05 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .who-chip .lv { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); white-space: nowrap; }
 .who-chip .icon { width: 16px; height: 16px; color: var(--ink-3); }
@@ -65,14 +65,21 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .editbanner { display: none; font: 500 var(--fs-s) / 1.35 var(--sans); color: #1b1406; background: linear-gradient(90deg, var(--gold-2), var(--gold)); padding: 8px var(--s4); text-align: center; }
 body.editing .editbanner { display: block; }
 
-/* velas: espacios de conjuro (encendida = libre) */
-.slotbtn { width: 30px; height: 34px; min-height: 0; padding: 0; border: 0; background: transparent; display: inline-grid; place-items: center; border-radius: 8px; }
-.slotbtn:active { transform: scale(.9); }
-.flame { width: 13px; height: 18px; border-radius: 50% 50% 45% 45% / 62% 62% 38% 38%;
-  background: radial-gradient(ellipse at 50% 72%, var(--candle-core) 0 22%, var(--candle-mid) 46%, var(--candle-edge) 78%, transparent 80%);
-  box-shadow: 0 0 10px 1px var(--glow); transform-origin: 50% 90%; transition: transform var(--t-med) var(--spring), opacity var(--t-med), box-shadow var(--t-med); }
-.slotbtn.spent .flame { background: none; box-shadow: none; border: 1.5px solid var(--ink-3); opacity: .55; transform: scale(.78); border-radius: 50%; width: 12px; height: 12px; }
-
+/* espacios de conjuro: orbes (lleno = libre, anillo vacío = gastado) */
+.slotbtn { width: 30px; height: 34px; min-height: 0; padding: 0; border: 0; background: transparent; display: inline-grid; place-items: center; border-radius: 50%; }
+.slotbtn:hover { background: var(--gold-soft); }
+.slotbtn:active { transform: scale(.88); }
+.orb { position: relative; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--gold);
+  box-shadow: 0 0 10px var(--glow); transition: border-color var(--t-med), box-shadow var(--t-med), opacity var(--t-med); }
+.orb::before { content: ""; position: absolute; inset: 2px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--gold-2) 45%, var(--gold) 100%);
+  transform: scale(1); transition: transform var(--t-med) var(--spring), opacity var(--t-med); }
+.slotbtn.spent .orb { border-color: var(--ink-3); box-shadow: none; opacity: .55; }
+.slotbtn.spent .orb::before { transform: scale(0); opacity: 0; }
+.sb-l > b { cursor: pointer; border-radius: 6px; padding: 2px 4px; }
+.sb-l > b:hover { background: var(--gold-soft); color: var(--gold); }
+.monogram .gi { width: 22px; height: 22px; }
+.gi { width: 1.2em; height: 1.2em; flex: none; vertical-align: -0.2em; }
 .conc { display: inline-flex; align-items: center; gap: 8px; font: 500 var(--fs-s) / 1.2 var(--sans); color: var(--ink);
   background: var(--gold-soft); border: 1px solid var(--gold); border-radius: var(--r-pill); padding: 3px 4px 3px 12px; }
 .conc button { min-height: 28px; padding: 0 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); }
@@ -100,6 +107,8 @@ body.editing #dEdit { color: #1b1406; background: linear-gradient(180deg, var(--
 html, body { overflow-x: clip; }
 .hero { position: relative; padding: var(--s5) var(--s1) var(--s4); isolation: isolate; }
 .astrolabe { position: absolute; z-index: -1; right: -60px; top: -40px; width: 340px; height: 340px; color: var(--gold); opacity: .16; pointer-events: none; }
+.emblem { position: absolute; z-index: -1; right: 70px; top: 90px; width: 80px; height: 80px; color: var(--gold); opacity: .32; pointer-events: none; filter: drop-shadow(0 0 18px var(--glow)); }
+@media (max-width: 560px) { .emblem { right: 50px; top: 70px; width: 64px; height: 64px; } }
 .astrolabe g.spin { transform-origin: 170px 170px; animation: orrery 240s linear infinite; }
 .hero h1 { font: 500 var(--fs-display) / .95 var(--serif); letter-spacing: -.01em; margin: 0; position: relative; display: inline-block; }
 .hero h1 .underline { position: absolute; left: -2%; bottom: -10px; width: 104%; height: 14px; overflow: visible; }

@@ -6,6 +6,7 @@ import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { pageToColumns } from '../domain/manualLineas.js';
 import { parseSpells } from '../domain/manual.js';
+import { parseGlosario } from '../domain/glosario.js';
 
 // Android y web: el lector de PDF trabaja en un hilo aparte (worker).
 // Archivo único de Windows (abierto desde el disco): los workers no se pueden cargar desde file://,
@@ -42,7 +43,18 @@ export async function leerManual(file, onProgress = () => {}) {
   if (!first) { await doc.destroy(); throw new Error('No encuentro el capítulo de descripciones de conjuros en este PDF.'); }
   const pages = [];
   for (let p = first; p <= last; p++) { const r = await leer(p); pages.push({ p, cols: pageToColumns(r.items, r.w) }); }
+  // Glosario de reglas: desde «Definiciones de las reglas» hasta el índice de términos
+  const glos = []; let dentro = false;
+  for (let p = last + 1; p <= N; p++) {
+    const r = await leer(p), cols = pageToColumns(r.items, r.w);
+    const txt = cols.flat().map(l => l.s).join('\n').replace(/\s+/g, ' ');
+    onProgress({ fase: 'glosario', pagina: p, total: N });
+    // títulos en mayúsculas (el texto normal también menciona «el índice de términos»)
+    if (!dentro && /DEFINICIONES DE LAS REGLAS/.test(txt)) dentro = true;
+    if (dentro && glos.length && /ÍNDICE DE TÉRMINOS/.test(txt)) break;
+    if (dentro) glos.push({ p, cols });
+  }
   await doc.destroy();
   onProgress({ fase: 'analizar' });
-  return parseSpells(pages);
+  return { spells: parseSpells(pages), glosario: glos.length ? parseGlosario(glos) : [] };
 }

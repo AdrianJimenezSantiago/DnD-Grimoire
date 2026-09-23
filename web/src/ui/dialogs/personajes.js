@@ -10,6 +10,7 @@ import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
 import { viewTransition } from '../fx.js';
 import { undoBtn } from '../../app/acciones.js';
+import { confirmar } from '../modal.js';
 
 let S, onCreated;
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
@@ -17,7 +18,7 @@ const fill = (id, arr) => { $(id).innerHTML = arr.map(v => `<option value="${esc
 
 export function openCharacter(id) {
   if (!S.db.chars.some(c => c.id === id)) return;
-  viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = id; }); window.scrollTo({ top: 0 }); });
+  viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = id; }); window.scrollTo({ top: 0 }); document.dispatchEvent(new CustomEvent('grimorio:abierto')); });
 }
 
 function renderList() {
@@ -42,9 +43,9 @@ function duplicate(id) {
   });
   renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [undoBtn(S, h)]);
 }
-function remove(id) {
+async function remove(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
-  if (!confirm(`¿Borrar a ${c.nombre || 'este personaje'} y su libro de conjuros? Los conjuros siguen en el catálogo para los demás.`)) return;
+  if (!(await confirmar({ titulo: `¿Borrar a ${c.nombre || 'este personaje'}?`, texto: 'Se borran su ficha, su libro y su historial. Los conjuros siguen en el catálogo para los demás personajes.', ok: 'Borrar personaje', peligro: true }))) return;
   const h = S.edit(db => { db.chars = db.chars.filter(x => x.id !== id); if (db.activeId === id) db.activeId = db.chars[0]?.id ?? null; });
   renderList(); toast(`${esc(c.nombre || 'Personaje')} borrado.`, [undoBtn(S, h)]);
 }
@@ -135,6 +136,7 @@ function save() {
   } else {
     const c = normChar(draft);
     const h = S.edit(db => { db.chars.push(c); db.activeId = c.id; });
+    document.dispatchEvent(new CustomEvent('grimorio:creado'));
     closeSheet(charDlg()); if (charsDlg().open) closeSheet(charsDlg());
     window.scrollTo({ top: 0 });
     toast(`Grimorio de ${esc(c.nombre)} creado.`, [{ label: 'Añadir conjuros', hl: true, fn: () => onCreated?.() }, undoBtn(S, h)]);

@@ -4,6 +4,8 @@
  * y, si el usuario lo importa desde su PDF, las descripciones del manual (se guardan solo en su dispositivo).
  */
 import { esc, norm, uid } from '../core/util.js';
+import { tiradasDe } from './tiradas.js';
+import { formasDeEstado } from './glosario.js';
 
 let SRD = null, SRDK = {}, SRDN = {}, MANUAL = null;
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
@@ -97,3 +99,35 @@ export const listFilter = (it, cls) => !cls || !it.cl || it.cl.includes(cls);
 /** Vista de un conjuro del compendio con la forma de un conjuro del catálogo (para la ficha). */
 export const srdAsSpell = x => ({ es: x.es, en: x.en, level: x.l, escuela: x.esc, tiempo: x.t, alcance: x.a, duracion: x.du, comp: x.co, coste: x.cs,
   ritual: !!x.ri, conc: !!x.c, efecto: '', desc: x.dEs || '', sup: x.hEs || '' });
+
+/* ---- glosario de reglas importado (estados, acciones…) ---- */
+let GLOS = null, RE_EST = null;
+export function setGlosario(lista) {
+  GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, e])) : null; RE_EST = null;
+}
+export const glosario = () => (GLOS ? [...GLOS.values()] : []);
+export const termino = clave => GLOS?.get(clave) || null;
+/** Expresión que reconoce los estados en un texto, con su clave de glosario. */
+export function estadosRegex() {
+  if (!GLOS) return null;
+  if (RE_EST) return RE_EST;
+  const formas = new Map();
+  for (const e of GLOS.values()) if (e.cat === 'Estado') for (const f of formasDeEstado(e.nombre)) formas.set(f, e.clave);
+  if (!formas.size) return null;
+  const alt = [...formas.keys()].sort((a, b) => b.length - a.length).join('|');
+  RE_EST = { re: new RegExp('(^|[^\\p{L}])(' + alt + ')(?![\\p{L}])', 'giu'), formas };
+  return RE_EST;
+}
+const sinTildes = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+export const claveDeForma = palabra => RE_EST?.formas.get(sinTildes(palabra)) || null;
+
+/* ---- tiradas de cada conjuro (texto propio > manual > traducción > SRD) ---- */
+const tirMemo = new Map();
+export function tiradasConjuro(s) {
+  if (!s) return null;
+  const x = srdFor(s), man = manualFor(x);
+  const k = `${s.id || s.es}|${man ? 1 : 0}|${(s.desc || '').length}`;
+  if (tirMemo.has(k)) return tirMemo.get(k);
+  const r = tiradasDe([[man?.d, man?.h], [s.desc, s.sup], [x?.dEs, x?.hEs], [x?.d, x?.h]]);
+  tirMemo.set(k, r); return r;
+}
