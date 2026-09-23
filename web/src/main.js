@@ -37,6 +37,7 @@ import * as landing from './ui/landing.js';
 import * as retrato from './ui/dialogs/retrato.js';
 import * as trasfondo from './ui/dialogs/trasfondo.js';
 import * as diario from './ui/dialogs/diario.js';
+import * as area from './ui/dialogs/area.js';
 import { tour } from './ui/tour.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
@@ -55,7 +56,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S);
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S);
   const app = await eventos.init(S);
 
   // Tutoriales: portada y hoja (una vez cada uno; se repiten desde Más → Ver tutorial)

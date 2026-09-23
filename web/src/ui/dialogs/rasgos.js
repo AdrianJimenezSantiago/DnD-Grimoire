@@ -48,7 +48,10 @@ function renderForm() {
       ${['fijo', 'nivelx'].includes(r.maxBase) ? `<label class="f">${r.maxBase === 'nivelx' ? 'N' : 'Número'}<input data-rf="maxN" type="number" inputmode="numeric" min="0" value="${esc(r.maxN)}"></label>` : ''}
       ${r.maxBase === 'mod' ? `<label class="f">Característica<select data-rf="maxAb">${ABILS.map(([k, n]) => opt(k, r.maxAb, n)).join('')}</select></label>` : ''}</div>`;
     h += r.tipo === 'recurso'
-      ? `<div class="frow" style="margin-top:12px"><label class="f wide">Se recuperan<select data-rf="recarga">${opt('largo', r.recarga, 'Con un descanso largo')}${opt('corto', r.recarga, 'Con un descanso corto o largo')}${opt('corto1', r.recarga, 'Uno con descanso corto; todos con uno largo')}</select></label></div>`
+      ? `<div class="frow" style="margin-top:12px"><label class="f wide">Se recuperan<select data-rf="recarga">${opt('largo', r.recarga, 'Todos con un descanso largo')}${opt('corto', r.recarga, 'Todos con un descanso corto o largo')}${opt('corto1', r.recarga, 'Uno con descanso corto; todos con uno largo')}${opt('dado', r.recarga, 'Tirando dados (p. ej. 1d3 cargas al amanecer)')}${opt('nunca', r.recarga, 'No se recuperan (consumible)')}</select></label></div>
+        ${r.recarga === 'dado' ? `<div class="frow" style="margin-top:12px"><label class="f">Dados<input data-rf="recDado" value="${esc(r.recDado || '1d3')}" placeholder="1d3" autocomplete="off"><span class="hint">Por ejemplo 1d3, 1d6 o 2d4.</span></label>
+          <label class="f">Suma<input data-rf="recBono" type="number" inputmode="numeric" value="${esc(r.recBono || 0)}"><span class="hint">1d6+1 → dados 1d6, suma 1.</span></label>
+          <label class="f">Cuándo<select data-rf="recMomento">${opt('largo', r.recMomento, 'Al amanecer (descanso largo)')}${opt('corto', r.recMomento, 'Con cada descanso, corto o largo')}</select></label></div>` : ''}`
       : `<div class="frow" style="margin-top:12px"><label class="f">Nivel máximo de espacio<input data-rf="nivMax" type="number" inputmode="numeric" min="1" max="9" value="${esc(r.nivMax)}"></label></div>`;
   }
   if (r.tipo === 'dados') h += `<div class="frow" style="margin-top:12px"><label class="f">Cuántos dados<input data-rf="maxN" type="number" inputmode="numeric" min="1" max="6" value="${esc(r.maxN)}"></label>
@@ -137,7 +140,7 @@ export function init(store) {
   $('#ruleForm').addEventListener('input', ev => {
     const t = ev.target, k = t.dataset.rf; if (!k) return;
     RD[k] = t.type === 'checkbox' ? t.checked : t.value;
-    if (['tipo', 'maxBase', 'efecto'].includes(k)) { if (k === 'tipo') { RD.maxBase = RD.tipo === 'recuperar' ? 'mitad' : 'fijo'; RD.soloEspacio = true; } renderForm(); }
+    if (['tipo', 'maxBase', 'efecto', 'recarga'].includes(k)) { if (k === 'tipo') { RD.maxBase = RD.tipo === 'recuperar' ? 'mitad' : 'fijo'; RD.soloEspacio = true; } renderForm(); }
     else { const p = $('#ruleForm .fsum p'); if (p) p.textContent = ruleSummary(preview()); }
   });
   $('#ruleSave').addEventListener('click', saveRule);

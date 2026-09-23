@@ -94,6 +94,21 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
 
 Iconos temáticos: game-icons.net (CC BY 3.0). `node tools/iconos.mjs` regenera el módulo con los que usa la app.
 
+## Flujo de los conjuros
+
+- **Al lanzar** un conjuro con tiradas se abre directamente la bandeja de dados. En los trucos no hay aviso previo.
+- **Salvación:** la bandeja pregunta qué ha sacado el objetivo (ha fallado, ha superado o varios objetivos) y muestra el efecto de cada caso.
+  - El daño se aplica completo, a la mitad o nada, según diga el conjuro. Con varios objetivos, una sola tirada da el total para quien falle y la mitad para quien supere.
+- **Ataque:** ventaja o desventaja. El crítico (dados dobles) solo existe en los conjuros de ataque, y se marca solo con un 20 natural.
+- **Daños automáticos:** los que no dependen de ataque ni salvación (las telarañas en llamas de *Telaraña*) se tiran directamente y nunca son críticos.
+- **Alternativas y dados extra:** las alternativas se muestran con su condición (*Tañido por los muertos*: 1d12 si al objetivo le faltan puntos de golpe). Los dados que no son daño, como el 1d4 de *Fragmento mental*, tienen su propio botón.
+- **Ficha del conjuro:** resalta dados, tipos de daño (con su icono y color), salvaciones, ataques y distancias. Enlaza al glosario los estados y también la visión ciega, la visión verdadera, la iluminación («muy oscura», luz tenue…), el terreno difícil, la cobertura, maltrecho y las formas de área.
+- **Ver área en la cuadrícula:** en los conjuros con área (esfera, cubo, cono, línea, emanación o cilindro) muestra una cuadrícula de casillas de 1,5 m con el lanzador y las casillas afectadas (las cubiertas al menos a la mitad).
+  - Se puede girar, acercar y mostrar el alcance, con el área colocada en su punto más lejano.
+- **Recursos propios con recarga por dados**, como una varita que recupera 1d3 cargas al amanecer, y consumibles que no se recargan. Las tiradas de recarga aparecen al descansar y quedan en el historial.
+
+**Tras actualizar, vuelve a importar el manual** (Más → Manual del jugador). Así se aplican las mejoras del lector, como la errata del pie de foto en *Disipar magia*.
+
 ## Retrato, historia y diario
 
 - **Retrato.** Toca el círculo junto al nombre en la hoja (o «Añadir retrato» en Editar personaje) y elige una imagen. Arrastra para encuadrar y acerca con el deslizador, la rueda o pellizcando. Puedes volver a encuadrarla, cambiarla o quitarla cuando quieras.
@@ -175,7 +190,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (35)
+npm test           # pruebas (39)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android
