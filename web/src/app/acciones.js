@@ -5,7 +5,7 @@
  */
 import { esc, joinY } from '../core/util.js';
 import { perfil } from '../domain/reglas2024.js';
-import { reglas, recState, schoolMatch } from '../domain/rasgos.js';
+import { reglas, recState, schoolMatch, recuperarEnDescanso } from '../domain/rasgos.js';
 import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/sheet.js';
 import { toast } from '../ui/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
@@ -61,12 +61,12 @@ export function cast(S, bi, mode, L) {
     if (s.conc) c.play.conc = s.es;
   });
   const extra = [...fx.extra];
-  if (tieneTiradas(tiradasConjuro(s))) extra.unshift({ label: 'Tirar', hl: true, fn: () => openRoll(bi, mode === 'slot' ? L : null) });
   if (mode === 'slot' && s.ritual && (isPrepared(e) || P.ritualLibro)) extra.push({ label: 'Era como ritual', fn: () => { S.undo(h); cast(S, bi, 'ritual'); } });
   castFx(row(bi), schoolColor(schoolKey(s.escuela)));
   if (snuffIdx >= 0) slotFx(L, snuffIdx, 'snuff');
   haptic();
   toast(msg + fx.msg, [...extra, undoBtn(S, h)]);
+  if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' ? L : null), 350);
 }
 
 export function quickCast(S, bi, force) {
@@ -75,7 +75,8 @@ export function quickCast(S, bi, force) {
     const fx = castEffects(S, ch, P, s, 'truco', 0);
     S.act(`${s.es} (truco)`, () => {});
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
-    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`, tieneTiradas(tiradasConjuro(s)) ? [{ label: 'Tirar', hl: true, fn: () => openRoll(bi) }] : []); return;
+    if (tieneTiradas(tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return; }
+    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return;
   }
   if (!force && !isPrepared(e)) {
     if (s.ritual && P.ritualLibro) return cast(S, bi, 'ritual');
@@ -104,10 +105,18 @@ export function endConc(S) {
 export function longRest(S) {
   const ch = S.cur(); if (!ch) return;
   const rs = reglas(ch), dados = rs.filter(r => r.tipo === 'dados');
-  const h = S.act('Descanso largo', (db, c) => { c.play.used = {}; c.play.conc = ''; c.play.rec = {}; c.book.forEach(e => { e.used = false; }); });
+  const tiradas = [];
+  const h = S.act('Descanso largo', (db, c) => {
+    c.play.used = {}; c.play.conc = ''; c.book.forEach(e => { e.used = false; });
+    const rec = {};
+    reglas(c).forEach(r => { const st = c.play.rec?.[r.id];
+      if (r.tipo === 'recurso' && st?.used) { const x = recuperarEnDescanso(r, Math.min(st.used, r.max), 'largo'); if (x.usados) rec[r.id] = { used: x.usados, dice: [] }; if (x.tirada) tiradas.push(`${r.nombre}: recupera ${x.tirada}`); } });
+    c.play.rec = rec;
+  });
+  if (tiradas.length) S.note(tiradas.join('; '));
   dawn(); haptic('medium');
   const bits = ['espacios', 'usos gratis']; if (rs.some(r => r.tipo === 'recurso' || r.tipo === 'recuperar')) bits.push('rasgos');
-  let msg = `Descanso largo: ${joinY(bits)} restaurados.`;
+  let msg = `Descanso largo: ${joinY(bits)} restaurados.${tiradas.length ? ' ' + esc(tiradas.join('. ')) + '.' : ''}`;
   if (dados.length) {
     msg += ` Anota tus dados de ${joinY(dados.map(r => esc(r.nombre)))}.`;
     setTimeout(() => { document.querySelectorAll('.pdie').forEach(p => p.classList.add('fresh')); document.querySelector('[data-dv]')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 400);
@@ -126,7 +135,7 @@ export function shortRest(S, openRecovery) {
     if (P.pact) c.play.used[P.pact.level] = 0;
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
-      if (r.recarga === 'corto') st.used = 0; if (r.recarga === 'corto1' && st.used) st.used--; });
+      const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });
   });
   haptic();
   if (P.pact) document.querySelectorAll(`[data-slotbtn^="${P.pact.level}:"]`).forEach(b => pop(b, 'fx-ignite'));

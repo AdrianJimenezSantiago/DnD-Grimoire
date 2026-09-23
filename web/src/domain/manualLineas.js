@@ -27,16 +27,28 @@ export function pageToColumns(items, pageWidth) {
     cols[x < mid ? 0 : 1].push({ x, y, h, w: it.width || 0, s: it.str });
   }
   return cols.map(col => {
+    // Bandas: fragmentos a la misma altura (±45 % del cuerpo) forman una línea, ordenada de izquierda a derecha.
+    // Dos fragmentos que se solapan en horizontal nunca comparten línea (título junto a final de párrafo, pies de foto…).
     col.sort((a, b) => b.y - a.y || a.x - b.x);
     const lines = [];
     for (const it of col) {
-      const last = lines[lines.length - 1];
-      if (last && Math.abs(last.y - it.y) < Math.max(2, Math.min(it.h, last.h) * 0.45) && it.x > last.x + 1) {
-        const gap = it.x - last.xEnd;
-        last.s += (gap > it.h * 0.15 && !last.s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s;
-        last.xEnd = it.x + it.w; last.h = Math.max(last.h, it.h);
-      } else lines.push({ x: it.x, xEnd: it.x + it.w, y: it.y, h: it.h, s: it.s });
+      const tol = h => Math.max(2, h * 0.45);
+      let dest = null;
+      for (let k = lines.length - 1; k >= 0 && k >= lines.length - 3; k--) {
+        const L = lines[k];
+        if (Math.abs(L.y - it.y) >= tol(Math.min(L.h, it.h))) continue;
+        const m = Math.min(L.h, it.h) * 0.6;   // solape real, no el espacio final que pdf.js suma al ancho
+        if (L.items.some(o => it.x < o.x + o.w - m && it.x + it.w > o.x + m)) continue;
+        dest = L; break;
+      }
+      if (dest) { dest.items.push(it); dest.h = Math.max(dest.h, it.h); }
+      else lines.push({ y: it.y, h: it.h, items: [it] });
     }
-    return lines.map(l => ({ x: l.x, y: l.y, h: l.h, s: l.s.replace(/\s+/g, ' ').trim() }));
+    return lines.map(L => {
+      L.items.sort((a, b) => a.x - b.x);
+      let s = '', fin = -Infinity;
+      for (const it of L.items) { s += (s && it.x - fin > it.h * 0.15 && !s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s; fin = it.x + it.w; }
+      return { x: L.items[0].x, y: L.y, h: L.h, s: s.replace(/\s+/g, ' ').trim() };
+    });
   });
 }

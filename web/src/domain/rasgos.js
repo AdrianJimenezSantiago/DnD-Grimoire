@@ -7,8 +7,31 @@ import { clamp, norm } from '../core/util.js';
 import { modOf, nivelDe, competencia } from './reglas2024.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
-export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo' };
-export const RECARGA_CORTA = { largo: 'Descanso largo', corto: 'Descanso corto o largo', corto1: 'Recupera 1 con descanso corto' };
+export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
+export const RECARGA_CORTA = { largo: 'Descanso largo', corto: 'Descanso corto o largo', corto1: 'Recupera 1 con descanso corto', nunca: 'No se recarga' };
+/** Recarga con dados: «recupera 1d3 cargas al amanecer». */
+export const dadoRecarga = r => { const m = /^(\d*)d(\d+)$/i.exec(String(r.recDado || '').trim()); return m ? { n: +(m[1] || 1), caras: +m[2], bono: parseInt(r.recBono, 10) || 0 } : null; };
+export function etiquetaRecarga(r, larga = false) {
+  if (r.recarga === 'dado') { const d = dadoRecarga(r); const txt = d ? `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? '+' : '') + d.bono : ''}` : 'dados';
+    return larga ? `recupera ${txt} ${r.recMomento === 'corto' ? 'con cada descanso corto o largo' : 'al amanecer (descanso largo)'}` : `Recupera ${txt} ${r.recMomento === 'corto' ? 'por descanso' : 'al amanecer'}`; }
+  return (larga ? RECARGA_TXT : RECARGA_CORTA)[r.recarga] || (larga ? RECARGA_TXT.largo : RECARGA_CORTA.largo);
+}
+/** Cuánto recupera un recurso en un descanso. Devuelve {usados, tirada} (tirada = texto si se tiraron dados). */
+export function recuperarEnDescanso(r, usados, tipo, tirar = c => 1 + Math.floor(Math.random() * c)) {
+  if (!usados) return { usados: 0, tirada: '' };
+  switch (r.recarga) {
+    case 'nunca': return { usados, tirada: '' };
+    case 'corto': return { usados: 0, tirada: '' };
+    case 'corto1': return { usados: tipo === 'largo' ? 0 : usados - 1, tirada: '' };
+    case 'dado': {
+      if (tipo === 'corto' && r.recMomento !== 'corto') return { usados, tirada: '' };
+      const d = dadoRecarga(r); if (!d) return { usados: 0, tirada: '' };
+      const vals = Array.from({ length: d.n }, () => tirar(d.caras)), total = Math.max(0, vals.reduce((a, b) => a + b, 0) + d.bono);
+      return { usados: Math.max(0, usados - total), tirada: `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? '+' : '') + d.bono : ''} = ${total}` };
+    }
+    default: return { usados: tipo === 'largo' ? 0 : usados, tirada: '' };
+  }
+}
 const byLvl = (L, pairs) => pairs.reduce((v, [from, val]) => (L >= from ? val : v), 0);
 
 export function plantillas(ch) {
@@ -169,7 +192,7 @@ export function castTriggerDesc(r) {
 export function ruleSummary(r) {
   const nota = r.nota ? ' ' + r.nota : '';
   switch (r.tipo) {
-    case 'recurso': return `${r.max} ${r.max === 1 ? 'uso' : 'usos'}; ${RECARGA_TXT[r.recarga] || RECARGA_TXT.largo}.${nota}`;
+    case 'recurso': return `${r.max} ${r.max === 1 ? 'uso' : 'usos'}; ${etiquetaRecarga(r, true)}.${nota}`;
     case 'dados': return `${r.max}${r.dado || 'd20'} anotados tras un descanso largo.${nota}`;
     case 'recuperar': return `Hasta ${r.max} niveles de espacios (ninguno de nivel ${(r.nivMax || 5) + 1}+), una vez por descanso largo.${nota}`;
     case 'al_lanzar': return castTriggerDesc(r);
@@ -179,7 +202,7 @@ export function ruleSummary(r) {
 export const schoolMatch = (s, escuela) => !escuela || norm(s.escuela || '').slice(0, 5) === norm(escuela).slice(0, 5);
 export const castSchools = ch => reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.escuela).map(r => norm(r.escuela).slice(0, 5));
 export const hasShortRest = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.espaciosManuales)
-  || reglas(ch).some(r => (r.tipo === 'recurso' && r.recarga !== 'largo') || r.tipo === 'recuperar');
+  || reglas(ch).some(r => (r.tipo === 'recurso' && ['corto', 'corto1'].includes(r.recarga)) || (r.recarga === 'dado' && r.recMomento === 'corto') || r.tipo === 'recuperar');
 
 /** Estado de juego de un rasgo (se crea al vuelo). */
 export function recState(ch, id) {

@@ -1,7 +1,7 @@
 /** Vista de la hoja. Solo pinta: los eventos viven en app/eventos.js. */
 import { esc, norm } from '../core/util.js';
 import { ABIL_NAME, perfil, sgn } from '../domain/reglas2024.js';
-import { castSchools, castTriggerDesc, reglas, recState, RECARGA_CORTA, schoolMatch, usosGastados } from '../domain/rasgos.js';
+import { castSchools, castTriggerDesc, reglas, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../domain/rasgos.js';
 import { $, patch, patchKeyed } from './dom.js';
 import { icon, ASTROLABE } from './icons.js';
 import { pop } from './fx.js';
@@ -67,7 +67,7 @@ function recursoHtml(ch, r) {
   const ctl = r.max <= 10
     ? `<span class="rticks">${Array.from({ length: r.max }, (_, i) => `<button type="button" class="rtick ${i >= left ? 'on' : ''}" data-rtick="${r.id}|${i}" aria-label="${esc(r.nombre)}: uso ${i + 1} ${i >= left ? 'gastado' : 'disponible'}"></button>`).join('')}</span>`
     : `<span class="rstep"><button type="button" data-rstep="${r.id}|1" aria-label="Gastar 1 de ${esc(r.nombre)}">−</button><button type="button" class="rleft" data-rset="${r.id}" aria-label="Cambiar lo que queda">${left}<small> / ${r.max}</small></button><button type="button" data-rstep="${r.id}|-1" aria-label="Recuperar 1 de ${esc(r.nombre)}">+</button></span>`;
-  return `<div class="res rr ${left === 0 ? 'empty-res' : ''}"><strong>${esc(r.nombre)}</strong>${ctl}<span class="rnote">${esc(RECARGA_CORTA[r.recarga] || RECARGA_CORTA.largo)}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
+  return `<div class="res rr ${left === 0 ? 'empty-res' : ''}"><strong>${esc(r.nombre)}</strong>${ctl}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
 }
 function dadosHtml(ch, r) {
   const st = recState(ch, r.id), sides = parseInt(String(r.dado || 'd20').slice(1), 10) || 20; let h = '';
@@ -170,7 +170,7 @@ export function renderBar(S) {
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="monogram">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const tema = aplicarTema(ch);
-  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
+  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong><button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;

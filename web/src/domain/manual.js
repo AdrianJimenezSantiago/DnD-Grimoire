@@ -13,6 +13,8 @@ const SUP = /^(Con un espacio de conjuro de nivel superior|Usar un espacio de co
 const isFooter = s => /^CAP[ÍI]TULO\s*\d/i.test(s) || /^\d{1,3}$/.test(s) || /^DESCRIPCIONES DE CONJUROS$/.test(s);
 const letters = s => s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
 const isCaps = s => { const l = letters(s); return l.length >= 3 && l === l.toUpperCase(); };
+/** Pie de foto: casi todo en mayúsculas aunque empiece por «Una…». */
+const casiMayus = s => { const l = letters(s); if (l.length < 8) return false; const m = l.replace(/[^A-ZÁÉÍÓÚÜÑ]/g, '').length; return m / l.length >= 0.75; };
 const lev = (a, b) => { const d = Array.from({ length: b.length + 1 }, (_, j) => j); for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i;
   for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } } return d[b.length]; };
 const escuelaDe = w => { w = (w || '').toLowerCase(); return ESCUELA[w] || Object.entries(ESCUELA).find(([k]) => lev(k, w) <= 2)?.[1] || ''; };
@@ -25,7 +27,7 @@ const SUFIJOS = ['guardián de la fe'];     // nombres pegados a un pie de foto
 export function nombreBonito(caps) {
   let s = caps.replace(/^[“”"]/, '').toLowerCase().replace(/\s+/g, ' ').trim();
   if (ARREGLOS[s]) return ARREGLOS[s];
-  const suf = SUFIJOS.find(x => s.endsWith(x) && s !== x); if (suf) s = suf;
+  const suf = SUFIJOS.find(x => (s.endsWith(x) || s.startsWith(x)) && s !== x); if (suf) s = suf;
   s = s.charAt(0).toUpperCase() + s.slice(1);
   PROPIOS.forEach(p => { s = s.replace(new RegExp(`\\b${p.toLowerCase()}\\b`, 'g'), p); });
   return s;
@@ -93,7 +95,7 @@ export function parseSpells(pages) {
     for (; k < end; k++) {
       const l = L[k], s = l.s.replace(/^\|\s*/, '');
       if (FIELD.test(s)) continue;
-      if (isCaps(s) && !/\d/.test(s)) continue;
+      if ((isCaps(s) || casiMayus(s)) && !/\d/.test(s)) continue;
       if (s.length <= 2 && !/\d/.test(s)) continue;
       const indent = l.x - l.margin > 4;
       if (para && (indent || SUP.test(s))) { paras.push(para); para = ''; }

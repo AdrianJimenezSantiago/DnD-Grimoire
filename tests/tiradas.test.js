@@ -25,3 +25,19 @@ test('formas de los estados para enlazarlos', () => {
   assert.deepEqual(formasDeEstado('Apresado'), ['apresado', 'apresada', 'apresados', 'apresadas']);
   assert.deepEqual(formasDeEstado('Invisible'), ['invisible', 'invisibles']);
 });
+
+test('salvación: mitad al superar, daño automático al empezar el turno y alternativa condicional', () => {
+  const bola = analizarTiradas('Cada criatura hace una tirada de salvación de Destreza. Si la falla, sufre 8d6 de daño de fuego; si la supera, sufre la mitad del daño.', '');
+  assert.equal(bola.mitad, true); assert.equal(bola.danos[0].via, 'salvacion'); assert.match(bola.falla, /Si la falla/); assert.match(bola.supera, /si la supera/);
+  const red = analizarTiradas('Cada criatura hace una tirada de salvación de Destreza o queda apresada. La red arde: una criatura que comience su turno en el fuego sufre 2d4 de daño de fuego.', '');
+  assert.equal(red.danos[0].via, 'auto'); assert.equal(red.mitad, false);
+  const campana = analizarTiradas('El objetivo debe superar una tirada de salvación de Sabiduría o sufrirá 1d8 de daño necrótico. Si el objetivo no tiene todos sus puntos de golpe, el daño necrótico aumenta a 1d12.', 'El daño aumenta en un dado cuando alcanzas los niveles 5, 11 y 17.');
+  assert.deepEqual(campana.danos.map(d => `${d.n}d${d.caras}`), ['1d8', '1d12']);
+  assert.match(campana.danos[1].cond, /no tiene todos sus puntos de golpe/);
+  assert.deepEqual(dadosPara(campana, { nivelPj: 5 }).map(d => `${d.n}d${d.caras}`), ['2d8', '2d12']);
+  assert.match(campana.falla, /debe superar/);
+  const astilla = analizarTiradas('El objetivo debe superar una tirada de salvación de Inteligencia o sufrirá 1d6 de daño psíquico y restará 1d4 a la siguiente tirada de salvación que haga.', '');
+  assert.deepEqual(astilla.extras.map(x => `${x.n}d${x.caras}`), ['1d4']);
+  const flecha = analizarTiradas('Haz un ataque de conjuro a distancia. Si impacta, el objetivo sufre 1d10 de daño de fuego.', '');
+  assert.equal(flecha.danos[0].via, 'ataque');
+});
