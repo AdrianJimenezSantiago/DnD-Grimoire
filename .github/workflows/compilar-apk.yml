@@ -12,20 +12,25 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
           cache: gradle
 
+      # Solo lo que necesita el proyecto (compileSdk 36). El paquete «tools» ya no existe
+      # en las cmdline-tools recientes y hacía fallar la instalación por defecto.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36'
+          log-accept-android-sdk-licenses: false
 
       - name: Dependencias
         run: npm ci
