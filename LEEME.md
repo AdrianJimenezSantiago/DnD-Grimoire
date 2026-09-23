@@ -162,6 +162,18 @@ GitHub compila la app en sus servidores, gratis. Es más cómodo hacerlo desde u
 
 Cada vez que subas un cambio, se compila una versión nueva con un número mayor. También puedes lanzarla a mano desde Actions → Compilar APK → **Run workflow**.
 
+## Versión web en Vercel (opcional)
+
+El proyecto incluye `vercel.json`, así que Vercel sabe cómo compilarlo:
+
+1. Entra en vercel.com con tu cuenta de GitHub.
+2. Pulsa **Add New → Project** y elige este repositorio. Si no aparece, da permiso a Vercel para verlo con «Adjust GitHub App Permissions».
+3. No cambies nada de la configuración y pulsa **Deploy**.
+
+Tendrás una dirección `…vercel.app` que se actualiza sola con cada cambio que subas a `main`. Si alguna prueba falla, no se publica.
+
+Tus personajes nunca se suben a Vercel: se guardan en el navegador de cada dispositivo, como en el móvil. Lo que sí es visible para quien tenga el enlace es la propia app con la hoja de ejemplo de Theo. Si quieres restringirla, mira Settings → Deployment Protection en Vercel; lo que se puede proteger depende del plan.
+
 ## Versión para Windows (un solo archivo)
 
 Cada compilación genera también `grimorio-windows-1.0.N.html`, en **Releases** junto al APK. Es la misma app en un único archivo de unos 2,5 MB:
@@ -223,6 +235,7 @@ android/             proyecto Android (icono, colores, firma)
 tools/make_icons.py  regenera el icono y la pantalla de carga
 tools/build_compendio.py  regenera el compendio (datos del manual + SRD)
 capacitor.config.json
+vercel.json          cómo compila Vercel la versión web
 ```
 
 Fuentes Alegreya y Alegreya Sans bajo licencia SIL Open Font License 1.1 (ver `www/fonts`).

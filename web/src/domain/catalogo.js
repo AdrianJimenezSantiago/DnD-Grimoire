@@ -8,9 +8,10 @@ import { esc, norm, uid } from '../core/util.js';
 let SRD = null, SRDK = {}, SRDN = {}, MANUAL = null;
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
-export async function loadSrd(url) {
+/** Carga el compendio desde una URL (Android/web) o desde datos ya incluidos (archivo único de Windows). */
+export async function loadSrd(fuente) {
   try {
-    const j = await (await fetch(url)).json();
+    const j = typeof fuente === 'string' ? await (await fetch(fuente)).json() : await fuente;
     SRD = j.conjuros; SRDK = {}; SRDN = {};
     SRD.forEach(x => { SRDK[x.k] = x; SRDN[norm(x.en) + '|' + x.l] = x; });
     itemsMemo = null;

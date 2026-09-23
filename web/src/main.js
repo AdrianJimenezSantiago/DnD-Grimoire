@@ -60,7 +60,9 @@ async function boot() {
 
   // El compendio (≈330 kB) y las descripciones importadas se cargan cuando el navegador está libre
   idle(async () => {
-    const [ok] = await Promise.all([loadSrd('data/compendio.json'), manual.cargarManualGuardado()]);
+    // En el archivo único de Windows no se puede leer otro archivo del disco: el compendio va incluido
+    const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
+    const [ok] = await Promise.all([loadSrd(fuente), manual.cargarManualGuardado()]);
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
   });
