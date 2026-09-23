@@ -41,6 +41,11 @@ jobs:
       - name: Compilar la web (Vite)
         run: npm run build
 
+      - name: Compilar la versión de Windows (un solo HTML)
+        run: |
+          npm run build:windows
+          cp dist-windows/grimorio.html "grimorio-windows-1.0.${{ github.run_number }}.html"
+
       - name: Copiar la web al proyecto Android
         run: npx cap sync android
 
@@ -56,13 +61,17 @@ jobs:
       - name: Guardar como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: grimorio-apk
-          path: grimorio-*.apk
+          name: grimorio
+          path: |
+            grimorio-*.apk
+            grimorio-windows-*.html
 
       - name: Publicar en Releases (para descargar desde el móvil)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Grimorio 1.0.${{ github.run_number }}
-          files: grimorio-*.apk
+          files: |
+            grimorio-*.apk
+            grimorio-windows-*.html
           make_latest: true
