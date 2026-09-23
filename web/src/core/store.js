@@ -44,6 +44,8 @@ export function createStore({ storage, key, db }) {
       return { id: null, before };
     },
     touch() { S.save(); },
+    /** Anota en el historial algo que no cambia la hoja (una tirada, por ejemplo). */
+    note(text) { const ch = S.cur(); if (!ch) return; ch.play.log.push({ id: uid('n'), t: Date.now(), x: String(text) }); if (ch.play.log.length > MAX_LOG) ch.play.log.splice(0, ch.play.log.length - MAX_LOG); S.save(); },
     replace(db) { const before = clone(S.db); S.db = db; S.save(); S.emit('replace'); return { id: null, before }; },
 
     /** Vuelve al estado anterior a una acción (y descarta todo lo posterior). */

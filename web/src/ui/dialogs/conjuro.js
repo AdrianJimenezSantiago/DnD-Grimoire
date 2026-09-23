@@ -1,18 +1,22 @@
 /** Ficha del conjuro: lectura completa, opciones de lanzamiento y edición de textos. */
 import { esc } from '../../core/util.js';
 import { perfil } from '../../domain/reglas2024.js';
-import { srdFor, srdAsSpell, manualFor } from '../../domain/catalogo.js';
+import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
+import { tieneTiradas } from '../../domain/tiradas.js';
+import { openRoll, iconoDano } from './tiradas.js';
 import { $, on } from '../dom.js';
 import { freeOf, isPrepared, schoolKey, slotsOf } from '../sheet.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
 import { cast, undoBtn } from '../../app/acciones.js';
+import { confirmar } from '../modal.js';
 
 let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
 const dlg = () => $('#spellDlg');
 
+const enlazar = h => { const e = estadosRegex(); return e ? h.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term" data-term="${k}">${w}</button>` : m; }) : h; };
 export function md(t) {
-  return String(t || '').trim().split(/\n{2,}/).map(p => '<p>' + esc(p)
+  return String(t || '').trim().split(/\n{2,}/).map(p => '<p>' + enlazar(esc(p))
     .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>').replace(/\*\*_?(.+?)_?\*\*/g, '<b>$1</b>').replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1<i>$2</i>')
     .replace(/\n/g, '<br>') + '</p>').join('');
 }
@@ -64,7 +68,7 @@ function render() {
     else h += `<p class="note">Aún no hay descripción. Impórtala desde tu manual (Más → Manual del jugador) o escríbela con «Editar texto».</p>`;
     if (en) h += `<p class="note">Texto original del SRD en inglés. Importa tu manual para verlo en español, o escríbelo con «Editar texto».</p>`;
     if (sup) h += `<section class="sp-text ${en ? 'en' : ''}"><h3>${s.level === 0 ? 'Mejora del truco' : 'Con espacios de nivel superior'}</h3>${md(sup)}</section>`;
-    if (SP.mode === 'book') h += castOptions(SP.bi);
+    if (SP.mode === 'book') { const t = tiradasConjuro(s); if (tieneTiradas(t)) h += `<section class="sp-cast"><h3>Tiradas</h3><button type="button" class="rl-open" data-rollopen>${t.danos[0] ? iconoDano(t.danos[0].tipo) : t.curacion ? iconoDano('curación') : ''}<span><b>${t.ataque ? 'Atacar y tirar daño' : t.curacion && !t.danos.length ? 'Tirar curación' : 'Tirar daño'}</b><small>${[t.ataque ? 'ataque ' + t.ataque : '', t.salvacion ? 'salvación de ' + t.salvacion : ''].filter(Boolean).join(', ') || 'dados del conjuro'}</small></span></button></section>`; h += castOptions(SP.bi); }
     if (x && en) h += `<p class="credit">Texto del System Reference Document 5.2 de Wizards of the Coast, licencia CC-BY 4.0.</p>`;
   }
   $('#spBody').innerHTML = h; $('#spBody').scrollTop = 0;
@@ -77,8 +81,9 @@ const catalogEntry = () => (SP.mode === 'book' ? S.db.catalog[S.cur().book[SP.bi
 
 export function init(store) {
   S = store;
-  on($('#spBody'), 'click', '#spFromEn,[data-opt]', (ev, b) => {
-    if (b.id === 'spFromEn') { const { x } = data(), man = manualFor(x); if ($('#spDe').value.trim() && !confirm('¿Sustituir lo escrito?')) return;
+  on($('#spBody'), 'click', '[data-rollopen]', () => { const bi = SP.bi; closeSheet(dlg()); setTimeout(() => openRoll(bi), 150); });
+  on($('#spBody'), 'click', '#spFromEn,[data-opt]', async (ev, b) => {
+    if (b.id === 'spFromEn') { const { x } = data(), man = manualFor(x); if ($('#spDe').value.trim() && !(await confirmar({ titulo: '¿Sustituir lo escrito?', texto: 'El texto que has escrito se reemplaza por el original.', ok: 'Sustituir' }))) return;
       $('#spDe').value = man ? man.d : x.d; $('#spSu').value = (man ? man.h : x.h) || ''; $('#spDe').focus(); return; }
     if (b.disabled) return;
     const bi = SP.bi, [m, L] = b.dataset.opt.split(':');

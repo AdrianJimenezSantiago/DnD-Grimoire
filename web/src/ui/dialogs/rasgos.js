@@ -9,6 +9,7 @@ import { toast } from '../toast.js';
 import { slotFx } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
+import { confirmar } from '../modal.js';
 
 let S, RD = null, REC = null;
 
@@ -123,10 +124,10 @@ export function init(store) {
     });
     renderRules();
   });
-  on($('#rulesBody'), 'click', '[data-rcustom],[data-redit],[data-rdel]', (ev, b) => {
+  on($('#rulesBody'), 'click', '[data-rcustom],[data-redit],[data-rdel]', async (ev, b) => {
     const ch = S.cur();
     if (b.dataset.redit) return openRuleForm(ch.rasgos.find(x => x.id === b.dataset.redit));
-    if (b.dataset.rdel) { const r = ch.rasgos.find(x => x.id === b.dataset.rdel); if (!confirm(`¿Borrar «${r.nombre}»?`)) return;
+    if (b.dataset.rdel) { const r = ch.rasgos.find(x => x.id === b.dataset.rdel); if (!(await confirmar({ titulo: `¿Borrar «${r.nombre}»?`, texto: 'Se quita de este personaje. Puedes deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
       const h = S.edit((db, c) => { c.rasgos = c.rasgos.filter(x => x.id !== r.id); }); renderRules(); toast(`«${esc(r.nombre)}» borrado.`, [undoBtn(S, h)]); return; }
     const t = reglas(ch, true).find(x => x.id === b.dataset.rcustom);
     openRuleForm({ id: uid('r'), tipo: t.tipo, nombre: t.nombre, nota: t.nota || '', maxBase: 'fijo', maxN: t.max, maxAb: 'car', recarga: t.recarga || 'largo', dado: t.dado || 'd20', nivMax: t.nivMax || 5,

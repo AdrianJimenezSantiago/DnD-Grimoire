@@ -10,6 +10,10 @@ import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '.
 import { toast } from '../ui/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
 import { haptic } from '../platform/native.js';
+import { pedir } from '../ui/modal.js';
+import { tiradasConjuro } from '../domain/catalogo.js';
+import { tieneTiradas } from '../domain/tiradas.js';
+import { openRoll } from '../ui/dialogs/tiradas.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -57,6 +61,7 @@ export function cast(S, bi, mode, L) {
     if (s.conc) c.play.conc = s.es;
   });
   const extra = [...fx.extra];
+  if (tieneTiradas(tiradasConjuro(s))) extra.unshift({ label: 'Tirar', hl: true, fn: () => openRoll(bi, mode === 'slot' ? L : null) });
   if (mode === 'slot' && s.ritual && (isPrepared(e) || P.ritualLibro)) extra.push({ label: 'Era como ritual', fn: () => { S.undo(h); cast(S, bi, 'ritual'); } });
   castFx(row(bi), schoolColor(schoolKey(s.escuela)));
   if (snuffIdx >= 0) slotFx(L, snuffIdx, 'snuff');
@@ -70,7 +75,7 @@ export function quickCast(S, bi, force) {
     const fx = castEffects(S, ch, P, s, 'truco', 0);
     S.act(`${s.es} (truco)`, () => {});
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
-    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return;
+    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`, tieneTiradas(tiradasConjuro(s)) ? [{ label: 'Tirar', hl: true, fn: () => openRoll(bi) }] : []); return;
   }
   if (!force && !isPrepared(e)) {
     if (s.ritual && P.ritualLibro) return cast(S, bi, 'ritual');
@@ -143,9 +148,9 @@ export function stepResource(S, id, d) {
   S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; });
   haptic();
 }
-export function setResource(S, id) {
+export async function setResource(S, id) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);
-  const v = prompt(`¿Cuántos te quedan de ${r.nombre}? (0 a ${r.max})`, String(r.max - used)); if (v == null) return;
+  const v = await pedir({ titulo: r.nombre, texto: `¿Cuántos te quedan? Entre 0 y ${r.max}.`, valor: String(r.max - used), tipo: 'number', min: 0, max: r.max, ok: 'Guardar' }); if (v == null) return;
   const n = parseInt(v, 10); if (isNaN(n)) return;
   const left = Math.max(0, Math.min(r.max, n));
   const h = S.act(`${r.nombre}: quedan ${left}`, (db, c) => { recState(c, id).used = r.max - left; });

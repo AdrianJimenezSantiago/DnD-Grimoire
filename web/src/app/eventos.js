@@ -5,7 +5,7 @@
 import { esc } from '../core/util.js';
 import { perfil } from '../domain/reglas2024.js';
 import { hasShortRest } from '../domain/rasgos.js';
-import { REL_FIELDS, seedDb } from '../domain/modelo.js';
+import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems, linkCatalog } from '../domain/catalogo.js';
 import { $, on } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
@@ -14,6 +14,7 @@ import { closeSheet, openSheet, topSheet } from '../ui/dialog.js';
 import { pop, viewTransition } from '../ui/fx.js';
 import { NATIVE, haptic, keepAwake, minimize, setBars, storage } from '../platform/native.js';
 import * as A from './acciones.js';
+import { confirmar } from '../ui/modal.js';
 import { openChars, openCharForm } from '../ui/dialogs/personajes.js';
 import { openPicker } from '../ui/dialogs/buscador.js';
 import { openSpell } from '../ui/dialogs/conjuro.js';
@@ -22,6 +23,10 @@ import { openRules, openRecovery } from '../ui/dialogs/rasgos.js';
 import { openHistory } from '../ui/dialogs/historial.js';
 import { openBackup } from '../ui/dialogs/copia.js';
 import { openManual } from '../ui/dialogs/manual.js';
+import { openGlosario } from '../ui/dialogs/glosario.js';
+import { showLanding, landingVisible } from '../ui/landing.js';
+import { enTour, cerrarTour } from '../ui/tour.js';
+import { gi } from '../ui/tema.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -34,11 +39,11 @@ function toggleTheme() {
 }
 
 /* ---------------- menús emergentes ---------------- */
-let openMenu = null;
+let openMenu = null, menuY = 0;
 function showMenu(menu, anchor, items) {
   closeMenu();
   menu.innerHTML = items.filter(Boolean).map(it => it === '-' ? '<hr>' : `<button type="button" role="menuitem" data-mcmd="${it.cmd}" ${it.chk != null ? `class="chk" role="menuitemcheckbox" aria-checked="${it.chk}"` : ''}>${icon(it.icon)}${esc(it.label)}</button>`).join('');
-  menu.hidden = false; openMenu = menu;
+  menu.hidden = false; openMenu = menu; menuY = scrollY;
   const r = anchor.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
   const below = r.bottom + 8 + mh < innerHeight;
   menu.style.left = `${Math.max(8, Math.min(innerWidth - mw - 8, r.right - mw))}px`;
@@ -49,18 +54,21 @@ function showMenu(menu, anchor, items) {
 function closeMenu() { if (openMenu) { openMenu.hidden = true; openMenu = null; } }
 function moreItems() {
   return [
-    { cmd: 'chars', icon: 'users', label: 'Personajes' },
+    { cmd: 'home', icon: 'book', label: 'Inicio' },
+    { cmd: 'chars', icon: 'users', label: 'Gestionar personajes' },
     { cmd: 'rules', icon: 'sliders', label: 'Rasgos y recursos' },
     { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
     '-',
     { cmd: 'manual', icon: 'book', label: 'Manual del jugador' },
+    { cmd: 'glosario', icon: 'info', label: 'Glosario de reglas' },
     { cmd: 'backup', icon: 'save', label: 'Copia de seguridad' },
     !NATIVE && { cmd: 'print', icon: 'print', label: 'Imprimir' },
     { cmd: 'theme', icon: 'contrast', label: isDark() ? 'Tema de día' : 'Tema de noche' },
     NATIVE && { cmd: 'awake', icon: 'eye', label: 'Pantalla siempre encendida', chk: awake },
     '-',
+    { cmd: 'tutorial', icon: 'star', label: 'Ver tutorial' },
     { cmd: 'about', icon: 'info', label: 'Acerca de y licencias' },
-    { cmd: 'reset', icon: 'reset', label: 'Restablecer los datos de ejemplo' },
+    { cmd: 'reset', icon: 'reset', label: 'Borrar todos los datos' },
   ];
 }
 function restItems() {
@@ -72,6 +80,9 @@ function restItems() {
 function setEditing(v) { S.editing = v; S.emit('ui'); }
 const COMMANDS = {
   chars: () => openChars(),
+  home: () => { setEditing(false); showLanding(); },
+  glosario: () => openGlosario(),
+  tutorial: () => COMMANDS._tutorial?.(),
   newchar: () => openCharForm(null),
   editchar: () => S.cur() && openCharForm(S.cur().id),
   rules: () => S.cur() && openRules(),
@@ -91,20 +102,22 @@ const COMMANDS = {
   theme: () => toggleTheme(),
   awake: () => { awake = !awake; storage.set(PREF + '-awake', awake ? '1' : '0'); keepAwake(awake); toast(awake ? 'La pantalla no se apagará mientras la hoja esté abierta.' : 'La pantalla se apagará como de costumbre.'); },
   about: () => openSheet($('#aboutDlg')),
-  reset: () => {
-    if (!confirm('Esto borra todos los personajes y el catálogo, y deja solo la hoja original de Theo de nivel 6. ¿Seguir?')) return;
-    const db = seedDb(); linkCatalog(db); invalidateItems(); S.editing = false;
-    const h = S.replace(db); toast('Datos de ejemplo restablecidos.', [A.undoBtn(S, h)]);
+  reset: async () => {
+    if (!(await confirmar({ titulo: '¿Borrar todos los datos?', texto: 'Se borran todos los personajes, el catálogo y el historial de este dispositivo. Justo después podrás deshacerlo.', ok: 'Borrar todo', peligro: true }))) return;
+    const db = emptyDb(); invalidateItems(); S.editing = false;
+    const h = S.replace(db); toast('Datos borrados.', [A.undoBtn(S, h)]);
   },
 };
 function run(cmd, el) { closeMenu(); COMMANDS[cmd]?.(el); }
 
 /* ---------------- botón Atrás (Android) ---------------- */
 function back() {
+  if (enTour()) return cerrarTour();
   if (openMenu) return closeMenu();
   const d = topSheet(); if (d) return closeSheet(d);
   if (toastOpen()) return hideToast();
   if (S.editing) return setEditing(false);
+  if (!landingVisible()) return showLanding();
   S.flush(); minimize();
 }
 
@@ -122,6 +135,7 @@ function bindSheet() {
   sheet.addEventListener('pointermove', e => { if (lpStart && Math.hypot(e.clientX - lpStart[0], e.clientY - lpStart[1]) > 10) clearTimeout(lpTimer); });
   sheet.addEventListener('contextmenu', e => { if (e.target.closest('.castzone') && !S.editing) e.preventDefault(); });
 
+  on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;
     if (d.slotbtn) { const [L, i] = d.slotbtn.split(':').map(Number); return A.toggleSlot(S, L, i); }
@@ -178,10 +192,11 @@ export async function init(store) {
   on(document, 'click', 'dialog [data-close]', (e, b) => closeSheet(b.closest('dialog')));
   document.addEventListener('click', e => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('[data-cmd="more"],[data-cmd="rest"]')) closeMenu(); }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); hideToast(); } });
-  addEventListener('resize', closeMenu); addEventListener('scroll', closeMenu, { passive: true });
+  // el menú se cierra al desplazar de verdad la página, no con los pequeños saltos de foco al cerrar una hoja
+  addEventListener('resize', closeMenu); addEventListener('scroll', () => { if (openMenu && Math.abs(scrollY - menuY) > 60) closeMenu(); }, { passive: true });
   // cerrar hojas tocando el fondo
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) closeSheet(d); }));
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setBars(isDark())); } catch { /* navegadores antiguos */ }
   if (NATIVE) { awake = (await storage.get(PREF + '-awake')) === '1'; keepAwake(awake); }
-  return { back, resume: () => { keepAwake(awake); setBars(isDark()); } };
+  return { back, run, COMMANDS, resume: () => { keepAwake(awake); setBars(isDark()); } };
 }

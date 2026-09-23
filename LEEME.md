@@ -77,6 +77,23 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
   - El texto del historial se guarda con el personaje.
 - **Buscador.** Además de texto, nivel y lista de clase, filtra por escuela, solo rituales y sin concentración.
 
+## Novedades de uso
+
+- **Portada.** La app se abre en una portada con tus personajes, cada uno con el color y el emblema de su clase. Toca uno para abrir su hoja. El nombre de la barra superior te devuelve a la portada, y el botón Atrás de Android también. Una instalación nueva empieza sin personajes.
+- **Tema por clase y subclase.** Cada clase tiene su color y su emblema, y algunas subclases el suyo propio. El adivino conserva el dorado de vela.
+- **Espacios de conjuro.** Son círculos: llenos si están libres y un anillo vacío si están gastados, con animación al cambiar. El número de cada nivel en la barra superior te lleva a sus conjuros.
+- **Tiradas.** Tras lanzar un conjuro, «Tirar» abre la bandeja de dados. También desde la ficha del conjuro → Tiradas. Permite:
+  - ataque con ventaja o desventaja y aviso de crítico;
+  - daño o curación escalados al nivel del personaje (trucos) o al espacio usado;
+  - dados dobles en crítico.
+
+  Cada tirada queda en el historial. Los conjuros que hacen daño muestran el icono de su tipo en la lista.
+- **Glosario de reglas.** Al importar tu manual se lee también el glosario (130 entradas). Los estados (apresado, hechizado, incapacitado…) aparecen enlazados en las descripciones: tócalos para leer la regla. Todo el glosario está en Más → Glosario de reglas.
+- **Tutorial.** Se muestra la primera vez en la portada y en la hoja. Se repite desde Más → Ver tutorial o desde la portada.
+- **Avisos propios.** Las confirmaciones, como borrar un personaje, y las preguntas usan ventanas de la propia app, no las del navegador.
+
+Iconos temáticos: game-icons.net (CC BY 3.0). `node tools/iconos.mjs` regenera el módulo con los que usa la app.
+
 ## Manual del jugador y compendio
 
 - **Compendio.** La app trae los **391 conjuros del Manual del Jugador 2024** con su nombre oficial en español y sus datos técnicos: nivel, escuela, clases, tiempo, alcance, componentes, duración, ritual y concentración. De los que están en el SRD 5.2 incluye además su texto en inglés (licencia CC-BY 4.0).
@@ -143,7 +160,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (25)
+npm test           # pruebas (30)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

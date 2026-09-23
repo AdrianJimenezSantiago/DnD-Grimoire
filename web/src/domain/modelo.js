@@ -90,6 +90,8 @@ export function charFromV1(d, v1) {
   return normChar(ch);
 }
 
+export const emptyDb = () => ({ schema: SCHEMA, catalog: {}, chars: [], activeId: null });
+/** Hoja de ejemplo de Theo: ya no se usa al instalar (la app empieza vacía); se conserva para pruebas. */
 export function seedDb() {
   const d = { schema: SCHEMA, catalog: {}, chars: [] };
   const ch = charFromV1(d, HOJA_THEO);
@@ -104,5 +106,5 @@ export function fromStored(rawV2, rawV1) {
     if (rawV1) { const v1 = JSON.parse(rawV1);
       if (v1?.levels) { const d = { schema: SCHEMA, catalog: {}, chars: [] }; const ch = charFromV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normDb(d), migrated: true }; } }
   } catch { /* idem */ }
-  return { db: seedDb(), migrated: true };
+  return { db: emptyDb(), migrated: false };
 }

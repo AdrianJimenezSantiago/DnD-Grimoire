@@ -3,6 +3,7 @@ import { esc } from '../../core/util.js';
 import { $, on } from '../dom.js';
 import { openSheet } from '../dialog.js';
 import { toast } from '../toast.js';
+import { confirmar } from '../modal.js';
 
 let S;
 const fmtDay = t => new Date(t).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -23,11 +24,11 @@ export function openHistory() { render(); openSheet($('#histDlg')); }
 export function init(store) {
   S = store;
   S.subscribe(() => { if ($('#histDlg').open) render(); });
-  on($('#histBody'), 'click', '[data-hundo]', (ev, b) => {
+  on($('#histBody'), 'click', '[data-hundo]', async (ev, b) => {
     const hist = S.history(), i = hist.findIndex(h => h.id === b.dataset.hundo); if (i < 0) return;
     const n = hist.length - i;
-    if (n > 1 && !confirm(`Esto deshace esta acción y ${n - 1 === 1 ? 'la posterior' : 'las ' + (n - 1) + ' posteriores'}. ¿Seguir?`)) return;
+    if (n > 1 && !(await confirmar({ titulo: `¿Deshacer ${n} acciones?`, texto: `La hoja vuelve a como estaba justo antes de esta acción, así que también se deshace${n - 1 === 1 ? ' la posterior' : 'n las ' + (n - 1) + ' posteriores'}.`, ok: 'Deshacer', icono: 'hourglass' }))) return;
     S.undo(hist[i]); toast(n > 1 ? `Deshechas ${n} acciones.` : 'Acción deshecha.');
   });
-  $('#histClear').addEventListener('click', () => { const ch = S.cur(); if (!ch || !confirm('¿Borrar el historial de este personaje?')) return; S.edit((db, c) => { c.play.log = []; }); });
+  $('#histClear').addEventListener('click', async () => { const ch = S.cur(); if (!ch || !(await confirmar({ titulo: '¿Borrar el historial?', texto: `Se borra lo anotado de ${ch.nombre}. La hoja no cambia.`, ok: 'Borrar', peligro: true }))) return; S.edit((db, c) => { c.play.log = []; }); });
 }

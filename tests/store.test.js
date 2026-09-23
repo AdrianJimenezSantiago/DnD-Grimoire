@@ -33,5 +33,13 @@ test('fromStored: v2, v1 y datos corruptos', () => {
   assert.equal(fromStored(v2, null).migrated, false);
   const v1 = JSON.stringify({ meta: { nombre: 'Theo', sub: 'Mago adivino, nivel 6', cd: '16' }, levels: [{ level: 1, slots: 4, spells: [{ es: 'Escudo', en: 'Shield', prep: true }] }] });
   const r = fromStored(null, v1); assert.equal(r.migrated, true); assert.equal(r.db.chars[0].extraCD, 1);
-  assert.equal(fromStored('{roto', null).db.chars[0].nombre, 'Theo');
+  const vacio = fromStored('{roto', null).db;            // la app empieza sin personajes
+  assert.equal(vacio.chars.length, 0); assert.equal(vacio.activeId, null);
+  assert.equal(fromStored(null, null).db.chars.length, 0);
+});
+
+test('note anota una tirada sin crear punto de deshacer', () => {
+  const S = createStore({ storage: mem(), key: 'k', db: seedDb() });
+  S.note('Descarga de fuego: 7 de daño de fuego');
+  assert.equal(S.cur().play.log.length, 1); assert.equal(S.history().length, 0);
 });
