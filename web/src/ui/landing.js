@@ -4,6 +4,7 @@ import { $, on, patch } from './dom.js';
 import { gi, temaDe, aplicarTema } from './tema.js';
 import { icon, ASTROLABE } from './icons.js';
 import { claseLinea } from './sheet.js';
+import { avatarHtml } from './avatar.js';
 import { viewTransition } from './fx.js';
 
 let S, cbs;
@@ -15,7 +16,7 @@ function render() {
   const card = (c, i) => {
     const t = temaDe(c), n = c.book.length;
     return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''}" data-lopen="${c.id}" style="--acc-h:${t.h};--acc-s:${t.s}%;--i:${i}">
-      <span class="lc-emb">${gi(t.icono)}</span>
+      ${c.retrato ? `<span class="lc-av">${avatarHtml(c, 'lg')}<span class="lc-badge">${gi(t.icono)}</span></span>` : `<span class="lc-emb">${gi(t.icono)}</span>`}
       <span class="lc-txt"><span class="lc-name">${esc(c.nombre || 'Sin nombre')}</span><span class="lc-cls">${esc(claseLinea(c))}</span>
       <span class="lc-meta">${[c.especie, n === 1 ? '1 conjuro' : n + ' conjuros'].filter(Boolean).map(esc).join(' · ')}</span></span>
       ${c.id === ult ? '<span class="lc-cont">Continuar</span>' : ''}</button>`;

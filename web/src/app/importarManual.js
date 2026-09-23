@@ -2,27 +2,16 @@
  * Lee las descripciones de conjuros del PDF del Manual del Jugador del propio usuario, en su dispositivo.
  * Se carga bajo demanda (pdf.js pesa ~1 MB) y el texto se guarda solo en el almacenamiento local.
  */
-import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { abrirPdf } from './pdf.js';
 import { pageToColumns } from '../domain/manualLineas.js';
 import { parseSpells } from '../domain/manual.js';
 import { parseGlosario } from '../domain/glosario.js';
 
-// Android y web: el lector de PDF trabaja en un hilo aparte (worker).
-// Archivo único de Windows (abierto desde el disco): los workers no se pueden cargar desde file://,
-// así que pdf.js usa su modo en el hilo principal con el mismo código, ya incluido en el HTML.
-async function prepararPdf() {
-  if (import.meta.env.MODE === 'windows') {
-    if (!globalThis.pdfjsWorker) globalThis.pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs');
-  } else pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-}
 const HAS = items => items.some(it => /Tiempo de lanza/.test(it.str));
 
 export async function leerManual(file, onProgress = () => {}) {
   onProgress({ fase: 'abrir' });
-  await prepararPdf();
-  const data = new Uint8Array(await file.arrayBuffer());
-  const doc = await pdfjs.getDocument({ data, disableFontFace: true, isEvalSupported: false }).promise;
+  const doc = await abrirPdf(file);
   const N = doc.numPages, cache = new Map();
   const leer = async p => {
     if (cache.has(p)) return cache.get(p);

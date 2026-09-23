@@ -8,6 +8,9 @@ import { pop } from './fx.js';
 import { aplicarTema, gi, temaDe } from './tema.js';
 import { tiradasConjuro } from '../domain/catalogo.js';
 import { iconoDano } from './dialogs/tiradas.js';
+import { avatarHtml } from './avatar.js';
+import { paraRecordar } from '../domain/diario.js';
+import { notaHtml } from './dialogs/diario.js';
 
 /* ---------- consultas de la hoja ---------- */
 export const slotsOf = (P, n) => P.slots[n] || 0;
@@ -37,14 +40,17 @@ function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="t
 function heroHtml(ch, P) {
   const mods = P.apKey ? `${ABIL_NAME[P.apKey]} ${sgn(P.mod)}, competencia ${sgn(P.pb)}` : `Competencia ${sgn(P.pb)}`;
   const t = temaDe(ch);
-  return `${ASTROLABE}${gi(t.icono, 'emblem')}
-    <h1>${esc(ch.nombre)}<svg class="underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 60 3, 120 12, 180 7 S 270 5, 297 8"/></svg></h1>
+  return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
+    <div class="hero-id"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
+    <h1>${esc(ch.nombre)}<svg class="underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 60 3, 120 12, 180 7 S 270 5, 297 8"/></svg></h1></div>
     <div class="clase">${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}, nivel ${ch.nivel}${origenLinea(ch) ? `<span class="sub">. ${esc(origenLinea(ch))}</span>` : ''}</div>
     <div class="mods">${mods}</div>
     ${ch.lema ? `<div class="motto">${lemaHtml(ch.lema)}</div>` : ''}
     <div class="chips">
       <button type="button" class="chip" data-cmd="editchar">${icon('user')}Editar personaje</button>
       <button type="button" class="chip" data-cmd="rules">${icon('sliders')}Rasgos</button>
+      <button type="button" class="chip" data-cmd="historia">${gi('libro')}Historia</button>
+      <button type="button" class="chip" data-cmd="diario">${icon('quill')}Diario</button>
       ${ch.nivel < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${ch.nivel + 1}</button>` : ''}
     </div>`;
 }
@@ -92,6 +98,8 @@ function alLanzarHtml(db, ch, r) {
 }
 function resourcesHtml(db, ch, P) {
   let h = '';
+  const rec = paraRecordar(ch);
+  if (rec.length) h += `<div class="res wide rec-card"><strong>${icon('star')} Para recordar</strong><button type="button" class="ruse" data-cmd="diario">Abrir diario</button><ul class="nts">${rec.slice(0, 4).map(n => notaHtml(n, true)).join('')}</ul>${rec.length > 4 ? `<span class="rnote">Y ${rec.length - 4} más en el diario.</span>` : ''}</div>`;
   if (P.pact) h += `<div class="res"><strong>Magia de pacto</strong><span class="rnote">${P.pact.n} ${P.pact.n > 1 ? 'espacios' : 'espacio'} de nivel ${P.pact.level}; se recuperan con un descanso corto o largo.</span></div>`;
   reglas(ch).forEach(r => { h += r.tipo === 'recurso' ? recursoHtml(ch, r) : r.tipo === 'dados' ? dadosHtml(ch, r) : r.tipo === 'recuperar' ? recuperarHtml(ch, r) : alLanzarHtml(db, ch, r); });
   return h ? `<div class="resources">${h}</div>` : '';
@@ -162,7 +170,7 @@ export function renderBar(S) {
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="monogram">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const tema = aplicarTema(ch);
-  patch($('#whoChip'), `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span><span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
+  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong><button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;

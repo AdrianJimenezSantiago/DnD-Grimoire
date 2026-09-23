@@ -11,6 +11,9 @@ import { toast } from '../toast.js';
 import { viewTransition } from '../fx.js';
 import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
+import { avatarHtml } from '../avatar.js';
+import { openRetrato } from './retrato.js';
+import { fileStore } from '../../platform/native.js';
 
 let S, onCreated;
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
@@ -25,7 +28,7 @@ function renderList() {
   const n = Object.keys(S.db.catalog).length;
   $('#charList').innerHTML = (S.db.chars.length ? S.db.chars.map(c => {
     const nb = c.book.length, ini = esc((c.nombre || '?').trim().charAt(0).toUpperCase());
-    return `<div class="ccard ${c.id === S.db.activeId ? 'active' : ''}"><span class="monogram">${ini}</span>
+    return `<div class="ccard ${c.id === S.db.activeId ? 'active' : ''}">${c.retrato ? avatarHtml(c, 'md') : `<span class="monogram">${ini}</span>`}
       <button type="button" class="cmain" data-openc="${c.id}"><span class="cname">${esc(c.nombre || 'Sin nombre')}</span>
         <span class="cline">${esc(claseLinea(c))}${origenLinea(c) ? '. ' + esc(origenLinea(c)) : ''}. ${nb === 1 ? '1 conjuro' : nb + ' conjuros'} en el libro</span></button>
       <div class="cacts"><button type="button" data-editc="${c.id}">Editar</button><button type="button" data-dupc="${c.id}">Duplicar</button><button type="button" class="warn" data-delc="${c.id}">Borrar</button></div>
@@ -38,7 +41,7 @@ function duplicate(id) {
   const src = S.db.chars.find(c => c.id === id); if (!src) return;
   const h = S.edit(db => {
     const c = clone(src); c.id = uid('c'); c.nombre = `${src.nombre} (copia)`;
-    c.play = { used: {}, conc: '', rec: {}, log: [], onlyPrep: src.play.onlyPrep }; c.book.forEach(e => { e.used = false; });
+    c.play = { used: {}, conc: '', rec: {}, log: [], onlyPrep: src.play.onlyPrep }; c.book.forEach(e => { e.used = false; }); c.diario = { sesiones: [] };
     db.chars.splice(db.chars.findIndex(x => x.id === id) + 1, 0, c);
   });
   renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [undoBtn(S, h)]);
@@ -47,6 +50,7 @@ async function remove(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
   if (!(await confirmar({ titulo: `¿Borrar a ${c.nombre || 'este personaje'}?`, texto: 'Se borran su ficha, su libro y su historial. Los conjuros siguen en el catálogo para los demás personajes.', ok: 'Borrar personaje', peligro: true }))) return;
   const h = S.edit(db => { db.chars = db.chars.filter(x => x.id !== id); if (db.activeId === id) db.activeId = db.chars[0]?.id ?? null; });
+  fileStore.remove(`retrato-${id}.txt`);   // el original del retrato; la miniatura vuelve con Deshacer
   renderList(); toast(`${esc(c.nombre || 'Personaje')} borrado.`, [undoBtn(S, h)]);
 }
 
@@ -61,7 +65,7 @@ export function openCharForm(id) {
   const abil = ABILS.map(([k, n]) => `<div class="ab" data-ab="${k}"><span>${n}</span><input type="number" inputmode="numeric" min="1" max="30" id="f_${k}" value="${c.stats[k]}" aria-label="${n}"><b id="m_${k}">${sgn(modOf(c.stats[k]))}</b></div>`).join('');
   const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(L => `<label class="f">Nv. ${L}<input type="number" inputmode="numeric" min="0" max="9" id="f_e${L}" value="${(c.espacios || {})[L] || ''}" placeholder="0"></label>`).join('');
   $('#charForm').innerHTML = `
-  <section class="fsec"><h3>Quién es</h3><div class="frow">
+  <section class="fsec"><h3>Quién es</h3>${id ? `<div class="f-ret">${avatarHtml(c, 'lg')}<div><b>Retrato</b><p class="note">${c.retrato ? 'Puedes reencuadrarlo o cambiarlo cuando quieras.' : 'Añade una imagen de tu personaje: aparece en la portada, la hoja y la barra superior.'}</p><button type="button" data-retrato>${c.retrato ? 'Editar retrato' : 'Añadir retrato'}</button></div></div>` : '<p class="note">Podrás añadir un retrato, su historia y su diario en cuanto lo crees.</p>'}<div class="frow">
     <label class="f" id="w_nombre">Nombre<input id="f_nombre" value="${esc(c.nombre)}" autocomplete="off" required></label>
     <label class="f">Especie<input id="f_especie" list="dl_especie" value="${esc(c.especie)}" autocomplete="off"></label>
     <label class="f">Trasfondo<input id="f_trasfondo" list="dl_trasfondo" value="${esc(c.trasfondo)}" autocomplete="off"></label></div></section>
@@ -155,6 +159,7 @@ export function init(store, { onNewCharacterAddSpells }) {
     }
     sync(false);
   });
+  on(form, 'click', '[data-retrato]', () => openRetrato(formId));
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);
   $('#charNew').addEventListener('click', () => openCharForm(null));

@@ -24,6 +24,9 @@ import { openHistory } from '../ui/dialogs/historial.js';
 import { openBackup } from '../ui/dialogs/copia.js';
 import { openManual } from '../ui/dialogs/manual.js';
 import { openGlosario } from '../ui/dialogs/glosario.js';
+import { openRetrato } from '../ui/dialogs/retrato.js';
+import { openTrasfondo } from '../ui/dialogs/trasfondo.js';
+import { openDiario, accionNota } from '../ui/dialogs/diario.js';
 import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
@@ -57,6 +60,8 @@ function moreItems() {
     { cmd: 'home', icon: 'book', label: 'Inicio' },
     { cmd: 'chars', icon: 'users', label: 'Gestionar personajes' },
     { cmd: 'rules', icon: 'sliders', label: 'Rasgos y recursos' },
+    { cmd: 'historia', icon: 'book', label: 'Historia del personaje' },
+    { cmd: 'diario', icon: 'quill', label: 'Diario de sesión' },
     { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
     '-',
     { cmd: 'manual', icon: 'book', label: 'Manual del jugador' },
@@ -82,6 +87,9 @@ const COMMANDS = {
   chars: () => openChars(),
   home: () => { setEditing(false); showLanding(); },
   glosario: () => openGlosario(),
+  retrato: () => S.cur() && openRetrato(S.cur().id),
+  historia: () => S.cur() && openTrasfondo(),
+  diario: () => S.cur() && openDiario(),
   tutorial: () => COMMANDS._tutorial?.(),
   newchar: () => openCharForm(null),
   editchar: () => S.cur() && openCharForm(S.cur().id),
@@ -136,6 +144,7 @@ function bindSheet() {
   sheet.addEventListener('contextmenu', e => { if (e.target.closest('.castzone') && !S.editing) e.preventDefault(); });
 
   on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  on(sheet, 'click', '#res [data-ntact]', (e, b) => { const li = b.closest('[data-nt]'); accionNota(S, li.dataset.ses, li.dataset.nt, b.dataset.ntact); });
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;
     if (d.slotbtn) { const [L, i] = d.slotbtn.split(':').map(Number); return A.toggleSlot(S, L, i); }
