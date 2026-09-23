@@ -7,11 +7,19 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { pageToColumns } from '../domain/manualLineas.js';
 import { parseSpells } from '../domain/manual.js';
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+// Android y web: el lector de PDF trabaja en un hilo aparte (worker).
+// Archivo único de Windows (abierto desde el disco): los workers no se pueden cargar desde file://,
+// así que pdf.js usa su modo en el hilo principal con el mismo código, ya incluido en el HTML.
+async function prepararPdf() {
+  if (import.meta.env.MODE === 'windows') {
+    if (!globalThis.pdfjsWorker) globalThis.pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs');
+  } else pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+}
 const HAS = items => items.some(it => /Tiempo de lanza/.test(it.str));
 
 export async function leerManual(file, onProgress = () => {}) {
   onProgress({ fase: 'abrir' });
+  await prepararPdf();
   const data = new Uint8Array(await file.arrayBuffer());
   const doc = await pdfjs.getDocument({ data, disableFontFace: true, isEvalSupported: false }).promise;
   const N = doc.numPages, cache = new Map();
