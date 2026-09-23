@@ -1,0 +1,122 @@
+[hidden] { display: none !important; }
+/* ------------------------------ base ------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--sat) + 150px); height: 100%; }
+body {
+  margin: 0; min-height: 100%; font-family: var(--serif); font-size: var(--fs-m); line-height: 1.4;
+  color: var(--ink); background: var(--bg) var(--sky) no-repeat; background-attachment: fixed;
+  font-variant-numeric: lining-nums; -webkit-tap-highlight-color: transparent;
+  padding: 0 var(--sar) 0 var(--sal);
+  transition: background-color var(--t-med) var(--ease), color var(--t-med) var(--ease);
+}
+/* cielo estrellado muy tenue (solo de noche) */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, var(--ink-2) 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 12%, var(--ink-2) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 64% 34%, var(--gold) 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 62%, var(--ink-3) 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 70%, var(--ink-2) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 46% 88%, var(--ink-3) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 80%, var(--ink-3) 50%, transparent 51%);
+  transition: opacity var(--t-slow) var(--ease);
+}
+:root[data-theme="dark"] body::after { opacity: .5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body::after { opacity: .5; } }
+
+button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 500 var(--fs-s) / 1 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-s); padding: 0 var(--s3); min-height: 40px; cursor: pointer; touch-action: manipulation;
+  transition: background-color var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease), box-shadow var(--t-fast); }
+button:hover { border-color: var(--ink-3); }
+button:active { transform: scale(.97); }
+button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+button.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+button.gold { background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: #1b1406; border-color: transparent; box-shadow: 0 6px 20px var(--glow); }
+button.ghost { background: transparent; border-color: transparent; }
+button.warn { color: var(--danger); }
+button[aria-pressed="true"]:not(.dockbtn):not(.slotbtn):not(.tick) { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+input, select, textarea { font: 400 16px / 1.3 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-s); padding: 9px 12px; min-height: 44px; width: 100%; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--glow); }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.note { font: 400 var(--fs-s) / 1.45 var(--sans); color: var(--ink-2); margin: var(--s2) 0; }
+
+/* ------------------------------ barra superior ------------------------------ */
+.appbar { position: sticky; top: 0; z-index: 30; padding-top: var(--sat);
+  background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid var(--line-soft); }
+.bar { display: flex; align-items: center; gap: var(--s2); max-width: 1240px; margin: 0 auto; padding: var(--s2) var(--s4); }
+.who-chip { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 3px 12px 3px 3px; border-radius: var(--r-pill);
+  background: var(--surface); border: 1px solid var(--line); max-width: 60vw; }
+.monogram { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  font: 700 18px / 1 var(--serif); color: #1b1406; background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--candle-mid) 55%, var(--candle-edge)); box-shadow: 0 0 14px var(--glow); }
+.who-chip .nm { font: 500 var(--fs-l) / 1.05 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who-chip .lv { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); white-space: nowrap; }
+.who-chip .icon { width: 16px; height: 16px; color: var(--ink-3); }
+.bar .spacer { flex: 1; }
+.bar .act { display: none; }
+.iconbtn { width: 44px; min-width: 44px; padding: 0; display: grid; place-items: center; border-radius: var(--r-pill); }
+.slots-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; max-width: 1240px; margin: 0 auto; padding: 0 var(--s4) var(--s2); min-height: 8px; }
+.sb-l { display: inline-flex; align-items: center; gap: 1px; }
+.sb-l > b { font: 700 15px / 1 var(--serif); color: var(--ink-2); margin-right: 5px; }
+.editbanner { display: none; font: 500 var(--fs-s) / 1.35 var(--sans); color: #1b1406; background: linear-gradient(90deg, var(--gold-2), var(--gold)); padding: 8px var(--s4); text-align: center; }
+body.editing .editbanner { display: block; }
+
+/* velas: espacios de conjuro (encendida = libre) */
+.slotbtn { width: 30px; height: 34px; min-height: 0; padding: 0; border: 0; background: transparent; display: inline-grid; place-items: center; border-radius: 8px; }
+.slotbtn:active { transform: scale(.9); }
+.flame { width: 13px; height: 18px; border-radius: 50% 50% 45% 45% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 72%, var(--candle-core) 0 22%, var(--candle-mid) 46%, var(--candle-edge) 78%, transparent 80%);
+  box-shadow: 0 0 10px 1px var(--glow); transform-origin: 50% 90%; transition: transform var(--t-med) var(--spring), opacity var(--t-med), box-shadow var(--t-med); }
+.slotbtn.spent .flame { background: none; box-shadow: none; border: 1.5px solid var(--ink-3); opacity: .55; transform: scale(.78); border-radius: 50%; width: 12px; height: 12px; }
+
+.conc { display: inline-flex; align-items: center; gap: 8px; font: 500 var(--fs-s) / 1.2 var(--sans); color: var(--ink);
+  background: var(--gold-soft); border: 1px solid var(--gold); border-radius: var(--r-pill); padding: 3px 4px 3px 12px; }
+.conc button { min-height: 28px; padding: 0 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); }
+
+/* ------------------------------ dock inferior (móvil) ------------------------------ */
+.dock { position: fixed; z-index: 35; left: 50%; bottom: calc(10px + var(--sab)); transform: translateX(-50%);
+  display: flex; gap: 2px; padding: 6px; border-radius: 22px; width: min(560px, calc(100vw - 20px));
+  background: var(--glass); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--line); box-shadow: var(--shadow-2); }
+.dockbtn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 54px; padding: 4px 2px; border: 0; background: transparent; border-radius: 16px; font: 500 11.5px / 1 var(--sans); color: var(--ink-2); }
+.dockbtn .icon { width: 22px; height: 22px; }
+.dockbtn[aria-pressed="true"], .dockbtn.on { color: var(--gold); background: var(--gold-soft); }
+body.editing #dEdit { color: #1b1406; background: linear-gradient(180deg, var(--gold-2), var(--gold)); }
+:root { --dock-h: calc(86px + var(--sab)); }
+
+@media (min-width: 900px) {
+  .dock { display: none; }
+  :root { --dock-h: 0px; }
+  .bar .act { display: inline-flex; align-items: center; gap: 8px; }
+}
+
+/* ------------------------------ contenido ------------------------------ */
+.wrap { max-width: 1240px; margin: 0 auto; padding: var(--s4) var(--s4) calc(var(--dock-h) + var(--s6)); overflow-x: clip; }
+html, body { overflow-x: clip; }
+.hero { position: relative; padding: var(--s5) var(--s1) var(--s4); isolation: isolate; }
+.astrolabe { position: absolute; z-index: -1; right: -60px; top: -40px; width: 340px; height: 340px; color: var(--gold); opacity: .16; pointer-events: none; }
+.astrolabe g.spin { transform-origin: 170px 170px; animation: orrery 240s linear infinite; }
+.hero h1 { font: 500 var(--fs-display) / .95 var(--serif); letter-spacing: -.01em; margin: 0; position: relative; display: inline-block; }
+.hero h1 .underline { position: absolute; left: -2%; bottom: -10px; width: 104%; height: 14px; overflow: visible; }
+.hero h1 .underline path { fill: none; stroke: var(--gold); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 600; stroke-dashoffset: 0; filter: drop-shadow(0 0 6px var(--glow)); }
+.hero .clase { font: 500 var(--fs-l) / 1.3 var(--sans); margin-top: 18px; }
+.hero .clase .sub { color: var(--ink-2); font-weight: 400; }
+.hero .mods { font: 400 var(--fs-s) / 1.3 var(--sans); color: var(--ink-2); margin-top: 4px; }
+.motto { font: italic 400 var(--fs-l) / 1.45 var(--serif); color: var(--ink-2); margin-top: var(--s3); max-width: 60ch; }
+.motto .u { color: var(--ink); background: linear-gradient(transparent 62%, var(--gold-soft) 62%); box-shadow: inset 0 -2px 0 var(--gold); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s4); }
+.chip { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 14px; border-radius: var(--r-pill); font-size: var(--fs-s); background: var(--surface); }
+.chip .icon { width: 17px; height: 17px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s2); margin: var(--s4) 0 var(--s2); }
+.stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); padding: 12px 6px 10px; text-align: center; box-shadow: var(--shadow-1); position: relative; overflow: hidden; }
+.stat b { display: block; font: 700 var(--fs-2xl) / 1 var(--serif); }
+.stat span { display: block; margin-top: 6px; font: 400 var(--fs-xs) / 1.15 var(--sans); color: var(--ink-2); }
+.stat.over b { color: var(--danger); }
+.stat.key::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+@media (max-width: 420px) { .stat b { font-size: 24px; } }

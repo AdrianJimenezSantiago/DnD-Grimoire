@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D14">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light dark">
+<title>Grimorio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231E2740'/><path d='M40 16a16 16 0 1 0 0 30 13 13 0 1 1 0-30Z' fill='%23E2B75E'/><rect x='16' y='50' width='32' height='3' rx='1.5' fill='%23E2B75E'/></svg>">
+<script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+<header class="appbar" id="appbar">
+  <div class="bar">
+    <button type="button" class="who-chip" data-cmd="chars" id="whoChip" aria-label="Cambiar de personaje"></button>
+    <span class="spacer"></span>
+    <span class="act">
+      <button type="button" data-cmd="rest" id="bRest"></button>
+      <button type="button" data-cmd="filter" id="bFilter" aria-pressed="false"></button>
+      <button type="button" data-cmd="edit" id="bEdit"></button>
+      <button type="button" data-cmd="add" id="bAdd" class="edit-only"></button>
+      <button type="button" data-cmd="hist" id="bHist"></button>
+    </span>
+    <button type="button" class="iconbtn" data-cmd="more" id="btnMore" aria-label="Más opciones" aria-haspopup="menu"></button>
+  </div>
+  <div class="slots-bar" id="sbar" aria-label="Espacios de conjuro"></div>
+  <div class="editbanner">Modo edición: toca cualquier texto para cambiarlo. R y C se activan tocándolas. Los datos del conjuro se comparten con los demás personajes que lo tengan.</div>
+</header>
+
+<main class="wrap">
+  <div id="sheet">
+    <div class="hero" id="hero"></div>
+    <div class="stats" id="stats"></div>
+    <div id="res"></div>
+    <div class="legend" id="legend"></div>
+    <div id="levels"></div>
+    <footer class="foot" id="foot"></footer>
+  </div>
+</main>
+
+<nav class="dock" aria-label="Acciones">
+  <button type="button" class="dockbtn" data-cmd="rest" id="dRest"></button>
+  <button type="button" class="dockbtn" data-cmd="filter" id="dFilter" aria-pressed="false"></button>
+  <button type="button" class="dockbtn" data-cmd="edit" id="dEdit"></button>
+  <button type="button" class="dockbtn" data-cmd="add" id="dAdd"></button>
+  <button type="button" class="dockbtn" data-cmd="hist" id="dHist"></button>
+</nav>
+
+<div class="menu" id="moreMenu" role="menu" hidden></div>
+<div class="menu" id="restMenu" role="menu" hidden></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><span class="acts" id="toastActs"></span></div>
+
+<dialog id="spellDlg" class="tall" aria-labelledby="spTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="spTitle"></h2><div class="dsub" id="spSub"></div></div>
+  <div class="dbody" id="spBody"></div><div class="dfoot" id="spFoot"></div>
+</dialog>
+
+<dialog id="charsDlg" class="tall" aria-labelledby="charsTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="charsTitle">Personajes</h2><div class="dsub">Toca un personaje para abrir su grimorio.</div></div>
+  <div class="dbody" id="charList"></div>
+  <div class="dfoot"><button type="button" data-close>Cerrar</button><span class="spacer"></span><button type="button" class="primary" id="charNew">Nuevo personaje</button></div>
+</dialog>
+
+<dialog id="charDlg" class="tall" aria-labelledby="charTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="charTitle">Nuevo personaje</h2><div class="dsub">Reglas del Manual del Jugador de 2024. Lo que se calcula solo aparece en el resumen del final.</div></div>
+  <div class="dbody" id="charForm"></div>
+  <div class="dfoot"><span class="ferr" id="charErr" role="alert"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="charSave">Guardar</button></div>
+</dialog>
+
+<dialog id="pickDlg" class="tall" aria-labelledby="pickTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="pickTitle">Añadir conjuro</h2><div class="dsub" id="pickSub"></div></div>
+  <div class="pickbar">
+    <input type="search" id="pickQ" placeholder="Buscar en el catálogo y el compendio" aria-label="Buscar conjuro" autocomplete="off">
+    <select id="pickCls" aria-label="Lista de clase"></select>
+    <select id="pickEsc" aria-label="Escuela"></select>
+    <select id="pickLvl" aria-label="Nivel"><option value="">Nivel</option><option value="0">Trucos</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
+  </div>
+  <div class="pickfilters">
+    <button type="button" class="chip" id="pickRit" aria-pressed="false">Solo rituales</button>
+    <button type="button" class="chip" id="pickNoConc" aria-pressed="false">Sin concentración</button>
+  </div>
+  <div class="dbody" id="pickList"></div>
+  <div class="dfoot"><button type="button" id="pickNew">Crear conjuro nuevo</button><span class="spacer"></span><button type="button" class="primary" data-close>Hecho</button></div>
+</dialog>
+
+<dialog id="lvlDlg" class="tall" aria-labelledby="lvTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="lvTitle"></h2><div class="dsub" id="lvSub"></div><div class="steps" id="lvSteps"></div></div>
+  <div class="dbody" id="lvBody"></div>
+  <div class="dfoot"><button type="button" data-close>Cancelar</button><span class="spacer"></span><button type="button" id="lvBack">Atrás</button><button type="button" class="gold" id="lvNext">Siguiente</button></div>
+</dialog>
+
+<dialog id="rulesDlg" class="tall" aria-labelledby="rulesTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="rulesTitle">Rasgos y recursos</h2><div class="dsub" id="rulesSub"></div></div>
+  <div class="dbody" id="rulesBody"></div>
+  <div class="dfoot"><button type="button" data-close>Cerrar</button><span class="spacer"></span><button type="button" class="primary" id="ruleNew">Añadir rasgo</button></div>
+</dialog>
+
+<dialog id="ruleDlg" class="tall" aria-labelledby="ruleTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="ruleTitle">Nuevo rasgo</h2><div class="dsub">Define qué cuenta la hoja por ti y cuándo se recupera.</div></div>
+  <div class="dbody" id="ruleForm"></div>
+  <div class="dfoot"><span class="ferr" id="ruleErr" role="alert"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="ruleSave">Guardar</button></div>
+</dialog>
+
+<dialog id="recDlg" aria-labelledby="recTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="recTitle"></h2><div class="dsub" id="recSub"></div></div>
+  <div class="dbody" id="recBody"></div>
+  <div class="dfoot"><button type="button" data-close>Cancelar</button><span class="spacer"></span><button type="button" class="gold" id="recOk">Recuperar</button></div>
+</dialog>
+
+<dialog id="histDlg" class="tall" aria-labelledby="histTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="histTitle">Historial de la sesión</h2><div class="dsub" id="histSub"></div></div>
+  <div class="dbody" id="histBody"></div>
+  <div class="dfoot"><button type="button" class="warn" id="histClear">Borrar historial</button><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="backupDlg" aria-labelledby="bkTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="bkTitle">Copia de seguridad</h2><div class="dsub">Incluye todos los personajes y el catálogo de conjuros.</div></div>
+  <div class="dbody">
+    <p class="note">Guárdala en un archivo y mándala a Drive, a tu correo o a otro dispositivo. Para recuperarla, abre ese archivo.</p>
+    <div class="row-btns" style="justify-content:flex-start">
+      <button type="button" class="primary" id="bkSave">Guardar en archivo</button>
+      <button type="button" id="bkOpen">Abrir archivo</button>
+      <input type="file" id="bkFile" class="visually-hidden" accept=".json,application/json,text/plain" tabindex="-1" aria-hidden="true">
+    </div>
+    <p class="note">También puedes copiar el texto o pegar el de otra copia y pulsar «Cargar copia». Una copia de la hoja antigua del navegador se añade como un personaje más.</p>
+    <textarea id="bkText" spellcheck="false" rows="5" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
+  </div>
+  <div class="dfoot"><button type="button" id="bkCopy">Copiar texto</button><button type="button" id="bkLoad">Cargar copia</button><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="manualDlg" class="tall" aria-labelledby="mnTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="mnTitle">Manual del jugador</h2><div class="dsub">Descripciones completas de los conjuros desde tu propio PDF.</div></div>
+  <div class="dbody">
+    <p class="note">Elige el PDF de tu Manual del Jugador (2024, en español). La app lee el capítulo de conjuros en este dispositivo y guarda las descripciones aquí: no se suben a ningún sitio ni van en las copias de seguridad. Tarda entre unos segundos y un minuto, según el móvil.</p>
+    <div id="mnEstado"></div>
+    <label class="chk-line"><input type="checkbox" id="mnOficial" checked> Poner a mis conjuros los nombres y datos técnicos oficiales del manual</label>
+    <p class="note">Por ejemplo, «Contraconjuro» pasa a «Contrahechizo». Tus resúmenes y textos propios no se tocan, y se puede deshacer.</p>
+    <div id="mnProg" class="mnprog" hidden><div class="mnbar"><i id="mnFill"></i></div><span id="mnMsg"></span></div>
+    <div id="mnRes"></div>
+    <input type="file" id="mnFile" class="visually-hidden" accept="application/pdf,.pdf" tabindex="-1" aria-hidden="true">
+  </div>
+  <div class="dfoot"><button type="button" class="warn" id="mnBorrar" hidden>Borrar descripciones</button><button type="button" id="mnSoloNombres">Solo nombres oficiales</button><span class="spacer"></span><button type="button" data-close>Cerrar</button><button type="button" class="gold" id="mnElegir">Elegir PDF</button></div>
+</dialog>
+
+<dialog id="aboutDlg" aria-labelledby="abTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="abTitle">Acerca del grimorio</h2></div>
+  <div class="dbody">
+    <p class="note">Hoja de conjuros para Crónicas de La Argos, con las reglas del Manual del Jugador de 2024.</p>
+    <p class="note">Este trabajo incluye material del System Reference Document 5.2 («SRD 5.2») de Wizards of the Coast LLC, disponible en https://www.dndbeyond.com/srd. El SRD 5.2 tiene licencia Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/legalcode). Los datos del SRD llegan a través de Open5e. Los nombres en español y los datos técnicos siguen el Manual del Jugador 2024; las descripciones del manual solo aparecen si importas tu propio PDF, y se quedan en tu dispositivo.</p>
+    <p class="note">This work includes material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0 International License.</p>
+    <p class="note">Fuentes Alegreya y Alegreya Sans, SIL Open Font License 1.1.</p>
+  </div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<datalist id="dl_especie"></datalist><datalist id="dl_trasfondo"></datalist><datalist id="dl_sub"></datalist>
+</body>
+</html>

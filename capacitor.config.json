@@ -1,0 +1,14 @@
+{
+  "appId": "com.cronicasargos.grimorio",
+  "appName": "Grimorio",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#E7EAF1"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DEFAULT"
+    }
+  }
+}
