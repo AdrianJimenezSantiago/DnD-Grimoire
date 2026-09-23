@@ -1,0 +1,63 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Dependencias
+        run: npm ci
+
+      - name: Pruebas de reglas y estado
+        run: npm test
+
+      - name: Compilar la web (Vite)
+        run: npm run build
+
+      - name: Copiar la web al proyecto Android
+        run: npx cap sync android
+
+      - name: Compilar
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Renombrar
+        run: cp android/app/build/outputs/apk/release/app-release.apk "grimorio-1.0.${{ github.run_number }}.apk"
+
+      - name: Guardar como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: grimorio-apk
+          path: grimorio-*.apk
+
+      - name: Publicar en Releases (para descargar desde el móvil)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Grimorio 1.0.${{ github.run_number }}
+          files: grimorio-*.apk
+          make_latest: true
