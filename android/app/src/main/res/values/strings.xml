@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Grimorio</string>
+    <string name="title_activity_main">Grimorio</string>
+    <string name="package_name">com.cronicasargos.grimorio</string>
+    <string name="custom_url_scheme">com.cronicasargos.grimorio</string>
+</resources>
