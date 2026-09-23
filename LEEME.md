@@ -144,7 +144,8 @@ Comandos:
 npm install
 npm run dev        # servidor local con recarga
 npm test           # pruebas (25)
-npm run build      # compila web/ en www/
+npm run build      # compila web/ en www/ (Android)
+npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android
 ```
 
@@ -160,6 +161,20 @@ GitHub compila la app en sus servidores, gratis. Es más cómodo hacerlo desde u
 6. Cuando termine en verde, el APK aparece en la portada del repositorio, a la derecha, en **Releases**.
 
 Cada vez que subas un cambio, se compila una versión nueva con un número mayor. También puedes lanzarla a mano desde Actions → Compilar APK → **Run workflow**.
+
+## Versión para Windows (un solo archivo)
+
+Cada compilación genera también `grimorio-windows-1.0.N.html`, en **Releases** junto al APK. Es la misma app en un único archivo de unos 2,5 MB:
+
+- **Abrirla:** descárgalo, guárdalo donde quieras (por ejemplo, en Documentos) y ábrelo con doble clic en Edge o Chrome.
+- **Sin instalación:** no instala nada, no necesita conexión y no hace ninguna petición a internet.
+- **Tus datos:** se guardan en ese navegador y en ese PC. Si cambias de navegador o de carpeta, puede parecer vacía; vuelve a abrirlo desde el mismo sitio o carga una copia.
+- **Pasar datos entre móvil y PC:** Más → Copia de seguridad → «Guardar en archivo» en uno, y «Abrir archivo» en el otro.
+- **Manual del jugador:** se importa igual, desde Más → Manual del jugador. En el PC tarda unos segundos, y las descripciones quedan en ese navegador.
+- **Imprimir** funciona aquí (en Android no), y da la hoja limpia en A4 apaisado.
+- **Actualizar:** descarga el archivo nuevo y sustituye al anterior con el mismo nombre y en la misma carpeta, y tus datos seguirán ahí. Por si acaso, haz antes una copia de seguridad.
+
+Para generarlo en tu ordenador: `npm run build:windows` deja el archivo en `dist-windows/grimorio.html`.
 
 ## Instalar en el móvil o la tablet
 

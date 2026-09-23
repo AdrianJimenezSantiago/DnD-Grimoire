@@ -10,7 +10,8 @@
     "test": "node --test \"tests/*.test.js\"",
     "sync": "npm run build && cap sync android",
     "icons": "python3 tools/make_icons.py",
-    "srd": "python3 tools/build_srd.py"
+    "srd": "python3 tools/build_srd.py",
+    "build:windows": "vite build --config web/vite.config.js --mode windows && node tools/renombrar-windows.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -30,7 +31,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.2",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "^2.3.3"
   },
   "type": "module"
 }
