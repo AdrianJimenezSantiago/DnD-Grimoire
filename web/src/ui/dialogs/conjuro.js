@@ -1,0 +1,99 @@
+/** Ficha del conjuro: lectura completa, opciones de lanzamiento y edición de textos. */
+import { esc } from '../../core/util.js';
+import { perfil } from '../../domain/reglas2024.js';
+import { srdFor, srdAsSpell, manualFor } from '../../domain/catalogo.js';
+import { $, on } from '../dom.js';
+import { freeOf, isPrepared, schoolKey, slotsOf } from '../sheet.js';
+import { openSheet, closeSheet } from '../dialog.js';
+import { toast } from '../toast.js';
+import { cast, undoBtn } from '../../app/acciones.js';
+
+let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
+const dlg = () => $('#spellDlg');
+
+export function md(t) {
+  return String(t || '').trim().split(/\n{2,}/).map(p => '<p>' + esc(p)
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>').replace(/\*\*_?(.+?)_?\*\*/g, '<b>$1</b>').replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1<i>$2</i>')
+    .replace(/\n/g, '<br>') + '</p>').join('');
+}
+function data() {
+  if (SP.mode === 'book') { const ch = S.cur(), e = ch.book[SP.bi], s = S.db.catalog[e.sid]; return { s, x: srdFor(s), e }; }
+  const it = SP.item; if (it.src === 'cat') return { s: it.s, x: srdFor(it.s) };
+  return { s: srdAsSpell(it.x), x: it.x };
+}
+export function openSpell(bi, opt = {}) { SP = { mode: 'book', bi, edit: !!opt.edit }; render(); openSheet(dlg()); }
+export function previewSpell(item, opt = {}) { SP = { mode: 'preview', item, onAdd: opt.onAdd }; render(); openSheet(dlg()); }
+
+function castOptions(bi) {
+  const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
+  if (s.level === 0) return '';
+  let o = '';
+  if (e.gratis) o += `<button type="button" data-opt="free" ${e.used ? 'disabled' : ''}>Uso gratis <small>${e.used ? 'ya gastado' : esc(e.gratis)}</small></button>`;
+  if (s.ritual && (isPrepared(e) || P.ritualLibro)) o += `<button type="button" data-opt="ritual">Como ritual <small>sin espacio, +10 min</small></button>`;
+  for (let L = s.level; L <= P.maxSlot; L++) { if (!slotsOf(P, L)) continue;
+    const pact = P.pact && L === P.pact.level;
+    o += `<button type="button" data-opt="slot:${L}" ${freeOf(ch, P, L) ? '' : 'disabled'}>${pact ? 'Espacio de pacto, nivel ' + L : 'Espacio de nivel ' + L}${L > s.level && !pact ? ' (potenciado)' : ''} <small>${freeOf(ch, P, L)} de ${slotsOf(P, L)} libres</small></button>`; }
+  return `<section class="sp-cast"><h3>Lanzar${!isPrepared(e) ? ' <small>(no está preparado)</small>' : ''}</h3><div class="opts">${o || '<p class="note">No hay espacios de este nivel ni usos gratis.</p>'}</div></section>`;
+}
+function render() {
+  const { s, x } = data();
+  $('#spTitle').textContent = s.es || s.en;
+  const sk = schoolKey(s.escuela);
+  $('#spSub').innerHTML = (s.en && s.en !== s.es ? `<i>${esc(s.en)}</i>` : '')
+    + `<div class="sp-kind" style="--sc:var(--sc-${sk || 'none'})"><span>${s.level === 0 ? 'Truco' : 'Nivel ' + s.level}</span>${s.escuela ? `<span class="school">${esc(s.escuela)}</span>` : ''}${s.ritual ? '<span>Ritual</span>' : ''}${s.conc ? '<span>Concentración</span>' : ''}</div>`;
+  let h = '';
+  if (SP.edit) {
+    h = `<label class="f wide">Resumen para la mesa<textarea id="spEf" rows="2" placeholder="Una línea con lo esencial">${esc(s.efecto)}</textarea></label>
+      <label class="f wide" style="margin-top:14px">Descripción<textarea id="spDe" rows="10" placeholder="El texto completo del conjuro">${esc(s.desc)}</textarea></label>
+      <label class="f wide" style="margin-top:14px">${s.level === 0 ? 'Mejora del truco' : 'Con espacios de nivel superior'}<textarea id="spSu" rows="3">${esc(s.sup)}</textarea></label>
+      ${x && (x.d || manualFor(x)) ? `<div class="row-btns" style="justify-content:flex-start"><button type="button" id="spFromEn">${manualFor(x) ? 'Partir del texto del manual' : 'Partir del texto original en inglés'}</button></div>` : ''}
+      <p class="note">Separa los párrafos con una línea en blanco; **así** se escribe en negrita. Estos textos se comparten con todos los personajes que tengan el conjuro.</p>`;
+  } else {
+    if (s.efecto) h += `<p class="sp-sum">${esc(s.efecto)}</p>`;
+    const props = [['Lanzamiento', s.tiempo], ['Alcance', s.alcance], ['Duración', s.duracion], ['Componentes', s.comp], ['Material', s.coste]].filter(p => p[1]);
+    h += `<dl class="sp-props">${props.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
+    // Prioridad: texto propio > manual importado > traducción incluida > SRD en inglés
+    const man = manualFor(x), propio = s.desc && !(x && s.desc === x.dEs);
+    let desc = '', sup = '', en = false, fuente = '';
+    if (propio) { desc = s.desc; sup = s.sup; }
+    else if (man) { desc = man.d; sup = man.h; fuente = 'Manual del Jugador (importado de tu PDF)'; }
+    else if (s.desc) { desc = s.desc; sup = s.sup; }
+    else if (x?.d) { desc = x.d; sup = x.h; en = true; }
+    if (fuente) h += `<p class="srcnote">${fuente}</p>`;
+    if (desc) h += `<section class="sp-text ${en ? 'en' : ''}" ${en ? 'lang="en"' : ''}>${md(desc)}</section>`;
+    else h += `<p class="note">Aún no hay descripción. Impórtala desde tu manual (Más → Manual del jugador) o escríbela con «Editar texto».</p>`;
+    if (en) h += `<p class="note">Texto original del SRD en inglés. Importa tu manual para verlo en español, o escríbelo con «Editar texto».</p>`;
+    if (sup) h += `<section class="sp-text ${en ? 'en' : ''}"><h3>${s.level === 0 ? 'Mejora del truco' : 'Con espacios de nivel superior'}</h3>${md(sup)}</section>`;
+    if (SP.mode === 'book') h += castOptions(SP.bi);
+    if (x && en) h += `<p class="credit">Texto del System Reference Document 5.2 de Wizards of the Coast, licencia CC-BY 4.0.</p>`;
+  }
+  $('#spBody').innerHTML = h; $('#spBody').scrollTop = 0;
+  const canEdit = SP.mode === 'book' || SP.item?.src === 'cat';
+  $('#spFoot').innerHTML = SP.edit
+    ? `<button type="button" data-sp="canceledit">Cancelar</button><span class="spacer"></span><button type="button" class="primary" data-sp="save">Guardar texto</button>`
+    : `${canEdit ? '<button type="button" data-sp="edit">Editar texto</button>' : ''}<span class="spacer"></span><button type="button" data-sp="close">Cerrar</button>${SP.mode === 'preview' && SP.onAdd ? '<button type="button" class="gold" data-sp="add">Añadir al libro</button>' : ''}`;
+}
+const catalogEntry = () => (SP.mode === 'book' ? S.db.catalog[S.cur().book[SP.bi].sid] : SP.item.src === 'cat' ? SP.item.s : null);
+
+export function init(store) {
+  S = store;
+  on($('#spBody'), 'click', '#spFromEn,[data-opt]', (ev, b) => {
+    if (b.id === 'spFromEn') { const { x } = data(), man = manualFor(x); if ($('#spDe').value.trim() && !confirm('¿Sustituir lo escrito?')) return;
+      $('#spDe').value = man ? man.d : x.d; $('#spSu').value = (man ? man.h : x.h) || ''; $('#spDe').focus(); return; }
+    if (b.disabled) return;
+    const bi = SP.bi, [m, L] = b.dataset.opt.split(':');
+    closeSheet(dlg()); setTimeout(() => cast(S, bi, m, L ? +L : undefined), 120);
+  });
+  on($('#spFoot'), 'click', '[data-sp]', (ev, a) => {
+    const act = a.dataset.sp;
+    if (act === 'close') return closeSheet(dlg());
+    if (act === 'edit' || act === 'canceledit') { SP.edit = act === 'edit'; return render(); }
+    if (act === 'save') {
+      const s = catalogEntry(), ef = $('#spEf').value.trim(), de = $('#spDe').value.trim(), su = $('#spSu').value.trim();
+      const h = S.edit(db => { const t = db.catalog[s.id]; t.efecto = ef; t.desc = de; t.sup = su; });
+      if (SP.item?.src === 'cat') SP.item.s = S.db.catalog[s.id];
+      SP.edit = false; render(); toast(`Texto de <b>${esc(s.es)}</b> guardado.`, [undoBtn(S, h)]); return;
+    }
+    if (act === 'add') { const f = SP.onAdd; closeSheet(dlg()); f?.(); }
+  });
+}
