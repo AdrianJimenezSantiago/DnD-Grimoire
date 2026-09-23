@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mismo tono que el fondo de la hoja para que no haya destellos al abrir -->
+    <color name="desk">#E7EAF1</color>
+    <color name="ink">#1E2740</color>
+    <color name="colorPrimary">#1E2740</color>
+    <color name="colorPrimaryDark">#1E2740</color>
+    <color name="colorAccent">#A97A1E</color>
+</resources>
