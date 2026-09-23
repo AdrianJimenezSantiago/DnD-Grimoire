@@ -94,6 +94,21 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
 
 Iconos temáticos: game-icons.net (CC BY 3.0). `node tools/iconos.mjs` regenera el módulo con los que usa la app.
 
+## Retrato, historia y diario
+
+- **Retrato.** Toca el círculo junto al nombre en la hoja (o «Añadir retrato» en Editar personaje) y elige una imagen. Arrastra para encuadrar y acerca con el deslizador, la rueda o pellizcando. Puedes volver a encuadrarla, cambiarla o quitarla cuando quieras.
+  - Aparece en la portada, en la barra superior, en la cabecera de la hoja, en la lista de personajes, en la historia y en el diario.
+  - La miniatura va con el personaje y en las copias de seguridad. El original se guarda aparte en el dispositivo, para reencuadrar sin perder calidad.
+- **Historia.** Botón «Historia» de la hoja. Trae índice de capítulos, búsqueda con resaltado (por ejemplo, «Iliana») y tiempo de lectura.
+  - Se escribe o se pega con un formato sencillo: `## Capítulo`, `### Apartado`, `---` para un cambio de escena y `>` para una cita.
+  - También se importa desde un PDF, un TXT o un Markdown: la app quita las cabeceras repetidas y detecta capítulos y párrafos.
+  - Para Theo tienes el archivo `Theo - Historia.md`, preparado a partir de su trasfondo: impórtalo desde Historia → Importar.
+- **Diario de sesión.** Botón «Diario». Cada sesión tiene título, fecha, notas rápidas y una crónica libre, y se guarda mientras escribes.
+  - Las notas pueden ser de cuatro tipos: nombre, suceso, pendiente o nota.
+  - Como en el cuaderno de Theo: **S** subraya lo que no quieres olvidar y **T** tacha lo que ya está resuelto.
+  - Lo subrayado y los pendientes sin tachar aparecen en la hoja, en «Para recordar», al empezar la siguiente sesión. Se pueden tachar desde ahí mismo.
+  - El diario tiene búsqueda en todas las sesiones.
+
 ## Manual del jugador y compendio
 
 - **Compendio.** La app trae los **391 conjuros del Manual del Jugador 2024** con su nombre oficial en español y sus datos técnicos: nivel, escuela, clases, tiempo, alcance, componentes, duración, ritual y concentración. De los que están en el SRD 5.2 incluye además su texto en inglés (licencia CC-BY 4.0).
@@ -160,7 +175,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (30)
+npm test           # pruebas (35)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

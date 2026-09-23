@@ -28,6 +28,7 @@ export function blankChar(over = {}) {
     stats: { ...STATS0 }, aptitud: '', extraCD: 0, extraAtaque: 0,
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], play: PLAY0(),
+    retrato: null, historia: '', diario: { sesiones: [] },
     ...clone(over),
   };
 }
@@ -44,6 +45,9 @@ export function normChar(c) {
   if (Array.isArray(c.play.presagio) && c.play.presagio.length && !c.play.rec['tpl:adivino.presagio']) c.play.rec['tpl:adivino.presagio'] = { used: 0, dice: c.play.presagio };
   if (c.play.recupUsed && !c.play.rec['tpl:mago.recuperacion']) c.play.rec['tpl:mago.recuperacion'] = { used: 1, dice: [] };
   delete c.play.presagio; delete c.play.recupUsed;
+  if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
+  if (typeof c.historia !== 'string') c.historia = '';
+  if (c.retrato && !c.retrato.src) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
   c.book = (c.book || []).filter(e => e && e.sid);
   return c;

@@ -113,3 +113,83 @@ button.term:active { transform: none; }
 .tour-btns { display: flex; gap: 8px; align-items: center; } .tour-btns span { flex: 1; }
 .tour-btns button { min-height: 40px; border-radius: var(--r-pill); }
 body.touring .toast { display: none; }
+
+/* ============================ retrato ============================ */
+.avatar { display: inline-grid; place-items: center; flex: none; border-radius: 50%; overflow: hidden; color: var(--gold);
+  background: radial-gradient(circle at 35% 30%, var(--gold-soft), var(--surface-2)); box-shadow: 0 0 0 2px var(--gold), 0 0 16px var(--glow); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar .gi { width: 58%; height: 58%; }
+.avatar.chip { width: 36px; height: 36px; box-shadow: 0 0 0 2px var(--gold); }
+.avatar.md { width: 48px; height: 48px; } .avatar.lg { width: 64px; height: 64px; } .avatar.xl { width: 88px; height: 88px; box-shadow: 0 0 0 3px var(--gold), 0 0 28px var(--glow); }
+@media (max-width: 560px) { .avatar.xl { width: 70px; height: 70px; } }
+.hero-id { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.hero-av { position: relative; padding: 0; min-height: 0; border: 0; background: transparent; border-radius: 50%; }
+.hero-av:hover .avatar { box-shadow: 0 0 0 3px var(--gold-2), 0 0 34px var(--glow); }
+.av-edit { position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--gold); color: hsl(var(--acc-h) 60% 10%); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.av-edit .icon { width: 15px; height: 15px; }
+.lc-av { position: relative; flex: none; }
+.lc-av .avatar { box-shadow: 0 0 0 2px hsl(var(--acc-h) var(--acc-s) 58%), 0 0 18px hsl(var(--acc-h) var(--acc-s) 50% / .4); }
+.lc-badge { position: absolute; right: -4px; bottom: -4px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: hsl(var(--acc-h) var(--acc-s) 20%); background: hsl(var(--acc-h) var(--acc-s) 66%); }
+.lc-badge .gi { width: 16px; height: 16px; }
+.ccard > .avatar { grid-row: span 2; }
+.f-ret { display: flex; gap: 16px; align-items: center; margin-bottom: 14px; padding: 12px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.f-ret .note { margin: 2px 0 8px; } .f-ret button { min-height: 36px; border-radius: var(--r-pill); }
+.ret-stage { position: relative; width: min(320px, 78vw); aspect-ratio: 1; margin: 6px auto 14px; border-radius: 50%; overflow: hidden; touch-action: none; cursor: grab;
+  background: repeating-conic-gradient(var(--surface-2) 0 25%, var(--surface) 0 50%) 0 0 / 20px 20px; box-shadow: 0 0 0 3px var(--gold), 0 0 40px var(--glow); }
+.ret-stage:active { cursor: grabbing; }
+.ret-stage canvas { width: 100%; height: 100%; display: block; }
+.ret-vacio { position: absolute; inset: 0; margin: auto; width: 60%; height: 48px; border-radius: var(--r-pill); }
+.ret-stage:not(.empty) .ret-vacio { display: none; }
+.ret-zoom { max-width: 320px; margin: 0 auto; } .ret-zoom input { padding: 0; min-height: 30px; accent-color: var(--gold); }
+dialog#retDlg { width: min(460px, 94vw); }
+
+/* ============================ historia ============================ */
+.dhead-av { display: flex; gap: 14px; align-items: center; }
+.dhead-av h2 { margin: 0; } .dhead-av .iconbtn { font-size: 26px; }
+.tr-tools { padding: 0 22px 8px; display: grid; gap: 8px; }
+.tr-count { font: 400 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); min-height: 12px; }
+.tr-toc { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tr-toc .chip { white-space: nowrap; min-height: 34px; font-size: var(--fs-xs); }
+.doc { max-width: 68ch; margin: 0 auto; font: 400 18px / 1.7 var(--serif); }
+.doc p { margin: 0 0 1em; }
+.doc .doc-h { font-family: var(--serif); font-weight: 500; scroll-margin-top: 12px; }
+.doc h2.doc-h { font-size: 40px; line-height: 1; margin: 6px 0 10px; }
+.doc h3.doc-h { font-size: 28px; margin: 40px 0 4px; color: var(--gold); text-shadow: 0 0 22px var(--glow); }
+.doc h4.doc-h { font: 700 var(--fs-s) / 1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; margin: 26px 0 8px; color: var(--ink-2); }
+.doc .doc-sub { font-style: italic; color: var(--ink-2); margin-top: -4px; }
+.doc blockquote { margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--gold); background: var(--gold-soft); border-radius: 0 12px 12px 0; font-style: italic; }
+.doc hr.doc-hr { border: 0; height: 18px; margin: 22px 0; background: radial-gradient(circle, var(--gold) 0 2.5px, transparent 3px) center / 22px 18px repeat-x; width: 90px; margin-inline: auto; opacity: .8; }
+.doc mark { background: var(--gold); color: hsl(var(--acc-h) 60% 10%); border-radius: 3px; padding: 0 2px; }
+.tr-edit { min-height: 55vh; font: 400 15px / 1.55 ui-monospace, Menlo, Consolas, monospace; }
+.tr-empty { text-align: center; padding: 30px 6px; font: 400 var(--fs-l) / 1.5 var(--sans); } .tr-empty .avatar { margin-bottom: 12px; }
+
+/* ============================ diario ============================ */
+.di-bar { display: flex; gap: 8px; margin: 4px 0 12px; } .di-bar input { flex: 1; } .di-bar button { border-radius: var(--r-pill); white-space: nowrap; }
+.ses-list { display: flex; flex-direction: column; gap: 8px; }
+.ses { display: flex; gap: 14px; align-items: flex-start; text-align: left; padding: 12px 14px; min-height: 64px; border-radius: var(--r-m); background: var(--surface); }
+.ses-n { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 700 18px / 1 var(--serif); color: var(--gold); background: var(--gold-soft); }
+.ses-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ses-t b { font: 500 var(--fs-l) / 1.2 var(--serif); } .ses-t small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }
+.ses-x { font: 400 var(--fs-s) / 1.4 var(--sans); color: var(--ink-3); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rec { margin-bottom: 14px; padding: 12px 14px; border-radius: var(--r-m); background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); }
+.rec h3, .rec-card > strong { display: flex; align-items: center; gap: 8px; font: 500 var(--fs-l) / 1.2 var(--serif); margin: 0 0 6px; color: var(--gold); }
+.compose { margin: 14px 0 10px; padding: 12px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.tipos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tipos button { min-height: 34px; border-radius: var(--r-pill); font-size: var(--fs-xs); padding: 0 12px; }
+.tipos button .icon { width: 15px; height: 15px; }
+.tipos button[aria-checked="true"] { background: var(--gold); color: hsl(var(--acc-h) 60% 10%); border-color: var(--gold); }
+.add { display: flex; gap: 8px; } .add input { flex: 1; } .add button { border-radius: var(--r-pill); }
+.nts { list-style: none; margin: 0; padding: 0; }
+.nt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 2px; border-bottom: 1px solid var(--line-soft); }
+.nt-ico { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--gold); background: var(--gold-soft); }
+.nt-ico .icon { width: 15px; height: 15px; }
+.nt-txt { flex: 1; font: 400 var(--fs-m) / 1.4 var(--sans); padding-top: 4px; position: relative; }
+.nt-txt small { display: block; font-size: var(--fs-xs); color: var(--ink-3); margin-top: 2px; }
+.nt.fijada .nt-main { text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 4px; text-shadow: 0 0 14px var(--glow); }
+.nt.hecho .nt-main { text-decoration: line-through; text-decoration-color: var(--gold); }
+.nt.hecho .nt-txt { color: var(--ink-3); opacity: .7; }
+.nt-acts { display: flex; gap: 4px; }
+.nt-b { width: 32px; min-height: 32px; padding: 0; border-radius: 8px; font: 700 13px / 1 var(--serif); }
+.nts .nt-b[aria-pressed="true"] { background: var(--gold) !important; color: hsl(var(--acc-h) 60% 10%) !important; border-color: var(--gold) !important; }
+.rec-card .nts { flex-basis: 100%; }
+.rec-card { border-color: color-mix(in srgb, var(--gold) 45%, transparent); background: linear-gradient(135deg, var(--gold-soft), var(--surface) 70%); }

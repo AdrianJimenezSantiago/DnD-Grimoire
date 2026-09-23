@@ -79,6 +79,30 @@
   <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
 </dialog>
 
+<dialog id="retDlg" aria-labelledby="retTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="retTitle">Retrato</h2><div class="dsub">Arrastra para encuadrar; pellizca, usa la rueda o el deslizador para acercar.</div></div>
+  <div class="dbody">
+    <div class="ret-stage" id="retStage"><canvas id="retCanvas"></canvas><button type="button" class="ret-vacio" id="retVacio">Elegir imagen</button></div>
+    <label class="f ret-zoom">Zoom<input type="range" id="retZoom" min="1" max="6" step="0.01" value="1"></label>
+    <input type="file" id="retFile" class="visually-hidden" accept="image/*" tabindex="-1" aria-hidden="true">
+  </div>
+  <div class="dfoot"><button type="button" class="warn" id="retQuitar" hidden>Quitar</button><button type="button" id="retElegir">Cambiar imagen</button><span class="spacer"></span><button type="button" data-close>Cancelar</button><button type="button" class="gold" id="retGuardar">Guardar</button></div>
+</dialog>
+
+<dialog id="trasDlg" class="tall" aria-labelledby="trTitle"><div class="grip"></div>
+  <div class="dhead dhead-av" id="trHead"></div>
+  <div class="tr-tools" id="trTools"><input type="search" id="trQ" placeholder="Buscar en la historia (nombres, lugares…)" aria-label="Buscar en la historia" autocomplete="off"><span class="tr-count" id="trCount"></span><div class="tr-toc" id="trToc"></div></div>
+  <div class="dbody" id="trBody"></div>
+  <input type="file" id="trFile" class="visually-hidden" accept=".pdf,.txt,.md,.markdown,application/pdf,text/plain,text/markdown" tabindex="-1" aria-hidden="true">
+  <div class="dfoot" id="trFoot"></div>
+</dialog>
+
+<dialog id="diaDlg" class="tall" aria-labelledby="diTitle"><div class="grip"></div>
+  <div class="dhead dhead-av" id="diHead"></div>
+  <div class="dbody" id="diBody"></div>
+  <div class="dfoot" id="diFoot"></div>
+</dialog>
+
 <dialog id="charsDlg" class="tall" aria-labelledby="charsTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="charsTitle">Personajes</h2><div class="dsub">Toca un personaje para abrir su grimorio.</div></div>
   <div class="dbody" id="charList"></div>
