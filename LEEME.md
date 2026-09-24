@@ -54,7 +54,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - Los espíritus se ajustan a la variante elegida (tierra, mar o aire…) y al nivel del espacio.
   - Usan tu ataque de conjuro y tu CD.
 
-  Datos del Manual del Jugador 2024 (apéndice B y capítulo de conjuros). El PDF del Manual de Monstruos es solo imagen, así que de ahí no se puede leer nada.
+  Datos del Manual del Jugador 2024 (apéndice B y capítulo de conjuros). El PDF del Manual de Monstruos (también la versión nueva de `tools/resources`) es solo imagen, sin texto, así que de ahí no se puede leer nada sin pasarlo antes por un reconocimiento de texto.
 - **Efectos activos.** Al concentrarte en un conjuro con objetivos (*Bendición*, *Acelerar*, *Maleficio*, *Marca del cazador*…), puedes anotar sobre quién está, desde el aviso o desde la propia bandeja de tiradas. Los conjuros de área, como *Dormir*, no lo piden.
   - Hay una opción para que lo pregunte siempre.
   - Los rasgos que se ponen sobre una criatura (Voto de enemistad, Inspiración bárdica, Golpe aturdidor…) se marcan desde la tarjeta «Efectos activos».
@@ -67,10 +67,12 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 
 Los cambios se prueban primero en la rama `development` y pasan a `main` cuando están listos. `main` sigue siendo la que genera el APK y la versión de Windows, y la que publica Vercel en producción.
 
-- **Personajes de prueba.** En cualquier compilación que no sea de `main` (la rama `development`, sus vistas previas en Vercel o `npm run dev` en local), la app crea al arrancar un personaje de **nivel 8 por cada subclase**: 56 en total. Aparecen en la portada en su propia sección, «Personajes de prueba».
+- **Clases de prueba.** Un personaje de **nivel 8 por cada subclase**: 56 en total.
+  - En `main` (APK, Windows y web publicada) no aparecen hasta que pulsas **«Revisar clases de prueba»** al pie de la portada. La primera vez se crean; después, el mismo botón muestra u oculta su sección.
+  - En cualquier otra compilación (la rama `development`, sus vistas previas en Vercel o `npm run dev` en local) se crean solos al arrancar y se ven desde el principio.
   - Cada uno viene montado de forma automática según las reglas: características con la matriz estándar, el trasfondo y las mejoras de característica; especie y trasfondo, con su dote de origen; trucos, conjuros preparados y conjuros siempre preparados de clase y subclase; el libro del mago con Experto en su escuela; invocaciones y rasgos propios.
   - Llevan también objetos mágicos (uno sintonizado y una varita con cargas), una sesión de diario con todos los tipos de nota, una criatura en el bestiario y una historia con sus rasgos.
-  - «Regenerar personajes de prueba», en la portada, los vuelve a crear desde cero sin tocar tus personajes (se puede deshacer).
+  - En su sección, «Regenerar» los vuelve a crear desde cero y «Quitar» los borra. Tus personajes no se tocan, y las dos cosas se pueden deshacer.
   - Para forzarlo en cualquier rama: `PERSONAJES_PRUEBA=1 npm run build` (o `=0` para quitarlo).
 - **Pruebas automáticas en cada cambio.** GitHub pasa las pruebas y compila la web y la versión de Windows en cada cambio de `development` y en cada PR (`.github/workflows/pruebas.yml`). No publica nada.
 

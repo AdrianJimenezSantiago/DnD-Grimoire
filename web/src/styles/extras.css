@@ -328,3 +328,11 @@ dialog#retDlg { width: min(460px, 94vw); }
 .sb h5 { margin: 10px 0 2px; padding-bottom: 2px; font: 600 var(--fs-s) / 1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--sc, var(--ink));
   border-bottom: 1px solid color-mix(in srgb, var(--sc, var(--gold)) 30%, transparent); }
 @media (max-width: 420px) { .sb .sb-car { grid-template-columns: repeat(3, 1fr); row-gap: 8px; } }
+
+/* Portada: clases de prueba bajo su propio botón */
+.l-pruebas-nota { width: min(720px, 100%); margin: -4px auto 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
+  text-align: center; font-size: var(--fs-s); color: var(--ink-2); }
+.l-pruebas-nota button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-size: var(--fs-xs); }
+.l-pruebas-nota .gi, .l-pruebas-nota .icon { width: 16px; height: 16px; }
+.l-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.l-foot .gi { width: 18px; height: 18px; }

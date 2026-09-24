@@ -54,7 +54,8 @@ import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
-// Personajes de prueba: se definen al compilar (web/vite.config.js); fuera de main vienen activados
+// Personajes de prueba (uno por subclase, nivel 8): en todas las compilaciones se crean con «Revisar clases de prueba» en la portada;
+// fuera de main (web/vite.config.js) se crean además solos al arrancar
 const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
@@ -98,12 +99,17 @@ async function boot() {
   ];
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);
   const regenerarPruebas = () => {
-    let r; const h = S.edit(db => { r = sembrarPruebas(db, compendio()); });
-    toast(r.creados ? `${r.creados} personajes de prueba regenerados a nivel 8.` : 'El compendio aún no ha cargado; inténtalo en un momento.', r.creados ? [undoBtn(S, h)] : []);
+    const habia = hayPruebas(S.db); let r; const h = S.edit(db => { r = sembrarPruebas(db, compendio()); });
+    toast(r.creados ? `${r.creados} personajes de prueba ${habia ? 'regenerados' : 'creados'} a nivel 8.` : 'El compendio aún no ha cargado; inténtalo en un momento.', r.creados ? [undoBtn(S, h)] : []);
+  };
+  const quitarPruebas = () => {
+    const n = S.db.chars.filter(c => c.prueba).length; if (!n) return;
+    const h = S.edit(db => { db.chars = db.chars.filter(c => !c.prueba); if (!db.chars.some(c => c.id === db.activeId)) db.activeId = db.chars[0]?.id ?? null; });
+    toast(`${n} personajes de prueba quitados. Tus personajes no se tocan.`, [undoBtn(S, h)]);
   };
   landing.init(S, {
-    pruebas: PRUEBAS,
-    cmd: c => ({ pruebas: regenerarPruebas, nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    pruebasAuto: PRUEBAS,
+    cmd: c => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO), 500),
   });
