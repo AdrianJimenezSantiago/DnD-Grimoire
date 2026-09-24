@@ -8,7 +8,7 @@ import { avatarHtml } from './avatar.js';
 import { viewTransition } from './fx.js';
 import { runaSvg, portalDesde, selloEn } from './magia.js';
 
-let S, cbs;
+let S, cbs, verPruebas = false;
 export const landingVisible = () => document.body.classList.contains('on-landing');
 
 function render() {
@@ -27,17 +27,20 @@ function render() {
   patch($('#landing'), `<div class="l-sky" aria-hidden="true">${ASTROLABE}</div>
     <header class="l-head"><span class="l-mark">${runaSvg({ n: 22, lados: 7, cls: 'l-runa', semillaInicial: 42 })}${gi('libro')}</span><h1>Grimorio</h1><p>Libro de conjuros para D&amp;D 2024</p></header>
     ${propios.length ? `<h2 class="l-h2">Elige personaje</h2><div class="l-grid">${propios.map(card).join('')}</div>` : ''}
-    ${pruebas.length ? `<h2 class="l-h2">Personajes de prueba <small>(${pruebas.length}, nivel ${pruebas[0].nivel})</small></h2><div class="l-grid">${pruebas.map((c, i) => card(c, propios.length + i)).join('')}</div>` : ''}
-    ${chars.length ? '' : `<div class="l-empty"><p>Aún no hay ningún personaje en este dispositivo.</p><p class="note">Crea el primero, o carga una copia de seguridad si ya tienes uno en otro sitio.</p></div>`}
+    ${pruebas.length && verPruebas ? `<h2 class="l-h2">Clases de prueba <small>(${pruebas.length}, nivel ${pruebas[0].nivel})</small></h2>
+      <p class="l-pruebas-nota">Un personaje por subclase, montado solo con las reglas. Sirven para revisar colores, emblemas, recursos y progresión.
+        <button type="button" class="ghost" data-lcmd="pruebas">${gi('dados')}Regenerar</button><button type="button" class="ghost" data-lcmd="quitarPruebas">${icon('reset')}Quitar</button></p>
+      <div class="l-grid">${pruebas.map((c, i) => card(c, propios.length + i)).join('')}</div>` : ''}
+    ${propios.length || (pruebas.length && verPruebas) ? '' : `<div class="l-empty"><p>Aún no hay ningún personaje en este dispositivo.</p><p class="note">Crea el primero, o carga una copia de seguridad si ya tienes uno en otro sitio.</p></div>`}
     <div class="l-actions">
       <button type="button" class="${chars.length ? '' : 'gold'}" data-lcmd="nuevo">${icon('plus')}Nuevo personaje</button>
       <button type="button" data-lcmd="copia">${icon('save')}Cargar copia</button>
       <button type="button" data-lcmd="biblioteca">${gi('biblioteca')}Biblioteca</button>
       <button type="button" data-lcmd="manual">${gi('libro')}Libros y manuales</button>
       ${chars.length ? `<button type="button" data-lcmd="gestionar">${icon('users')}Gestionar personajes</button>` : ''}
-      ${cbs.pruebas ? `<button type="button" data-lcmd="pruebas">${gi('dados')}Regenerar personajes de prueba</button>` : ''}
     </div>
-    <footer class="l-foot"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button></footer>`);
+    <footer class="l-foot"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button>
+      <button type="button" class="ghost" data-lcmd="revisarPruebas" aria-pressed="${!!(pruebas.length && verPruebas)}">${gi('dados')}${pruebas.length && verPruebas ? 'Ocultar clases de prueba' : 'Revisar clases de prueba'}</button></footer>`);
 }
 export function showLanding() {
   render(); aplicarTema(null);
@@ -50,7 +53,7 @@ export function hideLanding() {
   aplicarTema(S.cur()); S.emit('ui');
 }
 export function init(store, callbacks) {
-  S = store; cbs = callbacks;
+  S = store; cbs = callbacks; verPruebas = !!callbacks.pruebasAuto;
   S.subscribe(() => { if (landingVisible()) render(); });
   on($('#landing'), 'click', '[data-lopen]', (e, b) => {
     const r = b.getBoundingClientRect();
@@ -59,5 +62,11 @@ export function init(store, callbacks) {
     setTimeout(() => abrir(b), 120);
   });
   const abrir = b => viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = b.dataset.lopen; }); hideLanding(); window.scrollTo({ top: 0 }); cbs.onOpen?.(); });
-  on($('#landing'), 'click', '[data-lcmd]', (e, b) => cbs.cmd(b.dataset.lcmd));
+  on($('#landing'), 'click', '[data-lcmd]', (e, b) => {
+    const c = b.dataset.lcmd;
+    if (c !== 'revisarPruebas') return cbs.cmd(c);
+    // «Revisar clases de prueba»: la primera vez los crea; luego muestra u oculta su sección
+    if (!S.db.chars.some(x => x.prueba)) { verPruebas = true; cbs.cmd('pruebas'); } else { verPruebas = !verPruebas; render(); }
+    if (verPruebas) setTimeout(() => $('#landing .l-pruebas-nota')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  });
 }
