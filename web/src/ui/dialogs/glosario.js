@@ -6,6 +6,7 @@ import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
 import { md } from './conjuro.js';
 import { fileStore } from '../../platform/native.js';
+import { openBiblioteca, abrirTermino } from './biblioteca.js';
 
 export const ARCHIVO_GLOS = 'manual-glosario.json';
 export async function cargarGlosarioGuardado() {
@@ -22,8 +23,9 @@ function lista() {
     <div class="gl-grid">${v.map(e => `<button type="button" class="gl-item ${e.cat === 'Estado' ? 'estado' : ''}" data-term="${e.clave}">${esc(e.nombre)}</button>`).join('')}</div>`).join('')
     || '<p class="pempty">Nada coincide con la búsqueda.</p>';
 }
-export function openGlosario() { $('#glQ').value = ''; lista(); openSheet($('#glosDlg')); }
-export function openTerm(clave) {
+export function openGlosario() { openBiblioteca('reglas'); }
+export function openTerm(clave) { abrirTermino(clave); }
+export function openTermViejo(clave) {
   const e = termino(clave); if (!e) return;
   $('#tmTitle').textContent = e.nombre;
   $('#tmSub').innerHTML = e.cat ? `<span class="tm-cat">${esc(e.cat)}</span>` : '';
@@ -31,6 +33,5 @@ export function openTerm(clave) {
   openSheet($('#termDlg'));
 }
 export function init() {
-  $('#glQ').addEventListener('input', lista);
-  on(document, 'click', '[data-term]', (e, b) => { e.preventDefault(); e.stopPropagation(); openTerm(b.dataset.term); });
+  on(document, 'click', '[data-term]', (e, b) => { e.preventDefault(); e.stopPropagation(); abrirTermino(b.dataset.term); });
 }

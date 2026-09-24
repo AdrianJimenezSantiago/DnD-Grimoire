@@ -28,6 +28,7 @@ function render() {
     <div class="l-actions">
       <button type="button" class="${chars.length ? '' : 'gold'}" data-lcmd="nuevo">${icon('plus')}Nuevo personaje</button>
       <button type="button" data-lcmd="copia">${icon('save')}Cargar copia</button>
+      <button type="button" data-lcmd="biblioteca">${gi('biblioteca')}Biblioteca</button>
       <button type="button" data-lcmd="manual">${gi('libro')}Libros y manuales</button>
       ${chars.length ? `<button type="button" data-lcmd="gestionar">${icon('users')}Gestionar personajes</button>` : ''}
     </div>

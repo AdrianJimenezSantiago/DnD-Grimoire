@@ -72,11 +72,24 @@
   <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
 </dialog>
 
-<dialog id="glosDlg" class="tall" aria-labelledby="glTitle"><div class="grip"></div>
-  <div class="dhead"><h2 id="glTitle">Glosario de reglas</h2><div class="dsub">Estados, acciones y reglas del Manual del Jugador. Los estados aparecen enlazados en las descripciones de los conjuros.</div></div>
-  <div class="pickbar" style="grid-template-columns:1fr"><input type="search" id="glQ" placeholder="Buscar término" aria-label="Buscar término" autocomplete="off"></div>
-  <div class="dbody" id="glList"></div>
-  <div class="dfoot"><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+<dialog id="bibDlg" class="tall" aria-labelledby="bibTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="bibTitle">Biblioteca</h2><div class="dsub" id="bibSub"></div>
+    <div class="seg bib-tabs" role="tablist" aria-label="Secciones de la biblioteca" id="bibTabs"></div></div>
+  <div class="bib-tools" id="bibTools"></div>
+  <div class="dbody" id="bibBody"></div>
+  <div class="dfoot"><button type="button" data-cmd="manual">Libros y manuales</button><span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="fichaDlg" class="tall ficha" aria-labelledby="fiTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="fiTitle"></h2><div class="dsub" id="fiSub"></div></div>
+  <div class="dbody" id="fiBody"></div>
+  <div class="dfoot" id="fiFoot"></div>
+</dialog>
+
+<dialog id="equipoDlg" class="tall" aria-labelledby="eqTitle"><div class="grip"></div>
+  <div class="dhead dhead-av" id="eqHead"></div>
+  <div class="dbody" id="eqBody"></div>
+  <div class="dfoot" id="eqFoot"></div>
 </dialog>
 
 <dialog id="retDlg" aria-labelledby="retTitle"><div class="grip"></div>
@@ -183,9 +196,9 @@
 </dialog>
 
 <dialog id="manualDlg" class="tall" aria-labelledby="mnTitle"><div class="grip"></div>
-  <div class="dhead"><h2 id="mnTitle">Libros y manuales</h2><div class="dsub">Descripciones, conjuros, glosario y subclases desde tus propios PDF.</div></div>
+  <div class="dhead"><h2 id="mnTitle">Libros y manuales</h2><div class="dsub">Conjuros, reglas, objetos mágicos y opciones de personaje desde tus propios PDF.</div></div>
   <div class="dbody">
-    <p class="note">Elige el PDF de tu Manual del Jugador (2024, en español) o de una expansión con el mismo formato. La app lee sus conjuros, el glosario de reglas y las subclases en este dispositivo y guarda las descripciones aquí: no se suben a ningún sitio ni van en las copias de seguridad. Tarda entre unos segundos y un minuto, según el móvil.</p>
+    <p class="note">Elige el PDF de tu Manual del Jugador, de la Guía del Dungeon Master (2024, en español) o de una expansión como Héroes de Faerûn. La app lee en este dispositivo lo que reconozca (conjuros, glosario y reglas, objetos mágicos, dotes, trasfondos y subclases) y lo guarda aquí: no se sube a ningún sitio ni va en las copias de seguridad. Tarda entre unos segundos y un minuto, según el móvil.</p>
     <div id="mnEstado"></div>
     <label class="chk-line"><input type="checkbox" id="mnOficial" checked> Poner a mis conjuros los nombres y datos técnicos oficiales del manual</label>
     <p class="note">Por ejemplo, «Contraconjuro» pasa a «Contrahechizo». Tus resúmenes y textos propios no se tocan, y se puede deshacer.</p>

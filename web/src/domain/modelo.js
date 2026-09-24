@@ -28,7 +28,7 @@ export function blankChar(over = {}) {
     stats: { ...STATS0 }, aptitud: '', extraCD: 0, extraAtaque: 0,
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], play: PLAY0(),
-    retrato: null, historia: '', diario: { sesiones: [] },
+    retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
     ...clone(over),
   };
 }
@@ -47,6 +47,8 @@ export function normChar(c) {
   delete c.play.presagio; delete c.play.recupUsed;
   if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
   if (typeof c.historia !== 'string') c.historia = '';
+  if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
+  if (!c.bestiario || !Array.isArray(c.bestiario.criaturas)) c.bestiario = { criaturas: [] };
   if (c.retrato && !c.retrato.src) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
   c.book = (c.book || []).filter(e => e && e.sid);

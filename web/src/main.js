@@ -16,6 +16,7 @@ import './styles/sheet.css';
 import './styles/dialogs.css';
 import './styles/motion.css';
 import './styles/extras.css';
+import './styles/biblioteca.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
@@ -38,6 +39,8 @@ import * as retrato from './ui/dialogs/retrato.js';
 import * as trasfondo from './ui/dialogs/trasfondo.js';
 import * as diario from './ui/dialogs/diario.js';
 import * as area from './ui/dialogs/area.js';
+import * as biblioteca from './ui/dialogs/biblioteca.js';
+import * as equipo from './ui/dialogs/equipo.js';
 import { tour } from './ui/tour.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
@@ -56,7 +59,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S);
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S);
   const app = await eventos.init(S);
 
   // Tutoriales: portada y hoja (una vez cada uno; se repiten desde Más → Ver tutorial)
@@ -64,23 +67,25 @@ async function boot() {
     { titulo: 'Bienvenido al grimorio', texto: 'Tu libro de conjuros para D&amp;D 2024: espacios, preparados, rasgos de clase, tiradas y descripciones del manual, en el móvil o en el PC.' },
     { sel: '.l-grid, .l-empty', titulo: 'Tus personajes', texto: 'Cada tarjeta lleva el color y el emblema de su clase. Toca una para abrir su hoja.' },
     { sel: '[data-lcmd="nuevo"]', titulo: 'Crear un personaje', texto: 'Nombre, clase, subclase, nivel y características: la app calcula CD, ataque, espacios, preparados y recursos con las reglas de 2024.' },
-    { sel: '[data-lcmd="manual"]', titulo: 'Tu manual, dentro', texto: 'Elige el PDF de tu Manual del Jugador y la app leerá en tu dispositivo las descripciones de los 391 conjuros y el glosario de reglas.' },
+    { sel: '[data-lcmd="manual"]', titulo: 'Tus libros, dentro', texto: 'Importa el PDF de tu Manual del Jugador, de la Guía del DM o de una expansión: la app lee en tu dispositivo conjuros, reglas, objetos mágicos, dotes, trasfondos y subclases.' },
+    { sel: '[data-lcmd="biblioteca"]', titulo: 'Biblioteca', texto: 'Todo lo importado en un sitio: reglas con tablas, objetos mágicos con filtros por rareza y tipo, dotes, trasfondos y subclases nivel a nivel.' },
   ];
   const TOUR_HOJA = [
     { sel: '#sbar', titulo: 'Espacios de conjuro', texto: 'Cada círculo lleno es un espacio libre. Tócalo para gastarlo o recuperarlo. El número de la izquierda te lleva a ese nivel.' },
     { sel: '.spell[id] .castzone', titulo: 'Lanzar', texto: '<b>Toca</b> un conjuro para lanzarlo: gasta el espacio adecuado, marca la concentración y te ofrece <b>Tirar</b>. <b>Mantén pulsado</b> para leerlo y elegir nivel o ritual.' },
     { sel: '.spell[id] .prep:not(.none):not(.always), .spell[id] .prep', titulo: 'Preparados', texto: 'El rombo marca los conjuros preparados. En dorado, los que están siempre preparados.' },
-    { sel: '.hero-av', titulo: 'Tu personaje', texto: 'Toca el retrato para añadir o reencuadrar una imagen. En <b>Historia</b> tienes su trasfondo con índice y búsqueda, y en <b>Diario</b> las notas de cada sesión: lo subrayado aparece en la hoja para recordarlo.' },
+    { sel: '.hero-av', titulo: 'Tu personaje', texto: 'Toca el retrato para añadir o reencuadrar una imagen. En <b>Historia</b> tienes su trasfondo con índice y búsqueda, y en <b>Diario</b> las notas de cada sesión y su <b>bestiario</b>: lo que sabéis de cada criatura.' },
+    { sel: '[data-cmd="equipo"]', titulo: 'Objetos mágicos', texto: 'Sus objetos, con los tres huecos de sintonización. Las cargas aparecen en la hoja como un recurso más y se recuperan solas al amanecer.' },
     { sel: '#res .resources', titulo: 'Rasgos y recursos', texto: 'Los recursos de tu clase y subclase se cuentan aquí y se recuperan solos con los descansos.' },
     { sel: '#dRest, #bRest', titulo: 'Descansar', texto: 'Descanso corto o largo: la app restaura lo que corresponde según tu clase.' },
     { sel: '#dEdit, #bEdit', titulo: 'Editar y añadir', texto: 'En modo edición cambias textos y añades conjuros desde el catálogo o el compendio de 391 conjuros.' },
     { sel: '#dHist, #bHist', titulo: 'Historial', texto: 'Todo lo que lances, gastes o tires queda anotado, y puedes deshacer varios pasos.' },
-    { sel: '#btnMore', titulo: 'Más opciones', texto: 'Glosario de reglas, manual, copia de seguridad, tema de día o de noche y este tutorial.' },
+    { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
     { sel: '#whoChip', titulo: 'Volver al inicio', texto: 'Desde aquí vuelves a la portada para cambiar de personaje.' },
   ];
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);
   landing.init(S, {
-    cmd: c => ({ nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: c => ({ nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO), 500),
   });

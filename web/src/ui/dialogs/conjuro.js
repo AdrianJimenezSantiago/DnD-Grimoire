@@ -13,6 +13,9 @@ import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
 import { cast, undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
+import { notasConjuro } from '../../domain/bestiario.js';
+import { openBestiario } from './diario.js';
+import { haptic } from '../../platform/native.js';
 
 let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
 const dlg = () => $('#spellDlg');
@@ -36,10 +39,53 @@ const PASOS = [
 export const realzar = h => PASOS.reduce((acc, [re, rep]) => porTexto(acc, t => t.replace(re, rep)), h);
 /* Encabezado corto al inicio de un párrafo («Sonido.», «Efecto sensorial.») en negrita. */
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
+/* Texto enriquecido de la app: párrafos, «### apartados», «• viñetas» y tablas «| a | b |» (con botón para tirar las de dado). */
+const DADO_CAB = /^(\d{0,2})d(\d{1,3})$/i;
+const enLinea = t => enlazar(realzar(cabecilla(esc(t))))
+  .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>').replace(/\*\*_?(.+?)_?\*\*/g, '<b>$1</b>').replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1<i>$2</i>');
+const celdas = f => f.trim().replace(/^\|/, '').replace(/\|$/, '').split(' | ').map(c => c.trim());
+function tablaHtml(lineas) {
+  const filas = lineas.map(celdas), cab = filas[0], cuerpo = filas.slice(1), n = Math.max(...filas.map(f => f.length));
+  const esRot = c => /^\d{1,3}(?:\s*[–-]\s*\d{1,3})?\.?$/.test(c);
+  const dado = DADO_CAB.exec(cab[0] || ''), numerada = dado || cuerpo.filter(f => esRot(f[0])).length >= cuerpo.length * 0.7;
+  const td = (c, k, th) => { const t = th ? 'th' : 'td'; return `<${t}${k === 0 && numerada ? ' class="tb-n"' : ''}>${c ? (th ? esc(c) : enLinea(c)) : ''}</${t}>`; };
+  const pad = f => [...f, ...Array(n - f.length).fill('')];
+  const tirar = dado ? `<button type="button" class="tb-roll" data-tbroll="${esc(cab[0])}" aria-label="Tirar ${esc(cab[0])} en esta tabla">${gi('d20')}<span>Tirar ${esc(cab[0])}</span></button>` : '';
+  return `<figure class="tb ${numerada ? 'numerada' : ''} ${n > 2 ? 'ancha' : ''}">${tirar}<div class="tb-scroll"><table>
+    <thead><tr>${pad(cab).map((c, k) => td(c, k, true)).join('')}</tr></thead>
+    <tbody>${cuerpo.map(f => `<tr${numerada && esRot(f[0]) ? ` data-rot="${esc(f[0].replace(/\.$/, ''))}"` : ''}>${pad(f).map((c, k) => td(c, k)).join('')}</tr>`).join('')}</tbody></table></div></figure>`;
+}
 export function md(t) {
-  return String(t || '').trim().split(/\n{2,}/).map(p => '<p>' + enlazar(realzar(cabecilla(esc(p))))
-    .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>').replace(/\*\*_?(.+?)_?\*\*/g, '<b>$1</b>').replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1<i>$2</i>')
-    .replace(/\n/g, '<br>') + '</p>').join('');
+  const bloques = String(t || '').trim().split(/\n{2,}/).filter(b => b.trim());
+  let h = '', lista = [];
+  const cierraLista = () => { if (lista.length) h += `<ul class="md-ul">${lista.map(x => `<li>${enLinea(x)}</li>`).join('')}</ul>`; lista = []; };
+  for (const b of bloques) {
+    const lineas = b.split('\n');
+    if (lineas.length >= 2 && lineas.every(l => /^\|.*\|?\s*$/.test(l.trim()) && l.trim().startsWith('|'))) { cierraLista(); h += tablaHtml(lineas); continue; }
+    if (/^###\s/.test(b)) { cierraLista(); h += `<h4 class="md-h">${esc(b.replace(/^###\s*/, ''))}</h4>`; continue; }
+    if (/^•\s/.test(b)) { lista.push(b.replace(/^•\s*/, '')); continue; }
+    cierraLista();
+    h += '<p>' + enLinea(b).replace(/\n/g, '<br>') + '</p>';
+  }
+  cierraLista();
+  return h;
+}
+/** Botón «Tirar» de las tablas de dado: tira y resalta la fila (vale para conjuros, objetos y reglas). */
+export function tirarTabla(btn) {
+  const m = DADO_CAB.exec(btn.dataset.tbroll || ''); if (!m) return;
+  const n = +(m[1] || 1), caras = +m[2];
+  const v = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * caras)).reduce((a, b) => a + b, 0);
+  const fig = btn.closest('.tb'); let hit = null;
+  fig.querySelectorAll('tr[data-rot]').forEach(tr => {
+    tr.classList.remove('hit');
+    const r = /^(\d{1,3})(?:\s*[–-]\s*(\d{1,3}))?$/.exec(tr.dataset.rot); if (!r) return;
+    const a = r[1] === '00' ? 100 : +r[1], z = r[2] == null ? a : (r[2] === '00' ? 100 : +r[2]);
+    if (v >= a && v <= z) hit = tr;
+  });
+  btn.querySelector('span').innerHTML = `${esc(btn.dataset.tbroll)}: <b>${v}</b>`;
+  btn.classList.remove('rolled'); void btn.offsetWidth; btn.classList.add('rolled');
+  if (hit) { void hit.offsetWidth; hit.classList.add('hit'); hit.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  return v;
 }
 function data() {
   if (SP.mode === 'book') { const ch = S.cur(), e = ch.book[SP.bi], s = S.db.catalog[e.sid]; return { s, x: srdFor(s), e }; }
@@ -92,6 +138,7 @@ function render() {
     { const man = manualFor(x), textos = [man?.d, s.desc, x?.dEs, x?.d].filter(Boolean), ar = parseArea(textos.join(' '), s.alcance);
       if (ar) h += `<button type="button" class="rl-open ar-open" data-areaopen><span class="ar-ico" aria-hidden="true"></span><span><b>Ver área en la cuadrícula</b><small>${esc(describir(ar))}</small></span></button>`; }
     if (SP.mode === 'book') { const t = tiradasConjuro(s); if (tieneTiradas(t)) h += `<section class="sp-cast"><h3>Tiradas</h3><button type="button" class="rl-open" data-rollopen>${t.danos[0] ? iconoDano(t.danos[0].tipo) : t.curacion ? iconoDano('curación') : ''}<span><b>${t.ataque ? 'Atacar y tirar daño' : t.curacion && !t.danos.length ? 'Tirar curación' : 'Tirar daño'}</b><small>${[t.ataque ? 'ataque ' + t.ataque : '', t.salvacion ? 'salvación de ' + t.salvacion : ''].filter(Boolean).join(', ') || 'dados del conjuro'}</small></span></button></section>`; h += castOptions(SP.bi); }
+    h += pieBestiario(s);
     if (x && en) h += `<p class="credit">Texto del System Reference Document 5.2 de Wizards of the Coast, licencia CC-BY 4.0.</p>`;
   }
   $('#spBody').innerHTML = h; $('#spBody').scrollTop = 0;
@@ -100,10 +147,23 @@ function render() {
     ? `<button type="button" data-sp="canceledit">Cancelar</button><span class="spacer"></span><button type="button" class="primary" data-sp="save">Guardar texto</button>`
     : `${canEdit ? '<button type="button" data-sp="edit">Editar texto</button>' : ''}<span class="spacer"></span><button type="button" data-sp="close">Cerrar</button>${SP.mode === 'preview' && SP.onAdd ? '<button type="button" class="gold" data-sp="add">Añadir al libro</button>' : ''}`;
 }
+/* Pie discreto: lo que el bestiario del personaje sabe de este conjuro (por su tipo de daño o anotado a mano). */
+function pieBestiario(s) {
+  const ch = S.cur(); if (!ch || !ch.bestiario?.criaturas?.length) return '';
+  const t = tiradasConjuro(s), sid = SP.mode === 'book' ? s.id : SP.item?.src === 'cat' ? SP.item.s.id : null;
+  const notas = notasConjuro(ch, { sid, tipos: (t?.danos || []).map(d => d.tipo) }); if (!notas.length) return '';
+  const REL = { vul: 'vulnerable', res: 'resiste', inm: 'inmune', eficaz: 'funcionó', ineficaz: 'no funcionó' };
+  const max = 4, vis = notas.slice(0, max);
+  return `<aside class="bx-foot" aria-label="Según tu bestiario">${gi('bestia')}<span class="bx-foot-l">Tu bestiario</span>
+    ${vis.map(n => `<button type="button" class="bx-chip rel-${n.rel} ${n.c.estado !== 'viva' ? 'apagada' : ''}" data-bxopen="${n.c.id}" title="${esc(n.motivo)}">${esc(n.c.nombre || 'Sin nombre')}<em>${REL[n.rel]}</em></button>`).join('')}
+    ${notas.length > max ? `<span class="bx-foot-mas">y ${notas.length - max} más</span>` : ''}</aside>`;
+}
 const catalogEntry = () => (SP.mode === 'book' ? S.db.catalog[S.cur().book[SP.bi].sid] : SP.item.src === 'cat' ? SP.item.s : null);
 
 export function init(store) {
   S = store;
+  on($('#spBody'), 'click', '[data-bxopen]', (e, b) => openBestiario(b.dataset.bxopen));
+  on(document, 'click', '[data-tbroll]', (e, b) => { tirarTabla(b); haptic('light'); });
   on($('#spBody'), 'click', '[data-areaopen]', () => { const { s, x } = data(), man = manualFor(x); openArea(s, [man?.d, s.desc, x?.dEs, x?.d].filter(Boolean)); });
   on($('#spBody'), 'click', '[data-rollopen]', () => { const bi = SP.bi; closeSheet(dlg()); setTimeout(() => openRoll(bi), 150); });
   on($('#spBody'), 'click', '#spFromEn,[data-opt]', async (ev, b) => {

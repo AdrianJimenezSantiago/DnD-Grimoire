@@ -49,6 +49,7 @@ function heroHtml(ch, P) {
     <div class="chips">
       <button type="button" class="chip" data-cmd="editchar">${icon('user')}Editar personaje</button>
       <button type="button" class="chip" data-cmd="rules">${icon('sliders')}Rasgos</button>
+      <button type="button" class="chip" data-cmd="equipo">${gi('cofre')}Objetos${(ch.equipo?.objetos || []).length ? `<small class="chip-n">${ch.equipo.objetos.length}</small>` : ''}</button>
       <button type="button" class="chip" data-cmd="historia">${gi('libro')}Historia</button>
       <button type="button" class="chip" data-cmd="diario">${icon('quill')}Diario</button>
       ${ch.nivel < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${ch.nivel + 1}</button>` : ''}
