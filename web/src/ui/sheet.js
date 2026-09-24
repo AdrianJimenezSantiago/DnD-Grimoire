@@ -12,6 +12,7 @@ import { iconoDano } from './dialogs/tiradas.js';
 import { avatarHtml } from './avatar.js';
 import { paraRecordar } from '../domain/diario.js';
 import { notaHtml } from './dialogs/diario.js';
+import { rasgosConObjetivo } from '../domain/concentracion.js';
 
 /* ---------- consultas de la hoja ---------- */
 export const slotsOf = (P, n) => P.slots[n] || 0;
@@ -102,9 +103,25 @@ function resourcesHtml(db, ch, P) {
   let h = '';
   const rec = paraRecordar(ch);
   if (rec.length) h += `<div class="res wide rec-card"><strong>${icon('star')} Para recordar</strong><button type="button" class="ruse" data-cmd="diario">Abrir diario</button><ul class="nts">${rec.slice(0, 4).map(n => notaHtml(n, true)).join('')}</ul>${rec.length > 4 ? `<span class="rnote">Y ${rec.length - 4} más en el diario.</span>` : ''}</div>`;
+  h += efectosHtml(ch);
   if (P.pact) h += `<div class="res"><strong>Magia de pacto</strong><span class="rnote">${P.pact.n} ${P.pact.n > 1 ? 'espacios' : 'espacio'} de nivel ${P.pact.level}; se recuperan con un descanso corto o largo.</span></div>`;
   reglas(ch).forEach(r => { h += r.tipo === 'recurso' ? recursoHtml(ch, r) : r.tipo === 'dados' ? dadosHtml(ch, r) : r.tipo === 'recuperar' ? recuperarHtml(ch, r) : alLanzarHtml(db, ch, r); });
   return h ? `<div class="resources">${h}</div>` : '';
+}
+/** Efectos activos: la concentración y los rasgos puestos sobre criaturas, con sus objetivos escritos a mano. */
+function efectosHtml(ch) {
+  const pl = ch.play, sug = rasgosConObjetivo(ch);
+  if (!pl.conc && !pl.efectos.length && !sug.length) return '';
+  const chips = (clave, lista) => lista.map((o, i) => `<button type="button" class="obj-chip" data-objdel="${clave}|${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('');
+  const entrada = (clave, ph) => `<input class="obj-in" data-objin="${clave}" placeholder="${ph}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo">`;
+  const fila = (clave, nombre, nota, lista, fin) => `<div class="ef-row"><div class="ef-h"><b>${esc(nombre)}</b>${nota ? `<small>${esc(nota)}</small>` : ''}${fin}</div>
+    <div class="obj-list">${chips(clave, lista)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
+  let h = '';
+  if (pl.conc) h += fila('conc', pl.conc, 'Concentración', pl.concObj, '<button type="button" class="ruse" data-cmd="endconc">Terminar</button>');
+  pl.efectos.forEach(e => { h += fila(e.id, e.nombre, e.nota, e.objetivos, `<button type="button" class="ruse" data-eferm="${e.id}">Terminar</button>`); });
+  const add = sug.length ? `<div class="ef-add">${sug.map(n => `<button type="button" data-efnuevo="${esc(n)}">${icon('plus')}${esc(n)}</button>`).join('')}</div>` : '';
+  return `<div class="res wide ef-card"><strong>${gi('ojo')} Efectos activos</strong>${h || '<span class="rnote">Nada activo. Marca un rasgo cuando lo uses sobre alguien, o concéntrate en un conjuro.</span>'}${add}
+    ${pl.conc ? `<label class="chk-line ef-pedir"><input type="checkbox" data-pedirobj ${pl.pedirObjetivos ? 'checked' : ''}> Preguntar sobre quién al concentrarme en un conjuro con objetivos</label>` : ''}</div>`;
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
@@ -130,6 +147,11 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
   const ritualOnly = ch.play.onlyPrep && L > 0 && !isPrepared(e) && s.ritual && P.ritualLibro;
   const lvlSel = editing ? `<label>nivel <select data-lvl="${bi}">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}" ${n === L ? 'selected' : ''}>${n === 0 ? 'truco' : n}</option>`).join('')}</select></label>` : '';
   const cell = (cls, v, key) => `<span class="${cls}">${editing || v ? ce(v, `${k} data-k="${key}"`, editing) : ''}</span>`;
+  // En edición, la escuela se elige de las ocho oficiales y los componentes se marcan: así los colores y los datos siempre cuadran
+  const escuela = editing ? `<span class="c-school ${trig ? 'trig' : ''}"><button type="button" class="sch-pick" data-schoolpick="${bi}" aria-haspopup="menu"><i class="sch-dot" aria-hidden="true"></i>${esc(s.escuela || 'Escuela')}${icon('chevron')}</button></span>`
+    : cell(`c-school ${trig ? 'trig' : ''}`, s.escuela, 'escuela');
+  const comps = editing ? `<span class="c-comp comp-pick" role="group" aria-label="Componentes">${[['V', 'Verbal'], ['S', 'Somático'], ['M', 'Material']].map(([c, t]) => `<button type="button" data-comp="${bi}|${c}" aria-pressed="${(s.comp || '').split(' ').includes(c)}" title="${t}">${c}</button>`).join('')}</span>`
+    : cell('c-comp', s.comp, 'comp');
   return `<div class="spell ${castable ? '' : 'dim'}" id="sp-${bi}" data-sc="${schoolKey(s.escuela)}">
     <div class="c-prep">${prep}</div>
     <div class="c-name"><div class="castzone" data-cast="${bi}" ${editing ? '' : 'role="button" tabindex="0"'} aria-label="${editing ? '' : 'Lanzar ' + esc(s.es)}">
@@ -138,7 +160,7 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
       <div class="en">${ce(s.en, `${k} data-k="en"`, editing)}</div></div>
       ${editing ? `<div class="flags edit-only"><label><input type="checkbox" data-always ${k} ${e.always ? 'checked' : ''}> ${L === 0 ? 'de otra fuente, no cuenta' : 'siempre preparado'}</label>${lvlSel}<button type="button" data-text="${bi}">Texto</button><button type="button" class="warn" data-del="${bi}">Quitar</button></div>` : ''}
     </div>
-    <div class="meta">${cell(`c-school ${trig ? 'trig' : ''}`, s.escuela, 'escuela')}${cell('c-time', s.tiempo, 'tiempo')}${cell('c-range', s.alcance, 'alcance')}${cell('c-dur', s.duracion, 'duracion')}${cell('c-comp', s.comp, 'comp')}${cell('c-cost', s.coste, 'coste')}</div>
+    <div class="meta">${escuela}${cell('c-time', s.tiempo, 'tiempo')}${cell('c-range', s.alcance, 'alcance')}${cell('c-dur', s.duracion, 'duracion')}${comps}${cell('c-cost', s.coste, 'coste')}</div>
     <div class="c-src">${ce(e.fuente, `${k} data-k="fuente"`, editing)}${free}</div>
   </div>`;
 }
@@ -175,7 +197,7 @@ export function renderBar(S) {
   patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
-  if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong><button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;
+  if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong>${ch.play.concObj.length ? `<span class="conc-obj">sobre ${esc(ch.play.concObj.join(', '))}</span>` : `<button type="button" class="conc-add" data-cmd="objetivos">¿Sobre quién?</button>`}<button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;
   patch($('#sbar'), h);
   document.documentElement.style.setProperty('--appbar-h', `${Math.round($('#appbar').getBoundingClientRect().height - (parseFloat(getComputedStyle($('#appbar')).paddingTop) || 0))}px`);
 }

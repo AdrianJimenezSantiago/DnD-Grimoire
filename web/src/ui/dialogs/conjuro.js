@@ -16,6 +16,7 @@ import { confirmar } from '../modal.js';
 import { notasConjuro } from '../../domain/bestiario.js';
 import { openBestiario } from './diario.js';
 import { haptic } from '../../platform/native.js';
+import { CAR_TXT, ESPIRITUS, PERFILES, caracteristicas, criaturasDe, perfilDe } from '../../domain/criaturas.js';
 
 let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
 const dlg = () => $('#spellDlg');
@@ -139,6 +140,7 @@ function render() {
     { const man = manualFor(x), textos = [man?.d, s.desc, x?.dEs, x?.d].filter(Boolean), ar = parseArea(textos.join(' '), s.alcance);
       if (ar) h += `<button type="button" class="rl-open ar-open" data-areaopen><span class="ar-ico" aria-hidden="true"></span><span><b>Ver área en la cuadrícula</b><small>${esc(describir(ar))}</small></span></button>`; }
     if (SP.mode === 'book') { const t = tiradasConjuro(s); if (tieneTiradas(t)) h += `<section class="sp-cast"><h3>Tiradas</h3><button type="button" class="rl-open" data-rollopen>${t.danos[0] ? iconoDano(t.danos[0].tipo) : t.curacion ? iconoDano('curación') : ''}<span><b>${t.ataque ? 'Atacar y tirar daño' : t.curacion && !t.danos.length ? 'Tirar curación' : 'Tirar daño'}</b><small>${[t.ataque ? 'ataque ' + t.ataque : '', t.salvacion ? 'salvación de ' + t.salvacion : ''].filter(Boolean).join(', ') || 'dados del conjuro'}</small></span></button></section>`; h += castOptions(SP.bi); }
+    h += criaturasHtml(s);
     h += pieBestiario(s);
     if (x && en) h += `<p class="credit">Texto del System Reference Document 5.2 de Wizards of the Coast, licencia CC-BY 4.0.</p>`;
   }
@@ -147,6 +149,42 @@ function render() {
   $('#spFoot').innerHTML = SP.edit
     ? `<button type="button" data-sp="canceledit">Cancelar</button><span class="spacer"></span><button type="button" class="primary" data-sp="save">Guardar texto</button>`
     : `${canEdit ? '<button type="button" data-sp="edit">Editar texto</button>' : ''}<span class="spacer"></span><button type="button" data-sp="close">Cerrar</button>${SP.mode === 'preview' && SP.onAdd ? '<button type="button" class="gold" data-sp="add">Añadir al libro</button>' : ''}`;
+}
+/* ---------------- criaturas que trae el conjuro ---------------- */
+const signo = n => (n >= 0 ? '+' : '−') + Math.abs(n);
+/** Perfil de criatura con el aspecto de un bloque de estadísticas, en el color de la escuela del conjuro. */
+export function bloqueHtml(p) {
+  const sec = (t, filas) => (filas?.length ? `<h5>${t}</h5>${filas.map(([n, d]) => `<p><b><i>${esc(n)}.</i></b> ${realzar(esc(d))}</p>`).join('')}` : '');
+  const linea = (k, v) => (v ? `<p class="sb-ln"><b>${k}</b> ${esc(v)}</p>` : '');
+  return `<article class="sb" aria-label="Perfil de ${esc(p.nombre)}"><header><h4>${esc(p.nombre)}</h4><p class="sb-tipo">${esc(p.tipo)}</p></header>
+    <div class="sb-base"><span><b>CA</b> ${p.ca}</span><span><b>PG</b> ${esc(p.pg)}</span><span><b>Velocidad</b> ${esc(p.vel)}</span></div>
+    <div class="sb-car">${caracteristicas(p).map(c => `<div><b>${CAR_TXT[c.k]}</b><span>${c.v}</span><small>${signo(c.mod)}${c.salv !== c.mod ? ` · salv. ${signo(c.salv)}` : ''}</small></div>`).join('')}</div>
+    ${linea('Habilidades', p.hab)}${linea('Vulnerabilidades', p.vul)}${linea('Resistencias', p.res)}${linea('Inmunidades', p.inm)}${linea('Equipo', p.equipo)}
+    ${linea('Sentidos', p.sentidos)}${linea('Idiomas', p.idiomas || 'ninguno')}${linea('VD', p.vd)}
+    ${sec('Atributos', p.rasgos)}${sec('Acciones', p.acciones)}${sec('Acciones adicionales', p.adicionales)}${sec('Reacciones', p.reacciones)}</article>`;
+}
+function criaturasHtml(s) {
+  const cr = criaturasDe(s.es); if (!cr) return '';
+  const ch = S.cur(), P = ch ? perfil(ch) : null, mem = ch?.invocaciones?.[s.es] || {};
+  if (SP.cria === undefined) SP.cria = SP.mode === 'book' && PERFILES[mem.id] ? mem.id : null;
+  const chip = id => `<button type="button" class="cr-chip ${SP.cria === id ? 'on' : ''} ${mem.id === id ? 'mio' : ''}" data-cria="${id}" aria-pressed="${SP.cria === id}">${esc(PERFILES[id].nombre)}${mem.id === id ? '<small>tuyo</small>' : ''}</button>`;
+  let h = `<section class="sp-cria"><h3>${cr.espiritu ? 'Perfil de la criatura' : cr.familiar ? 'Formas del familiar' : 'Criaturas'}</h3>`;
+  if (cr.familiar) {
+    h += `<p class="note">Es un espíritu con forma animal: celestial, feérico o infernal (lo eliges al lanzarlo). No puede atacar, pero sí hacer otras acciones.</p><div class="cr-chips">${cr.familiar.map(chip).join('')}</div>`;
+    if (ch?.clase === 'Brujo') h += `<p class="cr-grupo">Pacto de la cadena <small>si tienes esta invocación: puede atacar con tu reacción cuando renuncias a uno de tus ataques</small></p><div class="cr-chips">${cr.cadena.map(chip).join('')}</div>`;
+  }
+  if (cr.fijos) h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}<div class="cr-chips">${cr.fijos.map(chip).join('')}</div>`;
+  if (cr.espiritu) {
+    const e = ESPIRITUS[cr.espiritu], n = Math.max(e.base, SP.nivelCria || mem.n || Math.max(s.level, e.base)), v = SP.varCria || mem.v || e.variantes[0];
+    const p = perfilDe(cr.espiritu, { n, v, atk: P?.atk ?? 0, cd: P?.cd ?? 10 });
+    h += `<div class="cr-ctl">${e.variantes.length ? `<div class="seg" role="radiogroup" aria-label="Variante">${e.variantes.map(x => `<button type="button" role="radio" aria-checked="${x === v}" data-crvar="${esc(x)}">${esc(x.charAt(0).toUpperCase() + x.slice(1))}</button>`).join('')}</div>` : ''}
+      <label class="f cr-niv">Espacio de nivel<select data-crniv>${Array.from({ length: 10 - e.base }, (_, i) => e.base + i).map(L => `<option ${L === n ? 'selected' : ''}>${L}</option>`).join('')}</select></label></div>
+      ${P?.atk != null ? `<p class="note">Con tu ataque de conjuro ${signo(P.atk)} y tu CD ${P.cd}. Su bonificador por competencia es el tuyo (${signo(P.pb)}).</p>` : ''}${bloqueHtml(p)}`;
+  } else if (SP.cria && PERFILES[SP.cria]) {
+    h += bloqueHtml(perfilDe(SP.cria));
+    if (SP.mode === 'book' && ch) h += `<div class="row-btns" style="justify-content:flex-start"><button type="button" data-crmio="${SP.cria}">${mem.id === SP.cria ? 'Es tu forma actual' : 'Marcar como la mía'}</button></div>`;
+  } else h += '<p class="note">Toca una forma para ver su perfil.</p>';
+  return h + '</section>';
 }
 /* Pie discreto: lo que el bestiario del personaje sabe de este conjuro (por su tipo de daño o anotado a mano). */
 function pieBestiario(s) {
@@ -164,6 +202,17 @@ const catalogEntry = () => (SP.mode === 'book' ? S.db.catalog[S.cur().book[SP.bi
 export function init(store) {
   S = store;
   on($('#spBody'), 'click', '[data-bxopen]', (e, b) => openBestiario(b.dataset.bxopen));
+  // criaturas: elegir forma, variante y nivel; «la mía» se recuerda por personaje y conjuro
+  const recuerda = cambios => { const { s } = data(), ch = S.cur(); if (SP.mode !== 'book' || !ch) return;
+    S.edit((db, c) => { c.invocaciones ||= {}; c.invocaciones[s.es] = { ...(c.invocaciones[s.es] || {}), ...cambios }; }); };
+  const repinta = () => { const y = $('#spBody').scrollTop; render(); $('#spBody').scrollTop = y; };
+  on($('#spBody'), 'click', '[data-cria],[data-crvar],[data-crmio]', (e, b) => {
+    if (b.dataset.cria) SP.cria = SP.cria === b.dataset.cria ? null : b.dataset.cria;
+    if (b.dataset.crvar) { SP.varCria = b.dataset.crvar; recuerda({ v: SP.varCria }); }
+    if (b.dataset.crmio) { recuerda({ id: b.dataset.crmio }); toast(`${esc(PERFILES[b.dataset.crmio].nombre)}: la forma que usas ahora.`); }
+    repinta(); haptic('light');
+  });
+  $('#spBody').addEventListener('change', e => { if (e.target.dataset.crniv !== undefined) { SP.nivelCria = +e.target.value; recuerda({ n: SP.nivelCria }); repinta(); } });
   on(document, 'click', '[data-tbroll]', (e, b) => { tirarTabla(b); haptic('light'); });
   on($('#spBody'), 'click', '[data-areaopen]', () => { const { s, x } = data(), man = manualFor(x); openArea(s, [man?.d, s.desc, x?.dEs, x?.d].filter(Boolean)); });
   on($('#spBody'), 'click', '[data-rollopen]', () => { const bi = SP.bi; closeSheet(dlg()); setTimeout(() => openRoll(bi), 150); });

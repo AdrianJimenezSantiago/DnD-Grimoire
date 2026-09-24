@@ -41,6 +41,28 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 - **Más recursos de subclase:** Arcanum místico (brujo), Venganza ardiente, Precognición divina, Restablecer equilibrio, Sobrecarga domada, Salto psiónico, Bastión de fuerza, Canción de la hoja, Sed de sangre, Recuperación grupal, Represalia escalofriante, Represalia elemental, Vástago noble… La reserva del paladín se llama ahora como en el manual: Imponer las manos.
 - **Un color y un emblema por subclase.** Las 56 subclases tienen su propio tono y su propio emblema, y cada una su fondo animado. Una prueba automática comprueba que no se repite ninguno.
 
+### Hoja más coherente, criaturas y efectos activos
+
+- **Escuela con selector.** En «Editar hoja», la escuela se elige de las ocho oficiales, cada una con su color, y los componentes V, S y M se marcan con un toque. Siempre queda al menos uno.
+- **Datos coherentes.** Al editar, y también al cargar datos antiguos o leídos de un PDF:
+  - un «0» en usos gratis deja el conjuro sin uso gratis;
+  - un alcance de 0 pasa a «Toque» y una duración vacía, a «Instantáneo»;
+  - el material «0 po» se borra y la escuela escrita a mano («Ilusión») pasa a su nombre oficial.
+
+  Los rasgos propios no admiten 0 usos ni dados de recarga imposibles.
+- **Perfiles de criaturas en los conjuros.** *Encontrar familiar* muestra sus 11 formas con su perfil completo. Si el personaje es brujo, también las 8 del Pacto de la cadena, y se puede marcar cuál es tu familiar. *Hallar corcel*, *Corcel fantasma*, *Animar a los muertos* y los nueve *Invocar…* traen el perfil de la criatura.
+  - Los espíritus se ajustan a la variante elegida (tierra, mar o aire…) y al nivel del espacio.
+  - Usan tu ataque de conjuro y tu CD.
+
+  Datos del Manual del Jugador 2024 (apéndice B y capítulo de conjuros). El PDF del Manual de Monstruos es solo imagen, así que de ahí no se puede leer nada.
+- **Efectos activos.** Al concentrarte en un conjuro con objetivos (*Bendición*, *Acelerar*, *Maleficio*, *Marca del cazador*…), puedes anotar sobre quién está, desde el aviso o desde la propia bandeja de tiradas. Los conjuros de área, como *Dormir*, no lo piden.
+  - Hay una opción para que lo pregunte siempre.
+  - Los rasgos que se ponen sobre una criatura (Voto de enemistad, Inspiración bárdica, Golpe aturdidor…) se marcan desde la tarjeta «Efectos activos».
+  - Todo se olvida al terminar la concentración o con el descanso largo.
+- **Media esperada en las tiradas.** Con dos dados o más, cada botón de daño o curación indica la media, que se ajusta al potenciar el conjuro (*Nube de dagas*: 10 a nivel 2, 20 a nivel 4). El resultado dice si ha salido por encima o por debajo de la media.
+- **Ficha de personaje.** La sección de conjuros solo aparece si la clase o la subclase lanza conjuros; un bárbaro no la ve. Para dotes, especie o multiclase se abre con «Opciones de conjuros».
+- **Corrección del compendio.** *Guía* e *Impacto certero* tenían el texto en inglés intercambiado (Guidance y True Strike); se corrige solo al abrir la app.
+
 ### Rama `development` y personajes de prueba
 
 Los cambios se prueban primero en la rama `development` y pasan a `main` cuando están listos. `main` sigue siendo la que genera el APK y la versión de Windows, y la que publica Vercel en producción.
@@ -292,7 +314,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (58)
+npm test           # pruebas (67)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

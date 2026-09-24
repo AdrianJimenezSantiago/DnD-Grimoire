@@ -5,6 +5,7 @@ import { reglas } from '../../domain/rasgos.js';
 import { levelDiff } from '../../domain/progresion.js';
 import { blankChar, normChar, THEO } from '../../domain/modelo.js';
 import { $, on } from '../dom.js';
+import { icon } from '../icons.js';
 import { claseLinea, origenLinea } from '../sheet.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -56,9 +57,9 @@ async function remove(id) {
 }
 
 /* ---------------- ficha ---------------- */
-let formId = null;
+let formId = null, conjAbierto = false;
 export function openCharForm(id) {
-  formId = id || null;
+  formId = id || null; conjAbierto = false;
   const c = id ? S.db.chars.find(x => x.id === id) : blankChar({ campana: S.cur()?.campana || THEO.campana });
   $('#charTitle').textContent = id ? `Editar a ${c.nombre || 'personaje'}` : 'Nuevo personaje';
   $('#charErr').textContent = '';
@@ -75,7 +76,8 @@ export function openCharForm(id) {
     <label class="f">Subclase<input id="f_subclase" list="dl_sub" value="${esc(c.subclase)}" autocomplete="off"><span class="hint" id="h_sub"></span></label>
     <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div></section>
   <section class="fsec"><h3>Características</h3><div class="abil">${abil}</div></section>
-  <section class="fsec"><h3>Conjuros</h3><div class="frow">
+  <button type="button" class="ghost conj-toggle" id="f_conjOpen" hidden>${icon('plus')}Opciones de conjuros (dotes, especie o multiclase)</button>
+  <section class="fsec" id="f_secConj"><h3>Conjuros</h3><div class="frow">
     <label class="f">Característica para conjuros<select id="f_aptitud"></select><span class="hint">Cámbiala solo si la da una dote o especie.</span></label>
     <label class="f">Bonificador extra a la CD<input id="f_extraCD" type="number" inputmode="numeric" value="${c.extraCD || 0}"><span class="hint">Objetos como un grimorio +1.</span></label>
     <label class="f">Bonificador extra al ataque<input id="f_extraAtaque" type="number" inputmode="numeric" value="${c.extraAtaque || 0}"></label></div>
@@ -116,6 +118,11 @@ function sync(first) {
   ABILS.forEach(([k]) => { $('#m_' + k).textContent = sgn(modOf($('#f_' + k).value)); });
   $('#h_sub').textContent = draft.nivel < 3 ? 'Se elige al llegar a nivel 3.' : (cls.subCast && !P.viaSub ? `Solo ${cls.subCast.nombre} lanza conjuros.` : '');
   $('#f_slots').hidden = !$('#f_manual').checked;
+  // La sección de conjuros solo aparece si la clase (o la subclase elegida) lanza conjuros, o si ya se usa por dotes o multiclase
+  const lanza = !!cls.cast || !!(cls.subCast && cls.subCast.re.test(draft.subclase || ''));
+  const enUso = draft.espaciosManuales || !!draft.aptitud || !!draft.extraCD || !!draft.extraAtaque;
+  const verConj = lanza || enUso || conjAbierto;
+  $('#f_secConj').hidden = !verConj; $('#f_conjOpen').hidden = verConj;
   const L = [`Competencia ${sgn(P.pb)}.${P.apKey ? ` ${ABIL_NAME[P.apKey]} ${sgn(P.mod)}: CD ${P.cd}, ataque de conjuro ${sgn(P.atk)}.` : ''}`];
   if (P.c || draft.espaciosManuales) L.push(slotText(P));
   if (P.c) L.push(`Prepara ${P.maxPrep} ${P.maxPrep === 1 ? 'conjuro' : 'conjuros'} de nivel 1+${P.c.cant ? ` y sabe ${P.maxCant} trucos` : ''}.`);
@@ -161,6 +168,7 @@ export function init(store, { onNewCharacterAddSpells }) {
     sync(false);
   });
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
+  on(form, 'click', '#f_conjOpen', () => { conjAbierto = true; sync(false); $('#f_aptitud').focus(); });
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);
   $('#charNew').addEventListener('click', () => openCharForm(null));

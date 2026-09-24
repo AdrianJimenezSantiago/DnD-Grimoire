@@ -7,6 +7,7 @@
 import { clamp, clone, uid } from '../core/util.js';
 import { perfil } from './reglas2024.js';
 import { HOJA_THEO } from './ejemplo.js';
+import { limpiarConjuro, usoGratis } from './validar.js';
 
 export const SCHEMA = 2;
 export const CAT_FIELDS = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
@@ -18,7 +19,7 @@ export const THEO = {
   campana: 'Crónicas de La Argos, Aequus. Temporada 2026/2027',
 };
 const STATS0 = { fue: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 };
-const PLAY0 = () => ({ used: {}, conc: '', rec: {}, log: [], onlyPrep: false });
+const PLAY0 = () => ({ used: {}, conc: '', concObj: [], efectos: [], rec: {}, log: [], onlyPrep: false });
 
 export const spellKey = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
 
@@ -38,6 +39,9 @@ export function normChar(c) {
   c.stats = { ...STATS0, ...(c.stats || {}) };
   c.play = { ...PLAY0(), ...(c.play || {}) };
   c.play.used ||= {}; c.play.rec ||= {};
+  if (!Array.isArray(c.play.concObj)) c.play.concObj = [];
+  if (!Array.isArray(c.play.efectos)) c.play.efectos = [];
+  if (!c.play.conc) c.play.concObj = [];
   if (!Array.isArray(c.play.log)) c.play.log = [];
   if (!Array.isArray(c.rasgos)) c.rasgos = [];
   if (!Array.isArray(c.rasgosOff)) c.rasgosOff = [];
@@ -57,8 +61,14 @@ export function normChar(c) {
 
 export function normDb(d) {
   d.schema = SCHEMA; d.catalog ||= {};
-  Object.values(d.catalog).forEach(s => { CAT_FIELDS.forEach(f => { if (s[f] == null) s[f] = ''; }); });
+  Object.values(d.catalog).forEach(s => { CAT_FIELDS.forEach(f => { if (s[f] == null) s[f] = ''; }); limpiarConjuro(s); });
+  // El compendio anterior emparejaba Guía con True Strike e Impacto certero con Guidance
+  Object.values(d.catalog).forEach(s => {
+    if (s.es === 'Guía' && s.en === 'True Strike') { s.en = 'Guidance'; s.srd = 'srd-2024_guidance'; }
+    else if (s.es === 'Impacto certero' && s.en === 'Guidance') { s.en = 'True Strike'; s.srd = 'srd-2024_true-strike'; }
+  });
   d.chars = (d.chars || []).map(normChar);
+  d.chars.forEach(c => c.book.forEach(e => { e.gratis = usoGratis(e.gratis); if (!e.gratis) e.used = false; }));
   d.chars.forEach(c => { c.book = c.book.filter(e => d.catalog[e.sid]); });
   if (!d.chars.some(c => c.id === d.activeId)) d.activeId = d.chars[0]?.id ?? null;
   return d;

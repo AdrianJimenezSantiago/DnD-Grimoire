@@ -10,7 +10,8 @@ export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anot
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
 export const RECARGA_CORTA = { largo: 'Descanso largo', corto: 'Descanso corto o largo', corto1: 'Recupera 1 con descanso corto', nunca: 'No se recarga' };
 /** Recarga con dados: «recupera 1d3 cargas al amanecer». */
-export const dadoRecarga = r => { const m = /^(\d*)d(\d+)$/i.exec(String(r.recDado || '').trim()); return m ? { n: +(m[1] || 1), caras: +m[2], bono: parseInt(r.recBono, 10) || 0 } : null; };
+export const dadoRecarga = r => { const m = /^(\d*)d(\d+)$/i.exec(String(r.recDado || '').trim()); const n = +(m?.[1] || 1), caras = +(m?.[2] || 0);
+  return m && n >= 1 && caras >= 1 ? { n, caras, bono: parseInt(r.recBono, 10) || 0 } : null; };
 export function etiquetaRecarga(r, larga = false) {
   if (r.recarga === 'dado') { const d = dadoRecarga(r); const txt = d ? `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? '+' : '') + d.bono : ''}` : 'dados';
     return larga ? `recupera ${txt} ${r.recMomento === 'corto' ? 'con cada descanso corto o largo' : 'al amanecer (descanso largo)'}` : `Recupera ${txt} ${r.recMomento === 'corto' ? 'por descanso' : 'al amanecer'}`; }
