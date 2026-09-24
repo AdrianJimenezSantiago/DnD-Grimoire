@@ -78,7 +78,7 @@ function moreMenuHtml() {
   const fila = (cmd, ico, label, extra = '') => `<button type="button" role="menuitem" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
   let i = 0;
   const personaje = ch ? [
-    tile('rules', icon('sliders'), 'Rasgos', 'Rasgos y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Objetos', 'Objetos mágicos', i++),
+    tile('rules', icon('sliders'), 'Rasgos', 'Rasgos y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Inventario', 'Inventario: objetos, monedas y carga', i++),
     tile('historia', gi('libro', 'icon'), 'Historia', '', i++), tile('diario', icon('quill'), 'Diario', 'Diario de sesión', i++),
     tile('bestiario', gi('bestia', 'icon'), 'Bestiario', '', i++), tile('chars', icon('users'), 'Personajes', '', i++),
   ].join('') : tile('chars', icon('users'), 'Personajes', '', i++);

@@ -8,6 +8,7 @@ import { clamp, clone, uid } from '../core/util.js';
 import { perfil } from './reglas2024.js';
 import { HOJA_THEO } from './ejemplo.js';
 import { limpiarConjuro, usoGratis } from './validar.js';
+import { normEquipo } from './equipo.js';
 
 export const SCHEMA = 2;
 export const CAT_FIELDS = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
@@ -52,6 +53,7 @@ export function normChar(c) {
   if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
   if (typeof c.historia !== 'string') c.historia = '';
   if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
+  normEquipo(c);   // inventario: categorías, cantidades, pesos y monedas (los antiguos solo tenían objetos mágicos)
   if (!c.bestiario || !Array.isArray(c.bestiario.criaturas)) c.bestiario = { criaturas: [] };
   if (c.retrato && !c.retrato.src) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);

@@ -2,7 +2,7 @@
  * Reglas del Manual del Jugador 2024 que necesita la hoja.
  * Módulo puro: sin DOM ni estado. Todo lo derivado de un personaje sale de perfil().
  */
-import { clamp } from '../core/util.js';
+import { clamp, norm } from '../core/util.js';
 
 export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
 export const ABIL_NAME = Object.fromEntries(ABILS);
@@ -100,6 +100,15 @@ export function dotesDe(ch, trasfondosLib = []) {
 }
 export const LISTAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
 
+/**
+ * La CD y el ataque que tocan a un conjuro según su fuente en el libro («Hechicero (nivel 6)», «Embaucador arcano», «Libro»…).
+ * Con una sola característica de lanzamiento, el perfil tal cual.
+ */
+export function magiaPara(P, fuente = '') {
+  if (!P.cds || P.cds.length < 2) return P;
+  const f = norm(fuente), x = P.cds.find(c => c.claves.some(k => k && f.includes(k))) || P.cds[0];
+  return { ...P, apKey: x.ap, mod: x.mod, cd: x.cd, atk: x.atk };
+}
 /** Lanzamiento de conjuros de una clase a su nivel (la subclase puede darlo: Caballero y Embaucador arcanos). */
 function lanzamientoDe(c) {
   const cls = CLASES[c.clase] || {};
@@ -137,9 +146,17 @@ export function perfil(ch) {
     row.forEach((n, i) => { if (n) slots[i + 1] = n; });
     if (pact) slots[pact.level] = (slots[pact.level] || 0) + pact.n;
   }
+  // cada clase lanza con su característica (Embaucador arcano con Inteligencia, Hechicero con Carisma): una CD por característica
+  const cds = [];
+  for (const { c: k, l } of lanzan) {
+    const ap = ch.aptitud || l.cast.ap, claves = [norm(k.clase), norm(l.nombre), ...(l.lista === 'Mago' || k.clase === 'Mago' ? ['libro', 'experto'] : []), ...(k.clase === 'Brujo' ? ['pacto'] : [])];
+    const x = cds.find(y => y.ap === ap);
+    if (x) x.claves.push(...claves);
+    else { const m = modOf(ch.stats[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
+  }
   const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length : 0);
   return {
-    c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases,
+    c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases, cds,
     lista: prim ? prim.l.lista : '',
     listaNombre: prim ? prim.l.nombre : '',
     listas: lanzan.map(x => x.l.lista),
