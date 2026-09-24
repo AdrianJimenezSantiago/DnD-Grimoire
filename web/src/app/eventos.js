@@ -43,8 +43,10 @@ let S, awake = false;
 /* ---------------- tema ---------------- */
 export const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 function toggleTheme() {
-  viewTransition(() => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; setBars(isDark()); });
-  storage.set(PREF + '-theme', document.documentElement.dataset.theme);
+  // el tema nuevo se decide antes: la transición aplica el cambio más tarde y se guardaba el anterior
+  const nuevo = isDark() ? 'light' : 'dark';
+  viewTransition(() => { document.documentElement.dataset.theme = nuevo; setBars(nuevo === 'dark'); });
+  storage.set(PREF + '-tema', nuevo);
 }
 
 /* ---------------- menús emergentes ---------------- */
