@@ -137,7 +137,7 @@ function efectosHtml(ch) {
   const chips = (clave, lista) => lista.map((o, i) => `<button type="button" class="obj-chip" data-objdel="${clave}|${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('');
   const entrada = (clave, ph) => `<input class="obj-in" data-objin="${clave}" placeholder="${ph}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo">`;
   const fila = (clave, nombre, nota, lista, fin) => `<div class="ef-row"><div class="ef-h"><b>${esc(nombre)}</b>${nota ? `<small>${esc(nota)}</small>` : ''}${fin}</div>
-    <div class="obj-list">${chips(clave, lista)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
+    <div class="objt-list">${chips(clave, lista)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
   let h = '';
   if (pl.conc) h += fila('conc', pl.conc, 'Concentración', pl.concObj, '<button type="button" class="ruse" data-cmd="endconc">Terminar</button>');
   pl.efectos.forEach(e => { h += fila(e.id, e.nombre, e.nota, e.objetivos, `<button type="button" class="ruse" data-eferm="${e.id}">Terminar</button>`); });

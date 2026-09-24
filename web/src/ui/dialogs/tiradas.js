@@ -47,7 +47,7 @@ function render() {
   // Concentración sobre criaturas concretas (Maleficio, Marca del cazador…): se anota aquí mismo sobre quién
   const x = srdFor(s);
   if (ch.play.conc === s.es && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d])) {
-    h += `<section class="rl-step rl-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="obj-list">${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
+    h += `<section class="rl-step rl-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
       <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`;
   }
   if (t?.escala?.tipo === 'espacio' && s.level > 0) {

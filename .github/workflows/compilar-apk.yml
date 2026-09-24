@@ -46,6 +46,28 @@ jobs:
           npm run build:windows
           cp dist-windows/grimorio.html "grimorio-windows-1.0.${{ github.run_number }}.html"
 
+      # Libros incluidos: los PDF de tools/resources (Git LFS) se leen aquí con el mismo lector de la app y van
+      # dentro de la APK ya procesados; al arrancar, la app añade los que le falten. Se guardan en caché y solo
+      # se vuelven a leer si cambian los PDF, el lector o el compendio.
+      - name: Libros incluidos (caché)
+        id: libros
+        uses: actions/cache@v4
+        with:
+          path: libros-generados
+          key: libros-${{ hashFiles('tools/resources/*.pdf', 'tools/preparar-libros.mjs', 'web/src/domain/**', 'web/public/data/compendio.json') }}
+
+      # El Manual de Monstruos está escaneado (sin texto): no se descarga (1 GB); sus criaturas van a mano en la app.
+      - name: Descargar los PDF (Git LFS)
+        if: steps.libros.outputs.cache-hit != 'true'
+        run: git lfs pull --exclude "tools/resources/*Monstruos*"
+
+      - name: Leer los libros
+        if: steps.libros.outputs.cache-hit != 'true'
+        run: node --max-old-space-size=6144 tools/preparar-libros.mjs tools/resources libros-generados
+
+      - name: Añadir los libros a la web
+        run: mkdir -p www/libros && cp libros-generados/* www/libros/
+
       - name: Copiar la web al proyecto Android
         run: npx cap sync android
 
