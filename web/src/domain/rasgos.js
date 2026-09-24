@@ -40,7 +40,7 @@ export function plantillas(ch) {
   const mod = k => Math.max(1, modOf(ch.stats[k]));
   const has = re => re.test(sub);
   const R = (id, o) => T.push({ id: 'tpl:' + id, tpl: true, nota: '', recarga: 'largo', ...o });
-  const uno = (id, nombre, nota, recarga = 'largo') => R(id, { tipo: 'recurso', nombre, max: 1, recarga, nota });
+  const uno = (id, nombre, nota = '', recarga = 'largo') => R(id, { tipo: 'recurso', nombre, max: 1, recarga, nota });
   switch (ch.clase) {
     case 'Bárbaro':
       R('barbaro.furia', { tipo: 'recurso', nombre: 'Furia', max: byLvl(L, [[1, 2], [3, 3], [6, 4], [12, 5], [17, 6]]), recarga: 'corto1' });

@@ -1,6 +1,6 @@
 /** Ficha del conjuro: lectura completa, opciones de lanzamiento y edición de textos. */
 import { esc, norm } from '../../core/util.js';
-import { perfil } from '../../domain/reglas2024.js';
+import { perfil, magiaPara } from '../../domain/reglas2024.js';
 import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
 import { tieneTiradas } from '../../domain/tiradas.js';
 import { gi } from '../tema.js';
@@ -100,7 +100,7 @@ export function openSpell(bi, opt = {}) { SP = { mode: 'book', bi, edit: !!opt.e
 export function previewSpell(item, opt = {}) { SP = { mode: 'preview', item, onAdd: opt.onAdd }; render(); openSheet(dlg()); }
 
 function castOptions(bi) {
-  const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
+  const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = magiaPara(perfil(ch), e.fuente);
   if (s.level === 0) return '';
   let o = '';
   if (e.gratis) o += `<button type="button" data-opt="free" ${e.used ? 'disabled' : ''}>Uso gratis <small>${e.used ? 'ya gastado' : esc(e.gratis)}</small></button>`;

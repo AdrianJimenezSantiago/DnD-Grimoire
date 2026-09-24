@@ -7,7 +7,7 @@
  * Todo se anota en el historial.
  */
 import { esc } from '../../core/util.js';
-import { perfil, sgn, nivelTotal } from '../../domain/reglas2024.js';
+import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
 import { conObjetivos, objetivosNuevos } from '../../domain/concentracion.js';
 import { dadosPara, media } from '../../domain/tiradas.js';
@@ -26,7 +26,7 @@ export const ICONO_DANO = { 'ácido': 'acido', contundente: 'contundente', corta
 export const iconoDano = (tipo, cls = '') => `<span class="dmg dmg-${ICONO_DANO[tipo] || 'fuerza'} ${cls}" title="${esc(tipo)}">${gi(ICONO_DANO[tipo] || 'fuerza')}</span>`;
 /** «daño de fuego» pero «daño psíquico»: los tipos adjetivos no llevan «de». */
 export const danoDe = tipo => (/^(psíquico|necrótico|radiante|contundente|cortante|perforante)$/.test(tipo) ? `daño ${tipo}` : `daño de ${tipo}`);
-const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: perfil(ch), t: tiradasConjuro(s) }; };
+const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s) }; };
 const fmtMedia = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
 const mediaTxt = (n, caras, bono, mitad) => (n >= 2 ? `media ${fmtMedia(media(n, caras, bono))}${mitad ? `; ${fmtMedia(media(n, caras, bono) / 2)} si supera` : ''}` : '');
 const TS_TXT = { falla: 'Ha fallado', supera: 'Ha superado', varios: 'Varios objetivos' };

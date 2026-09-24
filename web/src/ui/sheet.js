@@ -15,6 +15,7 @@ import { notaHtml } from './dialogs/diario.js';
 import { rasgosConObjetivo } from '../domain/concentracion.js';
 import { rasgosEnJuego, agrupar, numerosMarciales, FUENTES } from '../domain/enJuego.js';
 import { biblioteca } from '../domain/catalogo.js';
+import { claseArmadura } from '../domain/equipo.js';
 
 /* ---------- consultas de la hoja ---------- */
 export const slotsOf = (P, n) => P.slots[n] || 0;
@@ -43,7 +44,8 @@ function candles(ch, P, L) {
 function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="true"' : ''} ${attrs}>${esc(val)}</span>`; }
 
 function heroHtml(ch, P) {
-  const mods = P.apKey ? `${ABIL_NAME[P.apKey]} ${sgn(P.mod)}, competencia ${sgn(P.pb)}` : `Competencia ${sgn(P.pb)}`;
+  // CA con lo equipado en el inventario (o la defensa sin armadura)
+  const mods = `${P.apKey ? `${ABIL_NAME[P.apKey]} ${sgn(P.mod)}, competencia ${sgn(P.pb)}` : `Competencia ${sgn(P.pb)}`} · CA ${claseArmadura(ch).ca}`;
   const t = temaDe(ch);
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
     <div class="hero-id"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
@@ -54,7 +56,7 @@ function heroHtml(ch, P) {
     <div class="chips">
       <button type="button" class="chip" data-cmd="editchar">${icon('user')}Editar personaje</button>
       <button type="button" class="chip" data-cmd="rules">${icon('sliders')}Rasgos</button>
-      <button type="button" class="chip" data-cmd="equipo">${gi('cofre')}Objetos${(ch.equipo?.objetos || []).length ? `<small class="chip-n">${ch.equipo.objetos.length}</small>` : ''}</button>
+      <button type="button" class="chip" data-cmd="equipo">${gi('cofre')}Inventario${(ch.equipo?.objetos || []).length ? `<small class="chip-n">${ch.equipo.objetos.length}</small>` : ''}</button>
       <button type="button" class="chip" data-cmd="historia">${gi('libro')}Historia</button>
       <button type="button" class="chip" data-cmd="diario">${icon('quill')}Diario</button>
       ${P.lvl < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${P.lvl + 1}</button>` : ''}
@@ -71,8 +73,15 @@ function statsHtml(db, ch, P) {
     const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }] : [];
     return [...magia, ...numerosMarciales(ch)].slice(0, 4).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
   }
-  return st(P.cd ?? '—', 'CD de salvación', 'key') + st(P.atk == null ? '—' : sgn(P.atk), 'Ataque de conjuro', 'key')
-    + st(P.c?.cant ? `${cc}/${P.maxCant}` : cc, 'Trucos', P.c?.cant && cc > P.maxCant ? 'over' : '')
+  // multiclase con distintas características de lanzamiento: una CD y un ataque por cada una («15 · 16», «Int · Car»)
+  const AB = { fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' }, varias = (P.cds || []).length > 1;
+  const cd = varias ? st(P.cds.map(x => x.cd).join(' · '), `CD (${P.cds.map(x => AB[x.ap]).join(' · ')})`, 'key') : st(P.cd ?? '—', 'CD de salvación', 'key');
+  const at = varias ? st(P.cds.map(x => sgn(x.atk)).join(' · '), `Ataque (${P.cds.map(x => AB[x.ap]).join(' · ')})`, 'key') : st(P.atk == null ? '—' : sgn(P.atk), 'Ataque de conjuro', 'key');
+  // sin trucos en la clase (paladín, explorador) ni en el libro: en su lugar, un número de la clase
+  const sinTrucos = !P.maxCant && !cc, marcial = sinTrucos ? numerosMarciales(ch).filter(n => !/^(Competencia|Dado de golpe)$/.test(n.nombre))
+    .sort((a, b) => (a.nombre === 'Maestría con armas') - (b.nombre === 'Maestría con armas'))[0] : null;   // el Aura de protección antes que la maestría
+  return cd + at
+    + (marcial ? st(esc(marcial.valor), esc(marcial.nombre)) : st(P.c?.cant ? `${cc}/${P.maxCant}` : cc, 'Trucos', P.c?.cant && cc > P.maxCant ? 'over' : ''))
     + st(P.c ? `${pc}/${P.maxPrep}` : pc, 'Preparados', P.c && pc > P.maxPrep ? 'over' : '');
 }
 
@@ -233,6 +242,10 @@ export function renderBar(S) {
   $('#dAdd').hidden = !S.editing;
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="monogram">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
+  // sin conjuros, «Solo preparados» y «Añadir conjuro» no dicen nada: se ocultan (la hoja ofrece «Añadir conjuros» al pie)
+  const conj = conConjuros(ch, P);
+  $('#bFilter').hidden = $('#dFilter').hidden = $('#bAdd').hidden = !conj;
+  if (!conj) $('#dAdd').hidden = true;
   const tema = aplicarTema(ch);
   patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span>${icon('chevron')}`);
   let h = '';

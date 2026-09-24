@@ -95,7 +95,7 @@ async function boot() {
     { sel: '.spell[id] .castzone', titulo: 'Lanzar', texto: '<b>Toca</b> un conjuro para lanzarlo: gasta el espacio adecuado, marca la concentración y te ofrece <b>Tirar</b>. <b>Mantén pulsado</b> para leerlo y elegir nivel o ritual.' },
     { sel: '.spell[id] .prep:not(.none):not(.always), .spell[id] .prep', titulo: 'Preparados', texto: 'El rombo marca los conjuros preparados. En dorado, los que están siempre preparados.' },
     { sel: '.hero-av', titulo: 'Tu personaje', texto: 'Toca el retrato para añadir o reencuadrar una imagen. En <b>Historia</b> tienes su trasfondo con índice y búsqueda, y en <b>Diario</b> las notas de cada sesión y su <b>bestiario</b>: lo que sabéis de cada criatura.' },
-    { sel: '[data-cmd="equipo"]', titulo: 'Objetos mágicos', texto: 'Sus objetos, con los tres huecos de sintonización. Las cargas aparecen en la hoja como un recurso más y se recuperan solas al amanecer.' },
+    { sel: '[data-cmd="equipo"]', titulo: 'Inventario', texto: 'Todo lo que lleva: armas con su ataque y daño, armadura con su CA, equipo, consumibles, comida, tesoro y monedas, con el peso y la carga. Los objetos mágicos traen su sintonización y sus cargas.' },
     { sel: '#res .resources', titulo: 'Rasgos y recursos', texto: 'Los recursos de tu clase y subclase se cuentan aquí y se recuperan solos con los descansos.' },
     { sel: '#dRest, #bRest', titulo: 'Descansar', texto: 'Descanso corto o largo: la app restaura lo que corresponde según tu clase.' },
     { sel: '#dEdit, #bEdit', titulo: 'Editar y añadir', texto: 'En modo edición cambias textos y añades conjuros desde el catálogo o el compendio de 391 conjuros.' },

@@ -61,6 +61,23 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - **Forma salvaje:** la tarjeta del recurso tiene «Formas (n)». Muestra las bestias posibles según el nivel (VD 1/4, 1/2 o 1, con vuelo desde el nivel 8) y el Círculo de la luna. Las conocidas se marcan con ★, hasta el máximo del nivel. Las que no estén en tus libros se añaden a mano con nombre, VD, CA, PG y velocidad.
   - El texto del apéndice del PDF tiene restos de reconocimiento de texto. La app los corrige cuando puede (dados, características, nombres) y marca en la ficha lo que conviene comprobar en el libro.
 - **Las 48 subclases del Manual del Jugador, completas.** Al importarlo, cada subclase trae ya todos sus rasgos (241) con su descripción, y la importación no pide ningún nombre. El lector tolera los títulos mal leídos del PDF («NrIveEL 10», «HECHICERÍA pracónica», «LABRÓN DE CONJUROS»), los títulos pegados al texto y las tablas que se comían el rasgo siguiente. El Evocador y el Juramento de venganza, cuyo título está dentro de una ilustración, se reconocen por sus rasgos.
+- **Inventario.** «Objetos» pasa a ser un inventario completo: todo lo que lleva el personaje, por categorías (armas, armaduras y escudos, equipo, herramientas, consumibles, objetos mágicos, comida y agua, tesoro y otros).
+  - Cada objeto tiene cantidad, peso, valor y notas. Lo repetido se apila, se busca por nombre y se filtra por categoría.
+  - «Añadir objeto» trae una lista de objetos comunes del Manual del Jugador con su peso y su valor; también se puede escribir cualquier otro.
+    - Las armas traen daño, propiedades y maestría.
+    - Las armaduras traen CA base, cuánta Destreza suman y tipo.
+  - **Equipar:** las armas muestran su ataque y su daño ya calculados (Fuerza, o Destreza si es sutil o a distancia, más la competencia y el bonificador mágico). La armadura y el escudo equipados dan la **CA**, que aparece también en la hoja, bajo el nombre. Sin armadura cuentan 10 + Des y la Defensa sin armadura del bárbaro o del monje.
+  - **Consumibles y comida** se gastan con «Usar».
+  - **Monedas:** platino, oro, electro, plata y cobre, con su equivalente en oro.
+  - **Carga:** Fuerza × 7,5 kg, el doble para el goliat, con aviso si te pasas. Las monedas también pesan.
+  - **Objetos mágicos:** siguen con sus tres huecos de sintonización y sus cargas en la hoja.
+  - Los objetos que ya tenías se convierten solos: cada uno va a su categoría.
+  - Los personajes de prueba llevan el equipo inicial de su clase, con lo principal equipado.
+- **Revisión completa, niveles 1 a 20.** Se han subido de nivel con el asistente, de 1 a 20, un guerrero, un mago, un paladín y un pícaro 10 / hechicero 10. En ningún nivel aparecen errores ni textos rotos. Además se ha comprobado cada clase y subclase en cada nivel. Lo que se ha corregido:
+  - Con multiclase, cada clase lanza con su característica: la cabecera muestra una CD y un ataque por cada una («CD (Int · Car) 15 · 16»), y cada conjuro tira con la de su clase según su fuente.
+  - Un lanzador sin trucos (paladín, explorador) ya no muestra «0 trucos»: en su lugar sale un número de su clase (Aura de protección, Maestría con armas).
+  - Sin conjuros, la barra ya no ofrece «Solo preparados» ni «Añadir conjuro».
+  - Algunos recursos de clase guardaban su nota vacía como «undefined».
 - **«En juego»: los rasgos de tu clase, listos para la mesa.** Debajo de los recursos, la hoja agrupa los rasgos de clase y subclase por cuándo se usan: **Acción, Acción adicional, Reacción, Siempre activo y Fuera de combate**.
   - Cada rasgo muestra su nivel, una línea con lo que hace y sus números ya calculados (Furia +2, Ataque furtivo 4d6, Artes marciales d8…). Si gasta un recurso, trae el botón «Usar» con lo que queda.
   - El grupo sale solo del texto del libro («como acción adicional», «llevar a cabo una reacción»…). Si alguno no te encaja, ábrelo y cámbialo en «Mostrar en».
@@ -345,7 +362,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (85)
+npm test           # pruebas (89)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

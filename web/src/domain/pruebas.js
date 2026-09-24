@@ -13,7 +13,7 @@ import { CLASES_INFO, SUBCLASES, conjurosAutomaticos, progresion, subclaseDe } f
 import { ASI_LVLS } from './progresion.js';
 import { blankChar, normChar } from './modelo.js';
 import { importSrd } from './catalogo.js';
-import { anadirObjeto } from './equipo.js';
+import { anadirObjeto, anadirComun, alternarEquipado, equipoDe, PREDEFINIDOS } from './equipo.js';
 import { nuevaNota } from './diario.js';
 import { claveNombre } from './manual.js';
 
@@ -179,6 +179,7 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   ch.notas = notas.map(t => t.replace(/\.?$/, '.')).join('\n');
 
   // 6. Objetos mágicos: poción, capa sintonizada y, según la clase, varita con cargas o arma +1
+  equipoInicial(ch);
   const obj = (nombre, tipo, rareza, extra = {}) => anadirObjeto(ch, { clave: claveNombre(nombre), nombre, tipo, rareza, sintonia: !!extra.sintonia, cargas: extra.cargas || null });
   obj('Poción de curación', 'Poción', 'Común');
   const capa = obj('Capa de protección', 'Objeto maravilloso', 'Infrecuente', { sintonia: true }); capa.sintonizado = true;
@@ -195,6 +196,29 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   ch.bestiario.criaturas.push(cr);
   ch.historia = `## Origen\n\n${ch.nombre} es ${especie.toLowerCase()} de trasfondo ${trasfondo.toLowerCase()}.\n\n### Rasgos hasta nivel ${nivel}\n\n${progresion(ch).map(r => `${r.nivel}. ${r.nombre}`).join(' · ')}\n\n---\n\n> Personaje generado para probar la app.`;
   return { ch: normChar(ch), faltan };
+}
+
+// Equipo inicial por clase (Manual del Jugador 2024, simplificado): [nombre, cantidad]; las armas y armaduras primeras van equipadas
+const KIT = {
+  'Bárbaro': [['Hacha a dos manos', 1], ['Hacha de mano', 4]], 'Bardo': [['Estoque', 1], ['Armadura de cuero', 1], ['Laúd', 1]],
+  'Brujo': [['Daga', 2], ['Armadura de cuero', 1], ['Foco arcano (orbe)', 1]], 'Clérigo': [['Maza', 1], ['Cota de escamas', 1], ['Escudo', 1], ['Símbolo sagrado (amuleto)', 1]],
+  'Druida': [['Bastón', 1], ['Armadura de cuero', 1], ['Escudo', 1], ['Foco druídico (rama de muérdago)', 1], ['Kit de herborista', 1]],
+  'Explorador': [['Cimitarra', 1], ['Arco largo', 1], ['Armadura de cuero tachonado', 1], ['Flechas', 20]], 'Guerrero': [['Espada larga', 1], ['Arco largo', 1], ['Cota de mallas', 1], ['Escudo', 1], ['Flechas', 20]],
+  'Hechicero': [['Lanza', 1], ['Daga', 2], ['Foco arcano (orbe)', 1]], 'Mago': [['Bastón', 1], ['Daga', 1], ['Libro de conjuros', 1], ['Foco arcano (orbe)', 1]],
+  'Monje': [['Lanza', 1], ['Daga', 5]], 'Paladín': [['Espada larga', 1], ['Jabalina', 6], ['Cota de mallas', 1], ['Escudo', 1], ['Símbolo sagrado (amuleto)', 1]],
+  'Pícaro': [['Espada corta', 1], ['Arco corto', 1], ['Armadura de cuero', 1], ['Herramientas de ladrón', 1], ['Flechas', 20]],
+};
+const AVENTURERO = [['Mochila', 1], ['Saco de dormir', 1], ['Cuerda de cáñamo (15 m)', 1], ['Antorcha', 5], ['Yesquero', 1], ['Odre', 1], ['Raciones (1 día)', 5]];
+export function equipoInicial(ch) {
+  const puestos = new Set();
+  for (const [nombre, cantidad] of [...(KIT[ch.clase] || []), ...AVENTURERO]) {
+    const p = PREDEFINIDOS.find(x => x.nombre === nombre); if (!p) continue;
+    const o = anadirComun(ch, { ...JSON.parse(JSON.stringify(p)), cantidad });
+    // se equipa la primera arma, la primera armadura y el escudo
+    const hueco = p.arma ? 'arma' : p.armadura ? p.armadura.tipo === 'escudo' ? 'escudo' : 'armadura' : '';
+    if (hueco && !puestos.has(hueco)) { alternarEquipado(ch, o.id); puestos.add(hueco); }
+  }
+  Object.assign(equipoDe(ch).monedas, { po: 25, pp: 12, pc: 30 });
 }
 
 /**
