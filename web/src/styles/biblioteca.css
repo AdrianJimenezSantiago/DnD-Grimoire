@@ -3,7 +3,7 @@
    Rarezas en tonos de pigmento (verdín, lapislázuli, amatista, oro de vela, carmín), no de videojuego.
    ========================================================================= */
 :root, :root[data-theme="light"] {
-  --rar-comun: #6E7690; --rar-infrec: #3F8358; --rar-raro: #3565AE; --rar-muyraro: #7449B0; --rar-legend: #A8660F; --rar-artef: #AD3445; --rar-varia: #4C5572;
+  --rar-comun: #61687F; --rar-infrec: #38754F; --rar-raro: #3565AE; --rar-muyraro: #7449B0; --rar-legend: #955B0D; --rar-artef: #AD3445; --rar-varia: #4C5572;
   --acc-l: 36%;
   --rel-vul: #B0382A; --rel-res: #3565AE; --rel-inm: #4C5572; --rel-ok: #2E7B58;
 }

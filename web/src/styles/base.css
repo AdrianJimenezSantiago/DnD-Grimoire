@@ -62,7 +62,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .slots-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; max-width: 1240px; margin: 0 auto; padding: 0 var(--s4) var(--s2); min-height: 8px; }
 .sb-l { display: inline-flex; align-items: center; gap: 1px; }
 .sb-l > b { font: 700 15px / 1 var(--serif); color: var(--ink-2); margin-right: 5px; }
-.editbanner { display: none; font: 500 var(--fs-s) / 1.35 var(--sans); color: #1b1406; background: linear-gradient(90deg, var(--gold-2), var(--gold)); padding: 8px var(--s4); text-align: center; }
+.editbanner { display: none; font: 500 var(--fs-s) / 1.35 var(--sans); color: var(--on-gold); background: linear-gradient(90deg, var(--gold-2), var(--gold)); padding: 8px var(--s4); text-align: center; }
 body.editing .editbanner { display: block; }
 
 /* espacios de conjuro: orbes (lleno = libre, anillo vacío = gastado) */
@@ -93,7 +93,7 @@ body.editing .editbanner { display: block; }
   min-height: 54px; padding: 4px 2px; border: 0; background: transparent; border-radius: 16px; font: 500 11.5px / 1 var(--sans); color: var(--ink-2); }
 .dockbtn .icon { width: 22px; height: 22px; }
 .dockbtn[aria-pressed="true"], .dockbtn.on { color: var(--gold); background: var(--gold-soft); }
-body.editing #dEdit { color: #1b1406; background: linear-gradient(180deg, var(--gold-2), var(--gold)); }
+body.editing #dEdit { color: var(--on-gold); background: linear-gradient(180deg, var(--gold-2), var(--gold)); }
 :root { --dock-h: calc(86px + var(--sab)); }
 
 @media (min-width: 900px) {

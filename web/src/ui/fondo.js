@@ -16,6 +16,7 @@
  * Coste: ~30 fps, sprites precalculados (sin gradientes por partícula y fotograma), se detiene con la app
  * en segundo plano o con una hoja a pantalla completa. «Reducir movimiento» pinta un único fotograma quieto.
  */
+import { tinteDe } from '../domain/paleta.js';
 import { reducedMotion } from './fx.js';
 
 const ESCENA = {
@@ -319,7 +320,8 @@ function arrancar() {
 /** Cambia la escena (idempotente: solo reinicia si cambia clase, tono o tema). */
 export function setEscena(t) {
   if (!cv) return;
-  const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 220, s = t?.s ?? 8;
+  // las partículas se apagan como la estructura en los tonos que se perciben más intensos (rojos, magentas)
+  const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 220, s = Math.round((t?.s ?? 8) * (0.45 + 0.55 * tinteDe(h)));
   if (nombre === E.nombre && h === E.h && dark === E.dark) return;
   const cambiaEscena = nombre !== E.nombre;
   Object.assign(E, { nombre, h, s, dark });

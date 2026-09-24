@@ -2,6 +2,7 @@
 import { esc } from '../core/util.js';
 import { $, on, patch } from './dom.js';
 import { gi, temaDe, aplicarTema } from './tema.js';
+import { estiloPaleta } from '../domain/paleta.js';
 import { icon, ASTROLABE } from './icons.js';
 import { claseLinea } from './sheet.js';
 import { avatarHtml } from './avatar.js';
@@ -17,7 +18,7 @@ function render() {
   const propios = orden.filter(c => !c.prueba), pruebas = orden.filter(c => c.prueba);
   const card = (c, i) => {
     const t = temaDe(c), n = c.book.length;
-    return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''}" data-lopen="${c.id}" style="--acc-h:${t.h};--acc-s:${t.s}%;--acc-k:1;--i:${i}">
+    return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''}" data-lopen="${c.id}" style="${estiloPaleta(t)};--i:${i}">
       ${c.retrato ? `<span class="lc-av">${avatarHtml(c, 'lg')}<span class="lc-badge">${gi(t.icono)}</span></span>` : `<span class="lc-emb">${gi(t.icono)}</span>`}
       <span class="lc-txt"><span class="lc-name">${esc(c.nombre || 'Sin nombre')}</span><span class="lc-cls">${esc(claseLinea(c))}</span>
       <span class="lc-meta">${[c.especie, n === 1 ? '1 conjuro' : n + ' conjuros'].filter(Boolean).map(esc).join(' · ')}</span></span>

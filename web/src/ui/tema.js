@@ -6,6 +6,7 @@
 import { GI } from './gameIcons.js';
 import { TEMAS, subclaseDe } from '../domain/clases2024.js';
 import { setEscena } from './fondo.js';
+import { paleta } from '../domain/paleta.js';
 
 // Cada clase y cada subclase (Manual del Jugador y Héroes de Faerûn) tiene su tono y su emblema: domain/clases2024.js → TEMAS.
 // Las subclases escritas a mano se reconocen por su patrón dentro de la clase.
@@ -25,8 +26,8 @@ export function temaDe(ch) {
 export function aplicarTema(ch) {
   const t = temaDe(document.body.classList.contains('on-landing') ? null : ch), r = document.documentElement.style;
   if (r.getPropertyValue('--acc-h') !== String(t.h) || r.getPropertyValue('--acc-s') !== t.s + '%') { r.setProperty('--acc-h', t.h); r.setProperty('--acc-s', t.s + '%'); }
-  // los tintes con saturación fija (fondos, bordes, brillos) se apagan también en el tono neutro
-  r.setProperty('--acc-k', t === DEFECTO ? '0.15' : '1');
+  // tinte de la estructura y luminosidad del acento según el tono (domain/paleta.js); el neutro apaga los tintes
+  for (const [k, v] of Object.entries(paleta(t, t === DEFECTO))) if (r.getPropertyValue(k) !== v) r.setProperty(k, v);
   setEscena(t);
   return t;
 }
