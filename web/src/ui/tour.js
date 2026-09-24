@@ -46,13 +46,14 @@ function colocar() {
   card.querySelector('.gold')?.focus({ preventScroll: true });
 }
 function ir(i) { const n = pasosVisibles().length; if (i < 0 || i >= n) { if (i >= n) cerrar(true); return; } estado.i = i; colocar(); }
-function cerrar(visto) { if (!estado) return; if (visto) storage.set(PREF + estado.id, '1'); estado = null; capa?.classList.remove('on'); document.body.classList.remove('touring'); }
+function cerrar(visto) { if (!estado) return; if (visto) storage.set(PREF + estado.id, '1'); const fin = estado.alTerminar; estado = null; capa?.classList.remove('on'); document.body.classList.remove('touring'); fin?.(); }
 export const enTour = () => !!estado;
 export const cerrarTour = () => cerrar(true);
-export async function tour(id, pasos, { forzar = false } = {}) {
+/** Muestra un recorrido (una vez, salvo `forzar`). `alTerminar` se llama al cerrarlo, o enseguida si ya se había visto. */
+export async function tour(id, pasos, { forzar = false, alTerminar = null } = {}) {
   if (estado) return;
-  if (!forzar && (await storage.get(PREF + id)) === '1') return;
-  montar(); estado = { id, pasos, i: 0 };
-  if (!pasosVisibles().length) { estado = null; return; }
+  if (!forzar && (await storage.get(PREF + id)) === '1') { alTerminar?.(); return; }
+  montar(); estado = { id, pasos, i: 0, alTerminar };
+  if (!pasosVisibles().length) { estado = null; alTerminar?.(); return; }
   capa.classList.add('on'); document.body.classList.add('touring'); colocar();
 }

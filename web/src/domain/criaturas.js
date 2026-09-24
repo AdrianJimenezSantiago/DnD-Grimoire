@@ -194,10 +194,13 @@ export const ESPIRITUS = {
 
 /** Qué criaturas trae cada conjuro. `cadena` solo aparece si el personaje es brujo. */
 const POR_CONJURO = {
-  'encontrar familiar': { familiar: ['arana', 'buho', 'comadreja', 'cuervo', 'gato', 'halcon', 'lagarto', 'murcielago', 'pulpo', 'rana', 'rata'],
+  'encontrar familiar': { otrasVd0: true, familiar: ['arana', 'buho', 'comadreja', 'cuervo', 'gato', 'halcon', 'lagarto', 'murcielago', 'pulpo', 'rana', 'rata'],
     cadena: ['diablillo', 'duende', 'esfinge', 'esqueleto', 'pseudodragon', 'quasit', 'renacuajo', 'serpiente'] },
   'corcel fantasma': { fijos: ['caballo'], nota: 'El corcel es un caballo de monta cuasirreal que usa este perfil.' },
   'animar a los muertos': { fijos: ['esqueleto', 'zombi'], nota: 'Un montón de huesos se levanta como esqueleto y un cadáver, como zombi.' },
+  // Estos perfiles vienen del Manual de Monstruos importado (con texto)
+  'crear muerto viviente': { importadas: ['Necrófago', 'Ghast', 'Tumulario', 'Momia'], nota: 'Nivel 6: necrófagos. Con espacios superiores, ghasts o tumularios (nivel 8) y momias (nivel 9).' },
+  'polimorfar': { formas: 'polimorfar' }, 'polimorfar verdadero': { formas: 'verdadero' }, 'cambiar de forma': { formas: 'verdadero' },
   'hallar corcel': { espiritu: 'corcel' },
   'invocar bestia': { espiritu: 'bestia' }, 'invocar feerico': { espiritu: 'feerico' }, 'invocar muerto viviente': { espiritu: 'muerto' },
   'invocar aberracion': { espiritu: 'aberracion' }, 'invocar automata': { espiritu: 'automata' }, 'invocar elemental': { espiritu: 'elemental' },

@@ -13,15 +13,17 @@ import { gi } from '../tema.js';
 import { icon } from '../icons.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
-import { md } from './conjuro.js';
+import { bloqueHtml, md } from './conjuro.js';
+import { TIPOS_BASE, aBestiario, vdTexto } from '../../domain/monstruos.js';
+import { bestiarioDe, nuevaCriatura } from '../../domain/bestiario.js';
 import { undoBtn } from '../../app/acciones.js';
 
 let S;
-const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'az' };
+const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'az', ctipo: '', cvd: '' };
 const dlg = () => $('#bibDlg');
 export const RAR_K = { 'Común': 'comun', Infrecuente: 'infrec', Raro: 'raro', 'Muy raro': 'muyraro', Legendario: 'legend', Artefacto: 'artef', 'Varía': 'varia' };
 export const TIPO_I = { Arma: 'o_arma', Armadura: 'o_armadura', Anillo: 'o_anillo', 'Bastón': 'o_baston', 'Objeto maravilloso': 'o_maravilloso', Pergamino: 'o_pergamino', 'Poción': 'o_pocion', Vara: 'o_vara', Varita: 'o_varita' };
-const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'], ['dotes', 'Dotes', 'dote'], ['trasfondos', 'Trasfondos', 'trasfondo'], ['subclases', 'Subclases', 'subclase']];
+const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'], ['dotes', 'Dotes', 'dote'], ['trasfondos', 'Trasfondos', 'trasfondo'], ['subclases', 'Subclases', 'subclase'], ['criaturas', 'Criaturas', 'criatura']];
 const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
 const TIT_G = { Estado: 'Estados', 'Acción': 'Acciones', 'Área de efecto': 'Áreas de efecto', Peligro: 'Peligros', Actitud: 'Actitudes', '': 'Reglas generales', 'Herramientas del DM': 'Herramientas del DM', 'Objetos mágicos': 'Objetos mágicos: reglas' };
 const coincide = (q, ...t) => !q || norm(t.join(' ')).includes(q);
@@ -32,7 +34,7 @@ function vacio(que, libro) {
     <button type="button" class="gold" data-cmd="manual">${gi('libro')}Importar un libro</button></div>`;
 }
 function herramientas() {
-  const q = `<input type="search" id="bibQ" value="${esc(V.q)}" placeholder="${{ reglas: 'Buscar una regla o un estado', objetos: 'Buscar un objeto mágico', dotes: 'Buscar una dote', trasfondos: 'Buscar un trasfondo', subclases: 'Buscar una subclase' }[V.tab]}" aria-label="Buscar" autocomplete="off">`;
+  const q = `<input type="search" id="bibQ" value="${esc(V.q)}" placeholder="${{ reglas: 'Buscar una regla o un estado', objetos: 'Buscar un objeto mágico', dotes: 'Buscar una dote', trasfondos: 'Buscar un trasfondo', subclases: 'Buscar una subclase', criaturas: 'Buscar una criatura' }[V.tab]}" aria-label="Buscar" autocomplete="off">`;
   let f = '';
   if (V.tab === 'objetos') {
     f = `<div class="bib-rar" role="group" aria-label="Rareza">${RAREZAS.filter(r => r !== 'Varía').map(r => `<button type="button" class="rar-chip r-${RAR_K[r]}" aria-pressed="${V.rar === r}" data-rar="${r}">${r}</button>`).join('')}</div>
@@ -41,6 +43,8 @@ function herramientas() {
       <button type="button" class="chip" id="bibOrden" aria-pressed="${V.orden === 'rar'}" title="Cambiar el orden">${V.orden === 'rar' ? 'Por rareza' : 'A–Z'}</button></div>`;
   }
   if (V.tab === 'dotes') f = `<div class="bib-sel una">${['', 'Origen', 'General', 'Estilo de combate', 'Don épico'].map(c => `<button type="button" class="chip" aria-pressed="${V.cat === c}" data-cat="${c}">${c || 'Todas'}</button>`).join('')}</div>`;
+  if (V.tab === 'criaturas') f = `<div class="bib-sel una"><select id="bibCTipo" aria-label="Tipo de criatura"><option value="">Todos los tipos</option>${TIPOS_BASE.map(t => `<option ${V.ctipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <select id="bibCVd" aria-label="Valor de desafío máximo"><option value="">Cualquier VD</option>${[0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 8, 10, 15, 20, 30].map(v => `<option value="${v}" ${String(V.cvd) === String(v) ? 'selected' : ''}>VD ${vdTexto(v)} o menos</option>`).join('')}</select></div>`;
   if (V.tab === 'subclases') f = `<div class="bib-sel"><select id="bibClase" aria-label="Clase"><option value="">Todas las clases</option>${Object.keys(CLASES).map(c => `<option ${V.clase === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>`;
   $('#bibTools').innerHTML = q + f;
 }
@@ -89,6 +93,14 @@ function cuerpo() {
       n = f.length;
       const por = Object.keys(CLASES).map(c => [c, f.filter(s => s.clase === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length);
       h = por.map(([c, v]) => `<h3 class="bib-g">${gi(norm(c).replace(/[^a-z]/g, ''))}${esc(c)}<small>${v.length}</small></h3><ul class="bib-list">${v.map(s => `<li><button type="button" class="bib-it" data-sub="${esc(s.clase + '|' + s.clave)}"><b>${esc(s.nombre)}</b><small>${esc(s.lema || s.rasgos.map(r => r.nombre).slice(0, 3).join(', '))}</small><span class="bib-src">${esc(corto(s.fuente))}</span></button></li>`).join('')}</ul>`).join('');
+    }
+  }
+  if (V.tab === 'criaturas') {
+    if (!B.criaturas.length) h = vacio('Aquí aparecen los perfiles de criaturas: tipo, CA, PG, características, resistencias y acciones.', 'el Manual de Monstruos (con texto) o del Manual del Jugador');
+    else {
+      const f = B.criaturas.filter(c => coincide(q, c.nombre, c.tipo) && (!V.ctipo || c.tipoBase === V.ctipo) && (V.cvd === '' || (c.vdNum ?? 99) <= +V.cvd))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); n = f.length;
+      h = `<ul class="bib-list">${f.slice(0, 400).map(c => `<li><button type="button" class="bib-it" data-cria="${esc(c.clave)}"><b>${esc(c.nombre)}</b><small>${esc(c.tipo)}${c.vdNum != null ? ` · VD ${vdTexto(c.vdNum)}` : ''}</small><span class="bib-src">${esc(corto(c.fuente))}</span></button></li>`).join('')}</ul>${f.length > 400 ? `<p class="note">Y ${f.length - 400} más: afina la búsqueda.</p>` : ''}`;
     }
   }
   $('#bibBody').innerHTML = h || '<p class="pempty">Nada coincide con la búsqueda. Prueba con menos palabras o quita algún filtro.</p>';
@@ -145,6 +157,15 @@ function abrirSubclase(k) {
   ficha({ titulo: s.nombre, ico: norm(s.clase).replace(/[^a-z]/g, ''), sub: `<div class="fi-pills"><span class="rar-pill">${esc(s.clase)}</span>${[...new Map(s.rasgos.map(r => [r.nivel, r])).values()].map(r => `<a class="lvl-pill ${ch && ch.clase === s.clase && ch.nivel >= r.nivel ? 'on' : ''}" href="#rs-${r.nivel}-${norm(r.nombre).replace(/\W+/g, '-')}">${r.nivel}</a>`).join('')}</div>${s.lema ? `<p class="fi-lema">${esc(s.lema)}</p>` : ''}`,
     cuerpo: `<section class="sp-text">${md(s.texto).replace(/<h4 class="md-h">Nivel (\d+): ([^<]+)<\/h4>/g, (m, n, t) => `<h4 class="md-h rasgo" id="rs-${n}-${norm(t.replace(/&[a-z]+;/g, '')).replace(/\W+/g, '-')}"><span class="lvl-pill">${n}</span>${t}</h4>`)}</section>${fuente(s.fuente)}` });
 }
+/** Perfil de criatura importado, con «Añadir al bestiario» del personaje abierto. */
+export function abrirCriatura(clave) {
+  const c = biblioteca().criaturas.find(x => x.clave === clave); if (!c) return;
+  const ch = S.cur(), ya = ch && bestiarioDe(ch).criaturas.find(x => x.perfil === c.clave);
+  FICHA = { tipo: 'cria', c };
+  ficha({ titulo: c.nombre, ico: 'criatura', sub: `<div class="fi-pills"><span class="rar-pill">${esc(c.tipoBase || 'Criatura')}</span>${c.vdNum != null ? `<span>VD ${vdTexto(c.vdNum)}</span>` : ''}${c.tamano ? `<span>${esc(c.tamano)}</span>` : ''}</div>`,
+    cuerpo: `${bloqueHtml(c)}${c.revisar?.length ? `<p class="note">Leído con OCR: comprueba en el libro ${esc(c.revisar.filter(x => !/^corregido/.test(x)).join(', ') || 'los valores marcados')}.</p>` : ''}${fuente(c.fuente)}`,
+    pie: ch ? (ya ? `<span class="fi-ya">${gi('bestia')}Ya está en el bestiario de ${esc(ch.nombre)}</span>` : `<button type="button" class="gold" data-fi="bestiario">${gi('bestia')}Añadir al bestiario de ${esc(ch.nombre)}</button>`) : '' });
+}
 /** Término del glosario (también desde los enlaces de las descripciones). */
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;
@@ -166,14 +187,21 @@ export function init(store) {
   on(d, 'click', '[data-dote]', (e, b) => abrirDote(b.dataset.dote));
   on(d, 'click', '[data-tras]', (e, b) => abrirTrasfondo(b.dataset.tras));
   on(d, 'click', '[data-sub]', (e, b) => abrirSubclase(b.dataset.sub));
+  on(d, 'click', '[data-cria]', (e, b) => abrirCriatura(b.dataset.cria));
   d.addEventListener('input', e => { if (e.target.id === 'bibQ') { V.q = e.target.value; cuerpo(); } });
   d.addEventListener('change', e => {
-    const k = { bibTipo: 'tipo', bibClase: 'clase' }[e.target.id]; if (!k) return;   // el buscador ya filtra al escribir
+    const k = { bibTipo: 'tipo', bibClase: 'clase', bibCTipo: 'ctipo', bibCVd: 'cvd' }[e.target.id]; if (!k) return;   // el buscador ya filtra al escribir
     V[k] = e.target.value; cuerpo();
   });
   // índice de apartados de la ficha: salto suave dentro del cuerpo
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   on($('#fichaDlg'), 'click', '[data-fi]', (e, b) => {
+    if (b.dataset.fi === 'bestiario' && FICHA?.tipo === 'cria') {
+      const c = FICHA.c;
+      const h = S.edit((db, ch) => { Object.assign(nuevaCriatura(ch, c.nombre), aBestiario(c)); });
+      toast(`<b>${esc(c.nombre)}</b> en el bestiario de ${esc(S.cur().nombre)}, con sus daños, estados y salvaciones.`, [undoBtn(S, h)]);
+      return abrirCriatura(c.clave);
+    }
     if (b.dataset.fi !== 'anadir' || FICHA?.tipo !== 'obj') return;
     const o = FICHA.o; let nuevo;
     const h = S.edit((db, ch) => { nuevo = anadirObjeto(ch, o); });

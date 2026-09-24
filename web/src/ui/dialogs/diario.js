@@ -15,6 +15,9 @@ import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { gi } from '../tema.js';
 import { iconoDano } from './tiradas.js';
+import { biblioteca, criaturaImportada } from '../../domain/catalogo.js';
+import { aBestiario, vdTexto } from '../../domain/monstruos.js';
+import { abrirCriatura } from './biblioteca.js';
 import { TIPOS_CRIATURA, DANOS, ESTADOS, SALVACIONES, AMENAZAS, ESTADO_CRIATURA, REL_DANO, CICLO_DANO, REL_CONJ, bestiarioDe, nuevaCriatura, criatura, buscarCriaturas, resumenCriatura } from '../../domain/bestiario.js';
 import { tiradasConjuro } from '../../domain/catalogo.js';
 import { marcarNota, quemar } from '../magia.js';
@@ -107,10 +110,17 @@ function ficha() {
     return `<li class="bx-cj ${rel}"><span class="bx-cjn"><b>${esc(u.s.es)}</b><small>${u.s.level ? 'Nivel ' + u.s.level : 'Truco'}${u.tipos.length ? ' · ' + u.tipos.map(esc).join(', ') : ''}${aviso ? ` · <span class="rel-${aviso}">${REL_DANO[aviso].toLowerCase()}</span>` : ''}</small></span>
       <span class="seg xs">${[['eficaz', 'Funcionó'], ['ineficaz', 'No funcionó']].map(([v, t]) => `<button type="button" aria-pressed="${rel === v}" data-bxcj="${u.s.id}" data-v="${v}">${t}</button>`).join('')}</span></li>`; };
   const sesiones = diarioDe(c).sesiones.filter(s => x.sesiones.includes(s.id));
-  $('#diBody').innerHTML = `<div class="frow"><label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off"></label>
+  // perfil de un libro importado: se sugiere al escribir el nombre y rellena lo que se sabe de la criatura
+  const perfiles = biblioteca().criaturas, pf = criaturaImportada(x.perfil || x.nombre);
+  const perfilHtml = pf ? `<div class="bx-perfil">${gi('criatura')}<span><b>${esc(pf.nombre)}</b><small>${esc(pf.tipo)}${pf.vdNum != null ? ` · VD ${vdTexto(pf.vdNum)}` : ''} · CA ${pf.ca ?? '—'} · PG ${pf.pgMedia ?? '—'}</small></span>
+      <button type="button" data-bxperfil="${esc(pf.clave)}">Ver perfil</button>${x.perfil === pf.clave ? '' : `<button type="button" class="gold" data-bxrellenar="${esc(pf.clave)}">Rellenar con su perfil</button>`}</div>`
+    : perfiles.length ? '' : '<p class="note bx-sinperfil">Importa el Manual de Monstruos (con texto) en Libros y manuales y, al escribir el nombre, la app rellenará tipo, CA, PG, daños, estados y salvaciones.</p>';
+  $('#diBody').innerHTML = `${perfiles.length ? `<datalist id="bxSug">${perfiles.map(p => `<option value="${esc(p.nombre)}">`).join('')}</datalist>` : ''}
+    <div class="frow"><label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off" ${perfiles.length ? 'list="bxSug"' : ''}></label>
       <label class="f">Tipo<select id="bxTip"><option value="">Sin clasificar</option>${TIPOS_CRIATURA.map(t => `<option ${x.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
     <div class="frow" style="margin-top:10px"><label class="f">CA aproximada<input id="bxCa" value="${esc(x.ca)}" inputmode="numeric" placeholder="¿?" autocomplete="off"></label>
       <label class="f">Puntos de golpe aprox.<input id="bxPg" value="${esc(x.pg)}" placeholder="Aguantó unos 60" autocomplete="off"></label></div>
+    ${perfilHtml}
     <div class="bx-sec"><h3>Amenaza</h3>${seg('amenaza', [['', 'Sin valorar'], ...AMENAZAS.map(a => [a, a])], x.amenaza)}</div>
     <div class="bx-sec"><h3>Situación</h3>${seg('estado', Object.entries(ESTADO_CRIATURA), x.estado)}</div>
     <div class="bx-sec"><h3>Daños <small>Toca para marcar: vulnerable, resistente, inmune</small></h3>
@@ -159,6 +169,14 @@ export function init(store) {
     if (a === 'borrar') { const s = ses(); if (!(await confirmar({ titulo: `¿Borrar la sesión ${s.n}?`, texto: 'Se borran su crónica y sus notas. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
       const h = S.edit((db, c) => { const d = diarioDe(c); d.sesiones = d.sesiones.filter(x => x.id !== s.id); }); V.vista = 'lista'; lista(); toast(`Sesión ${s.n} borrada.`, [undoBtn(S, h)]); }
   });
+  on(root, 'click', '[data-bxperfil]', (e, b) => abrirCriatura(b.dataset.bxperfil));
+  on(root, 'click', '[data-bxrellenar]', (e, b) => {
+    const pf = criaturaImportada(b.dataset.bxrellenar); if (!pf) return;
+    const d = aBestiario(pf);
+    // lo anotado a mano se respeta; el perfil completa lo que falte
+    conCriatura(x => { x.perfil = pf.clave; x.tipo ||= d.tipo; x.ca ||= d.ca; x.pg ||= d.pg; x.danos = { ...d.danos, ...x.danos }; x.estados = [...new Set([...x.estados, ...d.estados])]; x.salv = { ...d.salv, ...x.salv }; });
+    toast(`${esc(pf.nombre)}: tipo, CA, PG, daños, estados y salvaciones rellenados con su perfil.`);
+  });
   on(root, 'click', '[data-bx]', (e, b) => { V.vista = 'criatura'; V.cid = b.dataset.bx; ficha(); root.querySelector('.dbody').scrollTop = 0; });
   const conCriatura = fn => { S.edit((db, c) => { const x = criatura(c, V.cid); if (x) fn(x); }); haptic(); const y = root.querySelector('.dbody').scrollTop; ficha(); root.querySelector('.dbody').scrollTop = y; };
   on(root, 'click', '[data-bxdano]', (e, b) => conCriatura(x => { const d = b.dataset.bxdano, n = CICLO_DANO[x.danos[d] || '']; if (n) x.danos[d] = n; else delete x.danos[d]; }));
@@ -169,6 +187,7 @@ export function init(store) {
   root.addEventListener('change', e => {
     if (e.target.id === 'bxLink' && e.target.value) { const id = e.target.value; S.edit((db, c) => { const x = criatura(c, id); if (x && !x.sesiones.includes(V.sid)) x.sesiones.push(V.sid); }); sesion(); }
     if (e.target.id === 'bxTipo') { V.btipo = e.target.value; bestiario(); }
+    if (e.target.id === 'bxNom' && V.vista === 'criatura') { const y = root.querySelector('.dbody').scrollTop; ficha(); root.querySelector('.dbody').scrollTop = y; }
     if (e.target.id === 'bxTip') { const x = criatura(ch(), V.cid); if (x) { x.tipo = e.target.value; S.touch(); } }
   });
   on(root, 'click', '[data-abrir]', (e, b) => { V.vista = 'sesion'; V.sid = b.dataset.abrir; sesion(); root.querySelector('.dbody').scrollTop = 0; });
