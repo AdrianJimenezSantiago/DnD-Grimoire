@@ -64,7 +64,8 @@ const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeo
 
 async function boot() {
   const theme = await storage.get(PREF + '-theme');
-  if (theme) document.documentElement.dataset.theme = theme;
+  // tema oscuro por defecto; el claro solo si se eligió en el menú
+  document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
   setBars(eventos.isDark());
   initFondo(); initMagia();
 

@@ -8,7 +8,8 @@
  */
 const DADO = /^(?:\d{0,2}d\d{1,3}|1[4d](?:100|4|6|8|10|12|20)|d%)$/i;
 const ROTULO = /^(?:\d{1,3}(?:\s*[-–]\s*\d{1,3})?|\d{4}|\d{2}\+)$/;
-const CAMPO = /^(Tiempo de lanza|Alcance:|Componentes:|Duraci)/;
+// una tabla termina al llegar a un campo de conjuro o al título de un rasgo («NIVEL 3: …»)
+const CAMPO = /^(Tiempo de lanza|Alcance:|Componentes:|Duraci|NIVEL \d{1,2}: [A-ZÁÉÍÓÚÑ])/;
 const letras = s => s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
 const mayus = s => { const l = letras(s); return l.length >= 4 && l === l.toUpperCase(); };
 

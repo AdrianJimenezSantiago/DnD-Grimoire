@@ -38,9 +38,9 @@
 .legend .keys { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; }
 
 /* ------------------------------ niveles ------------------------------ */
-.level { margin-top: var(--s5); content-visibility: auto; contain-intrinsic-size: auto 600px; }
+.level { margin-top: var(--s5); content-visibility: auto; contain-intrinsic-size: auto 600px; overflow-clip-margin: var(--s7); }  /* margen para el velo de la franja de nivel */
 .lvl-head { position: sticky; top: calc(var(--sat) + var(--appbar-h, 104px)); z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 10px 2px 8px; background: linear-gradient(var(--bg) 70%, transparent); }
+  padding: 10px 2px 8px; }
 .lvl-num { font: 700 38px / .9 var(--serif); color: var(--gold); min-width: 30px; text-shadow: 0 0 22px var(--glow); }
 .lvl-title { font: 500 var(--fs-xl) / 1 var(--serif); }
 .lvl-slots { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; font: 400 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); }

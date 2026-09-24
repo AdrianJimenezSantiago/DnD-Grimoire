@@ -103,7 +103,7 @@ body.editing #dEdit { color: #1b1406; background: linear-gradient(180deg, var(--
 }
 
 /* ------------------------------ contenido ------------------------------ */
-.wrap { max-width: 1240px; margin: 0 auto; padding: var(--s4) var(--s4) calc(var(--dock-h) + var(--s6)); overflow-x: clip; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: var(--s4) var(--s4) calc(var(--dock-h) + var(--s6)); }
 html, body { overflow-x: clip; }
 .hero { position: relative; padding: var(--s5) var(--s1) var(--s4); isolation: isolate; }
 .astrolabe { position: absolute; z-index: -1; right: -60px; top: -40px; width: 340px; height: 340px; color: var(--gold); opacity: .16; pointer-events: none; }
