@@ -1,0 +1,184 @@
+/**
+ * Biblioteca: lo que aportan los libros importados, en un solo sitio.
+ * Pestañas: Reglas (glosario), Objetos mágicos, Dotes, Trasfondos y Subclases. Cada entrada se lee en la ficha común,
+ * con tablas, apartados y enlaces a los estados. Los objetos se añaden al personaje desde su ficha.
+ */
+import { esc, norm } from '../../core/util.js';
+import { biblioteca, glosario, termino, libros } from '../../domain/catalogo.js';
+import { RAREZAS, TIPOS_OBJ, ordenRareza } from '../../domain/objetos.js';
+import { CLASES } from '../../domain/reglas2024.js';
+import { anadirObjeto, tieneObjeto } from '../../domain/equipo.js';
+import { $, on } from '../dom.js';
+import { gi } from '../tema.js';
+import { icon } from '../icons.js';
+import { openSheet, closeSheet } from '../dialog.js';
+import { toast } from '../toast.js';
+import { md } from './conjuro.js';
+import { undoBtn } from '../../app/acciones.js';
+
+let S;
+const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'az' };
+const dlg = () => $('#bibDlg');
+export const RAR_K = { 'Común': 'comun', Infrecuente: 'infrec', Raro: 'raro', 'Muy raro': 'muyraro', Legendario: 'legend', Artefacto: 'artef', 'Varía': 'varia' };
+export const TIPO_I = { Arma: 'o_arma', Armadura: 'o_armadura', Anillo: 'o_anillo', 'Bastón': 'o_baston', 'Objeto maravilloso': 'o_maravilloso', Pergamino: 'o_pergamino', 'Poción': 'o_pocion', Vara: 'o_vara', Varita: 'o_varita' };
+const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'], ['dotes', 'Dotes', 'dote'], ['trasfondos', 'Trasfondos', 'trasfondo'], ['subclases', 'Subclases', 'subclase']];
+const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
+const TIT_G = { Estado: 'Estados', 'Acción': 'Acciones', 'Área de efecto': 'Áreas de efecto', Peligro: 'Peligros', Actitud: 'Actitudes', '': 'Reglas generales', 'Herramientas del DM': 'Herramientas del DM', 'Objetos mágicos': 'Objetos mágicos: reglas' };
+const coincide = (q, ...t) => !q || norm(t.join(' ')).includes(q);
+const rareza = o => o.rareza === 'Varía' && o.rarezas?.length ? `${o.rarezas[0]} a ${o.rarezas[o.rarezas.length - 1].toLowerCase()}` : o.rareza;
+
+function vacio(que, libro) {
+  return `<div class="bib-empty">${gi('biblioteca')}<p>${que}</p><p class="note">Impórtalo desde tu PDF de ${libro} en Libros y manuales. Se lee en este dispositivo y no sale de él.</p>
+    <button type="button" class="gold" data-cmd="manual">${gi('libro')}Importar un libro</button></div>`;
+}
+function herramientas() {
+  const q = `<input type="search" id="bibQ" value="${esc(V.q)}" placeholder="${{ reglas: 'Buscar una regla o un estado', objetos: 'Buscar un objeto mágico', dotes: 'Buscar una dote', trasfondos: 'Buscar un trasfondo', subclases: 'Buscar una subclase' }[V.tab]}" aria-label="Buscar" autocomplete="off">`;
+  let f = '';
+  if (V.tab === 'objetos') {
+    f = `<div class="bib-rar" role="group" aria-label="Rareza">${RAREZAS.filter(r => r !== 'Varía').map(r => `<button type="button" class="rar-chip r-${RAR_K[r]}" aria-pressed="${V.rar === r}" data-rar="${r}">${r}</button>`).join('')}</div>
+      <div class="bib-sel una"><select id="bibTipo" aria-label="Tipo de objeto"><option value="">Todos los tipos</option>${TIPOS_OBJ.map(t => `<option ${V.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <button type="button" class="chip" id="bibSint" aria-pressed="${V.sint}">${gi('sintonia')}Sin sintonización</button>
+      <button type="button" class="chip" id="bibOrden" aria-pressed="${V.orden === 'rar'}" title="Cambiar el orden">${V.orden === 'rar' ? 'Por rareza' : 'A–Z'}</button></div>`;
+  }
+  if (V.tab === 'dotes') f = `<div class="bib-sel una">${['', 'Origen', 'General', 'Estilo de combate', 'Don épico'].map(c => `<button type="button" class="chip" aria-pressed="${V.cat === c}" data-cat="${c}">${c || 'Todas'}</button>`).join('')}</div>`;
+  if (V.tab === 'subclases') f = `<div class="bib-sel"><select id="bibClase" aria-label="Clase"><option value="">Todas las clases</option>${Object.keys(CLASES).map(c => `<option ${V.clase === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>`;
+  $('#bibTools').innerHTML = q + f;
+}
+function cuerpo() {
+  const q = norm(V.q.trim()), B = biblioteca();
+  let h = '', n = 0;
+  if (V.tab === 'reglas') {
+    const todo = glosario();
+    if (!todo.length) h = vacio('Aquí aparecen el glosario de reglas del Manual del Jugador y las herramientas de la Guía del Dungeon Master.', 'Manual del Jugador o de la Guía del DM');
+    else {
+      const f = todo.filter(e => coincide(q, e.nombre) || (q.length > 3 && coincide(q, e.texto))); n = f.length;
+      h = ORDEN_G.map(c => [c, f.filter(e => (e.cat || '') === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length)
+        .map(([c, v]) => `<h3 class="bib-g">${esc(TIT_G[c] ?? c)}<small>${v.length}</small></h3><div class="gl-grid">${v.map(e => `<button type="button" class="gl-item ${e.cat === 'Estado' ? 'estado' : ''} ${/Herramientas|Objetos/.test(e.cat) ? 'dm' : ''}" data-term="${e.clave}">${esc(e.nombre)}</button>`).join('')}</div>`).join('');
+    }
+  }
+  if (V.tab === 'objetos') {
+    if (!B.objetos.length) h = vacio('Aquí aparecen los objetos mágicos, con filtros por rareza, tipo y sintonización.', 'la Guía del Dungeon Master');
+    else {
+      let f = B.objetos.filter(o => coincide(q, o.nombre, o.tipo, o.subtipo) && (!V.rar || o.rareza === V.rar || o.rarezas?.includes(V.rar)) && (!V.tipo || o.tipo === V.tipo) && (!V.sint || !o.sintonia));
+      f = f.sort((a, b) => (V.orden === 'rar' ? ordenRareza(a.rarezas?.[0] || a.rareza) - ordenRareza(b.rarezas?.[0] || b.rareza) : 0) || a.nombre.localeCompare(b.nombre, 'es'));
+      n = f.length; const ch = S.cur();
+      h = `<ul class="obj-list">${f.map(o => `<li><button type="button" class="obj r-${RAR_K[o.rarezas?.[0] || o.rareza] || 'varia'}" data-obj="${esc(o.clave)}">
+        <span class="obj-ico">${gi(TIPO_I[o.tipo] || 'o_maravilloso')}</span>
+        <span class="obj-t"><b>${esc(o.nombre)}</b><small>${esc(o.tipo)}${o.subtipo ? ` (${esc(o.subtipo)})` : ''} · <span class="rar-txt">${esc(rareza(o))}</span></small></span>
+        ${o.sintonia ? `<span class="obj-sin" title="Requiere sintonización">${gi('sintonia')}</span>` : ''}${ch && tieneObjeto(ch, o.clave) ? `<span class="obj-lo" title="Lo tiene ${esc(ch.nombre)}">${icon('user')}</span>` : ''}</button></li>`).join('')}</ul>`;
+    }
+  }
+  if (V.tab === 'dotes') {
+    if (!B.dotes.length) h = vacio('Aquí aparecen las dotes de origen, generales, de estilo de combate y los dones épicos.', 'tu Manual del Jugador o de una expansión');
+    else {
+      const f = B.dotes.filter(d => coincide(q, d.nombre, d.req) && (!V.cat || d.cat === V.cat)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); n = f.length;
+      h = `<ul class="bib-list">${f.map(d => `<li><button type="button" class="bib-it" data-dote="${esc(d.clave)}"><b>${esc(d.nombre)}</b><small>${esc(d.cat)}${d.req ? ` · ${esc(d.req)}` : ''}</small><span class="bib-src">${esc(corto(d.fuente))}</span></button></li>`).join('')}</ul>`;
+    }
+  }
+  if (V.tab === 'trasfondos') {
+    if (!B.trasfondos.length) h = vacio('Aquí aparecen los trasfondos con sus características, dote, competencias y equipo.', 'tu Manual del Jugador o de una expansión');
+    else {
+      const f = B.trasfondos.filter(t => coincide(q, t.nombre, t.dote, t.habilidades)).sort((a, b) => (a.nombre || '~').localeCompare(b.nombre || '~', 'es')); n = f.length;
+      h = `<ul class="bib-list">${f.map(t => `<li><button type="button" class="bib-it" data-tras="${esc(t.clave)}"><b>${esc(t.nombre || 'Trasfondo sin nombre')}</b><small>${esc(t.caracteristicas || '')} · dote: ${esc(t.dote || '—')}</small><span class="bib-src">${esc(corto(t.fuente))}</span></button></li>`).join('')}</ul>`;
+    }
+  }
+  if (V.tab === 'subclases') {
+    if (!B.subclases.length) h = vacio('Aquí aparecen las subclases con todos sus rasgos, nivel a nivel.', 'tu Manual del Jugador o de una expansión');
+    else {
+      const f = B.subclases.filter(s => s.nombre && coincide(q, s.nombre, s.clase, s.lema) && (!V.clase || s.clase === V.clase));
+      n = f.length;
+      const por = Object.keys(CLASES).map(c => [c, f.filter(s => s.clase === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length);
+      h = por.map(([c, v]) => `<h3 class="bib-g">${gi(norm(c).replace(/[^a-z]/g, ''))}${esc(c)}<small>${v.length}</small></h3><ul class="bib-list">${v.map(s => `<li><button type="button" class="bib-it" data-sub="${esc(s.clase + '|' + s.clave)}"><b>${esc(s.nombre)}</b><small>${esc(s.lema || s.rasgos.map(r => r.nombre).slice(0, 3).join(', '))}</small><span class="bib-src">${esc(corto(s.fuente))}</span></button></li>`).join('')}</ul>`).join('');
+    }
+  }
+  $('#bibBody').innerHTML = h || '<p class="pempty">Nada coincide con la búsqueda. Prueba con menos palabras o quita algún filtro.</p>';
+  const libs = libros().length;
+  $('#bibSub').textContent = libs ? `${n} ${n === 1 ? 'entrada' : 'entradas'} · de ${libs} ${libs === 1 ? 'libro importado' : 'libros importados'}` : 'Reglas, objetos mágicos y opciones de personaje de tus libros';
+}
+const corto = t => String(t || '').replace(/^D&D\s*[\d.,]*\s*-?\s*/i, '').replace(/\s*\(.*$/, '').split(/[:–-]/)[0].trim().slice(0, 28);
+function pintar() {
+  $('#bibTabs').innerHTML = TABS.map(([k, t, ico]) => `<button type="button" role="tab" aria-selected="${V.tab === k}" data-tab="${k}">${gi(ico)}<span>${t}</span></button>`).join('');
+  herramientas(); cuerpo(); $('#bibBody').scrollTop = 0;
+}
+export function openBiblioteca(tab) {
+  if (tab) V.tab = tab;
+  if (!V.clase && S.cur()) V.clase = '';
+  pintar(); openSheet(dlg());
+}
+
+/* ------------------------------- ficha común ------------------------------- */
+let FICHA = null;
+function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) {
+  const d = $('#fichaDlg');
+  d.className = `tall ficha ${clase}`;
+  $('#fiTitle').innerHTML = (ico ? `<span class="fi-ico">${gi(ico)}</span>` : '') + `<span>${esc(titulo)}</span>`;
+  $('#fiSub').innerHTML = sub; $('#fiBody').innerHTML = h;
+  $('#fiFoot').innerHTML = `${pie}<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>`;
+  openSheet(d); $('#fiBody').scrollTop = 0;
+}
+const fuente = f => (f ? `<p class="fi-src">${gi('libro')}${esc(f)} · importado de tu PDF</p>` : '');
+export function abrirObjeto(clave) {
+  const o = biblioteca().objetos.find(x => x.clave === clave); if (!o) return;
+  const ch = S.cur(), ya = ch && tieneObjeto(ch, o.clave), rk = RAR_K[o.rarezas?.[0] || o.rareza] || 'varia';
+  FICHA = { tipo: 'obj', o };
+  ficha({ titulo: o.nombre, ico: TIPO_I[o.tipo] || 'o_maravilloso', clase: `r-${rk}`,
+    sub: `<div class="fi-pills"><span class="rar-pill r-${rk}">${esc(rareza(o))}</span><span>${esc(o.tipo)}${o.subtipo ? ` (${esc(o.subtipo)})` : ''}</span>
+      ${o.sintonia ? `<span class="sin-pill">${gi('sintonia')}Sintonización${o.sintoniaCon ? ` con ${esc(o.sintoniaCon.replace(/^(parte de |un |una )/, ''))}` : ''}</span>` : ''}
+      ${o.cargas ? `<span>${o.cargas.max} cargas${o.cargas.recarga ? ` · recupera ${esc(o.cargas.recarga)} al ${esc(o.cargas.cuando || 'amanecer')}` : ''}</span>` : ''}</div>`,
+    cuerpo: `<section class="sp-text">${md(o.texto)}</section>${fuente(o.fuente)}`,
+    pie: ch ? (ya ? `<span class="fi-ya">${icon('user')}${esc(ch.nombre)} ya lo lleva</span><button type="button" data-cmd="equipo">Ver sus objetos</button>`
+      : `<button type="button" class="gold" data-fi="anadir">${icon('plus')}Añadir a ${esc(ch.nombre)}</button>`) : '' });
+}
+function abrirDote(clave) {
+  const d = biblioteca().dotes.find(x => x.clave === clave); if (!d) return;
+  ficha({ titulo: d.nombre, ico: 'dote', sub: `<div class="fi-pills"><span class="rar-pill">${esc(d.cat)}</span>${d.req ? `<span>Requisitos: ${esc(d.req)}</span>` : ''}</div>`, cuerpo: `<section class="sp-text">${md(d.texto)}</section>${fuente(d.fuente)}` });
+}
+function abrirTrasfondo(clave) {
+  const t = biblioteca().trasfondos.find(x => x.clave === clave); if (!t) return;
+  const filas = [['Características', t.caracteristicas], ['Dote', t.dote], ['Habilidades', t.habilidades], ['Herramientas', t.herramientas], ['Equipo', t.equipo]].filter(f => f[1]);
+  ficha({ titulo: t.nombre || 'Trasfondo sin nombre', ico: 'trasfondo', sub: '',
+    cuerpo: `<dl class="fi-dl">${filas.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><section class="sp-text">${md(t.texto)}</section>${fuente(t.fuente)}` });
+}
+function abrirSubclase(k) {
+  const [clase, clave] = k.split('|'), s = biblioteca().subclases.find(x => x.clase === clase && x.clave === clave); if (!s) return;
+  const ch = S.cur();
+  ficha({ titulo: s.nombre, ico: norm(s.clase).replace(/[^a-z]/g, ''), sub: `<div class="fi-pills"><span class="rar-pill">${esc(s.clase)}</span>${[...new Map(s.rasgos.map(r => [r.nivel, r])).values()].map(r => `<a class="lvl-pill ${ch && ch.clase === s.clase && ch.nivel >= r.nivel ? 'on' : ''}" href="#rs-${r.nivel}-${norm(r.nombre).replace(/\W+/g, '-')}">${r.nivel}</a>`).join('')}</div>${s.lema ? `<p class="fi-lema">${esc(s.lema)}</p>` : ''}`,
+    cuerpo: `<section class="sp-text">${md(s.texto).replace(/<h4 class="md-h">Nivel (\d+): ([^<]+)<\/h4>/g, (m, n, t) => `<h4 class="md-h rasgo" id="rs-${n}-${norm(t.replace(/&[a-z]+;/g, '')).replace(/\W+/g, '-')}"><span class="lvl-pill">${n}</span>${t}</h4>`)}</section>${fuente(s.fuente)}` });
+}
+/** Término del glosario (también desde los enlaces de las descripciones). */
+export function abrirTermino(clave) {
+  const e = termino(clave); if (!e) return;
+  const largo = e.texto.length > 2500, apartados = [...e.texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
+  const indice = largo && apartados.length >= 3 ? `<nav class="fi-toc" aria-label="Apartados">${apartados.map((a, i) => `<a href="#ap-${i}">${esc(a)}</a>`).join('')}</nav>` : '';
+  let n = 0; const html = md(e.texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`);
+  ficha({ titulo: e.nombre, ico: 'glosario', sub: e.cat ? `<div class="fi-pills"><span class="rar-pill ${e.cat === 'Estado' ? 'estado' : ''}">${esc(e.cat)}</span></div>` : '', cuerpo: `${indice}<section class="sp-text">${html}</section>` });
+}
+
+export function init(store) {
+  S = store;
+  const d = dlg();
+  on(d, 'click', '[data-tab]', (e, b) => { V.tab = b.dataset.tab; V.q = ''; pintar(); });
+  on(d, 'click', '[data-rar]', (e, b) => { V.rar = V.rar === b.dataset.rar ? '' : b.dataset.rar; herramientas(); cuerpo(); });
+  on(d, 'click', '[data-cat]', (e, b) => { V.cat = b.dataset.cat; herramientas(); cuerpo(); });
+  on(d, 'click', '#bibSint', () => { V.sint = !V.sint; herramientas(); cuerpo(); });
+  on(d, 'click', '#bibOrden', () => { V.orden = V.orden === 'rar' ? 'az' : 'rar'; herramientas(); cuerpo(); });
+  on(d, 'click', '[data-obj]', (e, b) => abrirObjeto(b.dataset.obj));
+  on(d, 'click', '[data-dote]', (e, b) => abrirDote(b.dataset.dote));
+  on(d, 'click', '[data-tras]', (e, b) => abrirTrasfondo(b.dataset.tras));
+  on(d, 'click', '[data-sub]', (e, b) => abrirSubclase(b.dataset.sub));
+  d.addEventListener('input', e => { if (e.target.id === 'bibQ') { V.q = e.target.value; cuerpo(); } });
+  d.addEventListener('change', e => {
+    const k = { bibTipo: 'tipo', bibClase: 'clase' }[e.target.id]; if (!k) return;   // el buscador ya filtra al escribir
+    V[k] = e.target.value; cuerpo();
+  });
+  // índice de apartados de la ficha: salto suave dentro del cuerpo
+  on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  on($('#fichaDlg'), 'click', '[data-fi]', (e, b) => {
+    if (b.dataset.fi !== 'anadir' || FICHA?.tipo !== 'obj') return;
+    const o = FICHA.o; let nuevo;
+    const h = S.edit((db, ch) => { nuevo = anadirObjeto(ch, o); });
+    toast(`<b>${esc(o.nombre)}</b> añadido a ${esc(S.cur().nombre)}.${nuevo.rasgo ? ' Sus cargas ya están en la hoja.' : ''}`, [undoBtn(S, h)]);
+    abrirObjeto(o.clave); if (dlg().open) cuerpo();
+  });
+  d.addEventListener('close', () => { if ($('#fichaDlg').open) closeSheet($('#fichaDlg')); });
+}

@@ -23,7 +23,9 @@ import { openRules, openRecovery } from '../ui/dialogs/rasgos.js';
 import { openHistory } from '../ui/dialogs/historial.js';
 import { openBackup } from '../ui/dialogs/copia.js';
 import { openManual } from '../ui/dialogs/manual.js';
-import { openGlosario } from '../ui/dialogs/glosario.js';
+import { openBiblioteca } from '../ui/dialogs/biblioteca.js';
+import { openEquipo } from '../ui/dialogs/equipo.js';
+import { openBestiario } from '../ui/dialogs/diario.js';
 import { openRetrato } from '../ui/dialogs/retrato.js';
 import { openTrasfondo } from '../ui/dialogs/trasfondo.js';
 import { openDiario, accionNota } from '../ui/dialogs/diario.js';
@@ -45,7 +47,7 @@ function toggleTheme() {
 let openMenu = null, menuY = 0;
 function showMenu(menu, anchor, items) {
   closeMenu();
-  menu.innerHTML = items.filter(Boolean).map(it => it === '-' ? '<hr>' : `<button type="button" role="menuitem" data-mcmd="${it.cmd}" ${it.chk != null ? `class="chk" role="menuitemcheckbox" aria-checked="${it.chk}"` : ''}>${icon(it.icon)}${esc(it.label)}</button>`).join('');
+  menu.innerHTML = items.filter(Boolean).map(it => it === '-' ? '<hr>' : `<button type="button" role="menuitem" data-mcmd="${it.cmd}" ${it.chk != null ? `class="chk" role="menuitemcheckbox" aria-checked="${it.chk}"` : ''}>${it.gi ? gi(it.gi, 'icon') : icon(it.icon)}${esc(it.label)}</button>`).join('');
   menu.hidden = false; openMenu = menu; menuY = scrollY;
   const r = anchor.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
   const below = r.bottom + 8 + mh < innerHeight;
@@ -56,20 +58,23 @@ function showMenu(menu, anchor, items) {
 }
 function closeMenu() { if (openMenu) { openMenu.hidden = true; openMenu = null; } }
 function moreItems() {
+  const ch = S.cur();
   return [
-    { cmd: 'home', icon: 'book', label: 'Inicio' },
-    { cmd: 'chars', icon: 'users', label: 'Gestionar personajes' },
-    { cmd: 'rules', icon: 'sliders', label: 'Rasgos y recursos' },
-    { cmd: 'historia', icon: 'book', label: 'Historia del personaje' },
-    { cmd: 'diario', icon: 'quill', label: 'Diario de sesión' },
-    { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
+    ch && { cmd: 'rules', icon: 'sliders', label: 'Rasgos y recursos' },
+    ch && { cmd: 'equipo', gi: 'cofre', label: 'Objetos mágicos' },
+    ch && { cmd: 'historia', gi: 'libro', label: 'Historia' },
+    ch && { cmd: 'diario', icon: 'quill', label: 'Diario de sesión' },
+    ch && { cmd: 'bestiario', gi: 'bestia', label: 'Bestiario' },
+    ch && '-',
+    { cmd: 'biblioteca', gi: 'biblioteca', label: 'Biblioteca' },
+    { cmd: 'manual', gi: 'libro', label: 'Libros y manuales' },
     '-',
-    { cmd: 'manual', icon: 'book', label: 'Libros y manuales' },
-    { cmd: 'glosario', icon: 'info', label: 'Glosario de reglas' },
+    { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
+    { cmd: 'chars', icon: 'users', label: 'Personajes' },
     { cmd: 'backup', icon: 'save', label: 'Copia de seguridad' },
-    !NATIVE && { cmd: 'print', icon: 'print', label: 'Imprimir' },
     { cmd: 'theme', icon: 'contrast', label: isDark() ? 'Tema de día' : 'Tema de noche' },
     NATIVE && { cmd: 'awake', icon: 'eye', label: 'Pantalla siempre encendida', chk: awake },
+    !NATIVE && { cmd: 'print', icon: 'print', label: 'Imprimir' },
     '-',
     { cmd: 'tutorial', icon: 'star', label: 'Ver tutorial' },
     { cmd: 'about', icon: 'info', label: 'Acerca de y licencias' },
@@ -86,7 +91,10 @@ function setEditing(v) { S.editing = v; S.emit('ui'); }
 const COMMANDS = {
   chars: () => openChars(),
   home: () => { setEditing(false); showLanding(); },
-  glosario: () => openGlosario(),
+  glosario: () => openBiblioteca('reglas'),
+  biblioteca: () => openBiblioteca(),
+  equipo: () => S.cur() && openEquipo(),
+  bestiario: () => S.cur() && openBestiario(),
   retrato: () => S.cur() && openRetrato(S.cur().id),
   historia: () => S.cur() && openTrasfondo(),
   diario: () => S.cur() && openDiario(),

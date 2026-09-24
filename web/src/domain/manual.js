@@ -5,7 +5,8 @@
  * Entrada: [{p, cols:[[línea…],[línea…]]}] con línea = {x, y, h, s}
  * Salida:  [{nombre, nivel, escuela, clases[], tiempo, ritual, alcance, comp, material, duracion, conc, desc, sup}]
  */
-const LV = /^(?:Truco de ([a-záéíóúñ]+)|([A-ZÁÉÍÓÚH][a-záéíóúñ]+) de nivel ?(\d))\s*(\(.*)?$/;
+const LV = /^(?:Truco de ([a-záéíóúñ]+)|([A-ZÁÉÍÓÚH][a-záéíóúñ]+) de nivel ?[.,]? ?([\dBlI]))\s*(\(.*)?$/;
+const DIGITO_OCR = { B: 8, l: 1, I: 1 };
 const FIELD = /^(Tiempo de lanza\S*|Alcance|Componentes|Duraci\S*)\s*:\s*(.*)$/;
 const canon = k => (k.startsWith('Tiempo') ? 'Tiempo de lanzamiento' : k.startsWith('Duraci') ? 'Duración' : k);
 const DUR_VAL = /^(Instantáne[oa]|Concentración|Hasta |Especial|\d+ (asalto|minuto|hora|día))/i;
@@ -20,7 +21,9 @@ const lev = (a, b) => { const d = Array.from({ length: b.length + 1 }, (_, j) =>
 const escuelaDe = w => { w = (w || '').toLowerCase(); return ESCUELA[w] || Object.entries(ESCUELA).find(([k]) => lev(k, w) <= 2)?.[1] || ''; };
 const ESCUELA = { abjuración: 'Abjuración', adivinación: 'Adivinación', conjuración: 'Conjuración', encantamiento: 'Encantamiento', evocación: 'Evocación', ilusionismo: 'Ilusionismo', nigromancia: 'Nigromancia', transmutación: 'Transmutación' };
 const CLASE = { bardo: 'Bardo', brujo: 'Brujo', clérigo: 'Clérigo', druida: 'Druida', explorador: 'Explorador', hechicero: 'Hechicero', mago: 'Mago', paladín: 'Paladín' };
-const PROPIOS = ['Agathys', 'Hadar', 'Yolande', 'Bigby', 'Drawmij', 'Evard', 'Leomund', 'Melf', 'Mordenkainen', 'Nystul', 'Otiluke', 'Otto', 'Rary', 'Tasha', 'Tenser', 'Jallarzi', 'Vitriolo'];
+const PROPIOS = ['Alustriel', 'Elminster', 'Songal', 'Laeral', 'Simbul', 'Mystra', 'Deryan', 'Sylune', 'Syluné', 'Aganazzar', 'Snilloc', 'Agathys', 'Hadar', 'Yolande', 'Bigby', 'Drawmij', 'Evard', 'Leomund', 'Melf', 'Mordenkainen', 'Nystul', 'Otiluke', 'Otto', 'Rary', 'Tasha', 'Tenser', 'Jallarzi', 'Vitriolo'];
+
+import { leerTabla, tablaATexto, arreglarDados } from './tablas.js';
 
 const ARREGLOS = { escupo: 'Escudo' };   // mayúsculas pequeñas que el PDF codifica mal
 const SUFIJOS = ['guardián de la fe'];     // nombres pegados a un pie de foto
@@ -79,7 +82,7 @@ export function parseSpells(pages) {
     const end = n + 1 < heads.length ? heads[n + 1].nameStart : L.length;
     const nombre = nombreBonito(h.nameText || (h.nameStart === h.nameEnd ? L[h.nameStart].s : L.slice(h.nameStart, h.nameEnd + 1).map(l => l.s).join(' ')));
     const escuela = escuelaDe(h.m[1] || h.m[2]);
-    const nivel = h.m[1] ? 0 : parseInt(h.m[3], 10);
+    const nivel = h.m[1] ? 0 : (DIGITO_OCR[h.m[3]] ?? parseInt(h.m[3], 10));
     const clases = (h.par.match(/\(([^)]*)\)?/)?.[1] || '').split(',').map(c => CLASE[c.trim().toLowerCase()]).filter(Boolean);
     // Campos técnicos (cada uno puede ocupar varias líneas)
     const F = {}; let k = h.fieldsFrom, cur = null;
@@ -100,6 +103,11 @@ export function parseSpells(pages) {
     for (; k < end; k++) {
       const l = L[k], s = l.s.replace(/^[|\[\]]\s*/, '').replace(/\s*[|\[\]]$/, '').replace(/\s[|\[\]]\s/g, ' ').trim();
       if (!s || FIELD.test(s)) continue;
+      // tablas (de dado o de columnas alineadas): se guardan como filas «| a | b |»
+      if (/^\S+\s/.test(s) || (l.cells || []).length > 1) {
+        const t = leerTabla(L.slice(0, end), k, { margen: l.margin });
+        if (t) { if (para) { paras.push(para); para = ''; } paras.push(tablaATexto(t.filas)); k = t.fin - 1; continue; }
+      }
       // títulos dentro del texto (perfil de criatura: «Espíritu aberrante», «Atributos», «Acciones»): letra grande en mayúsculas
       if ((isCaps(s) || casiMayus(s)) && l.h >= 19.5 && letters(s).length >= 4) {
         if (para) { paras.push(para); para = ''; }
@@ -123,7 +131,7 @@ export function parseSpells(pages) {
     let desc = [], sup = [];
     paras.forEach(p => { if (SUP.test(p) && !sup.length) sup.push(p.replace(SUP, '')); else desc.push(p); });
     // restos de ilustraciones al final de un párrafo («…arder. mE», «…fuego. |»)
-    desc = desc.map(p => p.replace(/([.:!?»)])(?:\s+(?:[|\[\]]|[A-Za-z]{1,2}|[a-z][A-Z]\w?|\[?\s?\w{1,4}\s?\w?\]?)){1,3}$/, '$1'));
+    desc = desc.map(p => p.startsWith('|') ? p : p.replace(/([.:!?»)])(?:\s+(?:[|\[\]]|[A-Za-z]{1,2}|[a-z][A-Z]\w?|\[?\s?\w{1,4}\s?\w?\]?)){1,3}$/, '$1'));
     sup = sup.map(p => p.replace(/([.:!?»)])(?:\s+(?:[|\[\]]|[A-Za-z]{1,2}|[a-z][A-Z]\w?)){1,3}$/, '$1'));
     const tiempoRaw = (F['Tiempo de lanzamiento'] || '').trim(), durRaw = (F['Duración'] || '').trim();
     const compRaw = (F['Componentes'] || '').trim();
@@ -134,7 +142,7 @@ export function parseSpells(pages) {
       comp: (compRaw.match(/^[VSM,\s]+/)?.[0] || compRaw).replace(/[,\s]+/g, ' ').trim(),
       material: compRaw.match(/M\s*\((.*)\)\s*$/)?.[1]?.trim() || '',
       duracion: durRaw, conc: /^Concentración/i.test(durRaw),
-      desc: desc.join('\n\n').trim(), sup: sup.join('\n\n').trim(),
+      desc: arreglarDados(desc.join('\n\n').trim()), sup: arreglarDados(sup.join('\n\n').trim()),
     });
   });
   return out;

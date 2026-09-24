@@ -27,7 +27,9 @@ export function pageToColumns(items, pageWidth) {
     // número de página en el pie: nunca forma parte del texto
     if (!esp && /^\s*\d{1,3}\s*$/.test(it.str) && it.transform[5] < 75) continue;
     const x = it.transform[4], y = it.transform[5], h = Math.abs(it.transform[3]) || it.height || 10;
-    cols[x < mid ? 0 : 1].push({ x, y, h, w: esp ? 0 : it.width || 0, s: esp ? ' ' : it.str, esp });
+    // rótulos de fila de una tabla de la columna derecha («11-20», «96-00») que caen en el canal entre columnas
+    const rotulo = !esp && x < mid && x > mid - pageWidth * 0.075 && /^\s*\d[\d\s–-]{0,6}$/.test(it.str);
+    cols[x < mid && !rotulo ? 0 : 1].push({ x, y, h, w: esp ? 0 : it.width || 0, s: esp ? ' ' : it.str, esp });
   }
   return cols.map(col => {
     // Bandas: fragmentos a la misma altura (±45 % del cuerpo) forman una línea, ordenada de izquierda a derecha.
@@ -50,12 +52,19 @@ export function pageToColumns(items, pageWidth) {
     return lines.map(L => {
       L.items.sort((a, b) => a.x - b.x);
       let s = '', fin = -Infinity;
+      // celdas: tramos separados por un hueco grande (columnas de una tabla); el texto justificado nunca deja huecos así
+      const cells = [];
       // espacio entre fragmentos si hay hueco visible (el texto justificado deja huecos pequeños entre palabras)
       for (const it of L.items) {
-        if (it.esp) { if (s && !s.endsWith(' ')) s += ' '; continue; }
-        s += (s && it.x - fin > it.h * 0.06 && !s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s; fin = it.x + it.w;
+        if (it.esp) { if (s && !s.endsWith(' ')) s += ' '; if (cells.length) cells[cells.length - 1].s += ' '; continue; }
+        const hueco = it.x - fin;
+        if (!cells.length || hueco > Math.max(it.h * 1.6, 16)) cells.push({ x: it.x, s: '' });
+        const c = cells[cells.length - 1];
+        c.s += (c.s && hueco > it.h * 0.06 && !c.s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s;
+        s += (s && hueco > it.h * 0.06 && !s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s; fin = it.x + it.w;
       }
-      return { x: L.items[0].x, y: L.y, h: L.h, s: s.replace(/\s+/g, ' ').trim() };
+      const segs = L.items.filter(it => !it.esp).map(it => ({ x: it.x, w: it.w, s: it.s }));
+      return { x: L.items[0].x, y: L.y, h: L.h, s: s.replace(/\s+/g, ' ').trim(), segs, cells: cells.map(c => ({ x: c.x, s: c.s.replace(/\s+/g, ' ').trim() })).filter(c => c.s) };
     });
   });
 }

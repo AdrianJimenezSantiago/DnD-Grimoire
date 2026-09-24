@@ -16,6 +16,11 @@ const USO = {
   mecanica: 'cog', aberrante: 'tentacle-strike', salvaje: 'sparkles', celestial: 'angel-wings', infernal: 'pentagram-rose', feerico: 'fairy-wand',
   luz: 'sun', vida: 'heart-plus', luna: 'night-sky', estrellas: 'night-sky', tierra: 'tree-branch', sombra: 'shadow-follower',
   // interfaz
+  // objetos mágicos (por tipo), biblioteca y bestiario
+  o_arma: 'sword-hilt', o_armadura: 'breastplate', o_anillo: 'ring', o_baston: 'bo', o_maravilloso: 'gem-pendant', o_pergamino: 'tied-scroll',
+  o_pocion: 'potion-ball', o_vara: 'orb-wand', o_varita: 'crystal-wand', sintonia: 'linked-rings', cofre: 'open-treasure-chest',
+  biblioteca: 'bookshelf', dote: 'laurel-crown', trasfondo: 'knapsack', subclase: 'upgrade', bestia: 'beast-eye', criatura: 'spiked-dragon-head',
+  eficaz: 'target-arrows', inmune: 'checked-shield', vulnerable: 'cracked-shield',
   d20: 'dice-twenty-faces-twenty', dados: 'rolling-dices', libro: 'spell-book', vela: 'candle-light', glosario: 'scroll-unfurled', ojo: 'all-seeing-eye',
 };
 const out = {};

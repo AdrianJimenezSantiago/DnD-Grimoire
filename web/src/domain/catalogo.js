@@ -32,7 +32,14 @@ export function setLibros(libros) {
     for (const sc of lb.subclases || []) if (sc.clase) (SUBS[sc.clase] ||= new Set()).add(sc.nombre);
   }
   setManual(textos); setGlosario(glos); reindexar();
+  // biblioteca: objetos mágicos, dotes, trasfondos y subclases (el primer libro que aporta una entrada manda)
+  const junta = campo => { const m = new Map(); for (const lb of LIBROS) for (const e of lb[campo] || []) { const k = (e.clase ? e.clase + '|' : '') + e.clave; if (e.clave && !m.has(k)) m.set(k, { ...e, fuente: lb.titulo, libro: lb.id }); } return [...m.values()]; };
+  BIB = { objetos: junta('objetos'), dotes: junta('dotes'), trasfondos: junta('trasfondos'), subclases: junta('subTextos') };
 }
+let BIB = { objetos: [], dotes: [], trasfondos: [], subclases: [] };
+/** Contenido de biblioteca de los libros importados: objetos, dotes, trasfondos y subclases. */
+export const biblioteca = () => BIB;
+export const objetoPorClave = k => BIB.objetos.find(o => o.clave === k) || null;
 export const libros = () => LIBROS;
 /** Subclases de una clase: las oficiales más las de los libros importados. */
 export const subclasesDe = clase => [...new Set([...(CLASES[clase]?.subs || []), ...(SUBS[clase] || [])])];
