@@ -126,7 +126,7 @@ function sync(first) {
   const L = [`Competencia ${sgn(P.pb)}.${P.apKey ? ` ${ABIL_NAME[P.apKey]} ${sgn(P.mod)}: CD ${P.cd}, ataque de conjuro ${sgn(P.atk)}.` : ''}`];
   if (P.c || draft.espaciosManuales) L.push(slotText(P));
   if (P.c) L.push(`Prepara ${P.maxPrep} ${P.maxPrep === 1 ? 'conjuro' : 'conjuros'} de nivel 1+${P.c.cant ? ` y sabe ${P.maxCant} trucos` : ''}.`);
-  const ras = reglas(draft).map(r => r.nombre); if (P.ritualLibro) ras.unshift('Adepto de los rituales');
+  const ras = reglas(draft).map(r => r.nombre); if (P.ritualLibro) ras.unshift('Adepto en rituales');
   if (ras.length) L.push(`La hoja lleva la cuenta de: ${joinY(ras)}.`);
   const notes = [];
   if (!P.c && !draft.espaciosManuales) {
