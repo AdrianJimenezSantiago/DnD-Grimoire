@@ -25,7 +25,10 @@ import './styles/arcano.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
-import { linkCatalog, loadSrd } from './domain/catalogo.js';
+import { compendio, linkCatalog, loadSrd } from './domain/catalogo.js';
+import { hayPruebas, sembrarPruebas } from './domain/pruebas.js';
+import { toast } from './ui/toast.js';
+import { undoBtn } from './app/acciones.js';
 import { storage, setBars, onAppEvents } from './platform/native.js';
 import { renderBar, renderSheet } from './ui/sheet.js';
 import * as eventos from './app/eventos.js';
@@ -51,6 +54,8 @@ import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
+// Personajes de prueba: se definen al compilar (web/vite.config.js); fuera de main vienen activados
+const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
 async function boot() {
@@ -92,8 +97,13 @@ async function boot() {
     { sel: '#whoChip', titulo: 'Volver al inicio', texto: 'Desde aquí vuelves a la portada para cambiar de personaje.' },
   ];
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);
+  const regenerarPruebas = () => {
+    let r; const h = S.edit(db => { r = sembrarPruebas(db, compendio()); });
+    toast(r.creados ? `${r.creados} personajes de prueba regenerados a nivel 8.` : 'El compendio aún no ha cargado; inténtalo en un momento.', r.creados ? [undoBtn(S, h)] : []);
+  };
   landing.init(S, {
-    cmd: c => ({ nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    pruebas: PRUEBAS,
+    cmd: c => ({ pruebas: regenerarPruebas, nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO), 500),
   });
@@ -117,6 +127,7 @@ async function boot() {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
     const ok = await loadSrd(fuente);
     await manual.cargarLibros();              // libros importados: textos, conjuros nuevos, glosario, subclases
+    if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();   // rama de desarrollo: personajes de prueba
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
   });

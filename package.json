@@ -1,6 +1,6 @@
 {
   "name": "grimorio",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "Grimorio de Theo como app de Android (Capacitor)",
   "scripts": {

@@ -28,21 +28,21 @@ const PREP = {
   medio: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],        // paladín, explorador
   tercio: [0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13],          // caballero y embaucador arcanos
 };
-// cant: [base, niveles en los que se gana un truco más]
+// cant: [base, niveles en los que se gana un truco más]. Subclases del Manual del Jugador y, al final, las de Héroes de Faerûn.
 export const CLASES = {
   'Bárbaro': { subs: ['Senda del Árbol del Mundo', 'Senda del berserker', 'Senda del corazón salvaje', 'Senda del fanático'] },
-  'Bardo': { cast: { tipo: 'full', ap: 'car', prep: 'div', cant: [2, 4, 10] }, subs: ['Colegio de la danza', 'Colegio del conocimiento', 'Colegio del glamour', 'Colegio del valor'] },
+  'Bardo': { cast: { tipo: 'full', ap: 'car', prep: 'div', cant: [2, 4, 10] }, subs: ['Colegio de la danza', 'Colegio del conocimiento', 'Colegio del glamour', 'Colegio del valor', 'Colegio de la luna'] },
   'Brujo': { cast: { tipo: 'pact', ap: 'car', prep: 'brujo', cant: [2, 4, 10] }, subs: ['Patrón celestial', 'Patrón feérico', 'Patrón infernal', 'Patrón primigenio'] },
-  'Clérigo': { cast: { tipo: 'full', ap: 'sab', prep: 'div', cant: [3, 4, 10] }, subs: ['Dominio de la guerra', 'Dominio de la luz', 'Dominio de la vida', 'Dominio del engaño'] },
+  'Clérigo': { cast: { tipo: 'full', ap: 'sab', prep: 'div', cant: [3, 4, 10] }, subs: ['Dominio de la guerra', 'Dominio de la luz', 'Dominio de la vida', 'Dominio del engaño', 'Dominio del conocimiento'] },
   'Druida': { cast: { tipo: 'full', ap: 'sab', prep: 'div', cant: [2, 4, 10] }, subs: ['Círculo de la luna', 'Círculo de la tierra', 'Círculo de las estrellas', 'Círculo del mar'] },
-  'Explorador': { cast: { tipo: 'half', ap: 'sab', prep: 'medio' }, subs: ['Acechador en la penumbra', 'Cazador', 'Errante feérico', 'Señor de las bestias'] },
-  'Guerrero': { subs: ['Caballero arcano', 'Campeón', 'Guerrero psiónico', 'Maestro del combate'],
+  'Explorador': { cast: { tipo: 'half', ap: 'sab', prep: 'medio' }, subs: ['Acechador en la penumbra', 'Cazador', 'Errante feérico', 'Señor de las bestias', 'Caminante invernal'] },
+  'Guerrero': { subs: ['Caballero arcano', 'Campeón', 'Guerrero psiónico', 'Maestro del combate', 'Abanderado'],
     subCast: { re: /arcan|eldritch/i, desde: 3, tipo: 'third', ap: 'int', prep: 'tercio', cant: [2, 10], nombre: 'Caballero arcano' } },
-  'Hechicero': { cast: { tipo: 'full', ap: 'car', prep: 'hech', cant: [4, 4, 10] }, subs: ['Hechicería aberrante', 'Hechicería de magia salvaje', 'Hechicería dracónica', 'Hechicería mecánica'] },
-  'Mago': { cast: { tipo: 'full', ap: 'int', prep: 'mago', cant: [3, 4, 10] }, subs: ['Abjurador', 'Adivino', 'Evocador', 'Ilusionista'] },
+  'Hechicero': { cast: { tipo: 'full', ap: 'car', prep: 'hech', cant: [4, 4, 10] }, subs: ['Hechicería aberrante', 'Hechicería de magia salvaje', 'Hechicería dracónica', 'Hechicería mecánica', 'Hechicería del fuego mágico'] },
+  'Mago': { cast: { tipo: 'full', ap: 'int', prep: 'mago', cant: [3, 4, 10] }, subs: ['Abjurador', 'Adivino', 'Evocador', 'Ilusionista', 'Hojacantante'] },
   'Monje': { subs: ['Guerrero de la mano abierta', 'Guerrero de la misericordia', 'Guerrero de la sombra', 'Guerrero de los elementos'] },
-  'Paladín': { cast: { tipo: 'half', ap: 'car', prep: 'medio' }, subs: ['Juramento de entrega', 'Juramento de gloria', 'Juramento de los antiguos', 'Juramento de venganza'] },
-  'Pícaro': { subs: ['Asesino', 'Embaucador arcano', 'Ladrón', 'Rebanaalmas'],
+  'Paladín': { cast: { tipo: 'half', ap: 'car', prep: 'medio' }, subs: ['Juramento de entrega', 'Juramento de gloria', 'Juramento de los antiguos', 'Juramento de venganza', 'Juramento de los genios nobles'] },
+  'Pícaro': { subs: ['Asesino', 'Embaucador arcano', 'Ladrón', 'Rebanaalmas', 'Vástago de los Tres'],
     subCast: { re: /arcan|trickster/i, desde: 3, tipo: 'third', ap: 'int', prep: 'tercio', cant: [3, 10], nombre: 'Embaucador arcano' } },
 };
 export const ESPECIES = ['Aasimar', 'Dracónido', 'Elfo', 'Enano', 'Gnomo', 'Goliat', 'Humano', 'Mediano', 'Orco', 'Tiefling'];

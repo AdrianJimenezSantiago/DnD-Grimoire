@@ -11,10 +11,19 @@ const USO = {
   // clases
   barbaro: 'crossed-axes', bardo: 'lyre', brujo: 'warlock-eye', clerigo: 'holy-symbol', druida: 'oak-leaf', explorador: 'bow-arrow',
   guerrero: 'crossed-swords', hechicero: 'bolt-spell-cast', mago: 'wizard-staff', monje: 'fist', paladin: 'sword-brandish', picaro: 'hood',
-  // subclases con motivo propio
-  adivino: 'crystal-ball', evocador: 'fire-bowl', abjurador: 'shield-reflect', ilusionista: 'shadow-follower', draconica: 'dragon-head',
-  mecanica: 'cog', aberrante: 'tentacle-strike', salvaje: 'sparkles', celestial: 'angel-wings', infernal: 'pentagram-rose', feerico: 'fairy-wand',
-  luz: 'sun', vida: 'heart-plus', luna: 'night-sky', estrellas: 'night-sky', tierra: 'tree-branch', sombra: 'shadow-follower',
+  // subclases: una por subclase del Manual del Jugador y de Héroes de Faerûn, todas distintas (ver domain/clases2024.js → TEMAS)
+  arbol: 'tree-roots', berserker: 'axe-sword', corazon: 'bear-face', fanatico: 'thor-hammer',
+  danza: 'ballerina-shoes', saber: 'scroll-quill', glamour: 'crown', valor: 'round-shield', lunabardo: 'moon-orbit',
+  celestial: 'angel-wings', feerico: 'fairy-wand', infernal: 'pentagram-rose', primigenio: 'brain-tentacle',
+  guerra: 'sword-clash', luz: 'sun', vida: 'heart-wings', engano: 'domino-mask', conocimiento: 'open-book',
+  luna: 'wolf-howl', tierra: 'tree-branch', estrellas: 'star-formation', mar: 'big-wave',
+  acechador: 'night-vision', cazador: 'archery-target', errante: 'fairy', bestias: 'wolf-head', invernal: 'snowflake-2',
+  caballero: 'rune-sword', campeon: 'heavy-fighter', psionico: 'psychic-waves', maestro: 'chess-knight', abanderado: 'flying-flag',
+  aberrante: 'tentacle-strike', salvaje: 'sparkles', draconica: 'dragon-head', mecanica: 'cog', fuegomagico: 'fire-silhouette',
+  abjurador: 'shield-reflect', adivino: 'crystal-ball', evocador: 'fire-bowl', ilusionista: 'ghost-ally', hojacantante: 'sword-spin',
+  manoabierta: 'open-palm', misericordia: 'hand-bandage', sombra: 'hooded-figure', elementos: 'fire-punch',
+  entrega: 'holy-grail', gloria: 'laurels', antiguos: 'vine-flower', venganza: 'bleeding-eye', genios: 'whirlwind',
+  asesino: 'cloak-dagger', embaucador: 'magic-palm', ladron: 'lockpicks', rebanaalmas: 'spectre', vastago: 'skull-crossed-bones',
   // interfaz
   // objetos mágicos (por tipo), biblioteca y bestiario
   o_arma: 'sword-hilt', o_armadura: 'breastplate', o_anillo: 'ring', o_baston: 'bo', o_maravilloso: 'gem-pendant', o_pergamino: 'tied-scroll',

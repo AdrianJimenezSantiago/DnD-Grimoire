@@ -1,0 +1,33 @@
+name: Pruebas (development)
+
+# Cada cambio en development (y cada PR hacia main o development) pasa las pruebas y compila la web y la versión de Windows.
+# No publica nada: el APK y las Releases siguen saliendo solo de main (compilar-apk.yml).
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [main, development]
+  workflow_dispatch:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependencias
+        run: npm ci
+
+      - name: Pruebas de reglas, clases y estado
+        run: npm test
+
+      - name: Compilar la web (Vite)
+        run: npm run build
+
+      - name: Compilar la versión de Windows (un solo HTML)
+        run: npm run build:windows

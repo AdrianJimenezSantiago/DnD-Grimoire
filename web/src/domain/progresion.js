@@ -1,28 +1,20 @@
 /** Subida de nivel: qué se gana y qué hay que elegir. Módulo puro. */
-import { joinY } from '../core/util.js';
-import { CLASES } from './reglas2024.js';
+import { joinY, norm } from '../core/util.js';
 import { reglas } from './rasgos.js';
+import { conjurosAutomaticos, rasgosEnNivel } from './clases2024.js';
+import { importSrd } from './catalogo.js';
 
 export const ASI_LVLS = { _: [4, 8, 12, 16], 'Guerrero': [4, 6, 8, 12, 14, 16], 'Pícaro': [4, 8, 10, 12, 16] };
 const SAVANT = [[/abjur/i, 'Abjuración'], [/adivin|divin/i, 'Adivinación'], [/evoca/i, 'Evocación'], [/ilusi|illus/i, 'Ilusionismo']];
-const RASGOS_CLASE = {
-  'Mago': { 1: ['Lanzamiento de conjuros', 'Adepto de los rituales', 'Recuperación arcana'], 2: ['Erudito'], 5: ['Memorizar conjuro'], 18: ['Maestría con conjuros'], 20: ['Conjuros distintivos'] },
-  'Mago/Adivinación': { 3: ['Experto en adivinación', 'Presagio'], 6: ['Adivino avezado'], 10: ['El tercer ojo'], 14: ['Gran presagio'] },
-};
-
 export const esMejora = (clase, L) => (ASI_LVLS[clase] || ASI_LVLS._).includes(L);
 export function savantSchool(ch) {
   if (ch.clase !== 'Mago') return '';
   const m = SAVANT.find(([re]) => re.test(ch.subclase || ''));
   return m ? m[1] : '';
 }
+/** Rasgos que se ganan al llegar a un nivel (clase y subclase del borrador, que puede traer la subclase recién elegida). */
 export function featuresAt(ch, draft, to) {
-  const f = [...((RASGOS_CLASE[ch.clase] || {})[to] || [])];
-  const sch = savantSchool(draft); if (sch) f.push(...(((RASGOS_CLASE['Mago/' + sch] || {})[to]) || []));
-  if (to === 3 && (CLASES[ch.clase] || {}).subs) f.push('Subclase');
-  if (esMejora(ch.clase, to)) f.push('Mejora de característica o dote');
-  if (to === 19) f.push('Don épico');
-  return [...new Set(f)];
+  return rasgosEnNivel({ ...ch, subclase: draft.subclase ?? ch.subclase }, to).map(r => (/^Subclase de /.test(r) ? 'Subclase' : r));
 }
 
 /** Diferencias entre dos perfiles (y sus rasgos) en una frase. */
@@ -45,4 +37,19 @@ export function levelDiff(a, b, chA, chB) {
   }
   if (!bits.length) return '';
   return (b.lvl > a.lvl ? 'Al subir de nivel gana: ' : 'Con este cambio: ') + joinY(bits) + '.';
+}
+
+/** Conjuros siempre preparados de clase y subclase (hasta el nivel del personaje) que aún no están en su libro. */
+export function conjurosPendientes(db, ch, compendio) {
+  const porNombre = new Map(); for (const x of compendio || []) if (!porNombre.has(norm(x.es))) porNombre.set(norm(x.es), x);
+  const tiene = new Set(ch.book.map(e => norm(db.catalog[e.sid]?.es)));
+  return conjurosAutomaticos(ch).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
+}
+/** Añade al libro los conjuros pendientes, siempre preparados. Devuelve sus nombres. */
+export function anadirPendientes(db, ch, pendientes) {
+  for (const c of pendientes) {
+    const sid = importSrd(db, c.x);
+    if (!ch.book.some(e => e.sid === sid)) ch.book.push({ sid, prep: true, always: true, fuente: c.fuente + (c.ritual ? ' (solo ritual)' : ''), gratis: c.gratis || '', used: false });
+  }
+  return pendientes.map(c => c.x.es);
 }

@@ -15,7 +15,7 @@ test('adivino 14: Gran presagio (3 dados)', () => {
 });
 test('plantillas de otras clases escalan con el nivel', () => {
   assert.deepEqual(names(blankChar({ clase: 'Bárbaro', nivel: 6 })), ['Furia:4']);
-  assert.deepEqual(names(blankChar({ clase: 'Paladín', nivel: 5 })), ['Imposición de manos:25', 'Castigo de paladín:1', 'Canalizar divinidad:2', 'Corcel fiel:1']);
+  assert.deepEqual(names(blankChar({ clase: 'Paladín', nivel: 5 })), ['Imponer las manos:25', 'Castigo de paladín:1', 'Canalizar divinidad:2', 'Corcel fiel:1']);
   assert.deepEqual(names(blankChar({ clase: 'Bardo', nivel: 5, stats: { car: 16 } })), ['Inspiración bárdica:3']);
 });
 test('plantillas desactivables y rasgos propios', () => {
