@@ -4,7 +4,7 @@
  */
 import { aplanar, bloques, esMayus, letras, tituloBonito, sinTildes } from './lector.js';
 import { claveNombre } from './manual.js';
-import { CLASES } from './reglas2024.js';
+import { CLASES, ESPECIES } from './reglas2024.js';
 import { SUBCLASES, CLASES_INFO } from './clases2024.js';
 
 const PROPIOS = ['Faerûn', 'Faerún', 'Mystra', 'Tymora', 'Arpistas', 'Zhentarim', 'Guantelete', 'Dragón Púrpura', 'Alianza de los Lores', 'Enclave Esmeralda',
@@ -18,8 +18,11 @@ const nombreDe = s => tituloBonito(s, PROPIOS);
 // «Dot·e de don épico», «Dote genera/»: la etiqueta también llega con restos del OCR
 const CAT_DOTE = /^Dot\W?e\s+(de origen|genera[l\/1I|]|de estilo de combate|de don [ée]pico)(?![\p{L}])\s*(.*)$/iu;
 export const CATS_DOTE = { 'de origen': 'Origen', general: 'General', 'de estilo de combate': 'Estilo de combate', 'de don épico': 'Don épico', 'de don epico': 'Don épico' };
+// La columna «Categoría» de la «Lista de dotes» a veces se cuela delante del texto («Origen ALERTA», «General Dote de origen»)
+const RESTO_CAT = /^(General|Origen|Estilo de combate|Don [ée]pico)(\s+|$)/;
 export function parseDotes(pages) {
-  const L = aplanar(pages), cab = [];
+  const L = aplanar(pages).map(l => (RESTO_CAT.test(l.s) && (l.segs || []).length > 1 && RESTO_CAT.test(l.segs[0].s.trim()) && l.segs[0].s.trim().length < 20
+    ? { ...l, s: l.segs.slice(1).map(g => g.s).join(' ').trim(), x: l.segs[1].x, segs: l.segs.slice(1) } : l)).filter(l => !/^(General|Origen|Estilo de combate|Don [ée]pico)$/.test(l.s.trim())), cab = [];
   for (let i = 1; i < L.length; i++) {
     const m = CAT_DOTE.exec(L[i].s); if (!m) continue;
     const n = L[i - 1].s; if (n.length > 48 || /[.,:;]$/.test(n) || letras(n).length < 3 || CAT_DOTE.test(n)) continue;
@@ -306,6 +309,42 @@ export function completarSubclases(lista) {
     const libres = (sc.candidatas || []).filter(n => !vistas.has(claveNombre(n)));
     if (libres.length === 1) { const n = libres[0]; const x = { ...sc, nombre: n, clave: claveNombre(n), revisar: false }; vistas.set(x.clave, x); out.push(x); }
     else out.push(sc);
+  }
+  return out;
+}
+
+/* ---------------------------------- especies ---------------------------------- */
+// Palabras con las que empieza una frase normal (no el nombre de un atributo: «Elige un linaje.»)
+const NO_ATRIBUTO = /^(elige|puedes|tienes|obtienes|cuando|si|tu|tus|la|el|los|las|como|al|una|un|mientras|esta|este|ademas|tambien|para|siempre)\b|\b(tienes|puedes|eres|es|son|esta)\b/;
+// un atributo que ofrece elegir entre opciones: las entradas que siguen son sus opciones, no atributos nuevos
+const OFRECE_OPCIONES = /(una de las (siguientes )?opciones|elige una de las siguientes|las opciones que aparecen)/i;
+/**
+ * Especies («ATRIBUTOS DE LOS ENANOS»: tipo, tamaño, velocidad y «tienes estos atributos especiales:» seguido de
+ * entradas «Nombre. texto»). Devuelve [{clave, nombre, tipo, tamano, velocidad, rasgos: [{nombre, texto, nivel}]}].
+ */
+export function parseEspecies(pages) {
+  const L = aplanar(pages), out = [];
+  for (let i = 0; i < L.length; i++) {
+    const m = /^ATRIBUTOS DE (?:LOS|LAS) (.+)$/i.exec(L[i].s.replace(/[|>\s]+$/, '').trim()); if (!m || !esMayus(L[i].s)) continue;
+    const plural = sinTildes(m[1]).toLowerCase();
+    const nombre = ESPECIES.find(e => plural.startsWith(sinTildes(e).toLowerCase())) || nombreDe(m[1].replace(/(es|s)$/i, ''));
+    if (out.some(o => o.nombre === nombre)) continue;
+    const dato = re => { for (let k = i + 1; k < Math.min(L.length, i + 12); k++) { const x = re.exec(L[k].s); if (x) return x[1].trim(); } return ''; };
+    const ini = L.slice(i + 1, i + 20).findIndex(l => /atributos especiales\s*:?\s*$/i.test(l.s)); if (ini < 0) continue;
+    let fin = i + 1 + ini + 1;
+    while (fin < L.length && fin - i < 160 && !/^ATRIBUTOS DE /i.test(L[fin].s) && !(esMayus(L[fin].s) && L[fin].h >= (L[fin].hTip || 16) * 1.5)) fin++;
+    const rasgos = []; let cur = null;
+    for (const b of bloques(L, i + 1 + ini + 1, fin, { propios: PROPIOS })) {
+      const x = /^([A-ZÁÉÍÓÚÑ][^.:|]{2,40})\.\s+(\S.{15,})$/s.exec(b);
+      const esEntrada = x && x[1].split(/\s+/).length <= 5 && !NO_ATRIBUTO.test(clave(x[1]));
+      // (Visión en la oscuridad, que casi todas tienen, es siempre un atributo propio)
+      if (esEntrada && cur && OFRECE_OPCIONES.test(cur.partes.join(' ')) && !/^visi[oó]n en la oscuridad$/i.test(x[1].trim())) cur.partes.push(`**${nombreDe(x[1])}.** ${x[2]}`);
+      else if (esEntrada) { cur = { nombre: nombreDe(x[1]), partes: [x[2]] }; rasgos.push(cur); }
+      else if (cur) cur.partes.push(b);
+    }
+    if (!rasgos.length) continue;
+    out.push({ clave: claveNombre(nombre), nombre, tipo: dato(/^Tipo de criatura\s*:\s*(.+)$/i), tamano: dato(/^Tama[ñn]o\s*:\s*(.+)$/i), velocidad: dato(/^Velocidad\s*:\s*(.+)$/i),
+      rasgos: rasgos.map(r => { const texto = r.partes.join('\n\n'), nv = /cuando alcanzas el nivel (\d+) de personaje/i.exec(texto); return { nombre: r.nombre, texto, nivel: nv && /^cuando alcanzas/i.test(r.partes[0]) ? +nv[1] : 1 }; }) });
   }
   return out;
 }

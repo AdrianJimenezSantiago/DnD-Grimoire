@@ -12,6 +12,35 @@ export const sgn = n => (n >= 0 ? '+' : '') + n;
 export const nivelDe = ch => clamp(parseInt(ch.nivel, 10) || 1, 1, 20);
 export const competencia = L => 2 + Math.floor((L - 1) / 4);
 
+/**
+ * Clases del personaje: la principal (clase, subclase, nivel) y las de multiclase (ch.multiclase = [{clase, subclase, nivel}]).
+ * Una clase repetida o desconocida se ignora; el nivel total no pasa de 20.
+ */
+export function clasesDe(ch) {
+  const out = [{ clase: ch.clase, subclase: ch.subclase || '', nivel: nivelDe(ch), principal: true }];
+  for (const m of ch.multiclase || []) {
+    if (!m || !CLASES[m.clase] || out.some(o => o.clase === m.clase)) continue;
+    const libre = 20 - out.reduce((n, o) => n + o.nivel, 0); if (libre < 1) break;
+    out.push({ clase: m.clase, subclase: m.subclase || '', nivel: clamp(parseInt(m.nivel, 10) || 1, 1, libre), principal: false });
+  }
+  return out;
+}
+export const nivelTotal = ch => clasesDe(ch).reduce((n, c) => n + c.nivel, 0);
+/** El personaje visto desde una sola de sus clases (para rasgos, recursos y conjuros de esa clase). */
+export const vistaClase = (ch, c) => ({ ...ch, clase: c.clase, subclase: c.subclase, nivel: c.nivel, multiclase: [] });
+/** Multiclase: característica mínima (13) de cada clase; «o» cuando basta una de ellas (Guerrero). */
+export const REQ_MULTICLASE = { 'Bárbaro': [['fue']], 'Bardo': [['car']], 'Brujo': [['car']], 'Clérigo': [['sab']], 'Druida': [['sab']], 'Explorador': [['des'], ['sab']],
+  'Guerrero': [['fue', 'des']], 'Hechicero': [['car']], 'Mago': [['int']], 'Monje': [['des'], ['sab']], 'Paladín': [['fue'], ['car']], 'Pícaro': [['des']] };
+/** Clases (de las del personaje) que no cumplen el requisito de 13: [{clase, falta: 'Fuerza 13'}]. Solo aviso: la mesa decide. */
+export function requisitosMulticlase(ch) {
+  const cs = clasesDe(ch); if (cs.length < 2) return [];
+  const N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
+  return cs.flatMap(c => (REQ_MULTICLASE[c.clase] || []).filter(alts => !alts.some(k => (ch.stats?.[k] || 0) >= 13))
+    .map(alts => ({ clase: c.clase, falta: alts.map(k => `${N[k]} 13`).join(' o ') })));
+}
+/** Texto corto de las clases: «Bárbaro 5 / Guerrero 3». */
+export const clasesTexto = ch => { const cs = clasesDe(ch); return cs.length > 1 ? cs.map(c => `${c.clase} ${c.nivel}`).join(' / ') : `${ch.clase}, nivel ${cs[0].nivel}`; };
+
 // Espacios por nivel de personaje (índice 0 = nivel 1). Cada fila: espacios de nivel 1, 2, 3…
 const FULL = [[2], [3], [4, 2], [4, 3], [4, 3, 2], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2], [4, 3, 3, 3, 2, 1], [4, 3, 3, 3, 2, 1],
   [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1, 1], [4, 3, 3, 3, 3, 1, 1, 1, 1], [4, 3, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 3, 2, 2, 1, 1]];
@@ -47,33 +76,78 @@ export const CLASES = {
 };
 export const ESPECIES = ['Aasimar', 'Dracónido', 'Elfo', 'Enano', 'Gnomo', 'Goliat', 'Humano', 'Mediano', 'Orco', 'Tiefling'];
 export const TRASFONDOS = ['Acólito', 'Animador', 'Artesano', 'Campesino', 'Charlatán', 'Comerciante', 'Criminal', 'Ermitaño', 'Erudito', 'Escriba', 'Guardia', 'Guía', 'Marinero', 'Noble', 'Soldado', 'Vagabundo'];
+/** Trasfondos de 2024: características que mejoran y dote de origen. */
+export const TRASFONDOS_2024 = {
+  'Acólito': [['int', 'sab', 'car'], 'Iniciado en la magia (clérigo)'], 'Animador': [['fue', 'des', 'car'], 'Músico'],
+  'Artesano': [['fue', 'des', 'int'], 'Fabricante'], 'Campesino': [['fue', 'con', 'sab'], 'Duro'], 'Charlatán': [['des', 'con', 'car'], 'Habilidoso'],
+  'Comerciante': [['con', 'int', 'car'], 'Afortunado'], 'Criminal': [['des', 'con', 'int'], 'Alerta'], 'Ermitaño': [['con', 'sab', 'car'], 'Sanador'],
+  'Erudito': [['con', 'int', 'sab'], 'Iniciado en la magia (mago)'], 'Escriba': [['des', 'int', 'sab'], 'Habilidoso'], 'Guardia': [['fue', 'int', 'sab'], 'Alerta'],
+  'Guía': [['des', 'con', 'sab'], 'Iniciado en la magia (druida)'], 'Marinero': [['fue', 'des', 'sab'], 'Matón de taberna'], 'Noble': [['fue', 'int', 'car'], 'Habilidoso'],
+  'Soldado': [['fue', 'des', 'con'], 'Atacante salvaje'], 'Vagabundo': [['des', 'sab', 'car'], 'Afortunado'],
+};
+/**
+ * Dotes del personaje: la de origen de su trasfondo (del Manual del Jugador o de un libro importado) y las elegidas (ch.dotes).
+ * [{nombre, detalle, origen: 'trasfondo'|'elegida'}]; «Iniciado en la magia (mago)» → nombre «Iniciado en la magia», detalle «mago».
+ */
+export function dotesDe(ch, trasfondosLib = []) {
+  const partir = t => { const m = /^(.+?)\s*\(([^)]+)\)\s*$/.exec(t); return m ? { nombre: m[1], detalle: m[2] } : { nombre: t, detalle: '' }; };
+  const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const out = [];
+  const tr = trasfondosLib.find(x => n(x.nombre) === n(ch.trasfondo))?.dote || (TRASFONDOS_2024[Object.keys(TRASFONDOS_2024).find(k => n(k) === n(ch.trasfondo))] || [])[1];
+  if (tr) out.push({ ...partir(tr), origen: 'trasfondo' });
+  for (const d of ch.dotes || []) { const x = partir(d); if (x.nombre && !out.some(o => n(o.nombre) === n(x.nombre) && n(o.detalle) === n(x.detalle))) out.push({ ...x, origen: 'elegida' }); }
+  return out;
+}
 export const LISTAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
 
-/** Todo lo que la hoja necesita saber de un personaje. */
+/** Lanzamiento de conjuros de una clase a su nivel (la subclase puede darlo: Caballero y Embaucador arcanos). */
+function lanzamientoDe(c) {
+  const cls = CLASES[c.clase] || {};
+  if (cls.cast) return { cast: cls.cast, viaSub: false, nombre: c.clase, lista: c.clase };
+  if (cls.subCast && cls.subCast.re.test(c.subclase || '') && c.nivel >= cls.subCast.desde) return { cast: cls.subCast, viaSub: true, nombre: cls.subCast.nombre, lista: 'Mago' };
+  return null;
+}
+const FACTOR = { full: L => L, half: L => Math.ceil(L / 2), third: L => Math.floor(L / 3) };
+
+/**
+ * Todo lo que la hoja necesita saber de un personaje. Con multiclase (Manual del Jugador 2024):
+ *  - la competencia va por el nivel total;
+ *  - con una sola clase lanzadora, sus espacios son los de su tabla a su nivel;
+ *  - con varias, se suman los niveles de lanzador (completos, la mitad hacia arriba de paladín y explorador,
+ *    un tercio hacia abajo de caballero y embaucador arcanos) y se usa la tabla completa;
+ *  - la magia de pacto del brujo va aparte; preparados y trucos se suman por clase.
+ */
 export function perfil(ch) {
-  const cls = CLASES[ch.clase] || {};
-  const lvl = nivelDe(ch);
-  let c = cls.cast || null, viaSub = false;
-  if (!c && cls.subCast && cls.subCast.re.test(ch.subclase || '') && lvl >= cls.subCast.desde) { c = cls.subCast; viaSub = true; }
+  const clases = clasesDe(ch), lvl = clases.reduce((n, c) => n + c.nivel, 0);
+  const lanzan = clases.map(c => ({ c, l: lanzamientoDe(c) })).filter(x => x.l);
+  const prim = lanzan[0] || null, c = prim ? prim.l.cast : null;
   const apKey = ch.aptitud || (c ? c.ap : '');
   const pb = competencia(lvl);
   const mod = apKey ? modOf(ch.stats[apKey]) : null;
   const slots = {}; let pact = null;
   if (ch.espaciosManuales) {
     for (let L = 1; L <= 9; L++) { const n = parseInt((ch.espacios || {})[L], 10) || 0; if (n > 0) slots[L] = n; }
-  } else if (c) {
-    if (c.tipo === 'pact') { pact = { level: PACT_L[lvl - 1], n: PACT_N[lvl - 1] }; slots[pact.level] = pact.n; }
-    else { const row = (c.tipo === 'full' ? FULL : c.tipo === 'half' ? HALF : THIRD)[lvl - 1]; row.forEach((n, i) => { if (n) slots[i + 1] = n; }); }
+  } else {
+    const brujo = lanzan.find(x => x.l.cast.tipo === 'pact');
+    if (brujo) pact = { level: PACT_L[brujo.c.nivel - 1], n: PACT_N[brujo.c.nivel - 1] };
+    const otros = lanzan.filter(x => x.l.cast.tipo !== 'pact');
+    let row = [];
+    if (otros.length === 1) { const { c: k, l } = otros[0]; row = (l.cast.tipo === 'full' ? FULL : l.cast.tipo === 'half' ? HALF : THIRD)[k.nivel - 1] || []; }
+    else if (otros.length > 1) { const nl = otros.reduce((n, { c: k, l }) => n + FACTOR[l.cast.tipo](k.nivel), 0); row = nl > 0 ? FULL[Math.min(20, nl) - 1] : []; }
+    row.forEach((n, i) => { if (n) slots[i + 1] = n; });
+    if (pact) slots[pact.level] = (slots[pact.level] || 0) + pact.n;
   }
+  const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length : 0);
   return {
-    c, viaSub, lvl, pb, apKey, mod,
-    lista: c ? (viaSub ? 'Mago' : ch.clase) : '',
-    listaNombre: c ? (viaSub ? cls.subCast.nombre : ch.clase) : '',
+    c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases,
+    lista: prim ? prim.l.lista : '',
+    listaNombre: prim ? prim.l.nombre : '',
+    listas: lanzan.map(x => x.l.lista),
     cd: mod == null ? null : 8 + pb + mod + (parseInt(ch.extraCD, 10) || 0),
     atk: mod == null ? null : pb + mod + (parseInt(ch.extraAtaque, 10) || 0),
     slots, pact, maxSlot: Math.max(0, ...Object.keys(slots).map(Number)),
-    maxPrep: c ? PREP[c.prep][lvl - 1] : 0,
-    maxCant: c && c.cant ? c.cant[0] + c.cant.slice(1).filter(t => lvl >= t).length : 0,
-    ritualLibro: ch.clase === 'Mago',   // Adepto en rituales
+    maxPrep: lanzan.reduce((n, { c: k, l }) => n + PREP[l.cast.prep][k.nivel - 1], 0),
+    maxCant: lanzan.reduce((n, x) => n + trucos(x), 0),
+    ritualLibro: clases.some(x => x.clase === 'Mago'),   // Adepto en rituales
   };
 }

@@ -28,7 +28,7 @@ export function blankChar(over = {}) {
     id: uid('c'), nombre: '', especie: '', trasfondo: '', clase: 'Mago', subclase: '', nivel: 1,
     stats: { ...STATS0 }, aptitud: '', extraCD: 0, extraAtaque: 0,
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
-    book: [], rasgos: [], rasgosOff: [], play: PLAY0(),
+    book: [], rasgos: [], rasgosOff: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
     ...clone(over),
   };
@@ -55,6 +55,10 @@ export function normChar(c) {
   if (!c.bestiario || !Array.isArray(c.bestiario.criaturas)) c.bestiario = { criaturas: [] };
   if (c.retrato && !c.retrato.src) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
+  // multiclase: [{clase, subclase, nivel}] sin la clase principal ni repetidas; dotes elegidas: nombres sin repetir
+  c.multiclase = (Array.isArray(c.multiclase) ? c.multiclase : []).filter(m => m && m.clase && m.clase !== c.clase)
+    .filter((m, i, a) => a.findIndex(x => x.clase === m.clase) === i).map(m => ({ clase: m.clase, subclase: String(m.subclase || ''), nivel: clamp(parseInt(m.nivel, 10) || 1, 1, 19) }));
+  c.dotes = [...new Set((Array.isArray(c.dotes) ? c.dotes : []).map(d => String(d || '').trim()).filter(Boolean))];
   c.book = (c.book || []).filter(e => e && e.sid);
   return c;
 }

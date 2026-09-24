@@ -165,7 +165,8 @@ export function shortRest(S, openRecovery) {
     if (r.recarga === 'corto' && st.used) bits.push(r.nombre);
     if (r.recarga === 'corto1' && st.used) bits.push(`1 de ${r.nombre}`); });
   const h = S.act(`Descanso corto${bits.length ? ': ' + bits.join(', ') : ''}`, (db, c) => {
-    if (P.pact) c.play.used[P.pact.level] = 0;
+    // solo vuelven los de pacto: con multiclase, ese nivel puede tener también espacios normales
+    if (P.pact) c.play.used[P.pact.level] = Math.max(0, (c.play.used[P.pact.level] || 0) - P.pact.n);
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
       const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });

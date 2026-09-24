@@ -90,7 +90,7 @@ async function guardarLibro(lb) {
 }
 function resumenBiblioteca(lb) {
   const b = [(lb.objetos || []).length && pl(lb.objetos.length, 'objeto mágico', 'objetos mágicos'), (lb.dotes || []).length && pl(lb.dotes.length, 'dote', 'dotes'),
-    (lb.trasfondos || []).length && pl(lb.trasfondos.length, 'trasfondo', 'trasfondos'), (lb.rasgosClase || []).length && pl(lb.rasgosClase.reduce((n, c) => n + c.rasgos.length, 0), 'rasgo de clase', 'rasgos de clase'), (lb.subTextos || []).length && pl(lb.subTextos.length, 'subclase con sus rasgos', 'subclases con sus rasgos'), (lb.criaturas || []).length && pl(lb.criaturas.length, 'perfil de criatura', 'perfiles de criatura')].filter(Boolean);
+    (lb.trasfondos || []).length && pl(lb.trasfondos.length, 'trasfondo', 'trasfondos'), (lb.especies || []).length && pl(lb.especies.length, 'especie', 'especies'), (lb.rasgosClase || []).length && pl(lb.rasgosClase.reduce((n, c) => n + c.rasgos.length, 0), 'rasgo de clase', 'rasgos de clase'), (lb.subTextos || []).length && pl(lb.subTextos.length, 'subclase con sus rasgos', 'subclases con sus rasgos'), (lb.criaturas || []).length && pl(lb.criaturas.length, 'perfil de criatura', 'perfiles de criatura')].filter(Boolean);
   return b.length ? `<p>En la biblioteca: <b>${b.join('</b>, <b>')}</b>.</p>` : '';
 }
 async function importar(file) {
@@ -119,7 +119,7 @@ async function importar(file) {
     else if (r.criaturas.length >= 150 && !r.spells.length) titulo = 'Manual de Monstruos (2025)';
     const id = idLibro(titulo), { textos, nuevos } = emparejarLibro(r.spells, id, titulo);
     fill.style.width = '100%'; msg.textContent = `Leído en ${Math.round((performance.now() - t0) / 1000)} s.`;
-    const lb = { id, titulo, fecha: Date.now(), textos, nuevos, glosario: r.glosario, subclases: [], objetos: r.objetos, dotes: r.dotes, trasfondos: r.trasfondos, subTextos: r.subTextos, rasgosClase: r.rasgosClase, criaturas: r.criaturas };
+    const lb = { id, titulo, fecha: Date.now(), textos, nuevos, glosario: r.glosario, subclases: [], objetos: r.objetos, dotes: r.dotes, trasfondos: r.trasfondos, subTextos: r.subTextos, rasgosClase: r.rasgosClase, especies: r.especies, criaturas: r.criaturas };
     const props = propuestas(r.subclases), sinNombre = r.trasfondos.filter(t => t.revisar).length + r.subTextos.filter(t => t.revisar).length;
     if (props.some(p => p.ok) || sinNombre) { pendiente = { lb, props }; pedirSubclases(); } else { lb.subclases = props.filter(p => p.ok).map(({ clase, nombre }) => ({ clase, nombre })); await guardarLibro(lb); }
   } catch (e) {

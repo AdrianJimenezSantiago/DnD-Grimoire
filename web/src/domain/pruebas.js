@@ -8,7 +8,7 @@
  * Módulo puro: recibe el compendio y modifica la base de datos que se le pasa.
  */
 import { norm, uid } from '../core/util.js';
-import { CLASES, ESPECIES, competencia, perfil } from './reglas2024.js';
+import { CLASES, ESPECIES, TRASFONDOS_2024, competencia, perfil } from './reglas2024.js';
 import { CLASES_INFO, SUBCLASES, conjurosAutomaticos, progresion, subclaseDe } from './clases2024.js';
 import { ASI_LVLS } from './progresion.js';
 import { blankChar, normChar } from './modelo.js';
@@ -28,15 +28,6 @@ const NOMBRES = ['Brunhild', 'Korgan', 'Yara', 'Tormund', 'Lirael', 'Odrin', 'Se
   'Theodora', 'Orla', 'Ember', 'Mirage', 'Aerith', 'Jun', 'Mei', 'Kage', 'Tenzin',
   'Galahad', 'Aurelia', 'Sylvan', 'Vengar', 'Zahir', 'Silas', 'Wren', 'Nim', 'Vex', 'Mordecai'];
 
-/** Trasfondos de 2024: características que mejoran y dote de origen. */
-export const TRASFONDOS_2024 = {
-  'Acólito': [['int', 'sab', 'car'], 'Iniciado en la magia (clérigo)'], 'Animador': [['fue', 'des', 'car'], 'Músico'],
-  'Artesano': [['fue', 'des', 'int'], 'Fabricante'], 'Campesino': [['fue', 'con', 'sab'], 'Duro'], 'Charlatán': [['des', 'con', 'car'], 'Habilidoso'],
-  'Comerciante': [['con', 'int', 'car'], 'Afortunado'], 'Criminal': [['des', 'con', 'int'], 'Alerta'], 'Ermitaño': [['con', 'sab', 'car'], 'Sanador'],
-  'Erudito': [['con', 'int', 'sab'], 'Iniciado en la magia (mago)'], 'Escriba': [['des', 'int', 'sab'], 'Habilidoso'], 'Guardia': [['fue', 'int', 'sab'], 'Alerta'],
-  'Guía': [['des', 'con', 'sab'], 'Iniciado en la magia (druida)'], 'Marinero': [['fue', 'des', 'sab'], 'Matón de taberna'], 'Noble': [['fue', 'int', 'car'], 'Habilidoso'],
-  'Soldado': [['fue', 'des', 'con'], 'Atacante salvaje'], 'Vagabundo': [['des', 'sab', 'car'], 'Afortunado'],
-};
 /** Conjuros de especie (linaje por defecto): [nombre, nivel de personaje, uso gratis]. */
 const ESPECIE_CONJUROS = {
   'Aasimar': [['Luz', 1, '']],
@@ -219,6 +210,15 @@ export function sembrarPruebas(db, compendio, nivel = NIVEL_PRUEBA) {
     const { ch, faltan: f } = personajePrueba(db, compendio, clase, sc, i, nivel);
     f.forEach(x => faltan.add(x)); db.chars.push(ch); creados++;
   });
+  // y uno con multiclase, especie y dotes (Bárbaro 5 / Guerrero 3), para revisar «En juego» con todas sus fuentes
+  const berserker = combinaciones().find(x => x.clase === 'Bárbaro' && /berserk/i.test(x.sc.nombre));
+  if (berserker) {
+    const { ch } = personajePrueba(db, compendio, 'Bárbaro', berserker.sc, creados, Math.max(1, nivel - 3));
+    Object.assign(ch, { nombre: 'Sigrun', especie: 'Enano', trasfondo: 'Soldado', dotes: ['Alerta'],
+      multiclase: [{ clase: 'Guerrero', subclase: 'Campeón', nivel: Math.min(3, nivel - 1) }],
+      lema: `Personaje de prueba con multiclase (Bárbaro ${Math.max(1, nivel - 3)} / Guerrero ${Math.min(3, nivel - 1)}), especie y dotes.` });
+    db.chars.push(ch); creados++;
+  }
   if (!db.chars.some(c => c.id === db.activeId)) db.activeId = db.chars[0]?.id ?? null;
   return { creados, faltan: [...faltan] };
 }

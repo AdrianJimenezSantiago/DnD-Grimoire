@@ -8,6 +8,7 @@
 import { aplanar, esMayus, letras, limpiarRestos, tituloBonito } from './lector.js';
 import { claveNombre } from './manual.js';
 import { norm } from '../core/util.js';
+import { clasesDe } from './reglas2024.js';
 
 export const TIPOS_BASE = ['Aberración', 'Autómata', 'Bestia', 'Celestial', 'Cieno', 'Dragón', 'Elemental', 'Feérico', 'Gigante', 'Humanoide', 'Infernal', 'Monstruosidad', 'Muerto viviente', 'Planta'];
 const TAMANOS = ['Diminut', 'Pequeñ', 'Median', 'Grande', 'Enorme', 'Gargantues'];
@@ -262,7 +263,9 @@ const vuela = c => /\bvolar\b/i.test(c.vel || '');
  * el Círculo de la luna sube el VD a un tercio del nivel. Formas conocidas: 4, 6 u 8.
  */
 export function limiteFormaSalvaje(ch) {
-  const L = Math.max(1, Math.min(20, parseInt(ch.nivel, 10) || 1)), luna = ch.clase === 'Druida' && /luna/i.test(ch.subclase || '') && L >= 3;
+  // el nivel de druida (con multiclase, no el total)
+  const d = clasesDe(ch).find(c => c.clase === 'Druida') || { nivel: Math.max(1, Math.min(20, parseInt(ch.nivel, 10) || 1)), subclase: ch.subclase };
+  const L = d.nivel, luna = /luna/i.test(d.subclase || '') && L >= 3;
   const base = L >= 8 ? 1 : L >= 4 ? 0.5 : 0.25;
   return { vd: luna ? Math.max(base, Math.floor(L / 3)) : base, vuelo: L >= 8, conocidas: L >= 8 ? 8 : L >= 4 ? 6 : 4, luna };
 }
