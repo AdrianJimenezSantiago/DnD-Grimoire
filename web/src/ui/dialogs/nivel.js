@@ -5,7 +5,7 @@
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE, requisitosMulticlase } from '../../domain/reglas2024.js';
 import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
-import { allSpellItems, biblioteca, compendio, itemMeta, itemToSid, listFilter, subclasesDe } from '../../domain/catalogo.js';
+import { allSpellItems, biblioteca, compendio, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -13,6 +13,7 @@ import { ascend } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { previewSpell } from './conjuro.js';
+import { tarjetasSubclase } from '../subclases.js';
 
 let S, LV = null;
 const dlg = () => $('#lvlDlg');
@@ -107,9 +108,8 @@ function render() {
       ${LV.elegirClase ? '' : `<button type="button" class="ghost" data-lvmulti>${'¿Multiclase? Subir en otra clase'}</button>`}`;
   }
   if (step === 'subclase') {
-    const subs = subclasesDe(o.clase);
     h = `<p class="note">A nivel 3 eliges la subclase. Puedes escribir otra si tu mesa usa más manuales.</p>
-      <div class="opts">${subs.map(s => `<button type="button" data-lvsub="${esc(s)}" aria-pressed="${LV.subclase === s}">${esc(s)}</button>`).join('')}</div>
+      <div class="scp-grid" role="listbox" aria-label="Subclases de ${esc(o.clase)}">${tarjetasSubclase(o.clase, LV.subclase, 'data-lvsub')}</div>
       <label class="f wide" style="margin-top:14px">Subclase<input id="lvSubIn" value="${esc(LV.subclase)}" autocomplete="off"></label>`;
   }
   if (step === 'mejora') {
@@ -184,7 +184,7 @@ export function init(store) {
   body.addEventListener('input', ev => {
     const t = ev.target;
     if (t.dataset.chq) { LV.q[t.dataset.chq] = t.value; const pos = t.selectionStart; render(); const n = body.querySelector(`[data-chq="${t.dataset.chq}"]`); n?.focus(); n?.setSelectionRange(pos, pos); return; }
-    if (t.id === 'lvSubIn') { LV.subclase = t.value.trim(); body.querySelectorAll('[data-lvsub]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lvsub === LV.subclase)); plan();
+    if (t.id === 'lvSubIn') { LV.subclase = t.value.trim(); body.querySelectorAll('[data-lvsub]').forEach(b => { b.classList.toggle('on', b.dataset.lvsub === LV.subclase); b.setAttribute('aria-selected', b.dataset.lvsub === LV.subclase); }); plan();
       $('#lvSub').textContent = `Paso ${LV.i + 1} de ${LV.steps.length}: ${TITLE[LV.steps[LV.i]]}`; return; }
     if (t.id === 'lvDote') LV.asi.dote = t.value.trim();
   });

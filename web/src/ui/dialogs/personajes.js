@@ -15,6 +15,7 @@ import { confirmar } from '../modal.js';
 import { avatarHtml } from '../avatar.js';
 import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
+import { campoSubclase, initSubclases } from '../subclases.js';
 import { fileStore } from '../../platform/native.js';
 
 let S, onCreated;
@@ -75,7 +76,7 @@ export function openCharForm(id) {
     <label class="f">Trasfondo<input id="f_trasfondo" list="dl_trasfondo" value="${esc(c.trasfondo)}" autocomplete="off"></label></div></section>
   <section class="fsec"><h3>Clase y nivel</h3><div class="frow">
     <label class="f">Clase<select id="f_clase">${clsOpts}</select></label>
-    <label class="f">Subclase<input id="f_subclase" list="dl_sub" value="${esc(c.subclase)}" autocomplete="off"><span class="hint" id="h_sub"></span></label>
+    <div class="f">Subclase<span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
     <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
     <div id="f_mc" class="mc-list"></div>
     <button type="button" class="ghost mc-add" id="f_mcAdd">${icon('plus')}Añadir otra clase (multiclase)</button>
@@ -120,7 +121,7 @@ function pintarMulticlase() {
   $('#f_mc').innerHTML = MC.map((m, i) => {
     const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k))).map(k => `<option ${k === m.clase ? 'selected' : ''}>${k}</option>`).join('');
     return `<div class="frow mc-row"><label class="f">Clase ${i + 2}<select data-mc="${i}|clase">${opts}</select></label>
-      <label class="f">Subclase<input data-mc="${i}|subclase" list="dl_mc${i}" value="${esc(m.subclase || '')}" autocomplete="off"><datalist id="dl_mc${i}">${subclasesDe(m.clase).map(v => `<option value="${esc(v)}">`).join('')}</datalist></label>
+      <div class="f">Subclase${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</div>
       <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;
   }).join('');
@@ -146,7 +147,6 @@ function slotText(P) {
 }
 function sync(first) {
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
-  fill('#dl_sub', subclasesDe(clase));
   const sel = $('#f_aptitud'), keep = first ? (formId ? (S.db.chars.find(x => x.id === formId).aptitud || '') : '') : sel.value;
   const draft0 = readForm(), P0 = perfil({ ...draft0, aptitud: '' }), autoAp = P0.c ? P0.c.ap : '';
   sel.innerHTML = `<option value="">${autoAp ? `Según la clase (${ABIL_NAME[autoAp]})` : 'Ninguna'}</option>` + ['int', 'sab', 'car'].map(k => `<option value="${k}">${ABIL_NAME[k]}</option>`).join('');
@@ -199,7 +199,7 @@ function save() {
 }
 
 export function init(store, { onNewCharacterAddSpells }) {
-  S = store; onCreated = onNewCharacterAddSpells;
+  S = store; onCreated = onNewCharacterAddSpells; initSubclases();
   fill('#dl_especie', ESPECIES); fill('#dl_trasfondo', TRASFONDOS);
   const form = $('#charForm');
   const leerMc = t => { if (!t.dataset.mc) return false; const [i, k] = t.dataset.mc.split('|'); MC[+i][k] = k === 'nivel' ? clamp(parseInt(t.value, 10) || 1, 1, 19) : t.value.trim();
@@ -207,7 +207,8 @@ export function init(store, { onNewCharacterAddSpells }) {
   form.addEventListener('input', e => { leerMc(e.target); if (e.target.id === 'f_nombre') { $('#w_nombre').classList.remove('bad'); $('#charErr').textContent = ''; } sync(false); });
   form.addEventListener('change', e => {
     if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
-    if (e.target.id === 'f_clase') { MC = MC.filter(m => m.clase !== e.target.value); pintarMulticlase(); }
+    if (e.target.id === 'f_clase') { MC = MC.filter(m => m.clase !== e.target.value); pintarMulticlase();
+      const v = $('#f_subclase').value, vale = subclasesDe(e.target.value).includes(v); $('#f_subWrap').innerHTML = campoSubclase(e.target.value, vale ? v : '', 'id="f_subclase" aria-label="Subclase"'); }
     if (e.target.id === 'f_trasfondo') pintarDotes();
     if (e.target.id === 'f_manual' && e.target.checked) {
       const P = perfil({ ...readForm(), espaciosManuales: false });
