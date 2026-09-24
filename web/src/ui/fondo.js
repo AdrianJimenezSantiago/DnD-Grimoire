@@ -319,7 +319,7 @@ function arrancar() {
 /** Cambia la escena (idempotente: solo reinicia si cambia clase, tono o tema). */
 export function setEscena(t) {
   if (!cv) return;
-  const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 40, s = t?.s ?? 78;
+  const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 220, s = t?.s ?? 8;
   if (nombre === E.nombre && h === E.h && dark === E.dark) return;
   const cambiaEscena = nombre !== E.nombre;
   Object.assign(E, { nombre, h, s, dark });

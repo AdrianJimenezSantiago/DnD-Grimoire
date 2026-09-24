@@ -11,7 +11,9 @@ import { setEscena } from './fondo.js';
 // Las subclases escritas a mano se reconocen por su patrón dentro de la clase.
 const CLASE = TEMAS.clase;
 const temaSub = ch => { const sc = subclaseDe(ch); return sc ? TEMAS.sub[sc.nombre] || null : null; };
-export const DEFECTO = { h: 40, s: 78, icono: 'libro' };
+// Sin personaje elegido (portada, biblioteca desde la portada…): gris plata, que no es el tono de ninguna clase ni subclase
+// (la menos saturada es el Pícaro, con 20 %).
+export const DEFECTO = { h: 220, s: 8, icono: 'libro' };
 
 export function temaDe(ch) {
   if (!ch) return DEFECTO;
@@ -19,9 +21,12 @@ export function temaDe(ch) {
   const m = temaSub(ch);
   return m ? { h: m[0], s: m[1], icono: m[2] || icono, clase: icono } : { h, s, icono, clase: icono };
 }
+/** Colorea la app con el personaje; mientras se ve la portada no hay personaje elegido y manda el tono neutro. */
 export function aplicarTema(ch) {
-  const t = temaDe(ch), r = document.documentElement.style;
+  const t = temaDe(document.body.classList.contains('on-landing') ? null : ch), r = document.documentElement.style;
   if (r.getPropertyValue('--acc-h') !== String(t.h) || r.getPropertyValue('--acc-s') !== t.s + '%') { r.setProperty('--acc-h', t.h); r.setProperty('--acc-s', t.s + '%'); }
+  // los tintes con saturación fija (fondos, bordes, brillos) se apagan también en el tono neutro
+  r.setProperty('--acc-k', t === DEFECTO ? '0.15' : '1');
   setEscena(t);
   return t;
 }
