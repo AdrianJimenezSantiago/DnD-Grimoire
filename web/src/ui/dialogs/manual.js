@@ -109,7 +109,7 @@ async function importar(file) {
       if (p.fase === 'reglas') { msg.textContent = 'Leyendo las reglas del DM…'; fill.style.width = '97%'; }
       if (p.fase === 'criaturas') { msg.textContent = 'Leyendo los perfiles de criaturas…'; fill.style.width = '99%'; }
     });
-    if (!r.spells.length && !r.glosario.length && !r.subclases.length && !r.objetos.length && !r.dotes.length && !r.trasfondos.length && !r.criaturas.length) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos, criaturas ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable (un PDF escaneado sin texto hay que pasarlo antes por OCR: tools/ocr_pdf.py).');
+    if (!r.spells.length && !r.glosario.length && !r.subclases.length && !r.objetos.length && !r.dotes.length && !r.trasfondos.length && !r.criaturas.length) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos, criaturas ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable (un PDF escaneado, solo con imágenes, no se puede leer).');
     let titulo = r.titulo;
     const provisional = emparejarLibro(r.spells, 'x', titulo);
     if (Object.keys(provisional.textos).length >= 300 && provisional.nuevos.length <= 5) titulo = 'Manual del Jugador (2024)';

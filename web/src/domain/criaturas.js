@@ -198,7 +198,7 @@ const POR_CONJURO = {
     cadena: ['diablillo', 'duende', 'esfinge', 'esqueleto', 'pseudodragon', 'quasit', 'renacuajo', 'serpiente'] },
   'corcel fantasma': { fijos: ['caballo'], nota: 'El corcel es un caballo de monta cuasirreal que usa este perfil.' },
   'animar a los muertos': { fijos: ['esqueleto', 'zombi'], nota: 'Un montón de huesos se levanta como esqueleto y un cadáver, como zombi.' },
-  // Estos perfiles vienen del Manual de Monstruos importado (con texto)
+  // Estos perfiles vienen de un libro importado, si lo trae
   'crear muerto viviente': { importadas: ['Necrófago', 'Ghast', 'Tumulario', 'Momia'], nota: 'Nivel 6: necrófagos. Con espacios superiores, ghasts o tumularios (nivel 8) y momias (nivel 9).' },
   'polimorfar': { formas: 'polimorfar' }, 'polimorfar verdadero': { formas: 'verdadero' }, 'cambiar de forma': { formas: 'verdadero' },
   'hallar corcel': { espiritu: 'corcel' },
