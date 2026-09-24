@@ -52,7 +52,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .who-chip { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 3px 12px 3px 3px; border-radius: var(--r-pill);
   background: var(--surface); border: 1px solid var(--line); max-width: 60vw; }
 .monogram { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  font: 700 18px / 1 var(--serif); color: hsl(var(--acc-h) 60% 12%); background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--candle-mid) 55%, var(--candle-edge)); box-shadow: 0 0 14px var(--glow); }
+  font: 700 18px / 1 var(--serif); color: hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 12%); background: radial-gradient(circle at 35% 30%, var(--candle-core), var(--candle-mid) 55%, var(--candle-edge)); box-shadow: 0 0 14px var(--glow); }
 .who-chip .nm { font: 500 var(--fs-l) / 1.05 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .who-chip .lv { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); white-space: nowrap; }
 .who-chip .icon { width: 16px; height: 16px; color: var(--ink-3); }
