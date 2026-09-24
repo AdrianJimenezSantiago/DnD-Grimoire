@@ -5,6 +5,7 @@
 import { aplanar, bloques, esMayus, letras, tituloBonito, sinTildes } from './lector.js';
 import { claveNombre } from './manual.js';
 import { CLASES } from './reglas2024.js';
+import { SUBCLASES } from './clases2024.js';
 
 const PROPIOS = ['Faerûn', 'Faerún', 'Mystra', 'Tymora', 'Arpistas', 'Zhentarim', 'Guantelete', 'Dragón Púrpura', 'Alianza de los Lores', 'Enclave Esmeralda',
   'Magos Rojos', 'Thay', 'Culto del Dragón', 'Calimshan', 'Aguasprofundas', 'Puerta de Baldur', 'Myth Drannor', 'Cormyr', 'Sembia', 'Luskan', 'Neverwinter',
@@ -85,13 +86,64 @@ function leerTrasfondos(pages) {
 }
 
 /* ---------------------------------- subclases ---------------------------------- */
+/** Distancia de edición (para títulos con una o dos letras mal leídas: «pracónica», «LABRÓN»). */
+function distancia(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 9;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const clave = t => sinTildes(String(t)).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+/** El nombre conocido más parecido (hasta 2 letras de diferencia en nombres largos), o null. */
+function parecido(texto, nombres) {
+  const t = clave(texto); if (t.length < 6) return null;
+  let mejor = null, d = 3;
+  for (const n of nombres) { const x = distancia(t, clave(n)); if (x < d) { d = x; mejor = n; } }
+  return mejor;
+}
+const rasgosConocidos = (clase, nombre) => {
+  const sc = (SUBCLASES[clase] || []).find(x => clave(x.nombre) === clave(nombre));
+  return sc ? Object.entries(sc.rasgos).flatMap(([nv, rs]) => rs.map(r => ({ nivel: +nv, nombre: r }))) : [];
+};
 const RASGO = /^NIVEL\s*(\d{1,2})\s*[:.]\s*(.+)$/i;
+// «NIVEL» leído con OCR: «NrIveEL», «Niveel», «NrveL», «NIvEL»…
+const NIVEL_OCR = /(^|[.!?»)]\s+|^\W+)N[rRiIl1]{0,2}[vV][eE]{1,2}[lL]\s*(\d{1,2})\s*[:;.]\s*/;
+const MENOR = /^(DE|DEL|LA|LAS|LOS|EL|Y|A|EN|CON|SIN|AL|POR)$/;
+const esMay = w => /^[A-ZÁÉÍÓÚÜÑ0-9'’-]+$/.test(w) && /[A-ZÁÉÍÓÚÜÑ]/.test(w);
+const esCap = w => /^[A-ZÁÉÍÓÚÑ][a-záéíóúüñ]+$/.test(w);
+/**
+ * Los títulos de rasgo a veces llegan con «NIVEL» mal leído, pegados al texto («NIVEL 10: REPRESALIA Cuando recibas…»)
+ * o en mitad de una línea («…gastado. NIVEL 10: EL TERCER OJO Puedes…»). Se separan en título («NIVEL 10: REPRESALIA») y texto.
+ */
+export function separarRasgos(L) {
+  const out = [];
+  for (const l of L) {
+    const m = NIVEL_OCR.exec(l.s);
+    if (!m) { out.push(l); continue; }
+    const antes = l.s.slice(0, m.index + m[1].length).replace(/^\W+$/, '').trim(), resto = l.s.slice(m.index + m[0].length).trim().split(/\s+/);
+    // el nombre: palabras en versalitas («Foco FANÁTICO», «Paso VELOZ»); el texto empieza en la primera palabra normal
+    let n = 0;
+    while (n < resto.length) {
+      const w = resto[n].replace(/[.,:;]$/, ''), sig = resto[n + 1] || '';
+      if (esMay(w) || (MENOR.test(w.toUpperCase()) && n > 0 && esMay(sig)) || (esCap(w) && esMay(sig.replace(/[.,:;]$/, '')))) n++; else break;
+    }
+    if (!n) { out.push(l); continue; }
+    if (antes) out.push({ ...l, s: antes });
+    out.push({ ...l, s: `NIVEL ${m[2]}: ${resto.slice(0, n).join(' ').toUpperCase()}`, x: l.margin ?? l.x, h: Math.max(l.h, (l.hTip || 16) * 1.12) });
+    if (n < resto.length) out.push({ ...l, s: resto.slice(n).join(' '), x: l.margin ?? l.x });
+  }
+  return out;
+}
 /**
  * Subclases con su texto: título conocido («ADIVINO») o con la clase entre paréntesis («HOJACANTANTE (MAGO)»),
  * seguido de rasgos «NIVEL 3: …». Devuelve [{clave, clase, nombre, lema, texto, rasgos:[{nivel, nombre}]}].
  */
 export function parseSubclases(pages, extras = []) {
-  const L = aplanar(pages);
+  const L = separarRasgos(aplanar(pages));
   const conocidas = new Map();
   for (const [clase, v] of Object.entries(CLASES)) for (const s of v.subs || []) conocidas.set(claveNombre(s), { clase, nombre: s });
   for (const s of extras) if (s.clase) conocidas.set(claveNombre(s.nombre), s);
@@ -99,7 +151,8 @@ export function parseSubclases(pages, extras = []) {
   for (let i = 0; i < L.length; i++) {
     let s = L[i].s.replace(/^[|>\s]+|[|<\s]+$/g, ''); if (!esMayus(s) || s.length > 60 || RASGO.test(s)) continue;
     // título de verdad: en el margen de la columna y más grande que el texto (las etiquetas de las ilustraciones no)
-    if (Math.abs(L[i].x - L[i].margin) > 12 || L[i].h < (L[i].hTip || 16) * 1.12) continue;
+    // (a la izquierda del margen estimado vale: una tabla sangrada en la misma columna lo desplaza)
+    if (L[i].x - L[i].margin > 12 || L[i].h < (L[i].hTip || 16) * 1.12) continue;
     // título en dos líneas («SENDA DEL» + «BERSERKER»)
     const sig = L[i + 1];
     if (sig && esMayus(sig.s) && !RASGO.test(sig.s) && sig.p === L[i].p && L[i].y - sig.y < L[i].h * 2 && !conocidas.get(claveNombre(s))) {
@@ -109,6 +162,11 @@ export function parseSubclases(pages, extras = []) {
     const p = new RegExp(`^(.+?)\\s*\\((${CLASE_RE})\\)$`, 'i').exec(sinTildes(s).toUpperCase() === sinTildes(s) ? s : s);
     if (p) { clase = CLASE_DE(p[2]); nombre = p[1]; }
     else { const k = conocidas.get(claveNombre(s)); if (k) { clase = k.clase; nombre = k.nombre; } }
+    // título con una letra mal leída, a veces en dos líneas y la segunda sin mayúsculas («HECHICERÍA» + «pracónica»)
+    if (!clase) {
+      const sig2 = L[i + 1], opciones = [s, sig2 && sig2.p === L[i].p && L[i].y - sig2.y < L[i].h * 2 ? s + ' ' + sig2.s.replace(/^[|>\s]+/, '') : null].filter(Boolean);
+      for (const o of opciones) { const n = parecido(o, [...conocidas.values()].map(v => v.nombre)); if (n) { const k = conocidas.get(claveNombre(n)); clase = k.clase; nombre = k.nombre; break; } }
+    }
     if (!clase) continue;
     // tiene que haber un rasgo de subclase poco después
     const rasgo = L.slice(i + 1, i + 40).findIndex(l => RASGO.test(l.s) && +RASGO.exec(l.s)[1] >= 3);
@@ -120,7 +178,7 @@ export function parseSubclases(pages, extras = []) {
     let hasta = n + 1 < cab.length ? cab[n + 1].ini : L.length;
     for (let k = c.ini + 1; k < hasta; k++) {
       const s = L[k].s, r = RASGO.exec(s);
-      if ((r && +r[1] < 3) || /^(RASGOS DE|SUBCLASES DE)\b/i.test(sinTildes(s).toUpperCase()) || k - c.ini > 170) { hasta = k; break; }
+      if ((r && +r[1] < 3 && esMayus(s)) || /^(RASGOS DE|SUBCLASES DE)\b/i.test(sinTildes(s).toUpperCase()) || k - c.ini > 280) { hasta = k; break; }
     }
     const rasgos = [];
     const bs = bloques(L, c.ini + 1, hasta, { propios: PROPIOS, subtitulo: (l, s) => {
@@ -141,8 +199,29 @@ function partirPorReinicio(sc, conocidas) {
   const a = { ...sc, texto: bs.slice(0, corte).join('\n\n'), rasgos: sc.rasgos.slice(0, sc.rasgos.length - rasgos.length) };
   return [a, { clave: '', clase: sc.clase, nombre: '', lema: '', texto: resto, rasgos, revisar: true, candidatas: faltan.map(f => f.nombre) }];
 }
+/** Nombres de rasgo con alguna letra mal leída («Labrón de conjuros») → el nombre oficial de esa subclase. */
+function corregirRasgos(sc, nombre) {
+  const oficiales = rasgosConocidos(sc.clase, nombre); if (!oficiales.length) return sc;
+  let texto = sc.texto;
+  const rasgos = sc.rasgos.map(r => {
+    const n = oficiales.some(o => clave(o.nombre) === clave(r.nombre)) ? null : parecido(r.nombre, oficiales.filter(o => o.nivel === r.nivel).map(o => o.nombre));
+    if (!n) return r;
+    texto = texto.replace(`### Nivel ${r.nivel}: ${r.nombre}`, `### Nivel ${r.nivel}: ${n}`);
+    return { ...r, nombre: n };
+  });
+  return { ...sc, texto, rasgos };
+}
+/** Una subclase sin título (el nombre va dentro de una ilustración) se reconoce por sus rasgos: al menos dos que coincidan. */
+function nombrarPorRasgos(sc) {
+  const propios = new Set(sc.rasgos.map(r => clave(r.nombre)));
+  const cand = (SUBCLASES[sc.clase] || []).map(x => ({ x, n: rasgosConocidos(sc.clase, x.nombre).filter(r => propios.has(clave(r.nombre))).length })).sort((a, b) => b.n - a.n);
+  if (!cand[0] || cand[0].n < 2 || (cand[1] && cand[1].n === cand[0].n)) return sc;
+  const nombre = cand[0].x.nombre;
+  return corregirRasgos({ ...sc, nombre, clave: claveNombre(nombre), revisar: false }, nombre);
+}
 /** Quita duplicados y pone nombre a las partes sin título cuando solo falta una subclase de esa clase. */
 export function completarSubclases(lista) {
+  lista = lista.map(sc => (sc.nombre ? corregirRasgos(sc, sc.nombre) : nombrarPorRasgos(sc)));
   const vistas = new Map();
   for (const sc of lista) if (sc.nombre) { const v = vistas.get(sc.clave); if (!v || sc.texto.length > v.texto.length) vistas.set(sc.clave, sc); }
   const out = [...vistas.values()];

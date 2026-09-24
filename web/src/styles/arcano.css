@@ -216,7 +216,14 @@ body.editing #dEdit { background: var(--gilt); }
 .rec-card > strong .icon, .rec h3 .icon { color: var(--gold); filter: drop-shadow(0 0 6px var(--glow)); }
 
 /* ------------------------------ niveles y conjuros ------------------------------ */
-.lvl-head { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 45%, transparent), transparent 75%) left bottom / 100% 1px no-repeat, linear-gradient(var(--bg) 72%, transparent); padding-bottom: 10px; margin-bottom: 8px; }
+.lvl-head { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 45%, transparent) 12%, transparent 80%) left bottom / 100% 1px no-repeat; padding-bottom: 10px; margin-bottom: 8px; }
+/* franja fija de cada nivel: velo translúcido que desenfoca lo que pasa por debajo, más ancho que la tabla
+   y desvanecido por los lados y por abajo para fundirse con el fondo animado */
+.lvl-head::before { content: ""; position: absolute; z-index: -1; pointer-events: none; inset: -8px calc(-1 * var(--s7)) -6px;
+  background: color-mix(in srgb, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 var(--s7), #000 calc(100% - var(--s7)), transparent), linear-gradient(#000 70%, transparent);
+  -webkit-mask-composite: source-in; mask: linear-gradient(90deg, transparent, #000 var(--s7), #000 calc(100% - var(--s7)), transparent), linear-gradient(#000 70%, transparent);
+  mask-composite: intersect; }
 .lvl-num { position: relative; display: grid; place-items: center; width: 42px; height: 42px; min-width: 42px; font: 700 21px / 1 var(--display); color: var(--gold-2); text-shadow: 0 0 14px var(--glow); }
 .lvl-num::before { content: ""; position: absolute; inset: 7px; border: 1.5px solid var(--gold); transform: rotate(45deg); border-radius: 4px; background: var(--gold-soft); box-shadow: 0 0 14px -2px var(--glow); z-index: -1; }
 :root[data-theme="light"] .lvl-num { color: var(--gold); }

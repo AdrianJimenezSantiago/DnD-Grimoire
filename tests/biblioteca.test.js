@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { leerTablaDado, leerTablaColumnas, tablaATexto, arreglarDados, normRotulo, intervalo } from '../web/src/domain/tablas.js';
 import { parseObjetos, leerTipo, leerCargas } from '../web/src/domain/objetos.js';
-import { parseDotes, parseTrasfondos, parseSubclases } from '../web/src/domain/contenido.js';
+import { parseDotes, parseTrasfondos, parseSubclases, separarRasgos, completarSubclases } from '../web/src/domain/contenido.js';
 import { anadirObjeto, quitarObjeto, alternarSintonia, rasgoDeCargas } from '../web/src/domain/equipo.js';
 import { nuevaCriatura, notasConjuro, resumenCriatura } from '../web/src/domain/bestiario.js';
 
@@ -48,6 +48,20 @@ test('dotes, trasfondos y subclases', () => {
   const s = parseSubclases(pag([[L(60, 900, 'CUSTODIO DE PRUEBA (MAGO)', 26), L(60, 880, 'Un lema breve.'), L(60, 870, 'Introducción de la subclase.'), L(60, 850, 'NIVEL 3: PRIMER RASGO', 20), L(60, 830, 'Texto del rasgo.'),
     L(60, 800, 'NIVEL 6: SEGUNDO RASGO', 20), L(60, 780, 'Más texto.')], []]));
   assert.equal(s[0].clase, 'Mago'); assert.deepEqual(s[0].rasgos.map(r => r.nivel), [3, 6]); assert.equal(s[0].lema, 'Un lema breve.');
+});
+test('subclases: títulos de rasgo con «NIVEL» mal leído, pegados al texto o en mitad de línea', () => {
+  const ls = separarRasgos([L(60, 900, 'NrIveEL 10: REPRESALIA Cuando recibas daño de una criatura'), L(60, 880, 'NIveL 6: Foco FANÁTICO Una vez por furia, si fallas'),
+    L(60, 860, 'del espacio gastado. NrveL 10: EL TERCER OJO Puedes aumentar'), L(60, 840, 'tres espacios de nivel 1. Cuando recuperes espacios')].map(l => ({ ...l, margin: 60, hTip: 16 })));
+  assert.deepEqual(ls.map(l => l.s), ['NIVEL 10: REPRESALIA', 'Cuando recibas daño de una criatura', 'NIVEL 6: FOCO FANÁTICO', 'Una vez por furia, si fallas',
+    'del espacio gastado.', 'NIVEL 10: EL TERCER OJO', 'Puedes aumentar', 'tres espacios de nivel 1. Cuando recuperes espacios']);
+});
+test('subclases: sin título se reconocen por sus rasgos; nombres de rasgo casi iguales se corrigen', () => {
+  const sin = { clave: '', clase: 'Mago', nombre: '', lema: '', texto: '### Nivel 3: Experto en evocación\n\nTexto.\n\n### Nivel 3: Truco potente\n\nMás.', revisar: true,
+    rasgos: [{ nivel: 3, nombre: 'Experto en evocación' }, { nivel: 3, nombre: 'Truco potente' }] };
+  const emb = { clave: 'embaucador arcano', clase: 'Pícaro', nombre: 'Embaucador arcano', lema: '', texto: '### Nivel 17: Labrón de conjuros\n\nRobas un conjuro.', rasgos: [{ nivel: 17, nombre: 'Labrón de conjuros' }] };
+  const [a, b] = completarSubclases([emb, sin]);
+  assert.equal(a.rasgos[0].nombre, 'Ladrón de conjuros'); assert.match(a.texto, /^### Nivel 17: Ladrón de conjuros/);
+  assert.equal(b.nombre, 'Evocador'); assert.equal(b.revisar, false);
 });
 test('equipo: cargas como recurso y tres huecos de sintonización', () => {
   const ch = { rasgos: [], play: { rec: {} } };

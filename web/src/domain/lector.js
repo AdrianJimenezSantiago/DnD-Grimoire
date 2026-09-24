@@ -57,8 +57,10 @@ export function bloques(L, a, b, opt = {}) {
     const s = l.s.replace(/^[|\[\]]\s*/, '').replace(/\s*[|\[\]]$/, '').replace(/\s[|\[\]]\s/g, ' ').trim();
     if (!s) continue;
     // tablas
-    if (/^\S+\s/.test(s) || (l.cells || []).length > 1) {
-      const t = leerTabla(L.slice(0, b), k, { margen: l.margin });
+    if ((/^\S+\s/.test(s) || (l.cells || []).length > 1) && !/^NIVEL \d{1,2}: [A-ZÁÉÍÓÚÑ]/.test(s)) {
+      // una tabla no cruza el título de un rasgo («NIVEL 17: …»), aunque la columna de al lado la alargue
+      let hasta = b; for (let j = k + 1; j < b; j++) if (/^NIVEL \d{1,2}: [A-ZÁÉÍÓÚÑ]/.test(L[j].s)) { hasta = j; break; }
+      const t = leerTabla(L.slice(0, hasta), k, { margen: l.margin });
       if (t) { cierra(); out.push(tablaATexto(t.filas)); k = t.fin - 1; continue; }
     }
     // apartados y pies de foto (mayúsculas)
