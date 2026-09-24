@@ -114,7 +114,7 @@ function ficha() {
   const perfiles = biblioteca().criaturas, pf = criaturaImportada(x.perfil || x.nombre);
   const perfilHtml = pf ? `<div class="bx-perfil">${gi('criatura')}<span><b>${esc(pf.nombre)}</b><small>${esc(pf.tipo)}${pf.vdNum != null ? ` · VD ${vdTexto(pf.vdNum)}` : ''} · CA ${pf.ca ?? '—'} · PG ${pf.pgMedia ?? '—'}</small></span>
       <button type="button" data-bxperfil="${esc(pf.clave)}">Ver perfil</button>${x.perfil === pf.clave ? '' : `<button type="button" class="gold" data-bxrellenar="${esc(pf.clave)}">Rellenar con su perfil</button>`}</div>`
-    : perfiles.length ? '' : '<p class="note bx-sinperfil">Importa el Manual de Monstruos (con texto) en Libros y manuales y, al escribir el nombre, la app rellenará tipo, CA, PG, daños, estados y salvaciones.</p>';
+    : perfiles.length ? '' : '<p class="note bx-sinperfil">Anota a mano lo que sepas. Con el Manual del Jugador importado, al escribir el nombre de una criatura de su apéndice la app rellena tipo, CA, PG, daños, estados y salvaciones.</p>';
   $('#diBody').innerHTML = `${perfiles.length ? `<datalist id="bxSug">${perfiles.map(p => `<option value="${esc(p.nombre)}">`).join('')}</datalist>` : ''}
     <div class="frow"><label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off" ${perfiles.length ? 'list="bxSug"' : ''}></label>
       <label class="f">Tipo<select id="bxTip"><option value="">Sin clasificar</option>${TIPOS_CRIATURA.map(t => `<option ${x.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>

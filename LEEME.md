@@ -54,7 +54,13 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - Los espíritus se ajustan a la variante elegida (tierra, mar o aire…) y al nivel del espacio.
   - Usan tu ataque de conjuro y tu CD.
 
-  Datos del Manual del Jugador 2024 (apéndice B y capítulo de conjuros). El PDF del Manual de Monstruos (también la versión nueva de `tools/resources`) es solo imagen, sin texto, así que de ahí no se puede leer nada sin pasarlo antes por un reconocimiento de texto.
+  Datos del Manual del Jugador 2024 (apéndice B y capítulo de conjuros). El PDF del Manual de Monstruos es solo imagen, sin texto, así que la app no lo lee: lo que haga falta de él se anota a mano (bestiario y formas propias).
+- **Perfiles de criaturas de tus libros.** Al importar el Manual del Jugador, la app lee su apéndice de criaturas: unos 50 perfiles (Lobo, Oso pardo, Pantera, Búho…). Están en Biblioteca → Criaturas, con búsqueda, filtro por tipo y por VD máximo, y cada ficha trae «Añadir al bestiario».
+  - **Bestiario:** al escribir el nombre de una criatura se sugieren las de tus libros. «Ver perfil» abre la ficha completa y «Rellenar con su perfil» completa tipo, CA, PG, daños, estados y salvaciones sin tocar lo que hayas anotado a mano.
+  - **Conjuros:** *Encontrar familiar* añade las «Otras bestias de VD 0» de tus libros. *Crear muerto viviente* muestra sus criaturas si algún libro importado las trae; si no, lo dice. *Polimorfar*, *Polimorfar verdadero* y *Cambiar de forma* tienen «Elegir forma», que filtra por VD.
+  - **Forma salvaje:** la tarjeta del recurso tiene «Formas (n)». Muestra las bestias posibles según el nivel (VD 1/4, 1/2 o 1, con vuelo desde el nivel 8) y el Círculo de la luna. Las conocidas se marcan con ★, hasta el máximo del nivel. Las que no estén en tus libros se añaden a mano con nombre, VD, CA, PG y velocidad.
+  - El texto del apéndice del PDF tiene restos de reconocimiento de texto. La app los corrige cuando puede (dados, características, nombres) y marca en la ficha lo que conviene comprobar en el libro.
+- **Primer arranque.** Tras el recorrido de la portada, la app pregunta una vez si quieres importar tus libros antes de empezar. «Más tarde» no vuelve a preguntar; se puede hacer luego desde Libros y manuales.
 - **Efectos activos.** Al concentrarte en un conjuro con objetivos (*Bendición*, *Acelerar*, *Maleficio*, *Marca del cazador*…), puedes anotar sobre quién está, desde el aviso o desde la propia bandeja de tiradas. Los conjuros de área, como *Dormir*, no lo piden.
   - Hay una opción para que lo pregunte siempre.
   - Los rasgos que se ponen sobre una criatura (Voto de enemistad, Inspiración bárdica, Golpe aturdidor…) se marcan desde la tarjeta «Efectos activos».
@@ -166,12 +172,13 @@ Iconos temáticos: game-icons.net (CC BY 3.0). `node tools/iconos.mjs` regenera 
 
 ## Libros y manuales (expansiones)
 
-Más → **Libros y manuales** → «Importar libro (PDF)» sirve para el Manual del Jugador y para cualquier expansión en español con el mismo formato de fichas de conjuro. La app recorre todo el libro en tu dispositivo y recoge cuatro cosas:
+Más → **Libros y manuales** → «Importar libro (PDF)» sirve para el Manual del Jugador y para cualquier expansión en español con el mismo formato de fichas de conjuro. La app recorre todo el libro en tu dispositivo y recoge estas cosas:
 
 - **Descripciones** de los conjuros que ya conoce, que aparecen en la ficha de cada conjuro.
 - **Conjuros nuevos** con todos sus datos técnicos. Entran en el buscador marcados con el nombre del libro, y con ellos funcionan las tiradas, el glosario y la cuadrícula de áreas.
 - **El glosario de reglas**, si el libro lo tiene.
 - **Subclases.** Las que detecta y no conoce se proponen para que confirmes la clase y el nombre, y pasan a las sugerencias del campo Subclase.
+- **Perfiles de criaturas** (apéndice del Manual del Jugador u otro libro con perfiles en texto). Un PDF escaneado, solo con imágenes, no se puede leer.
 
 Además:
 
@@ -293,7 +300,7 @@ web/                     código fuente (Vite)
   src/
     core/                store (estado único, historial y deshacer, guardado) y utilidades
     domain/              reglas 2024, progresión de clases y subclases (clases2024), rasgos, modelo y migraciones, catálogo,
-                         subida de nivel, personajes de prueba (pruebas), lectores de libros
+                         subida de nivel, personajes de prueba (pruebas), lectores de libros y de perfiles de criaturas (monstruos)
                          (conjuros, tablas, objetos, dotes, trasfondos, subclases, reglas), equipo y bestiario (sin DOM)
     platform/            adaptador de Capacitor (almacenamiento, vibración, compartir…)
     app/                 casos de uso (lanzar, descansar…) y controlador de eventos
@@ -316,7 +323,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (67)
+npm test           # pruebas (72)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

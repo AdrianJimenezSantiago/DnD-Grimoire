@@ -108,7 +108,7 @@ async function boot() {
     if (libros().length || (await storage.get(OFRECIDO)) === '1') return;
     await storage.set(OFRECIDO, '1');
     const si = await confirmar({ titulo: '¿Importamos tus libros ahora?', icono: 'book', ok: 'Importar libros', cancelar: 'Más tarde',
-      texto: 'La app rellena descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos, subclases y perfiles de criaturas con tus PDF: Manual del Jugador, Guía del DM, Manual de Monstruos (con texto) y expansiones. Se leen en este dispositivo y no salen de él. Puedes hacerlo luego desde Libros y manuales.' });
+      texto: 'La app rellena descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos, subclases y perfiles de criaturas con tus PDF: Manual del Jugador, Guía del DM y expansiones. Se leen en este dispositivo y no salen de él. Puedes hacerlo luego desde Libros y manuales.' });
     if (si) app.run('manual');
   };
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);

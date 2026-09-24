@@ -97,9 +97,11 @@ export function leerCaracteristicas(txt, filas = []) {
 
 const SECCIONES = { atributos: 'rasgos', acciones: 'acciones', 'acciones adicionales': 'adicionales', reacciones: 'reacciones', 'acciones legendarias': 'legendarias' };
 const seccion = s => SECCIONES[norm(s).replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim()] || null;
-const TIPO_RE = new RegExp(`^\\W*(?:(${TIPOS_BASE.join('|')})|(Enjambre))\\b.*\\b(${TAMANOS.join('|')})`, 'i');
+const TIPO_RE = new RegExp(`^\\W*(?:[lI1|!]{1,3}\\s+)?(?:(${TIPOS_BASE.join('|')})|(Enjambre))\\b.*\\b(${TAMANOS.join('|')})`, 'i');
 const CAMPOS = [['hab', /^Habilidades?\s*[:;]/i], ['vul', /^Vulnerabilidad(?:es)?\s*[:;]/i], ['res', /^Resistencias?\s*[:;]/i], ['inm', /^Inmunidad(?:es)?\s*[:;]/i],
   ['equipo', /^Equipo\s*[:;]/i], ['sentidos', /^Sentidos\s*[:;]/i], ['idiomas', /^Idiomas\s*[:;]/i]];
+/** Restos de OCR alrededor del nombre: «TIGRE.», «Fl JABALÍ», «( TEJÓN», «AÁLCE». */
+const limpiaNombre = s => s.replace(/[.·]+$/, '').replace(/^\S{1,2}\s+(?=[A-ZÁÉÍÓÚÑ]{3,})/, '').replace(/^([AEIOU])[ÁÉÍÓÚáéíóú](?=\p{L})/u, '$1').trim();
 const limpiaIni = s => s.replace(/^[^\p{L}\d¿(+\-−–]+/u, '').replace(/\s*[|]\s*$/, '').trim();
 
 /** Inmunidades «fuego, veneno; envenenado» → daños y estados por separado. */
@@ -119,18 +121,23 @@ export function parseCriaturas(pages) {
   for (let i = 1; i < L.length - 2; i++) {
     if (!TIPO_RE.test(L[i].s)) continue;
     // «CA: 18», «Ca: 18» o «CA:» con el número en otra línea; basta con que la cabecera empiece enseguida
-    const ca = L.slice(i + 1, i + 5).findIndex(l => /^(C\s?[Aa]\s*[:;.]|CA\s*\d|Iniciativa\s*[:;]|P\s?G\s*[:;])/.test(l.s));
+    const ca = L.slice(i + 1, i + 5).findIndex(l => /^(C\s?[Aa]\s*[:;.]|CA\s*\d|Iniciativa\s*[:;]|P\s?G\s*[:;])|\bIniciativa\s*[:;]\s*[+\-−]/.test(l.s));
     if (ca < 0) continue;
     // nombre: la línea justo encima del tipo (a veces en versalitas que el OCR lee como «Dao» o «DAo»)
     let n = i - 1;
-    const valeNombre = s => letras(s).length >= 3 && s.length <= 48 && !/[.:;,]$/.test(s) && /^[A-ZÁÉÍÓÚÑ]/.test(s) && !seccion(s) && !TIPO_RE.test(s);
-    if (!valeNombre(L[n].s) || Math.abs(L[n].x - L[i].x) > 30) {
+    const valeNombre = s => letras(s).length >= 3 && s.length <= 48 && !/[.:;,]$/.test(s) && !/[:\d]/.test(s) && /^[A-ZÁÉÍÓÚÑ]/.test(s) && !seccion(s) && !TIPO_RE.test(s);
+    const nom = j => limpiaNombre(L[j].s);
+    if (!valeNombre(nom(n)) || (L[n].ci !== L[i].ci && Math.abs(L[n].x - L[i].x) > 70)) {
       // si la línea de encima es un resto de ilustración, se busca un nombre en mayúsculas un poco más arriba
-      const k = [i - 2, i - 3].find(j => j >= 0 && L[j].p === L[i].p && esMayus(L[j].s) && valeNombre(L[j].s));
-      if (k == null) continue; n = k;
+      const k = [i - 2, i - 3].find(j => j >= 0 && L[j].p === L[i].p && esMayus(nom(j)) && valeNombre(nom(j)));
+      // sin nombre legible: se deduce luego del texto del perfil («El lobo tiene ventaja…»)
+      if (k == null) { inicios.push({ nombreIni: i, tipoIni: i, nombre: null }); continue; }
+      n = k;
     }
-    let nombre = L[n].s;
-    if (n > 0 && esMayus(L[n - 1].s) && L[n - 1].p === L[n].p && L[n - 1].ci === L[n].ci && Math.abs(L[n - 1].h - L[n].h) < 3 && L[n - 1].y - L[n].y < L[n].h * 1.9 && !seccion(L[n - 1].s)) { nombre = L[n - 1].s + ' ' + nombre; n--; }
+    let nombre = nom(n);
+    // nombre en dos líneas («ESFINGE DE LAS» / «MARAVILLAS») aunque la segunda haya quedado en otra columna
+    if (n < i - 1 && esMayus(nom(n + 1)) && valeNombre(nom(n + 1)) && L[n + 1].p === L[n].p) nombre += ' ' + nom(n + 1);
+    else if (n > 0 && esMayus(L[n - 1].s) && L[n - 1].p === L[n].p && L[n - 1].ci === L[n].ci && Math.abs(L[n - 1].h - L[n].h) < 3 && L[n - 1].y - L[n].y < L[n].h * 1.9 && !seccion(L[n - 1].s)) { nombre = L[n - 1].s + ' ' + nombre; n--; }
     inicios.push({ nombreIni: n, tipoIni: i, nombre });
   }
   const out = [];
@@ -145,13 +152,27 @@ export function parseCriaturas(pages) {
   return [...porClave.values()];
 }
 
+/** «El lobo tiene ventaja…», «La serpiente venenosa realiza…»: el sujeto de los rasgos, cuando el título no se lee. */
+const NO_NOMBRE = /^(objetivo|criatura|tirada|salvaci[oó]n|acci[oó]n|ataque|da[nñ]o|turno|estado|jinete|primera|siguiente|misma|mitad|velocidad|carga|presa)$/i;
+function nombreDelTexto(txt) {
+  const re = /\b(?:El|La|el|la) ([a-záéíóúñ]{3,}(?: (?:gigante|terrible|venenosa|venenoso|negro|negra|pardo|parda|de [a-záéíóúñ]+))?) (?:tiene|realiza|puede|recibe|hace|obtiene|es|no|se|ataca|solo|muerde)\b/g;
+  const cuenta = new Map();
+  for (const m of txt.matchAll(re)) { const w = m[1]; if (NO_NOMBRE.test(w.split(' ')[0])) continue; cuenta.set(w, (cuenta.get(w) || 0) + 1); }
+  const [mejor] = [...cuenta].sort((a, b) => b[1] - a[1]);
+  return mejor ? mejor[0].toUpperCase() : null;
+}
+
 function leerBloque(L, ini, fin) {
   const revisar = [];
-  let i = ini.tipoIni, tipo = L[i].s;
+  let i = ini.tipoIni, tipo = L[i].s.replace(/^[lI1|!]{1,3}\s+/, '');
   if (!/,/.test(tipo) && L[i + 1] && !/^(C\s?[Aa]\b|Iniciativa|P\s?G\b)/.test(L[i + 1].s)) { tipo += ' ' + L[i + 1].s; i++; }
   i++;
   const mt = TIPO_RE.exec(tipo), tamIdx = TAMANOS.findIndex(t => new RegExp(t, 'i').test(tipo));
   const tipoBase = mt?.[1] ? TIPOS_BASE.find(t => norm(t) === norm(mt[1])) : (/enjambre/i.test(tipo) ? (TIPOS_BASE.find(t => new RegExp(norm(t).slice(0, 5), 'i').test(norm(tipo.split(/\bde\b/).slice(1).join(' ')))) || 'Bestia') : '');
+  if (ini.nombre == null) {
+    const d = nombreDelTexto(L.slice(i, fin).map(l => l.s).join(' ')); if (!d) return null;
+    ini = { ...ini, nombre: d }; revisar.push('nombre deducido del texto');
+  }
   // nombre sin restos del OCR («Caballo de guerra a»); si no queda ninguna palabra de verdad, no es un perfil
   const nombre = tituloBonito(ini.nombre.replace(/(\s+[\p{L}]{1,2})+$/u, (m) => (/^\s+(de|del|la|el|y)$/i.test(m) ? m : '')));
   if (!/[\p{L}]{4,}/u.test(nombre) || /^(\p{L}{1,2}\s)+/u.test(nombre.toLowerCase() + ' ') && !/[\p{L}]{4,}/u.test(nombre.split(/\s+/)[0])) return null;
@@ -163,6 +184,8 @@ function leerBloque(L, ini, fin) {
   const C = cab.join('\n');
   const num = re => { const m = re.exec(C); return m ? +digitos(m[1]) : null; };
   r.ca = num(/(?:^|\n)\W*C\s?(?:A\s*[:;.]?|a\s*[:;.])\s*([0-9lIO]{1,2})\b/);
+  // «A: 12 Iniciativa…»: la C se perdió en el OCR
+  if (r.ca == null) r.ca = num(/(?:^|\n)\W*A\s*[:;]\s*(\d{1,2})\s+Iniciativa/);
   const ini2 = /Iniciativa\s*[:;]?\s*([+\-−–]?)\s*([0-9lIO]{1,2})/.exec(C); r.ini = ini2 ? (ini2[1] && ini2[1] !== '+' ? -1 : 1) * +digitos(ini2[2]) : null;
   const pg = /P\s?G\s*[:;.]?\s*([0-9lIO]{1,4})\s*(?:\(([^)\n]*)\)?)?/.exec(C);
   if (pg) { r.pgMedia = +digitos(pg[1]); const d = pg[2] ? arreglarDadosCon(pg[2], r.pgMedia) : ''; r.pg = d ? `${r.pgMedia} (${d})` : String(r.pgMedia); if (d && !/d\d/.test(d)) revisar.push('dados de PG'); }
@@ -213,6 +236,7 @@ function leerBloque(L, ini, fin) {
   const inm = repartir(r.inm), res = repartir(r.res), vul = repartir(r.vul);
   r.danos = {}; vul.danos.forEach(d => { r.danos[d] = 'vul'; }); res.danos.forEach(d => { r.danos[d] = 'res'; }); inm.danos.forEach(d => { r.danos[d] = 'inm'; });
   r.estadosInm = inm.estados;
+  if (r.ca != null && r.ca < 5) revisar.push('CA dudosa');
   if (r.ca == null) revisar.push('sin CA'); if (r.pgMedia == null) revisar.push('sin PG');
   if (!r.acciones.length && !r.rasgos.length) revisar.push('sin acciones');
   r.clave = claveNombre(r.nombre); r.revisar = revisar;

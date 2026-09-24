@@ -178,20 +178,22 @@ function criaturasHtml(s) {
   if (cr.familiar) {
     h += `<p class="note">Es un espíritu con forma animal: celestial, feérico o infernal (lo eliges al lanzarlo). No puede atacar, pero sí hacer otras acciones.</p><div class="cr-chips">${cr.familiar.map(chip).join('')}</div>`;
     if (cr.otrasVd0) {
-      const otras = formasPosibles(biblioteca().criaturas, { vd: 0 }).filter(c => !cr.familiar.some(id => norm(PERFILES[id].nombre) === norm(c.nombre)));
-      h += otras.length ? `<p class="cr-grupo">Otras bestias de VD 0 <small>del Manual de Monstruos importado</small></p><div class="cr-chips">${otras.map(c => chip('mm:' + c.clave)).join('')}</div>`
-        : importadas ? '' : '<p class="note">El conjuro admite cualquier otra bestia de VD 0: importa el Manual de Monstruos (con texto) para verlas aquí.</p>';
+      const otras = formasPosibles(biblioteca().criaturas, { vd: 0 })
+        // la misma forma de la lista oficial, aunque el OCR del libro le haya pegado una letra delante («Úrana»)
+        .filter(c => { const n = norm(c.nombre); return !cr.familiar.some(id => { const f = norm(PERFILES[id].nombre); return n === f || n.slice(1) === f; }); });
+      h += otras.length ? `<p class="cr-grupo">Otras bestias de VD 0 <small>de tus libros importados</small></p><div class="cr-chips">${otras.map(c => chip('mm:' + c.clave)).join('')}</div>`
+        : importadas ? '' : '<p class="note">El conjuro admite cualquier otra bestia de VD 0 (su perfil está en el Manual de Monstruos).</p>';
     }
     if (ch?.clase === 'Brujo') h += `<p class="cr-grupo">Pacto de la cadena <small>si tienes esta invocación: puede atacar con tu reacción cuando renuncias a uno de tus ataques</small></p><div class="cr-chips">${cr.cadena.map(chip).join('')}</div>`;
   }
   if (cr.fijos) h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}<div class="cr-chips">${cr.fijos.map(chip).join('')}</div>`;
   if (cr.importadas) {
     const ids = cr.importadas.map(n => criaturaImportada(n)).filter(Boolean).map(c => 'mm:' + c.clave);
-    h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}${ids.length ? `<div class="cr-chips">${ids.map(chip).join('')}</div>` : '<p class="note">Sus perfiles están en el Manual de Monstruos: impórtalo (con texto) en Libros y manuales para verlos aquí.</p>'}`;
+    h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}${ids.length ? `<div class="cr-chips">${ids.map(chip).join('')}</div>` : '<p class="note">Sus perfiles están en el Manual de Monstruos: anótalos a mano en el bestiario si los necesitas.</p>'}`;
   }
   if (cr.formas) {
     h += `<p class="note">${cr.formas === 'polimorfar' ? 'El objetivo se convierte en una bestia con un VD igual o inferior al suyo (o a su nivel).' : 'Cualquier criatura con un VD igual o inferior al nivel del objetivo.'}</p>
-      <button type="button" class="rl-open" data-formas="${cr.formas}">${gi('criatura')}<span><b>Elegir forma</b><small>${importadas ? 'Filtra por VD las criaturas de tus libros y consulta su perfil' : 'Necesita el Manual de Monstruos importado (con texto)'}</small></span></button>`;
+      <button type="button" class="rl-open" data-formas="${cr.formas}">${gi('criatura')}<span><b>Elegir forma</b><small>${importadas ? 'Filtra por VD las criaturas de tus libros y consulta su perfil' : 'Las bestias del Manual del Jugador importado, filtradas por VD'}</small></span></button>`;
     return h + '</section>';
   }
   if (cr.espiritu) {

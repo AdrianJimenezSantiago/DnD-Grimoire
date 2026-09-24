@@ -96,7 +96,7 @@ function cuerpo() {
     }
   }
   if (V.tab === 'criaturas') {
-    if (!B.criaturas.length) h = vacio('Aquí aparecen los perfiles de criaturas: tipo, CA, PG, características, resistencias y acciones.', 'el Manual de Monstruos (con texto) o del Manual del Jugador');
+    if (!B.criaturas.length) h = vacio('Aquí aparecen los perfiles de criaturas: tipo, CA, PG, características, resistencias y acciones.', 'del apéndice de criaturas del Manual del Jugador');
     else {
       const f = B.criaturas.filter(c => coincide(q, c.nombre, c.tipo) && (!V.ctipo || c.tipoBase === V.ctipo) && (V.cvd === '' || (c.vdNum ?? 99) <= +V.cvd))
         .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); n = f.length;
@@ -163,7 +163,7 @@ export function abrirCriatura(clave) {
   const ch = S.cur(), ya = ch && bestiarioDe(ch).criaturas.find(x => x.perfil === c.clave);
   FICHA = { tipo: 'cria', c };
   ficha({ titulo: c.nombre, ico: 'criatura', sub: `<div class="fi-pills"><span class="rar-pill">${esc(c.tipoBase || 'Criatura')}</span>${c.vdNum != null ? `<span>VD ${vdTexto(c.vdNum)}</span>` : ''}${c.tamano ? `<span>${esc(c.tamano)}</span>` : ''}</div>`,
-    cuerpo: `${bloqueHtml(c)}${c.revisar?.length ? `<p class="note">Leído con OCR: comprueba en el libro ${esc(c.revisar.filter(x => !/^corregido/.test(x)).join(', ') || 'los valores marcados')}.</p>` : ''}${fuente(c.fuente)}`,
+    cuerpo: `${bloqueHtml(c)}${c.revisar?.length ? `<p class="note">Comprueba en el libro ${esc(c.revisar.filter(x => !/^corregido/.test(x)).join(', ') || 'los valores marcados')}.</p>` : ''}${fuente(c.fuente)}`,
     pie: ch ? (ya ? `<span class="fi-ya">${gi('bestia')}Ya está en el bestiario de ${esc(ch.nombre)}</span>` : `<button type="button" class="gold" data-fi="bestiario">${gi('bestia')}Añadir al bestiario de ${esc(ch.nombre)}</button>`) : '' });
 }
 /** Término del glosario (también desde los enlaces de las descripciones). */

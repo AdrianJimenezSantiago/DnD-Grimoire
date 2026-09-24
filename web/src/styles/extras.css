@@ -346,6 +346,10 @@ dialog#retDlg { width: min(460px, 94vw); }
 /* Formas de bestia */
 .fm-list li { display: flex; align-items: stretch; gap: 6px; } .fm-list .bib-it { flex: 1; }
 .fm-star { min-width: 44px; font-size: 20px; line-height: 1; color: var(--ink-3); border: 1px dashed var(--line); background: transparent; border-radius: 10px; }
-.fm-star[aria-pressed="true"] { color: var(--gold); border-style: solid; border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); }
+.fm-list .fm-it .fm-star[aria-pressed="true"]:not(.dockbtn) { color: var(--gold); border-style: solid; border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); }
 .fm-it.conocida .bib-it b::after { content: " · conocida"; font-weight: 400; font-size: var(--fs-xs); color: var(--gold); }
 .res .ruse .gi { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
+.fm-mano { margin: 0 0 12px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 12px; }
+.fm-mano summary { cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; min-height: 36px; }
+.fm-mano .frow { margin-top: 8px; } .fm-mano > button { margin-top: 10px; }
+.fm-list div.bib-it { cursor: default; }

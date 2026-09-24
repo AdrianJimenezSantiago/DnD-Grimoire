@@ -77,3 +77,15 @@ test('formas: Forma salvaje por nivel y Círculo de la luna; filtro por VD y vue
   assert.deepEqual(formasPosibles(cs, { vd: 1, vuelo: true }).map(c => c.nombre), ['Búho', 'Lobo', 'Oso pardo']);
   assert.deepEqual(formasPosibles(cs, { vd: 2, soloBestias: false }).map(c => c.nombre), ['Búho', 'Lobo', 'Oso pardo', 'Ogro']);
 });
+test('criaturas: nombres con restos de OCR o ilegibles se recuperan', () => {
+  const bloque = (cab, rasgo) => [...cab, 'CA: 13 Iniciativa: +3 (13)', 'PG: 13 (3d8)', 'Velocidad: 12 m', 'VD: 1 (200 PX; BC +2)', 'ATRIBUTOS', rasgo];
+  const [t] = parseCriaturas([pagina(bloque(['TIGRE.', 'Bestia Grande, sin alineamiento'], 'Olfato agudo. Ventaja en las pruebas.'))]);
+  assert.equal(t.nombre, 'Tigre');
+  const [j] = parseCriaturas([pagina(bloque(['Fl JABALÍ', 'Bestia Mediana, sin alineamiento'], 'Carga. Si se mueve 6 m.'))]);
+  assert.equal(j.nombre, 'Jabalí');
+  // sin título legible y con la línea de tipo manchada: el nombre sale de sus rasgos y queda para revisar
+  const [l] = parseCriaturas([pagina(bloque(['ll', 'll Bestia Mediana, sin alineamiento'], 'Atacar en manada. El lobo tiene ventaja en las tiradas de ataque.'))]);
+  assert.equal(l.nombre, 'Lobo'); assert.ok(l.revisar.includes('nombre deducido del texto'));
+  // la criatura, el objetivo… no son nombres
+  assert.equal(parseCriaturas([pagina(bloque(['ll', 'Bestia Mediana, sin alineamiento'], 'Mordisco. Si el objetivo es una criatura Mediana, la criatura tiene el estado de derribada.'))]).length, 0);
+});
