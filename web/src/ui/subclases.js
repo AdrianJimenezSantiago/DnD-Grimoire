@@ -8,6 +8,7 @@ import { SUBCLASES, TEMAS } from '../domain/clases2024.js';
 import { biblioteca, subclasesDe } from '../domain/catalogo.js';
 import { gi } from './tema.js';
 import { icon } from './icons.js';
+import { abrirResumen } from './dialogs/biblioteca.js';
 
 /** Datos para pintar una subclase: tono, saturación, icono, libro y lema. */
 function datos(clase, nombre) {
@@ -23,8 +24,10 @@ export function tarjetasSubclase(clase, actual = '', attr = 'data-scp-v', filtro
   if (!lista.length) return `<p class="scp-vacio">Ninguna coincide: se guardará tal cual la escribas.</p>`;
   return lista.map(n => {
     const d = datos(clase, n), on = norm(n) === norm(actual);
-    return `<button type="button" class="scp-card ${on ? 'on' : ''}" ${attr}="${esc(n)}" role="option" aria-selected="${on}" style="--sh:${d.h};--ss:${d.s}%">
-      <span class="scp-emb">${gi(d.ico)}</span><span class="scp-t"><b>${esc(n)}</b>${d.lema ? `<i>${esc(d.lema)}</i>` : ''}<small>${esc(d.libro)}</small></span>${on ? '<span class="scp-ok" aria-hidden="true">✓</span>' : ''}</button>`;
+    // la tarjeta elige; «Ver» abre lo que aprende nivel a nivel sin elegirla
+    return `<div class="scp-item" style="--sh:${d.h};--ss:${d.s}%"><button type="button" class="scp-card ${on ? 'on' : ''}" ${attr}="${esc(n)}" role="option" aria-selected="${on}">
+      <span class="scp-emb">${gi(d.ico)}</span><span class="scp-t"><b>${esc(n)}</b>${d.lema ? `<i>${esc(d.lema)}</i>` : ''}<small>${esc(d.libro)}</small></span>${on ? '<span class="scp-ok" aria-hidden="true">✓</span>' : ''}</button>
+      <button type="button" class="scp-info" data-scp-info="${esc(n)}" data-scp-clase-info="${esc(clase)}" aria-label="Ver qué aprende ${esc(n)}">Ver</button></div>`;
   }).join('');
 }
 /** Campo de subclase con su panel. attrs: atributos extra del input (id, data-mc…). */
@@ -56,6 +59,9 @@ export function initSubclases() {
   document.addEventListener('focusin', e => { const w = e.target.closest?.('.scp'); if (w && e.target.tagName === 'INPUT') abrir(w); });
   document.addEventListener('input', e => { const w = e.target.closest?.('.scp'); if (w && e.target.tagName === 'INPUT' && e.isTrusted) abrir(w, true); });
   document.addEventListener('click', e => {
+    // resumen de una subclase (desde su tarjeta) o de una clase (botones «Ver qué aprende»)
+    const info = e.target.closest?.('[data-scp-info]'); if (info) { e.preventDefault(); return abrirResumen(info.dataset.scpClaseInfo, info.dataset.scpInfo); }
+    const vc = e.target.closest?.('[data-verclase]'); if (vc) { e.preventDefault(); const c = vc.dataset.verclase.startsWith('#') ? document.querySelector(vc.dataset.verclase)?.value : vc.dataset.verclase; return c && abrirResumen(c); }
     const card = e.target.closest?.('[data-scp-v]'); if (card) { e.preventDefault(); return elegir(card.closest('.scp'), card.dataset.scpV); }
     const b = e.target.closest?.('.scp-abrir'); if (b) { const w = b.closest('.scp'); return w.classList.contains('abierto') ? cerrar(w) : (abrir(w), w.querySelector('input').focus()); }
     document.querySelectorAll('.scp.abierto').forEach(w => { if (!w.contains(e.target)) cerrar(w); });

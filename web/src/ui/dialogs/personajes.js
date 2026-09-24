@@ -75,7 +75,7 @@ export function openCharForm(id) {
     <label class="f">Especie<input id="f_especie" list="dl_especie" value="${esc(c.especie)}" autocomplete="off"></label>
     <label class="f">Trasfondo<input id="f_trasfondo" list="dl_trasfondo" value="${esc(c.trasfondo)}" autocomplete="off"></label></div></section>
   <section class="fsec"><h3>Clase y nivel</h3><div class="frow">
-    <label class="f">Clase<select id="f_clase">${clsOpts}</select></label>
+    <div class="f"><label for="f_clase">Clase</label><select id="f_clase">${clsOpts}</select><span class="hint"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende</button></span></div>
     <div class="f">Subclase<span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
     <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
     <div id="f_mc" class="mc-list"></div>
@@ -120,7 +120,7 @@ function pintarMulticlase() {
   const principal = $('#f_clase').value;
   $('#f_mc').innerHTML = MC.map((m, i) => {
     const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k))).map(k => `<option ${k === m.clase ? 'selected' : ''}>${k}</option>`).join('');
-    return `<div class="frow mc-row"><label class="f">Clase ${i + 2}<select data-mc="${i}|clase">${opts}</select></label>
+    return `<div class="frow mc-row"><div class="f"><label>Clase ${i + 2}<select data-mc="${i}|clase">${opts}</select></label><span class="hint"><button type="button" class="linkish" data-verclase="${esc(m.clase)}">Ver qué aprende</button></span></div>
       <div class="f">Subclase${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</div>
       <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;

@@ -31,3 +31,15 @@ test('en juego: rasgos del personaje con texto, números, recurso, grupo manual 
   assert.equal(g[0].clave, 'fijados'); assert.deepEqual(g[0].rasgos.map(r => r.nombre), ['Furia']);
   assert.deepEqual(numerosMarciales(ch).map(n => n.nombre), ['Daño por furia', 'Maestría con armas', 'Competencia', 'Dado de golpe']);
 });
+test('resumen de clase y subclase: datos clave, niveles 1 a 20 y conjuros de la subclase', async () => {
+  const { resumenClase, resumenSubclase } = await import('../web/src/domain/enJuego.js');
+  const lib = { rasgosClase: [{ clase: 'Pícaro', fuente: 'Libro', rasgos: [{ nivel: 1, nombre: 'Ataque furtivo', texto: 'Una vez por turno puedes infligir 1d6 de daño adicional con ventaja.' }] }] };
+  const c = resumenClase('Pícaro', lib);
+  assert.deepEqual(c.datos[0], ['Dado de golpe', 'd8']); assert.match(c.datos[3][1], /Embaucador arcano/);
+  assert.equal(c.niveles[0].nivel, 1); assert.equal(c.niveles.at(-1).nivel, 20);
+  assert.match(c.niveles[0].rasgos.find(r => r.nombre === 'Ataque furtivo').resumen, /1d6/);
+  assert.ok(c.niveles.find(n => n.nivel === 9).rasgos.some(r => r.sub));      // hueco de subclase
+  const s = resumenSubclase('Clérigo', 'Dominio de la luz', {});
+  assert.deepEqual(s.niveles.map(n => n.nivel), [3, 6, 17]); assert.equal(s.conjuros[0].nivel, 3); assert.equal(s.conTextos, false);
+  assert.equal(resumenSubclase('Mago', 'Inventada', {}), null);
+});
