@@ -63,8 +63,10 @@ const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRU
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
 async function boot() {
-  const theme = await storage.get(PREF + '-theme');
-  // tema oscuro por defecto; el claro solo si se eligió en el menú
+  // tema oscuro por defecto; el claro solo si se eligió en el menú. Clave nueva: la antigua («-theme») guardaba el tema
+  // que seguía al del sistema, y con ella muchos dispositivos seguían arrancando en claro
+  const theme = await storage.get(PREF + '-tema');
+  storage.remove(PREF + '-theme');
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
   setBars(eventos.isDark());
   initFondo(); initMagia();
