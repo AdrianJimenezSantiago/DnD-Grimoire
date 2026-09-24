@@ -4,8 +4,8 @@
  * los números que escalan con el nivel y el recurso que gastan. Puro: los textos llegan de los libros importados.
  */
 import { norm } from '../core/util.js';
-import { progresion, escalas } from './clases2024.js';
-import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia } from './reglas2024.js';
+import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
+import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
 
 /** De dónde sale un rasgo, para filtrar en la hoja: clase (con subclase y multiclase), especie o dote. */
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
@@ -136,4 +136,41 @@ export function numerosMarciales(ch) {
   const dados = clasesDe(ch).map(c => escalas(vistaClase(ch, c)).find(x => x.nombre === 'Dado de golpe')?.valor).filter(Boolean).join(' + ');
   const extra = [{ nombre: 'Competencia', valor: '+' + competencia(nivelTotal(ch)) }, dados && { nombre: 'Dado de golpe', valor: dados }, base.find(x => /^Puntos de golpe/.test(x.nombre))].filter(Boolean);
   return [...e, ...extra].slice(0, 4).map(x => ({ nombre: x.nombre.replace(' (media)', ''), valor: x.valor }));
+}
+
+/* ------------------------- resumen de una clase o subclase ------------------------- */
+const CAST_TXT = { full: 'Lanzador completo', half: 'Medio lanzador', third: 'Lanzador a un tercio', pact: 'Magia de pacto' };
+const AB_N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
+
+/**
+ * Lo que aprende una clase nivel a nivel, para verla antes de elegirla: datos clave y
+ * [{nivel, rasgos: [{nombre, resumen, texto, sub}]}] de 1 a 20 (los huecos de subclase se marcan con sub: true).
+ */
+export function resumenClase(clase, lib = {}) {
+  const info = CLASES_INFO[clase]; if (!info) return null;
+  const cast = CLASES[clase]?.cast, subCast = CLASES[clase]?.subCast;
+  const datos = [['Dado de golpe', `d${info.dg}`], ['Salvaciones', info.salv.map(k => AB_N[k]).join(' y ')], ['Característica principal', AB_N[info.prio[0]]],
+    ['Conjuros', cast ? `${CAST_TXT[cast.tipo]} (${AB_N[cast.ap]})` : subCast ? `Solo ${subCast.nombre} (${AB_N[subCast.ap]}, desde nivel ${subCast.desde})` : 'No lanza por su clase']];
+  const niveles = [];
+  for (let L = 1; L <= 20; L++) {
+    const rasgos = (info.rasgos[L] || []).map(nombre => {
+      if (nombre === 'Rasgo de subclase') return { nombre: 'Rasgo de subclase', resumen: 'Lo que dé la subclase que elijas a este nivel.', texto: '', sub: true };
+      const base = nombre.replace(/\s*\(.*\)$/, ''), t = textoDe({ nombre: base, nivel: L, origen: 'clase' }, { clase }, lib);
+      return { nombre, resumen: t ? resumen(t.texto) : '', texto: t?.texto || '', sub: /^Subclase de /.test(nombre) };
+    });
+    if (rasgos.length) niveles.push({ nivel: L, rasgos });
+  }
+  return { clase, datos, niveles, conTextos: niveles.some(n => n.rasgos.some(r => r.texto)) };
+}
+/** Lo mismo para una subclase: sus rasgos por nivel y los conjuros que prepara siempre. Null si la app no la conoce. */
+export function resumenSubclase(clase, subclase, lib = {}) {
+  const def = (SUBCLASES[clase] || []).find(x => norm(x.nombre) === norm(subclase));
+  const imp = (lib.subclases || []).find(x => x.clase === clase && norm(x.nombre) === norm(subclase));
+  if (!def && !imp) return null;
+  const porNivel = def ? Object.entries(def.rasgos).map(([L, rs]) => [+L, rs]) : [...(imp.rasgos || []).reduce((m, r) => m.set(r.nivel, [...(m.get(r.nivel) || []), r.nombre]), new Map())];
+  const niveles = porNivel.sort((a, b) => a[0] - b[0]).map(([L, rs]) => ({ nivel: L, rasgos: rs.map(nombre => {
+    const t = textoDe({ nombre, nivel: L, origen: 'subclase' }, { clase, subclase }, lib);
+    return { nombre, resumen: t ? resumen(t.texto) : '', texto: t?.texto || '' }; }) }));
+  const conjuros = def?.conjuros ? Object.entries(def.conjuros).map(([L, cs]) => ({ nivel: +L, conjuros: cs })) : [];
+  return { clase, subclase: def?.nombre || imp.nombre, libro: def?.libro || imp?.fuente || '', lema: imp?.lema || '', niveles, conjuros, conTextos: niveles.some(n => n.rasgos.some(r => r.texto)) };
 }

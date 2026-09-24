@@ -465,7 +465,8 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
   animation: scp-in .18s var(--ease) both; }
 @keyframes scp-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
 .scp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 8px; margin-top: 8px; }
-.scp-card { --sh: 40; --ss: 50%; position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 12px; text-align: left; border-radius: 12px;
+.scp-item { --sh: 40; --ss: 50%; position: relative; }
+.scp-card { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 12px; text-align: left; border-radius: 12px;
   border: 1px solid hsl(var(--sh) var(--ss) 55% / .28); color: var(--ink); font: inherit;
   background: linear-gradient(100deg, hsl(var(--sh) var(--ss) 45% / .16), transparent 70%), var(--surface); transition: transform .15s var(--ease), border-color .15s, box-shadow .15s; }
 .scp-card:hover, .scp-card:focus-visible { border-color: hsl(var(--sh) var(--ss) 60% / .75); transform: translateY(-1px); box-shadow: 0 8px 22px -12px hsl(var(--sh) var(--ss) 50% / .8); outline: none; }
@@ -480,3 +481,33 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
 .scp-ok { flex: none; font-size: 18px; color: hsl(var(--sh) var(--ss) 66%); }
 .scp-vacio { margin: 4px 6px; font-size: var(--fs-xs); color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) { .scp-panel { animation: none; } .scp-card { transition: none; } }
+
+.scp-card { padding-right: 62px; }
+.scp-info { position: absolute; right: 8px; bottom: 8px; min-height: 28px; padding: 0 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 600;
+  color: hsl(var(--sh) var(--ss) 70%); border: 1px solid hsl(var(--sh) var(--ss) 58% / .45); background: hsl(var(--sh) var(--ss) 40% / .14); }
+.scp-info:hover, .scp-info:focus-visible { background: hsl(var(--sh) var(--ss) 45% / .3); outline: none; }
+.scp-card.on + .scp-info { bottom: 8px; }
+.scp-ok { position: absolute; right: 12px; top: 8px; }
+
+/* resumen de clase o subclase */
+#fichaDlg.rz { --sh: 40; --ss: 50%; }
+#fichaDlg.rz .fi-ico { color: hsl(var(--sh) var(--ss) 66%); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .3), transparent 72%); }
+#fichaDlg.rz .dhead { background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent); }
+.rz-lema { margin: 8px 0 0; font: italic 400 var(--fs-s) / 1.4 var(--serif); color: var(--ink-2); }
+.rz-h { margin: 14px 0 8px; font: 600 var(--fs-xs) / 1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--sh) var(--ss) 66%); }
+.rz-lista { list-style: none; margin: 0; padding: 0; position: relative; }
+.rz-lista::before { content: ""; position: absolute; left: 17px; top: 18px; bottom: 18px; width: 2px; background: linear-gradient(hsl(var(--sh) var(--ss) 55% / .6), hsl(var(--sh) var(--ss) 55% / .1)); }
+.rz-lista li { position: relative; display: flex; gap: 12px; padding: 6px 0; }
+.rz-lv { flex: none; z-index: 1; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 15px / 1 var(--display);
+  color: hsl(var(--sh) var(--ss) 72%); background: var(--raised); border: 1.5px solid hsl(var(--sh) var(--ss) 58% / .7); }
+.rz-rs { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.rz-r { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--surface); }
+.rz-r.sub { border-style: dashed; border-color: hsl(var(--sh) var(--ss) 55% / .5); background: hsl(var(--sh) var(--ss) 40% / .08); }
+.rz-r > b, .rz-r summary b { font: 600 var(--fs-m, 16px) / 1.25 var(--serif); }
+.rz-r > span, .rz-r summary span { display: block; margin-top: 2px; font-size: var(--fs-s); line-height: 1.4; color: var(--ink-2); }
+.rz-r summary { cursor: pointer; list-style: none; } .rz-r summary::-webkit-details-marker { display: none; }
+.rz-r summary b::after { content: "›"; margin-left: 6px; color: hsl(var(--sh) var(--ss) 62%); display: inline-block; transition: transform .2s; }
+.rz-r[open] summary b::after { transform: rotate(90deg); }
+.rz-r .sp-text { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
+.rz-conj { display: grid; gap: 6px; margin: 0; }
+.rz-conj div { display: flex; gap: 10px; } .rz-conj dt { flex: none; min-width: 64px; font-weight: 600; color: hsl(var(--sh) var(--ss) 66%); } .rz-conj dd { margin: 0; }

@@ -17,7 +17,8 @@ import { bloqueHtml, md } from './conjuro.js';
 import { TIPOS_BASE, aBestiario, vdTexto } from '../../domain/monstruos.js';
 import { bestiarioDe, nuevaCriatura } from '../../domain/bestiario.js';
 import { undoBtn } from '../../app/acciones.js';
-import { rasgosEnJuego, GRUPOS } from '../../domain/enJuego.js';
+import { rasgosEnJuego, GRUPOS, resumenClase, resumenSubclase } from '../../domain/enJuego.js';
+import { TEMAS } from '../../domain/clases2024.js';
 import { reglas } from '../../domain/rasgos.js';
 
 let S;
@@ -169,6 +170,27 @@ export function abrirCriatura(clave) {
     pie: ch ? (ya ? `<span class="fi-ya">${gi('bestia')}Ya está en el bestiario de ${esc(ch.nombre)}</span>` : `<button type="button" class="gold" data-fi="bestiario">${gi('bestia')}Añadir al bestiario de ${esc(ch.nombre)}</button>`) : '' });
 }
 /** Término del glosario (también desde los enlaces de las descripciones). */
+/**
+ * Resumen de una clase o de una subclase antes de elegirla: datos clave y lo que aprende nivel a nivel,
+ * con una línea de cada rasgo (si el libro está importado) que se despliega para leerlo entero.
+ */
+export function abrirResumen(clase, subclase = '') {
+  const lib = biblioteca(), rz = subclase ? resumenSubclase(clase, subclase, lib) : resumenClase(clase, lib);
+  if (!rz) return toast(`La app no conoce los rasgos de ${esc(subclase || clase)}: si es de otro libro, impórtalo en Libros y manuales.`);
+  const [h, sat, ico] = (subclase && TEMAS.sub[rz.subclase]) || TEMAS.clase[clase] || [40, 50, 'subclase'];
+  const rasgo = r => r.texto
+    ? `<details class="rz-r ${r.sub ? 'sub' : ''}"><summary><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</summary><div class="sp-text">${md(r.texto)}</div></details>`
+    : `<div class="rz-r ${r.sub ? 'sub' : ''}"><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</div>`;
+  const lista = `<ol class="rz-lista">${rz.niveles.map(n => `<li><span class="rz-lv" aria-label="Nivel ${n.nivel}">${n.nivel}</span><div class="rz-rs">${n.rasgos.map(rasgo).join('')}</div></li>`).join('')}</ol>`;
+  const conj = rz.conjuros?.length ? `<h3 class="rz-h">Conjuros siempre preparados</h3><dl class="rz-conj">${rz.conjuros.map(c => `<div><dt>Nivel ${c.nivel}</dt><dd>${c.conjuros.map(esc).join(', ')}</dd></div>`).join('')}</dl>` : '';
+  const aviso = rz.conTextos ? '' : '<p class="note">Importa el Manual del Jugador (o el libro de esta subclase) en Libros y manuales para leer qué hace cada rasgo. Se lee en este dispositivo.</p>';
+  FICHA = { tipo: 'resumen', clase, subclase };
+  ficha({ titulo: subclase ? rz.subclase : clase, ico,
+    sub: `<div class="fi-pills">${subclase ? `<span class="rar-pill">${esc(clase)}</span>${rz.libro ? `<span>${esc(rz.libro)}</span>` : ''}` : rz.datos.map(([k, v]) => `<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('')}</div>${rz.lema ? `<p class="rz-lema">${esc(rz.lema)}</p>` : ''}`,
+    cuerpo: `${aviso}<h3 class="rz-h">${subclase ? 'Lo que aprende' : 'Lo que aprende nivel a nivel'}</h3>${lista}${conj}`,
+    pie: subclase ? `<button type="button" data-rzclase="${esc(clase)}">${gi(ico === 'subclase' ? 'libro' : TEMAS.clase[clase]?.[2] || 'libro')}Ver ${esc(clase)} completo</button>` : '', clase: 'rz' });
+  const d = $('#fichaDlg'); d.style.setProperty('--sh', h); d.style.setProperty('--ss', sat + '%');
+}
 /** Rasgo de «En juego»: el texto completo del libro y dónde se muestra en la hoja (se puede cambiar de grupo). */
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
@@ -207,6 +229,7 @@ export function init(store) {
   });
   // índice de apartados de la ficha: salto suave dentro del cuerpo
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  on($('#fichaDlg'), 'click', '[data-rzclase]', (e, b) => abrirResumen(b.dataset.rzclase));
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;
     S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.grupo = { ...(ch.enJuego.grupo || {}) }; ch.enJuego.grupo[k] = g; });
