@@ -11,7 +11,7 @@ import { $, on } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { toast, hideToast, toastOpen } from '../ui/toast.js';
 import { closeSheet, openSheet, topSheet } from '../ui/dialog.js';
-import { pop, viewTransition } from '../ui/fx.js';
+import { pop, viewTransition, reducedMotion } from '../ui/fx.js';
 import { NATIVE, haptic, keepAwake, minimize, setBars, storage } from '../platform/native.js';
 import * as A from './acciones.js';
 import { confirmar } from '../ui/modal.js';
@@ -32,6 +32,7 @@ import { openDiario, accionNota } from '../ui/dialogs/diario.js';
 import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
+import { avatarHtml } from '../ui/avatar.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -46,40 +47,48 @@ function toggleTheme() {
 /* ---------------- menús emergentes ---------------- */
 let openMenu = null, menuY = 0;
 function showMenu(menu, anchor, items) {
-  closeMenu();
-  menu.innerHTML = items.filter(Boolean).map(it => it === '-' ? '<hr>' : `<button type="button" role="menuitem" data-mcmd="${it.cmd}" ${it.chk != null ? `class="chk" role="menuitemcheckbox" aria-checked="${it.chk}"` : ''}>${it.gi ? gi(it.gi, 'icon') : icon(it.icon)}${esc(it.label)}</button>`).join('');
+  closeMenu(); menu.classList.remove('closing');
+  menu.innerHTML = typeof items === 'string' ? items : items.filter(Boolean).map(it => it === '-' ? '<hr>' : `<button type="button" role="menuitem" data-mcmd="${it.cmd}" ${it.chk != null ? `class="chk" role="menuitemcheckbox" aria-checked="${it.chk}"` : ''}>${it.gi ? gi(it.gi, 'icon') : icon(it.icon)}${esc(it.label)}</button>`).join('');
   menu.hidden = false; openMenu = menu; menuY = scrollY;
+  if (menu.id === 'moreMenu') anchor.setAttribute('aria-expanded', 'true');
   const r = anchor.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
   const below = r.bottom + 8 + mh < innerHeight;
   menu.style.left = `${Math.max(8, Math.min(innerWidth - mw - 8, r.right - mw))}px`;
   menu.style.top = `${below ? r.bottom + 8 : Math.max(8, r.top - mh - 8)}px`;
-  menu.style.transformOrigin = below ? 'top right' : 'bottom center';
+  menu.style.transformOrigin = below ? `${Math.min(mw - 22, r.left + r.width / 2 - parseFloat(menu.style.left))}px top` : 'bottom center';
   menu.querySelector('button')?.focus({ preventScroll: true });
 }
-function closeMenu() { if (openMenu) { openMenu.hidden = true; openMenu = null; } }
-function moreItems() {
-  const ch = S.cur();
-  return [
-    ch && { cmd: 'rules', icon: 'sliders', label: 'Rasgos y recursos' },
-    ch && { cmd: 'equipo', gi: 'cofre', label: 'Objetos mágicos' },
-    ch && { cmd: 'historia', gi: 'libro', label: 'Historia' },
-    ch && { cmd: 'diario', icon: 'quill', label: 'Diario de sesión' },
-    ch && { cmd: 'bestiario', gi: 'bestia', label: 'Bestiario' },
-    ch && '-',
-    { cmd: 'biblioteca', gi: 'biblioteca', label: 'Biblioteca' },
-    { cmd: 'manual', gi: 'libro', label: 'Libros y manuales' },
-    '-',
-    { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
-    { cmd: 'chars', icon: 'users', label: 'Personajes' },
-    { cmd: 'backup', icon: 'save', label: 'Copia de seguridad' },
-    { cmd: 'theme', icon: 'contrast', label: isDark() ? 'Tema de día' : 'Tema de noche' },
-    NATIVE && { cmd: 'awake', icon: 'eye', label: 'Pantalla siempre encendida', chk: awake },
-    !NATIVE && { cmd: 'print', icon: 'print', label: 'Imprimir' },
-    '-',
-    { cmd: 'tutorial', icon: 'star', label: 'Ver tutorial' },
-    { cmd: 'about', icon: 'info', label: 'Acerca de y licencias' },
-    { cmd: 'reset', icon: 'reset', label: 'Borrar todos los datos' },
-  ];
+function closeMenu() {
+  if (!openMenu) return;
+  const m = openMenu; openMenu = null;
+  if (m.id === 'moreMenu') $('#btnMore')?.setAttribute('aria-expanded', 'false');
+  if (reducedMotion()) { m.hidden = true; return; }
+  m.classList.add('closing');
+  setTimeout(() => { if (openMenu !== m) m.hidden = true; m.classList.remove('closing'); }, 150);
+}
+/** Menú «Más» compacto: cabecera con el personaje y el tema, rejilla de secciones y utilidades en pequeño. */
+function moreMenuHtml() {
+  const ch = S.cur(), dark = isDark();
+  const tile = (cmd, ico, label, full, i) => `<button type="button" role="menuitem" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}" aria-label="${esc(full || label)}"><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}</span></button>`;
+  const fila = (cmd, ico, label, extra = '') => `<button type="button" role="menuitem" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
+  let i = 0;
+  const personaje = ch ? [
+    tile('rules', icon('sliders'), 'Rasgos', 'Rasgos y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Objetos', 'Objetos mágicos', i++),
+    tile('historia', gi('libro', 'icon'), 'Historia', '', i++), tile('diario', icon('quill'), 'Diario', 'Diario de sesión', i++),
+    tile('bestiario', gi('bestia', 'icon'), 'Bestiario', '', i++), tile('chars', icon('users'), 'Personajes', '', i++),
+  ].join('') : tile('chars', icon('users'), 'Personajes', '', i++);
+  const saber = [tile('biblioteca', gi('biblioteca', 'icon'), 'Biblioteca', '', i++), tile('manual', gi('libro', 'icon'), 'Libros', 'Libros y manuales', i++), tile('hist', icon('hourglass'), 'Historial', 'Historial de la sesión', i++)].join('');
+  const util = [
+    fila('backup', icon('save'), 'Copia de seguridad'),
+    NATIVE ? fila('awake', icon('eye'), 'Pantalla encendida', `role="menuitemcheckbox" aria-checked="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
+    fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
+  ].join('');
+  return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
+      <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(`${ch.clase}, nivel ${ch.nivel}`) : 'Sin personaje abierto'}</small></span>
+      <button type="button" role="menuitem" class="mm-theme" data-mcmd="theme" aria-label="${dark ? 'Cambiar a tema de día' : 'Cambiar a tema de noche'}" title="${dark ? 'Tema de día' : 'Tema de noche'}"><span class="mm-sol">${icon('sun')}</span><span class="mm-luna">${icon('moon')}</span></button></div>
+    <div class="mm-grid">${personaje}</div><div class="mm-orla" aria-hidden="true"></div><div class="mm-grid">${saber}</div>
+    <div class="mm-util">${util}</div>
+    <button type="button" role="menuitem" class="mm-danger" data-mcmd="reset">${icon('reset')}Borrar todos los datos</button>`;
 }
 function restItems() {
   const ch = S.cur(); if (!ch) return [];
@@ -108,7 +117,7 @@ const COMMANDS = {
   edit: () => S.cur() && setEditing(!S.editing),
   filter: () => { if (!S.cur()) return; S.edit((db, ch) => { ch.play.onlyPrep = !ch.play.onlyPrep; }); },
   rest: (el) => S.cur() && showMenu($('#restMenu'), el, restItems()),
-  more: (el) => showMenu($('#moreMenu'), el, moreItems()),
+  more: (el) => showMenu($('#moreMenu'), el, moreMenuHtml()),
   long: () => A.longRest(S),
   short: () => A.shortRest(S, openRecovery),
   endconc: () => A.endConc(S),
@@ -124,7 +133,12 @@ const COMMANDS = {
     const h = S.replace(db); toast('Datos borrados.', [A.undoBtn(S, h)]);
   },
 };
-function run(cmd, el) { closeMenu(); COMMANDS[cmd]?.(el); }
+function run(cmd, el) {
+  const abierto = openMenu?.id;
+  closeMenu();
+  if ((cmd === 'more' && abierto === 'moreMenu') || (cmd === 'rest' && abierto === 'restMenu')) return;   // el mismo botón lo cierra
+  COMMANDS[cmd]?.(el);
+}
 
 /* ---------------- botón Atrás (Android) ---------------- */
 function back() {

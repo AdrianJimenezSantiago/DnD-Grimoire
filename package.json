@@ -1,6 +1,6 @@
 {
   "name": "grimorio",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "description": "Grimorio de Theo como app de Android (Capacitor)",
   "scripts": {
@@ -27,6 +27,8 @@
     "@capacitor/share": "8.0.2",
     "@fontsource/alegreya": "5.3.0",
     "@fontsource/alegreya-sans": "5.3.0",
+    "@fontsource/cinzel": "5.3.0",
+    "@fontsource/cinzel-decorative": "5.3.0",
     "pdfjs-dist": "^5.7.284"
   },
   "devDependencies": {

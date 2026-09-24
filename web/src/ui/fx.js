@@ -59,6 +59,7 @@ export function castFx(row, color) {
   setTimeout(() => row.classList.remove('fx-cast'), 1400);
   const nm = row.querySelector('.nm'); if (!nm) return;
   const r = nm.getBoundingClientRect();
+  document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'lanzar', x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, color } }));
   for (let i = 0; i < 4; i++) setTimeout(() => burst(r.left + r.width * (0.15 + 0.7 * Math.random()), r.top + r.height / 2, { color, n: 9, speed: 2.2, up: 2.4, life: 1000, size: 1.8 }), i * 70);
 }
 /** Vela que se apaga o se enciende. */
@@ -74,6 +75,7 @@ export function slotFx(level, index, kind) {
 export function dawn() {
   if (reducedMotion()) return;
   const d = document.createElement('div'); d.className = 'dawn'; document.body.appendChild(d);
+  document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'amanecer' } }));
   setTimeout(() => d.remove(), 1400);
   document.querySelectorAll('.slotbtn').forEach((b, i) => { b.style.setProperty('--i', i % 12); b.classList.add('fx-ignite'); setTimeout(() => b.classList.remove('fx-ignite'), 1300); });
 }
@@ -81,6 +83,7 @@ export function dawn() {
 export function ascend(el) {
   if (!el || reducedMotion()) return;
   const [x, y, r] = center(el);
+  document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'ascender', x, y } }));
   burst(x, y, { n: 60, speed: 5.5, up: 1, life: 1400, size: 2.4, gravity: 0.02 });
   for (let i = 0; i < 6; i++) setTimeout(() => burst(r.left + Math.random() * r.width, r.bottom, { n: 10, speed: 1.4, up: 3.4, life: 1500, size: 1.8 }), 120 + i * 90);
 }

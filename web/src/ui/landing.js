@@ -6,6 +6,7 @@ import { icon, ASTROLABE } from './icons.js';
 import { claseLinea } from './sheet.js';
 import { avatarHtml } from './avatar.js';
 import { viewTransition } from './fx.js';
+import { runaSvg, portalDesde, selloEn } from './magia.js';
 
 let S, cbs;
 export const landingVisible = () => document.body.classList.contains('on-landing');
@@ -19,10 +20,11 @@ function render() {
       ${c.retrato ? `<span class="lc-av">${avatarHtml(c, 'lg')}<span class="lc-badge">${gi(t.icono)}</span></span>` : `<span class="lc-emb">${gi(t.icono)}</span>`}
       <span class="lc-txt"><span class="lc-name">${esc(c.nombre || 'Sin nombre')}</span><span class="lc-cls">${esc(claseLinea(c))}</span>
       <span class="lc-meta">${[c.especie, n === 1 ? '1 conjuro' : n + ' conjuros'].filter(Boolean).map(esc).join(' · ')}</span></span>
+      <span class="lc-marca" aria-hidden="true">${gi(t.icono)}</span>
       ${c.id === ult ? '<span class="lc-cont">Continuar</span>' : ''}</button>`;
   };
   patch($('#landing'), `<div class="l-sky" aria-hidden="true">${ASTROLABE}</div>
-    <header class="l-head"><span class="l-mark">${gi('libro')}</span><h1>Grimorio</h1><p>Libro de conjuros para D&amp;D 2024</p></header>
+    <header class="l-head"><span class="l-mark">${runaSvg({ n: 22, lados: 7, cls: 'l-runa', semillaInicial: 42 })}${gi('libro')}</span><h1>Grimorio</h1><p>Libro de conjuros para D&amp;D 2024</p></header>
     ${chars.length ? `<h2 class="l-h2">Elige personaje</h2><div class="l-grid">${orden.map(card).join('')}</div>`
       : `<div class="l-empty"><p>Aún no hay ningún personaje en este dispositivo.</p><p class="note">Crea el primero, o carga una copia de seguridad si ya tienes uno en otro sitio.</p></div>`}
     <div class="l-actions">
@@ -47,6 +49,12 @@ export function hideLanding() {
 export function init(store, callbacks) {
   S = store; cbs = callbacks;
   S.subscribe(() => { if (landingVisible()) render(); });
-  on($('#landing'), 'click', '[data-lopen]', (e, b) => viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = b.dataset.lopen; }); hideLanding(); window.scrollTo({ top: 0 }); cbs.onOpen?.(); }));
+  on($('#landing'), 'click', '[data-lopen]', (e, b) => {
+    const r = b.getBoundingClientRect();
+    selloEn(b.querySelector('.lc-emb, .lc-av'), { size: 150, dur: 700 });
+    portalDesde(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
+    setTimeout(() => abrir(b), 120);
+  });
+  const abrir = b => viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = b.dataset.lopen; }); hideLanding(); window.scrollTo({ top: 0 }); cbs.onOpen?.(); });
   on($('#landing'), 'click', '[data-lcmd]', (e, b) => cbs.cmd(b.dataset.lcmd));
 }

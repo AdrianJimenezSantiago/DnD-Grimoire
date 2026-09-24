@@ -10,6 +10,10 @@ import '@fontsource/alegreya/latin-400-italic.css';
 import '@fontsource/alegreya-sans/latin-400.css';
 import '@fontsource/alegreya-sans/latin-500.css';
 import '@fontsource/alegreya-sans/latin-700.css';
+import '@fontsource/cinzel/latin-500.css';
+import '@fontsource/cinzel/latin-600.css';
+import '@fontsource/cinzel/latin-700.css';
+import '@fontsource/cinzel-decorative/latin-700.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/sheet.css';
@@ -17,6 +21,7 @@ import './styles/dialogs.css';
 import './styles/motion.css';
 import './styles/extras.css';
 import './styles/biblioteca.css';
+import './styles/arcano.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
@@ -42,6 +47,8 @@ import * as area from './ui/dialogs/area.js';
 import * as biblioteca from './ui/dialogs/biblioteca.js';
 import * as equipo from './ui/dialogs/equipo.js';
 import { tour } from './ui/tour.js';
+import { initFondo } from './ui/fondo.js';
+import { initMagia } from './ui/magia.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
@@ -50,6 +57,7 @@ async function boot() {
   const theme = await storage.get(PREF + '-theme');
   if (theme) document.documentElement.dataset.theme = theme;
   setBars(eventos.isDark());
+  initFondo(); initMagia();
 
   const [v2, v1] = await Promise.all([storage.get(KEY), storage.get(KEY_V1)]);
   const { db, migrated } = fromStored(v2, v1);

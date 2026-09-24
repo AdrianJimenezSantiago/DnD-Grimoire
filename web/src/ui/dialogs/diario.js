@@ -17,6 +17,7 @@ import { gi } from '../tema.js';
 import { iconoDano } from './tiradas.js';
 import { TIPOS_CRIATURA, DANOS, ESTADOS, SALVACIONES, AMENAZAS, ESTADO_CRIATURA, REL_DANO, CICLO_DANO, REL_CONJ, bestiarioDe, nuevaCriatura, criatura, buscarCriaturas, resumenCriatura } from '../../domain/bestiario.js';
 import { tiradasConjuro } from '../../domain/catalogo.js';
+import { marcarNota, quemar } from '../magia.js';
 
 let S, V = { vista: 'lista', sid: null, tipo: 'nombre', q: '', cid: null, bq: '', btipo: '' };
 const dlg = () => $('#diaDlg');
@@ -132,14 +133,16 @@ export function openDiario(sid) { if (!ch()) return; V = { ...V, vista: sid ? 's
 
 function anadir() {
   const inp = $('#diNota'), t = inp.value.trim(); if (!t) { inp.focus(); return; }
-  S.edit(() => { ses().notas.unshift(nuevaNota(V.tipo, t)); }); haptic();
-  sesion(); $('#diNota').focus();
+  const nt = nuevaNota(V.tipo, t);
+  S.edit(() => { ses().notas.unshift(nt); }); haptic();
+  sesion(); $('#diNota').focus(); marcarNota(nt.id, 'nueva');
 }
 /** Tachar / subrayar desde la tarjeta «Para recordar» de la hoja. */
 export function accionNota(store, sid, nid, act) {
+  let activa = false;
   store.edit((db, c) => { const s = diarioDe(c).sesiones.find(x => x.id === sid), n = s?.notas.find(x => x.id === nid); if (!n) return;
-    if (act === 'tachar') n.hecho = !n.hecho; if (act === 'subrayar') n.fijada = !n.fijada; });
-  haptic();
+    if (act === 'tachar') activa = n.hecho = !n.hecho; if (act === 'subrayar') activa = n.fijada = !n.fijada; });
+  haptic(); if (activa) marcarNota(nid, act);
 }
 export function init(store) {
   S = store;
@@ -170,15 +173,16 @@ export function init(store) {
   });
   on(root, 'click', '[data-abrir]', (e, b) => { V.vista = 'sesion'; V.sid = b.dataset.abrir; sesion(); root.querySelector('.dbody').scrollTop = 0; });
   on(root, 'click', '[data-tipo]', (e, b) => { V.tipo = b.dataset.tipo; const t = $('#diNota').value; sesion(); $('#diNota').value = t; $('#diNota').focus(); });
-  on(root, 'click', '[data-ntact]', (e, b) => {
-    const li = b.closest('[data-nt]'), a = b.dataset.ntact;
+  on(root, 'click', '[data-ntact]', async (e, b) => {
+    const li = b.closest('[data-nt]'), a = b.dataset.ntact, id = li.dataset.nt; let activa = false;
+    if (a === 'borrar') await quemar(li);
     S.edit((db, c) => {
-      const s = diarioDe(c).sesiones.find(x => x.id === li.dataset.ses), n = s?.notas.find(x => x.id === li.dataset.nt); if (!n) return;
-      if (a === 'tachar') n.hecho = !n.hecho;
-      if (a === 'subrayar') n.fijada = !n.fijada;
+      const s = diarioDe(c).sesiones.find(x => x.id === li.dataset.ses), n = s?.notas.find(x => x.id === id); if (!n) return;
+      if (a === 'tachar') activa = n.hecho = !n.hecho;
+      if (a === 'subrayar') activa = n.fijada = !n.fijada;
       if (a === 'borrar') s.notas = s.notas.filter(x => x !== n);
     });
-    haptic(); render();
+    haptic(); render(); if (activa) marcarNota(id, a);
   });
   root.addEventListener('keydown', e => { if (e.target.id === 'diNota' && e.key === 'Enter') { e.preventDefault(); anadir(); } });
   root.addEventListener('input', e => {
