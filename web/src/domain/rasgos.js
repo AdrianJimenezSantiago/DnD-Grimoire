@@ -54,11 +54,14 @@ export function plantillas(ch) {
       R('bardo.inspiracion', { tipo: 'recurso', nombre: 'Inspiración bárdica', max: mod('car'), recarga: L >= 5 ? 'corto' : 'largo',
         nota: `Dado de inspiración: ${L >= 15 ? 'd12' : L >= 10 ? 'd10' : L >= 5 ? 'd8' : 'd6'}.${L >= 5 ? ' También recuperas un uso gastando un espacio de conjuro.' : ''}` });
       if (has(/glamour/i) && L >= 3) uno('glamour.cautivadora', 'Magia cautivadora', 'También puedes restablecerla gastando un uso de Inspiración bárdica.');
+      if (has(/luna/i) && L >= 6) uno('lunabardo.bendicion', 'Bendición de la luz lunar', 'Modifica un lanzamiento de Rayo de luna: brillas y curas 2d4 a otra criatura cada vez que alguien falle la salvación.');
       break;
     case 'Brujo':
       if (L >= 2) uno('brujo.astucia', 'Astucia mágica', 'Rito de 1 minuto: recuperas espacios de pacto gastados hasta la mitad de tu máximo, redondeando hacia arriba.');
       if (L >= 9) uno('brujo.contactar', 'Contactar patrón', 'Contactar con otro plano sin gastar espacio.');
+      [6, 7, 8, 9].filter(n => L >= 2 * n - 1).forEach(n => uno('brujo.arcanum' + n, `Arcanum místico (nivel ${n})`, `Lanzas tu conjuro de nivel ${n} del arcanum sin gastar espacio.`));
       if (has(/celestial/i) && L >= 3) R('celestial.luz', { tipo: 'recurso', nombre: 'Luz sanadora', max: 1 + L, nota: `Reserva de d6 para curar; gastas como máximo ${mod('car')} a la vez.` });
+      if (has(/celestial/i) && L >= 14) uno('celestial.venganza', 'Venganza ardiente', 'Cura a quien vaya a tirar salvación contra muerte y ciega a los enemigos cercanos.');
       if (has(/fe[ée]ric/i)) {
         if (L >= 3) R('feerico.pasos', { tipo: 'recurso', nombre: 'Pasos feéricos', max: mod('car'), nota: 'Paso brumoso sin gastar espacio.' });
         if (L >= 6) uno('feerico.escape', 'Escape brumoso', 'También puedes restablecerlo gastando un espacio de pacto.');
@@ -77,6 +80,7 @@ export function plantillas(ch) {
         if (L >= 3) R('luz.fulgor', { tipo: 'recurso', nombre: 'Fulgor protector', max: mod('sab'), recarga: L >= 6 ? 'corto' : 'largo' });
         if (L >= 17) R('luz.halo', { tipo: 'recurso', nombre: 'Halo de luz', max: mod('sab') });
       }
+      if (has(/conocimiento/i) && L >= 17) uno('conocimiento.precognicion', 'Precognición divina', 'Ventaja en las pruebas con d20 durante 1 hora. También puedes restablecerla gastando un espacio de nivel 6 o superior.');
       break;
     case 'Druida':
       if (L >= 2) R('druida.forma', { tipo: 'recurso', nombre: 'Forma salvaje', max: byLvl(L, [[2, 2], [6, 3], [17, 4]]), recarga: 'corto1' });
@@ -96,19 +100,33 @@ export function plantillas(ch) {
         if (L >= 11) uno('errante.refuerzos', 'Refuerzos feéricos', 'Invocar feérico sin gastar espacio.');
         if (L >= 15) R('errante.brumoso', { tipo: 'recurso', nombre: 'Errante brumoso', max: mod('sab'), nota: 'Paso brumoso sin gastar espacio.' });
       }
+      if (has(/invernal/i)) {
+        if (L >= 7) uno('invernal.alma', 'Alma fortalecedora', `Hasta ${mod('sab')} criaturas recuperan 1d10 + ${L} puntos de golpe y tienen ventaja contra el miedo durante 1 hora.`);
+        if (L >= 11) R('invernal.represalia', { tipo: 'recurso', nombre: 'Represalia escalofriante', max: mod('sab'), nota: 'Reacción: salvación de Sabiduría o queda aturdido y con velocidad 0.' });
+        if (L >= 15) uno('invernal.espectro', 'Espectro congelado', 'Al lanzar Marca del cazador. También puedes restablecerlo gastando un espacio de nivel 4 o superior.');
+      }
       break;
     case 'Guerrero':
       R('guerrero.energias', { tipo: 'recurso', nombre: 'Tomar aliento', max: byLvl(L, [[1, 2], [4, 3], [10, 4]]), recarga: 'corto1' });
       if (L >= 2) R('guerrero.oleada', { tipo: 'recurso', nombre: 'Acción súbita', max: L >= 17 ? 2 : 1, recarga: 'corto', nota: 'Solo una vez por turno.' });
       if (L >= 9) R('guerrero.indomito', { tipo: 'recurso', nombre: 'Indómito', max: byLvl(L, [[9, 1], [13, 2], [17, 3]]) });
       if (has(/maestro del combate|batalla/i) && L >= 3) R('maestro.supremacia', { tipo: 'recurso', nombre: 'Dados de supremacía', max: byLvl(L, [[3, 4], [7, 5], [15, 6]]), recarga: 'corto', nota: `Dado: ${L >= 18 ? 'd12' : L >= 10 ? 'd10' : 'd8'}.` });
-      if (has(/psi[óo]nic/i) && L >= 3) R('psionico.dados', { tipo: 'recurso', nombre: 'Dados de energía psiónica', ...dadosPsionicos(L), recarga: 'corto1' });
+      if (has(/psi[óo]nic/i)) {
+        if (L >= 3) R('psionico.dados', { tipo: 'recurso', nombre: 'Dados de energía psiónica', ...dadosPsionicos(L), recarga: 'corto1' });
+        if (L >= 7) uno('psionico.salto', 'Salto psiónico', 'Velocidad volando doble hasta el final del turno. También puedes restablecerlo gastando un dado de energía psiónica.', 'corto');
+        if (L >= 15) uno('psionico.bastion', 'Bastión de fuerza', 'También puedes restablecerlo gastando un dado de energía psiónica.');
+        if (L >= 18) uno('psionico.maestro', 'Maestro telequinético', 'Telequinesis sin gastar espacio. También puedes restablecerlo gastando un dado de energía psiónica.');
+      }
+      if (has(/abanderad/i) && L >= 3) uno('abanderado.recuperacion', 'Recuperación grupal', `Al usar Tomar aliento, hasta ${mod('car')} aliados recuperan 1d4 + ${L} puntos de golpe.`, 'corto');
       break;
     case 'Hechicero':
       R('hechicero.innata', { tipo: 'recurso', nombre: 'Hechicería innata', max: 2 });
       if (L >= 2) R('hechicero.puntos', { tipo: 'recurso', nombre: 'Puntos de hechicería', max: L });
       if (L >= 5) uno('hechicero.recuperacion', 'Recuperación mágica', `Tras un descanso corto recuperas hasta ${Math.floor(L / 2)} puntos de hechicería.`);
       if (has(/salvaje/i) && L >= 3) uno('salvaje.mareas', 'Mareas del caos', 'Ventaja en una prueba de d20; se restablece tras una sobrecarga de magia salvaje.');
+      if (has(/salvaje/i) && L >= 18) uno('salvaje.domada', 'Sobrecarga domada', 'Eliges el efecto de la tabla de sobrecarga en lugar de tirar.');
+      if (has(/mec[áa]nic/i) && L >= 3) R('mecanica.equilibrio', { tipo: 'recurso', nombre: 'Restablecer equilibrio', max: mod('car'), nota: 'Reacción: anula la ventaja o la desventaja de una tirada de d20 a 18 m.' });
+      if (has(/fuego m[áa]gico/i) && L >= 18) uno('fuegomagico.corona', 'Corona de fuego mágico', 'Al activar Hechicería innata. También puedes restablecerla gastando 5 puntos de hechicería.');
       if (has(/drac[óo]nic/i) && L >= 14) uno('draconica.alas', 'Alas de dragón', 'También puedes restablecerlas gastando 3 puntos de hechicería.');
       if (has(/aberrant/i) && L >= 18) uno('aberrante.implosion', 'Implosión deformadora', 'También puedes restablecerla gastando 5 puntos de hechicería.');
       if (has(/mec[áa]nic/i) && L >= 14) uno('mecanica.trance', 'Trance de orden', 'También puedes restablecerlo gastando 5 puntos de hechicería.');
@@ -119,6 +137,7 @@ export function plantillas(ch) {
         if (L >= 3) R('adivino.presagio', { tipo: 'dados', nombre: 'Presagio', max: L >= 14 ? 3 : 2, dado: 'd20', nota: 'Sustituyen cualquier prueba de d20 tuya o de una criatura que veas; decídelo antes de tirar.' });
         if (L >= 6) R('adivino.avezado', { tipo: 'al_lanzar', nombre: 'Adivino avezado', escuela: 'Adivinación', espacioMin: 2, soloEspacio: true, efecto: 'recuperar', efectoN: 5 });
       }
+      if (has(/hojacantante|cantante/i) && L >= 3) R('hojacantante.cancion', { tipo: 'recurso', nombre: 'Canción de la hoja', max: mod('int'), nota: `+${mod('int')} a la CA, +3 m de velocidad y ataques con Inteligencia durante 1 minuto. Recuperas un uso al usar Recuperación arcana.` });
       if (has(/abjur/i) && L >= 3) R('abjurador.salvaguarda', { tipo: 'recurso', nombre: 'Salvaguarda arcana', max: 2 * L + modOf(ch.stats.int), nota: 'Puntos de golpe de la salvaguarda. Recupera el doble del nivel del espacio al lanzar abjuración.' });
       if (has(/evoca/i)) {
         if (L >= 10) R('evocador.potenciada', { tipo: 'al_lanzar', nombre: 'Evocación potenciada', escuela: 'Evocación', espacioMin: 0, soloEspacio: false, efecto: 'aviso', texto: 'Suma tu modificador de Inteligencia a una tirada de daño del conjuro.' });
@@ -136,12 +155,13 @@ export function plantillas(ch) {
       if (has(/misericordia/i) && L >= 17) uno('misericordia.suprema', 'Mano de misericordia suprema');
       break;
     case 'Paladín':
-      R('paladin.manos', { tipo: 'recurso', nombre: 'Imposición de manos', max: 5 * L, nota: 'Reserva de puntos de golpe para curar.' });
+      R('paladin.manos', { tipo: 'recurso', nombre: 'Imponer las manos', max: 5 * L, nota: 'Reserva de puntos de golpe para curar.' });
       if (L >= 2) uno('paladin.castigo', 'Castigo de paladín', 'Castigo divino sin gastar espacio.');
       if (L >= 3) R('paladin.canalizar', { tipo: 'recurso', nombre: 'Canalizar divinidad', max: L >= 11 ? 3 : 2, recarga: 'corto1' });
       if (L >= 5) uno('paladin.corcel', 'Corcel fiel', 'Hallar corcel sin gastar espacio.');
+      if (has(/genios/i) && L >= 15) R('genios.represalia', { tipo: 'recurso', nombre: 'Represalia elemental', max: mod('car'), nota: `Reacción: mitad de daño y el atacante sufre 2d10 + ${mod('car')} (salvación de Destreza, mitad).` });
       if (L >= 20) {
-        const cap = has(/entrega|devoci/i) ? 'Halo sagrado' : has(/gloria/i) ? 'Leyenda viviente' : has(/antiguos/i) ? 'Campeón ancestral' : has(/venganza/i) ? 'Ángel vengador' : '';
+        const cap = has(/entrega|devoci/i) ? 'Halo sagrado' : has(/gloria/i) ? 'Leyenda viviente' : has(/antiguos/i) ? 'Campeón ancestral' : has(/venganza/i) ? 'Ángel vengador' : has(/genios/i) ? 'Vástago noble' : '';
         if (cap) uno('paladin.cumbre', cap, 'También puedes restablecerlo gastando un espacio de nivel 5.');
       }
       break;
@@ -150,6 +170,7 @@ export function plantillas(ch) {
         R('rebanaalmas.dados', { tipo: 'recurso', nombre: 'Dados de energía psiónica', ...dadosPsionicos(L), recarga: 'corto1' });
         if (L >= 17) uno('rebanaalmas.desgarro', 'Desgarro mental', 'También puedes restablecerlo gastando 3 dados de energía psiónica.');
       }
+      if (has(/v[áa]stago|tres/i) && L >= 3) R('vastago.sed', { tipo: 'recurso', nombre: 'Sed de sangre', max: mod('int'), recarga: L >= 17 ? 'corto1' : 'largo', nota: 'Reacción: te teletransportas junto a un enemigo que queda maltrecho y le atacas.' });
       if (L >= 20) uno('picaro.suerte', 'Golpe de suerte', '', 'corto');
       break;
   }

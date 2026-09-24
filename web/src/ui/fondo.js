@@ -11,6 +11,7 @@
  *   forja   · guerrero, mecánica → chispas que saltan del yunque
  *   guarda  · abjurador → retícula hexagonal que late
  *   prisma  · ilusionista, salvaje → pompas irisadas
+ *   (cada subclase del Manual y de Héroes de Faerûn tiene su escena en ESCENA, según su emblema)
  *
  * Coste: ~30 fps, sprites precalculados (sin gradientes por partícula y fotograma), se detiene con la app
  * en segundo plano o con una hoja a pantalla completa. «Reducir movimiento» pinta un único fotograma quieto.
@@ -18,13 +19,17 @@
 import { reducedMotion } from './fx.js';
 
 const ESCENA = {
-  adivino: 'astral', mago: 'astral', estrellas: 'astral', luna: 'astral', libro: 'astral',
-  evocador: 'ascuas', hechicero: 'ascuas', draconica: 'ascuas', barbaro: 'ascuas', infernal: 'ascuas',
-  brujo: 'vacio', aberrante: 'vacio', sombra: 'vacio', picaro: 'vacio',
-  clerigo: 'halo', luz: 'halo', celestial: 'halo', paladin: 'halo', vida: 'halo',
-  druida: 'arboleda', explorador: 'arboleda', tierra: 'arboleda', feerico: 'arboleda',
-  bardo: 'cancion', monje: 'calma', guerrero: 'forja', mecanica: 'forja',
-  abjurador: 'guarda', ilusionista: 'prisma', salvaje: 'prisma',
+  adivino: 'astral', mago: 'astral', estrellas: 'astral', luna: 'astral', libro: 'astral', lunabardo: 'astral', conocimiento: 'astral', invernal: 'astral',
+  evocador: 'ascuas', hechicero: 'ascuas', draconica: 'ascuas', barbaro: 'ascuas', infernal: 'ascuas', berserker: 'ascuas', fuegomagico: 'ascuas', elementos: 'ascuas', venganza: 'ascuas',
+  brujo: 'vacio', aberrante: 'vacio', sombra: 'vacio', picaro: 'vacio', primigenio: 'vacio', engano: 'vacio', acechador: 'vacio', psionico: 'vacio',
+  asesino: 'vacio', ladron: 'vacio', rebanaalmas: 'vacio', vastago: 'vacio',
+  clerigo: 'halo', luz: 'halo', celestial: 'halo', paladin: 'halo', vida: 'halo', fanatico: 'halo', abanderado: 'halo', entrega: 'halo', gloria: 'halo',
+  druida: 'arboleda', explorador: 'arboleda', tierra: 'arboleda', feerico: 'arboleda', arbol: 'arboleda', corazon: 'arboleda', cazador: 'arboleda',
+  errante: 'arboleda', bestias: 'arboleda', antiguos: 'arboleda',
+  bardo: 'cancion', danza: 'cancion', saber: 'cancion', glamour: 'cancion', valor: 'cancion',
+  monje: 'calma', manoabierta: 'calma', misericordia: 'calma', mar: 'calma',
+  guerrero: 'forja', mecanica: 'forja', guerra: 'forja', campeon: 'forja', maestro: 'forja',
+  abjurador: 'guarda', caballero: 'guarda', ilusionista: 'prisma', salvaje: 'prisma', hojacantante: 'prisma', genios: 'prisma', embaucador: 'prisma',
 };
 export const escenaDe = t => ESCENA[t?.icono] || ESCENA[t?.clase] || 'astral';
 

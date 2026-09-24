@@ -30,6 +30,28 @@ La app guarda varios personajes. Cada uno tiene su propio libro de conjuros, sus
 
 Si tenías datos de la versión anterior, se convierten solos al abrir la app. Las copias de la hoja del navegador se pueden cargar y entran como un personaje más.
 
+## Novedades 2.3: progresión completa de todas las clases
+
+- **Las 12 clases, del nivel 1 al 20.** La app conoce todos los rasgos de clase del Manual del Jugador 2024 y los de sus 48 subclases, más las 8 subclases de Héroes de Faerûn: Colegio de la luna, Dominio del conocimiento, Caminante invernal, Abanderado, Hechicería del fuego mágico, Hojacantante, Juramento de los genios nobles y Vástago de los Tres. Los nombres están revisados contra los PDF.
+- **Rasgos → «Tu clase a nivel N».** Muestra:
+  - los valores que escalan con el nivel: puntos de golpe medios, dados de golpe, salvaciones, daño de Furia, Ataque furtivo, Artes marciales, invocaciones, Arcanum místico, ataques por acción…;
+  - los rasgos ganados nivel a nivel, con los de la subclase resaltados;
+  - los conjuros siempre preparados de la clase y la subclase (dominios, juramentos, patrones, círculos…), con un botón para añadir al libro los que falten.
+- **Subir de nivel lo aplica solo.** El resumen dice los rasgos exactos de ese nivel en cualquier clase, y los conjuros siempre preparados nuevos entran en el libro al confirmar.
+- **Más recursos de subclase:** Arcanum místico (brujo), Venganza ardiente, Precognición divina, Restablecer equilibrio, Sobrecarga domada, Salto psiónico, Bastión de fuerza, Canción de la hoja, Sed de sangre, Recuperación grupal, Represalia escalofriante, Represalia elemental, Vástago noble… La reserva del paladín se llama ahora como en el manual: Imponer las manos.
+- **Un color y un emblema por subclase.** Las 56 subclases tienen su propio tono y su propio emblema, y cada una su fondo animado. Una prueba automática comprueba que no se repite ninguno.
+
+### Rama `development` y personajes de prueba
+
+Los cambios se prueban primero en la rama `development` y pasan a `main` cuando están listos. `main` sigue siendo la que genera el APK y la versión de Windows, y la que publica Vercel en producción.
+
+- **Personajes de prueba.** En cualquier compilación que no sea de `main` (la rama `development`, sus vistas previas en Vercel o `npm run dev` en local), la app crea al arrancar un personaje de **nivel 8 por cada subclase**: 56 en total. Aparecen en la portada en su propia sección, «Personajes de prueba».
+  - Cada uno viene montado de forma automática según las reglas: características con la matriz estándar, el trasfondo y las mejoras de característica; especie y trasfondo, con su dote de origen; trucos, conjuros preparados y conjuros siempre preparados de clase y subclase; el libro del mago con Experto en su escuela; invocaciones y rasgos propios.
+  - Llevan también objetos mágicos (uno sintonizado y una varita con cargas), una sesión de diario con todos los tipos de nota, una criatura en el bestiario y una historia con sus rasgos.
+  - «Regenerar personajes de prueba», en la portada, los vuelve a crear desde cero sin tocar tus personajes (se puede deshacer).
+  - Para forzarlo en cualquier rama: `PERSONAJES_PRUEBA=1 npm run build` (o `=0` para quitarlo).
+- **Pruebas automáticas en cada cambio.** GitHub pasa las pruebas y compila la web y la versión de Windows en cada cambio de `development` y en cada PR (`.github/workflows/pruebas.yml`). No publica nada.
+
 ## Novedades 2.1: biblioteca, objetos mágicos y bestiario
 
 - **Más libros.** Libros y manuales importa ahora también la **Guía del Dungeon Master (2024)** y expansiones como **Héroes de Faerûn**. De cada PDF la app lee, en tu dispositivo, lo que reconozca:
@@ -91,7 +113,7 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
   - Hechicero: Hechicería innata y puntos de hechicería.
   - Mago: Recuperación arcana. Adivino: Presagio y Adivino avezado. Evocador: Evocación potenciada.
   - Monje: puntos de concentración.
-  - Paladín: Imposición de manos y Canalizar divinidad.
+  - Paladín: Imponer las manos y Canalizar divinidad.
 
   Se pueden desactivar o «Personalizar» (crea una copia editable). Los rasgos propios sirven para dotes, objetos o reglas de la mesa.
 - **Descanso corto.** Aparece cuando hace falta. Recupera lo que toca y ofrece usar la recuperación de espacios.
@@ -104,7 +126,7 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
 ## Novedades de uso
 
 - **Portada.** La app se abre en una portada con tus personajes, cada uno con el color y el emblema de su clase. Toca uno para abrir su hoja. El nombre de la barra superior te devuelve a la portada, y el botón Atrás de Android también. Una instalación nueva empieza sin personajes.
-- **Tema por clase y subclase.** Cada clase tiene su color y su emblema, y algunas subclases el suyo propio. El adivino conserva el dorado de vela.
+- **Tema por clase y subclase.** Cada clase y cada subclase (las del manual y las de Héroes de Faerûn) tienen su propio color y su propio emblema. El adivino conserva el dorado de vela.
 - **Espacios de conjuro.** Son círculos: llenos si están libres y un anillo vacío si están gastados, con animación al cambiar. El número de cada nivel en la barra superior te lleva a sus conjuros.
 - **Tiradas.** Tras lanzar un conjuro, «Tirar» abre la bandeja de dados. También desde la ficha del conjuro → Tiradas. Permite:
   - ataque con ventaja o desventaja y aviso de crítico;
@@ -246,7 +268,8 @@ web/                     código fuente (Vite)
   public/data/           compendio SRD 5.2
   src/
     core/                store (estado único, historial y deshacer, guardado) y utilidades
-    domain/              reglas 2024, rasgos, modelo y migraciones, catálogo, subida de nivel, lectores de libros
+    domain/              reglas 2024, progresión de clases y subclases (clases2024), rasgos, modelo y migraciones, catálogo,
+                         subida de nivel, personajes de prueba (pruebas), lectores de libros
                          (conjuros, tablas, objetos, dotes, trasfondos, subclases, reglas), equipo y bestiario (sin DOM)
     platform/            adaptador de Capacitor (almacenamiento, vibración, compartir…)
     app/                 casos de uso (lanzar, descansar…) y controlador de eventos
@@ -269,7 +292,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (48)
+npm test           # pruebas (58)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

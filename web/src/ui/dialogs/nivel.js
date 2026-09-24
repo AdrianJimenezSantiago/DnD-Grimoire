@@ -4,8 +4,8 @@
  */
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn } from '../../domain/reglas2024.js';
-import { esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
-import { allSpellItems, itemMeta, itemToSid, listFilter, subclasesDe } from '../../domain/catalogo.js';
+import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
+import { allSpellItems, compendio, itemMeta, itemToSid, listFilter, subclasesDe } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -73,11 +73,12 @@ function render() {
   $('#lvSteps').innerHTML = LV.steps.map((s, i) => `<i class="${i < LV.i ? 'done' : i === LV.i ? 'now' : ''}"></i>`).join('');
   let h = '';
   if (step === 'resumen') {
-    const feats = featuresAt(ch, d, to), diff = levelDiff(A, B, ch, d);
+    const feats = featuresAt(ch, d, to), diff = levelDiff(A, B, ch, d), auto = conjurosPendientes(S.db, d, compendio()).map(c => c.x.es);
     h = `<div class="lv-big" aria-hidden="true"><span>${ch.nivel}</span><i>→</i><b>${to}</b></div><div class="fsum"><p><b>${esc(ch.clase)}, nivel ${to}.</b> Competencia ${sgn(B.pb)}${B.pb > A.pb ? ' (sube)' : ''}.</p>
       ${diff ? `<p>${esc(diff.replace(/^Al subir de nivel gana: /, 'Ganas: '))}</p>` : '<p>Sin cambios en espacios, preparados ni trucos.</p>'}
-      ${feats.length ? `<p>Rasgos de este nivel: ${esc(joinY(feats))}.</p>` : ''}</div>
-      <p class="note">Puntos de golpe: suma la media o tira el dado de golpe, como indique tu DJ; esta app no los lleva.${ch.clase !== 'Mago' ? ' Revisa en el manual el resto de rasgos de tu clase para este nivel.' : ''}</p>
+      ${feats.length ? `<p>Rasgos de este nivel: ${esc(joinY(feats))}.</p>` : ''}
+      ${auto.length ? `<p>Siempre preparados desde ahora: ${esc(joinY(auto))}.</p>` : ''}</div>
+      <p class="note">Puntos de golpe: suma la media o tira el dado de golpe, como indique tu DJ; esta app no los lleva. La progresión completa está en Rasgos.</p>
       <p class="note">Los siguientes pasos te piden solo lo que cambia. Nada se guarda hasta el último.</p>`;
   }
   if (step === 'subclase') {
@@ -140,6 +141,8 @@ function apply() {
     add(picks.prep, { fuente: B.listaNombre, prep: true });
     add(picks.trucos, { fuente: `${B.listaNombre || c.clase} (nivel ${to})` });
     c.nivel = to; c.subclase = LV.subclase; c.stats = d.stats;
+    const auto = anadirPendientes(db, c, conjurosPendientes(db, c, compendio()));
+    if (auto.length) notes.push(`siempre preparados ${auto.join(', ')}`);
     if (notes.length) c.notas = `${(c.notas || '').trim()}\nNivel ${to}: ${notes.join('; ')}.`.trim();
   });
   closeSheet(dlg()); window.scrollTo({ top: 0, behavior: 'smooth' });

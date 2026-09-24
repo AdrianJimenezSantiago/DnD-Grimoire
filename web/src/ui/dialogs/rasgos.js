@@ -2,6 +2,9 @@
 import { clone, esc, uid } from '../../core/util.js';
 import { ABILS, SCHOOLS, perfil } from '../../domain/reglas2024.js';
 import { maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
+import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases2024.js';
+import { anadirPendientes, conjurosPendientes } from '../../domain/progresion.js';
+import { compendio } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { claseLinea, freeOf, usedOf } from '../sheet.js';
 import { openSheet, closeSheet } from '../dialog.js';
@@ -24,7 +27,22 @@ function renderRules() {
   $('#rulesBody').innerHTML =
     `<section class="fsec"><h3>De tu clase y subclase</h3>${tpl.length ? tpl.map(row).join('') : '<p class="note">Tu clase no tiene recursos que la app lleve por ti a este nivel.</p>'}
       <p class="note">Se ajustan solos al subir de nivel. Desactiva los que no quieras ver; «Personalizar» crea una copia tuya que puedes cambiar.</p></section>
-     <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>`;
+     <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>
+     ${progresionHtml(ch)}`;
+}
+/** Progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros que dan la clase y la subclase. */
+function progresionHtml(ch) {
+  const vals = escalas(ch); if (!vals.length) return '';
+  const prog = progresion(ch), sc = subclaseDe(ch), auto = conjurosAutomaticos(ch), pend = conjurosPendientes(S.db, ch, compendio());
+  const faltan = new Set(pend.map(c => c.nombre));
+  const porNivel = prog.reduce((m, r) => ((m[r.nivel] ||= []).push(r), m), {});
+  return `<section class="fsec prog"><h3>Tu clase a nivel ${ch.nivel}</h3>
+      <dl class="prog-vals">${vals.map(v => `<div><dt>${esc(v.nombre)}</dt><dd>${esc(v.valor)}${v.nota ? `<small>${esc(v.nota)}</small>` : ''}</dd></div>`).join('')}</dl>
+      <ol class="prog-lvls">${Object.entries(porNivel).map(([L, rs]) => `<li><b>${L}</b><span>${rs.map(r => `<span class="${r.origen === 'subclase' ? 'sub' : ''}">${esc(r.nombre)}</span>`).join(' · ')}</span></li>`).join('')}</ol>
+      <p class="note">${sc ? `Resaltados, los rasgos de ${esc(sc.nombre)} (${esc(sc.libro)}).` : ch.nivel >= 3 ? 'Escribe una subclase del manual en la ficha para ver también sus rasgos.' : 'La subclase llega a nivel 3.'}</p>
+      ${auto.length ? `<h3>Conjuros de tu clase y subclase</h3><p class="prog-conj">${auto.map(c => `<span class="${faltan.has(c.nombre) ? 'falta' : ''}">${esc(c.nombre)}<small>${esc(c.fuente)}${c.ritual ? ', solo ritual' : ''}</small></span>`).join('')}</p>
+        ${pend.length ? `<button type="button" data-rauto>Añadir los ${pend.length} que faltan al libro</button>` : '<p class="note">Todos están en tu libro, siempre preparados.</p>'}` : ''}
+    </section>`;
 }
 export function openRules() { renderRules(); openSheet($('#rulesDlg')); }
 
@@ -135,6 +153,10 @@ export function init(store) {
     const t = reglas(ch, true).find(x => x.id === b.dataset.rcustom);
     openRuleForm({ id: uid('r'), tipo: t.tipo, nombre: t.nombre, nota: t.nota || '', maxBase: 'fijo', maxN: t.max, maxAb: 'car', recarga: t.recarga || 'largo', dado: t.dado || 'd20', nivMax: t.nivMax || 5,
       escuela: t.escuela || '', espacioMin: t.espacioMin || 0, soloEspacio: !!t.soloEspacio, efecto: t.efecto || 'aviso', efectoN: t.efectoN || 5, texto: t.texto || '', desde: t.id }, true);
+  });
+  on($('#rulesBody'), 'click', '[data-rauto]', () => {
+    let nombres = []; const h = S.edit((db, c) => { nombres = anadirPendientes(db, c, conjurosPendientes(db, c, compendio())); });
+    renderRules(); toast(`Añadidos siempre preparados: ${esc(nombres.join(', '))}.`, [undoBtn(S, h)]);
   });
   $('#ruleNew').addEventListener('click', () => openRuleForm(null));
   $('#ruleForm').addEventListener('input', ev => {

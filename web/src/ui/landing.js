@@ -14,6 +14,7 @@ export const landingVisible = () => document.body.classList.contains('on-landing
 function render() {
   const chars = S.db.chars, ult = S.db.activeId;
   const orden = [...chars].sort((a, b) => (b.id === ult) - (a.id === ult));
+  const propios = orden.filter(c => !c.prueba), pruebas = orden.filter(c => c.prueba);
   const card = (c, i) => {
     const t = temaDe(c), n = c.book.length;
     return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''}" data-lopen="${c.id}" style="--acc-h:${t.h};--acc-s:${t.s}%;--i:${i}">
@@ -25,14 +26,16 @@ function render() {
   };
   patch($('#landing'), `<div class="l-sky" aria-hidden="true">${ASTROLABE}</div>
     <header class="l-head"><span class="l-mark">${runaSvg({ n: 22, lados: 7, cls: 'l-runa', semillaInicial: 42 })}${gi('libro')}</span><h1>Grimorio</h1><p>Libro de conjuros para D&amp;D 2024</p></header>
-    ${chars.length ? `<h2 class="l-h2">Elige personaje</h2><div class="l-grid">${orden.map(card).join('')}</div>`
-      : `<div class="l-empty"><p>Aún no hay ningún personaje en este dispositivo.</p><p class="note">Crea el primero, o carga una copia de seguridad si ya tienes uno en otro sitio.</p></div>`}
+    ${propios.length ? `<h2 class="l-h2">Elige personaje</h2><div class="l-grid">${propios.map(card).join('')}</div>` : ''}
+    ${pruebas.length ? `<h2 class="l-h2">Personajes de prueba <small>(${pruebas.length}, nivel ${pruebas[0].nivel})</small></h2><div class="l-grid">${pruebas.map((c, i) => card(c, propios.length + i)).join('')}</div>` : ''}
+    ${chars.length ? '' : `<div class="l-empty"><p>Aún no hay ningún personaje en este dispositivo.</p><p class="note">Crea el primero, o carga una copia de seguridad si ya tienes uno en otro sitio.</p></div>`}
     <div class="l-actions">
       <button type="button" class="${chars.length ? '' : 'gold'}" data-lcmd="nuevo">${icon('plus')}Nuevo personaje</button>
       <button type="button" data-lcmd="copia">${icon('save')}Cargar copia</button>
       <button type="button" data-lcmd="biblioteca">${gi('biblioteca')}Biblioteca</button>
       <button type="button" data-lcmd="manual">${gi('libro')}Libros y manuales</button>
       ${chars.length ? `<button type="button" data-lcmd="gestionar">${icon('users')}Gestionar personajes</button>` : ''}
+      ${cbs.pruebas ? `<button type="button" data-lcmd="pruebas">${gi('dados')}Regenerar personajes de prueba</button>` : ''}
     </div>
     <footer class="l-foot"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button></footer>`);
 }

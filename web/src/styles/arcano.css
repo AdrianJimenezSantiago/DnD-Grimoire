@@ -368,6 +368,7 @@ body.landing-in .l-head h1 { animation: rise .6s var(--ease-out) both .06s, bril
 .l-h2 { font: 600 var(--fs-m) / 1 var(--display); letter-spacing: .06em; color: var(--gold); display: flex; align-items: center; gap: 14px; width: min(720px, 100%); justify-content: center; }
 .l-h2::before, .l-h2::after { content: ""; flex: 1; max-width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
 .l-h2::after { transform: scaleX(-1); }
+.l-h2 small { font: 400 var(--fs-s, .8em) / 1 var(--sans); color: var(--ink-2); letter-spacing: 0; }
 .lcard { --orn: 22px; border-radius: 16px; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform .35s var(--ease-out), box-shadow .3s, border-color .3s; will-change: transform; }
 .lcard::before { background: linear-gradient(135deg, hsl(var(--acc-h) var(--acc-s) 72%), hsl(var(--acc-h) var(--acc-s) 50%)); opacity: .6; }
