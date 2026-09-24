@@ -37,7 +37,7 @@
   --surface: #FCFCFE; --surface-2: #F2F4F9; --raised: #FFFFFF;
   --line: #CCD2DF; --line-soft: #E4E8F0;
   --ink: #171D33; --ink-2: #4C5572; --ink-3: #7D859E;
-  --gold: hsl(var(--acc-h) var(--acc-s) 32%); --gold-2: hsl(var(--acc-h) var(--acc-s) 44%); --gold-soft: hsl(var(--acc-h) var(--acc-s) 90%); --glow: hsl(var(--acc-h) var(--acc-s) 45% / .24);
+  --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-l, 32%)); --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-l, 44%)); --gold-soft: hsl(var(--acc-h) var(--acc-s) 90%); --glow: hsl(var(--acc-h) var(--acc-s) 45% / .24);
   --candle-core: hsl(var(--acc-h) calc(100% * var(--acc-k, 1)) 92%); --candle-mid: hsl(var(--acc-h) var(--acc-s) 66%); --candle-edge: hsl(var(--acc-h) var(--acc-s) 42%);
   --danger: #B0382A; --ok: #2E7B58;
   --glass: rgba(231, 234, 241, .78);
@@ -46,8 +46,8 @@
   --backdrop: rgba(18, 22, 38, .38);
   --sky: radial-gradient(1200px 520px at 50% -180px, hsl(var(--acc-h) var(--acc-s) 50% / .13), transparent 70%);
   /* escuelas */
-  --sc-abj: #3F6FD8; --sc-adi: #A26E12; --sc-con: #1E9483; --sc-enc: #C24D8B;
-  --sc-evo: #D35E25; --sc-ilu: #7A58D6; --sc-nig: #5E8A3A; --sc-tra: #A77A36; --sc-none: var(--ink-3);
+  --sc-abj: #2E62D5; --sc-adi: #8B5E0F; --sc-con: #187669; --sc-enc: #AF3C79;
+  --sc-evo: #AC4D1E; --sc-ilu: #7350D4; --sc-nig: #4D712F; --sc-tra: #84612B; --sc-none: var(--ink-3);
 }
 
 /* ---------- noche: tinta profunda y vela ---------- */
@@ -57,7 +57,7 @@
     --surface: #131726; --surface-2: #191E30; --raised: #1D2338;
     --line: #2A314D; --line-soft: #1E2438;
     --ink: #EDE7D9; --ink-2: #A8AEC3; --ink-3: #6F7690;
-    --gold: hsl(var(--acc-h) var(--acc-s) 66%); --gold-2: hsl(var(--acc-h) var(--acc-s) 78%); --gold-soft: hsl(var(--acc-h) var(--acc-s) 62% / .14); --glow: hsl(var(--acc-h) var(--acc-s) 62% / .34);
+    --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-d, 66%)); --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-d, 78%)); --gold-soft: hsl(var(--acc-h) var(--acc-s) 62% / .14); --glow: hsl(var(--acc-h) var(--acc-s) 62% / .34);
     --candle-core: hsl(var(--acc-h) calc(100% * var(--acc-k, 1)) 94%); --candle-mid: hsl(var(--acc-h) var(--acc-s) 68%); --candle-edge: hsl(var(--acc-h) var(--acc-s) 40%);
     --danger: #F2826F; --ok: #6ECB9D;
     --glass: rgba(10, 12, 19, .72);
@@ -75,7 +75,7 @@
   --surface: #131726; --surface-2: #191E30; --raised: #1D2338;
   --line: #2A314D; --line-soft: #1E2438;
   --ink: #EDE7D9; --ink-2: #A8AEC3; --ink-3: #6F7690;
-  --gold: hsl(var(--acc-h) var(--acc-s) 66%); --gold-2: hsl(var(--acc-h) var(--acc-s) 78%); --gold-soft: hsl(var(--acc-h) var(--acc-s) 62% / .14); --glow: hsl(var(--acc-h) var(--acc-s) 62% / .34);
+  --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-d, 66%)); --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-d, 78%)); --gold-soft: hsl(var(--acc-h) var(--acc-s) 62% / .14); --glow: hsl(var(--acc-h) var(--acc-s) 62% / .34);
   --candle-core: hsl(var(--acc-h) calc(100% * var(--acc-k, 1)) 94%); --candle-mid: hsl(var(--acc-h) var(--acc-s) 68%); --candle-edge: hsl(var(--acc-h) var(--acc-s) 40%);
   --danger: #F2826F; --ok: #6ECB9D;
   --glass: rgba(10, 12, 19, .72);

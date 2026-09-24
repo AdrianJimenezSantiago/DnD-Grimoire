@@ -35,7 +35,8 @@
   --surface-2: color-mix(in oklab, #F2EAD8 92%, hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 60%));
   --raised: #FFFBF2;
   --line: #D3C5A8; --line-soft: #E4D9C2;
-  --ink: #2A2016; --ink-2: #5A4B3A; --ink-3: #7B6B57;
+  --ink: #2A2016; --ink-2: #5A4B3A; --ink-3: #6A5B48;
+  --on-gold: #FFF8EC;   /* texto sobre un relleno de acento (de día el acento es oscuro) */
   --glass: color-mix(in oklab, rgba(238, 229, 210, .84) 90%, hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 55% / .84));
   --backdrop: rgba(42, 30, 16, .42);
   --shadow-1: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 1px 2px rgba(60, 40, 15, .08), 0 8px 22px -8px rgba(60, 40, 15, .16);
@@ -49,7 +50,8 @@
     --bg: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 5%); --bg-2: hsl(var(--acc-h) calc(24% * var(--acc-k, 1)) 7%);
     --surface: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 9% / .95); --surface-2: hsl(var(--acc-h) calc(20% * var(--acc-k, 1)) 12.5%); --raised: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 10.5%);
     --line: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 22%); --line-soft: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 15%);
-    --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 59%);
+    --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 65%);
+    --on-gold: hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 9%);
     --glass: hsl(var(--acc-h) calc(28% * var(--acc-k, 1)) 5% / .76);
     --backdrop: hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 2% / .66);
     --shadow-1: 0 1px 0 hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 80% / .04) inset, 0 10px 26px -10px rgba(0, 0, 0, .6);
@@ -62,7 +64,8 @@
   --bg: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 5%); --bg-2: hsl(var(--acc-h) calc(24% * var(--acc-k, 1)) 7%);
   --surface: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 9% / .95); --surface-2: hsl(var(--acc-h) calc(20% * var(--acc-k, 1)) 12.5%); --raised: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 10.5%);
   --line: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 22%); --line-soft: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 15%);
-  --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 59%);
+  --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 65%);
+    --on-gold: hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 9%);
   --glass: hsl(var(--acc-h) calc(28% * var(--acc-k, 1)) 5% / .76);
   --backdrop: hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 2% / .66);
   --shadow-1: 0 1px 0 hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 80% / .04) inset, 0 10px 26px -10px rgba(0, 0, 0, .6);
@@ -446,7 +449,7 @@ html.vt-portal::view-transition-new(root) { animation: portal .8s cubic-bezier(.
 .tipos button[aria-checked="true"] { background: var(--gilt); box-shadow: 0 0 14px -4px var(--glow); }
 .ses { border-color: color-mix(in srgb, var(--gold) 14%, var(--line-soft)); transition: transform .25s var(--spring), border-color .25s, box-shadow .25s; }
 .ses:hover { transform: translateX(3px); border-color: color-mix(in srgb, var(--gold) 45%, transparent); box-shadow: 0 0 0 3px var(--gold-soft); }
-.ses-n { width: 44px; height: 44px; border-radius: 0; font: 700 17px / 1 var(--display); color: hsl(var(--acc-h) calc(55% * var(--acc-k, 1)) 12%);
+.ses-n { width: 44px; height: 44px; border-radius: 0; font: 700 17px / 1 var(--display); color: var(--on-gold);
   background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--gold-2) 80%, #fff), var(--gold) 50%, color-mix(in srgb, var(--gold) 55%, #000));
   -webkit-mask: var(--sello) center / contain no-repeat; mask: var(--sello) center / contain no-repeat; }
 .rec { background: linear-gradient(135deg, var(--gold-soft), transparent 80%); }
