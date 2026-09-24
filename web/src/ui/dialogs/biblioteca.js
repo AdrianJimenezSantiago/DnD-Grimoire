@@ -65,7 +65,7 @@ function cuerpo() {
     else {
       const f = todo.filter(e => coincide(q, e.nombre) || (q.length > 3 && coincide(q, e.texto))); n = f.length;
       h = ORDEN_G.map(c => [c, f.filter(e => (e.cat || '') === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length)
-        .map(([c, v]) => `<h3 class="bib-g">${esc(TIT_G[c] ?? c)}<small>${v.length}</small></h3><div class="gl-grid">${v.map(e => `<button type="button" class="gl-item ${e.cat === 'Estado' ? 'estado' : ''} ${/Herramientas|Objetos/.test(e.cat) ? 'dm' : ''}" data-term="${e.clave}">${esc(e.nombre)}</button>`).join('')}</div>`).join('');
+        .map(([c, v]) => `<h3 class="bib-g obj-g">${gi(c === 'Estado' ? 'ojo' : 'glosario')}${esc(TIT_G[c] ?? c)}<small>${v.length}</small></h3><div class="gl-grid">${v.map(e => `<button type="button" class="gl-item ${e.cat === 'Estado' ? 'estado' : ''} ${/Herramientas|Objetos/.test(e.cat) ? 'dm' : ''}" data-term="${e.clave}">${esc(e.nombre)}</button>`).join('')}</div>`).join('');
     }
   }
   if (V.tab === 'objetos') {
@@ -89,15 +89,18 @@ function cuerpo() {
   if (V.tab === 'dotes') {
     if (!B.dotes.length) h = vacio('Aquí aparecen las dotes de origen, generales, de estilo de combate y los dones épicos.', 'tu Manual del Jugador o de una expansión');
     else {
-      const f = B.dotes.filter(d => coincide(q, d.nombre, d.req) && (!V.cat || d.cat === V.cat)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); n = f.length;
-      h = `<ul class="bib-list">${f.map(d => `<li><button type="button" class="bib-it" data-dote="${esc(d.clave)}"><b>${esc(d.nombre)}</b><small>${esc(d.cat)}${d.req ? ` · ${esc(d.req)}` : ''}</small><span class="bib-src">${esc(corto(d.fuente))}</span></button></li>`).join('')}</ul>`;
+      const f = B.dotes.filter(d => coincide(q, d.nombre, d.req) && (!V.cat || d.cat === V.cat)); n = f.length;
+      h = agrupar(f, d => d.cat, CATS_DOTE).map(([c, v]) => grupo(c === 'Origen' ? 'Dotes de origen' : c === 'General' ? 'Dotes generales' : c === 'Estilo de combate' ? 'Estilos de combate' : c === 'Don épico' ? 'Dones épicos' : c || 'Otras', v.length, gi('dote'),
+        v.map(d => tarjeta({ attr: `data-dote="${esc(d.clave)}"`, ico: 'dote', color: tono(COLOR_DOTE[d.cat] ?? [40, 20]), titulo: d.nombre, sub: d.req ? esc(d.req) : 'Sin requisitos', lib: d.fuente })), `style="--rar:${tono(COLOR_DOTE[c] ?? [40, 20])}"`)).join('');
     }
   }
   if (V.tab === 'trasfondos') {
     if (!B.trasfondos.length) h = vacio('Aquí aparecen los trasfondos con sus características, dote, competencias y equipo.', 'tu Manual del Jugador o de una expansión');
     else {
-      const f = B.trasfondos.filter(t => coincide(q, t.nombre, t.dote, t.habilidades)).sort((a, b) => (a.nombre || '~').localeCompare(b.nombre || '~', 'es')); n = f.length;
-      h = `<ul class="bib-list">${f.map(t => `<li><button type="button" class="bib-it" data-tras="${esc(t.clave)}"><b>${esc(t.nombre || 'Trasfondo sin nombre')}</b><small>${esc(t.caracteristicas || '')} · dote: ${esc(t.dote || '—')}</small><span class="bib-src">${esc(corto(t.fuente))}</span></button></li>`).join('')}</ul>`;
+      const f = B.trasfondos.filter(t => coincide(q, t.nombre, t.dote, t.habilidades)); n = f.length;
+      // por libro: los del Manual del Jugador primero
+      h = agrupar(f, t => t.fuente, [...new Set(f.map(t => t.fuente))].sort((x, y) => /jugador/i.test(y) - /jugador/i.test(x) || x.localeCompare(y, 'es'))).map(([lb, v]) => grupo(lb, v.length, gi('libro'),
+        v.map(t => tarjeta({ attr: `data-tras="${esc(t.clave)}"`, ico: 'trasfondo', color: 'var(--gold)', titulo: t.nombre || 'Trasfondo sin nombre', sub: `${esc(abrevCar(t.caracteristicas))}${t.dote ? ` · ${esc(t.dote)}` : ''}` })))).join('');
     }
   }
   if (V.tab === 'subclases') {
@@ -106,21 +109,49 @@ function cuerpo() {
       const f = B.subclases.filter(s => s.nombre && coincide(q, s.nombre, s.clase, s.lema) && (!V.clase || s.clase === V.clase));
       n = f.length;
       const por = Object.keys(CLASES).map(c => [c, f.filter(s => s.clase === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length);
-      h = por.map(([c, v]) => `<h3 class="bib-g">${gi(norm(c).replace(/[^a-z]/g, ''))}${esc(c)}<small>${v.length}</small></h3><ul class="bib-list">${v.map(s => `<li><button type="button" class="bib-it" data-sub="${esc(s.clase + '|' + s.clave)}"><b>${esc(s.nombre)}</b><small>${esc(s.lema || s.rasgos.map(r => r.nombre).slice(0, 3).join(', '))}</small><span class="bib-src">${esc(corto(s.fuente))}</span></button></li>`).join('')}</ul>`).join('');
+      h = por.map(([c, v]) => grupo(c, v.length, gi(norm(c).replace(/[^a-z]/g, '')), v.map(sc => { const [hu, sa, ico] = TEMAS.sub[sc.nombre] || TEMAS.clase[c] || [40, 40, 'subclase'];
+        return tarjeta({ attr: `data-sub="${esc(sc.clase + '|' + sc.clave)}"`, ico, color: tono([hu, sa]), titulo: sc.nombre, sub: esc(sc.lema || sc.rasgos.map(r => r.nombre).slice(0, 3).join(', ')), lib: sc.fuente }); }))).join('');
     }
   }
   if (V.tab === 'criaturas') {
     if (!B.criaturas.length) h = vacio('Aquí aparecen los perfiles de criaturas: tipo, CA, PG, características, resistencias y acciones.', 'del apéndice de criaturas del Manual del Jugador');
     else {
-      const f = B.criaturas.filter(c => coincide(q, c.nombre, c.tipo) && (!V.ctipo || c.tipoBase === V.ctipo) && (V.cvd === '' || (c.vdNum ?? 99) <= +V.cvd))
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); n = f.length;
-      h = `<ul class="bib-list">${f.slice(0, 400).map(c => `<li><button type="button" class="bib-it" data-cria="${esc(c.clave)}"><b>${esc(c.nombre)}</b><small>${esc(c.tipo)}${c.vdNum != null ? ` · VD ${vdTexto(c.vdNum)}` : ''}</small><span class="bib-src">${esc(corto(c.fuente))}</span></button></li>`).join('')}</ul>${f.length > 400 ? `<p class="note">Y ${f.length - 400} más: afina la búsqueda.</p>` : ''}`;
+      const f = B.criaturas.filter(c => coincide(q, c.nombre, c.tipo) && (!V.ctipo || c.tipoBase === V.ctipo) && (V.cvd === '' || (c.vdNum ?? 99) <= +V.cvd)); n = f.length;
+      // por tipo y, dentro, de menor a mayor desafío
+      const porVd = (a, b) => (a.vdNum ?? 99) - (b.vdNum ?? 99) || a.nombre.localeCompare(b.nombre, 'es');
+      h = agrupar(f.slice(0, 400), c => c.tipoBase || '', TIPOS_BASE, porVd).map(([t, v]) => grupo(t ? PLURAL_TIPO[t] || t : 'Otras', v.length, gi(t === 'Bestia' ? 'bestia' : 'criatura'),
+        v.map(c => tarjeta({ attr: `data-cria="${esc(c.clave)}"`, ico: c.tipoBase === 'Bestia' ? 'bestia' : 'criatura', color: tono(COLOR_VD(c.vdNum)), titulo: c.nombre,
+          sub: `${c.vdNum != null ? `<span class="rar-txt">VD ${vdTexto(c.vdNum)}</span> · ` : ''}${esc(c.tipo.replace(new RegExp(`^${c.tipoBase || '-'}\\s*`, 'i'), '').replace(/^./, m => m.toUpperCase()))}`, lib: c.fuente })))).join('')
+        + (f.length > 400 ? `<p class="note">Y ${f.length - 400} más: afina la búsqueda.</p>` : '');
     }
   }
   $('#bibBody').innerHTML = h || '<p class="pempty">Nada coincide con la búsqueda. Prueba con menos palabras o quita algún filtro.</p>';
   const libs = libros().length;
   $('#bibSub').textContent = libs ? `${n} ${n === 1 ? 'entrada' : 'entradas'} · de ${libs} ${libs === 1 ? 'libro importado' : 'libros importados'}` : 'Reglas, objetos mágicos y opciones de personaje de tus libros';
 }
+/* ---- piezas comunes de todas las pestañas: grupo con cabecera fija y rejilla de tarjetas iguales ---- */
+const tono = ([h, sat]) => `hsl(${h} ${sat}% var(--acc-l))`;
+/** Libro de una entrada en corto, solo si no es el Manual del Jugador (el habitual). */
+const libroCorto = f => (!f || /jugador/i.test(f) ? '' : /faer|reinos/i.test(f) ? 'Faerûn' : /dungeon|gu[ií]a/i.test(f) ? 'Guía del DM' : /monstruos/i.test(f) ? 'Monstruos' : corto(f));
+function tarjeta({ attr, ico, color, titulo, sub = '', lib = '' }) {
+  const l = libroCorto(lib);
+  return `<li><button type="button" class="obj" ${attr} style="--rar:${color}"><span class="obj-ico">${gi(ico)}</span>
+    <span class="obj-t"><b>${esc(titulo)}</b><small title="${esc(lib || '')}">${l ? `<span class="bc-lib">${esc(l)}</span>` : ''}${sub}</small></span></button></li>`;
+}
+const grupo = (titulo, n, ico, tarjetas, attrs = '') => `<h3 class="bib-g obj-g" ${attrs}>${ico}${esc(titulo)}<small>${n}</small></h3><ul class="obj-list obj-grid">${tarjetas.join('')}</ul>`;
+/** [clave, entradas] en el orden dado (lo que no está, al final) y A–Z dentro salvo otro orden. */
+function agrupar(lista, clave, orden = [], cmp = (a, b) => (a.nombre || '~').localeCompare(b.nombre || '~', 'es')) {
+  const m = new Map(orden.map(k => [k, []]));
+  for (const e of lista) { const k = clave(e) ?? ''; if (!m.has(k)) m.set(k, []); m.get(k).push(e); }
+  return [...m].filter(([, v]) => v.length).map(([k, v]) => [k, v.sort(cmp)]);
+}
+const CATS_DOTE = ['Origen', 'General', 'Estilo de combate', 'Don épico'];
+const COLOR_DOTE = { Origen: [42, 70], General: [212, 60], 'Estilo de combate': [4, 65], 'Don épico': [276, 60] };
+// del verde de los desafíos bajos al rojo de los altos
+const COLOR_VD = vd => (vd == null ? [40, 10] : vd < 1 ? [140, 40] : vd < 5 ? [95, 45] : vd < 11 ? [45, 70] : vd < 17 ? [20, 70] : [355, 65]);
+const PLURAL_TIPO = { 'Aberración': 'Aberraciones', 'Autómata': 'Autómatas', Bestia: 'Bestias', Celestial: 'Celestiales', Cieno: 'Cienos', 'Dragón': 'Dragones', Elemental: 'Elementales', 'Feérico': 'Feéricos', Gigante: 'Gigantes', Humanoide: 'Humanoides', Infernal: 'Infernales', Monstruosidad: 'Monstruosidades', 'Muerto viviente': 'Muertos vivientes', Planta: 'Plantas' };
+const CAR_CORTA = { Fuerza: 'Fue', Destreza: 'Des', 'Constitución': 'Con', Inteligencia: 'Int', 'Sabiduría': 'Sab', Carisma: 'Car' };
+const abrevCar = t => String(t || '').replace(/[A-ZÁÉÍÓÚ][a-záéíóúñ]+/g, w => CAR_CORTA[w] || w).replace(/\s+y\s+/g, ', ');
 const corto = t => String(t || '').replace(/^D&D\s*[\d.,]*\s*-?\s*/i, '').replace(/\s*\(.*$/, '').split(/[:–-]/)[0].trim().slice(0, 28);
 function pintar() {
   $('#bibTabs').innerHTML = TABS.map(([k, t, ico]) => `<button type="button" role="tab" aria-selected="${V.tab === k}" data-tab="${k}">${gi(ico)}<span>${t}</span></button>`).join('');

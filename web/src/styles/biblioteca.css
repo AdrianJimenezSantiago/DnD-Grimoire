@@ -4,13 +4,16 @@
    ========================================================================= */
 :root, :root[data-theme="light"] {
   --rar-comun: #6E7690; --rar-infrec: #3F8358; --rar-raro: #3565AE; --rar-muyraro: #7449B0; --rar-legend: #A8660F; --rar-artef: #AD3445; --rar-varia: #4C5572;
+  --acc-l: 36%;
   --rel-vul: #B0382A; --rel-res: #3565AE; --rel-inm: #4C5572; --rel-ok: #2E7B58;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --rar-comun: #A8AEC3; --rar-infrec: #86C99A; --rar-raro: #8CAEF0; --rar-muyraro: #BC9CF5; --rar-legend: #F0B45A; --rar-artef: #F2869A; --rar-varia: #A8AEC3;
+  --acc-l: 70%;
   --rel-vul: #F2826F; --rel-res: #8CAEF0; --rel-inm: #C9CDDA; --rel-ok: #6ECB9D; } }
 :root[data-theme="dark"] {
   --rar-comun: #A8AEC3; --rar-infrec: #86C99A; --rar-raro: #8CAEF0; --rar-muyraro: #BC9CF5; --rar-legend: #F0B45A; --rar-artef: #F2869A; --rar-varia: #A8AEC3;
+  --acc-l: 70%;
   --rel-vul: #F2826F; --rel-res: #8CAEF0; --rel-inm: #C9CDDA; --rel-ok: #6ECB9D;
 }
 .r-comun { --rar: var(--rar-comun); } .r-infrec { --rar: var(--rar-infrec); } .r-raro { --rar: var(--rar-raro); } .r-muyraro { --rar: var(--rar-muyraro); }
@@ -63,7 +66,14 @@
 .obj-g { position: sticky; top: 0; z-index: 1; padding: 8px 2px 6px; margin: 14px 0 6px; background: var(--raised); border-bottom: 1px solid var(--line-soft); }
 .obj-g:first-child { margin-top: 0; }
 .obj-g .rar-pt { width: 10px; height: 10px; border-radius: 50%; background: var(--rar); box-shadow: 0 0 8px color-mix(in srgb, var(--rar) 60%, transparent); }
-.obj-g[class*=" r-"] { color: var(--rar); }
+.obj-g[class*=" r-"], .obj-g[style] { color: var(--rar); }
+/* libro de la entrada cuando no es el Manual del Jugador */
+.bc-lib { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: var(--r-pill); font: 500 10px / 1.4 var(--sans); color: var(--ink-2); background: color-mix(in srgb, var(--ink) 9%, transparent); vertical-align: 1px; }
+/* reglas: la misma rejilla, en baldosas más pequeñas */
+#bibBody .gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; margin-bottom: 4px; }
+#bibBody .gl-item { border-radius: 10px; justify-content: flex-start; text-align: left; padding: 0 12px; background: color-mix(in srgb, var(--surface-2) 55%, transparent); border-color: var(--line-soft); }
+#bibBody .gl-item:hover { background: var(--surface-2); border-color: var(--line); }
+#bibBody .gl-item.estado { border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
 .obj-grid .obj-t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .obj-t b { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .obj { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 6px 10px 12px; min-height: 60px; position: relative; border-radius: 8px; content-visibility: auto; contain-intrinsic-size: 60px; }
