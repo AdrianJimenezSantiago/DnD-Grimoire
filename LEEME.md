@@ -30,6 +30,30 @@ La app guarda varios personajes. Cada uno tiene su propio libro de conjuros, sus
 
 Si tenías datos de la versión anterior, se convierten solos al abrir la app. Las copias de la hoja del navegador se pueden cargar y entran como un personaje más.
 
+## Novedades 2.1: biblioteca, objetos mágicos y bestiario
+
+- **Más libros.** Libros y manuales importa ahora también la **Guía del Dungeon Master (2024)** y expansiones como **Héroes de Faerûn**. De cada PDF la app lee, en tu dispositivo, lo que reconozca:
+  - conjuros (con sus tablas), glosario de reglas y apartados de reglas del DM (veneno, trampas, maldiciones, persecuciones, efectos ambientales…);
+  - objetos mágicos con tipo, rareza, sintonización y cargas;
+  - dotes (de origen, generales, de estilo de combate y dones épicos), trasfondos y subclases con todos sus rasgos.
+
+  Con tus PDF: Manual del Jugador (391 conjuros, 130 términos, 73 dotes, 16 trasfondos, 47 subclases), Guía del DM (343 objetos, 27 apartados de reglas) y Héroes de Faerûn (17 conjuros, 32 dotes, 16 trasfondos, 8 subclases). Cuando el título de una entrada está dentro de una ilustración y no se puede leer, la app te lo pide al importar.
+- **Biblioteca** (Más → Biblioteca, o desde la portada). Pestañas Reglas, Objetos, Dotes, Trasfondos y Subclases, con búsqueda:
+  - Objetos: filtros por rareza (cada una con su color), tipo y «sin sintonización», y orden A–Z o por rareza.
+  - Subclases: los rasgos nivel a nivel, con saltos a cada nivel; los que ya tiene tu personaje se marcan.
+  - Las reglas largas llevan índice de apartados.
+- **Tablas** en conjuros, objetos y reglas (*Confusión*, *Bolsa de judías*, la tabla de venenos…). En las de dado, «Tirar» saca un resultado y resalta la fila.
+- **Objetos del personaje** (botón «Objetos» de la hoja). Desde la ficha de un objeto, «Añadir a …». Hay tres huecos de sintonización. Si el objeto tiene cargas, aparecen en la hoja como un recurso más y se recuperan solas al amanecer con sus dados (la *Varita de bolas de fuego* recupera 1d6+1).
+- **Bestiario** (Diario → Bestiario). Por personaje, anota de cada criatura:
+  - tipo, amenaza, situación, CA y puntos de golpe aproximados;
+  - los 13 tipos de daño (toca para marcar vulnerable, resistente o inmune), estados a los que es inmune y salvaciones débiles o fuertes;
+  - qué conjuros de tu libro funcionaron o no, tácticas, notas y sesiones en las que apareció (se vinculan desde cada sesión).
+
+  La ficha de un conjuro solo lo menciona al pie, en una línea discreta y solo si hay algo que decir: «Tu bestiario: Trol del vado *vulnerable*». Toca el nombre para abrir la criatura.
+- **Menú «Más» reordenado** en grupos: personaje, biblioteca y libros, sesión y ajustes, ayuda.
+
+Tras actualizar, vuelve a importar tus libros (Más → Libros y manuales) para que se lean las tablas y el contenido nuevo.
+
 ## Descripciones, compendio SRD y subida de nivel
 
 - **Ficha del conjuro.** Mantén pulsado un conjuro para leerlo entero: resumen para la mesa, datos técnicos, descripción y efecto con espacios superiores. Debajo están las opciones para lanzarlo. «Editar texto» permite escribir o corregir la descripción en español; en modo edición, el botón «Texto» de cada fila hace lo mismo.
@@ -186,7 +210,8 @@ web/                     código fuente (Vite)
   public/data/           compendio SRD 5.2
   src/
     core/                store (estado único, historial y deshacer, guardado) y utilidades
-    domain/              reglas 2024, rasgos, modelo y migraciones, catálogo, subida de nivel, lector del manual (sin DOM)
+    domain/              reglas 2024, rasgos, modelo y migraciones, catálogo, subida de nivel, lectores de libros
+                         (conjuros, tablas, objetos, dotes, trasfondos, subclases, reglas), equipo y bestiario (sin DOM)
     platform/            adaptador de Capacitor (almacenamiento, vibración, compartir…)
     app/                 casos de uso (lanzar, descansar…) y controlador de eventos
     ui/                  hoja, diálogos, efectos visuales, iconos
@@ -208,7 +233,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (41)
+npm test           # pruebas (48)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android
