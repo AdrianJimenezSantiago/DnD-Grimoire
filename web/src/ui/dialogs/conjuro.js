@@ -110,6 +110,7 @@ function render() {
   const { s, x } = data();
   $('#spTitle').textContent = s.es || s.en;
   const sk = schoolKey(s.escuela);
+  dlg().style.setProperty('--sc', `var(--sc-${sk || 'none'})`);
   $('#spSub').innerHTML = (s.en && s.en !== s.es ? `<i>${esc(s.en)}</i>` : '')
     + `<div class="sp-kind" style="--sc:var(--sc-${sk || 'none'})"><span>${s.level === 0 ? 'Truco' : 'Nivel ' + s.level}</span>${s.escuela ? `<span class="school">${esc(s.escuela)}</span>` : ''}${s.ritual ? '<span>Ritual</span>' : ''}${s.conc ? '<span>Concentración</span>' : ''}</div>`;
   let h = '';

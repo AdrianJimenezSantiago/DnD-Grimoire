@@ -4,7 +4,7 @@ El grimorio de Theo (y de quien quieras) convertido en una app de Android indepe
 
 ## Qué cambia respecto a la hoja del navegador
 
-- **Sin internet.** Las fuentes (Alegreya y Alegreya Sans) van dentro de la app.
+- **Sin internet.** Las fuentes (Alegreya, Alegreya Sans y Cinzel) van dentro de la app.
 - **Datos a prueba de limpiezas.** Se guardan en el almacenamiento nativo de Android, no en el del navegador. La copia automática de Android (Google) también los incluye.
 - **Copia de seguridad en archivo.** Más → Copia de seguridad → «Guardar en archivo» abre el menú de compartir de Android: Drive, correo, WhatsApp, lo que quieras. «Abrir archivo» la recupera.
 - **Botón Atrás.** Cierra el diálogo, el menú, el aviso o el modo edición, en ese orden. Si no hay nada abierto, minimiza la app.
@@ -181,26 +181,62 @@ Sobre la calidad de lectura del Manual del Jugador: la app se ha comparado conju
 
 ## Diseño
 
-La estética parte del mundo del personaje: el cuaderno de un adivino de noche. Hay dos temas:
+La estética es la de un grimorio iluminado. Cada personaje tiñe la app con el color de su clase: el acento, el papel, los ornamentos y el fondo. Hay dos temas:
 
-- **Noche:** tinta profunda, luz de vela dorada y un astrolabio que gira muy despacio tras el nombre.
-- **Día:** papel azulado y tinta.
+- **Noche:** tinta profunda con el tono de la clase, luz de vela y viñeta.
+- **Día:** vitela cálida con un leve grano de papel.
 
-Los elementos visuales llevan información:
+**Tipografía.** Cinzel para nombres y títulos, Cinzel Decorative solo para el título de la portada, Alegreya para leer y Alegreya Sans para los controles. Todas van dentro de la app y funcionan sin conexión.
 
-- **Velas:** son los espacios de conjuro. Encendida es libre, apagada es gastada.
-- **Color de escuela:** cada escuela de magia tiene el suyo, en la barra lateral de cada conjuro y en las chispas al lanzarlo.
-- **Dorado:** marca lo que activa un rasgo al lanzar, los usos gratis y lo siempre preparado.
+**Fondo vivo por clase y subclase** (`ui/fondo.js`). Un único lienzo detrás de la hoja pinta una escena distinta para cada una:
 
-Movimiento: las llamas parpadean, se apagan con humo al gastar un espacio y se encienden al recuperarlo. Además:
+| Escena | Clases y subclases | Qué se ve |
+|---|---|---|
+| Astral | Adivino, Mago, Estrellas, Luna | estrellas, constelaciones que se trazan y alguna fugaz |
+| Ascuas | Evocador, Hechicero, Dracónica, Bárbaro, Infernal | brasas que suben |
+| Vacío | Brujo, Aberrante, Sombra, Pícaro | niebla lenta y motas |
+| Halo | Clérigo, Paladín, Luz, Vida, Celestial | rayos de luz y polvo dorado |
+| Arboleda | Druida, Explorador, Tierra, Feérico | luciérnagas y hojas |
+| Canción | Bardo | notas sobre un pentagrama ondulante |
+| Calma | Monje | ondas de tinta y pétalos |
+| Forja | Guerrero, Mecánica | chispas del yunque |
+| Guarda | Abjurador | retícula hexagonal que late |
+| Prisma | Ilusionista, Salvaje | pompas irisadas |
 
-- Al lanzar un conjuro saltan chispas del color de su escuela.
-- El descanso largo trae un amanecer.
-- Al subir de nivel hay un estallido de luz dorada.
-- El nombre se subraya al abrir un personaje.
-- Las hojas suben desde abajo en el móvil.
+El fondo pinta a unos 30 fotogramas por segundo y se detiene con la app en segundo plano o con una hoja a pantalla completa en el móvil.
 
-Todo respeta la opción del sistema «Reducir movimiento». En el móvil, las acciones principales van en un dock inferior al alcance del pulgar. En tableta horizontal y escritorio, la lista pasa a tabla. Imprimir sigue dando una hoja limpia.
+**Ornamentos.** Diálogos, menús, tarjetas de personaje, recursos y listas de conjuros llevan esquinas de filigrana propias:
+
+- La ficha de un conjuro se enmarca con el color de su escuela.
+- Las confirmaciones llevan un sello de lacre y los avisos son un pergamino.
+- El círculo rúnico es el motivo común: está en la portada y alrededor del retrato, y aparece al lanzar y al subir de nivel.
+
+**Menú «Más» compacto.** El botón es una hamburguesa que se convierte en una X. Dentro hay:
+
+- una cabecera con el personaje y un interruptor de día o noche;
+- una rejilla con las secciones;
+- las utilidades en pequeño.
+
+**Los elementos visuales llevan información:**
+
+- Velas: son los espacios de conjuro. Encendida es libre y respira; apagada es gastada.
+- Color de escuela: está en la barra lateral de cada conjuro, en su brillo al pasar el ratón y en las chispas y el círculo al lanzarlo.
+- Dorado: marca lo que activa un rasgo al lanzar, los usos gratis y lo siempre preparado.
+
+**Movimiento.** Solo hay animación cuando la persona hace algo:
+
+- Al pulsar un botón sale una onda de luz desde el punto del toque.
+- Al abrir un grimorio desde la portada se abre un portal circular.
+- Las tarjetas de la portada se inclinan con el ratón.
+- Los diálogos se despliegan como una página. En el móvil suben desde abajo.
+- Al lanzar un conjuro aparece un círculo rúnico con chispas de su escuela.
+- Al subir de nivel hay un doble círculo y un estallido de luz. El descanso largo trae un amanecer.
+- En el diario, las notas nuevas se escriben con la pluma. Subrayar y tachar se trazan, y borrar quema la nota.
+- En las tiradas el dado gira al salir, y el crítico late.
+
+Todo respeta la opción del sistema «Reducir movimiento»: el fondo queda quieto y no hay ondas, sellos ni portal. En el móvil, las acciones principales van en un dock inferior al alcance del pulgar. En tableta horizontal y escritorio, la lista pasa a tabla. Imprimir sigue dando una hoja limpia, sin fondo ni ornamentos.
+
+Los ornamentos, runas y sellos están dibujados para esta app. No usa logotipos ni símbolos de marcas registradas.
 
 ## Arquitectura
 
@@ -214,8 +250,8 @@ web/                     código fuente (Vite)
                          (conjuros, tablas, objetos, dotes, trasfondos, subclases, reglas), equipo y bestiario (sin DOM)
     platform/            adaptador de Capacitor (almacenamiento, vibración, compartir…)
     app/                 casos de uso (lanzar, descansar…) y controlador de eventos
-    ui/                  hoja, diálogos, efectos visuales, iconos
-    styles/              tokens de diseño, base, hoja, diálogos, movimiento e impresión
+    ui/                  hoja, diálogos, efectos visuales (fx, fondo vivo, magia), iconos
+    styles/              tokens de diseño, base, hoja, diálogos, movimiento, impresión y capa «arcano»
 tests/                   pruebas de reglas, rasgos y store (node:test)
 www/                     resultado de la compilación (no se sube: lo genera GitHub)
 ```
@@ -328,4 +364,4 @@ capacitor.config.json
 vercel.json          cómo compila Vercel la versión web
 ```
 
-Fuentes Alegreya y Alegreya Sans bajo licencia SIL Open Font License 1.1 (ver `www/fonts`).
+Fuentes Alegreya, Alegreya Sans, Cinzel y Cinzel Decorative bajo licencia SIL Open Font License 1.1.

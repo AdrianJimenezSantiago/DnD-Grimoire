@@ -5,6 +5,7 @@
  */
 import { GI } from './gameIcons.js';
 import { norm } from '../core/util.js';
+import { setEscena } from './fondo.js';
 
 const CLASE = {
   'Bárbaro': [12, 78, 'barbaro'], 'Bardo': [318, 62, 'bardo'], 'Brujo': [272, 58, 'brujo'], 'Clérigo': [44, 80, 'clerigo'],
@@ -32,6 +33,7 @@ export function temaDe(ch) {
 export function aplicarTema(ch) {
   const t = temaDe(ch), r = document.documentElement.style;
   if (r.getPropertyValue('--acc-h') !== String(t.h)) { r.setProperty('--acc-h', t.h); r.setProperty('--acc-s', t.s + '%'); }
+  setEscena(t);
   return t;
 }
 /** Icono de game-icons como SVG en línea (toma el color del texto). */
