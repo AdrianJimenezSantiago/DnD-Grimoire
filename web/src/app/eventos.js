@@ -3,9 +3,9 @@
  * Un único despachador de órdenes (data-cmd) sirve al dock del móvil, a la barra de escritorio y a los menús.
  */
 import { esc } from '../core/util.js';
-import { SCHOOLS, perfil } from '../domain/reglas2024.js';
+import { SCHOOLS, perfil, clasesTexto } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
-import { schoolKey, conConjuros } from '../ui/sheet.js';
+import { schoolKey } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems, linkCatalog } from '../domain/catalogo.js';
@@ -89,7 +89,7 @@ function moreMenuHtml() {
     fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
   ].join('');
   return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
-      <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(`${ch.clase}, nivel ${ch.nivel}`) : 'Sin personaje abierto'}</small></span>
+      <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(clasesTexto(ch)) : 'Sin personaje abierto'}</small></span>
       <button type="button" role="menuitem" class="mm-theme" data-mcmd="theme" aria-label="${dark ? 'Cambiar a tema de día' : 'Cambiar a tema de noche'}" title="${dark ? 'Tema de día' : 'Tema de noche'}"><span class="mm-sol">${icon('sun')}</span><span class="mm-luna">${icon('moon')}</span></button></div>
     <div class="mm-grid">${personaje}</div><div class="mm-orla" aria-hidden="true"></div><div class="mm-grid">${saber}</div>
     <div class="mm-util">${util}</div>
@@ -175,11 +175,12 @@ function bindSheet() {
 
   on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   // «En juego»: plegar, fijar arriba y leer el rasgo entero
-  on(sheet, 'click', '[data-ej="toggle"]', () => S.edit((db, ch) => { const P = perfil(ch), lanza = conConjuros(ch, P); ch.enJuego ||= {};
+  on(sheet, 'click', '[data-ej="toggle"]', () => S.edit((db, ch) => { const lanza = !!perfil(ch).c; ch.enJuego ||= {};
     const abierto = lanza ? !!ch.enJuego.abierto : ch.enJuego.abierto !== false; ch.enJuego.abierto = !abierto; }));
   on(sheet, 'click', '[data-ejfijar]', (e, b) => { const k = b.dataset.ejfijar; S.edit((db, ch) => { ch.enJuego ||= {}; const f = ch.enJuego.fijados || [];
     ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
+  on(sheet, 'click', '[data-ejfiltro]', (e, b) => S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.filtro = b.dataset.ejfiltro; }));
   on(sheet, 'click', '#res [data-ntact]', (e, b) => { const li = b.closest('[data-nt]'); accionNota(S, li.dataset.ses, li.dataset.nt, b.dataset.ntact); });
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;

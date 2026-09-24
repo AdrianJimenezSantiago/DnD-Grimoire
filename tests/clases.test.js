@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { CLASES, perfil } from '../web/src/domain/reglas2024.js';
+import { CLASES, perfil, nivelTotal } from '../web/src/domain/reglas2024.js';
 import { CLASES_INFO, SUBCLASES, TEMAS, conjurosAutomaticos, escalas, progresion, rasgosEnNivel, subclaseDe } from '../web/src/domain/clases2024.js';
 import { featuresAt, conjurosPendientes, anadirPendientes } from '../web/src/domain/progresion.js';
 import { reglas } from '../web/src/domain/rasgos.js';
@@ -124,12 +124,12 @@ test('pruebas: un personaje de nivel 8 por subclase, completos y coherentes con 
   const db = { schema: 2, catalog: {}, chars: [{ id: 'mio', nombre: 'Theo', clase: 'Mago', nivel: 6, book: [] }], activeId: 'mio' };
   const r = sembrarPruebas(db, conjuros);
   assert.deepEqual(r.faltan, []);
-  assert.equal(r.creados, 56);
-  assert.equal(db.chars.length, 57); assert.equal(db.activeId, 'mio');
+  assert.equal(r.creados, 57);                               // 56 subclases + uno con multiclase
+  assert.equal(db.chars.length, 58); assert.equal(db.activeId, 'mio');
   const pruebas = db.chars.filter(c => c.prueba);
   for (const c of pruebas) {
     const P = perfil(c), libro = c.book.map(e => db.catalog[e.sid]);
-    assert.equal(c.nivel, NIVEL_PRUEBA);
+    assert.equal(nivelTotal(c), NIVEL_PRUEBA);
     assert.ok(subclaseDe(c), c.subclase);
     assert.ok(Object.values(c.stats).every(v => v >= 8 && v <= 20), c.nombre);
     assert.ok(libro.every(Boolean), `${c.nombre}: conjuro fuera del catálogo`);
@@ -143,7 +143,7 @@ test('pruebas: un personaje de nivel 8 por subclase, completos y coherentes con 
     assert.ok(c.equipo.objetos.some(o => o.sintonizado));
     assert.equal(c.diario.sesiones.length, 1); assert.equal(c.bestiario.criaturas.length, 1);
     assert.match(c.historia, /## Origen/);
-    assert.match(c.notas, /Nivel 8/);
+    assert.match(c.notas, /Nivel \d/);
   }
   const mago = pruebas.find(c => c.subclase === 'Adivino');
   assert.equal(mago.book.filter(e => e.fuente === 'Libro').length, 20);   // 6 + 2 por nivel
@@ -151,5 +151,7 @@ test('pruebas: un personaje de nivel 8 por subclase, completos y coherentes con 
   assert.ok(reglas(mago).some(x => x.nombre === 'Presagio'));
   // regenerar sustituye la tanda sin duplicar ni tocar los personajes propios
   sembrarPruebas(db, conjuros);
-  assert.equal(db.chars.length, 57); assert.ok(db.chars.some(c => c.id === 'mio'));
+  assert.equal(db.chars.length, 58); assert.ok(db.chars.some(c => c.id === 'mio'));
+  const multi = db.chars.find(c => c.multiclase?.length);
+  assert.deepEqual([multi.clase, multi.nivel, multi.multiclase[0].clase, multi.multiclase[0].nivel, perfil(multi).pb], ['Bárbaro', 5, 'Guerrero', 3, 3]);
 });

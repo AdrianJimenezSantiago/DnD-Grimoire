@@ -1,6 +1,6 @@
 /** Personajes: lista (abrir, editar, duplicar, borrar) y ficha de creación/edición. */
 import { clamp, clone, esc, joinY, uid } from '../../core/util.js';
-import { ABILS, ABIL_NAME, CLASES, ESPECIES, TRASFONDOS, modOf, perfil, sgn } from '../../domain/reglas2024.js';
+import { ABILS, ABIL_NAME, CLASES, ESPECIES, TRASFONDOS, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase } from '../../domain/reglas2024.js';
 import { reglas } from '../../domain/rasgos.js';
 import { levelDiff } from '../../domain/progresion.js';
 import { blankChar, normChar, THEO } from '../../domain/modelo.js';
@@ -13,11 +13,13 @@ import { viewTransition } from '../fx.js';
 import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
 import { avatarHtml } from '../avatar.js';
-import { subclasesDe } from '../../domain/catalogo.js';
+import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { fileStore } from '../../platform/native.js';
 
 let S, onCreated;
+// Mientras la ficha está abierta: clases de multiclase y dotes elegidas (se guardan al pulsar Guardar)
+let MC = [], DOTES = [];
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 const fill = (id, arr) => { $(id).innerHTML = arr.map(v => `<option value="${esc(v)}"></option>`).join(''); };
 
@@ -74,7 +76,15 @@ export function openCharForm(id) {
   <section class="fsec"><h3>Clase y nivel</h3><div class="frow">
     <label class="f">Clase<select id="f_clase">${clsOpts}</select></label>
     <label class="f">Subclase<input id="f_subclase" list="dl_sub" value="${esc(c.subclase)}" autocomplete="off"><span class="hint" id="h_sub"></span></label>
-    <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div></section>
+    <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
+    <div id="f_mc" class="mc-list"></div>
+    <button type="button" class="ghost mc-add" id="f_mcAdd">${icon('plus')}Añadir otra clase (multiclase)</button>
+    <p class="hint" id="h_mc" aria-live="polite"></p></section>
+  <section class="fsec"><h3>Dotes</h3>
+    <div class="dote-chips" id="f_dotes"></div>
+    <div class="dote-add"><input id="f_doteIn" list="dl_dotes" placeholder="Añadir una dote: Alerta, Iniciado en la magia (mago)…" autocomplete="off" aria-label="Añadir dote"><button type="button" id="f_doteAdd">Añadir</button></div>
+    <datalist id="dl_dotes"></datalist>
+    <p class="hint">La de origen sale de tu trasfondo. Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p></section>
   <section class="fsec"><h3>Características</h3><div class="abil">${abil}</div></section>
   <button type="button" class="ghost conj-toggle" id="f_conjOpen" hidden>${icon('plus')}Opciones de conjuros (dotes, especie o multiclase)</button>
   <section class="fsec" id="f_secConj"><h3>Conjuros</h3><div class="frow">
@@ -88,6 +98,8 @@ export function openCharForm(id) {
     <label class="f wide">Campaña<input id="f_campana" value="${esc(c.campana)}" autocomplete="off"></label>
     <label class="f wide">Dotes y notas<textarea id="f_notas" rows="3" placeholder="Dotes, rasgos de especie, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
   <section class="fsec"><h3>Resumen</h3><div class="fsum" id="f_sum" aria-live="polite"></div></section>`;
+  MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])];
+  pintarMulticlase(); pintarDotes();
   sync(true); openSheet(charDlg());
   if (!id) setTimeout(() => $('#f_nombre').focus(), 60);
 }
@@ -96,10 +108,36 @@ function readForm() {
   const v = id => $(id).value.trim();
   Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: v('#f_subclase'),
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
-    espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim() });
+    espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
+    multiclase: clone(MC), dotes: [...DOTES] });
   ABILS.forEach(([k]) => { base.stats[k] = clamp(parseInt(v('#f_' + k), 10) || 10, 1, 30); });
   base.espacios = {}; for (let L = 1; L <= 9; L++) { const n = clamp(parseInt(v('#f_e' + L), 10) || 0, 0, 9); if (n) base.espacios[L] = n; }
   return base;
+}
+/* ---------------- multiclase y dotes ---------------- */
+function pintarMulticlase() {
+  const principal = $('#f_clase').value;
+  $('#f_mc').innerHTML = MC.map((m, i) => {
+    const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k))).map(k => `<option ${k === m.clase ? 'selected' : ''}>${k}</option>`).join('');
+    return `<div class="frow mc-row"><label class="f">Clase ${i + 2}<select data-mc="${i}|clase">${opts}</select></label>
+      <label class="f">Subclase<input data-mc="${i}|subclase" list="dl_mc${i}" value="${esc(m.subclase || '')}" autocomplete="off"><datalist id="dl_mc${i}">${subclasesDe(m.clase).map(v => `<option value="${esc(v)}">`).join('')}</datalist></label>
+      <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
+      <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;
+  }).join('');
+  $('#f_mcAdd').hidden = MC.length >= 3;
+}
+function pintarDotes() {
+  const d = readForm(), origen = dotesDe({ ...d, dotes: [] }, biblioteca().trasfondos)[0];
+  $('#f_dotes').innerHTML = (origen ? `<span class="dote-chip fija" title="Dote de origen de tu trasfondo">${esc(origen.detalle ? `${origen.nombre} (${origen.detalle})` : origen.nombre)}<small>trasfondo</small></span>` : '')
+    + DOTES.map((n, i) => `<button type="button" class="dote-chip" data-dotedel="${i}" aria-label="Quitar la dote ${esc(n)}">${esc(n)}<span aria-hidden="true">×</span></button>`).join('')
+    || '<span class="hint">Sin dotes todavía.</span>';
+  const lib = biblioteca().dotes;
+  fill('#dl_dotes', lib.length ? lib.map(x => x.nombre) : ['Alerta', 'Afortunado', 'Atacante salvaje', 'Duro', 'Fabricante', 'Habilidoso', 'Iniciado en la magia (clérigo)', 'Iniciado en la magia (druida)', 'Iniciado en la magia (mago)', 'Matón de taberna', 'Músico', 'Sanador']);
+}
+function anadirDote() {
+  const i = $('#f_doteIn'), n = i.value.trim(); if (!n) { i.focus(); return; }
+  if (!DOTES.some(x => x.toLowerCase() === n.toLowerCase())) DOTES.push(n);
+  i.value = ''; pintarDotes(); sync(false); i.focus();
 }
 function slotText(P) {
   if (P.pact && !Object.keys(P.slots).some(L => +L !== P.pact.level)) return `${P.pact.n} ${P.pact.n > 1 ? 'espacios' : 'espacio'} de pacto de nivel ${P.pact.level}, que vuelven con un descanso corto.`;
@@ -123,6 +161,10 @@ function sync(first) {
   const enUso = draft.espaciosManuales || !!draft.aptitud || !!draft.extraCD || !!draft.extraAtaque;
   const verConj = lanza || enUso || conjAbierto;
   $('#f_secConj').hidden = !verConj; $('#f_conjOpen').hidden = verConj;
+  const cs = clasesDe(draft), total = cs.reduce((n, c) => n + c.nivel, 0), exceso = draft.nivel + MC.reduce((n, m) => n + (parseInt(m.nivel, 10) || 1), 0) > 20;
+  const req = requisitosMulticlase(draft);
+  $('#h_mc').textContent = MC.length ? `Nivel de personaje ${total}: ${cs.map(c => `${c.clase} ${c.nivel}`).join(', ')}.${exceso ? ' El total no puede pasar de 20.' : ''}${req.length ? ` Para esta multiclase el manual pide ${req.map(r => `${r.falta} (${r.clase})`).join(', ')}.` : ''}` : '';
+  $('#h_mc').classList.toggle('warn', exceso || req.length > 0);
   const L = [`Competencia ${sgn(P.pb)}.${P.apKey ? ` ${ABIL_NAME[P.apKey]} ${sgn(P.mod)}: CD ${P.cd}, ataque de conjuro ${sgn(P.atk)}.` : ''}`];
   if (P.c || draft.espaciosManuales) L.push(slotText(P));
   if (P.c) L.push(`Prepara ${P.maxPrep} ${P.maxPrep === 1 ? 'conjuro' : 'conjuros'} de nivel 1+${P.c.cant ? ` y sabe ${P.maxCant} trucos` : ''}.`);
@@ -139,6 +181,7 @@ function sync(first) {
 function save() {
   const draft = readForm();
   if (!draft.nombre) { $('#charErr').textContent = 'Falta el nombre.'; $('#w_nombre').classList.add('bad'); $('#f_nombre').focus(); return; }
+  if (draft.nivel + (draft.multiclase || []).reduce((n, m) => n + (parseInt(m.nivel, 10) || 1), 0) > 20) { $('#charErr').textContent = 'El nivel de personaje (la suma de las clases) no puede pasar de 20.'; return; }
   if (formId) {
     const oc = clone(S.db.chars.find(x => x.id === formId));
     const h = S.edit(db => { const i = db.chars.findIndex(x => x.id === formId); db.chars[i] = normChar(draft); });
@@ -159,8 +202,13 @@ export function init(store, { onNewCharacterAddSpells }) {
   S = store; onCreated = onNewCharacterAddSpells;
   fill('#dl_especie', ESPECIES); fill('#dl_trasfondo', TRASFONDOS);
   const form = $('#charForm');
-  form.addEventListener('input', e => { if (e.target.id === 'f_nombre') { $('#w_nombre').classList.remove('bad'); $('#charErr').textContent = ''; } sync(false); });
+  const leerMc = t => { if (!t.dataset.mc) return false; const [i, k] = t.dataset.mc.split('|'); MC[+i][k] = k === 'nivel' ? clamp(parseInt(t.value, 10) || 1, 1, 19) : t.value.trim();
+    if (k === 'clase') { MC[+i].subclase = ''; pintarMulticlase(); } return true; };
+  form.addEventListener('input', e => { leerMc(e.target); if (e.target.id === 'f_nombre') { $('#w_nombre').classList.remove('bad'); $('#charErr').textContent = ''; } sync(false); });
   form.addEventListener('change', e => {
+    if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
+    if (e.target.id === 'f_clase') { MC = MC.filter(m => m.clase !== e.target.value); pintarMulticlase(); }
+    if (e.target.id === 'f_trasfondo') pintarDotes();
     if (e.target.id === 'f_manual' && e.target.checked) {
       const P = perfil({ ...readForm(), espaciosManuales: false });
       for (let L = 1; L <= 9; L++) { const i = $('#f_e' + L); if (!i.value) i.value = P.slots[L] || ''; }
@@ -168,6 +216,13 @@ export function init(store, { onNewCharacterAddSpells }) {
     sync(false);
   });
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
+  on(form, 'click', '#f_mcAdd', () => { const libre = Object.keys(CLASES).find(k => k !== $('#f_clase').value && !MC.some(m => m.clase === k)); if (!libre) return;
+    MC.push({ clase: libre, subclase: '', nivel: 1 }); pintarMulticlase(); sync(false); form.querySelector(`[data-mc="${MC.length - 1}|clase"]`)?.focus(); });
+  on(form, 'click', '[data-mcdel]', (e, b) => { MC.splice(+b.dataset.mcdel, 1); pintarMulticlase(); sync(false); });
+  on(form, 'click', '[data-mcstep]', (e, b) => { const [i, d] = b.dataset.mcstep.split('|').map(Number); MC[i].nivel = clamp((parseInt(MC[i].nivel, 10) || 1) + d, 1, 19); pintarMulticlase(); sync(false); });
+  on(form, 'click', '#f_doteAdd', anadirDote);
+  on(form, 'click', '[data-dotedel]', (e, b) => { DOTES.splice(+b.dataset.dotedel, 1); pintarDotes(); sync(false); });
+  form.addEventListener('keydown', e => { if (e.target.id === 'f_doteIn' && e.key === 'Enter') { e.preventDefault(); anadirDote(); } });
   on(form, 'click', '#f_conjOpen', () => { conjAbierto = true; sync(false); $('#f_aptitud').focus(); });
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);

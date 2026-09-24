@@ -42,9 +42,9 @@ export function setLibros(libros) {
   setManual(textos); setGlosario(glos); reindexar();
   // biblioteca: objetos mágicos, dotes, trasfondos y subclases (el primer libro que aporta una entrada manda)
   const junta = campo => { const m = new Map(); for (const lb of LIBROS) for (const e of lb[campo] || []) { const k = (e.clase ? e.clase + '|' : '') + e.clave; if (e.clave && !m.has(k)) m.set(k, { ...e, fuente: lb.titulo, libro: lb.id }); } return [...m.values()]; };
-  BIB = { objetos: junta('objetos'), dotes: junta('dotes'), trasfondos: junta('trasfondos'), subclases: junta('subTextos'), rasgosClase: junta('rasgosClase'), criaturas: junta('criaturas') };
+  BIB = { objetos: junta('objetos'), dotes: junta('dotes'), trasfondos: junta('trasfondos'), subclases: junta('subTextos'), rasgosClase: junta('rasgosClase'), especies: junta('especies'), criaturas: junta('criaturas') };
 }
-let BIB = { objetos: [], dotes: [], trasfondos: [], subclases: [], rasgosClase: [], criaturas: [] };
+let BIB = { objetos: [], dotes: [], trasfondos: [], subclases: [], rasgosClase: [], especies: [], criaturas: [] };
 /** Perfil de criatura importado (Manual de Monstruos, apéndice B del Manual del Jugador…) por su clave o su nombre. */
 export const criaturaImportada = k => BIB.criaturas.find(c => c.clave === k) || BIB.criaturas.find(c => norm(c.nombre) === norm(k)) || null;
 /** Contenido de biblioteca de los libros importados: objetos, dotes, trasfondos y subclases. */

@@ -4,7 +4,7 @@
  * Las plantillas de clase se calculan con el nivel; los rasgos propios los define el jugador.
  */
 import { clamp, norm } from '../core/util.js';
-import { modOf, nivelDe, competencia } from './reglas2024.js';
+import { modOf, nivelDe, competencia, clasesDe, vistaClase } from './reglas2024.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
@@ -200,7 +200,8 @@ export function maxFrom(ch, r) {
 export function reglas(ch, todas = false) {
   const off = new Set(ch.rasgosOff || []);
   const list = [
-    ...plantillas(ch).map(r => ({ ...r, off: off.has(r.id) })),
+    // los recursos de cada clase, a su nivel (con multiclase, también los de la segunda clase)
+    ...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))).map(r => ({ ...r, off: off.has(r.id) })),
     ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, off: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.off);

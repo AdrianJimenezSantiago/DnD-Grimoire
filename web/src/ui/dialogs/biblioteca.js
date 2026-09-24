@@ -175,9 +175,9 @@ export function abrirRasgoJuego(clave) {
   const r = rasgosEnJuego(ch, biblioteca(), reglas(ch)).find(x => x.clave === clave); if (!r) return;
   FICHA = { tipo: 'rasgo', clave };
   const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
-  ficha({ titulo: r.nombre, ico: r.origen === 'subclase' ? 'subclase' : 'dote',
-    sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.origen === 'subclase' ? ch.subclase : ch.clase)}</span><span>Nivel ${r.nivel}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
-    cuerpo: `${grupos}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el Manual del Jugador en Libros y manuales: se lee en este dispositivo.</p>`}` });
+  ficha({ titulo: r.nombre, ico: r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : r.origen === 'subclase' ? 'subclase' : norm(r.clase || '').replace(/[^a-z]/g, ''),
+    sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
+    cuerpo: `${grupos}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;

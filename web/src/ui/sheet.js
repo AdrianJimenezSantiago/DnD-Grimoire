@@ -1,6 +1,6 @@
 /** Vista de la hoja. Solo pinta: los eventos viven en app/eventos.js. */
 import { esc, norm } from '../core/util.js';
-import { ABIL_NAME, perfil, sgn } from '../domain/reglas2024.js';
+import { ABIL_NAME, perfil, sgn, clasesDe, clasesTexto } from '../domain/reglas2024.js';
 import { castSchools, castTriggerDesc, reglas, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../domain/rasgos.js';
 import { $, patch, patchKeyed } from './dom.js';
 import { icon, ASTROLABE } from './icons.js';
@@ -13,7 +13,7 @@ import { avatarHtml } from './avatar.js';
 import { paraRecordar } from '../domain/diario.js';
 import { notaHtml } from './dialogs/diario.js';
 import { rasgosConObjetivo } from '../domain/concentracion.js';
-import { rasgosEnJuego, agrupar, numerosMarciales } from '../domain/enJuego.js';
+import { rasgosEnJuego, agrupar, numerosMarciales, FUENTES } from '../domain/enJuego.js';
 import { biblioteca } from '../domain/catalogo.js';
 
 /* ---------- consultas de la hoja ---------- */
@@ -24,7 +24,8 @@ export function firstFreeFrom(ch, P, n) { for (let L = Math.max(1, n); L <= 9; L
 export const isPrepared = e => !!(e.prep || e.always);
 export const prepCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level > 0 && e.prep && !e.always; }).length;
 export const cantCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level === 0 && !e.always; }).length;
-export const claseLinea = ch => `${ch.clase}${ch.subclase ? ` (${ch.subclase})` : ''}, nivel ${ch.nivel}`;
+// «Bárbaro (Senda del fanático), nivel 8» o, con multiclase, «Bárbaro 5 (Senda del berserker) / Guerrero 3 (Campeón)»
+export const claseLinea = ch => { const cs = clasesDe(ch); return cs.length > 1 ? cs.map(c => `${c.clase} ${c.nivel}${c.subclase ? ` (${c.subclase})` : ''}`).join(' / ') : `${ch.clase}${ch.subclase ? ` (${ch.subclase})` : ''}, nivel ${ch.nivel}`; };
 export const origenLinea = ch => [ch.especie, ch.trasfondo].filter(Boolean).join(', ');
 const SC = { abj: 'abj', adi: 'adi', con: 'con', enc: 'enc', evo: 'evo', ilu: 'ilu', nig: 'nig', tra: 'tra' };
 export const schoolKey = esc2 => SC[norm(esc2).slice(0, 3)] || '';
@@ -47,7 +48,7 @@ function heroHtml(ch, P) {
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
     <div class="hero-id"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
     <h1>${esc(ch.nombre)}<svg class="underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 60 3, 120 12, 180 7 S 270 5, 297 8"/></svg></h1></div>
-    <div class="clase">${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}, nivel ${ch.nivel}${origenLinea(ch) ? `<span class="sub">. ${esc(origenLinea(ch))}</span>` : ''}</div>
+    <div class="clase">${clasesDe(ch).length > 1 ? `${clasesDe(ch).map(c => `${esc(c.clase)} ${c.nivel}${c.subclase ? ` <span class="sub">· ${esc(c.subclase)}</span>` : ''}`).join(' <span class="sub">/</span> ')}, <b>nivel ${P.lvl}</b>` : `${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}, nivel ${ch.nivel}`}${origenLinea(ch) ? `<span class="sub">. ${esc(origenLinea(ch))}</span>` : ''}</div>
     <div class="mods">${mods}</div>
     ${ch.lema ? `<div class="motto">${lemaHtml(ch.lema)}</div>` : ''}
     <div class="chips">
@@ -56,7 +57,7 @@ function heroHtml(ch, P) {
       <button type="button" class="chip" data-cmd="equipo">${gi('cofre')}Objetos${(ch.equipo?.objetos || []).length ? `<small class="chip-n">${ch.equipo.objetos.length}</small>` : ''}</button>
       <button type="button" class="chip" data-cmd="historia">${gi('libro')}Historia</button>
       <button type="button" class="chip" data-cmd="diario">${icon('quill')}Diario</button>
-      ${ch.nivel < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${ch.nivel + 1}</button>` : ''}
+      ${P.lvl < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${P.lvl + 1}</button>` : ''}
     </div>`;
 }
 /** ¿Se enseña la parte de conjuros? Si la clase o la subclase lanza, si hay conjuros en el libro o si se pidió al pie de la hoja. */
@@ -64,8 +65,12 @@ export const conConjuros = (ch, P) => !!P.apKey || P.maxSlot > 0 || ch.book.leng
 function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`;
-  // sin conjuros: los números de la clase que se miran en combate (daño de furia, ataque furtivo, artes marciales…)
-  if (!conConjuros(ch, P)) return numerosMarciales(ch).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
+  // sin lanzamiento de clase: los números de la clase que se miran en combate (daño de furia, ataque furtivo, artes
+  // marciales…); si hay conjuros de especie o dote con su característica, primero su CD y su ataque
+  if (!P.c) {
+    const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }] : [];
+    return [...magia, ...numerosMarciales(ch)].slice(0, 4).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
+  }
   return st(P.cd ?? '—', 'CD de salvación', 'key') + st(P.atk == null ? '—' : sgn(P.atk), 'Ataque de conjuro', 'key')
     + st(P.c?.cant ? `${cc}/${P.maxCant}` : cc, 'Trucos', P.c?.cant && cc > P.maxCant ? 'over' : '')
     + st(P.c ? `${pc}/${P.maxPrep}` : pc, 'Preparados', P.c && pc > P.maxPrep ? 'over' : '');
@@ -131,26 +136,32 @@ function efectosHtml(ch) {
   return `<div class="res wide ef-card"><strong>${gi('ojo')} Efectos activos</strong>${h || '<span class="rnote">Nada activo. Marca un rasgo cuando lo uses sobre alguien, o concéntrate en un conjuro.</span>'}${add}
     ${pl.conc ? `<label class="chk-line ef-pedir"><input type="checkbox" data-pedirobj ${pl.pedirObjetivos ? 'checked' : ''}> Preguntar sobre quién al concentrarme en un conjuro con objetivos</label>` : ''}</div>`;
 }
-/** «En juego»: rasgos de clase y subclase agrupados por cuándo se usan, con resumen, números y el recurso que gastan. */
+// Icono de la fuente de cada rasgo: el de su clase, la especie o la dote
+const iconoFuente = r => (r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, ''));
+/** «En juego»: rasgos de clases, subclases, especie y dotes agrupados por cuándo se usan, con resumen, números y recurso. */
 function enJuegoHtml(ch, P) {
-  const lista = rasgosEnJuego(ch, biblioteca(), reglas(ch)); if (!lista.length) return '';
-  const lanza = conConjuros(ch, P), abierto = lanza ? !!ch.enJuego?.abierto : ch.enJuego?.abierto !== false;
-  const fij = ch.enJuego?.fijados || [];
+  const todos = rasgosEnJuego(ch, biblioteca(), reglas(ch)); if (!todos.length) return '';
+  // plegada por defecto solo si la clase lanza conjuros (un truco de especie no convierte a un bárbaro en lanzador)
+  const lanza = !!P.c, abierto = lanza ? !!ch.enJuego?.abierto : ch.enJuego?.abierto !== false;
+  const fij = ch.enJuego?.fijados || [], hay = FUENTES.filter(([k]) => !k || todos.some(r => r.fuente === k));
+  const filtro = hay.some(([k]) => k === ch.enJuego?.filtro) ? ch.enJuego.filtro : '';
+  const cuenta = hay.filter(([k]) => k).map(([k]) => { const n = todos.filter(r => r.fuente === k).length; return k === 'dote' ? `${n} ${n === 1 ? 'dote' : 'dotes'}` : k === 'especie' ? `${n} de especie` : `${n} de clase`; });
   const tarjeta = r => {
     const rec = r.recurso, left = rec ? rec.max - usosGastados(ch, rec) : 0, fijo = fij.includes(r.clave);
-    return `<article class="ej-it ${r.origen === 'subclase' ? 'sub' : ''}">
+    return `<article class="ej-it f-${r.fuente} o-${r.origen}">
       <button type="button" class="ej-main" data-ejver="${esc(r.clave)}" aria-label="Leer ${esc(r.nombre)}"><b>${esc(r.nombre)}</b>
-        <small>Nivel ${r.nivel}${r.origen === 'subclase' ? ` · ${esc(ch.subclase)}` : ''}</small>
+        <small>${gi(iconoFuente(r), 'ej-ico')}${esc(r.etiqueta)}</small>
         ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
       <div class="ej-side">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
         ${rec ? `<button type="button" class="ruse ej-use" data-rstep="${rec.id}|1" ${left ? '' : 'disabled'} aria-label="Usar ${esc(rec.nombre)}: quedan ${left} de ${rec.max}">Usar <small>${left}/${rec.max}</small></button>` : ''}
         <button type="button" class="ej-star" data-ejfijar="${esc(r.clave)}" aria-pressed="${fijo}" aria-label="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}: ${esc(r.nombre)}" title="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}">★</button></div></article>`;
   };
-  const sinTextos = lista.every(r => !r.texto);
-  return `<div class="ej-head"><span class="ej-emb">${gi('dote')}</span><h2>En juego</h2><small>${lista.length} rasgos de ${esc(ch.clase)}${ch.subclase ? ` y ${esc(ch.subclase)}` : ''}</small>
+  const sinTextos = todos.every(r => !r.texto), grupos = agrupar(todos, fij, filtro);
+  return `<div class="ej-head"><span class="ej-emb">${gi('dote')}</span><h2>En juego</h2><small>${esc(cuenta.join(' · '))}</small>
       <button type="button" class="ruse ej-toggle" data-ej="toggle" aria-expanded="${abierto}">${abierto ? 'Plegar' : 'Desplegar'}</button></div>
-    ${abierto ? `${sinTextos ? `<p class="note ej-note">Importa el Manual del Jugador en <button type="button" class="linkish" data-cmd="manual">Libros y manuales</button> para ver qué hace cada rasgo. Se lee en este dispositivo.</p>` : ''}
-      ${agrupar(lista, fij).map(g => `<div class="ej-grupo ej-${g.clave}"><h3>${esc(g.titulo)}</h3><div class="ej-grid">${g.rasgos.map(tarjeta).join('')}</div></div>`).join('')}` : ''}`;
+    ${abierto ? `${hay.length > 2 ? `<div class="seg sm ej-filtro" role="radiogroup" aria-label="Mostrar rasgos de">${hay.map(([k, t]) => `<button type="button" role="radio" aria-checked="${filtro === k}" data-ejfiltro="${k}">${esc(t)}</button>`).join('')}</div>` : ''}
+      ${sinTextos ? `<p class="note ej-note">Importa el Manual del Jugador en <button type="button" class="linkish" data-cmd="manual">Libros y manuales</button> para ver qué hace cada rasgo. Se lee en este dispositivo.</p>` : ''}
+      ${grupos.map(g => `<div class="ej-grupo ej-${g.clave}"><h3>${esc(g.titulo)}</h3><div class="ej-grid">${g.rasgos.map(tarjeta).join('')}</div></div>`).join('')}` : ''}`;
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
@@ -223,7 +234,7 @@ export function renderBar(S) {
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="monogram">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const tema = aplicarTema(ch);
-  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(ch.clase)}, nivel ${ch.nivel}</span></span>${icon('chevron')}`);
+  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span>${icon('chevron')}`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong>${ch.play.concObj.length ? `<span class="conc-obj">sobre ${esc(ch.play.concObj.join(', '))}</span>` : `<button type="button" class="conc-add" data-cmd="objetivos">¿Sobre quién?</button>`}<button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;

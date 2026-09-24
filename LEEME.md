@@ -67,6 +67,17 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - La estrella ★ sube un rasgo a «Fijados», arriba del todo.
   - Los textos vienen del Manual del Jugador importado: ahora la importación también lee los **rasgos de clase** (170 de las 12 clases). Sin libro, la sección muestra nombres, niveles, números y recursos, y avisa de que falta el texto.
   - En los lanzadores de conjuros aparece plegada, encima de los conjuros; en los demás, desplegada.
+- **Especie, dotes y multiclase en «En juego».** La sección reúne todo lo que tiene tu personaje, cada rasgo con su origen («Nivel 5 · Bárbaro», «Enano», «Dote de origen · Soldado») y un filtro **Todo · Clase · Especie · Dotes**.
+  - **Especie:** la importación del Manual del Jugador lee los atributos de las 10 especies. Los que llegan más tarde, como Revelación celestial a nivel 3, aparecen a su nivel. Las opciones de un atributo (Alas celestiales, Gnomo de las rocas…) van dentro de él.
+  - **Dotes:** la de origen sale sola de tu trasfondo, también de los de un libro importado. Las demás se añaden en la ficha, en la nueva sección «Dotes», con sugerencias de tus libros. La dote que eliges al subir de nivel se añade sola. La importación lee las 75 dotes del manual.
+  - **Multiclase:** en la ficha, «Añadir otra clase» (hasta cuatro clases) con subclase y nivel de cada una. La app muestra el nivel de personaje y avisa si no llegas a 13 en la característica que pide cada clase; avisa, pero no lo impide.
+    - La competencia va por el nivel total.
+    - Los espacios siguen el Manual del Jugador 2024: con una sola clase lanzadora, su tabla; con varias, se suman los niveles de lanzador (completos, la mitad hacia arriba de paladín y explorador, un tercio de caballero y embaucador arcanos). La magia de pacto va aparte, y el descanso corto solo recupera esos espacios.
+    - Los preparados y trucos se suman; los recursos y rasgos de cada clase van a su nivel; los trucos escalan con el nivel de personaje.
+    - Forma salvaje usa el nivel de druida.
+    - Un mismo rasgo de dos clases (Maestría con armas) es una sola tarjeta.
+  - **Subir de nivel:** con multiclase, el primer paso pregunta en qué clase subes; también se puede empezar una clase nueva desde «¿Multiclase? Subir en otra clase». Un mago nuevo empieza con 6 conjuros en el libro.
+  - La cabecera y la barra superior muestran las clases («Bárbaro 5 / Guerrero 3») y el nivel de personaje. Rasgos → progresión enseña una sección por clase.
 - **Personajes sin conjuros.** Si ni la clase ni la subclase lanzan conjuros (ni hay ninguno en el libro), la cabecera muestra los números de la clase en lugar de CD y ataque de conjuro, y la parte de conjuros queda al pie con «Añadir conjuros», por si llegan por especie, dote, objeto o multiclase. Mientras siga vacía, se puede volver a ocultar.
 - **Héroes de Faerûn, completo.** Al importarlo salen sus 17 conjuros nuevos, las 34 dotes, los 18 trasfondos y las 8 subclases con sus 42 rasgos. Los nombres mal leídos por el OCR del PDF («Toca do por los mythales», «Don deljolgorio», «Víbora de sylun é») y los trasfondos sin título (Arpista, Caballero del Guantelete, Sectario del Dragón) se corrigen con las tablas del propio libro («Lista de dotes», «Trasfondos regionales / de facciones»). El libro se reconoce aunque el archivo se llame de otra forma.
 - **Tema oscuro por defecto.** El claro sigue en el menú y se recuerda.
@@ -84,7 +95,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 
 Los cambios se prueban primero en la rama `development` y pasan a `main` cuando están listos. `main` sigue siendo la que genera el APK y la versión de Windows, y la que publica Vercel en producción.
 
-- **Clases de prueba.** Un personaje de **nivel 8 por cada subclase**: 56 en total.
+- **Clases de prueba.** Un personaje de **nivel 8 por cada subclase** (56) y uno más con multiclase, especie y dotes: Sigrun, Bárbaro 5 / Guerrero 3, enana y soldado, con la dote Alerta.
   - En `main` (APK, Windows y web publicada) no aparecen hasta que pulsas **«Revisar clases de prueba»** al pie de la portada. La primera vez se crean; después, el mismo botón muestra u oculta su sección.
   - En cualquier otra compilación (la rama `development`, sus vistas previas en Vercel o `npm run dev` en local) se crean solos al arrancar y se ven desde el principio.
   - Cada uno viene montado de forma automática según las reglas: características con la matriz estándar, el trasfondo y las mejoras de característica; especie y trasfondo, con su dote de origen; trucos, conjuros preparados y conjuros siempre preparados de clase y subclase; el libro del mago con Experto en su escuela; invocaciones y rasgos propios.
@@ -334,7 +345,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (79)
+npm test           # pruebas (85)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

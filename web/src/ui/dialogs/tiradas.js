@@ -7,7 +7,7 @@
  * Todo se anota en el historial.
  */
 import { esc } from '../../core/util.js';
-import { perfil, sgn } from '../../domain/reglas2024.js';
+import { perfil, sgn, nivelTotal } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
 import { conObjetivos, objetivosNuevos } from '../../domain/concentracion.js';
 import { dadosPara, media } from '../../domain/tiradas.js';
@@ -39,10 +39,10 @@ export function openRoll(bi, nivelEspacio) {
 }
 function render() {
   const { ch, s, P, t } = datos();
-  const dados = t ? dadosPara(t, { nivelPj: ch.nivel, nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : [];
+  const dados = t ? dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : [];
   const conTS = !!t?.salvacion && (dados.some(x => x.via === 'salvacion') || t.falla || t.extras.length);
   $('#rlTitle').innerHTML = `${gi('d20', 'rl-d20')} ${esc(s.es)}`;
-  $('#rlSub').textContent = s.level === 0 ? `Truco, nivel de personaje ${ch.nivel}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
+  $('#rlSub').textContent = s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   let h = '';
   // Concentración sobre criaturas concretas (Maleficio, Marca del cazador…): se anota aquí mismo sobre quién
   const x = srdFor(s);
@@ -125,7 +125,7 @@ function tirar(tipo, i) {
       <div class="rl-det">${dadosHtml(vals, x.caras)}${comparaMedia(total, x.n, x.caras, x.bono)}</div><div class="rl-ctx">${md(x.frase)}</div>`;
     texto = `${s.es}: ${x.n}d${x.caras} = ${total}`;
   } else {
-    const dd = dadosPara(t, { nivelPj: ch.nivel, nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level })[i];
+    const dd = dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level })[i];
     const cura = dd.tipo === 'curación', crit = dd.via === 'ataque' && R.critico, n = dd.n * (crit ? 2 : 1);
     const vals = Array.from({ length: n }, () => d(dd.caras)), bono = dd.bono + (cura && t.curacion?.mod ? (P.mod || 0) : 0);
     const bruto = vals.reduce((p, q) => p + q, 0) + bono;

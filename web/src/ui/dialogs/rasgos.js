@@ -1,6 +1,6 @@
 /** Rasgos y recursos: lista con plantillas, editor de rasgos propios y recuperación de espacios. */
 import { clone, esc, uid } from '../../core/util.js';
-import { ABILS, SCHOOLS, perfil } from '../../domain/reglas2024.js';
+import { ABILS, SCHOOLS, perfil, clasesDe, vistaClase } from '../../domain/reglas2024.js';
 import { dadoRecarga, maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
 import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases2024.js';
 import { anadirPendientes, conjurosPendientes } from '../../domain/progresion.js';
@@ -28,15 +28,17 @@ function renderRules() {
     `<section class="fsec"><h3>De tu clase y subclase</h3>${tpl.length ? tpl.map(row).join('') : '<p class="note">Tu clase no tiene recursos que la app lleve por ti a este nivel.</p>'}
       <p class="note">Se ajustan solos al subir de nivel. Desactiva los que no quieras ver; «Personalizar» crea una copia tuya que puedes cambiar.</p></section>
      <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>
-     ${progresionHtml(ch)}`;
+     ${clasesDe(ch).map(c => progresionHtml(vistaClase(ch, c), clasesDe(ch).length > 1)).join('')}`;
 }
 /** Progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros que dan la clase y la subclase. */
-function progresionHtml(ch) {
+function progresionHtml(ch, multi = false) {
   const vals = escalas(ch); if (!vals.length) return '';
-  const prog = progresion(ch), sc = subclaseDe(ch), auto = conjurosAutomaticos(ch), pend = conjurosPendientes(S.db, ch, compendio());
+  // con multiclase, cada clase lleva su sección; los conjuros pendientes son solo los de esa clase
+  const prog = progresion(ch), sc = subclaseDe(ch), auto = conjurosAutomaticos(ch), deEsta = new Set(auto.map(c => c.nombre));
+  const pend = conjurosPendientes(S.db, S.cur(), compendio()).filter(c => deEsta.has(c.nombre));
   const faltan = new Set(pend.map(c => c.nombre));
   const porNivel = prog.reduce((m, r) => ((m[r.nivel] ||= []).push(r), m), {});
-  return `<section class="fsec prog"><h3>Tu clase a nivel ${ch.nivel}</h3>
+  return `<section class="fsec prog"><h3>${multi ? `${esc(ch.clase)} a nivel ${ch.nivel}` : `Tu clase a nivel ${ch.nivel}`}</h3>
       <dl class="prog-vals">${vals.map(v => `<div><dt>${esc(v.nombre)}</dt><dd>${esc(v.valor)}${v.nota ? `<small>${esc(v.nota)}</small>` : ''}</dd></div>`).join('')}</dl>
       <ol class="prog-lvls">${Object.entries(porNivel).map(([L, rs]) => `<li><b>${L}</b><span>${rs.map(r => `<span class="${r.origen === 'subclase' ? 'sub' : ''}">${esc(r.nombre)}</span>`).join(' · ')}</span></li>`).join('')}</ol>
       <p class="note">${sc ? `Resaltados, los rasgos de ${esc(sc.nombre)} (${esc(sc.libro)}).` : ch.nivel >= 3 ? 'Escribe una subclase del manual en la ficha para ver también sus rasgos.' : 'La subclase llega a nivel 3.'}</p>

@@ -2,6 +2,7 @@
 import { joinY, norm } from '../core/util.js';
 import { reglas } from './rasgos.js';
 import { conjurosAutomaticos, rasgosEnNivel } from './clases2024.js';
+import { clasesDe, vistaClase } from './reglas2024.js';
 import { importSrd } from './catalogo.js';
 
 export const ASI_LVLS = { _: [4, 8, 12, 16], 'Guerrero': [4, 6, 8, 12, 14, 16], 'Pícaro': [4, 8, 10, 12, 16] };
@@ -43,7 +44,7 @@ export function levelDiff(a, b, chA, chB) {
 export function conjurosPendientes(db, ch, compendio) {
   const porNombre = new Map(); for (const x of compendio || []) if (!porNombre.has(norm(x.es))) porNombre.set(norm(x.es), x);
   const tiene = new Set(ch.book.map(e => norm(db.catalog[e.sid]?.es)));
-  return conjurosAutomaticos(ch).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
+  return clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
 }
 /** Añade al libro los conjuros pendientes, siempre preparados. Devuelve sus nombres. */
 export function anadirPendientes(db, ch, pendientes) {
