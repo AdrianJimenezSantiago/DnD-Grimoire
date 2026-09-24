@@ -1,7 +1,7 @@
 /** Rasgos y recursos: lista con plantillas, editor de rasgos propios y recuperación de espacios. */
 import { clone, esc, uid } from '../../core/util.js';
 import { ABILS, SCHOOLS, perfil } from '../../domain/reglas2024.js';
-import { maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
+import { dadoRecarga, maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
 import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases2024.js';
 import { anadirPendientes, conjurosPendientes } from '../../domain/progresion.js';
 import { compendio } from '../../domain/catalogo.js';
@@ -83,12 +83,24 @@ function renderForm() {
   h += `<div class="fsum" style="margin-top:16px"><p>${esc(ruleSummary(preview()))}</p></div>`;
   $('#ruleForm').innerHTML = h;
 }
+/** Un rasgo que no se puede usar nunca no es un rasgo: sin usos, sin dados o con una recarga imposible. */
+export function errorRasgo(r) {
+  if ((r.tipo === 'recurso' && ['fijo', 'nivelx'].includes(r.maxBase)) && !(parseInt(r.maxN, 10) >= 1)) return 'Tiene que tener al menos un uso.';
+  if (r.tipo === 'dados' && !(parseInt(r.maxN, 10) >= 1 && parseInt(r.maxN, 10) <= 6)) return 'Entre 1 y 6 dados.';
+  if (r.tipo === 'recuperar' && r.maxBase === 'fijo' && !(parseInt(r.maxN, 10) >= 1)) return 'Tiene que recuperar al menos un nivel de espacio.';
+  if (r.tipo === 'recuperar' && !(r.nivMax >= 1 && r.nivMax <= 9)) return 'El nivel máximo de espacio va de 1 a 9.';
+  if (r.tipo === 'al_lanzar' && r.efecto === 'recuperar' && !(r.efectoN >= 1 && r.efectoN <= 8)) return 'El nivel que recupera va de 1 a 8.';
+  if (r.tipo === 'al_lanzar' && r.efecto === 'aviso' && !String(r.texto || '').trim()) return 'Escribe el texto del aviso.';
+  if (r.tipo === 'recurso' && r.recarga === 'dado' && !dadoRecarga(r)) return 'Escribe los dados de recarga como 1d3, 1d6 o 2d4.';
+  return '';
+}
 function saveRule() {
   RD.nombre = (RD.nombre || '').trim();
   if (!RD.nombre) { $('#ruleErr').textContent = 'Falta el nombre.'; return; }
   if (RD.tipo === 'dados') RD.maxBase = 'fijo';
   ['maxN', 'nivMax', 'espacioMin', 'efectoN'].forEach(k => { RD[k] = parseInt(RD[k], 10) || 0; });
   if (RD.tipo === 'recuperar' && !RD.nivMax) RD.nivMax = 5;
+  const err = errorRasgo(RD); if (err) { $('#ruleErr').textContent = err; return; }
   const { _tpl: tpl, _nuevo: nuevo, ...rule } = RD;
   const h = S.edit((db, ch) => {
     const i = ch.rasgos.findIndex(x => x.id === rule.id);

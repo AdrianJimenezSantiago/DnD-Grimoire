@@ -8,8 +8,9 @@
  */
 import { esc } from '../../core/util.js';
 import { perfil, sgn } from '../../domain/reglas2024.js';
-import { tiradasConjuro } from '../../domain/catalogo.js';
-import { dadosPara } from '../../domain/tiradas.js';
+import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
+import { conObjetivos, objetivosNuevos } from '../../domain/concentracion.js';
+import { dadosPara, media } from '../../domain/tiradas.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
@@ -26,6 +27,8 @@ export const iconoDano = (tipo, cls = '') => `<span class="dmg dmg-${ICONO_DANO[
 /** «daño de fuego» pero «daño psíquico»: los tipos adjetivos no llevan «de». */
 export const danoDe = tipo => (/^(psíquico|necrótico|radiante|contundente|cortante|perforante)$/.test(tipo) ? `daño ${tipo}` : `daño de ${tipo}`);
 const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: perfil(ch), t: tiradasConjuro(s) }; };
+const fmtMedia = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
+const mediaTxt = (n, caras, bono, mitad) => (n >= 2 ? `media ${fmtMedia(media(n, caras, bono))}${mitad ? `; ${fmtMedia(media(n, caras, bono) / 2)} si supera` : ''}` : '');
 const TS_TXT = { falla: 'Ha fallado', supera: 'Ha superado', varios: 'Varios objetivos' };
 
 export function openRoll(bi, nivelEspacio) {
@@ -41,6 +44,12 @@ function render() {
   $('#rlTitle').innerHTML = `${gi('d20', 'rl-d20')} ${esc(s.es)}`;
   $('#rlSub').textContent = s.level === 0 ? `Truco, nivel de personaje ${ch.nivel}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   let h = '';
+  // Concentración sobre criaturas concretas (Maleficio, Marca del cazador…): se anota aquí mismo sobre quién
+  const x = srdFor(s);
+  if (ch.play.conc === s.es && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d])) {
+    h += `<section class="rl-step rl-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="obj-list">${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
+      <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`;
+  }
   if (t?.escala?.tipo === 'espacio' && s.level > 0) {
     const niveles = []; for (let L = s.level; L <= 9; L++) niveles.push(L);
     h += `<label class="f rl-lvl">Espacio de nivel<select id="rlNivel">${niveles.map(L => `<option ${L === R.nivel ? 'selected' : ''}>${L}</option>`).join('')}</select></label>`;
@@ -74,14 +83,16 @@ function render() {
       else if (R.ts === 'varios') nota = t.mitad ? 'total si falla, mitad si supera' : 'solo quien falle';
     }
     if (dd.via === 'ataque' && R.critico) nota += ', crítico: dados dobles';
-    btns.push(`<button type="button" class="rl-btn ${dd.cond ? 'alt' : ''}" data-roll="dano" data-i="${i}" ${off ? 'disabled' : ''}>${iconoDano(dd.tipo)}<span><b>${cura ? 'Curación' : 'Daño'} ${dd.n}d${dd.caras}${bono ? sgn(bono) : ''} ${cura ? '' : esc(dd.tipo)}</b>${dd.cond ? `<em>solo si ${esc(dd.cond)}</em>` : ''}<small>${esc(nota)}</small></span></button>`);
+    const nDados = dd.n * (dd.via === 'ataque' && R.critico ? 2 : 1), med = mediaTxt(nDados, dd.caras, bono, dd.via === 'salvacion' && t.mitad && (R.ts === 'supera' || R.ts === 'varios'));
+    btns.push(`<button type="button" class="rl-btn ${dd.cond ? 'alt' : ''}" data-roll="dano" data-i="${i}" ${off ? 'disabled' : ''}>${iconoDano(dd.tipo)}<span><b>${cura ? 'Curación' : 'Daño'} ${dd.n}d${dd.caras}${bono ? sgn(bono) : ''} ${cura ? '' : esc(dd.tipo)}</b>${dd.cond ? `<em>solo si ${esc(dd.cond)}</em>` : ''}<small>${esc(nota)}</small></span>${med ? `<i class="rl-avg" title="Resultado medio esperado">${med}</i>` : ''}</button>`);
   });
   (t?.extras || []).forEach((x, i) => {
     const off = conTS && R.ts !== 'falla' && R.ts !== 'varios' && t.falla.includes(x.frase.slice(0, 30));
     // el trozo de la frase que habla de esos dados («…y restará 1d4 en la siguiente tirada de salvación…»)
     const k = x.frase.search(new RegExp(`\\b${x.n}d${x.caras}\\b`)), ini = Math.max(0, ...[', ', ' y ', '; '].map(sep => { const v = x.frase.lastIndexOf(sep, k); return v < 0 ? 0 : v + sep.length; }));
     let trozo = x.frase.slice(ini).trim().replace(/^(y|e|o)\s+/, ''); trozo = trozo.charAt(0).toUpperCase() + trozo.slice(1);
-    btns.push(`<button type="button" class="rl-btn extra" data-roll="extra" data-i="${i}" ${off ? 'disabled' : ''}>${gi('dados')}<span><b>Tirar ${x.n}d${x.caras}${x.bono ? sgn(x.bono) : ''}</b><small>${esc(trozo.length > 110 ? trozo.slice(0, 108) + '…' : trozo)}</small></span></button>`);
+    const med = mediaTxt(x.n, x.caras, x.bono);
+    btns.push(`<button type="button" class="rl-btn extra" data-roll="extra" data-i="${i}" ${off ? 'disabled' : ''}>${gi('dados')}<span><b>Tirar ${x.n}d${x.caras}${x.bono ? sgn(x.bono) : ''}</b><small>${esc(trozo.length > 110 ? trozo.slice(0, 108) + '…' : trozo)}</small></span>${med ? `<i class="rl-avg" title="Resultado medio esperado">${med}</i>` : ''}</button>`);
   });
   if (btns.length) h += `<section class="rl-step"><div class="rl-btns">${btns.join('')}</div>${t?.ataque ? `<label class="chk-line"><input type="checkbox" id="rlCrit" ${R.critico ? 'checked' : ''}> Crítico: se tiran el doble de dados de daño del ataque</label>` : ''}</section>`;
   if (!t || (!t.ataque && !dados.length && !t.extras.length)) h += `<p class="note">No encuentro dados de ataque ni de daño en el texto de este conjuro.${t?.salvacion ? '' : ' Importa tu manual para mejores resultados.'}</p>`;
@@ -94,6 +105,9 @@ function contar(el, total) {
   const paso = now => { const k = Math.min(1, (now - t0) / dur); el.textContent = k < 1 ? d(Math.max(total + 6, 20)) : total; if (k < 1) requestAnimationFrame(paso); };
   requestAnimationFrame(paso);
 }
+/** «media 10,5 · por encima»: discreto, junto al detalle de los dados. */
+const comparaMedia = (valor, n, caras, bono) => { if (n < 2) return ''; const m = media(n, caras, bono), d = valor - m;
+  return ` <span class="rl-vsmedia ${d > 0 ? 'sube' : d < 0 ? 'baja' : ''}">media ${fmtMedia(m)} · ${Math.abs(d) < 0.01 ? 'justo en la media' : d > 0 ? 'por encima' : 'por debajo'}</span>`; };
 const dadosHtml = (vals, caras) => vals.map(v => `<b class="die ${v === caras ? 'max' : v === 1 ? 'min' : ''}">${v}</b>`).join('');
 function tirar(tipo, i) {
   const { ch, s, P, t } = datos();
@@ -108,7 +122,7 @@ function tirar(tipo, i) {
   } else if (tipo === 'extra') {
     const x = t.extras[i], vals = Array.from({ length: x.n }, () => d(x.caras)); total = vals.reduce((p, q) => p + q, 0) + x.bono;
     html = `<div class="rl-total">${gi('dados', 'rl-big')}<span class="rl-num">${total}</span><span class="rl-lbl">${x.n}d${x.caras}${x.bono ? sgn(x.bono) : ''}</span></div>
-      <div class="rl-det">${dadosHtml(vals, x.caras)}</div><div class="rl-ctx">${md(x.frase)}</div>`;
+      <div class="rl-det">${dadosHtml(vals, x.caras)}${comparaMedia(total, x.n, x.caras, x.bono)}</div><div class="rl-ctx">${md(x.frase)}</div>`;
     texto = `${s.es}: ${x.n}d${x.caras} = ${total}`;
   } else {
     const dd = dadosPara(t, { nivelPj: ch.nivel, nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level })[i];
@@ -120,7 +134,7 @@ function tirar(tipo, i) {
     const lbl = cura ? 'puntos de golpe' : `de ${danoDe(esc(dd.tipo))}`;
     html = `<div class="rl-total ${clase}">${iconoDano(dd.tipo, 'big')}<span class="rl-num">${total}</span><span class="rl-lbl">${lbl}${ts === 'supera' ? ' (mitad por superar la salvación)' : ''}</span></div>
       ${ts === 'varios' ? `<div class="rl-split"><span>Quien falle: <b>${bruto}</b></span><span>Quien supere: <b>${t.mitad ? mitad : 0}</b></span></div>` : ''}
-      <div class="rl-det">${n}d${dd.caras}: ${dadosHtml(vals, dd.caras)}${bono ? ` ${sgn(bono)}` : ''}${crit ? ' <b class="tag-crit">crítico</b>' : ''}${dd.cond ? `<br><em>solo si ${esc(dd.cond)}</em>` : ''}</div>`;
+      <div class="rl-det">${n}d${dd.caras}: ${dadosHtml(vals, dd.caras)}${bono ? ` ${sgn(bono)}` : ''}${crit ? ' <b class="tag-crit">crítico</b>' : ''}${comparaMedia(bruto, n, dd.caras, bono)}${dd.cond ? `<br><em>solo si ${esc(dd.cond)}</em>` : ''}</div>`;
     texto = `${s.es}: ${ts === 'varios' ? `${bruto} (${t.mitad ? mitad : 0} si supera)` : total} ${cura ? 'de curación' : 'de ' + danoDe(dd.tipo)} (${n}d${dd.caras}${bono ? sgn(bono) : ''}${s.level && R.nivel > s.level ? ', espacio ' + R.nivel : ''}${crit ? ', crítico' : ''}${ts === 'supera' ? ', mitad' : ''})`;
     if (crit) R.critico = false;
   }
@@ -134,6 +148,11 @@ export function init(store) {
   on(body, 'click', '[data-roll]', (e, b) => { if (!b.disabled) tirar(b.dataset.roll, +b.dataset.i || 0); });
   on(body, 'click', '[data-modo]', (e, b) => { R.modo = b.dataset.modo; render(); });
   on(body, 'click', '[data-ts]', (e, b) => { R.ts = b.dataset.ts; R.ultimo = null; render(); haptic(); });
+  const anotar = inp => { const ch = S.cur(), nuevos = objetivosNuevos(inp.value, ch.play.concObj); inp.value = ''; if (!nuevos.length) return;
+    S.act(`${ch.play.conc}: sobre ${nuevos.join(', ')}`, (db, c) => { c.play.concObj.push(...nuevos); }); render(); haptic('light'); $('#rlObj')?.focus(); };
+  body.addEventListener('keydown', e => { if (e.target.id === 'rlObj' && e.key === 'Enter') { e.preventDefault(); anotar(e.target); } });
+  body.addEventListener('focusout', e => { if (e.target.id === 'rlObj' && e.target.value.trim()) anotar(e.target); });
+  on(body, 'click', '[data-rlobjdel]', (e, b) => { S.act('Objetivo quitado', (db, c) => { c.play.concObj.splice(+b.dataset.rlobjdel, 1); }); render(); });
   body.addEventListener('change', e => {
     if (e.target.id === 'rlNivel') { R.nivel = +e.target.value; render(); }
     if (e.target.id === 'rlCrit') { R.critico = e.target.checked; render(); }

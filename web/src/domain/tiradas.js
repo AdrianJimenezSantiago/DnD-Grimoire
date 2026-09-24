@@ -119,3 +119,6 @@ export function dadosPara(r, { nivelPj = 1, nivelEspacio = null, nivelConjuro = 
     return { ...d, n };
   });
 }
+
+/** Media esperada de n dados de c caras más un bono (2d6 + 3 → 10). */
+export const media = (n, caras, bono = 0) => n * (caras + 1) / 2 + bono;

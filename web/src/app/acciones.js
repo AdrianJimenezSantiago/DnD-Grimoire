@@ -11,7 +11,8 @@ import { toast } from '../ui/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
 import { haptic } from '../platform/native.js';
 import { pedir } from '../ui/modal.js';
-import { tiradasConjuro } from '../domain/catalogo.js';
+import { manualFor, srdFor, tiradasConjuro } from '../domain/catalogo.js';
+import { conObjetivos, empezarConc, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
 
@@ -58,9 +59,12 @@ export function cast(S, bi, mode, L) {
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
-    if (s.conc) c.play.conc = s.es;
+    if (s.conc) empezarConc(c.play, s.es);
   });
   const extra = [...fx.extra];
+  const x = srdFor(s), apunta = s.conc && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d]);
+  if (apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
+  else if (apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
   if (mode === 'slot' && s.ritual && (isPrepared(e) || P.ritualLibro)) extra.push({ label: 'Era como ritual', fn: () => { S.undo(h); cast(S, bi, 'ritual'); } });
   castFx(row(bi), schoolColor(schoolKey(s.escuela)));
   if (snuffIdx >= 0) slotFx(L, snuffIdx, 'snuff');
@@ -98,8 +102,37 @@ export function toggleSlot(S, L, i) {
 
 export function endConc(S) {
   const c = S.cur().play.conc;
-  const h = S.act(`Termina la concentración en ${c}`, (db, ch) => { ch.play.conc = ''; });
+  const h = S.act(`Termina la concentración en ${c}`, (db, ch) => { terminarConc(ch.play); });
   toast(`Concentración en ${esc(c)} terminada.`, [undoBtn(S, h)]);
+}
+
+/* ---------------- objetivos de la concentración y efectos activos ---------------- */
+/** Lleva a la casilla donde se escriben los objetivos (clave 'conc' o id de un efecto). */
+export function enfocarObjetivos(clave) {
+  const i = document.querySelector(`[data-objin="${clave}"]`); if (!i) return;
+  i.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => i.focus({ preventScroll: true }), 250);
+}
+const listaDe = (play, clave) => (clave === 'conc' ? play.concObj : play.efectos.find(e => e.id === clave)?.objetivos);
+export function anadirObjetivos(S, clave, texto) {
+  const ch = S.cur(), nuevos = objetivosNuevos(texto, listaDe(ch.play, clave) || []); if (!nuevos.length) return false;
+  const nombre = clave === 'conc' ? ch.play.conc : ch.play.efectos.find(e => e.id === clave)?.nombre;
+  S.act(`${nombre}: sobre ${joinY(nuevos)}`, (db, c) => { listaDe(c.play, clave)?.push(...nuevos); });
+  return true;
+}
+export function quitarObjetivo(S, clave, i) {
+  const ch = S.cur(), l = listaDe(ch.play, clave); if (!l?.[i]) return;
+  const quien = l[i], nombre = clave === 'conc' ? ch.play.conc : ch.play.efectos.find(e => e.id === clave)?.nombre;
+  const h = S.act(`${nombre}: ya no está sobre ${quien}`, (db, c) => { listaDe(c.play, clave).splice(i, 1); });
+  toast(`<b>${esc(nombre)}</b> ya no está sobre ${esc(quien)}.`, [undoBtn(S, h)]);
+}
+export function marcarEfecto(S, nombre) {
+  let id = ''; S.act(`Efecto activo: ${nombre}`, (db, c) => { id = nuevoEfecto(c.play, nombre).id; });
+  setTimeout(() => enfocarObjetivos(id), 120);
+}
+export function terminarEfecto(S, id) {
+  const e = S.cur().play.efectos.find(x => x.id === id); if (!e) return;
+  const h = S.act(`Termina ${e.nombre}`, (db, c) => { c.play.efectos = c.play.efectos.filter(x => x.id !== id); });
+  toast(`<b>${esc(e.nombre)}</b> terminado.`, [undoBtn(S, h)]);
 }
 
 export function longRest(S) {
@@ -107,7 +140,7 @@ export function longRest(S) {
   const rs = reglas(ch), dados = rs.filter(r => r.tipo === 'dados');
   const tiradas = [];
   const h = S.act('Descanso largo', (db, c) => {
-    c.play.used = {}; c.play.conc = ''; c.book.forEach(e => { e.used = false; });
+    c.play.used = {}; terminarConc(c.play); c.play.efectos = []; c.book.forEach(e => { e.used = false; });
     const rec = {};
     reglas(c).forEach(r => { const st = c.play.rec?.[r.id];
       if (r.tipo === 'recurso' && st?.used) { const x = recuperarEnDescanso(r, Math.min(st.used, r.max), 'largo'); if (x.usados) rec[r.id] = { used: x.usados, dice: [] }; if (x.tirada) tiradas.push(`${r.nombre}: recupera ${x.tirada}`); } });

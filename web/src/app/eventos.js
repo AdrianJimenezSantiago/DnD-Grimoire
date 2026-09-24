@@ -3,7 +3,9 @@
  * Un único despachador de órdenes (data-cmd) sirve al dock del móvil, a la barra de escritorio y a los menús.
  */
 import { esc } from '../core/util.js';
-import { perfil } from '../domain/reglas2024.js';
+import { SCHOOLS, perfil } from '../domain/reglas2024.js';
+import { campo } from '../domain/validar.js';
+import { schoolKey } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems, linkCatalog } from '../domain/catalogo.js';
@@ -121,6 +123,7 @@ const COMMANDS = {
   long: () => A.longRest(S),
   short: () => A.shortRest(S, openRecovery),
   endconc: () => A.endConc(S),
+  objetivos: () => A.enfocarObjetivos('conc'),
   backup: () => openBackup(),
   manual: () => openManual(),
   print: () => { setEditing(false); setTimeout(() => print(), 80); },
@@ -202,9 +205,56 @@ function bindSheet() {
       S.touch();
     }
   });
-  sheet.addEventListener('focusout', e => { if (['gratis', 'escuela', 'coste', 'es'].includes(e.target.dataset?.k)) S.emit('edit'); });
+  // Al salir de un campo editable: se valida y se deja coherente (0 no es un uso gratis, el alcance mínimo es Toque…)
+  let previo = null;
+  sheet.addEventListener('focusin', e => { const k = e.target.dataset?.k; if (!k) return; const e2 = S.cur()?.book[+e.target.dataset.bi]; if (!e2) return;
+    previo = REL_FIELDS.includes(k) ? e2[k] : S.db.catalog[e2.sid][k]; });
+  sheet.addEventListener('focusout', e => {
+    const t = e.target, k = t.dataset?.k; if (!k || t.dataset.bi == null) return;
+    const ch = S.cur(), e2 = ch?.book[+t.dataset.bi]; if (!e2) return;
+    const { valor, aviso } = campo(k, t.textContent), rel = REL_FIELDS.includes(k);
+    const final = valor == null ? (previo ?? '') : valor;
+    if (rel) { e2[k] = final; if (k === 'gratis' && !final) e2.used = false; } else { S.db.catalog[e2.sid][k] = final; invalidateItems(); }
+    if (t.textContent !== final) t.textContent = final;
+    S.touch(); S.emit('edit'); previo = null;
+    if (aviso) toast(esc(aviso));
+  });
+  // Escuela: selector con las ocho escuelas y su color
+  let escuelaBi = null;
+  on(sheet, 'click', '[data-schoolpick]', (e, b) => {
+    escuelaBi = +b.dataset.schoolpick; const actual = S.db.catalog[S.cur().book[escuelaBi].sid].escuela;
+    showMenu($('#schoolMenu'), b, `<p class="sch-menu-h">Escuela de magia</p>` + SCHOOLS.map(sc => `<button type="button" role="menuitemradio" aria-checked="${sc === actual}" data-school="${sc}" style="--sc:var(--sc-${schoolKey(sc)})"><i class="sch-dot" aria-hidden="true"></i>${sc}</button>`).join(''));
+  });
+  on(document, 'click', '[data-school]', (e, b) => {
+    closeMenu(); const ch = S.cur(); if (escuelaBi == null || !ch) return;
+    const sid = ch.book[escuelaBi].sid, s = S.db.catalog[sid], antes = s.escuela, nueva = b.dataset.school; if (antes === nueva) return;
+    const otros = S.db.chars.filter(c => c !== ch && c.book.some(x => x.sid === sid)).length;
+    const h = S.edit(db => { db.catalog[sid].escuela = nueva; }); invalidateItems();
+    toast(`<b>${esc(s.es)}</b>: ${esc(nueva.toLowerCase())}.${otros ? ` También cambia en ${otros === 1 ? 'otro personaje' : otros + ' personajes'}.` : ''}`, [A.undoBtn(S, h)]);
+  });
+  // Componentes: V, S y M se marcan; siempre queda al menos uno
+  on(sheet, 'click', '[data-comp]', (e, b) => {
+    const [bi, c] = b.dataset.comp.split('|'), sid = S.cur().book[+bi].sid, act = (S.db.catalog[sid].comp || '').split(' ').filter(Boolean);
+    const sig = act.includes(c) ? act.filter(x => x !== c) : [...act, c], { valor } = campo('comp', sig.join(' '));
+    if (!valor) return toast('Todo conjuro tiene al menos un componente: verbal (V), somático (S) o material (M).');
+    S.edit(db => { db.catalog[sid].comp = valor; if (!valor.includes('M')) db.catalog[sid].coste = ''; }); haptic('light');
+  });
+  // Efectos activos: objetivos de la concentración y de los rasgos
+  sheet.addEventListener('keydown', e => {
+    const t = e.target; if (!t.dataset?.objin || e.key !== 'Enter') return;
+    e.preventDefault(); const clave = t.dataset.objin;
+    if (A.anadirObjetivos(S, clave, t.value)) { haptic('light'); setTimeout(() => document.querySelector(`[data-objin="${clave}"]`)?.focus({ preventScroll: true }), 30); }
+    else t.value = '';
+  });
+  sheet.addEventListener('focusout', e => { const t = e.target; if (t.dataset?.objin && t.value.trim()) A.anadirObjetivos(S, t.dataset.objin, t.value); });
+  on(sheet, 'click', '[data-objdel],[data-efnuevo],[data-eferm]', (e, b) => {
+    if (b.dataset.objdel) { const [clave, i] = b.dataset.objdel.split('|'); return A.quitarObjetivo(S, clave, +i); }
+    if (b.dataset.efnuevo) return A.marcarEfecto(S, b.dataset.efnuevo);
+    if (b.dataset.eferm) return A.terminarEfecto(S, b.dataset.eferm);
+  });
   sheet.addEventListener('change', e => {
     const t = e.target;
+    if (t.hasAttribute('data-pedirobj')) { S.edit((db, ch) => { ch.play.pedirObjetivos = t.checked; }); return; }
     if (t.hasAttribute('data-always')) { const bi = +t.dataset.bi; S.edit((db, ch) => { ch.book[bi].always = t.checked; if (t.checked) ch.book[bi].prep = false; }); return; }
     if (t.dataset.lvl !== undefined) {
       const ch = S.cur(), sid = ch.book[+t.dataset.lvl].sid, s = S.db.catalog[sid], others = S.db.chars.filter(c => c !== ch && c.book.some(b => b.sid === sid)).length;

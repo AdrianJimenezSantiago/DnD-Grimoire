@@ -102,6 +102,7 @@ body.editing [contenteditable="true"] { background: var(--surface-2); border-rad
 body.editing .edit-only { display: flex !important; }
 .flags { flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 8px; font: 400 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); }
 .flags label { display: inline-flex; gap: 6px; align-items: center; }
+.flags input[type="checkbox"] { width: 18px; height: 18px; min-height: 0; flex: none; margin: 0; }
 .flags select { min-height: 30px; padding: 2px 6px; width: auto; font-size: var(--fs-xs); border-radius: 6px; }
 .flags button { min-height: 30px; padding: 0 10px; font-size: var(--fs-xs); border-radius: var(--r-pill); }
 

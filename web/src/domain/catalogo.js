@@ -8,6 +8,7 @@ import { tiradasDe } from './tiradas.js';
 import { formasDeEstado } from './glosario.js';
 import { CLASES } from './reglas2024.js';
 import { claveNombre } from './manual.js';
+import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
 
 let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null, SUBS = {};
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
@@ -19,8 +20,15 @@ function reindexar() {
   const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
   for (const lb of LIBROS) for (const x of lb.nuevos || []) { const c = claveEs(x.es, x.l); if (!vistos.has(c)) { vistos.add(c); extra.push(x); } }
   SRD = BASE ? [...BASE, ...extra] : null; SRDK = {}; SRDN = {};
+  (SRD || []).forEach(limpiarDatos);
   (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
   itemsMemo = null; tirMemo.clear();
+}
+/** Datos técnicos coherentes aunque vengan de un PDF leído con OCR («18 m |», «36m *», escuela abreviada…). */
+const LIMPIOS = new WeakSet();
+function limpiarDatos(x) {
+  if (LIMPIOS.has(x)) return; LIMPIOS.add(x);
+  x.a = alcance(x.a); x.du = duracion(x.du); x.co = componentes(x.co) || x.co; x.esc = escuelaOficial(x.esc) || x.esc;
 }
 /** Aplica los libros importados: textos, conjuros nuevos, glosario y subclases (el primero que aporta algo manda). */
 export function setLibros(libros) {
