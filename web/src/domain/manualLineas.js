@@ -22,9 +22,12 @@ export function pageToColumns(items, pageWidth) {
   const mid = gutterOf(items, pageWidth);
   const cols = [[], []];
   for (const it of items) {
-    if (!it.str || !it.str.trim()) continue;
+    if (!it.str) continue;
+    const esp = !it.str.trim();   // pdf.js entrega a veces el espacio entre palabras como fragmento propio
+    // número de página en el pie: nunca forma parte del texto
+    if (!esp && /^\s*\d{1,3}\s*$/.test(it.str) && it.transform[5] < 75) continue;
     const x = it.transform[4], y = it.transform[5], h = Math.abs(it.transform[3]) || it.height || 10;
-    cols[x < mid ? 0 : 1].push({ x, y, h, w: it.width || 0, s: it.str });
+    cols[x < mid ? 0 : 1].push({ x, y, h, w: esp ? 0 : it.width || 0, s: esp ? ' ' : it.str, esp });
   }
   return cols.map(col => {
     // Bandas: fragmentos a la misma altura (±45 % del cuerpo) forman una línea, ordenada de izquierda a derecha.
@@ -38,16 +41,20 @@ export function pageToColumns(items, pageWidth) {
         const L = lines[k];
         if (Math.abs(L.y - it.y) >= tol(Math.min(L.h, it.h))) continue;
         const m = Math.min(L.h, it.h) * 0.6;   // solape real, no el espacio final que pdf.js suma al ancho
-        if (L.items.some(o => it.x < o.x + o.w - m && it.x + it.w > o.x + m)) continue;
+        if (!it.esp && L.items.some(o => !o.esp && it.x < o.x + o.w - m && it.x + it.w > o.x + m)) continue;
         dest = L; break;
       }
-      if (dest) { dest.items.push(it); dest.h = Math.max(dest.h, it.h); }
-      else lines.push({ y: it.y, h: it.h, items: [it] });
+      if (dest) { dest.items.push(it); if (!it.esp) dest.h = Math.max(dest.h, it.h); }
+      else if (!it.esp) lines.push({ y: it.y, h: it.h, items: [it] });
     }
     return lines.map(L => {
       L.items.sort((a, b) => a.x - b.x);
       let s = '', fin = -Infinity;
-      for (const it of L.items) { s += (s && it.x - fin > it.h * 0.15 && !s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s; fin = it.x + it.w; }
+      // espacio entre fragmentos si hay hueco visible (el texto justificado deja huecos pequeños entre palabras)
+      for (const it of L.items) {
+        if (it.esp) { if (s && !s.endsWith(' ')) s += ' '; continue; }
+        s += (s && it.x - fin > it.h * 0.06 && !s.endsWith(' ') && !it.s.startsWith(' ') ? ' ' : '') + it.s; fin = it.x + it.w;
+      }
       return { x: L.items[0].x, y: L.y, h: L.h, s: s.replace(/\s+/g, ' ').trim() };
     });
   });

@@ -39,8 +39,12 @@ export function parseSpells(pages) {
   const L = [];
   for (const pg of pages) pg.cols.forEach(col => {
     const body = col.filter(l => !isFooter(l.s));
-    const margin = Math.min(...body.map(l => l.x).filter(Number.isFinite));
-    body.forEach((l, i) => L.push({ ...l, margin, colStart: i === 0 }));
+    // margen = la x más repetida de la columna (el mínimo falla con cajas de perfil o texto que rodea imágenes)
+    const cuenta = new Map(); body.forEach(l => { const k = Math.round(l.x / 3); cuenta.set(k, (cuenta.get(k) || 0) + 1); });
+    const moda = [...cuenta].sort((a, b) => b[1] - a[1])[0];
+    const margin = moda ? moda[0] * 3 : Math.min(...body.map(l => l.x));
+    const largos = body.map(l => l.s.length).sort((a, b) => a - b), tipico = largos[Math.floor(largos.length * 0.7)] || 50;
+    body.forEach((l, i) => L.push({ ...l, margin, tipico, colStart: i === 0 }));
   });
   // Cabeceras: línea de escuela/nivel precedida del nombre en mayúsculas
   const heads = [];
@@ -92,19 +96,35 @@ export function parseSpells(pages) {
     }
     // Descripción: párrafos por sangría; se omiten pies de foto en mayúsculas
     const paras = []; let para = '';
+    const ETIQ = /^(?:[A-ZÁÉÍÓÚ][\p{L}.]{1,24}(?: [\p{L}.]{1,14}){0,2}:\s|(?:Fue|Des|Con|Int|Sab|Car)\s?\d)/u;
     for (; k < end; k++) {
-      const l = L[k], s = l.s.replace(/^\|\s*/, '');
-      if (FIELD.test(s)) continue;
-      if ((isCaps(s) || casiMayus(s)) && !/\d/.test(s)) continue;
+      const l = L[k], s = l.s.replace(/^[|\[\]]\s*/, '').replace(/\s*[|\[\]]$/, '').replace(/\s[|\[\]]\s/g, ' ').trim();
+      if (!s || FIELD.test(s)) continue;
+      // títulos dentro del texto (perfil de criatura: «Espíritu aberrante», «Atributos», «Acciones»): letra grande en mayúsculas
+      if ((isCaps(s) || casiMayus(s)) && l.h >= 19.5 && letters(s).length >= 4) {
+        if (para) { paras.push(para); para = ''; }
+        paras.push(`**${nombreBonito(s.replace(/^\d+\s+/, ''))}**`); continue;
+      }
+      if ((isCaps(s) || casiMayus(s)) && (!/\d/.test(s) || letters(s).length >= 12)) continue;   // pies de foto
       if (s.length <= 2 && !/\d/.test(s)) continue;
-      const indent = l.x - l.margin > 4;
-      if (para && (indent || SUP.test(s))) { paras.push(para); para = ''; }
+      // restos de ilustraciones: mayoría de símbolos y siglas sin sentido («> ARA a >», «EEN Sab ION [Cars EAS»)
+      const toks = s.split(/\s+/), raros = toks.filter(w => /^[^\p{L}\d]+$/u.test(w) || /^[[(]?[A-Z]{2,4}[\])]?$/.test(w) && !/^(CD|CA|PG|PX|BC|VD|DJ)$/.test(w)).length;
+      if (!ETIQ.test(s) && toks.length <= 10 && raros >= 2 && raros / toks.length >= 0.45) continue;
+      if (para && ETIQ.test(s)) { paras.push(para); para = ''; }                                  // líneas de perfil: CA:, PG:, Velocidad:…
+      // nuevo párrafo solo si el anterior cerró la frase y esta línea está sangrada o la anterior era corta
+      const prev = L[k - 1], cierra = /[.:!?»)”…]$/.test(para);
+      const indent = l.x - l.margin > 4 && l.x - l.margin < 60, corta = prev && prev.s.length < prev.tipico * 0.75;
+      if (para && (SUP.test(s) || (cierra && (indent || corta)))) { paras.push(para); para = ''; }
       para = para ? (para.endsWith('-') && /^[a-záéíóúñ]/.test(s) ? para.slice(0, -1) + s : para + ' ' + s) : s;
     }
     if (para) paras.push(para);
     for (let q = 0; q < paras.length; q++) paras[q] = paras[q].replace(/\s*CAP[ÍI]TULO\s*\d+\s*\|?\s*[A-ZÁÉÍÓÚ ]+\s*\d*\s*/g, ' ').trim();
+    // Nivel superior / mejora de truco: solo su párrafo. Lo que venga después (p. ej. el perfil de la criatura) es descripción.
     let desc = [], sup = [];
-    paras.forEach(p => { if (SUP.test(p) || sup.length) sup.push(p.replace(SUP, '')); else desc.push(p); });
+    paras.forEach(p => { if (SUP.test(p) && !sup.length) sup.push(p.replace(SUP, '')); else desc.push(p); });
+    // restos de ilustraciones al final de un párrafo («…arder. mE», «…fuego. |»)
+    desc = desc.map(p => p.replace(/([.:!?»)])(?:\s+(?:[|\[\]]|[A-Za-z]{1,2}|[a-z][A-Z]\w?|\[?\s?\w{1,4}\s?\w?\]?)){1,3}$/, '$1'));
+    sup = sup.map(p => p.replace(/([.:!?»)])(?:\s+(?:[|\[\]]|[A-Za-z]{1,2}|[a-z][A-Z]\w?)){1,3}$/, '$1'));
     const tiempoRaw = (F['Tiempo de lanzamiento'] || '').trim(), durRaw = (F['Duración'] || '').trim();
     const compRaw = (F['Componentes'] || '').trim();
     out.push({
