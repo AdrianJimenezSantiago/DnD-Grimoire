@@ -55,6 +55,17 @@
 
 /* ------------------------------ objetos ------------------------------ */
 .obj-list li + li { border-top: 1px solid var(--line-soft); }
+/* lista de la biblioteca: grupos con cabecera y, dentro, una rejilla de tarjetas del mismo ancho */
+.obj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 6px; }
+.obj-grid li + li { border-top: 0; }
+.obj-grid .obj { height: 100%; background: color-mix(in srgb, var(--surface-2) 55%, transparent); border: 1px solid var(--line-soft); border-radius: 10px; }
+.obj-grid .obj:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--rar) 40%, var(--line-soft)); }
+.obj-g { position: sticky; top: 0; z-index: 1; padding: 8px 2px 6px; margin: 14px 0 6px; background: var(--raised); border-bottom: 1px solid var(--line-soft); }
+.obj-g:first-child { margin-top: 0; }
+.obj-g .rar-pt { width: 10px; height: 10px; border-radius: 50%; background: var(--rar); box-shadow: 0 0 8px color-mix(in srgb, var(--rar) 60%, transparent); }
+.obj-g[class*=" r-"] { color: var(--rar); }
+.obj-grid .obj-t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obj-t b { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .obj { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 6px 10px 12px; min-height: 60px; position: relative; border-radius: 8px; content-visibility: auto; contain-intrinsic-size: 60px; }
 .obj::before, .eq::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--rar); }
 .obj:hover { background: var(--surface-2); } .obj:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

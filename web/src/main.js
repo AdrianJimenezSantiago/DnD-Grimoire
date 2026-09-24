@@ -28,6 +28,7 @@ import { fromStored } from './domain/modelo.js';
 import { compendio, linkCatalog, loadSrd } from './domain/catalogo.js';
 import { hayPruebas, sembrarPruebas } from './domain/pruebas.js';
 import { toast } from './ui/toast.js';
+import { esc } from './core/util.js';
 import { undoBtn } from './app/acciones.js';
 import { confirmar } from './ui/modal.js';
 import { libros } from './domain/catalogo.js';
@@ -150,7 +151,10 @@ async function boot() {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
     const ok = await loadSrd(fuente);
     await manual.cargarLibros();              // libros importados: textos, conjuros nuevos, glosario, subclases
+    // APK: los libros de tools/resources vienen ya leídos dentro de la app; se añaden los que falten
+    const incluidos = ok ? await manual.aplicarIncluidos() : [];
     listos();
+    if (incluidos.length) toast(`Libros listos: <b>${incluidos.map(l => esc(l.titulo)).join('</b>, <b>')}</b>.`, [{ label: 'Abrir biblioteca', fn: () => app.run('biblioteca') }]);
     if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();   // rama de desarrollo: personajes de prueba
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');

@@ -3,8 +3,9 @@
  * Cada libro aporta textos de conjuros, conjuros nuevos, glosario y subclases. Se pueden quitar uno a uno.
  */
 import { esc } from '../../core/util.js';
-import { emparejarLibro, libros, setLibros, oficializar, manualCount, glosario, subclasesDe } from '../../domain/catalogo.js';
-import { CLASES_ES, idLibro } from '../../domain/libros.js';
+import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/catalogo.js';
+import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/componerLibro.js';
+import { CLASES_ES } from '../../domain/libros.js';
 import { claveNombre } from '../../domain/manual.js';
 import { $, on } from '../dom.js';
 import { openSheet } from '../dialog.js';
@@ -44,6 +45,30 @@ export async function cargarLibros() {
 }
 export const cargarManualGuardado = cargarLibros;   // compatibilidad
 
+/* ---- libros incluidos en la APK (los PDF de tools/resources, leídos al compilar) ---- */
+const QUITADOS = 'libros-incluidos-quitados.json';
+const quitados = async () => { try { return JSON.parse((await fileStore.get(QUITADOS)) || '[]'); } catch { return []; } };
+/**
+ * Al arrancar: añade los libros incluidos que falten o cuya lectura haya mejorado con una versión nueva de la app.
+ * Nunca pisa un libro importado a mano ni vuelve a poner uno que el usuario quitó. Devuelve los añadidos.
+ */
+export async function aplicarIncluidos() {
+  let idx;
+  try { const r = await fetch('libros/indice.json', { cache: 'no-cache' }); if (!r.ok) return []; idx = await r.json(); } catch { return []; }
+  const L = libros(), fuera = new Set(await quitados()), nuevos = [];
+  for (const e of Array.isArray(idx) ? idx : []) {
+    const ya = L.find(l => l.id === e.id);
+    if (fuera.has(e.id) || (ya && (!ya.incluido || ya.version === e.version))) continue;
+    try { const lb = await (await fetch(`libros/${e.archivo}`)).json(); nuevos.push({ ...lb, fecha: Date.now(), incluido: true, version: e.version }); }
+    catch (err) { console.warn('Libro incluido no disponible', e.titulo, err); }
+  }
+  if (!nuevos.length) return [];
+  const ids = new Set(nuevos.map(l => l.id)), lista = L.filter(l => !ids.has(l.id)).concat(nuevos);
+  for (const lb of nuevos) await fileStore.set(archivo(lb.id), JSON.stringify(lb));
+  await guardarTodo(lista); setLibros(lista); S?.emit('manual');
+  return nuevos;
+}
+
 function lista() {
   const L = libros();
   $('#mnEstado').innerHTML = L.length ? `<div class="lb-list">${L.map(l => `<div class="lb">
@@ -57,24 +82,15 @@ function lista() {
         (l.trasfondos || []).length ? `${l.trasfondos.length} trasfondos` : '',
         (l.criaturas || []).length ? `${l.criaturas.length} perfiles de criatura` : '',
       ].filter(Boolean).join(' · ')}</small></div>
-      <button type="button" class="warn" data-quitar="${esc(l.id)}">Quitar</button></div>`).join('')}</div>`
+      ${l.incluido ? '<span class="lb-inc" title="Leído del PDF al compilar la app">Incluido con la app</span>' : ''}<button type="button" class="warn" data-quitar="${esc(l.id)}">Quitar</button></div>`).join('')}</div>`
     : '<p class="note">Aún no has importado ningún libro en este dispositivo.</p>';
   $('#mnBorrar').hidden = true;
 }
 export function openManual() { pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); openSheet(dlg()); }
 
-/** Subclases detectadas que no son ya conocidas (o casi iguales a una conocida) → propuestas para confirmar. */
-function propuestas(detectadas) {
-  const lev = (a, b) => { const d = Array.from({ length: b.length + 1 }, (_, j) => j); for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
-  return detectadas.filter(sc => {
-    const k = claveNombre(sc.nombre), conocidas = CLASES_ES.flatMap(c => subclasesDe(c)).map(claveNombre);
-    return !conocidas.some(c => c === k || lev(c, k) <= 2 || c.startsWith(k));
-  }).map(sc => {
-    const ws = sc.nombre.split(/\s+/), menores = ['de', 'del', 'la', 'las', 'los', 'el', 'y', 'e', 'o'];
-    return { ...sc, ok: !!sc.clase && ws.every(w => w.length >= 3 || menores.includes(w.toLowerCase())) && ws.some(w => w.length >= 5) };
-  });
-}
 async function guardarLibro(lb) {
+  // importarlo a mano otra vez lo recupera aunque se hubiera quitado
+  const q = await quitados(); if (q.includes(lb.id)) await fileStore.set(QUITADOS, JSON.stringify(q.filter(x => x !== lb.id)));
   const L = libros().filter(l => l.id !== lb.id).concat(lb);
   await fileStore.set(archivo(lb.id), JSON.stringify(lb)); await guardarTodo(L);
   setLibros(L);
@@ -109,19 +125,10 @@ async function importar(file) {
       if (p.fase === 'reglas') { msg.textContent = 'Leyendo las reglas del DM…'; fill.style.width = '97%'; }
       if (p.fase === 'criaturas') { msg.textContent = 'Leyendo los perfiles de criaturas…'; fill.style.width = '99%'; }
     });
-    if (!r.spells.length && !r.glosario.length && !r.subclases.length && !r.objetos.length && !r.dotes.length && !r.trasfondos.length && !r.criaturas.length) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos, criaturas ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable (un PDF escaneado, solo con imágenes, no se puede leer).');
-    let titulo = r.titulo;
-    const provisional = emparejarLibro(r.spells, 'x', titulo);
-    if (Object.keys(provisional.textos).length >= 300 && provisional.nuevos.length <= 5) titulo = 'Manual del Jugador (2024)';
-    else if (r.objetos.length >= 200 && r.glosario.some(e => e.cat === 'Herramientas del DM')) titulo = 'Guía del Dungeon Master (2024)';
-    // por el nombre del archivo o, si se llama de otra forma, por sus subclases
-    else if (/h[ée]roes de faer[uú]n/i.test(titulo) || ['Hojacantante', 'Caminante invernal', 'Abanderado'].every(n => r.subTextos.some(x => x.nombre === n))) titulo = 'Reinos Olvidados: Héroes de Faerûn';
-    else if (r.criaturas.length >= 150 && !r.spells.length) titulo = 'Manual de Monstruos (2025)';
-    const id = idLibro(titulo), { textos, nuevos } = emparejarLibro(r.spells, id, titulo);
+    if (!hayContenido(r)) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos, criaturas ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable (un PDF escaneado, solo con imágenes, no se puede leer).');
     fill.style.width = '100%'; msg.textContent = `Leído en ${Math.round((performance.now() - t0) / 1000)} s.`;
-    const lb = { id, titulo, fecha: Date.now(), textos, nuevos, glosario: r.glosario, subclases: [], objetos: r.objetos, dotes: r.dotes, trasfondos: r.trasfondos, subTextos: r.subTextos, rasgosClase: r.rasgosClase, especies: r.especies, criaturas: r.criaturas };
-    const props = propuestas(r.subclases), sinNombre = r.trasfondos.filter(t => t.revisar).length + r.subTextos.filter(t => t.revisar).length;
-    if (props.some(p => p.ok) || sinNombre) { pendiente = { lb, props }; pedirSubclases(); } else { lb.subclases = props.filter(p => p.ok).map(({ clase, nombre }) => ({ clase, nombre })); await guardarLibro(lb); }
+    const { lb, props, sinNombre } = componerLibro(r);
+    if (props.some(p => p.ok) || sinNombre) { pendiente = { lb, props }; pedirSubclases(); } else await guardarLibro(aceptarPropuestas(lb, props));
   } catch (e) {
     msg.textContent = 'No se pudo importar.'; $('#mnRes').innerHTML = `<p class="ferr">${esc(e.message || e)}</p>`;
   } finally { $('#mnElegir').disabled = false; }
@@ -162,6 +169,7 @@ export function init(store) {
     const lb = libros().find(l => l.id === b.dataset.quitar); if (!lb) return;
     if (!(await confirmar({ titulo: `¿Quitar «${lb.titulo}»?`, texto: 'Se borran de este dispositivo sus descripciones, glosario, subclases y conjuros nuevos. Los conjuros que ya tengas en tu libro siguen ahí.', ok: 'Quitar', peligro: true }))) return;
     const L = libros().filter(l => l.id !== lb.id); await fileStore.remove(archivo(lb.id)); await guardarTodo(L); setLibros(L);
+    if (lb.incluido) await fileStore.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));   // no vuelve al arrancar
     lista(); S.emit('manual'); toast(`«${lb.titulo}» quitado.`);
   });
   $('#mnSoloNombres').addEventListener('click', () => {

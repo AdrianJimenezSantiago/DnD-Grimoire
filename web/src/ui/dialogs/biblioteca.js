@@ -22,7 +22,7 @@ import { TEMAS } from '../../domain/clases2024.js';
 import { reglas } from '../../domain/rasgos.js';
 
 let S;
-const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'az', ctipo: '', cvd: '' };
+const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'tipo', ctipo: '', cvd: '' };
 const dlg = () => $('#bibDlg');
 export const RAR_K = { 'Común': 'comun', Infrecuente: 'infrec', Raro: 'raro', 'Muy raro': 'muyraro', Legendario: 'legend', Artefacto: 'artef', 'Varía': 'varia' };
 export const TIPO_I = { Arma: 'o_arma', Armadura: 'o_armadura', Anillo: 'o_anillo', 'Bastón': 'o_baston', 'Objeto maravilloso': 'o_maravilloso', Pergamino: 'o_pergamino', 'Poción': 'o_pocion', Vara: 'o_vara', Varita: 'o_varita' };
@@ -30,6 +30,11 @@ const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'],
 const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
 const TIT_G = { Estado: 'Estados', 'Acción': 'Acciones', 'Área de efecto': 'Áreas de efecto', Peligro: 'Peligros', Actitud: 'Actitudes', '': 'Reglas generales', 'Herramientas del DM': 'Herramientas del DM', 'Objetos mágicos': 'Objetos mágicos: reglas' };
 const coincide = (q, ...t) => !q || norm(t.join(' ')).includes(q);
+// orden de la lista de objetos: [etiqueta, siguiente]
+const ORDEN_OBJ = { tipo: ['Por tipo', 'rar'], rar: ['Por rareza', 'az'], az: ['A–Z', 'tipo'] };
+const ORDEN_TIPOS = ['Arma', 'Armadura', 'Anillo', 'Poción', 'Pergamino', 'Varita', 'Vara', 'Bastón', 'Objeto maravilloso'];
+const TIT_TIPO = { Arma: 'Armas', Armadura: 'Armaduras', Anillo: 'Anillos', 'Poción': 'Pociones', Pergamino: 'Pergaminos', Varita: 'Varitas', Vara: 'Varas', 'Bastón': 'Bastones', 'Objeto maravilloso': 'Objetos maravillosos' };
+const inicial = t => norm(t).charAt(0).toUpperCase() || '#';
 const rareza = o => o.rareza === 'Varía' && o.rarezas?.length ? `${o.rarezas[0]} a ${o.rarezas[o.rarezas.length - 1].toLowerCase()}` : o.rareza;
 
 function vacio(que, libro) {
@@ -41,9 +46,9 @@ function herramientas() {
   let f = '';
   if (V.tab === 'objetos') {
     f = `<div class="bib-rar" role="group" aria-label="Rareza">${RAREZAS.filter(r => r !== 'Varía').map(r => `<button type="button" class="rar-chip r-${RAR_K[r]}" aria-pressed="${V.rar === r}" data-rar="${r}">${r}</button>`).join('')}</div>
-      <div class="bib-sel una"><select id="bibTipo" aria-label="Tipo de objeto"><option value="">Todos los tipos</option>${TIPOS_OBJ.map(t => `<option ${V.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <div class="bib-sel"><select id="bibTipo" aria-label="Tipo de objeto"><option value="">Todos los tipos</option>${TIPOS_OBJ.map(t => `<option ${V.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <button type="button" class="chip" id="bibSint" aria-pressed="${V.sint}">${gi('sintonia')}Sin sintonización</button>
-      <button type="button" class="chip" id="bibOrden" aria-pressed="${V.orden === 'rar'}" title="Cambiar el orden">${V.orden === 'rar' ? 'Por rareza' : 'A–Z'}</button></div>`;
+      <button type="button" class="chip" id="bibOrden" title="Cambiar cómo se agrupa la lista">${icon('sliders')}${ORDEN_OBJ[V.orden][0]}</button></div>`;
   }
   if (V.tab === 'dotes') f = `<div class="bib-sel una">${['', 'Origen', 'General', 'Estilo de combate', 'Don épico'].map(c => `<button type="button" class="chip" aria-pressed="${V.cat === c}" data-cat="${c}">${c || 'Todas'}</button>`).join('')}</div>`;
   if (V.tab === 'criaturas') f = `<div class="bib-sel una"><select id="bibCTipo" aria-label="Tipo de criatura"><option value="">Todos los tipos</option>${TIPOS_BASE.map(t => `<option ${V.ctipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
@@ -67,12 +72,18 @@ function cuerpo() {
     if (!B.objetos.length) h = vacio('Aquí aparecen los objetos mágicos, con filtros por rareza, tipo y sintonización.', 'la Guía del Dungeon Master');
     else {
       let f = B.objetos.filter(o => coincide(q, o.nombre, o.tipo, o.subtipo) && (!V.rar || o.rareza === V.rar || o.rarezas?.includes(V.rar)) && (!V.tipo || o.tipo === V.tipo) && (!V.sint || !o.sintonia));
-      f = f.sort((a, b) => (V.orden === 'rar' ? ordenRareza(a.rarezas?.[0] || a.rareza) - ordenRareza(b.rarezas?.[0] || b.rareza) : 0) || a.nombre.localeCompare(b.nombre, 'es'));
-      n = f.length; const ch = S.cur();
-      h = `<ul class="obj-list">${f.map(o => `<li><button type="button" class="obj r-${RAR_K[o.rarezas?.[0] || o.rareza] || 'varia'}" data-obj="${esc(o.clave)}">
+      n = f.length; const ch = S.cur(), rz = o => o.rarezas?.[0] || o.rareza;
+      const porNombre = (a, b) => a.nombre.localeCompare(b.nombre, 'es'), porRareza = (a, b) => ordenRareza(rz(a)) - ordenRareza(rz(b)) || porNombre(a, b);
+      // por tipo (dentro, de común a artefacto), por rareza (dentro, A–Z) o A–Z por inicial
+      const grupos = V.orden === 'rar' ? RAREZAS.map(r => [r, f.filter(o => (RAREZAS.includes(rz(o)) ? rz(o) : 'Varía') === r).sort(porNombre), null, `r-${RAR_K[r]}`])
+        : V.orden === 'az' ? [...new Set(f.map(o => inicial(o.nombre)))].sort((a, b) => a.localeCompare(b, 'es')).map(l => [l, f.filter(o => inicial(o.nombre) === l).sort(porNombre), null, ''])
+        : [...ORDEN_TIPOS, ''].map(t => [t || 'Otros', f.filter(o => (ORDEN_TIPOS.includes(o.tipo) ? o.tipo : '') === t).sort(porRareza), TIPO_I[t] || 'o_maravilloso', '']);
+      const tarjeta = o => `<li><button type="button" class="obj r-${RAR_K[rz(o)] || 'varia'}" data-obj="${esc(o.clave)}">
         <span class="obj-ico">${gi(TIPO_I[o.tipo] || 'o_maravilloso')}</span>
-        <span class="obj-t"><b>${esc(o.nombre)}</b><small>${esc(o.tipo)}${o.subtipo ? ` (${esc(o.subtipo)})` : ''} · <span class="rar-txt">${esc(rareza(o))}</span></small></span>
-        ${o.sintonia ? `<span class="obj-sin" title="Requiere sintonización">${gi('sintonia')}</span>` : ''}${ch && tieneObjeto(ch, o.clave) ? `<span class="obj-lo" title="Lo tiene ${esc(ch.nombre)}">${icon('user')}</span>` : ''}</button></li>`).join('')}</ul>`;
+        <span class="obj-t"><b>${esc(o.nombre)}</b><small title="${esc([o.tipo, o.subtipo].filter(Boolean).join(': '))}">${[V.orden === 'rar' && o.rareza !== 'Varía' ? '' : `<span class="rar-txt">${esc(rareza(o))}</span>`, V.orden === 'tipo' ? '' : esc(o.tipo), esc(o.subtipo || '')].filter(Boolean).join(' · ')}</small></span>
+        ${o.sintonia ? `<span class="obj-sin" title="Requiere sintonización" aria-label="Requiere sintonización">${gi('sintonia')}</span>` : ''}${ch && tieneObjeto(ch, o.clave) ? `<span class="obj-lo" title="Lo tiene ${esc(ch.nombre)}">${icon('user')}</span>` : ''}</button></li>`;
+      h = grupos.filter(([, v]) => v.length).map(([t, v, ico, cls]) => `<h3 class="bib-g obj-g ${cls}">${ico ? gi(ico) : cls ? '<i class="rar-pt"></i>' : ''}${esc(TIT_TIPO[t] || t)}<small>${v.length}</small></h3>
+        <ul class="obj-list obj-grid">${v.map(tarjeta).join('')}</ul>`).join('');
     }
   }
   if (V.tab === 'dotes') {
@@ -216,7 +227,7 @@ export function init(store) {
   on(d, 'click', '[data-rar]', (e, b) => { V.rar = V.rar === b.dataset.rar ? '' : b.dataset.rar; herramientas(); cuerpo(); });
   on(d, 'click', '[data-cat]', (e, b) => { V.cat = b.dataset.cat; herramientas(); cuerpo(); });
   on(d, 'click', '#bibSint', () => { V.sint = !V.sint; herramientas(); cuerpo(); });
-  on(d, 'click', '#bibOrden', () => { V.orden = V.orden === 'rar' ? 'az' : 'rar'; herramientas(); cuerpo(); });
+  on(d, 'click', '#bibOrden', () => { V.orden = ORDEN_OBJ[V.orden][1]; herramientas(); cuerpo(); });
   on(d, 'click', '[data-obj]', (e, b) => abrirObjeto(b.dataset.obj));
   on(d, 'click', '[data-dote]', (e, b) => abrirDote(b.dataset.dote));
   on(d, 'click', '[data-tras]', (e, b) => abrirTrasfondo(b.dataset.tras));
