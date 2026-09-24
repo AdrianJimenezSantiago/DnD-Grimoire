@@ -230,6 +230,11 @@ body.editing #dEdit { background: var(--gilt); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .lvl-num { color: var(--gold); } }
 .lvl-title { font: 600 var(--fs-l) / 1 var(--display); letter-spacing: .05em; }
 .list { border-radius: 14px; border-color: color-mix(in srgb, var(--gold) 12%, var(--line-soft)); background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface) 82%, transparent)); }
+/* aire dentro del marco: la barra de la escuela y las filas no rozan el borde redondeado ni los adornos de las esquinas */
+.list { padding: 6px 10px; }
+@media (max-width: 700px) { .list { padding: 4px 6px; } }
+.spell { border-radius: 10px; }
+.spell::before { left: 2px; border-radius: 3px; }
 .spell { transition: background-color .3s var(--ease); }
 .spell:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 10%, transparent), transparent 55%); }
 .spell::before { transition: width .25s var(--ease), box-shadow .25s; }
