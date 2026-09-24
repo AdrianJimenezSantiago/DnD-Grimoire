@@ -31,8 +31,10 @@ export function nombreBonito(caps) {
   let s = caps.replace(/^[“”"]/, '').toLowerCase().replace(/\s+/g, ' ').trim();
   if (ARREGLOS[s]) return ARREGLOS[s];
   const suf = SUFIJOS.find(x => (s.endsWith(x) || s.startsWith(x)) && s !== x); if (suf) s = suf;
+  s = s.replace(/(\p{L}{2,}) ([áéíóú])(?=\s|$)/gu, '$1$2');   // «sylun é»: tilde suelta del OCR
   s = s.charAt(0).toUpperCase() + s.slice(1);
-  PROPIOS.forEach(p => { s = s.replace(new RegExp(`\\b${p.toLowerCase()}\\b`, 'g'), p); });
+  // (sin \b: no sirve con letras acentuadas como la «é» final de Syluné)
+  PROPIOS.forEach(p => { s = s.replace(new RegExp(`(?<!\\p{L})${p.toLowerCase()}(?!\\p{L})`, 'gu'), p); });
   return s;
 }
 export const claveNombre = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();

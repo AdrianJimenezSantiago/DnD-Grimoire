@@ -61,6 +61,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - **Forma salvaje:** la tarjeta del recurso tiene «Formas (n)». Muestra las bestias posibles según el nivel (VD 1/4, 1/2 o 1, con vuelo desde el nivel 8) y el Círculo de la luna. Las conocidas se marcan con ★, hasta el máximo del nivel. Las que no estén en tus libros se añaden a mano con nombre, VD, CA, PG y velocidad.
   - El texto del apéndice del PDF tiene restos de reconocimiento de texto. La app los corrige cuando puede (dados, características, nombres) y marca en la ficha lo que conviene comprobar en el libro.
 - **Las 48 subclases del Manual del Jugador, completas.** Al importarlo, cada subclase trae ya todos sus rasgos (241) con su descripción, y la importación no pide ningún nombre. El lector tolera los títulos mal leídos del PDF («NrIveEL 10», «HECHICERÍA pracónica», «LABRÓN DE CONJUROS»), los títulos pegados al texto y las tablas que se comían el rasgo siguiente. El Evocador y el Juramento de venganza, cuyo título está dentro de una ilustración, se reconocen por sus rasgos.
+- **Héroes de Faerûn, completo.** Al importarlo salen sus 17 conjuros nuevos, las 34 dotes, los 18 trasfondos y las 8 subclases con sus 42 rasgos. Los nombres mal leídos por el OCR del PDF («Toca do por los mythales», «Don deljolgorio», «Víbora de sylun é») y los trasfondos sin título (Arpista, Caballero del Guantelete, Sectario del Dragón) se corrigen con las tablas del propio libro («Lista de dotes», «Trasfondos regionales / de facciones»). El libro se reconoce aunque el archivo se llame de otra forma.
 - **Tema oscuro por defecto.** El claro sigue en el menú y se recuerda.
 - **Franja de nivel de los conjuros.** Es un velo translúcido que desenfoca lo que pasa por debajo, algo más ancho que la tabla y desvanecido por los lados, en lugar de un bloque opaco.
 - **Primer arranque.** Tras el recorrido de la portada, la app pregunta una vez si quieres importar tus libros antes de empezar. «Más tarde» no vuelve a preguntar; se puede hacer luego desde Libros y manuales.
@@ -326,7 +327,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (74)
+npm test           # pruebas (76)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

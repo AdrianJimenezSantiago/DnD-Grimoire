@@ -15,7 +15,8 @@ const CLASE_DE = s => Object.keys(CLASES).find(c => sinTildes(c).toUpperCase() =
 const nombreDe = s => tituloBonito(s, PROPIOS);
 
 /* ------------------------------------ dotes ------------------------------------ */
-const CAT_DOTE = /^Dote (de origen|general|de estilo de combate|de don [ée]pico)\b\s*(.*)$/i;
+// «Dot·e de don épico», «Dote genera/»: la etiqueta también llega con restos del OCR
+const CAT_DOTE = /^Dot\W?e\s+(de origen|genera[l\/1I|]|de estilo de combate|de don [ée]pico)(?![\p{L}])\s*(.*)$/iu;
 export const CATS_DOTE = { 'de origen': 'Origen', general: 'General', 'de estilo de combate': 'Estilo de combate', 'de don épico': 'Don épico', 'de don epico': 'Don épico' };
 export function parseDotes(pages) {
   const L = aplanar(pages), cab = [];
@@ -24,7 +25,7 @@ export function parseDotes(pages) {
     const n = L[i - 1].s; if (n.length > 48 || /[.,:;]$/.test(n) || letras(n).length < 3 || CAT_DOTE.test(n)) continue;
     let req = m[2] || '', fin = i + 1;
     while (/\([^)]*$/.test(req) && L[fin] && fin < i + 3) { req += ' ' + L[fin].s; fin++; }
-    cab.push({ ini: i - 1, fin, nombre: nombreDe(n), cat: CATS_DOTE[m[1].toLowerCase()] || m[1], req: req.replace(/^\(|\)$/g, '').replace(/^requisitos?:\s*/i, '').trim() });
+    cab.push({ ini: i - 1, fin, nombre: nombreDe(n), cat: CATS_DOTE[m[1].toLowerCase().replace(/^genera.$/, 'general')] || m[1], req: req.replace(/^\(|\)$/g, '').replace(/^requisitos?:\s*/i, '').trim() });
   }
   return cab.map((c, n) => {
     let hasta = n + 1 < cab.length ? cab[n + 1].ini : L.length;
@@ -35,7 +36,7 @@ export function parseDotes(pages) {
 }
 
 /* ---------------------------------- trasfondos ---------------------------------- */
-const CAMPOS_T = [['caracteristicas', /^Puntuaciones de caracter[ií]stica\s*:\s*(.*)$/i], ['dote', /^Dote\s*:\s*(.*)$/i],
+const CAMPOS_T = [['caracteristicas', /^Puntuaci[oó]n(?:es)? de caracter[ií]stic\.?a\s*:\s*(.*)$/i], ['dote', /^Dote\s*:\s*(.*)$/i],
   ['habilidades', /^Competencias? (?:en|con) habilidades\s*:\s*(.*)$/i], ['herramientas', /^Competencias? con herramientas\s*:\s*(.*)$/i], ['equipo', /^Equipo\s*:\s*(.*)$/i]];
 /* Firmas de los trasfondos del Manual del Jugador (características + dote): dan el nombre aunque el título no se lea bien. */
 const FIRMAS = { 'int sab car|iniciado en la magia clerigo': 'Acólito', 'fue des int|fabricante': 'Artesano', 'des con car|habilidoso': 'Charlatán',
@@ -44,6 +45,75 @@ const FIRMAS = { 'int sab car|iniciado en la magia clerigo': 'Acólito', 'fue de
   'fue int car|habilidoso': 'Noble', 'con int sab|iniciado en la magia mago': 'Erudito', 'fue des sab|maton de taberna': 'Marinero',
   'des int sab|habilidoso': 'Escriba', 'fue des con|atacante salvaje': 'Soldado', 'des sab car|afortunado': 'Vagabundo' };
 const firma = t => `${claveNombre(t.caracteristicas || '').split(' ').filter(w => w.length >= 5).map(w => w.slice(0, 3).replace('con', 'con')).join(' ')}|${claveNombre(t.dote || '')}`;
+/**
+ * Nombres de las tablas «TRASFONDOS REGIONALES / DE FACCIONES» (columna «Trasfondo»), para dar nombre a los trasfondos
+ * cuyo título va dentro de una ilustración o se lee mal.
+ */
+export const nombresTablaTrasfondos = pages => nombresDeTabla(pages, /^Trasfondo\s+(Regi[oó]n|Facci[oó]n)$/i);
+/** Primera columna de las tablas con esa cabecera («Dote Categoría», «Trasfondo Región»…): los nombres tal y como los da el libro. */
+export function nombresDeTabla(pages, cabecera) {
+  const L = aplanar(pages), out = [];
+  for (let i = 0; i < L.length; i++) {
+    if (!cabecera.test(L[i].s.trim())) continue;
+    const cab = L[i].segs || [], x0 = cab[0]?.x ?? L[i].x, x1 = cab[1]?.x ?? Infinity;
+    for (let j = i + 1; j < L.length && j < i + 60 && L[j].p === L[i].p; j++) {
+      const segs = (L[j].segs || [{ x: L[j].x, s: L[j].s }]).filter(g => g.x < x1 - 5);
+      if (esMayus(L[j].s) || cabecera.test(L[j].s.trim())) break;
+      if (!segs.length) continue;                                     // solo la segunda columna («Púrpura»)
+      if (Math.abs(segs[0].x - x0) > 8) break;
+      const t = segs.map(g => g.s).join(' ').trim();
+      // «Expulsado de los Amos de las» + «Sombras»: la línea sin segunda columna continúa el nombre
+      if (out.length && j > i + 1 && (L[j].segs || []).length === segs.length && segs.length === 1 && (L[j - 1].segs || []).length >= 2 && !/\s/.test(t)) out[out.length - 1] += ' ' + t;
+      else out.push(t);
+    }
+  }
+  return [...new Set(out.map(n => n.replace(/\s+/g, ' ').trim()))];
+}
+const tokens = t => claveNombre(t).split(' ').filter(w => w.length >= 4);
+const casiIgual = (a, b) => a === b || (a.length >= 5 && b.length >= 5 && distanciaCorta(a, b) <= 1);
+function distanciaCorta(a, b) {
+  if (Math.abs(a.length - b.length) > 1) return 2;
+  let i = 0, j = 0, d = 0;
+  while (i < a.length && j < b.length) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return 2; if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; } }
+  return d + (a.length - i) + (b.length - j);
+}
+/**
+ * Nombres mal leídos («Toca do por los mythales», «Don deljolgorio», «resistencla») contra la tabla del libro, que también trae
+ * errores («Dragó n», «Huidas»): entre las dos lecturas gana la de palabras más frecuentes en el libro (la bien escrita se repite).
+ */
+export function corregirConTabla(lista, nombres, frec = new Map()) {
+  if (!nombres.length) return lista;
+  const junto = t => clave(t).replace(/ /g, '');
+  const palabras = t => String(t).toLowerCase().match(/\p{L}+/gu) || [];
+  // solo cuentan las palabras en que difieren las dos lecturas («resistencla» frente a «resistencia»)
+  const mejorQue = (a, b) => { const pa = palabras(a), pb = palabras(b), da = pa.filter(w => !pb.includes(w)), db = pb.filter(w => !pa.includes(w));
+    const f = ws => (ws.length ? Math.min(...ws.map(w => frec.get(w) || 0)) : 0); return f(da) > f(db); };
+  return lista.map(x => {
+    const k = junto(x.nombre); if (!k) return x;
+    let mejor = null, d = 3; for (const n of nombres) { const e = distancia(k, junto(n)); if (e < d) { d = e; mejor = n; } }
+    return mejor && mejor !== x.nombre && mejorQue(mejor, x.nombre) ? { ...x, nombre: mejor, clave: claveNombre(mejor) } : x;
+  });
+}
+/** Frecuencia de cada palabra en el libro (para elegir la lectura buena de un nombre). */
+export function frecuencias(textos) {
+  const m = new Map(); for (const t of textos) for (const w of String(t).toLowerCase().match(/\p{L}+/gu) || []) m.set(w, (m.get(w) || 0) + 1); return m;
+}
+/** Nombra los trasfondos con la tabla del libro: los mal leídos por parecido y los que no tienen título por su texto. */
+export function nombrarTrasfondos(lista, nombres) {
+  if (!nombres.length) return lista;
+  const usados = new Set();
+  const parecidoA = n => { const tn = tokens(n); if (!tn.length) return null;
+    let mejor = null, pm = 0; for (const c of nombres) { const tc = tokens(c), comunes = tn.filter(w => tc.some(v => casiIgual(w, v))).length; const p = comunes / Math.max(tc.length, tn.length); if (comunes >= Math.min(2, tc.length) && p > pm) { pm = p; mejor = c; } } return pm >= 0.5 ? mejor : null; };
+  const out = lista.map(t => { if (!t.nombre) return t; const n = parecidoA(t.nombre); if (!n) return t; usados.add(n); return n === t.nombre ? t : { ...t, nombre: n, clave: claveNombre(n), revisar: false }; });
+  return out.map(t => {
+    if (t.nombre) return t;
+    // sin título: el nombre libre cuyas palabras más aparecen en su descripción («unirte a los Arpistas» → Arpista)
+    const txt = claveNombre(t.texto || '');
+    const pts = nombres.filter(n => !usados.has(n)).map(n => ({ n, p: tokens(n).filter(w => txt.includes(w.slice(0, Math.max(5, w.length - 2)))).length })).sort((a, b) => b.p - a.p);
+    if (!pts[0] || pts[0].p < 1 || (pts[1] && pts[1].p === pts[0].p)) return t;
+    usados.add(pts[0].n); return { ...t, nombre: pts[0].n, clave: claveNombre(pts[0].n), revisar: false };
+  });
+}
 export function parseTrasfondos(pages) {
   return leerTrasfondos(pages).map(t => { const n = FIRMAS[firma(t)]; return n ? { ...t, nombre: n, clave: claveNombre(n), revisar: false } : t; });
 }
@@ -111,7 +181,9 @@ const rasgosConocidos = (clase, nombre) => {
 };
 const RASGO = /^NIVEL\s*(\d{1,2})\s*[:.]\s*(.+)$/i;
 // «NIVEL» leído con OCR: «NrIveEL», «Niveel», «NrveL», «NIvEL»…
-const NIVEL_OCR = /(^|[.!?»)]\s+|^\W+)N[rRiIl1]{0,2}[vV][eE]{1,2}[lL]\s*(\d{1,2})\s*[:;.]\s*/;
+// el número también llega mal leído («lL» = 11, «IO» = 10) y los dos puntos como coma o sin ellos («NIVEL 15, ESPECTRO»)
+const NIVEL_OCR = /(^|[.!?»)]\s+|^\W+)N[rRiIl1]{0,2}[vV][eE]{1,2}[lL]\s*([\dlIOL]{1,2})\s*(?:[:;.,]\s*|\s+(?=[A-ZÁÉÍÓÚÑ]{2}))/;
+const numOcr = t => +t.replace(/[lIL]/g, '1').replace(/O/g, '0');
 const MENOR = /^(DE|DEL|LA|LAS|LOS|EL|Y|A|EN|CON|SIN|AL|POR)$/;
 const esMay = w => /^[A-ZÁÉÍÓÚÜÑ0-9'’-]+$/.test(w) && /[A-ZÁÉÍÓÚÜÑ]/.test(w);
 const esCap = w => /^[A-ZÁÉÍÓÚÑ][a-záéíóúüñ]+$/.test(w);
@@ -121,9 +193,9 @@ const esCap = w => /^[A-ZÁÉÍÓÚÑ][a-záéíóúüñ]+$/.test(w);
  */
 export function separarRasgos(L) {
   const out = [];
-  for (const l of L) {
-    const m = NIVEL_OCR.exec(l.s);
-    if (!m) { out.push(l); continue; }
+  for (let i = 0; i < L.length; i++) {
+    const l = L[i], m = NIVEL_OCR.exec(l.s), nv = m && numOcr(m[2]);
+    if (!m || !(nv >= 1 && nv <= 20)) { out.push(l); continue; }
     const antes = l.s.slice(0, m.index + m[1].length).replace(/^\W+$/, '').trim(), resto = l.s.slice(m.index + m[0].length).trim().split(/\s+/);
     // el nombre: palabras en versalitas («Foco FANÁTICO», «Paso VELOZ»); el texto empieza en la primera palabra normal
     let n = 0;
@@ -132,8 +204,13 @@ export function separarRasgos(L) {
       if (esMay(w) || (MENOR.test(w.toUpperCase()) && n > 0 && esMay(sig)) || (esCap(w) && esMay(sig.replace(/[.,:;]$/, '')))) n++; else break;
     }
     if (!n) { out.push(l); continue; }
+    let nombre = resto.slice(0, n).join(' ');
+    // título en dos líneas («NIVEL 3: CONJUROS DE» + «CAMINANTE INVERNAL»)
+    const sig = L[i + 1];
+    if (n === resto.length && sig && sig.p === l.p && esMayus(sig.s) && sig.s.length < 40 && !NIVEL_OCR.test(sig.s)) { nombre += ' ' + sig.s.trim(); i++; }
     if (antes) out.push({ ...l, s: antes });
-    out.push({ ...l, s: `NIVEL ${m[2]}: ${resto.slice(0, n).join(' ').toUpperCase()}`, x: l.margin ?? l.x, h: Math.max(l.h, (l.hTip || 16) * 1.12) });
+    // «EXPLORADOR. GÉLIDO»: puntos sueltos dentro del nombre
+    out.push({ ...l, s: `NIVEL ${nv}: ${nombre.replace(/\.(?=\s)/g, '').toUpperCase()}`, x: l.margin ?? l.x, h: Math.max(l.h, (l.hTip || 16) * 1.12) });
     if (n < resto.length) out.push({ ...l, s: resto.slice(n).join(' '), x: l.margin ?? l.x });
   }
   return out;

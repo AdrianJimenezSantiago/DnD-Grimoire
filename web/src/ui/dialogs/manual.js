@@ -114,7 +114,8 @@ async function importar(file) {
     const provisional = emparejarLibro(r.spells, 'x', titulo);
     if (Object.keys(provisional.textos).length >= 300 && provisional.nuevos.length <= 5) titulo = 'Manual del Jugador (2024)';
     else if (r.objetos.length >= 200 && r.glosario.some(e => e.cat === 'Herramientas del DM')) titulo = 'Guía del Dungeon Master (2024)';
-    else if (/h[ée]roes de faer[uú]n/i.test(titulo)) titulo = 'Reinos Olvidados: Héroes de Faerûn';
+    // por el nombre del archivo o, si se llama de otra forma, por sus subclases
+    else if (/h[ée]roes de faer[uú]n/i.test(titulo) || ['Hojacantante', 'Caminante invernal', 'Abanderado'].every(n => r.subTextos.some(x => x.nombre === n))) titulo = 'Reinos Olvidados: Héroes de Faerûn';
     else if (r.criaturas.length >= 150 && !r.spells.length) titulo = 'Manual de Monstruos (2025)';
     const id = idLibro(titulo), { textos, nuevos } = emparejarLibro(r.spells, id, titulo);
     fill.style.width = '100%'; msg.textContent = `Leído en ${Math.round((performance.now() - t0) / 1000)} s.`;

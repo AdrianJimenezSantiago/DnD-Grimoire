@@ -7,7 +7,7 @@ import { parseSpells } from './manual.js';
 import { parseGlosario } from './glosario.js';
 import { detectarSubclases } from './libros.js';
 import { parseObjetos } from './objetos.js';
-import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones } from './contenido.js';
+import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones, nombresTablaTrasfondos, nombrarTrasfondos, nombresDeTabla, corregirConTabla, frecuencias } from './contenido.js';
 import { parseCriaturas } from './monstruos.js';
 
 const TIPO_OBJ = /(Objeto maravilloso|Anillo|Varita|Vara|Poci[oó]n|Arma|Armadura|Bast[oó]n|Pergamino)\b[^,]{0,70},\s*(com[uú]n|infrecuente|rar[oa]|muy rar[oa]|legendari[oa]|artefacto|rareza)/;
@@ -40,9 +40,14 @@ export function analizarLibro(paginas, aviso = () => {}) {
 
   // Dotes, trasfondos y subclases
   aviso('personaje');
-  const dotes = [], trasfondos = [];
-  for (const [a, b] of bloquesDe(texto.map((t, i) => (/Dote (de origen|general|de estilo de combate|de don [ée]pico)/.test(t) ? i + 1 : 0)).filter(Boolean), 2)) dotes.push(...parseDotes(rango(a - 1, b)));
-  for (const [a, b] of bloquesDe(texto.map((t, i) => (/Puntuaciones de caracter[ií]stica\s*:/.test(t) ? i + 1 : 0)).filter(Boolean), 2)) trasfondos.push(...parseTrasfondos(rango(a - 1, b)));
+  let dotes = [], trasfondos = [];
+  for (const [a, b] of bloquesDe(texto.map((t, i) => (/Dot\W?e\s+(de origen|genera[l\/1I|]|de estilo de combate|de don [ée]pico)/.test(t) ? i + 1 : 0)).filter(Boolean), 2)) dotes.push(...parseDotes(rango(a - 1, b)));
+  // nombres de dote mal leídos: se corrigen con la «Lista de dotes» del propio libro
+  dotes = corregirConTabla(dotes, nombresDeTabla(texto.map((t, i) => (/LISTA\s+DE\s+DOTES/.test(t) ? i + 1 : 0)).filter(Boolean).map(cols), /^Dote\s+Categor[ií]a$/i), frecuencias(texto));
+  for (const [a, b] of bloquesDe(texto.map((t, i) => (/Puntuaci[oó]n(?:es)? de caracter[ií]stic\.?a\s*:/.test(t) ? i + 1 : 0)).filter(Boolean), 2)) trasfondos.push(...parseTrasfondos(rango(a - 1, b)));
+  // los que no tienen título (o se lee mal) se nombran con la tabla de trasfondos del propio libro
+  const tablaT = nombresTablaTrasfondos(texto.map((t, i) => (/TRASFONDOS (REGIONALES|DE FACCIONES)/.test(t) ? i + 1 : 0)).filter(Boolean).map(cols));
+  trasfondos = nombrarTrasfondos(trasfondos, tablaT);
   const conRasgo = texto.map((t, i) => (/NIVEL\s*\d{1,2}\s*:/i.test(t) ? i + 1 : 0)).filter(Boolean);
   let subTextos = [];
   for (const [a, b] of bloquesDe(conRasgo, 2)) subTextos.push(...parseSubclases(rango(a - 1, b)));
