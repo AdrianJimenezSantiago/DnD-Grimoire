@@ -27,6 +27,7 @@ import { openBackup } from '../ui/dialogs/copia.js';
 import { openManual } from '../ui/dialogs/manual.js';
 import { openBiblioteca } from '../ui/dialogs/biblioteca.js';
 import { openEquipo } from '../ui/dialogs/equipo.js';
+import { openFormas } from '../ui/dialogs/formas.js';
 import { openBestiario } from '../ui/dialogs/diario.js';
 import { openRetrato } from '../ui/dialogs/retrato.js';
 import { openTrasfondo } from '../ui/dialogs/trasfondo.js';
@@ -124,6 +125,7 @@ const COMMANDS = {
   short: () => A.shortRest(S, openRecovery),
   endconc: () => A.endConc(S),
   objetivos: () => A.enfocarObjetivos('conc'),
+  formas: () => S.cur() && openFormas('salvaje'),
   backup: () => openBackup(),
   manual: () => openManual(),
   print: () => { setEditing(false); setTimeout(() => print(), 80); },

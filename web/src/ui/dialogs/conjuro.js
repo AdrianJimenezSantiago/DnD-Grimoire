@@ -1,5 +1,5 @@
 /** Ficha del conjuro: lectura completa, opciones de lanzamiento y edición de textos. */
-import { esc } from '../../core/util.js';
+import { esc, norm } from '../../core/util.js';
 import { perfil } from '../../domain/reglas2024.js';
 import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
 import { tieneTiradas } from '../../domain/tiradas.js';
@@ -17,6 +17,9 @@ import { notasConjuro } from '../../domain/bestiario.js';
 import { openBestiario } from './diario.js';
 import { haptic } from '../../platform/native.js';
 import { CAR_TXT, ESPIRITUS, PERFILES, caracteristicas, criaturasDe, perfilDe } from '../../domain/criaturas.js';
+import { biblioteca, criaturaImportada } from '../../domain/catalogo.js';
+import { formasPosibles } from '../../domain/monstruos.js';
+import { openFormas } from './formas.js';
 
 let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
 const dlg = () => $('#spellDlg');
@@ -154,34 +157,51 @@ function render() {
 const signo = n => (n >= 0 ? '+' : '−') + Math.abs(n);
 /** Perfil de criatura con el aspecto de un bloque de estadísticas, en el color de la escuela del conjuro. */
 export function bloqueHtml(p) {
-  const sec = (t, filas) => (filas?.length ? `<h5>${t}</h5>${filas.map(([n, d]) => `<p><b><i>${esc(n)}.</i></b> ${realzar(esc(d))}</p>`).join('')}` : '');
+  const sec = (t, filas) => (filas?.length ? `<h5>${t}</h5>${filas.map(([n, d]) => `<p>${n ? `<b><i>${esc(n)}.</i></b> ` : ''}${realzar(esc(d)).replace(/\n/g, '<br>')}</p>`).join('')}` : '');
   const linea = (k, v) => (v ? `<p class="sb-ln"><b>${k}</b> ${esc(v)}</p>` : '');
   return `<article class="sb" aria-label="Perfil de ${esc(p.nombre)}"><header><h4>${esc(p.nombre)}</h4><p class="sb-tipo">${esc(p.tipo)}</p></header>
-    <div class="sb-base"><span><b>CA</b> ${p.ca}</span><span><b>PG</b> ${esc(p.pg)}</span><span><b>Velocidad</b> ${esc(p.vel)}</span></div>
+    <div class="sb-base"><span><b>CA</b> ${p.ca ?? '—'}</span>${p.ini != null ? `<span><b>Iniciativa</b> ${signo(p.ini)}</span>` : ''}<span><b>PG</b> ${esc(p.pg)}</span><span><b>Velocidad</b> ${esc(p.vel)}</span></div>
     <div class="sb-car">${caracteristicas(p).map(c => `<div><b>${CAR_TXT[c.k]}</b><span>${c.v}</span><small>${signo(c.mod)}${c.salv !== c.mod ? ` · salv. ${signo(c.salv)}` : ''}</small></div>`).join('')}</div>
     ${linea('Habilidades', p.hab)}${linea('Vulnerabilidades', p.vul)}${linea('Resistencias', p.res)}${linea('Inmunidades', p.inm)}${linea('Equipo', p.equipo)}
     ${linea('Sentidos', p.sentidos)}${linea('Idiomas', p.idiomas || 'ninguno')}${linea('VD', p.vd)}
-    ${sec('Atributos', p.rasgos)}${sec('Acciones', p.acciones)}${sec('Acciones adicionales', p.adicionales)}${sec('Reacciones', p.reacciones)}</article>`;
+    ${sec('Atributos', p.rasgos)}${sec('Acciones', p.acciones)}${sec('Acciones adicionales', p.adicionales)}${sec('Reacciones', p.reacciones)}${sec('Acciones legendarias', p.legendarias)}</article>`;
 }
 function criaturasHtml(s) {
   const cr = criaturasDe(s.es); if (!cr) return '';
   const ch = S.cur(), P = ch ? perfil(ch) : null, mem = ch?.invocaciones?.[s.es] || {};
-  if (SP.cria === undefined) SP.cria = SP.mode === 'book' && PERFILES[mem.id] ? mem.id : null;
-  const chip = id => `<button type="button" class="cr-chip ${SP.cria === id ? 'on' : ''} ${mem.id === id ? 'mio' : ''}" data-cria="${id}" aria-pressed="${SP.cria === id}">${esc(PERFILES[id].nombre)}${mem.id === id ? '<small>tuyo</small>' : ''}</button>`;
+  if (SP.cria === undefined) SP.cria = SP.mode === 'book' && (PERFILES[mem.id] || String(mem.id || '').startsWith('mm:')) ? mem.id : null;
+  // perfiles propios de la app o importados de un libro («mm:clave»)
+  const perfilDeId = id => (String(id).startsWith('mm:') ? criaturaImportada(id.slice(3)) : PERFILES[id] ? perfilDe(id) : null);
+  const chip = id => { const p = perfilDeId(id); if (!p) return ''; return `<button type="button" class="cr-chip ${SP.cria === id ? 'on' : ''} ${mem.id === id ? 'mio' : ''}" data-cria="${esc(id)}" aria-pressed="${SP.cria === id}">${esc(p.nombre)}${mem.id === id ? '<small>tuyo</small>' : ''}</button>`; };
+  const importadas = biblioteca().criaturas.length > 0;
   let h = `<section class="sp-cria"><h3>${cr.espiritu ? 'Perfil de la criatura' : cr.familiar ? 'Formas del familiar' : 'Criaturas'}</h3>`;
   if (cr.familiar) {
     h += `<p class="note">Es un espíritu con forma animal: celestial, feérico o infernal (lo eliges al lanzarlo). No puede atacar, pero sí hacer otras acciones.</p><div class="cr-chips">${cr.familiar.map(chip).join('')}</div>`;
+    if (cr.otrasVd0) {
+      const otras = formasPosibles(biblioteca().criaturas, { vd: 0 }).filter(c => !cr.familiar.some(id => norm(PERFILES[id].nombre) === norm(c.nombre)));
+      h += otras.length ? `<p class="cr-grupo">Otras bestias de VD 0 <small>del Manual de Monstruos importado</small></p><div class="cr-chips">${otras.map(c => chip('mm:' + c.clave)).join('')}</div>`
+        : importadas ? '' : '<p class="note">El conjuro admite cualquier otra bestia de VD 0: importa el Manual de Monstruos (con texto) para verlas aquí.</p>';
+    }
     if (ch?.clase === 'Brujo') h += `<p class="cr-grupo">Pacto de la cadena <small>si tienes esta invocación: puede atacar con tu reacción cuando renuncias a uno de tus ataques</small></p><div class="cr-chips">${cr.cadena.map(chip).join('')}</div>`;
   }
   if (cr.fijos) h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}<div class="cr-chips">${cr.fijos.map(chip).join('')}</div>`;
+  if (cr.importadas) {
+    const ids = cr.importadas.map(n => criaturaImportada(n)).filter(Boolean).map(c => 'mm:' + c.clave);
+    h += `${cr.nota ? `<p class="note">${esc(cr.nota)}</p>` : ''}${ids.length ? `<div class="cr-chips">${ids.map(chip).join('')}</div>` : '<p class="note">Sus perfiles están en el Manual de Monstruos: impórtalo (con texto) en Libros y manuales para verlos aquí.</p>'}`;
+  }
+  if (cr.formas) {
+    h += `<p class="note">${cr.formas === 'polimorfar' ? 'El objetivo se convierte en una bestia con un VD igual o inferior al suyo (o a su nivel).' : 'Cualquier criatura con un VD igual o inferior al nivel del objetivo.'}</p>
+      <button type="button" class="rl-open" data-formas="${cr.formas}">${gi('criatura')}<span><b>Elegir forma</b><small>${importadas ? 'Filtra por VD las criaturas de tus libros y consulta su perfil' : 'Necesita el Manual de Monstruos importado (con texto)'}</small></span></button>`;
+    return h + '</section>';
+  }
   if (cr.espiritu) {
     const e = ESPIRITUS[cr.espiritu], n = Math.max(e.base, SP.nivelCria || mem.n || Math.max(s.level, e.base)), v = SP.varCria || mem.v || e.variantes[0];
     const p = perfilDe(cr.espiritu, { n, v, atk: P?.atk ?? 0, cd: P?.cd ?? 10 });
     h += `<div class="cr-ctl">${e.variantes.length ? `<div class="seg" role="radiogroup" aria-label="Variante">${e.variantes.map(x => `<button type="button" role="radio" aria-checked="${x === v}" data-crvar="${esc(x)}">${esc(x.charAt(0).toUpperCase() + x.slice(1))}</button>`).join('')}</div>` : ''}
       <label class="f cr-niv">Espacio de nivel<select data-crniv>${Array.from({ length: 10 - e.base }, (_, i) => e.base + i).map(L => `<option ${L === n ? 'selected' : ''}>${L}</option>`).join('')}</select></label></div>
       ${P?.atk != null ? `<p class="note">Con tu ataque de conjuro ${signo(P.atk)} y tu CD ${P.cd}. Su bonificador por competencia es el tuyo (${signo(P.pb)}).</p>` : ''}${bloqueHtml(p)}`;
-  } else if (SP.cria && PERFILES[SP.cria]) {
-    h += bloqueHtml(perfilDe(SP.cria));
+  } else if (SP.cria && perfilDeId(SP.cria)) {
+    h += bloqueHtml(perfilDeId(SP.cria));
     if (SP.mode === 'book' && ch) h += `<div class="row-btns" style="justify-content:flex-start"><button type="button" data-crmio="${SP.cria}">${mem.id === SP.cria ? 'Es tu forma actual' : 'Marcar como la mía'}</button></div>`;
   } else h += '<p class="note">Toca una forma para ver su perfil.</p>';
   return h + '</section>';
@@ -206,10 +226,11 @@ export function init(store) {
   const recuerda = cambios => { const { s } = data(), ch = S.cur(); if (SP.mode !== 'book' || !ch) return;
     S.edit((db, c) => { c.invocaciones ||= {}; c.invocaciones[s.es] = { ...(c.invocaciones[s.es] || {}), ...cambios }; }); };
   const repinta = () => { const y = $('#spBody').scrollTop; render(); $('#spBody').scrollTop = y; };
+  on($('#spBody'), 'click', '[data-formas]', (e, b) => openFormas(b.dataset.formas));
   on($('#spBody'), 'click', '[data-cria],[data-crvar],[data-crmio]', (e, b) => {
     if (b.dataset.cria) SP.cria = SP.cria === b.dataset.cria ? null : b.dataset.cria;
     if (b.dataset.crvar) { SP.varCria = b.dataset.crvar; recuerda({ v: SP.varCria }); }
-    if (b.dataset.crmio) { recuerda({ id: b.dataset.crmio }); toast(`${esc(PERFILES[b.dataset.crmio].nombre)}: la forma que usas ahora.`); }
+    if (b.dataset.crmio) { const id = b.dataset.crmio, p = String(id).startsWith('mm:') ? criaturaImportada(id.slice(3)) : PERFILES[id]; recuerda({ id }); toast(`${esc(p?.nombre || '')}: la forma que usas ahora.`); }
     repinta(); haptic('light');
   });
   $('#spBody').addEventListener('change', e => { if (e.target.dataset.crniv !== undefined) { SP.nivelCria = +e.target.value; recuerda({ n: SP.nivelCria }); repinta(); } });

@@ -55,6 +55,7 @@ function lista() {
         (l.objetos || []).length ? `${l.objetos.length} objetos mágicos` : '',
         (l.dotes || []).length ? `${l.dotes.length} dotes` : '',
         (l.trasfondos || []).length ? `${l.trasfondos.length} trasfondos` : '',
+        (l.criaturas || []).length ? `${l.criaturas.length} perfiles de criatura` : '',
       ].filter(Boolean).join(' · ')}</small></div>
       <button type="button" class="warn" data-quitar="${esc(l.id)}">Quitar</button></div>`).join('')}</div>`
     : '<p class="note">Aún no has importado ningún libro en este dispositivo.</p>';
@@ -89,7 +90,7 @@ async function guardarLibro(lb) {
 }
 function resumenBiblioteca(lb) {
   const b = [(lb.objetos || []).length && pl(lb.objetos.length, 'objeto mágico', 'objetos mágicos'), (lb.dotes || []).length && pl(lb.dotes.length, 'dote', 'dotes'),
-    (lb.trasfondos || []).length && pl(lb.trasfondos.length, 'trasfondo', 'trasfondos'), (lb.subTextos || []).length && pl(lb.subTextos.length, 'subclase con sus rasgos', 'subclases con sus rasgos')].filter(Boolean);
+    (lb.trasfondos || []).length && pl(lb.trasfondos.length, 'trasfondo', 'trasfondos'), (lb.subTextos || []).length && pl(lb.subTextos.length, 'subclase con sus rasgos', 'subclases con sus rasgos'), (lb.criaturas || []).length && pl(lb.criaturas.length, 'perfil de criatura', 'perfiles de criatura')].filter(Boolean);
   return b.length ? `<p>En la biblioteca: <b>${b.join('</b>, <b>')}</b>.</p>` : '';
 }
 async function importar(file) {
@@ -105,17 +106,19 @@ async function importar(file) {
       if (p.fase === 'glosario') { msg.textContent = 'Leyendo el glosario de reglas…'; fill.style.width = '91%'; }
       if (p.fase === 'objetos') { msg.textContent = 'Leyendo los objetos mágicos…'; fill.style.width = '93%'; }
       if (p.fase === 'personaje') { msg.textContent = 'Leyendo dotes, trasfondos y subclases…'; fill.style.width = '95%'; }
-      if (p.fase === 'reglas') { msg.textContent = 'Leyendo las reglas del DM…'; fill.style.width = '98%'; }
+      if (p.fase === 'reglas') { msg.textContent = 'Leyendo las reglas del DM…'; fill.style.width = '97%'; }
+      if (p.fase === 'criaturas') { msg.textContent = 'Leyendo los perfiles de criaturas…'; fill.style.width = '99%'; }
     });
-    if (!r.spells.length && !r.glosario.length && !r.subclases.length && !r.objetos.length && !r.dotes.length && !r.trasfondos.length) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable.');
+    if (!r.spells.length && !r.glosario.length && !r.subclases.length && !r.objetos.length && !r.dotes.length && !r.trasfondos.length && !r.criaturas.length) throw new Error('He leído el PDF, pero no reconozco conjuros, reglas, objetos mágicos, criaturas ni opciones de personaje. Comprueba que es un libro de D&D 2024 en español con texto seleccionable (un PDF escaneado sin texto hay que pasarlo antes por OCR: tools/ocr_pdf.py).');
     let titulo = r.titulo;
     const provisional = emparejarLibro(r.spells, 'x', titulo);
     if (Object.keys(provisional.textos).length >= 300 && provisional.nuevos.length <= 5) titulo = 'Manual del Jugador (2024)';
     else if (r.objetos.length >= 200 && r.glosario.some(e => e.cat === 'Herramientas del DM')) titulo = 'Guía del Dungeon Master (2024)';
     else if (/h[ée]roes de faer[uú]n/i.test(titulo)) titulo = 'Reinos Olvidados: Héroes de Faerûn';
+    else if (r.criaturas.length >= 150 && !r.spells.length) titulo = 'Manual de Monstruos (2025)';
     const id = idLibro(titulo), { textos, nuevos } = emparejarLibro(r.spells, id, titulo);
     fill.style.width = '100%'; msg.textContent = `Leído en ${Math.round((performance.now() - t0) / 1000)} s.`;
-    const lb = { id, titulo, fecha: Date.now(), textos, nuevos, glosario: r.glosario, subclases: [], objetos: r.objetos, dotes: r.dotes, trasfondos: r.trasfondos, subTextos: r.subTextos };
+    const lb = { id, titulo, fecha: Date.now(), textos, nuevos, glosario: r.glosario, subclases: [], objetos: r.objetos, dotes: r.dotes, trasfondos: r.trasfondos, subTextos: r.subTextos, criaturas: r.criaturas };
     const props = propuestas(r.subclases), sinNombre = r.trasfondos.filter(t => t.revisar).length + r.subTextos.filter(t => t.revisar).length;
     if (props.some(p => p.ok) || sinNombre) { pendiente = { lb, props }; pedirSubclases(); } else { lb.subclases = props.filter(p => p.ok).map(({ clase, nombre }) => ({ clase, nombre })); await guardarLibro(lb); }
   } catch (e) {

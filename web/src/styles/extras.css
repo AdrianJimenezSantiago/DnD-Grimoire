@@ -336,3 +336,16 @@ dialog#retDlg { width: min(460px, 94vw); }
 .l-pruebas-nota .gi, .l-pruebas-nota .icon { width: 16px; height: 16px; }
 .l-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .l-foot .gi { width: 18px; height: 18px; }
+
+/* Bestiario: perfil importado de un libro */
+.bx-perfil { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 4px; padding: 10px 12px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); background: var(--gold-soft); }
+.bx-perfil > .gi { width: 26px; height: 26px; color: var(--gold); }
+.bx-perfil span { display: grid; flex: 1 1 180px; } .bx-perfil small { color: var(--ink-2); font-size: var(--fs-xs); }
+.bx-perfil button { min-height: 32px; font-size: var(--fs-xs); }
+/* Formas de bestia */
+.fm-list li { display: flex; align-items: stretch; gap: 6px; } .fm-list .bib-it { flex: 1; }
+.fm-star { min-width: 44px; font-size: 20px; line-height: 1; color: var(--ink-3); border: 1px dashed var(--line); background: transparent; border-radius: 10px; }
+.fm-star[aria-pressed="true"] { color: var(--gold); border-style: solid; border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); }
+.fm-it.conocida .bib-it b::after { content: " · conocida"; font-weight: 400; font-size: var(--fs-xs); color: var(--gold); }
+.res .ruse .gi { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }

@@ -8,6 +8,7 @@ import { parseGlosario } from './glosario.js';
 import { detectarSubclases } from './libros.js';
 import { parseObjetos } from './objetos.js';
 import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones } from './contenido.js';
+import { parseCriaturas } from './monstruos.js';
 
 const TIPO_OBJ = /(Objeto maravilloso|Anillo|Varita|Vara|Poci[oó]n|Arma|Armadura|Bast[oó]n|Pergamino)\b[^,]{0,70},\s*(com[uú]n|infrecuente|rar[oa]|muy rar[oa]|legendari[oa]|artefacto|rareza)/;
 /** Bloques de páginas consecutivas (con huecos de hasta `hueco` páginas: ilustraciones, tablas). */
@@ -63,5 +64,12 @@ export function analizarLibro(paginas, aviso = () => {}) {
   const az = texto.findIndex((t, i) => i > cat && /DE\s*LA\s*A\s*A\s*LA\s*Z|DELAAALAZ/.test(t));
   if (cat >= 0 && az > cat) reglas.push(...parseSecciones(rango(cat, az + 1), 'Objetos mágicos').filter(e => !/de la a a la z|delaaalaz|registro|obras de arte|piedras preciosas/i.test(e.nombre)));
 
-  return { spells, glosario: [...glosario, ...reglas], objetos, dotes, trasfondos, subclases, subTextos };
+  // Perfiles de criaturas (Manual de Monstruos, apéndice B del Manual del Jugador): páginas con CA, PG y VD
+  aviso('criaturas');
+  const criaturas = [];
+  const conPerfil = texto.map((t, i) => (/\bC\s?[Aa]\s*[:;]/.test(t) && /\bP\s?G\s*[:;]\s*\d/.test(t) && /\bVD\s*[:;]/.test(t) ? i + 1 : 0)).filter(Boolean);
+  for (const [a, b] of bloquesDe(conPerfil, 2)) criaturas.push(...parseCriaturas(rango(a - 1, b)));
+  const unicas = [...new Map(criaturas.map(c => [c.clave, c])).values()];
+
+  return { spells, glosario: [...glosario, ...reglas], objetos, dotes, trasfondos, subclases, subTextos, criaturas: unicas };
 }

@@ -29,6 +29,8 @@ import { compendio, linkCatalog, loadSrd } from './domain/catalogo.js';
 import { hayPruebas, sembrarPruebas } from './domain/pruebas.js';
 import { toast } from './ui/toast.js';
 import { undoBtn } from './app/acciones.js';
+import { confirmar } from './ui/modal.js';
+import { libros } from './domain/catalogo.js';
 import { storage, setBars, onAppEvents } from './platform/native.js';
 import { renderBar, renderSheet } from './ui/sheet.js';
 import * as eventos from './app/eventos.js';
@@ -49,6 +51,7 @@ import * as diario from './ui/dialogs/diario.js';
 import * as area from './ui/dialogs/area.js';
 import * as biblioteca from './ui/dialogs/biblioteca.js';
 import * as equipo from './ui/dialogs/equipo.js';
+import * as formas from './ui/dialogs/formas.js';
 import { tour } from './ui/tour.js';
 import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
@@ -73,7 +76,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S);
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S);
   const app = await eventos.init(S);
 
   // Tutoriales: portada y hoja (una vez cada uno; se repiten desde Más → Ver tutorial)
@@ -97,6 +100,17 @@ async function boot() {
     { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
     { sel: '#whoChip', titulo: 'Volver al inicio', texto: 'Desde aquí vuelves a la portada para cambiar de personaje.' },
   ];
+  // Primer arranque: tras el tutorial de la portada, y antes de empezar, la app ofrece importar los libros (una sola vez)
+  const OFRECIDO = 'grimorio-libros-ofrecido';
+  let listos; const librosListos = new Promise(r => { listos = r; });
+  const ofrecerLibros = async () => {
+    await librosListos;
+    if (libros().length || (await storage.get(OFRECIDO)) === '1') return;
+    await storage.set(OFRECIDO, '1');
+    const si = await confirmar({ titulo: '¿Importamos tus libros ahora?', icono: 'book', ok: 'Importar libros', cancelar: 'Más tarde',
+      texto: 'La app rellena descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos, subclases y perfiles de criaturas con tus PDF: Manual del Jugador, Guía del DM, Manual de Monstruos (con texto) y expansiones. Se leen en este dispositivo y no salen de él. Puedes hacerlo luego desde Libros y manuales.' });
+    if (si) app.run('manual');
+  };
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);
   const regenerarPruebas = () => {
     const habia = hayPruebas(S.db); let r; const h = S.edit(db => { r = sembrarPruebas(db, compendio()); });
@@ -111,7 +125,7 @@ async function boot() {
     pruebasAuto: PRUEBAS,
     cmd: c => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
-    onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO), 500),
+    onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
   app.COMMANDS._tutorial = () => (document.body.classList.contains('on-landing') ? tour('inicio', TOUR_INICIO, { forzar: true }) : tourHoja(true));
   // al crear un personaje (desde la portada o la lista) se abre su hoja
@@ -133,6 +147,7 @@ async function boot() {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
     const ok = await loadSrd(fuente);
     await manual.cargarLibros();              // libros importados: textos, conjuros nuevos, glosario, subclases
+    listos();
     if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();   // rama de desarrollo: personajes de prueba
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
