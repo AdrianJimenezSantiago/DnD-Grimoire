@@ -18,18 +18,22 @@ let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
 const dlg = () => $('#spellDlg');
 
 /* Aplica una transformación solo al texto, nunca dentro de etiquetas ya puestas. */
-const porTexto = (html, fn) => html.split(/(<[^>]+>)/).map(p => (p.startsWith('<') ? p : fn(p))).join('');
+export const porTexto = (html, fn) => html.split(/(<[^>]+>)/).map(p => (p.startsWith('<') ? p : fn(p))).join('');
 const enlazar = h => { const e = estadosRegex(); return e ? porTexto(h, t => t.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term" data-term="${k}">${w}</button>` : m; })) : h; };
 const TIPOS = { 'ácido': 'acido', contundente: 'contundente', cortante: 'cortante', 'frío': 'frio', fuego: 'fuego', fuerza: 'fuerza', 'necrótico': 'necrotico',
   perforante: 'perforante', 'psíquico': 'psiquico', radiante: 'radiante', 'relámpago': 'relampago', trueno: 'trueno', veneno: 'veneno' };
 /* Resalta lo que se busca de un vistazo en mesa: dados, tipos de daño, salvaciones, ataques y distancias. */
-const realzar = h => porTexto(h, t => t
-  .replace(/\b(\d+d\d+(?:\s*\+\s*\d+)?)\b/g, '<span class="k-dice">$1</span>')
-  .replace(/(de daño )(?:(de |por ))?(ácido|contundente|cortante|frío|fuego|fuerza|necrótico|perforante|psíquico|radiante|relámpago|trueno|veneno)\b/gi,
-    (m, a, b, tipo) => `${a}${b || ''}<span class="k-dmg dmg-${TIPOS[tipo.toLowerCase()] || 'fuerza'}">${gi(TIPOS[tipo.toLowerCase()] || 'fuerza')}${tipo}</span>`)
-  .replace(/(tirada de salvación de (?:Fuerza|Destreza|Constitución|Inteligencia|Sabiduría|Carisma))/g, '<span class="k-save">$1</span>')
-  .replace(/(ataque de conjuro (?:a distancia|cuerpo a cuerpo))/g, '<span class="k-atk">$1</span>')
-  .replace(/\b(\d+(?:,\d+)?\s?(?:m|km))\b(?![\p{L}])/gu, '<span class="k-dist">$1</span>'));
+const PASOS = [
+  [/\b(\d+d\d+(?:\s*\+\s*\d+)?)\b/g, '<span class="k-dice">$1</span>'],
+  [/(tirada de salvación de (?:Fuerza|Destreza|Constitución|Inteligencia|Sabiduría|Carisma))/g, '<span class="k-save">$1</span>'],
+  [/(ataque de conjuro (?:a distancia|cuerpo a cuerpo))/g, '<span class="k-atk">$1</span>'],
+  [/(^|[^\p{L}\d,])(\d+(?:,\d+)?\s?(?:m|km))(?![\p{L}\d])/gu, '$1<span class="k-dist">$2</span>'],
+  // el icono se inserta el último: ningún paso posterior puede ver sus coordenadas
+  [/(de daño )(de |por )?(ácido|contundente|cortante|frío|fuego|fuerza|necrótico|perforante|psíquico|radiante|relámpago|trueno|veneno)(?![\p{L}])/giu,
+    (m, a, b, tipo) => `${a}${b || ''}<span class="k-dmg dmg-${TIPOS[tipo.toLowerCase()] || 'fuerza'}">${gi(TIPOS[tipo.toLowerCase()] || 'fuerza')}${tipo}</span>`],
+];
+/* Resalta lo que se busca de un vistazo en mesa. Cada paso actúa solo sobre texto, nunca dentro de etiquetas. */
+export const realzar = h => PASOS.reduce((acc, [re, rep]) => porTexto(acc, t => t.replace(re, rep)), h);
 /* Encabezado corto al inicio de un párrafo («Sonido.», «Efecto sensorial.») en negrita. */
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
 export function md(t) {
@@ -77,7 +81,7 @@ function render() {
     const man = manualFor(x), propio = s.desc && !(x && s.desc === x.dEs);
     let desc = '', sup = '', en = false, fuente = '';
     if (propio) { desc = s.desc; sup = s.sup; }
-    else if (man) { desc = man.d; sup = man.h; fuente = 'Manual del Jugador (importado de tu PDF)'; }
+    else if (man) { desc = man.d; sup = man.h; fuente = `${x?.fuente || 'Manual del Jugador'} (importado de tu PDF)`; }
     else if (s.desc) { desc = s.desc; sup = s.sup; }
     else if (x?.d) { desc = x.d; sup = x.h; en = true; }
     if (fuente) h += `<p class="srcnote">${fuente}</p>`;

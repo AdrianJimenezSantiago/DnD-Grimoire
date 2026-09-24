@@ -5,7 +5,7 @@
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn } from '../../domain/reglas2024.js';
 import { esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
-import { allSpellItems, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
+import { allSpellItems, itemMeta, itemToSid, listFilter, subclasesDe } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -81,7 +81,7 @@ function render() {
       <p class="note">Los siguientes pasos te piden solo lo que cambia. Nada se guarda hasta el último.</p>`;
   }
   if (step === 'subclase') {
-    const subs = (CLASES[ch.clase] || {}).subs || [];
+    const subs = subclasesDe(ch.clase);
     h = `<p class="note">A nivel 3 eliges la subclase. Puedes escribir otra si tu mesa usa más manuales.</p>
       <div class="opts">${subs.map(s => `<button type="button" data-lvsub="${esc(s)}" aria-pressed="${LV.subclase === s}">${esc(s)}</button>`).join('')}</div>
       <label class="f wide" style="margin-top:14px">Subclase<input id="lvSubIn" value="${esc(LV.subclase)}" autocomplete="off"></label>`;

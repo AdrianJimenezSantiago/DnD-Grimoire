@@ -12,6 +12,7 @@ import { viewTransition } from '../fx.js';
 import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
 import { avatarHtml } from '../avatar.js';
+import { subclasesDe } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { fileStore } from '../../platform/native.js';
 
@@ -105,7 +106,7 @@ function slotText(P) {
 }
 function sync(first) {
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
-  fill('#dl_sub', cls.subs || []);
+  fill('#dl_sub', subclasesDe(clase));
   const sel = $('#f_aptitud'), keep = first ? (formId ? (S.db.chars.find(x => x.id === formId).aptitud || '') : '') : sel.value;
   const draft0 = readForm(), P0 = perfil({ ...draft0, aptitud: '' }), autoAp = P0.c ? P0.c.ap : '';
   sel.innerHTML = `<option value="">${autoAp ? `Según la clase (${ABIL_NAME[autoAp]})` : 'Ninguna'}</option>` + ['int', 'sab', 'car'].map(k => `<option value="${k}">${ABIL_NAME[k]}</option>`).join('');

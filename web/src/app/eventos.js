@@ -64,7 +64,7 @@ function moreItems() {
     { cmd: 'diario', icon: 'quill', label: 'Diario de sesión' },
     { cmd: 'hist', icon: 'hourglass', label: 'Historial de la sesión' },
     '-',
-    { cmd: 'manual', icon: 'book', label: 'Manual del jugador' },
+    { cmd: 'manual', icon: 'book', label: 'Libros y manuales' },
     { cmd: 'glosario', icon: 'info', label: 'Glosario de reglas' },
     { cmd: 'backup', icon: 'save', label: 'Copia de seguridad' },
     !NATIVE && { cmd: 'print', icon: 'print', label: 'Imprimir' },

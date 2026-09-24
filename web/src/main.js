@@ -102,7 +102,8 @@ async function boot() {
   idle(async () => {
     // En el archivo único de Windows no se puede leer otro archivo del disco: el compendio va incluido
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
-    const [ok] = await Promise.all([loadSrd(fuente), manual.cargarManualGuardado(), glos.cargarGlosarioGuardado()]);
+    const ok = await loadSrd(fuente);
+    await manual.cargarLibros();              // libros importados: textos, conjuros nuevos, glosario, subclases
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
   });

@@ -94,6 +94,24 @@ El material del SRD 5.2 es de Wizards of the Coast LLC, con licencia Creative Co
 
 Iconos temáticos: game-icons.net (CC BY 3.0). `node tools/iconos.mjs` regenera el módulo con los que usa la app.
 
+## Libros y manuales (expansiones)
+
+Más → **Libros y manuales** → «Importar libro (PDF)» sirve para el Manual del Jugador y para cualquier expansión en español con el mismo formato de fichas de conjuro. La app recorre todo el libro en tu dispositivo y recoge cuatro cosas:
+
+- **Descripciones** de los conjuros que ya conoce, que aparecen en la ficha de cada conjuro.
+- **Conjuros nuevos** con todos sus datos técnicos. Entran en el buscador marcados con el nombre del libro, y con ellos funcionan las tiradas, el glosario y la cuadrícula de áreas.
+- **El glosario de reglas**, si el libro lo tiene.
+- **Subclases.** Las que detecta y no conoce se proponen para que confirmes la clase y el nombre, y pasan a las sugerencias del campo Subclase.
+
+Además:
+
+- Cada libro aparece en la lista con lo que aporta, y se puede **quitar** por separado.
+- El campo Subclase de la ficha del personaje admite cualquier nombre, así que puedes usar una subclase nueva aunque no la hayas importado. Sus recursos se añaden en Rasgos → «Añadir rasgo propio».
+- Si ya habías importado el manual con la versión anterior, se convierte solo al nuevo formato. Aun así, conviene volver a importarlo para aprovechar las mejoras del lector.
+- Nada se sube a ningún sitio: los textos de los libros solo están en tu dispositivo.
+
+Sobre la calidad de lectura del Manual del Jugador: la app se ha comparado conjuro a conjuro con un segundo lector de PDF independiente, y el 92 % de los conjuros coinciden palabra por palabra. Las diferencias restantes están casi todas en tablas (el perfil de las criaturas invocadas, *Teletransporte*, *Controlar el clima*), que el PDF guarda desordenadas; consúltalas en el libro si hace falta.
+
 ## Flujo de los conjuros
 
 - **Al lanzar** un conjuro con tiradas se abre directamente la bandeja de dados. En los trucos no hay aviso previo.
@@ -190,7 +208,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (39)
+npm test           # pruebas (41)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

@@ -6,17 +6,56 @@
 import { esc, norm, uid } from '../core/util.js';
 import { tiradasDe } from './tiradas.js';
 import { formasDeEstado } from './glosario.js';
+import { CLASES } from './reglas2024.js';
+import { claveNombre } from './manual.js';
 
-let SRD = null, SRDK = {}, SRDN = {}, MANUAL = null;
+let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null, SUBS = {};
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
 /** Carga el compendio desde una URL (Android/web) o desde datos ya incluidos (archivo único de Windows). */
+/* ---- libros importados: se suman al compendio base ---- */
+let LIBROS = [];
+function reindexar() {
+  const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
+  for (const lb of LIBROS) for (const x of lb.nuevos || []) { const c = claveEs(x.es, x.l); if (!vistos.has(c)) { vistos.add(c); extra.push(x); } }
+  SRD = BASE ? [...BASE, ...extra] : null; SRDK = {}; SRDN = {};
+  (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
+  itemsMemo = null; tirMemo.clear();
+}
+/** Aplica los libros importados: textos, conjuros nuevos, glosario y subclases (el primero que aporta algo manda). */
+export function setLibros(libros) {
+  LIBROS = libros || [];
+  const textos = {}, glos = [], vistosG = new Set(); SUBS = {};
+  for (const lb of LIBROS) {
+    for (const [k, v] of Object.entries(lb.textos || {})) if (!textos[k]) textos[k] = v;
+    for (const e of lb.glosario || []) if (!vistosG.has(e.clave)) { vistosG.add(e.clave); glos.push(e); }
+    for (const sc of lb.subclases || []) if (sc.clase) (SUBS[sc.clase] ||= new Set()).add(sc.nombre);
+  }
+  setManual(textos); setGlosario(glos); reindexar();
+}
+export const libros = () => LIBROS;
+/** Subclases de una clase: las oficiales más las de los libros importados. */
+export const subclasesDe = clase => [...new Set([...(CLASES[clase]?.subs || []), ...(SUBS[clase] || [])])];
+/** Lo leído de un libro: textos de conjuros conocidos y conjuros nuevos con sus datos técnicos. */
+export function emparejarLibro(spells, idLibro, titulo) {
+  const porClave = new Map((BASE || []).map(x => [claveEs(x.es, x.l), x]));
+  const textos = {}, nuevos = [];
+  for (const sp of spells) {
+    const x = porClave.get(claveEs(sp.nombre, sp.nivel));
+    if (x) { textos[x.k] = { d: sp.desc, h: sp.sup }; continue; }
+    const k = `lib:${idLibro}:${claveNombre(sp.nombre).replace(/\s+/g, '-')}`;
+    const dur = sp.duracion.replace(/^Concentración,\s*h/, 'H').replace(/(\d+) minutos?/, '$1 min').replace(/(\d+) horas?/, '$1 h');
+    nuevos.push({ k, en: '', es: sp.nombre, l: sp.nivel, esc: sp.escuela, t: sp.tiempo.split(',')[0].trim(), a: sp.alcance, du: dur, co: sp.comp,
+      cs: /\d\s*po\b/.test(sp.material) ? sp.material : '', ri: sp.ritual ? 1 : 0, c: sp.conc ? 1 : 0, cl: sp.clases, d: '', h: '', fuente: titulo });
+    textos[k] = { d: sp.desc, h: sp.sup };
+  }
+  return { textos, nuevos };
+}
+
 export async function loadSrd(fuente) {
   try {
     const j = typeof fuente === 'string' ? await (await fetch(fuente)).json() : await fuente;
-    SRD = j.conjuros; SRDK = {}; SRDN = {};
-    SRD.forEach(x => { SRDK[x.k] = x; SRDN[norm(x.en) + '|' + x.l] = x; });
-    itemsMemo = null;
+    BASE = j.conjuros; reindexar();
     return true;
   } catch (e) { SRD = null; console.warn('Compendio SRD no disponible', e); return false; }
 }
@@ -94,7 +133,7 @@ export function allSpellItems(db) {
 export const invalidateItems = () => { itemsMemo = null; };
 export const itemToSid = (db, it) => (it.src === 'cat' ? it.s.id : importSrd(db, it.x));
 export const itemMeta = it => [it.en !== it.es ? it.en : '', it.l === 0 ? 'Truco' : 'Nivel ' + it.l, it.esc, it.ri ? 'ritual' : '', it.c ? 'concentración' : ''].filter(Boolean).map(esc).join(', ');
-export const itemTag = it => (it.src === 'srd' ? (it.x.phb ? 'Manual' : 'SRD') : '');
+export const itemTag = it => (it.src === 'srd' ? (it.x.fuente ? it.x.fuente.split(/[:(]/)[0].trim().slice(0, 18) : it.x.phb ? 'Manual' : 'SRD') : '');
 export const listFilter = (it, cls) => !cls || !it.cl || it.cl.includes(cls);
 /** Vista de un conjuro del compendio con la forma de un conjuro del catálogo (para la ficha). */
 export const srdAsSpell = x => ({ es: x.es, en: x.en, level: x.l, escuela: x.esc, tiempo: x.t, alcance: x.a, duracion: x.du, comp: x.co, coste: x.cs,
