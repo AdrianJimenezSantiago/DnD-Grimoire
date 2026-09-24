@@ -15,7 +15,7 @@ import { confirmar } from '../modal.js';
 import { avatarHtml } from '../avatar.js';
 import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
-import { campoSubclase, initSubclases } from '../subclases.js';
+import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
 import { fileStore } from '../../platform/native.js';
 
 let S, onCreated;
@@ -66,7 +66,6 @@ export function openCharForm(id) {
   const c = id ? S.db.chars.find(x => x.id === id) : blankChar({ campana: S.cur()?.campana || THEO.campana });
   $('#charTitle').textContent = id ? `Editar a ${c.nombre || 'personaje'}` : 'Nuevo personaje';
   $('#charErr').textContent = '';
-  const clsOpts = Object.keys(CLASES).map(k => `<option ${k === c.clase ? 'selected' : ''}>${k}</option>`).join('');
   const abil = ABILS.map(([k, n]) => `<div class="ab" data-ab="${k}"><span>${n}</span><input type="number" inputmode="numeric" min="1" max="30" id="f_${k}" value="${c.stats[k]}" aria-label="${n}"><b id="m_${k}">${sgn(modOf(c.stats[k]))}</b></div>`).join('');
   const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(L => `<label class="f">Nv. ${L}<input type="number" inputmode="numeric" min="0" max="9" id="f_e${L}" value="${(c.espacios || {})[L] || ''}" placeholder="0"></label>`).join('');
   $('#charForm').innerHTML = `
@@ -75,7 +74,7 @@ export function openCharForm(id) {
     <label class="f">Especie<input id="f_especie" list="dl_especie" value="${esc(c.especie)}" autocomplete="off"></label>
     <label class="f">Trasfondo<input id="f_trasfondo" list="dl_trasfondo" value="${esc(c.trasfondo)}" autocomplete="off"></label></div></section>
   <section class="fsec"><h3>Clase y nivel</h3><div class="frow">
-    <div class="f"><label for="f_clase">Clase</label><select id="f_clase">${clsOpts}</select><span class="hint"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende</button></span></div>
+    <div class="f"><span>Clase</span>${campoClase('id="f_clase" aria-label="Clase"', c.clase, Object.keys(CLASES))}<span class="hint"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende</button></span></div>
     <div class="f">Subclase<span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
     <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
     <div id="f_mc" class="mc-list"></div>
@@ -119,8 +118,8 @@ function readForm() {
 function pintarMulticlase() {
   const principal = $('#f_clase').value;
   $('#f_mc').innerHTML = MC.map((m, i) => {
-    const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k))).map(k => `<option ${k === m.clase ? 'selected' : ''}>${k}</option>`).join('');
-    return `<div class="frow mc-row"><div class="f"><label>Clase ${i + 2}<select data-mc="${i}|clase">${opts}</select></label><span class="hint"><button type="button" class="linkish" data-verclase="${esc(m.clase)}">Ver qué aprende</button></span></div>
+    const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k)));
+    return `<div class="frow mc-row"><div class="f"><span>Clase ${i + 2}</span>${campoClase(`data-mc="${i}|clase" aria-label="Clase ${i + 2}"`, m.clase, opts)}<span class="hint"><button type="button" class="linkish" data-verclase="${esc(m.clase)}">Ver qué aprende</button></span></div>
       <div class="f">Subclase${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</div>
       <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;

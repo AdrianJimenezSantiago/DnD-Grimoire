@@ -13,7 +13,7 @@ import { ascend } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { previewSpell } from './conjuro.js';
-import { tarjetasSubclase } from '../subclases.js';
+import { tarjetasSubclase, campoClase } from '../subclases.js';
 import { gi } from '../tema.js';
 
 let S, LV = null;
@@ -95,9 +95,10 @@ function render() {
     const req = k => (REQ_MULTICLASE[k] || []).filter(alts => !alts.some(a => (ch.stats[a] || 0) >= 13)).map(alts => alts.map(a => ABIL_NAME[a]).join(' o ') + ' 13');
     h = `<p class="note">Subes un nivel de personaje en una de tus clases o empiezas una nueva (multiclase). Los rasgos, recursos y conjuros de cada clase van a su propio nivel.</p>
       <div class="opts">${mias.map(c => `<button type="button" data-lvclase="${esc(c.clase)}" aria-pressed="${LV.clase === c.clase}">${esc(c.clase)} ${c.nivel} → ${c.nivel + 1}${c.subclase ? `<small>${esc(c.subclase)}</small>` : ''}</button>`).join('')}</div>
-      <label class="f wide" style="margin-top:14px">O empieza una clase nueva<select id="lvNueva"><option value="">Elige una clase</option>${nuevas.map(k => `<option value="${esc(k)}" ${LV.clase === k ? 'selected' : ''}>${esc(k)}${req(k).length ? ` (pide ${req(k).join(', ')})` : ''}</option>`).join('')}</select>
-      <span class="hint">Para la multiclase, el manual pide 13 en la característica principal de cada clase. La app lo avisa pero no lo impide: tu mesa decide.</span></label>
-      ${LV.clase && !mias.some(c => c.clase === LV.clase) ? `<button type="button" class="ghost" data-verclase="${esc(LV.clase)}">${gi('libro')}Ver qué aprende ${esc(LV.clase)}</button>` : ''}`;
+      <div class="f wide" style="margin-top:14px"><span>O empieza una clase nueva</span>${campoClase('id="lvNueva" aria-label="Clase nueva"', nuevas.includes(LV.clase) ? LV.clase : '', nuevas, 'Elige una clase')}
+      <span class="hint">Para la multiclase, el manual pide 13 en la característica principal de cada clase. La app lo avisa pero no lo impide: tu mesa decide.</span></div>
+      ${LV.clase && !mias.some(c => c.clase === LV.clase) ? `${req(LV.clase).length ? `<p class="note warn-txt">${esc(LV.clase)} pide ${esc(req(LV.clase).join(', '))} para la multiclase.</p>` : ''}
+        <button type="button" class="ghost" data-verclase="${esc(LV.clase)}">${gi('libro')}Ver qué aprende ${esc(LV.clase)}</button>` : ''}`;
   }
   if (step === 'resumen') {
     const feats = featuresAt(LV.vista, { subclase: LV.subclase }, to), diff = levelDiff(A, B, ch, d), auto = conjurosPendientes(S.db, d, compendio()).map(c => c.x.es);
