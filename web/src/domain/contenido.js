@@ -5,7 +5,7 @@
 import { aplanar, bloques, esMayus, letras, tituloBonito, sinTildes } from './lector.js';
 import { claveNombre } from './manual.js';
 import { CLASES } from './reglas2024.js';
-import { SUBCLASES } from './clases2024.js';
+import { SUBCLASES, CLASES_INFO } from './clases2024.js';
 
 const PROPIOS = ['Faerûn', 'Faerún', 'Mystra', 'Tymora', 'Arpistas', 'Zhentarim', 'Guantelete', 'Dragón Púrpura', 'Alianza de los Lores', 'Enclave Esmeralda',
   'Magos Rojos', 'Thay', 'Culto del Dragón', 'Calimshan', 'Aguasprofundas', 'Puerta de Baldur', 'Myth Drannor', 'Cormyr', 'Sembia', 'Luskan', 'Neverwinter',
@@ -306,6 +306,38 @@ export function completarSubclases(lista) {
     const libres = (sc.candidatas || []).filter(n => !vistas.has(claveNombre(n)));
     if (libres.length === 1) { const n = libres[0]; const x = { ...sc, nombre: n, clave: claveNombre(n), revisar: false }; vistas.set(x.clave, x); out.push(x); }
     else out.push(sc);
+  }
+  return out;
+}
+
+/* ------------------------------- rasgos de clase ------------------------------- */
+/**
+ * Rasgos de clase («RASGOS DE CLASE DE BÁRBARO» → «NIVEL 1: FURIA»…) hasta las subclases de esa clase.
+ * Devuelve [{clave, clase, rasgos: [{nivel, nombre, texto}]}]; los nombres se ajustan a los oficiales de la app.
+ */
+export function parseRasgosClase(pages) {
+  const L = separarRasgos(aplanar(pages)), out = [];
+  const inicio = new RegExp(`^RASGOS DE CLASE DE (${CLASE_RE})$`, 'i');
+  for (let i = 0; i < L.length; i++) {
+    const t = L[i].s.replace(/[|>\s]+$/, '').trim(), m = inicio.exec(sinTildes(t).toUpperCase().replace(/\s+/g, ' ')) || inicio.exec(t);
+    const clase = m && CLASE_DE(m[1]); if (!clase || out.some(o => o.clase === clase)) continue;
+    let fin = i + 1;
+    while (fin < L.length && fin - i < 600 && !(esMayus(L[fin].s) && /^(SUBCLASES? DE\b|RASGOS DE CLASE DE\b)/i.test(sinTildes(L[fin].s).toUpperCase()))) fin++;
+    const bs = bloques(L, i + 1, fin, { propios: PROPIOS, subtitulo: (l, s) => {
+      const r = RASGO.exec(s); if (r) return `Nivel ${r[1]}: ${nombreDe(r[2])}`;
+      return l.h >= (l.hTip || 16) * 1.12 && letras(s).length >= 4 && s.length < 50 ? nombreDe(s) : null; } });
+    // cada «### Nivel N: Nombre» abre un rasgo; lo de antes (introducción, tabla de la clase) no es un rasgo
+    const oficiales = Object.entries(CLASES_INFO[clase]?.rasgos || {}).flatMap(([nv, rs]) => rs.filter(r => typeof r === 'string').map(r => ({ nivel: +nv, nombre: r })));
+    const rasgos = []; let cur = null;
+    for (const b of bs) {
+      const h = /^### Nivel (\d+): (.+)$/.exec(b);
+      if (h) {
+        const nv = +h[1], ok = oficiales.find(o => clave(o.nombre) === clave(h[2])) || (parecido(h[2], oficiales.filter(o => o.nivel === nv).map(o => o.nombre)) && { nombre: parecido(h[2], oficiales.filter(o => o.nivel === nv).map(o => o.nombre)) });
+        cur = { nivel: nv, nombre: ok ? ok.nombre : h[2], partes: [] };
+        if (!rasgos.some(r => r.nivel === cur.nivel && r.nombre === cur.nombre)) rasgos.push(cur);
+      } else if (cur) cur.partes.push(b.replace(/^### /, '#### '));
+    }
+    if (rasgos.length) out.push({ clave: claveNombre(clase), clase, rasgos: rasgos.map(r => ({ nivel: r.nivel, nombre: r.nombre, texto: r.partes.join('\n\n') })) });
   }
   return out;
 }

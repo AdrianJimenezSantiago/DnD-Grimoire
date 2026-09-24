@@ -13,6 +13,8 @@ import { avatarHtml } from './avatar.js';
 import { paraRecordar } from '../domain/diario.js';
 import { notaHtml } from './dialogs/diario.js';
 import { rasgosConObjetivo } from '../domain/concentracion.js';
+import { rasgosEnJuego, agrupar, numerosMarciales } from '../domain/enJuego.js';
+import { biblioteca } from '../domain/catalogo.js';
 
 /* ---------- consultas de la hoja ---------- */
 export const slotsOf = (P, n) => P.slots[n] || 0;
@@ -57,9 +59,13 @@ function heroHtml(ch, P) {
       ${ch.nivel < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${ch.nivel + 1}</button>` : ''}
     </div>`;
 }
+/** ¿Se enseña la parte de conjuros? Si la clase o la subclase lanza, si hay conjuros en el libro o si se pidió al pie de la hoja. */
+export const conConjuros = (ch, P) => !!P.apKey || P.maxSlot > 0 || ch.book.length > 0 || !!ch.enJuego?.conjuros;
 function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`;
+  // sin conjuros: los números de la clase que se miran en combate (daño de furia, ataque furtivo, artes marciales…)
+  if (!conConjuros(ch, P)) return numerosMarciales(ch).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
   return st(P.cd ?? '—', 'CD de salvación', 'key') + st(P.atk == null ? '—' : sgn(P.atk), 'Ataque de conjuro', 'key')
     + st(P.c?.cant ? `${cc}/${P.maxCant}` : cc, 'Trucos', P.c?.cant && cc > P.maxCant ? 'over' : '')
     + st(P.c ? `${pc}/${P.maxPrep}` : pc, 'Preparados', P.c && pc > P.maxPrep ? 'over' : '');
@@ -124,6 +130,27 @@ function efectosHtml(ch) {
   const add = sug.length ? `<div class="ef-add">${sug.map(n => `<button type="button" data-efnuevo="${esc(n)}">${icon('plus')}${esc(n)}</button>`).join('')}</div>` : '';
   return `<div class="res wide ef-card"><strong>${gi('ojo')} Efectos activos</strong>${h || '<span class="rnote">Nada activo. Marca un rasgo cuando lo uses sobre alguien, o concéntrate en un conjuro.</span>'}${add}
     ${pl.conc ? `<label class="chk-line ef-pedir"><input type="checkbox" data-pedirobj ${pl.pedirObjetivos ? 'checked' : ''}> Preguntar sobre quién al concentrarme en un conjuro con objetivos</label>` : ''}</div>`;
+}
+/** «En juego»: rasgos de clase y subclase agrupados por cuándo se usan, con resumen, números y el recurso que gastan. */
+function enJuegoHtml(ch, P) {
+  const lista = rasgosEnJuego(ch, biblioteca(), reglas(ch)); if (!lista.length) return '';
+  const lanza = conConjuros(ch, P), abierto = lanza ? !!ch.enJuego?.abierto : ch.enJuego?.abierto !== false;
+  const fij = ch.enJuego?.fijados || [];
+  const tarjeta = r => {
+    const rec = r.recurso, left = rec ? rec.max - usosGastados(ch, rec) : 0, fijo = fij.includes(r.clave);
+    return `<article class="ej-it ${r.origen === 'subclase' ? 'sub' : ''}">
+      <button type="button" class="ej-main" data-ejver="${esc(r.clave)}" aria-label="Leer ${esc(r.nombre)}"><b>${esc(r.nombre)}</b>
+        <small>Nivel ${r.nivel}${r.origen === 'subclase' ? ` · ${esc(ch.subclase)}` : ''}</small>
+        ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
+      <div class="ej-side">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
+        ${rec ? `<button type="button" class="ruse ej-use" data-rstep="${rec.id}|1" ${left ? '' : 'disabled'} aria-label="Usar ${esc(rec.nombre)}: quedan ${left} de ${rec.max}">Usar <small>${left}/${rec.max}</small></button>` : ''}
+        <button type="button" class="ej-star" data-ejfijar="${esc(r.clave)}" aria-pressed="${fijo}" aria-label="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}: ${esc(r.nombre)}" title="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}">★</button></div></article>`;
+  };
+  const sinTextos = lista.every(r => !r.texto);
+  return `<div class="ej-head"><span class="ej-emb">${gi('dote')}</span><h2>En juego</h2><small>${lista.length} rasgos de ${esc(ch.clase)}${ch.subclase ? ` y ${esc(ch.subclase)}` : ''}</small>
+      <button type="button" class="ruse ej-toggle" data-ej="toggle" aria-expanded="${abierto}">${abierto ? 'Plegar' : 'Desplegar'}</button></div>
+    ${abierto ? `${sinTextos ? `<p class="note ej-note">Importa el Manual del Jugador en <button type="button" class="linkish" data-cmd="manual">Libros y manuales</button> para ver qué hace cada rasgo. Se lee en este dispositivo.</p>` : ''}
+      ${agrupar(lista, fij).map(g => `<div class="ej-grupo ej-${g.clave}"><h3>${esc(g.titulo)}</h3><div class="ej-grid">${g.rasgos.map(tarjeta).join('')}</div></div>`).join('')}` : ''}`;
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
@@ -221,6 +248,14 @@ export function renderSheet(S) {
   } else if (heroChanged) $('#hero .underline path')?.classList.remove('fx-draw');
   patch($('#stats'), statsHtml(db, ch, P));
   patch($('#res'), resourcesHtml(db, ch, P));
+  patch($('#enjuego'), enJuegoHtml(ch, P));
+  const lanza = conConjuros(ch, P);
+  if (!lanza) {
+    // sin ninguna fuente de conjuros: la parte de conjuros queda al pie, a un toque, por si llega por especie, dote o multiclase
+    patch($('#legend'), ''); patchKeyed($('#levels'), []);
+    patch($('#foot'), `<div class="foot-conj"><button type="button" class="ruse" data-cmd="verConjuros">${icon('plus')}Añadir conjuros</button><span>Por especie, dote, objeto o multiclase.</span></div>${ch.campana ? `<span>${esc(ch.campana)}</span>` : ''}`);
+    return;
+  }
   patch($('#legend'), legendHtml(ch, P, schools));
   const byL = {};
   ch.book.forEach((e, bi) => { const s = db.catalog[e.sid]; if (s) (byL[s.level] ||= []).push({ e, s, bi }); });
@@ -228,5 +263,7 @@ export function renderSheet(S) {
   for (let L = 1; L <= P.maxSlot; L++) levels.add(L);
   patchKeyed($('#levels'), [...levels].sort((a, b) => a - b).map(L => ({ key: 'L' + L, cls: 'level', html: levelHtml(db, ch, P, L, byL[L] || [], schools, editing) })));
   const foot = [ch.campana, P.c ? 'Componentes sin coste: los cubre el foco de lanzamiento' : ''].filter(Boolean);
-  patch($('#foot'), foot.map(t => `<span>${esc(t)}</span>`).join(''));
+  // conjuros mostrados a mano y aún vacíos: se pueden volver a esconder
+  const ocultar = ch.enJuego?.conjuros && !P.apKey && !P.maxSlot && !ch.book.length ? `<div class="foot-conj"><button type="button" class="ruse" data-cmd="verConjuros">Ocultar conjuros</button></div>` : '';
+  patch($('#foot'), ocultar + foot.map(t => `<span>${esc(t)}</span>`).join(''));
 }

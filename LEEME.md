@@ -61,6 +61,13 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - **Forma salvaje:** la tarjeta del recurso tiene «Formas (n)». Muestra las bestias posibles según el nivel (VD 1/4, 1/2 o 1, con vuelo desde el nivel 8) y el Círculo de la luna. Las conocidas se marcan con ★, hasta el máximo del nivel. Las que no estén en tus libros se añaden a mano con nombre, VD, CA, PG y velocidad.
   - El texto del apéndice del PDF tiene restos de reconocimiento de texto. La app los corrige cuando puede (dados, características, nombres) y marca en la ficha lo que conviene comprobar en el libro.
 - **Las 48 subclases del Manual del Jugador, completas.** Al importarlo, cada subclase trae ya todos sus rasgos (241) con su descripción, y la importación no pide ningún nombre. El lector tolera los títulos mal leídos del PDF («NrIveEL 10», «HECHICERÍA pracónica», «LABRÓN DE CONJUROS»), los títulos pegados al texto y las tablas que se comían el rasgo siguiente. El Evocador y el Juramento de venganza, cuyo título está dentro de una ilustración, se reconocen por sus rasgos.
+- **«En juego»: los rasgos de tu clase, listos para la mesa.** Debajo de los recursos, la hoja agrupa los rasgos de clase y subclase por cuándo se usan: **Acción, Acción adicional, Reacción, Siempre activo y Fuera de combate**.
+  - Cada rasgo muestra su nivel, una línea con lo que hace y sus números ya calculados (Furia +2, Ataque furtivo 4d6, Artes marciales d8…). Si gasta un recurso, trae el botón «Usar» con lo que queda.
+  - El grupo sale solo del texto del libro («como acción adicional», «llevar a cabo una reacción»…). Si alguno no te encaja, ábrelo y cámbialo en «Mostrar en».
+  - La estrella ★ sube un rasgo a «Fijados», arriba del todo.
+  - Los textos vienen del Manual del Jugador importado: ahora la importación también lee los **rasgos de clase** (170 de las 12 clases). Sin libro, la sección muestra nombres, niveles, números y recursos, y avisa de que falta el texto.
+  - En los lanzadores de conjuros aparece plegada, encima de los conjuros; en los demás, desplegada.
+- **Personajes sin conjuros.** Si ni la clase ni la subclase lanzan conjuros (ni hay ninguno en el libro), la cabecera muestra los números de la clase en lugar de CD y ataque de conjuro, y la parte de conjuros queda al pie con «Añadir conjuros», por si llegan por especie, dote, objeto o multiclase. Mientras siga vacía, se puede volver a ocultar.
 - **Héroes de Faerûn, completo.** Al importarlo salen sus 17 conjuros nuevos, las 34 dotes, los 18 trasfondos y las 8 subclases con sus 42 rasgos. Los nombres mal leídos por el OCR del PDF («Toca do por los mythales», «Don deljolgorio», «Víbora de sylun é») y los trasfondos sin título (Arpista, Caballero del Guantelete, Sectario del Dragón) se corrigen con las tablas del propio libro («Lista de dotes», «Trasfondos regionales / de facciones»). El libro se reconoce aunque el archivo se llame de otra forma.
 - **Tema oscuro por defecto.** El claro sigue en el menú y se recuerda.
 - **Franja de nivel de los conjuros.** Es un velo translúcido que desenfoca lo que pasa por debajo, algo más ancho que la tabla y desvanecido por los lados, en lugar de un bloque opaco.
@@ -327,7 +334,7 @@ Comandos:
 ```
 npm install
 npm run dev        # servidor local con recarga
-npm test           # pruebas (76)
+npm test           # pruebas (79)
 npm run build      # compila web/ en www/ (Android)
 npm run build:windows  # un solo HTML para Windows en dist-windows/
 npm run sync       # compila y copia al proyecto Android

@@ -17,6 +17,8 @@ import { bloqueHtml, md } from './conjuro.js';
 import { TIPOS_BASE, aBestiario, vdTexto } from '../../domain/monstruos.js';
 import { bestiarioDe, nuevaCriatura } from '../../domain/bestiario.js';
 import { undoBtn } from '../../app/acciones.js';
+import { rasgosEnJuego, GRUPOS } from '../../domain/enJuego.js';
+import { reglas } from '../../domain/rasgos.js';
 
 let S;
 const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'az', ctipo: '', cvd: '' };
@@ -167,6 +169,16 @@ export function abrirCriatura(clave) {
     pie: ch ? (ya ? `<span class="fi-ya">${gi('bestia')}Ya está en el bestiario de ${esc(ch.nombre)}</span>` : `<button type="button" class="gold" data-fi="bestiario">${gi('bestia')}Añadir al bestiario de ${esc(ch.nombre)}</button>`) : '' });
 }
 /** Término del glosario (también desde los enlaces de las descripciones). */
+/** Rasgo de «En juego»: el texto completo del libro y dónde se muestra en la hoja (se puede cambiar de grupo). */
+export function abrirRasgoJuego(clave) {
+  const ch = S.cur(); if (!ch) return;
+  const r = rasgosEnJuego(ch, biblioteca(), reglas(ch)).find(x => x.clave === clave); if (!r) return;
+  FICHA = { tipo: 'rasgo', clave };
+  const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
+  ficha({ titulo: r.nombre, ico: r.origen === 'subclase' ? 'subclase' : 'dote',
+    sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.origen === 'subclase' ? ch.subclase : ch.clase)}</span><span>Nivel ${r.nivel}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
+    cuerpo: `${grupos}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el Manual del Jugador en Libros y manuales: se lee en este dispositivo.</p>`}` });
+}
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;
   const largo = e.texto.length > 2500, apartados = [...e.texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
@@ -195,6 +207,11 @@ export function init(store) {
   });
   // índice de apartados de la ficha: salto suave dentro del cuerpo
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;
+    S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.grupo = { ...(ch.enJuego.grupo || {}) }; ch.enJuego.grupo[k] = g; });
+    abrirRasgoJuego(k);
+  });
   on($('#fichaDlg'), 'click', '[data-fi]', (e, b) => {
     if (b.dataset.fi === 'bestiario' && FICHA?.tipo === 'cria') {
       const c = FICHA.c;

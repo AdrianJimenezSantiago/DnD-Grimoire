@@ -74,6 +74,6 @@ export function perfil(ch) {
     slots, pact, maxSlot: Math.max(0, ...Object.keys(slots).map(Number)),
     maxPrep: c ? PREP[c.prep][lvl - 1] : 0,
     maxCant: c && c.cant ? c.cant[0] + c.cant.slice(1).filter(t => lvl >= t).length : 0,
-    ritualLibro: ch.clase === 'Mago',   // Adepto de los rituales
+    ritualLibro: ch.clase === 'Mago',   // Adepto en rituales
   };
 }

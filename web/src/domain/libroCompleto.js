@@ -7,7 +7,7 @@ import { parseSpells } from './manual.js';
 import { parseGlosario } from './glosario.js';
 import { detectarSubclases } from './libros.js';
 import { parseObjetos } from './objetos.js';
-import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones, nombresTablaTrasfondos, nombrarTrasfondos, nombresDeTabla, corregirConTabla, frecuencias } from './contenido.js';
+import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones, nombresTablaTrasfondos, nombrarTrasfondos, nombresDeTabla, corregirConTabla, frecuencias, parseRasgosClase } from './contenido.js';
 import { parseCriaturas } from './monstruos.js';
 
 const TIPO_OBJ = /(Objeto maravilloso|Anillo|Varita|Vara|Poci[oó]n|Arma|Armadura|Bast[oó]n|Pergamino)\b[^,]{0,70},\s*(com[uú]n|infrecuente|rar[oa]|muy rar[oa]|legendari[oa]|artefacto|rareza)/;
@@ -52,6 +52,12 @@ export function analizarLibro(paginas, aviso = () => {}) {
   let subTextos = [];
   for (const [a, b] of bloquesDe(conRasgo, 2)) subTextos.push(...parseSubclases(rango(a - 1, b)));
   subTextos = completarSubclases(subTextos);
+  // rasgos de clase: desde «RASGOS DE CLASE DE …» hasta sus subclases (las páginas de listas de conjuros no llevan «NIVEL N:»)
+  const rasgosClase = [];
+  texto.forEach((t, i) => { if (/RASGOS DE CLASE DE/.test(t)) for (const c of parseRasgosClase(rango(i + 1, i + 20))) {
+    const k = rasgosClase.findIndex(x => x.clase === c.clase);
+    if (k < 0) rasgosClase.push(c); else if (c.rasgos.length > rasgosClase[k].rasgos.length) rasgosClase[k] = c;   // la lectura más completa
+  } });
   // nombres de subclase (etiquetas «SUBCLASE DE…»), como antes
   const subPags = texto.map((t, i) => (/SUBCLASE DE|RASGOS DE/i.test(t) ? i + 1 : 0)).filter(Boolean).map(cols);
   const subclases = detectarSubclases(subPags);
@@ -76,5 +82,5 @@ export function analizarLibro(paginas, aviso = () => {}) {
   for (const [a, b] of bloquesDe(conPerfil, 2)) criaturas.push(...parseCriaturas(rango(a - 1, b)));
   const unicas = [...new Map(criaturas.map(c => [c.clave, c])).values()];
 
-  return { spells, glosario: [...glosario, ...reglas], objetos, dotes, trasfondos, subclases, subTextos, criaturas: unicas };
+  return { spells, glosario: [...glosario, ...reglas], objetos, dotes, trasfondos, subclases, subTextos, rasgosClase, criaturas: unicas };
 }

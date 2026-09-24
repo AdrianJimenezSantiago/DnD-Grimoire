@@ -49,7 +49,7 @@ export const CLASES_INFO = {
     6: [SUB], 7: ['Encarnación mágica'], 8: [ASI], 10: ['Metamagia'], 12: [ASI], 14: [SUB], 16: [ASI], 17: ['Metamagia'], 18: [SUB], 19: [EPICO],
     20: ['Apoteosis arcana'] } },
   'Mago': { dg: 6, salv: ['int', 'sab'], prio: ['int', 'con', 'des', 'sab', 'car', 'fue'], rasgos: {
-    1: ['Adepto de los rituales', 'Lanzamiento de conjuros', 'Recuperación arcana'], 2: ['Académico'], 3: ['Subclase de mago'], 4: [ASI], 5: ['Memorizar conjuro'],
+    1: ['Adepto en rituales', 'Lanzamiento de conjuros', 'Recuperación arcana'], 2: ['Académico'], 3: ['Subclase de mago'], 4: [ASI], 5: ['Memorizar conjuro'],
     6: [SUB], 8: [ASI], 10: [SUB], 12: [ASI], 14: [SUB], 16: [ASI], 18: ['Maestría sobre conjuros'], 19: [EPICO], 20: ['Conjuros característicos'] } },
   'Monje': { dg: 8, salv: ['fue', 'des'], prio: ['des', 'sab', 'con', 'fue', 'int', 'car'], rasgos: {
     1: ['Artes marciales', 'Defensa sin armadura'], 2: ['Concentración de monje', 'Metabolismo asombroso', 'Movimiento sin armadura'],

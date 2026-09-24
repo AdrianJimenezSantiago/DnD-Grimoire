@@ -5,7 +5,7 @@
 import { esc } from '../core/util.js';
 import { SCHOOLS, perfil } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
-import { schoolKey } from '../ui/sheet.js';
+import { schoolKey, conConjuros } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems, linkCatalog } from '../domain/catalogo.js';
@@ -25,7 +25,7 @@ import { openRules, openRecovery } from '../ui/dialogs/rasgos.js';
 import { openHistory } from '../ui/dialogs/historial.js';
 import { openBackup } from '../ui/dialogs/copia.js';
 import { openManual } from '../ui/dialogs/manual.js';
-import { openBiblioteca } from '../ui/dialogs/biblioteca.js';
+import { openBiblioteca, abrirRasgoJuego } from '../ui/dialogs/biblioteca.js';
 import { openEquipo } from '../ui/dialogs/equipo.js';
 import { openFormas } from '../ui/dialogs/formas.js';
 import { openBestiario } from '../ui/dialogs/diario.js';
@@ -128,6 +128,7 @@ const COMMANDS = {
   endconc: () => A.endConc(S),
   objetivos: () => A.enfocarObjetivos('conc'),
   formas: () => S.cur() && openFormas('salvaje'),
+  verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
   backup: () => openBackup(),
   manual: () => openManual(),
   print: () => { setEditing(false); setTimeout(() => print(), 80); },
@@ -173,6 +174,12 @@ function bindSheet() {
   sheet.addEventListener('contextmenu', e => { if (e.target.closest('.castzone') && !S.editing) e.preventDefault(); });
 
   on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  // «En juego»: plegar, fijar arriba y leer el rasgo entero
+  on(sheet, 'click', '[data-ej="toggle"]', () => S.edit((db, ch) => { const P = perfil(ch), lanza = conConjuros(ch, P); ch.enJuego ||= {};
+    const abierto = lanza ? !!ch.enJuego.abierto : ch.enJuego.abierto !== false; ch.enJuego.abierto = !abierto; }));
+  on(sheet, 'click', '[data-ejfijar]', (e, b) => { const k = b.dataset.ejfijar; S.edit((db, ch) => { ch.enJuego ||= {}; const f = ch.enJuego.fijados || [];
+    ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
+  on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
   on(sheet, 'click', '#res [data-ntact]', (e, b) => { const li = b.closest('[data-nt]'); accionNota(S, li.dataset.ses, li.dataset.nt, b.dataset.ntact); });
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;
