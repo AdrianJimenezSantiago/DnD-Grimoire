@@ -1,4 +1,5 @@
 import { esc } from '../../core/util.js';
+import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/historia.js';
 import { $, on } from '../dom.js';
 import { avatarHtml } from '../avatar.js';
@@ -42,13 +43,13 @@ async function importar(file) {
   try {
     if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
       toast('Leyendo el PDF…');
-      const { paginasSimples } = await import('../../app/pdf.js');
+      const { paginasSimples } = await cargar(() => import('../../app/pdf.js'));
       md = pdfAMarkdown(await paginasSimples(file));
     } else {
       const txt = await file.text();
       md = /\.(md|markdown)$/i.test(file.name) || /^#{1,3}\s/m.test(txt) ? txt.trim() : textoAMarkdown(txt);
     }
-  } catch (e) { toast('No se pudo leer ese archivo.'); return; }
+  } catch (e) { if (esVersionVieja(e)) toast(esc(e.message), [{ label: 'Recargar', hl: true, fn: recargar }]); else toast('No se pudo leer ese archivo.'); return; }
   if (!md.trim()) { toast('El archivo no tiene texto que se pueda leer.'); return; }
   const c = ch();
   if (c.historia && !(await confirmar({ titulo: '¿Sustituir la historia?', texto: `${c.nombre} ya tiene una historia. La importada ocupará su lugar; podrás deshacerlo justo después.`, ok: 'Sustituir' }))) return;
