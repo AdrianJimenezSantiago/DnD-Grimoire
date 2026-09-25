@@ -1,7 +1,8 @@
+import { campoElegible, ponerValor, elegirDote } from '../elecciones.js';
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas2024.js';
 import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
-import { allSpellItems, biblioteca, compendio, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
+import { allSpellItems, compendio, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -114,7 +115,7 @@ function render() {
         <label class="chk-line"><input type="radio" name="lvasi" value="dos" ${a.modo === 'dos' ? 'checked' : ''}> +2 a una característica</label>${a.modo === 'dos' ? `<div class="frow">${sel('lvA', a.a)}</div>` : ''}
         <label class="chk-line"><input type="radio" name="lvasi" value="uno" ${a.modo === 'uno' ? 'checked' : ''}> +1 a dos características</label>${a.modo === 'uno' ? `<div class="frow">${sel('lvA', a.a)}${sel('lvB', a.b, a.a)}</div>` : ''}
         <label class="chk-line"><input type="radio" name="lvasi" value="dote" ${a.modo === 'dote' ? 'checked' : ''}> ${to === 19 ? 'Don épico u otra dote' : 'Otra dote'}</label>
-        ${a.modo === 'dote' ? `<label class="f wide">Nombre de la dote<input id="lvDote" list="lvDotes" value="${esc(a.dote)}" autocomplete="off" placeholder="Por ejemplo, Iniciado en la magia"><datalist id="lvDotes">${biblioteca().dotes.filter(x => x.cat !== 'Origen' || to !== 19).map(x => `<option value="${esc(x.nombre)}">`).join('')}</datalist><span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></label>` : ''}
+        ${a.modo === 'dote' ? `<div class="f wide"><span>Dote</span>${campoElegible('id="lvDote" aria-label="Nombre de la dote"', a.dote, 'dote', 'dote', 'Por ejemplo, Iniciado en la magia')}<span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></div>` : ''}
       </div>${B.apKey && B.mod !== A.mod ? `<div class="fsum" style="margin-top:14px">Tu ${ABIL_NAME[B.apKey]} pasa a ${sgn(B.mod)}: CD ${B.cd} y ataque ${sgn(B.atk)}.</div>` : ''}`;
   }
   const escL = LV.sch.toLowerCase();
@@ -176,6 +177,7 @@ function apply() {
 export function init(store) {
   S = store;
   const body = $('#lvBody');
+  on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(char(), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
   body.addEventListener('input', ev => {
     const t = ev.target;
     if (t.dataset.chq) { LV.q[t.dataset.chq] = t.value; const pos = t.selectionStart; render(); const n = body.querySelector(`[data-chq="${t.dataset.chq}"]`); n?.focus(); n?.setSelectionRange(pos, pos); return; }

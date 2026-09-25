@@ -1,5 +1,6 @@
+import { campoElegible, ponerValor, elegirObjetoComun } from '../elecciones.js';
 import { esc, norm } from '../../core/util.js';
-import { CATEGORIAS, NOMBRE_CAT, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, alternarEquipado, cambiarCantidad,
+import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, alternarEquipado, cambiarCantidad,
   quitarObjeto, anadirComun, normObjeto, pesoTotal, capacidadCarga, valorMonedas, claseArmadura, ataqueArma } from '../../domain/equipo.js';
 import { reglas, usosGastados } from '../../domain/rasgos.js';
 import { biblioteca } from '../../domain/catalogo.js';
@@ -64,8 +65,7 @@ function formulario() {
   const catOpts = CATEGORIAS.map(([k, t]) => `<option value="${k}" ${k === cat ? 'selected' : ''}>${esc(t)}</option>`).join('');
   const arma = o.arma || {}, arm = o.armadura || {};
   return `<section class="inv-form" aria-label="${f.id ? 'Editar objeto' : 'Añadir objeto'}"><h3>${f.id ? `Editar ${esc(o.nombre)}` : 'Añadir objeto'}</h3>
-    <div class="frow"><label class="f wide">Nombre<input id="ivNom" list="ivSug" value="${esc(o.nombre || '')}" placeholder="Escribe o elige: espada larga, raciones, cuerda…" autocomplete="off"></label>
-      <datalist id="ivSug">${PREDEFINIDOS.map(p => `<option value="${esc(p.nombre)}">${esc(NOMBRE_CAT[p.cat])}</option>`).join('')}</datalist></div>
+    <div class="frow"><div class="f wide"><span>Nombre</span>${campoElegible('id="ivNom" aria-label="Nombre del objeto"', o.nombre, 'objeto', 'cofre', 'Escribe o elige: espada larga, raciones, cuerda…')}</div></div>
     <div class="frow"><label class="f">Categoría<select id="ivCat">${catOpts}</select></label>
       <label class="f">Cantidad<input id="ivCant" type="number" inputmode="numeric" min="0" value="${o.cantidad ?? 1}"></label>
       <label class="f">Peso (kg, cada uno)<input id="ivPeso" inputmode="decimal" value="${o.peso ? String(o.peso).replace('.', ',') : ''}" placeholder="0"></label>
@@ -151,6 +151,7 @@ export function init(store) {
     let o; const h = S.edit((db, ch) => { o = quitarObjeto(ch, b.dataset.eqdel); });
     repintar(); toast(`<b>${esc(o?.nombre || 'Objeto')}</b> quitado.`, [undoBtn(S, h)]);
   });
+  on(d, 'click', '[data-elegir="objeto"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirObjetoComun(); if (v != null) ponerValor(inp, v); });
   d.addEventListener('input', e => {
     const t = e.target;
     if (t.id === 'ivQ') { V.q = t.value; const pos = t.selectionStart; render(); const i = $('#ivQ'); i.focus(); i.setSelectionRange(pos, pos); }
