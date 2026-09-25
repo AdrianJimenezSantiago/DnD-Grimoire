@@ -1,10 +1,9 @@
 import { esc, norm } from '../../core/util.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
-import { vidaDe, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom,
+import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
 import { bonoSalvacion } from '../../domain/habilidades.js';
 import { glosario } from '../../domain/catalogo.js';
-import { terminarConc } from '../../domain/concentracion.js';
 import { rngCripto } from '../../domain/dados.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
@@ -18,9 +17,8 @@ import { undoBtn } from '../../app/acciones.js';
 import { tirarPrueba } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
 import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../vitales.js';
-import { EFECTOS, EFECTO, efectosDe, normEfectos } from '../../domain/efectos.js';
+import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas } from '../../domain/efectos.js';
 import { pedir } from '../modal.js';
-import { uid } from '../../core/util.js';
 import { golpe } from '../golpes.js';
 
 let S;
@@ -56,7 +54,7 @@ function render() {
 
 export function danar(S2, n, critico = false) {
   const c = S2.cur(), desde = pgActuales(c); let r;
-  const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) terminarConc(x.play); });
+  const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) soltarConc(x); });
   const c2 = S2.cur(), acts = [undoBtn(S2, h)];
   let msg = `<b>${n}</b> de daño${r.absorbido ? ` (${r.absorbido} a los temporales)` : ''}. Quedan <b>${pgActuales(c2)}</b> PG.`;
   if (r.muerte) msg = `<b>${n}</b> de daño: <b>${esc(c.nombre)} muere</b>${r.fallo ? ' (tercer fallo)' : ' (daño masivo)'}.`;
@@ -67,9 +65,9 @@ export function danar(S2, n, critico = false) {
     msg += ` Concentración en <b>${esc(conj)}</b>: salvación de Constitución CD <b>${cd}</b>.`;
     acts.unshift({ label: `Tirar ${sgn(bono)}`, hl: true, fn: () => tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución contra CD ${cd} · ${conj}`, bono, tipo: 'salvacion', ab: 'con',
       alTirar: total => { if (total >= cd) return `<b class="ok">Mantienes la concentración</b> en ${esc(conj)}.`;
-        if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { terminarConc(x.play); });
+        if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { soltarConc(x); });
         return `<b class="ko">Pierdes la concentración</b> en ${esc(conj)}.`; } }) });
-    acts.splice(1, 0, { label: 'La pierdo', fn: () => S2.act(`Pierde la concentración en ${conj}`, (db, x) => { terminarConc(x.play); }) });
+    acts.splice(1, 0, { label: 'La pierdo', fn: () => S2.act(`Pierde la concentración en ${conj}`, (db, x) => { soltarConc(x); }) });
   }
   haptic(r.cayo || r.muerte ? 'heavy' : 'medium');
   golpeFx('dano', n, { desde, hasta: pgActuales(S2.cur()), cae: r.cayo || r.muerte });
@@ -110,14 +108,14 @@ function renderEstados() {
       return `<div class="es-it ${on ? 'on' : ''}"><button type="button" class="es-tog" data-estado="${k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${esc(n)}</b><small>${esc(RESUMEN_ESTADO[k])}</small></span></button>${cl ? `<button type="button" class="linkish es-regla" data-esregla="${esc(cl)}">Regla</button>` : ''}</div>`; }).join('')}</section>
     ${glos.length ? '' : '<p class="note">Resúmenes de la app. Importa el Manual del Jugador para leer cada regla completa.</p>'}
     <h3 class="es-h">${gi('inspiracion')}Efectos sobre ti</h3>
-    <p class="hint">Conjuros y rasgos que te han lanzado (tú u otro). La hoja los suma sola a tus tiradas, a tu CA y a tu velocidad. Se quitan con un descanso largo o tocándolos.</p>
-    ${[[true, 'Beneficiosos'], [false, 'Perjudiciales']].map(([bueno, t]) => `<h4 class="es-sub">${t}</h4><section class="es-lista ef">${EFECTOS.filter(e => e.bueno === bueno).map(e => { const on = v.efectos.some(x => x.k === e.k);
-      return `<div class="es-it ${on ? 'on' : ''} ${bueno ? 'bueno' : 'malo'}"><button type="button" class="es-tog" data-efk="${e.k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${gi(e.ico, 'es-ico')}${esc(e.nombre)}</b><small>${esc(e.texto)}</small></span></button></div>`; }).join('')}</section>`).join('')}
+    <p class="hint">Conjuros y rasgos que te han lanzado (tú u otro). La hoja los suma sola a tus tiradas, a tu CA y a tu velocidad. Cada uno dura lo que dice su conjuro: en combate se descuenta al pasar de ronda y te avisa al terminar. También se quitan con un descanso largo o tocándolos.</p>
+    ${[[true, 'Beneficiosos'], [false, 'Perjudiciales']].map(([bueno, t]) => `<h4 class="es-sub">${t}</h4><section class="es-lista ef">${EFECTOS.filter(e => e.bueno === bueno).map(e => { const x = v.efectos.find(y => y.k === e.k), on = !!x;
+      return `<div class="es-it ${on ? 'on' : ''} ${bueno ? 'bueno' : 'malo'}"><button type="button" class="es-tog" data-efk="${e.k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${gi(e.ico, 'es-ico')}${esc(e.nombre)}${on && x.rondas != null ? `<em class="es-dur">quedan ${esc(fmtRondas(x.rondas))}</em>` : !on && e.dur ? `<em class="es-dur apag">${esc(fmtRondas(e.dur))}</em>` : ''}${x?.conc ? '<em class="es-dur conc">concentración</em>' : ''}</b><small>${esc(e.texto)}</small></span></button></div>`; }).join('')}</section>`).join('')}
     <h4 class="es-sub">Propios</h4>
     ${v.efectos.filter(x => x.propio).map(x => `<div class="es-it on bueno"><div class="es-tog"><i class="es-marca" aria-hidden="true"></i><span><b>${esc(x.nombre)}</b><small>${esc(efectosDe(c).find(e => e.id === x.id)?.texto || '')}</small></span></div><button type="button" class="linkish es-regla" data-efq="${esc(x.id)}">Quitar</button></div>`).join('')}
     <div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off">
       <label>CA<input id="efCa" inputmode="numeric" placeholder="+2"></label><label>Ataques<input id="efAt" placeholder="1d4 o +1"></label>
-      <label>Salvaciones<input id="efSv" placeholder="+3"></label><label>Pruebas<input id="efPr" placeholder="1d4"></label><label>Velocidad (m)<input id="efVel" inputmode="decimal" placeholder="+3"></label>
+      <label>Salvaciones<input id="efSv" placeholder="+3"></label><label>Pruebas<input id="efPr" placeholder="1d4"></label><label>Velocidad (m)<input id="efVel" inputmode="decimal" placeholder="+3"></label><label>Rondas<input id="efRd" inputmode="numeric" placeholder="∞" title="Duración en rondas de combate (10 = 1 minuto). Vacío: hasta que lo quites."></label>
       <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`;
 }
 export async function alternarEfecto(S2, k) {
@@ -125,8 +123,7 @@ export async function alternarEfecto(S2, k) {
   if (ya) { S2.act(`Termina ${e.nombre}`, (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.k !== k); if (e.maxPg) quitarMax(x, ya.id); }); haptic('light'); return; }
   let n = 0;
   if (e.maxPg) { const r2 = await pedir({ titulo: e.nombre, texto: '¿Cuánto aumentan tus PG máximos? 5 con un espacio de nivel 2, y 5 más por cada nivel por encima.', valor: String(e.maxPg), tipo: 'number', min: 1, ok: 'Aplicar' }); n = parseInt(r2, 10); if (!(n > 0)) return; }
-  const id = uid('ef');
-  S2.act(`Efecto: ${e.nombre}`, (db, x) => { vidaDe(x).efectos.push({ id, k, nombre: e.nombre }); if (n) aumentarMax(x, { id, nombre: e.nombre, n }); });
+  S2.act(`Efecto: ${e.nombre}`, (db, x) => { ponerEfecto(x, k, { n }); });
   if (n) golpeFx('max', n); else golpeFx(e.bueno ? 'buff' : 'debuff');
   haptic('light');
 }
@@ -171,7 +168,7 @@ export function init(store) {
   on(eb, 'click', '[data-efadd]', () => {
     const val = id => $(id).value.trim(), nom = val('#efNom'), propio = { ca: val('#efCa'), ataque: val('#efAt'), salvacion: val('#efSv'), prueba: val('#efPr'), vel: val('#efVel') };
     if (!nom) { $('#efNom').focus(); return toast('Ponle un nombre al efecto.'); }
-    S.act(`Efecto: ${nom}`, (db, x) => { const vv = vidaDe(x); vv.efectos = normEfectos([...vv.efectos, { nombre: nom, propio }]); }); golpeFx('buff');
+    S.act(`Efecto: ${nom}`, (db, x) => { const vv = vidaDe(x); vv.efectos = normEfectos([...vv.efectos, { nombre: nom, propio, rondas: parseInt(val('#efRd'), 10) || null }]); }); golpeFx('buff');
   });
   on(eb, 'click', '[data-esregla]', (e, b) => abrirTermino(b.dataset.esregla));
   on(eb, 'click', '[data-es="inspiracion"]', () => { const v = vidaDe(S.cur()); S.act(v.inspiracion ? 'Gasta la inspiración heroica' : 'Gana inspiración heroica', (db, x) => { vidaDe(x).inspiracion = !vidaDe(x).inspiracion; }); haptic('light'); });

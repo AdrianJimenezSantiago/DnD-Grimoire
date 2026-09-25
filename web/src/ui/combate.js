@@ -34,14 +34,19 @@ function acciones(ch, db) {
     grupos.accion.push(`<div class="cb-it arma ${o.equipado ? 'eq' : ''}"><span class="cb-ico">${gi('o_arma')}</span><span class="cb-t"><b>${esc(o.nombre)}</b><small>${esc([o.arma.distancia, ...(o.arma.props || []).slice(0, 3), o.arma.maestria ? `maestría: ${o.arma.maestria}` : ''].filter(Boolean).join(' · '))}</small></span>
       <span class="cb-bts"><button type="button" class="cb-roll" data-cbataque="${o.id}">${gi('d20')}${esc(a.ataque)}${marca}</button><button type="button" class="cb-roll dano" data-cbdano="${o.id}">${gi('dados')}${esc(a.dano)}</button></span></div>`);
   }
+  const conj = [];
   if (db) ch.book.forEach((e, bi) => {
     const s = db.catalog[e.sid]; if (!s) return;
     if (s.level > 0 && !e.prep && !e.always && !e.gratis) return;
     const g = economiaDeTiempo(s.tiempo); if (!grupos[g]) return;
-    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela);
-    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}</span><span class="cb-t"><b>${esc(s.es)}</b><small>${s.level ? `Nivel ${s.level}` : 'Truco'}${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
-      <span class="cb-bts"><button type="button" class="cb-roll lanzar" data-cast="${bi}">${gi(ico || 'libro')}Lanzar</button></span></div>`);
+    conj.push({ e, bi, s, g });
   });
+  conj.sort((a, b) => a.s.level - b.s.level || a.s.es.localeCompare(b.s.es, 'es'));
+  for (const { e, bi, s, g } of conj) {
+    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), niv = s.level ? `Nivel ${s.level}` : 'Truco';
+    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em>${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
+      <span class="cb-bts"><button type="button" class="cb-roll lanzar" data-cast="${bi}">${gi(ico || 'libro')}Lanzar</button></span></div>`);
+  }
   const lib = biblioteca();
   for (const r of rasgosEnJuego(ch, lib, reglasVisibles(ch))) {
     if (!grupos[r.grupo]) continue;

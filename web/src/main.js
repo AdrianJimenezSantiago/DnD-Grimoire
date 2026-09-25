@@ -53,6 +53,7 @@ import * as vida from './ui/dialogs/vida.js';
 import * as dados from './ui/dialogs/dados.js';
 import * as buscar from './ui/dialogs/buscar.js';
 import * as elegir from './ui/dialogs/elegir.js';
+import * as aviso from './ui/dialogs/aviso.js';
 import { tour } from './ui/tour.js';
 import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
@@ -76,7 +77,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); dados.init(S); buscar.init(S); elegir.init();
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
   const app = await eventos.init(S);
 
   const TOUR_INICIO = [
@@ -101,7 +102,7 @@ async function boot() {
     { sel: '#dDados, #bDados', titulo: 'Dados', texto: 'Cualquier tirada: suma dados con un toque o escribe «2d6+3», con ventaja o desventaja y las últimas tiradas a mano.' },
     { sel: '#dCombate, #bCombate', titulo: 'Modo combate', texto: 'Una vista solo para la pelea: ronda e iniciativa, lo que has gastado del turno, puntos de golpe, ataques y conjuros ordenados por acción, acción adicional y reacción.' },
     { sel: '#btnBuscar', titulo: 'Buscar', texto: 'Encuentra cualquier cosa del grimorio: conjuros, reglas, objetos, rasgos, inventario o diario. En el ordenador, también con Ctrl+K.' },
-    { sel: '#dHist, #bHist', titulo: 'Historial', texto: 'Todo lo que lances, gastes o tires queda anotado, y puedes deshacer varios pasos.' },
+    { sel: '#dHist, #btnMore', titulo: 'Historial', texto: 'Todo lo que lances, gastes o tires queda anotado, y puedes deshacer varios pasos. En el ordenador está en el menú.' },
     { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
     { sel: '#whoChip', titulo: 'Cambiar de personaje', texto: 'Desde aquí vuelves a la portada para elegir otro personaje. Allí, «Gestionar personajes» los edita, duplica y borra.' },
   ];

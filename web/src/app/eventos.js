@@ -9,7 +9,7 @@ import { $, on } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { toast, hideToast, toastOpen } from '../ui/toast.js';
 import { closeSheet, openSheet, topSheet } from '../ui/dialog.js';
-import { pop, viewTransition, reducedMotion } from '../ui/fx.js';
+import { pop, viewTransition, reducedMotion, burst } from '../ui/fx.js';
 import { NATIVE, haptic, keepAwake, minimize, setBars, storage } from '../platform/native.js';
 import * as A from './acciones.js';
 import { confirmar } from '../ui/modal.js';
@@ -41,7 +41,9 @@ import { alternarCaracteristica } from '../ui/vitales.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
-import { efectosDe } from '../domain/efectos.js';
+import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
+import { pasarRonda, vidaDe } from '../domain/vida.js';
+import { avisar } from '../ui/dialogs/aviso.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -132,6 +134,7 @@ const COMMANDS = {
   verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
   backup: () => openBackup(),
   vida: () => S.cur() && openVida(),
+  inspiracion: () => alternarInspiracion(),
   estados: () => S.cur() && openEstados(),
   dados: () => openDados(),
   dadoslibres: () => openDados(),
@@ -153,6 +156,19 @@ const COMMANDS = {
     const h = S.replace(db); toast('Datos borrados.', [A.undoBtn(S, h)]);
   },
 };
+function alternarInspiracion() {
+  const ch = S.cur(); if (!ch) return;
+  const gana = !vidaDe(ch).inspiracion;
+  S.act(gana ? 'Gana inspiración heroica' : 'Gasta la inspiración heroica', (db, x) => { vidaDe(x).inspiracion = gana; });
+  haptic(gana ? 'medium' : 'light');
+  requestAnimationFrame(() => {
+    const b = document.querySelector('.hero-insp'); if (!b || reducedMotion()) return;
+    b.classList.add(gana ? 'gana' : 'gasta'); setTimeout(() => b.classList.remove('gana', 'gasta'), 900);
+    const r = b.getBoundingClientRect();
+    if (gana) burst(r.left + r.width / 2, r.top + r.height / 2, { color: '#F4D27A', n: 26, speed: 3.2, up: 1.2, life: 1000, size: 2, gravity: -.02 });
+  });
+  if (!gana) toast('Inspiración heroica gastada: repite un d20 y quédate con la nueva tirada.');
+}
 function run(cmd, el) {
   const abierto = openMenu?.id;
   closeMenu();
@@ -174,10 +190,25 @@ function alternarCombate(el) {
 }
 function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
-  const escudo = (ch.vida?.efectos || []).some(e => e.k === 'escudo');
-  S.act(`Ronda ${combateDe(ch).ronda + 1}${escudo ? ' (termina Escudo)' : ''}`, (db, x) => { siguienteTurno(x); if (x.vida) x.vida.efectos = x.vida.efectos.filter(e => e.k !== 'escudo'); });
-  if (escudo) toast('Empieza tu turno: el conjuro <b>Escudo</b> termina y tu CA vuelve a la normal.');
+  let fuera = [];
+  const ronda = combateDe(ch).ronda + 1;
+  const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); });
+  if (fuera.length) {
+    S.note(`Terminan: ${fuera.map(e => e.nombre).join(', ')}`);
+    setTimeout(() => avisoFinEfectos(fuera, ronda, h), 380);
+  }
   pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
+}
+function avisoFinEfectos(fuera, ronda, h) {
+  const buenos = fuera.filter(e => e.bueno), malos = fuera.filter(e => !e.bueno);
+  const ca = caEfectiva(S.cur()), vel = velocidadEfectiva(S.cur());
+  const cierra = e => ({ ico: e.ico, titulo: e.nombre, texto: e.k === 'escudo' ? `Tu CA vuelve a ${ca.ca}.` : EFECTO[e.k]?.ca ? `Tu CA queda en ${ca.ca}.` : EFECTO[e.k]?.vel || EFECTO[e.k]?.velX ? `Tu velocidad queda en ${String(vel.m).replace('.', ',')} m.` : EFECTO[e.k]?.maxPg ? 'Tus PG máximos vuelven a su valor.' : 'Su duración se ha agotado.', tono: `fin ${e.bueno ? 'buena' : 'mala'}` });
+  avisar({ ico: 'md_tiempo', tono: malos.length && !buenos.length ? 'verde' : 'azul', titulo: fuera.length === 1 ? `Termina ${fuera[0].nombre}` : 'Terminan tus efectos',
+    sub: `Empieza la ronda ${ronda}: ${fuera.length === 1 ? 'se agota la duración de un efecto' : `se agota la duración de ${fuera.length} efectos`}.`,
+    secciones: [{ titulo: 'Ya no te ayuda', ico: 'inspiracion', items: buenos.map(cierra) }, { titulo: 'Te libras de', ico: 'estados', items: malos.map(cierra) },
+      { titulo: 'Sigue activo', ico: 'md_tiempo', items: efectosDe(S.cur()).map(e => ({ ico: e.ico, titulo: e.nombre, texto: e.rondas != null ? `Quedan ${fmtRondas(e.rondas)}.` : 'Hasta que lo quites o descanses.' })) }],
+    botones: [{ ...A.undoBtn(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
+  haptic('light');
 }
 function tirarDesde(clave) {
   const ch = S.cur(); if (!ch) return;

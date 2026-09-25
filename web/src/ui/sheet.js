@@ -17,6 +17,7 @@ import { biblioteca } from '../domain/catalogo.js';
 import { vitalesHtml, caracteristicasHtml } from './vitales.js';
 import { combateHtml, escuelaIco } from './combate.js';
 import { combateDe } from '../domain/combate.js';
+import { vidaDe } from '../domain/vida.js';
 import { percepcionPasiva } from '../domain/habilidades.js';
 import { actualizarLuto, memorialHtml } from './luto.js';
 
@@ -43,11 +44,15 @@ function candles(ch, P, L) {
 }
 function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="true"' : ''} ${attrs}>${esc(val)}</span>`; }
 
+const inspHtml = ch => { const on = !!vidaDe(ch).inspiracion;
+  return `<button type="button" class="hero-insp ${on ? 'on' : ''}" data-cmd="inspiracion" aria-pressed="${on}" title="${on ? 'Tienes inspiración heroica: gástala para repetir un d20' : 'Sin inspiración heroica: toca para marcarla'}" aria-label="Inspiración heroica: ${on ? 'la tienes' : 'no la tienes'}">
+    <svg class="hi-marco" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L38 20 L20 38 L2 20 Z"/><path class="hi-in" d="M20 7 L33 20 L20 33 L7 20 Z"/></svg>${gi('inspiracion', 'hi-ico')}<i class="hi-chispa" aria-hidden="true"></i></button>`; };
 function heroHtml(ch, P) {
   const mods = `Competencia ${sgn(P.pb)}${P.apKey ? ` · ${ABIL_NAME[P.apKey]} ${sgn(P.mod)} para conjuros` : ''} · Percepción pasiva ${percepcionPasiva(ch)}`;
   const t = temaDe(ch);
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
-    <div class="hero-id"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
+    <div class="hero-id"><span class="hero-retrato"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
+    ${inspHtml(ch)}</span>
     <h1>${esc(ch.nombre)}<svg class="underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 60 3, 120 12, 180 7 S 270 5, 297 8"/></svg></h1></div>
     <div class="clase">${clasesDe(ch).length > 1 ? `${clasesDe(ch).map(c => `${esc(c.clase)} ${c.nivel}${c.subclase ? ` <span class="sub">· ${esc(c.subclase)}</span>` : ''}`).join(' <span class="sub">/</span> ')}, <b>nivel ${P.lvl}</b>` : `${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}, nivel ${ch.nivel}`}${origenLinea(ch) ? `<span class="sub">. ${esc(origenLinea(ch))}</span>` : ''}</div>
     <div class="mods">${mods}</div>
@@ -164,7 +169,8 @@ function enJuegoHtml(ch, P) {
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
-  return `<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las velas encendidas son espacios libres.</span>
+  const preparables = P.maxSlot > 0;
+  return `${preparables ? `<button type="button" class="chip leg-prep" data-cmd="filter" aria-pressed="${!!ch.play.onlyPrep}">${icon('book')}${ch.play.onlyPrep ? 'Mostrando solo preparados' : 'Solo preparados'}</button>` : ''}<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las velas encendidas son espacios libres.</span>
     <details><summary>Símbolos de la hoja ${icon('chevron')}</summary><div class="keys">
       <span><b>◆</b> preparado</span><span><b style="color:var(--gold)">◆</b> siempre preparado, no cuenta</span>
       <span><b>R</b> ritual: ${ritualTxt}</span><span><b>C</b> concentración</span>
@@ -230,17 +236,17 @@ export function renderBar(S) {
   patch($('#btnBuscar'), gi('buscar', 'icon'));
   ['#dCombate', '#bCombate'].forEach(id => $(id).setAttribute('aria-pressed', combate));
   document.body.classList.toggle('combate', combate);
-  deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bFilter', 'book', 'Solo preparados'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar conjuros');
-  deskLbl('#bAdd', 'plus', 'Añadir conjuro'); deskLbl('#bHist', 'hourglass', 'Historial');
+  deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar conjuros');
+  deskLbl('#bAdd', 'plus', 'Añadir conjuro');
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
-  ['#dFilter', '#bFilter'].forEach(id => $(id).setAttribute('aria-pressed', !!ch?.play.onlyPrep));
+  $('#dFilter').setAttribute('aria-pressed', !!ch?.play.onlyPrep);
   $('#dAdd').hidden = !S.editing;
   $('#dCombate').hidden = $('#bCombate').hidden = $('#dDados').hidden = !ch;
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const conj = conConjuros(ch, P);
   const preparables = P.maxSlot > 0 || ch.book.some(e => (S.db.catalog[e.sid]?.level || 0) > 0);
-  $('#bFilter').hidden = $('#dFilter').hidden = !conj || !preparables || combate; $('#bAdd').hidden = !conj || combate;
+  $('#dFilter').hidden = !conj || !preparables || combate; $('#bAdd').hidden = !conj || combate;
   $('#bRest').hidden = $('#dRest').hidden = combate;
   $('#bEdit').hidden = $('#dEdit').hidden = (!conj && !S.editing) || combate;
   if (combate) $('#dAdd').hidden = true;

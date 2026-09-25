@@ -2,7 +2,8 @@ import { campoElegible, ponerValor, elegirDote } from '../elecciones.js';
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas2024.js';
 import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
-import { allSpellItems, compendio, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
+import { allSpellItems, compendio, itemMeta, itemToSid, listFilter, biblioteca } from '../../domain/catalogo.js';
+import { nivelCambia } from '../../domain/intercambios.js';
 import { $, on } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -20,6 +21,7 @@ const char = () => S.db.chars.find(c => c.id === LV.id);
 const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase === LV.clase); return c || { clase: LV.clase, subclase: '', nivel: 0, principal: false, nueva: true }; };
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
 
+const cambiosHtml = xs => xs.length ? `<section class="av-sec av-cambios lv-cambios"><h3>${gi('libro')}Al subir también puedes cambiar</h3><ul class="av-lista">${xs.map(i => `<li class="av-it">${gi(i.ico, 'av-it-ico')}<span class="av-it-t"><b>${esc(i.titulo)}${i.fuente ? `<small>${esc(i.fuente)}</small>` : ''}</b><span>${esc(i.texto)}</span></span></li>`).join('')}</ul></section>` : '';
 function draft() {
   const d = clone(char()), o = objetivo();
   if (o.principal) { d.nivel = LV.to; d.subclase = LV.subclase; }
@@ -141,6 +143,7 @@ function render() {
     h = `<div class="fsum">${L.map(t => `<p>${esc(t)}</p>`).join('')}</div>
       ${pend.length ? `<p class="note">Quedan por elegir: ${esc(pend.join(', '))}. Puedes añadirlos más tarde desde «Añadir conjuro».</p>` : ''}
       ${o.clase === 'Mago' && B.maxPrep > A.maxPrep ? `<p class="note">Ahora preparas ${B.maxPrep}: marca los nuevos con ◆ en la hoja.</p>` : ''}
+      ${cambiosHtml(o.nueva ? [] : nivelCambia(d, o.clase, biblioteca().trasfondos))}
       <p class="note">Todo queda anotado en «Dotes y notas» de la ficha, y se puede deshacer.</p>`;
   }
   $('#lvBody').innerHTML = h;

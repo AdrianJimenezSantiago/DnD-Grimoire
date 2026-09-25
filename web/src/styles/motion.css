@@ -39,7 +39,7 @@
 .dawn { position: fixed; inset: -20% 0; z-index: 55; pointer-events: none;
   background: linear-gradient(to top, transparent, rgba(255, 214, 140, .28) 40%, rgba(255, 240, 210, .35) 50%, rgba(255, 214, 140, .2) 60%, transparent);
   animation: dawn 1.3s var(--ease) both; }
-.fxcanvas { position: fixed; inset: 0; z-index: 58; pointer-events: none; width: 100vw; height: 100vh; }
+.fxcanvas { position: fixed; inset: 0; z-index: 58; pointer-events: none; width: 100vw; height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; overflow: visible; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .45s; animation-timing-function: var(--ease); }
 
 @media (prefers-reduced-motion: reduce) {

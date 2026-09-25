@@ -270,7 +270,7 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);
   $('#charNew').addEventListener('click', () => openCharForm(null));
-  on($('#charList'), 'click', '[data-openc],[data-editc],[data-dupc],[data-delc]', (e, t) => {
+  on($('#charList'), 'click', '[data-openc],[data-editc],[data-dupc],[data-delc],[data-expc]', (e, t) => {
     if (t.dataset.openc) { closeSheet(charsDlg()); openCharacter(t.dataset.openc); return; }
     if (t.dataset.editc) return openCharForm(t.dataset.editc);
     if (t.dataset.dupc) return duplicate(t.dataset.dupc);
