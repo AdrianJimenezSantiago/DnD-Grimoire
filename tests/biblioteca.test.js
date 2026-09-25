@@ -6,7 +6,6 @@ import { parseDotes, parseTrasfondos, parseSubclases, separarRasgos, completarSu
 import { anadirObjeto, quitarObjeto, alternarSintonia, rasgoDeCargas } from '../web/src/domain/equipo.js';
 import { nuevaCriatura, notasConjuro, resumenCriatura } from '../web/src/domain/bestiario.js';
 
-// Líneas sintéticas (texto inventado) con la forma que produce manualLineas.js
 const L = (x, y, s, h = 16, segs) => ({ x, y, h, s, segs: segs || [{ x, w: s.length * 7, s }], cells: segs ? segs.map(g => ({ x: g.x, s: g.s })) : [{ x, s }] });
 const pag = cols => [{ p: 1, cols }];
 
@@ -66,7 +65,6 @@ test('libros: trasfondos y dotes se nombran con las tablas del propio libro', ()
   const t = nombrarTrasfondos([{ nombre: '', texto: 'Juraste defender el código de los Arpistas.', revisar: true }, { nombre: '~ eregrino de los manantiales l', texto: '' },
     { nombre: '', texto: 'Eres uno de los iniciados del Culto del Dragón.', revisar: true }], nombres);
   assert.deepEqual(t.map(x => x.nombre), ['Arpista', 'Peregrino de los manantiales lunares', 'Sectario del Dragón']);
-  // la tabla también tiene errores: gana la lectura con palabras que el libro repite
   const frec = frecuencias(['el dragón púrpura', 'dragón', 'tocado por los mythales', 'tocado', 'resistencia', 'resistencia']);
   const d = corregirConTabla([{ nombre: 'Comandante del Dragón Púrpura' }, { nombre: 'Toca do por los mythales' }, { nombre: 'Don de la resistencla desesperada' }],
     ['Comandante del Dragó n Púrpura', 'Tocado por los mythales', 'Don de la resistencia desesperada'], frec);

@@ -1,7 +1,3 @@
-/**
- * Tutorial guiado: foco sobre un elemento y una tarjeta con explicación, Siguiente / Atrás / Saltar.
- * Cada recorrido se muestra una vez (se recuerda en el dispositivo) y se puede repetir desde Más.
- */
 import { esc } from '../core/util.js';
 import { storage } from '../platform/native.js';
 
@@ -49,7 +45,6 @@ function ir(i) { const n = pasosVisibles().length; if (i < 0 || i >= n) { if (i 
 function cerrar(visto) { if (!estado) return; if (visto) storage.set(PREF + estado.id, '1'); const fin = estado.alTerminar; estado = null; capa?.classList.remove('on'); document.body.classList.remove('touring'); fin?.(); }
 export const enTour = () => !!estado;
 export const cerrarTour = () => cerrar(true);
-/** Muestra un recorrido (una vez, salvo `forzar`). `alTerminar` se llama al cerrarlo, o enseguida si ya se había visto. */
 export async function tour(id, pasos, { forzar = false, alTerminar = null } = {}) {
   if (estado) return;
   if (!forzar && (await storage.get(PREF + id)) === '1') { alTerminar?.(); return; }

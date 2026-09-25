@@ -1,9 +1,3 @@
-/**
- * Perfiles de las criaturas que aparecen con conjuros: familiares (Encontrar familiar y Pacto de la cadena), corceles,
- * muertos vivientes animados y los espíritus de los conjuros «Invocar…», que escalan con el nivel del espacio y usan
- * el ataque y la CD de conjuros de quien los lanza. Datos del Manual del Jugador 2024 (apéndice B y capítulo 7).
- * Módulo puro.
- */
 import { norm } from '../core/util.js';
 
 export const CARS = ['fue', 'des', 'con', 'int', 'sab', 'car'];
@@ -15,7 +9,6 @@ const TREPAR = ['Trepar cual arácnido', 'Puede trepar por superficies difícile
 const RES_MAGICA = n => ['Resistencia mágica', `${n} tiene ventaja en las tiradas de salvación contra conjuros y otros efectos mágicos.`];
 const INVIS = n => ['Invisibilidad', `${n} lanza invisibilidad sobre sí mismo sin necesidad de componentes; usa el Carisma como aptitud mágica.`];
 
-/** Perfiles fijos del apéndice B. car = [FUE, DES, CON, INT, SAB, CAR]; salv = salvaciones distintas del modificador. */
 export const PERFILES = {
   arana: { nombre: 'Araña', tipo: 'Bestia Diminuta, sin alineamiento', ca: 12, pg: '1 (1d4 − 1)', vel: '6 m, trepar 6 m', car: [2, 14, 8, 1, 10, 2],
     hab: 'Sigilo +4', sentidos: 'visión en la oscuridad 9 m, Percepción pasiva 10', vd: '0 (10 PX)',
@@ -58,7 +51,6 @@ export const PERFILES = {
     hab: 'Percepción +2', sentidos: 'visión en la oscuridad 9 m, Percepción pasiva 12', vd: '0 (10 PX)',
     rasgos: [['Ágil', 'No provoca ataques de oportunidad cuando se mueve para salir del alcance de un enemigo.']],
     acciones: [['Mordisco', ATQ(2, '1,5 m', '1 de daño perforante')]] },
-  // Formas especiales del Pacto de la cadena
   diablillo: { nombre: 'Diablillo', tipo: 'Infernal Diminuto (diablo), legal malvado', ca: 13, pg: '21 (6d4 + 6)', vel: '6 m, volar 12 m', car: [6, 17, 13, 11, 12, 14],
     hab: 'Engaño +4, Perspicacia +3, Sigilo +5', res: 'frío', inm: 'fuego, veneno; envenenado',
     sentidos: 'visión en la oscuridad 36 m (no la afecta la oscuridad mágica), Percepción pasiva 11', idiomas: 'común, infernal', vd: '1 (200 PX)',
@@ -97,7 +89,6 @@ export const PERFILES = {
   serpiente: { nombre: 'Serpiente venenosa', tipo: 'Bestia Diminuta, sin alineamiento', ca: 12, pg: '5 (2d4)', vel: '9 m, nadar 9 m', car: [2, 15, 11, 1, 10, 3],
     sentidos: 'visión ciega 3 m, Percepción pasiva 10', vd: '1/8 (25 PX)',
     acciones: [['Mordisco', ATQ(4, '1,5 m', '4 (1d4 + 2) de daño perforante más 3 (1d6) de daño de veneno')]] },
-  // Monturas y muertos vivientes
   caballo: { nombre: 'Caballo de monta', tipo: 'Bestia Grande, sin alineamiento', ca: 11, pg: '13 (2d10 + 2)', vel: '18 m', car: [16, 13, 12, 2, 11, 7],
     sentidos: 'Percepción pasiva 10', vd: '1/4 (50 PX)', acciones: [['Cascos', ATQ(5, '1,5 m', '7 (1d8 + 3) de daño contundente')]] },
   zombi: { nombre: 'Zombi', tipo: 'Muerto viviente Mediano, neutral malvado', ca: 8, pg: '15 (2d8 + 6)', vel: '6 m', car: [13, 6, 16, 3, 6, 5], salv: { sab: 0 },
@@ -106,10 +97,8 @@ export const PERFILES = {
     acciones: [['Golpe', ATQ(3, '1,5 m', '5 (1d8 + 1) de daño contundente')]] },
 };
 
-/* ---------------------------- espíritus que escalan ---------------------------- */
 const mitad = n => Math.floor(n / 2);
 const VD_NINGUNO = 'ninguno (BC igual al tuyo)';
-/** Cada espíritu: nivel base del conjuro, variantes y una función que construye el perfil para {n: nivel del espacio, v: variante, atk, cd}. */
 export const ESPIRITUS = {
   bestia: { nombre: 'Espíritu bestial', base: 2, variantes: ['tierra', 'mar', 'aire'], perfil: ({ n, v, atk }) => ({
     tipo: 'Bestia Pequeña, neutral', ca: 11 + n, pg: String((v === 'aire' ? 20 : 30) + 5 * (n - 2)),
@@ -192,13 +181,11 @@ export const ESPIRITUS = {
         : ['Mirada siniestra (1/descanso largo)', `Salvación de Sabiduría CD ${cd}, una criatura a 18 m que vea. Fallo: asustada hasta el final de tu siguiente turno.`]] }) },
 };
 
-/** Qué criaturas trae cada conjuro. `cadena` solo aparece si el personaje es brujo. */
 const POR_CONJURO = {
   'encontrar familiar': { otrasVd0: true, familiar: ['arana', 'buho', 'comadreja', 'cuervo', 'gato', 'halcon', 'lagarto', 'murcielago', 'pulpo', 'rana', 'rata'],
     cadena: ['diablillo', 'duende', 'esfinge', 'esqueleto', 'pseudodragon', 'quasit', 'renacuajo', 'serpiente'] },
   'corcel fantasma': { fijos: ['caballo'], nota: 'El corcel es un caballo de monta cuasirreal que usa este perfil.' },
   'animar a los muertos': { fijos: ['esqueleto', 'zombi'], nota: 'Un montón de huesos se levanta como esqueleto y un cadáver, como zombi.' },
-  // Estos perfiles vienen de un libro importado, si lo trae
   'crear muerto viviente': { importadas: ['Necrófago', 'Ghast', 'Tumulario', 'Momia'], nota: 'Nivel 6: necrófagos. Con espacios superiores, ghasts o tumularios (nivel 8) y momias (nivel 9).' },
   'polimorfar': { formas: 'polimorfar' }, 'polimorfar verdadero': { formas: 'verdadero' }, 'cambiar de forma': { formas: 'verdadero' },
   'hallar corcel': { espiritu: 'corcel' },
@@ -206,15 +193,12 @@ const POR_CONJURO = {
   'invocar aberracion': { espiritu: 'aberracion' }, 'invocar automata': { espiritu: 'automata' }, 'invocar elemental': { espiritu: 'elemental' },
   'invocar celestial': { espiritu: 'celestial' }, 'invocar dragon': { espiritu: 'dragon' }, 'invocar infernal': { espiritu: 'infernal' },
 };
-/** Criaturas de un conjuro (por su nombre en español) o null. */
 export const criaturasDe = nombre => POR_CONJURO[norm(nombre).trim()] || null;
 
-/** Perfil completo y listo para pintar: fijo por id, o espíritu {id, n, v, atk, cd}. */
 export function perfilDe(id, ctx = {}) {
   if (PERFILES[id]) return { id, ...PERFILES[id] };
   const e = ESPIRITUS[id]; if (!e) return null;
   const n = Math.max(e.base, Math.min(9, ctx.n || e.base)), v = e.variantes.includes(ctx.v) ? ctx.v : e.variantes[0];
   return { id, nombre: e.nombre + (v ? ` (${v})` : ''), n, v, ...e.perfil({ n, v, atk: ctx.atk ?? 0, cd: ctx.cd ?? 10 }) };
 }
-/** Modificador y salvación de cada característica. */
 export const caracteristicas = p => CARS.map((k, i) => ({ k, v: p.car[i], mod: modDe(p.car[i]), salv: p.salv?.[k] ?? modDe(p.car[i]) }));

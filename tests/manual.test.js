@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { parseSpells, nombreBonito } from '../web/src/domain/manual.js';
 import { pageToColumns } from '../web/src/domain/manualLineas.js';
 
-// Página sintética (texto inventado) con la misma estructura que el capítulo de conjuros.
 const L = (x, y, s, h = 16) => ({ x, y, h, s });
 const page = { p: 1, cols: [[
   L(60, 1300, 'CHISPA DE PRUEBA', 20), L(60, 1280, 'Evocación de nivel1 (hechicero, mago)'),
@@ -27,8 +26,8 @@ test('parseSpells separa cabecera, campos, párrafos y nivel superior', () => {
   assert.equal(a.comp, 'V S M'); assert.match(a.material, /50 po/);
   assert.equal(a.desc.split('\n\n').length, 2); assert.doesNotMatch(a.desc, /PIE DE FOTO/);
   assert.equal(a.sup, 'Sube el daño.');
-  assert.equal(b.nombre, 'Escudo');                       // versalitas mal codificadas
-  assert.equal(b.duracion, 'Instantáneo');                // etiqueta desordenada
+  assert.equal(b.nombre, 'Escudo');
+  assert.equal(b.duracion, 'Instantáneo');
   assert.equal(b.tiempo, 'Reacción, que llevas a cabo cuando algo pasa');
 });
 test('nombreBonito: nombres propios y comillas decorativas', () => {

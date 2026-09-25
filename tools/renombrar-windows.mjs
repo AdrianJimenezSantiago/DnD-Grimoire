@@ -1,4 +1,3 @@
-// Deja el resultado de «npm run build:windows» como dist-windows/grimorio.html
 import fs from 'node:fs';
 const dir = new URL('../dist-windows/', import.meta.url);
 fs.renameSync(new URL('index.html', dir), new URL('grimorio.html', dir));

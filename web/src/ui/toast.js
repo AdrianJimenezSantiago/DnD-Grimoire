@@ -1,4 +1,3 @@
-/** Aviso inferior con acciones (Deshacer, Adivino avezado…). */
 import { $ } from './dom.js';
 let timer = null;
 export function toast(msg, actions = []) {

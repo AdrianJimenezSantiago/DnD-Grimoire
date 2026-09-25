@@ -1,8 +1,3 @@
-/**
- * Arranque. Composición de capas:
- *   dominio (reglas puras) → núcleo (store) → aplicación (casos de uso, controlador) → vista (hoja, diálogos)
- *   plataforma (Capacitor o navegador) se inyecta a través del adaptador.
- */
 import '@fontsource/alegreya/latin-400.css';
 import '@fontsource/alegreya/latin-500.css';
 import '@fontsource/alegreya/latin-700.css';
@@ -58,14 +53,10 @@ import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
-// Personajes de prueba (uno por subclase, nivel 8): en todas las compilaciones se crean con «Revisar clases de prueba» en la portada;
-// fuera de main (web/vite.config.js) se crean además solos al arrancar
 const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
 async function boot() {
-  // tema oscuro por defecto; el claro solo si se eligió en el menú. Clave nueva: la antigua («-theme») guardaba el tema
-  // que seguía al del sistema, y con ella muchos dispositivos seguían arrancando en claro
   const theme = await storage.get(PREF + '-tema');
   storage.remove(PREF + '-theme');
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
@@ -83,7 +74,6 @@ async function boot() {
   conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S);
   const app = await eventos.init(S);
 
-  // Tutoriales: portada y hoja (una vez cada uno; se repiten desde Más → Ver tutorial)
   const TOUR_INICIO = [
     { titulo: 'Bienvenido al grimorio', texto: 'Tu libro de conjuros para D&amp;D 2024: espacios, preparados, rasgos de clase, tiradas y descripciones del manual, en el móvil o en el PC.' },
     { sel: '.l-grid, .l-empty', titulo: 'Tus personajes', texto: 'Cada tarjeta lleva el color y el emblema de su clase. Toca una para abrir su hoja.' },
@@ -104,7 +94,6 @@ async function boot() {
     { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
     { sel: '#whoChip', titulo: 'Cambiar de personaje', texto: 'Desde aquí vuelves a la portada para elegir otro personaje. Allí, «Gestionar personajes» los edita, duplica y borra.' },
   ];
-  // Primer arranque: tras el tutorial de la portada, y antes de empezar, la app ofrece importar los libros (una sola vez)
   const OFRECIDO = 'grimorio-libros-ofrecido';
   let listos; const librosListos = new Promise(r => { listos = r; });
   const ofrecerLibros = async () => {
@@ -132,7 +121,6 @@ async function boot() {
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
   app.COMMANDS._tutorial = () => (document.body.classList.contains('on-landing') ? tour('inicio', TOUR_INICIO, { forzar: true }) : tourHoja(true));
-  // al crear un personaje (desde la portada o la lista) se abre su hoja
   document.addEventListener('grimorio:creado', () => { if (landing.landingVisible()) landing.hideLanding(); tourHoja(false); });
   document.addEventListener('grimorio:abierto', () => { if (landing.landingVisible()) landing.hideLanding(); });
 
@@ -145,17 +133,14 @@ async function boot() {
   addEventListener('pagehide', () => S.flush());
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') S.flush(); });
 
-  // El compendio (≈330 kB) y las descripciones importadas se cargan cuando el navegador está libre
   idle(async () => {
-    // En el archivo único de Windows no se puede leer otro archivo del disco: el compendio va incluido
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
     const ok = await loadSrd(fuente);
-    await manual.cargarLibros();              // libros importados: textos, conjuros nuevos, glosario, subclases
-    // APK: los libros de tools/resources vienen ya leídos dentro de la app; se añaden los que falten
+    await manual.cargarLibros();
     const incluidos = ok ? await manual.aplicarIncluidos() : [];
     listos();
     if (incluidos.length) toast(`Libros listos: <b>${incluidos.map(l => esc(l.titulo)).join('</b>, <b>')}</b>.`, [{ label: 'Abrir biblioteca', fn: () => app.run('biblioteca') }]);
-    if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();   // rama de desarrollo: personajes de prueba
+    if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
   });

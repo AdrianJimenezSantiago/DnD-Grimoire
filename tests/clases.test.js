@@ -36,7 +36,7 @@ test('clases: cada subclase (Manual y Faerûn) tiene rasgos justo en los niveles
       assert.equal(subclaseDe({ clase, subclase: sc.nombre }), sc, `patrón de ${sc.nombre}`);
     }
   }
-  assert.equal(total, 56);   // 48 del Manual del Jugador + 8 de Héroes de Faerûn
+  assert.equal(total, 56);
   assert.equal(Object.values(SUBCLASES).flat().filter(s => s.libro === 'Héroes de Faerûn').length, 8);
 });
 
@@ -59,7 +59,6 @@ test('clases: conjuros siempre preparados de subclase y de clase, por nivel', ()
   assert.deepEqual(nombres(ch('Explorador', 'Caminante invernal', 5)), ['Marca del cazador', 'Cuchillo de hielo', 'Inmovilizar persona']);
   assert.deepEqual(nombres(ch('Hechicero', 'Hechicería del fuego mágico', 6)).slice(-1), ['Contrahechizo']);
   assert.ok(conjurosAutomaticos(ch('Bárbaro', 'Senda del corazón salvaje', 3)).every(c => c.ritual));
-  // todos los conjuros de todas las tablas existen en el compendio
   const hay = new Set(conjuros.map(x => x.es.toLowerCase()));
   for (const { clase, sc } of combinaciones()) for (const c of conjurosAutomaticos(ch(clase, sc.nombre, 20))) assert.ok(hay.has(c.nombre.toLowerCase()), `${sc.nombre}: ${c.nombre}`);
   for (const t of Object.values(SUBCLASES['Druida'][1].terrenos)) for (const n of Object.values(t).flat()) assert.ok(hay.has(n.toLowerCase()), n);
@@ -81,7 +80,6 @@ test('clases: valores que escalan con el nivel', () => {
   assert.equal(v(ch('Bárbaro', '', 9))['Daño por furia'], '+3');
   assert.equal(v(ch('Brujo', '', 13))['Arcanum místico'], 'nivel 6, nivel 7');
   assert.equal(v(ch('Guerrero', '', 11))['Ataques por acción'], '3');
-  // PG: máximo en nivel 1 y la media después (mago con CON 14: 6+2 + 7×(4+2) = 50)
   assert.equal(v(ch('Mago', '', 8))['Puntos de golpe (media)'], '50');
   assert.equal(v(ch('Bárbaro', '', 1, { con: 16 }))['Puntos de golpe (media)'], '15');
 });
@@ -124,7 +122,7 @@ test('pruebas: un personaje de nivel 8 por subclase, completos y coherentes con 
   const db = { schema: 2, catalog: {}, chars: [{ id: 'mio', nombre: 'Theo', clase: 'Mago', nivel: 6, book: [] }], activeId: 'mio' };
   const r = sembrarPruebas(db, conjuros);
   assert.deepEqual(r.faltan, []);
-  assert.equal(r.creados, 57);                               // 56 subclases + uno con multiclase
+  assert.equal(r.creados, 57);
   assert.equal(db.chars.length, 58); assert.equal(db.activeId, 'mio');
   const pruebas = db.chars.filter(c => c.prueba);
   for (const c of pruebas) {
@@ -146,10 +144,9 @@ test('pruebas: un personaje de nivel 8 por subclase, completos y coherentes con 
     assert.match(c.notas, /Nivel \d/);
   }
   const mago = pruebas.find(c => c.subclase === 'Adivino');
-  assert.equal(mago.book.filter(e => e.fuente === 'Libro').length, 20);   // 6 + 2 por nivel
+  assert.equal(mago.book.filter(e => e.fuente === 'Libro').length, 20);
   assert.equal(mago.book.filter(e => /^Experto/.test(e.fuente)).length, 4);
   assert.ok(reglas(mago).some(x => x.nombre === 'Presagio'));
-  // regenerar sustituye la tanda sin duplicar ni tocar los personajes propios
   sembrarPruebas(db, conjuros);
   assert.equal(db.chars.length, 58); assert.ok(db.chars.some(c => c.id === 'mio'));
   const multi = db.chars.find(c => c.multiclase?.length);

@@ -1,4 +1,3 @@
-/** Render de documentos largos (historias): títulos con ancla, citas, separadores, énfasis y resaltado de búsqueda. */
 import { esc } from '../core/util.js';
 import { capitulos } from '../domain/historia.js';
 

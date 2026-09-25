@@ -1,18 +1,8 @@
-/**
- * Progresión completa de las clases del Manual del Jugador 2024 y de las subclases de Héroes de Faerûn:
- * rasgos por nivel (1–20), rasgos y conjuros siempre preparados de cada subclase, y los valores que escalan con el nivel
- * (daño de Furia, Ataque furtivo, Artes marciales, invocaciones…). Nombres oficiales en español, revisados contra los PDF.
- * Módulo puro: sin DOM ni estado.
- */
 import { norm } from '../core/util.js';
 import { competencia, modOf, nivelDe } from './reglas2024.js';
 
 const ASI = 'Mejora de característica', EPICO = 'Don épico', SUB = 'Rasgo de subclase';
 
-/**
- * Por clase: dado de golpe, salvaciones, característica principal (para los personajes de prueba),
- * rasgos por nivel (SUB marca dónde llegan los de la subclase) y valores que escalan.
- */
 export const CLASES_INFO = {
   'Bárbaro': { dg: 12, salv: ['fue', 'con'], prio: ['fue', 'con', 'des', 'sab', 'car', 'int'], rasgos: {
     1: ['Defensa sin armadura', 'Furia', 'Maestría con armas'], 2: ['Ataque temerario', 'Sentir el peligro'], 3: ['Conocimiento primigenio', 'Subclase de bárbaro'],
@@ -67,10 +57,6 @@ export const CLASES_INFO = {
 };
 
 const PHB = 'Manual del Jugador', HF = 'Héroes de Faerûn';
-/**
- * Subclases: patrón (sobre el nombre sin tildes), libro, rasgos por nivel y conjuros siempre preparados por nivel de clase.
- * «prio» cambia la característica secundaria de los personajes de prueba cuando la subclase lanza conjuros con otra.
- */
 export const SUBCLASES = {
   'Bárbaro': [
     { nombre: 'Senda del Árbol del Mundo', re: /arbol/, libro: PHB, rasgos: { 3: ['Vitalidad del árbol'], 6: ['Ramas del árbol'], 10: ['Raíces apaleadoras'], 14: ['Viajar por el árbol'] } },
@@ -114,7 +100,6 @@ export const SUBCLASES = {
     { nombre: 'Círculo de la luna', re: /luna/, libro: PHB, rasgos: { 3: ['Conjuros del círculo de la luna', 'Formas del círculo'], 6: ['Formas del círculo mejoradas'], 10: ['Paso de la luz lunar'], 14: ['Forma lunar'] },
       conjuros: { 3: ['Curar heridas', 'Rayo de luna', 'Voluta estelar'], 5: ['Conjurar animales'], 7: ['Fuente de luz lunar'], 9: ['Curar heridas en masa'] } },
     { nombre: 'Círculo de la tierra', re: /tierra/, libro: PHB, rasgos: { 3: ['Conjuros del círculo de la tierra', 'Ayuda de la tierra'], 6: ['Recuperación natural'], 10: ['Protección de la naturaleza'], 14: ['Santuario de la naturaleza'] },
-      // Terreno árido (el que usan los personajes de prueba); los demás se cambian tras un descanso largo
       conjuros: { 3: ['Contorno borroso', 'Descarga de fuego', 'Manos ardientes'], 5: ['Bola de fuego'], 7: ['Marchitar'], 9: ['Muro de piedra'] },
       terrenos: {
         'Árido': { 3: ['Contorno borroso', 'Descarga de fuego', 'Manos ardientes'], 5: ['Bola de fuego'], 7: ['Marchitar'], 9: ['Muro de piedra'] },
@@ -195,20 +180,17 @@ export const SUBCLASES = {
   ],
 };
 
-/** Conjuros que dan los rasgos de clase, siempre preparados (sus usos gratis los lleva la plantilla del rasgo). */
 const CONJUROS_CLASE = {
   'Druida': { 1: [['Hablar con los animales', 'Druídico', '']] },
   'Explorador': { 1: [['Marca del cazador', 'Enemigo predilecto', '']] },
   'Paladín': { 2: [['Castigo divino', 'Castigo de paladín', '']], 5: [['Hallar corcel', 'Corcel fiel', '']] },
 };
 
-/** Subclase de un personaje (por su nombre, dentro de su clase). */
 export function subclaseDe(ch) {
   const n = norm(ch.subclase || ''); if (!n) return null;
   return (SUBCLASES[ch.clase] || []).find(s => norm(s.nombre) === n) || (SUBCLASES[ch.clase] || []).find(s => s.re.test(n)) || null;
 }
 
-/** Rasgos que se ganan justo en un nivel: de la clase y de la subclase (sin las marcas genéricas de subclase). */
 export function rasgosEnNivel(ch, L) {
   const info = CLASES_INFO[ch.clase]; if (!info) return [];
   const sc = subclaseDe(ch), out = [];
@@ -220,14 +202,12 @@ export function rasgosEnNivel(ch, L) {
   return [...new Set(out)];
 }
 
-/** Todos los rasgos hasta el nivel del personaje: [{nivel, nombre, origen: 'clase'|'subclase'}]. */
 export function progresion(ch, hasta = nivelDe(ch)) {
   const sc = subclaseDe(ch), subs = new Set(Object.values(sc?.rasgos || {}).flat()), out = [];
   for (let L = 1; L <= hasta; L++) for (const nombre of rasgosEnNivel(ch, L)) out.push({ nivel: L, nombre, origen: subs.has(nombre) ? 'subclase' : 'clase' });
   return out;
 }
 
-/** Conjuros siempre preparados por clase y subclase hasta el nivel: [{nombre, nivel, fuente, gratis, ritual}]. */
 export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   const out = [], sc = subclaseDe(ch);
   for (const [L, lista] of Object.entries(CONJUROS_CLASE[ch.clase] || {})) if (hasta >= +L) lista.forEach(([nombre, fuente, gratis]) => out.push({ nombre, nivel: +L, fuente, gratis, ritual: false }));
@@ -239,10 +219,6 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
 }
 
 const byLvl = (L, pairs) => pairs.reduce((v, [from, val]) => (L >= from ? val : v), pairs[0][1]);
-/**
- * Valores que escalan con el nivel, para la ficha: [{nombre, valor, nota?}].
- * Los puntos de golpe son la media fija del manual (máximo en nivel 1 y la media redondeada hacia arriba después).
- */
 export function escalas(ch) {
   const L = nivelDe(ch), info = CLASES_INFO[ch.clase]; if (!info) return [];
   const con = modOf(ch.stats?.con), out = [];
@@ -271,7 +247,6 @@ export function escalas(ch) {
   return out;
 }
 
-/** Tema (tono, saturación, icono) de cada clase y subclase; lo usa ui/tema.js. Todos distintos (lo comprueba una prueba). */
 export const TEMAS = {
   clase: {
     'Bárbaro': [12, 78, 'barbaro'], 'Bardo': [318, 62, 'bardo'], 'Brujo': [272, 58, 'brujo'], 'Clérigo': [44, 80, 'clerigo'],

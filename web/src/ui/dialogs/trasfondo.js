@@ -1,4 +1,3 @@
-/** Trasfondo / historia del personaje: lectura con índice y búsqueda, edición e importación (PDF, TXT, Markdown). */
 import { esc } from '../../core/util.js';
 import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/historia.js';
 import { $, on } from '../dom.js';

@@ -1,4 +1,3 @@
-/* ------------------------------ hojas (diálogos) ------------------------------ */
 dialog { color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: var(--r-l); padding: 0;
   width: min(560px, 94vw); max-height: calc(100dvh - 32px - var(--sat) - var(--sab)); box-shadow: var(--shadow-2); overflow: hidden; }
 dialog[open] { display: flex; flex-direction: column; animation: sheet-in var(--t-med) var(--ease-out); }
@@ -24,12 +23,9 @@ dialog.tall { width: min(760px, 96vw); }
   dialog.closing { animation: sheet-down .2s var(--ease) forwards; }
   .grip { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
   .dhead { padding-top: 10px; touch-action: pan-x; }
-  /* el asa se arrastra para cerrar (dialog.js): zona de toque más alta que la raya */
   .grip { touch-action: none; cursor: grab; }
   .grip::before { content: ""; position: absolute; left: -40px; right: -40px; top: -10px; bottom: -12px; }
 }
-
-/* ------------------------------ formularios ------------------------------ */
 .fsec { padding: 6px 0 16px; }
 .fsec + .fsec { border-top: 1px solid var(--line-soft); padding-top: 16px; }
 .fsec h3 { font: 500 var(--fs-xl) / 1.1 var(--serif); margin: 0 0 12px; }
@@ -58,11 +54,7 @@ dialog.tall { width: min(760px, 96vw); }
 .fsum p { margin: 0; } .fsum p + p { margin-top: 5px; } .fsum .note { margin: 5px 0 0; }
 .ferr { color: var(--danger); font: 500 var(--fs-s) / 1.2 var(--sans); margin-right: auto; }
 @media (max-width: 560px) { .abil { grid-template-columns: repeat(3, 1fr); } .slotgrid { grid-template-columns: repeat(5, 1fr); } }
-
-/* ------------------------------ listas (personajes, buscador, rasgos, historial) ------------------------------ */
 .ccard { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
-.ccard .monogram { width: 48px; height: 48px; font-size: 22px; grid-row: span 2; }
-.ccard:not(.active) .monogram { background: var(--surface-2); color: var(--ink-2); box-shadow: none; border: 1px solid var(--line); }
 .cmain { all: unset; cursor: pointer; display: block; border-radius: 8px; }
 .cmain:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .cname { display: block; font: 500 var(--fs-xl) / 1.1 var(--serif); }
@@ -90,8 +82,6 @@ dialog.tall { width: min(760px, 96vw); }
 .ptag { font: 700 10px / 1 var(--sans); color: var(--gold); border: 1px solid var(--gold); border-radius: var(--r-pill); padding: 1px 5px; margin-left: 4px; }
 .pempty { font: 400 var(--fs-s) / 1.5 var(--sans); color: var(--ink-2); padding: 18px 4px; }
 .credit { font: 400 11.5px / 1.4 var(--sans); color: var(--ink-3); margin-top: 14px; }
-
-/* ficha del conjuro */
 .sp-kind { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .sp-kind span { font: 500 var(--fs-xs) / 1 var(--sans); padding: 5px 10px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-soft); }
 .sp-kind span.school { color: var(--sc); border-color: color-mix(in srgb, var(--sc) 40%, transparent); background: color-mix(in srgb, var(--sc) 10%, transparent); }
@@ -109,8 +99,6 @@ dialog.tall { width: min(760px, 96vw); }
 .opts button { justify-content: space-between; display: flex; align-items: center; min-height: 52px; padding: 0 16px; font-size: var(--fs-m); text-align: left; border-radius: var(--r-m); }
 .opts button small { color: var(--ink-2); font-weight: 400; }
 .opts button[aria-pressed="true"] small { color: inherit; opacity: .8; }
-
-/* subida de nivel */
 .lv-big { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 6px 0 20px; font: 700 72px / 1 var(--serif); }
 .lv-big span { color: var(--ink-3); }
 .lv-big i { font: 400 30px / 1 var(--sans); color: var(--ink-3); }
@@ -124,8 +112,6 @@ dialog.tall { width: min(760px, 96vw); }
 .ch-count.ok { background: linear-gradient(180deg, var(--gold-2), var(--gold)); border-color: transparent; color: var(--on-gold); transform: scale(1.06); }
 .radios { display: flex; flex-direction: column; gap: 10px; }
 .radios .frow { margin: 0 0 6px 32px; }
-
-/* rasgos */
 .rrow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
 .rrow.off .rtxt { opacity: .45; }
 .rtxt b { display: block; font: 500 var(--fs-l) / 1.2 var(--serif); }
@@ -142,23 +128,17 @@ dialog.tall { width: min(760px, 96vw); }
 .switch input:checked + span::after { transform: translateX(18px); }
 .switch input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media (max-width: 560px) { .rrow { grid-template-columns: auto 1fr; } .racts { grid-column: 2; justify-content: flex-start; } }
-
-/* recuperar espacios */
 .recrow { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line-soft); font: 500 var(--fs-m) / 1 var(--sans); }
 .recrow small { color: var(--ink-2); font-weight: 400; margin-left: 8px; }
 .recrow b { min-width: 24px; text-align: center; font: 700 20px / 1 var(--serif); }
 .rectotal { font: 400 var(--fs-m) / 1 var(--sans); text-align: right; margin: 14px 0 0; }
 .rectotal b { font: 700 22px / 1 var(--serif); color: var(--gold); }
-
-/* historial */
 .hday { font: 500 var(--fs-m) / 1.2 var(--serif); color: var(--gold); margin: 18px 0 6px; text-transform: capitalize; }
 .hday:first-child { margin-top: 4px; }
 .hrow { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font: 400 var(--fs-m) / 1.35 var(--sans); }
 .hrow time { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: var(--fs-s); }
 .hrow button { min-height: 32px; padding: 0 12px; font-size: var(--fs-xs); border-radius: var(--r-pill); }
 .hrow.rest .hx { font-weight: 700; color: var(--gold); }
-
-/* ------------------------------ menús ------------------------------ */
 .menu { position: fixed; z-index: 45; min-width: 250px; padding: 6px; border-radius: var(--r-m); background: var(--raised); border: 1px solid var(--line); box-shadow: var(--shadow-2);
   display: flex; flex-direction: column; gap: 2px; animation: pop-in var(--t-med) var(--spring); transform-origin: top right; }
 .menu[hidden] { display: none; }
@@ -166,8 +146,6 @@ dialog.tall { width: min(760px, 96vw); }
 .menu button:hover { background: var(--surface-2); }
 .menu hr { border: 0; border-top: 1px solid var(--line-soft); margin: 4px 6px; }
 .menu .chk[aria-checked="true"] .icon { color: var(--gold); }
-
-/* ------------------------------ aviso (toast) ------------------------------ */
 .toast { position: fixed; z-index: 60; left: 50%; bottom: calc(var(--dock-h) + 14px + var(--sab)); transform: translate(-50%, 16px) scale(.98); opacity: 0; pointer-events: none;
   width: max-content; max-width: min(640px, calc(100vw - 24px)); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
   padding: 12px 12px 12px 18px; border-radius: var(--r-m); color: #F3EEE2; background: rgba(16, 19, 31, .94);
@@ -180,8 +158,6 @@ dialog.tall { width: min(760px, 96vw); }
 .toast button.hl { background: linear-gradient(180deg, #F6D28A, #E7B85F); color: #1b1406; border-color: transparent; }
 .toast .tnote { display: block; margin-top: 4px; opacity: .9; }
 @media (min-width: 900px) { .toast { bottom: calc(22px + var(--sab)); } }
-
-/* importar manual */
 .mnprog { margin: 14px 0; font: 400 var(--fs-s) / 1.4 var(--sans); color: var(--ink-2); }
 .mnbar { height: 8px; border-radius: 4px; background: var(--line-soft); overflow: hidden; margin-bottom: 8px; }
 .mnbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-2)); box-shadow: 0 0 12px var(--glow); transition: width .25s var(--ease); }

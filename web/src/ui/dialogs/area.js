@@ -1,15 +1,10 @@
-/**
- * Área del conjuro sobre una cuadrícula 2D de casillas de 1,5 m (5 pies).
- * Muestra al lanzador, las casillas afectadas (al menos la mitad cubierta), el contorno de la forma
- * y, si se quiere, el alcance con el área colocada en su punto más lejano. Girar en pasos de 45°.
- */
 import { esc } from '../../core/util.js';
 import { parseArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/area.js';
 import { $, on } from '../dom.js';
 import { openSheet } from '../dialog.js';
 import { avatarHtml } from '../avatar.js';
 
-let S, A = null;   // {s, area, alcance, dir, zoom, conAlcance}
+let S, A = null;
 const dlg = () => $('#areaDlg');
 
 export function openArea(s, textos) {
@@ -20,7 +15,6 @@ export function openArea(s, textos) {
 function render() {
   const { s, area } = A, ch = S.cur();
   const giro = ['cono', 'linea', 'cubo', 'esfera', 'cilindro'].includes(area.forma);
-  // desplazamiento del área para colocarla a la distancia máxima del alcance
   const lejos = A.conAlcance && A.alcance && ['esfera', 'cilindro', 'cubo'].includes(area.forma);
   const res = celdasArea(area, A.dir), rad = A.dir * Math.PI / 180;
   let dx = 0, dy = 0;
@@ -37,7 +31,6 @@ function render() {
   for (let x = 0; x <= W; x++) g += `<line x1="${u(x)}" y1="0" x2="${u(x)}" y2="${u(H)}" class="${(x + x0) % 2 ? '' : 'mj'}"/>`;
   for (let y = 0; y <= H; y++) g += `<line x1="0" y1="${u(y)}" x2="${u(W)}" y2="${u(y)}" class="${(y + y0) % 2 ? '' : 'mj'}"/>`;
   const cel = celdas.map(([x, y]) => `<rect x="${u(x - x0)}" y="${u(y - y0)}" width="${px}" height="${px}"/>`).join('');
-  // contorno exacto de la forma
   const O = [res.origen[0] + dx - x0, res.origen[1] + dy - y0], ux = Math.cos(rad), uy = Math.sin(rad), P = (a, b) => `${u(a)},${u(b)}`;
   let forma = '';
   if (['esfera', 'cilindro', 'emanacion'].includes(area.forma)) {

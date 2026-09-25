@@ -1,4 +1,3 @@
-/** Ficha del conjuro: lectura completa, opciones de lanzamiento y edición de textos. */
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas2024.js';
 import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
@@ -21,29 +20,23 @@ import { biblioteca, criaturaImportada } from '../../domain/catalogo.js';
 import { formasPosibles } from '../../domain/monstruos.js';
 import { openFormas } from './formas.js';
 
-let S, SP = null;   // {mode:'book'|'preview', bi, item, edit, onAdd}
+let S, SP = null;
 const dlg = () => $('#spellDlg');
 
-/* Aplica una transformación solo al texto, nunca dentro de etiquetas ya puestas. */
 export const porTexto = (html, fn) => html.split(/(<[^>]+>)/).map(p => (p.startsWith('<') ? p : fn(p))).join('');
 const enlazar = h => { const e = estadosRegex(); return e ? porTexto(h, t => t.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term" data-term="${k}">${w}</button>` : m; })) : h; };
 const TIPOS = { 'ácido': 'acido', contundente: 'contundente', cortante: 'cortante', 'frío': 'frio', fuego: 'fuego', fuerza: 'fuerza', 'necrótico': 'necrotico',
   perforante: 'perforante', 'psíquico': 'psiquico', radiante: 'radiante', 'relámpago': 'relampago', trueno: 'trueno', veneno: 'veneno' };
-/* Resalta lo que se busca de un vistazo en mesa: dados, tipos de daño, salvaciones, ataques y distancias. */
 const PASOS = [
   [/\b(\d+d\d+(?:\s*\+\s*\d+)?)\b/g, '<span class="k-dice">$1</span>'],
   [/(tirada de salvación de (?:Fuerza|Destreza|Constitución|Inteligencia|Sabiduría|Carisma))/g, '<span class="k-save">$1</span>'],
   [/(ataque de conjuro (?:a distancia|cuerpo a cuerpo))/g, '<span class="k-atk">$1</span>'],
   [/(^|[^\p{L}\d,])(\d+(?:,\d+)?\s?(?:m|km))(?![\p{L}\d])/gu, '$1<span class="k-dist">$2</span>'],
-  // el icono se inserta el último: ningún paso posterior puede ver sus coordenadas
   [/(de daño )(de |por )?(ácido|contundente|cortante|frío|fuego|fuerza|necrótico|perforante|psíquico|radiante|relámpago|trueno|veneno)(?![\p{L}])/giu,
     (m, a, b, tipo) => `${a}${b || ''}<span class="k-dmg dmg-${TIPOS[tipo.toLowerCase()] || 'fuerza'}">${gi(TIPOS[tipo.toLowerCase()] || 'fuerza')}${tipo}</span>`],
 ];
-/* Resalta lo que se busca de un vistazo en mesa. Cada paso actúa solo sobre texto, nunca dentro de etiquetas. */
 export const realzar = h => PASOS.reduce((acc, [re, rep]) => porTexto(acc, t => t.replace(re, rep)), h);
-/* Encabezado corto al inicio de un párrafo («Sonido.», «Efecto sensorial.») en negrita. */
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
-/* Texto enriquecido de la app: párrafos, «### apartados», «• viñetas» y tablas «| a | b |» (con botón para tirar las de dado). */
 const DADO_CAB = /^(\d{0,2})d(\d{1,3})$/i;
 const enLinea = t => enlazar(realzar(cabecilla(esc(t))))
   .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>').replace(/\*\*_?(.+?)_?\*\*/g, '<b>$1</b>').replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1<i>$2</i>');
@@ -74,7 +67,6 @@ export function md(t) {
   cierraLista();
   return h;
 }
-/** Botón «Tirar» de las tablas de dado: tira y resalta la fila (vale para conjuros, objetos y reglas). */
 export function tirarTabla(btn) {
   const m = DADO_CAB.exec(btn.dataset.tbroll || ''); if (!m) return;
   const n = +(m[1] || 1), caras = +m[2];
@@ -128,7 +120,6 @@ function render() {
     if (s.efecto) h += `<p class="sp-sum">${esc(s.efecto)}</p>`;
     const props = [['Lanzamiento', s.tiempo], ['Alcance', s.alcance], ['Duración', s.duracion], ['Componentes', s.comp], ['Material', s.coste]].filter(p => p[1]);
     h += `<dl class="sp-props">${props.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
-    // Prioridad: texto propio > manual importado > traducción incluida > SRD en inglés
     const man = manualFor(x), propio = s.desc && !(x && s.desc === x.dEs);
     let desc = '', sup = '', en = false, fuente = '';
     if (propio) { desc = s.desc; sup = s.sup; }
@@ -153,9 +144,7 @@ function render() {
     ? `<button type="button" data-sp="canceledit">Cancelar</button><span class="spacer"></span><button type="button" class="primary" data-sp="save">Guardar texto</button>`
     : `${canEdit ? '<button type="button" data-sp="edit">Editar texto</button>' : ''}<span class="spacer"></span><button type="button" data-sp="close">Cerrar</button>${SP.mode === 'preview' && SP.onAdd ? '<button type="button" class="gold" data-sp="add">Añadir al libro</button>' : ''}`;
 }
-/* ---------------- criaturas que trae el conjuro ---------------- */
 const signo = n => (n >= 0 ? '+' : '−') + Math.abs(n);
-/** Perfil de criatura con el aspecto de un bloque de estadísticas, en el color de la escuela del conjuro. */
 export function bloqueHtml(p) {
   const sec = (t, filas) => (filas?.length ? `<h5>${t}</h5>${filas.map(([n, d]) => `<p>${n ? `<b><i>${esc(n)}.</i></b> ` : ''}${realzar(esc(d)).replace(/\n/g, '<br>')}</p>`).join('')}` : '');
   const linea = (k, v) => (v ? `<p class="sb-ln"><b>${k}</b> ${esc(v)}</p>` : '');
@@ -170,7 +159,6 @@ function criaturasHtml(s) {
   const cr = criaturasDe(s.es); if (!cr) return '';
   const ch = S.cur(), P = ch ? perfil(ch) : null, mem = ch?.invocaciones?.[s.es] || {};
   if (SP.cria === undefined) SP.cria = SP.mode === 'book' && (PERFILES[mem.id] || String(mem.id || '').startsWith('mm:')) ? mem.id : null;
-  // perfiles propios de la app o importados de un libro («mm:clave»)
   const perfilDeId = id => (String(id).startsWith('mm:') ? criaturaImportada(id.slice(3)) : PERFILES[id] ? perfilDe(id) : null);
   const chip = id => { const p = perfilDeId(id); if (!p) return ''; return `<button type="button" class="cr-chip ${SP.cria === id ? 'on' : ''} ${mem.id === id ? 'mio' : ''}" data-cria="${esc(id)}" aria-pressed="${SP.cria === id}">${esc(p.nombre)}${mem.id === id ? '<small>tuyo</small>' : ''}</button>`; };
   const importadas = biblioteca().criaturas.length > 0;
@@ -179,7 +167,6 @@ function criaturasHtml(s) {
     h += `<p class="note">Es un espíritu con forma animal: celestial, feérico o infernal (lo eliges al lanzarlo). No puede atacar, pero sí hacer otras acciones.</p><div class="cr-chips">${cr.familiar.map(chip).join('')}</div>`;
     if (cr.otrasVd0) {
       const otras = formasPosibles(biblioteca().criaturas, { vd: 0 })
-        // la misma forma de la lista oficial, aunque el OCR del libro le haya pegado una letra delante («Úrana»)
         .filter(c => { const n = norm(c.nombre); return !cr.familiar.some(id => { const f = norm(PERFILES[id].nombre); return n === f || n.slice(1) === f; }); });
       h += otras.length ? `<p class="cr-grupo">Otras bestias de VD 0 <small>de tus libros importados</small></p><div class="cr-chips">${otras.map(c => chip('mm:' + c.clave)).join('')}</div>`
         : importadas ? '' : '<p class="note">El conjuro admite cualquier otra bestia de VD 0 (su perfil está en el Manual de Monstruos).</p>';
@@ -208,7 +195,6 @@ function criaturasHtml(s) {
   } else h += '<p class="note">Toca una forma para ver su perfil.</p>';
   return h + '</section>';
 }
-/* Pie discreto: lo que el bestiario del personaje sabe de este conjuro (por su tipo de daño o anotado a mano). */
 function pieBestiario(s) {
   const ch = S.cur(); if (!ch || !ch.bestiario?.criaturas?.length) return '';
   const t = tiradasConjuro(s), sid = SP.mode === 'book' ? s.id : SP.item?.src === 'cat' ? SP.item.s.id : null;
@@ -224,7 +210,6 @@ const catalogEntry = () => (SP.mode === 'book' ? S.db.catalog[S.cur().book[SP.bi
 export function init(store) {
   S = store;
   on($('#spBody'), 'click', '[data-bxopen]', (e, b) => openBestiario(b.dataset.bxopen));
-  // criaturas: elegir forma, variante y nivel; «la mía» se recuerda por personaje y conjuro
   const recuerda = cambios => { const { s } = data(), ch = S.cur(); if (SP.mode !== 'book' || !ch) return;
     S.edit((db, c) => { c.invocaciones ||= {}; c.invocaciones[s.es] = { ...(c.invocaciones[s.es] || {}), ...cambios }; }); };
   const repinta = () => { const y = $('#spBody').scrollTop; render(); $('#spBody').scrollTop = y; };

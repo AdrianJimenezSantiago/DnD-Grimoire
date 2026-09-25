@@ -3,27 +3,23 @@ from PIL import Image, ImageDraw, ImageFilter
 import os
 INK=(30,39,64); GOLD=(226,183,94); DESK_D=(15,19,28)
 RES='android/app/src/main/res'
-S=1024  # lienzo de trabajo = 108 dp
+S=1024
 
 def foreground(size=S, scale=1.0):
     """Motivo sobre transparente, dentro de la zona segura del icono adaptable."""
     im=Image.new('RGBA',(size,size),(0,0,0,0))
     c=size/2; u=size/1024*scale
-    # halo de vela bajo el subrayado
     glow=Image.new('RGBA',(size,size),(0,0,0,0)); g=ImageDraw.Draw(glow)
     g.rounded_rectangle([c-190*u,c+150*u,c+190*u,c+196*u],radius=23*u,fill=GOLD+(150,))
     glow=glow.filter(ImageFilter.GaussianBlur(34*u)); im.alpha_composite(glow)
-    # luna creciente
     moon=Image.new('L',(size,size),0); m=ImageDraw.Draw(moon)
     R=175*u; cx,cy=c-8*u,c-40*u
     m.ellipse([cx-R,cy-R,cx+R,cy+R],fill=255)
     r2=R*0.86; ox,oy=cx+R*0.52,cy-R*0.30
     m.ellipse([ox-r2,oy-r2,ox+r2,oy+r2],fill=0)
     im.paste(Image.new('RGBA',(size,size),GOLD+(255,)),(0,0),moon)
-    # estrella de cuatro puntas
     d=ImageDraw.Draw(im); sx,sy,a,b=c+118*u,c-118*u,46*u,11*u
     d.polygon([(sx,sy-a),(sx+b,sy-b),(sx+a,sy),(sx+b,sy+b),(sx,sy+a),(sx-b,sy+b),(sx-a,sy),(sx-b,sy-b)],fill=GOLD+(255,))
-    # subrayado
     d.rounded_rectangle([c-200*u,c+160*u,c+200*u,c+186*u],radius=13*u,fill=GOLD+(255,))
     return im
 
@@ -44,7 +40,6 @@ for k,f in dens.items():
     composite('square',round(48*f)).save(f'{d}/ic_launcher.png')
     composite('round',round(48*f)).save(f'{d}/ic_launcher_round.png')
 
-# pantallas de carga (Android < 12): mismo tamaño que las de la plantilla
 def splash(path):
     w,h=Image.open(path).size
     im=Image.new('RGBA',(w,h),INK+(255,)); side=int(min(w,h)*0.42)

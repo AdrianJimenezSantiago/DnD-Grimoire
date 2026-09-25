@@ -1,8 +1,3 @@
-/**
- * Editor de retrato: elegir imagen, encuadrar (arrastrar, rueda, pellizco o deslizador) y guardar.
- * En la ficha va una miniatura de 320 px (viaja en las copias); el original reducido se guarda aparte
- * en el dispositivo para poder reencuadrar más tarde sin perder calidad.
- */
 import { $ } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
 import { toast } from '../toast.js';
@@ -11,7 +6,7 @@ import { fileStore } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 
 const MINI = 320, MAXORIG = 1280;
-let S, E = null;   // {id, img, iw, ih, z, cx, cy, nueva, dataOrig}
+let S, E = null;
 const dlg = () => $('#retDlg');
 const archivo = id => `retrato-${id}.txt`;
 
@@ -22,7 +17,7 @@ function reducir(img, max) {
   c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
   return c.toDataURL('image/jpeg', 0.88);
 }
-const base = lado => lado / Math.min(E.iw, E.ih);          // escala «cubrir» del cuadro
+const base = lado => lado / Math.min(E.iw, E.ih);
 function limitar(lado) {
   E.z = Math.max(1, Math.min(6, E.z));
   const s = base(lado) * E.z, mx = lado / 2 / s;
@@ -73,7 +68,6 @@ async function elegir(file) {
 async function guardar() {
   const c = document.createElement('canvas'); c.width = c.height = MINI;
   const lado = $('#retCanvas').clientWidth, k = MINI / lado, s0 = { ...E };
-  // misma vista que el editor, a 320 px
   const ctx = c.getContext('2d'), s = base(lado) * E.z * k;
   ctx.drawImage(E.img, MINI / 2 - E.cx * s, MINI / 2 - E.cy * s, E.iw * s, E.ih * s);
   let src = c.toDataURL('image/webp', 0.86); if (!src.startsWith('data:image/webp')) src = c.toDataURL('image/jpeg', 0.86);

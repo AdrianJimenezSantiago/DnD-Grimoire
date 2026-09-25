@@ -1,8 +1,3 @@
-/**
- * Biblioteca: lo que aportan los libros importados, en un solo sitio.
- * Pestañas: Reglas (glosario), Objetos mágicos, Dotes, Trasfondos y Subclases. Cada entrada se lee en la ficha común,
- * con tablas, apartados y enlaces a los estados. Los objetos se añaden al personaje desde su ficha.
- */
 import { esc, norm } from '../../core/util.js';
 import { biblioteca, glosario, termino, libros } from '../../domain/catalogo.js';
 import { RAREZAS, TIPOS_OBJ, ordenRareza } from '../../domain/objetos.js';
@@ -30,7 +25,6 @@ const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'],
 const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
 const TIT_G = { Estado: 'Estados', 'Acción': 'Acciones', 'Área de efecto': 'Áreas de efecto', Peligro: 'Peligros', Actitud: 'Actitudes', '': 'Reglas generales', 'Herramientas del DM': 'Herramientas del DM', 'Objetos mágicos': 'Objetos mágicos: reglas' };
 const coincide = (q, ...t) => !q || norm(t.join(' ')).includes(q);
-// orden de la lista de objetos: [etiqueta, siguiente]
 const ORDEN_OBJ = { tipo: ['Por tipo', 'rar'], rar: ['Por rareza', 'az'], az: ['A–Z', 'tipo'] };
 const ORDEN_TIPOS = ['Arma', 'Armadura', 'Anillo', 'Poción', 'Pergamino', 'Varita', 'Vara', 'Bastón', 'Objeto maravilloso'];
 const TIT_TIPO = { Arma: 'Armas', Armadura: 'Armaduras', Anillo: 'Anillos', 'Poción': 'Pociones', Pergamino: 'Pergaminos', Varita: 'Varitas', Vara: 'Varas', 'Bastón': 'Bastones', 'Objeto maravilloso': 'Objetos maravillosos' };
@@ -74,7 +68,6 @@ function cuerpo() {
       let f = B.objetos.filter(o => coincide(q, o.nombre, o.tipo, o.subtipo) && (!V.rar || o.rareza === V.rar || o.rarezas?.includes(V.rar)) && (!V.tipo || o.tipo === V.tipo) && (!V.sint || !o.sintonia));
       n = f.length; const ch = S.cur(), rz = o => o.rarezas?.[0] || o.rareza;
       const porNombre = (a, b) => a.nombre.localeCompare(b.nombre, 'es'), porRareza = (a, b) => ordenRareza(rz(a)) - ordenRareza(rz(b)) || porNombre(a, b);
-      // por tipo (dentro, de común a artefacto), por rareza (dentro, A–Z) o A–Z por inicial
       const grupos = V.orden === 'rar' ? RAREZAS.map(r => [r, f.filter(o => (RAREZAS.includes(rz(o)) ? rz(o) : 'Varía') === r).sort(porNombre), null, `r-${RAR_K[r]}`])
         : V.orden === 'az' ? [...new Set(f.map(o => inicial(o.nombre)))].sort((a, b) => a.localeCompare(b, 'es')).map(l => [l, f.filter(o => inicial(o.nombre) === l).sort(porNombre), null, ''])
         : [...ORDEN_TIPOS, ''].map(t => [t || 'Otros', f.filter(o => (ORDEN_TIPOS.includes(o.tipo) ? o.tipo : '') === t).sort(porRareza), TIPO_I[t] || 'o_maravilloso', '']);
@@ -98,7 +91,6 @@ function cuerpo() {
     if (!B.trasfondos.length) h = vacio('Aquí aparecen los trasfondos con sus características, dote, competencias y equipo.', 'tu Manual del Jugador o de una expansión');
     else {
       const f = B.trasfondos.filter(t => coincide(q, t.nombre, t.dote, t.habilidades)); n = f.length;
-      // por libro: los del Manual del Jugador primero
       h = agrupar(f, t => t.fuente, [...new Set(f.map(t => t.fuente))].sort((x, y) => /jugador/i.test(y) - /jugador/i.test(x) || x.localeCompare(y, 'es'))).map(([lb, v]) => grupo(lb, v.length, gi('libro'),
         v.map(t => tarjeta({ attr: `data-tras="${esc(t.clave)}"`, ico: 'trasfondo', color: 'var(--gold)', titulo: t.nombre || 'Trasfondo sin nombre', sub: `${esc(abrevCar(t.caracteristicas))}${t.dote ? ` · ${esc(t.dote)}` : ''}` })))).join('');
     }
@@ -117,7 +109,6 @@ function cuerpo() {
     if (!B.criaturas.length) h = vacio('Aquí aparecen los perfiles de criaturas: tipo, CA, PG, características, resistencias y acciones.', 'del apéndice de criaturas del Manual del Jugador');
     else {
       const f = B.criaturas.filter(c => coincide(q, c.nombre, c.tipo) && (!V.ctipo || c.tipoBase === V.ctipo) && (V.cvd === '' || (c.vdNum ?? 99) <= +V.cvd)); n = f.length;
-      // por tipo y, dentro, de menor a mayor desafío
       const porVd = (a, b) => (a.vdNum ?? 99) - (b.vdNum ?? 99) || a.nombre.localeCompare(b.nombre, 'es');
       h = agrupar(f.slice(0, 400), c => c.tipoBase || '', TIPOS_BASE, porVd).map(([t, v]) => grupo(t ? PLURAL_TIPO[t] || t : 'Otras', v.length, gi(t === 'Bestia' ? 'bestia' : 'criatura'),
         v.map(c => tarjeta({ attr: `data-cria="${esc(c.clave)}"`, ico: c.tipoBase === 'Bestia' ? 'bestia' : 'criatura', color: tono(COLOR_VD(c.vdNum)), titulo: c.nombre,
@@ -129,9 +120,7 @@ function cuerpo() {
   const libs = libros().length;
   $('#bibSub').textContent = libs ? `${n} ${n === 1 ? 'entrada' : 'entradas'} · de ${libs} ${libs === 1 ? 'libro importado' : 'libros importados'}` : 'Reglas, objetos mágicos y opciones de personaje de tus libros';
 }
-/* ---- piezas comunes de todas las pestañas: grupo con cabecera fija y rejilla de tarjetas iguales ---- */
 const tono = ([h, sat]) => `hsl(${h} ${sat}% var(--acc-l))`;
-/** Libro de una entrada en corto, solo si no es el Manual del Jugador (el habitual). */
 const libroCorto = f => (!f || /jugador/i.test(f) ? '' : /faer|reinos/i.test(f) ? 'Faerûn' : /dungeon|gu[ií]a/i.test(f) ? 'Guía del DM' : /monstruos/i.test(f) ? 'Monstruos' : corto(f));
 function tarjeta({ attr, ico, color, titulo, sub = '', lib = '' }) {
   const l = libroCorto(lib);
@@ -139,7 +128,6 @@ function tarjeta({ attr, ico, color, titulo, sub = '', lib = '' }) {
     <span class="obj-t"><b>${esc(titulo)}</b><small title="${esc(lib || '')}">${l ? `<span class="bc-lib">${esc(l)}</span>` : ''}${sub}</small></span></button></li>`;
 }
 const grupo = (titulo, n, ico, tarjetas, attrs = '') => `<h3 class="bib-g obj-g" ${attrs}>${ico}${esc(titulo)}<small>${n}</small></h3><ul class="obj-list obj-grid">${tarjetas.join('')}</ul>`;
-/** [clave, entradas] en el orden dado (lo que no está, al final) y A–Z dentro salvo otro orden. */
 function agrupar(lista, clave, orden = [], cmp = (a, b) => (a.nombre || '~').localeCompare(b.nombre || '~', 'es')) {
   const m = new Map(orden.map(k => [k, []]));
   for (const e of lista) { const k = clave(e) ?? ''; if (!m.has(k)) m.set(k, []); m.get(k).push(e); }
@@ -147,7 +135,6 @@ function agrupar(lista, clave, orden = [], cmp = (a, b) => (a.nombre || '~').loc
 }
 const CATS_DOTE = ['Origen', 'General', 'Estilo de combate', 'Don épico'];
 const COLOR_DOTE = { Origen: [42, 70], General: [212, 60], 'Estilo de combate': [4, 65], 'Don épico': [276, 60] };
-// del verde de los desafíos bajos al rojo de los altos
 const COLOR_VD = vd => (vd == null ? [40, 10] : vd < 1 ? [140, 40] : vd < 5 ? [95, 45] : vd < 11 ? [45, 70] : vd < 17 ? [20, 70] : [355, 65]);
 const PLURAL_TIPO = { 'Aberración': 'Aberraciones', 'Autómata': 'Autómatas', Bestia: 'Bestias', Celestial: 'Celestiales', Cieno: 'Cienos', 'Dragón': 'Dragones', Elemental: 'Elementales', 'Feérico': 'Feéricos', Gigante: 'Gigantes', Humanoide: 'Humanoides', Infernal: 'Infernales', Monstruosidad: 'Monstruosidades', 'Muerto viviente': 'Muertos vivientes', Planta: 'Plantas' };
 const CAR_CORTA = { Fuerza: 'Fue', Destreza: 'Des', 'Constitución': 'Con', Inteligencia: 'Int', 'Sabiduría': 'Sab', Carisma: 'Car' };
@@ -163,7 +150,6 @@ export function openBiblioteca(tab) {
   pintar(); openSheet(dlg());
 }
 
-/* ------------------------------- ficha común ------------------------------- */
 let FICHA = null;
 function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) {
   const d = $('#fichaDlg');
@@ -202,7 +188,6 @@ function abrirSubclase(k) {
   ficha({ titulo: s.nombre, ico: norm(s.clase).replace(/[^a-z]/g, ''), sub: `<div class="fi-pills"><span class="rar-pill">${esc(s.clase)}</span>${[...new Map(s.rasgos.map(r => [r.nivel, r])).values()].map(r => `<a class="lvl-pill ${ch && ch.clase === s.clase && ch.nivel >= r.nivel ? 'on' : ''}" href="#rs-${r.nivel}-${norm(r.nombre).replace(/\W+/g, '-')}">${r.nivel}</a>`).join('')}</div>${s.lema ? `<p class="fi-lema">${esc(s.lema)}</p>` : ''}`,
     cuerpo: `<section class="sp-text">${md(s.texto).replace(/<h4 class="md-h">Nivel (\d+): ([^<]+)<\/h4>/g, (m, n, t) => `<h4 class="md-h rasgo" id="rs-${n}-${norm(t.replace(/&[a-z]+;/g, '')).replace(/\W+/g, '-')}"><span class="lvl-pill">${n}</span>${t}</h4>`)}</section>${fuente(s.fuente)}` });
 }
-/** Perfil de criatura importado, con «Añadir al bestiario» del personaje abierto. */
 export function abrirCriatura(clave) {
   const c = biblioteca().criaturas.find(x => x.clave === clave); if (!c) return;
   const ch = S.cur(), ya = ch && bestiarioDe(ch).criaturas.find(x => x.perfil === c.clave);
@@ -211,11 +196,6 @@ export function abrirCriatura(clave) {
     cuerpo: `${bloqueHtml(c)}${c.revisar?.length ? `<p class="note">Comprueba en el libro ${esc(c.revisar.filter(x => !/^corregido/.test(x)).join(', ') || 'los valores marcados')}.</p>` : ''}${fuente(c.fuente)}`,
     pie: ch ? (ya ? `<span class="fi-ya">${gi('bestia')}Ya está en el bestiario de ${esc(ch.nombre)}</span>` : `<button type="button" class="gold" data-fi="bestiario">${gi('bestia')}Añadir al bestiario de ${esc(ch.nombre)}</button>`) : '' });
 }
-/** Término del glosario (también desde los enlaces de las descripciones). */
-/**
- * Resumen de una clase o de una subclase antes de elegirla: datos clave y lo que aprende nivel a nivel,
- * con una línea de cada rasgo (si el libro está importado) que se despliega para leerlo entero.
- */
 export function abrirResumen(clase, subclase = '') {
   const lib = biblioteca(), rz = subclase ? resumenSubclase(clase, subclase, lib) : resumenClase(clase, lib);
   if (!rz) return toast(`La app no conoce los rasgos de ${esc(subclase || clase)}: si es de otro libro, impórtalo en Libros y manuales.`);
@@ -233,7 +213,6 @@ export function abrirResumen(clase, subclase = '') {
     pie: subclase ? `<button type="button" data-rzclase="${esc(clase)}">${gi(ico === 'subclase' ? 'libro' : TEMAS.clase[clase]?.[2] || 'libro')}Ver ${esc(clase)} completo</button>` : '', clase: 'rz' });
   const d = $('#fichaDlg'); d.style.setProperty('--sh', h); d.style.setProperty('--ss', sat + '%');
 }
-/** Rasgo de «En juego»: el texto completo del libro y dónde se muestra en la hoja (se puede cambiar de grupo). */
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
   const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
@@ -266,10 +245,9 @@ export function init(store) {
   on(d, 'click', '[data-cria]', (e, b) => abrirCriatura(b.dataset.cria));
   d.addEventListener('input', e => { if (e.target.id === 'bibQ') { V.q = e.target.value; cuerpo(); } });
   d.addEventListener('change', e => {
-    const k = { bibTipo: 'tipo', bibClase: 'clase', bibCTipo: 'ctipo', bibCVd: 'cvd' }[e.target.id]; if (!k) return;   // el buscador ya filtra al escribir
+    const k = { bibTipo: 'tipo', bibClase: 'clase', bibCTipo: 'ctipo', bibCVd: 'cvd' }[e.target.id]; if (!k) return;
     V[k] = e.target.value; cuerpo();
   });
-  // índice de apartados de la ficha: salto suave dentro del cuerpo
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   on($('#fichaDlg'), 'click', '[data-rzclase]', (e, b) => abrirResumen(b.dataset.rzclase));
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {

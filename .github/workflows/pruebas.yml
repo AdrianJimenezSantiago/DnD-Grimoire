@@ -1,7 +1,5 @@
 name: Pruebas (development)
 
-# Cada cambio en development (y cada PR hacia main o development) pasa las pruebas y compila la web y la versión de Windows.
-# No publica nada: el APK y las Releases siguen saliendo solo de main (compilar-apk.yml).
 on:
   push:
     branches: [development]

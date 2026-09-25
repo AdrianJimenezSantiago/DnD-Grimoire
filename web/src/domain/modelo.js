@@ -1,9 +1,3 @@
-/**
- * Modelo de datos y migraciones.
- *   db = { schema:2, activeId, catalog:{id:conjuro}, chars:[personaje] }
- *   conjuro   = datos compartidos (nombre, nivel, escuela, textos…)
- *   personaje = identidad, características, libro [{sid, prep, always, fuente, gratis, used}], rasgos y estado de juego
- */
 import { clamp, clone, uid } from '../core/util.js';
 import { perfil } from './reglas2024.js';
 import { HOJA_THEO } from './ejemplo.js';
@@ -36,7 +30,7 @@ export function blankChar(over = {}) {
 }
 
 export function normChar(c) {
-  const sinOcultos = !Array.isArray(c?.rasgosOcultos);   // datos de antes de separar «ocultar» de «sustituir»
+  const sinOcultos = !Array.isArray(c?.rasgosOcultos);
   c = { ...blankChar(), ...c };
   c.stats = { ...STATS0, ...(c.stats || {}) };
   c.play = { ...PLAY0(), ...(c.play || {}) };
@@ -47,24 +41,20 @@ export function normChar(c) {
   if (!Array.isArray(c.play.log)) c.play.log = [];
   if (!Array.isArray(c.rasgos)) c.rasgos = [];
   if (!Array.isArray(c.rasgosOff)) c.rasgosOff = [];
-  // Antes, desactivar una plantilla la apagaba del todo (rasgosOff). Ahora solo se oculta de la hoja (rasgosOcultos);
-  // en rasgosOff quedan solo las sustituidas por una copia personalizada (la que lleva `desde`).
   if (sinOcultos) {
     const sust = id => c.rasgos.some(r => r.desde === id);
     c.rasgosOcultos = c.rasgosOff.filter(id => !sust(id)); c.rasgosOff = c.rasgosOff.filter(sust);
   }
-  // Versiones anteriores: Presagio y Recuperación arcana eran campos fijos
   if (Array.isArray(c.play.presagio) && c.play.presagio.length && !c.play.rec['tpl:adivino.presagio']) c.play.rec['tpl:adivino.presagio'] = { used: 0, dice: c.play.presagio };
   if (c.play.recupUsed && !c.play.rec['tpl:mago.recuperacion']) c.play.rec['tpl:mago.recuperacion'] = { used: 1, dice: [] };
   delete c.play.presagio; delete c.play.recupUsed;
   if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
   if (typeof c.historia !== 'string') c.historia = '';
   if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
-  normEquipo(c);   // inventario: categorías, cantidades, pesos y monedas (los antiguos solo tenían objetos mágicos)
+  normEquipo(c);
   if (!c.bestiario || !Array.isArray(c.bestiario.criaturas)) c.bestiario = { criaturas: [] };
   if (c.retrato && !c.retrato.src) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
-  // multiclase: [{clase, subclase, nivel}] sin la clase principal ni repetidas; dotes elegidas: nombres sin repetir
   c.multiclase = (Array.isArray(c.multiclase) ? c.multiclase : []).filter(m => m && m.clase && m.clase !== c.clase)
     .filter((m, i, a) => a.findIndex(x => x.clase === m.clase) === i).map(m => ({ clase: m.clase, subclase: String(m.subclase || ''), nivel: clamp(parseInt(m.nivel, 10) || 1, 1, 19) }));
   c.dotes = [...new Set((Array.isArray(c.dotes) ? c.dotes : []).map(d => String(d || '').trim()).filter(Boolean))];
@@ -75,7 +65,6 @@ export function normChar(c) {
 export function normDb(d) {
   d.schema = SCHEMA; d.catalog ||= {};
   Object.values(d.catalog).forEach(s => { CAT_FIELDS.forEach(f => { if (s[f] == null) s[f] = ''; }); limpiarConjuro(s); });
-  // El compendio anterior emparejaba Guía con True Strike e Impacto certero con Guidance
   Object.values(d.catalog).forEach(s => {
     if (s.es === 'Guía' && s.en === 'True Strike') { s.en = 'Guidance'; s.srd = 'srd-2024_guidance'; }
     else if (s.es === 'Impacto certero' && s.en === 'Guidance') { s.en = 'True Strike'; s.srd = 'srd-2024_true-strike'; }
@@ -97,7 +86,6 @@ export function upsertSpell(d, s) {
   return id;
 }
 
-/** Convierte la hoja antigua de un solo personaje (v1) en un personaje; sus conjuros entran al catálogo. */
 export function charFromV1(d, v1) {
   const m = v1.meta || {};
   const nivel = parseInt((String(m.sub || '').match(/nivel\s+(\d+)/i) || [])[1], 10) || THEO.nivel;
@@ -108,7 +96,6 @@ export function charFromV1(d, v1) {
       fuente: s.fuente || '', gratis: s.gratis || '', used: !!s.used });
   }));
   ch.play = { ...PLAY0(), used: { ...(v1.used || {}) }, conc: v1.conc || '', recupUsed: !!v1.recupUsed, onlyPrep: !!v1.onlyPrep };
-  // Si la hoja antigua tenía espacios, CD o ataque distintos a las reglas, se respetan
   const P = perfil(ch);
   const oldSlots = {};
   (v1.levels || []).forEach(l => { const n = parseInt(l.slots, 10) || 0; if (l.level > 0 && n > 0) oldSlots[l.level] = n; });
@@ -120,7 +107,6 @@ export function charFromV1(d, v1) {
 }
 
 export const emptyDb = () => ({ schema: SCHEMA, catalog: {}, chars: [], activeId: null });
-/** Hoja de ejemplo de Theo: ya no se usa al instalar (la app empieza vacía); se conserva para pruebas. */
 export function seedDb() {
   const d = { schema: SCHEMA, catalog: {}, chars: [] };
   const ch = charFromV1(d, HOJA_THEO);
@@ -128,12 +114,11 @@ export function seedDb() {
   return normDb(d);
 }
 
-/** Lee lo guardado en cualquier versión. Devuelve {db, migrated}. */
 export function fromStored(rawV2, rawV1) {
-  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === SCHEMA) return { db: normDb(d), migrated: false }; } } catch { /* datos corruptos: se ignoran */ }
+  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === SCHEMA) return { db: normDb(d), migrated: false }; } } catch {}
   try {
     if (rawV1) { const v1 = JSON.parse(rawV1);
       if (v1?.levels) { const d = { schema: SCHEMA, catalog: {}, chars: [] }; const ch = charFromV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normDb(d), migrated: true }; } }
-  } catch { /* idem */ }
+  } catch {}
   return { db: emptyDb(), migrated: false };
 }

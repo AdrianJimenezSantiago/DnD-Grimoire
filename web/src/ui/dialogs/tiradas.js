@@ -1,11 +1,3 @@
-/**
- * Bandeja de dados con el flujo completo del conjuro:
- *   · Salvación: pregunta qué ha sacado el objetivo (falla / supera / varios) y aplica daño completo, mitad o nada.
- *   · Ataque: ventaja o desventaja; el crítico (dados dobles) solo existe aquí.
- *   · Daños automáticos (sin ataque ni salvación) y alternativas con su condición (Tañido por los muertos).
- *   · Dados extra que no son daño (el 1d4 de Fragmento mental).
- * Todo se anota en el historial.
- */
 import { esc } from '../../core/util.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
@@ -18,13 +10,12 @@ import { burstFrom, reducedMotion } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { md } from './conjuro.js';
 
-let S, R = null;   // {bi, nivel, modo, critico, ts, ultimo}
+let S, R = null;
 const dlg = () => $('#rollDlg');
 const d = caras => { const a = new Uint32Array(1); crypto.getRandomValues(a); return 1 + (a[0] % caras); };
 export const ICONO_DANO = { 'ácido': 'acido', contundente: 'contundente', cortante: 'cortante', 'frío': 'frio', fuego: 'fuego', fuerza: 'fuerza', 'necrótico': 'necrotico',
   perforante: 'perforante', 'psíquico': 'psiquico', radiante: 'radiante', 'relámpago': 'relampago', trueno: 'trueno', veneno: 'veneno', 'curación': 'curacion' };
 export const iconoDano = (tipo, cls = '') => `<span class="dmg dmg-${ICONO_DANO[tipo] || 'fuerza'} ${cls}" title="${esc(tipo)}">${gi(ICONO_DANO[tipo] || 'fuerza')}</span>`;
-/** «daño de fuego» pero «daño psíquico»: los tipos adjetivos no llevan «de». */
 export const danoDe = tipo => (/^(psíquico|necrótico|radiante|contundente|cortante|perforante)$/.test(tipo) ? `daño ${tipo}` : `daño de ${tipo}`);
 const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s) }; };
 const fmtMedia = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
@@ -44,7 +35,6 @@ function render() {
   $('#rlTitle').innerHTML = `${gi('d20', 'rl-d20')} ${esc(s.es)}`;
   $('#rlSub').textContent = s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   let h = '';
-  // Concentración sobre criaturas concretas (Maleficio, Marca del cazador…): se anota aquí mismo sobre quién
   const x = srdFor(s);
   if (ch.play.conc === s.es && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d])) {
     h += `<section class="rl-step rl-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
@@ -54,7 +44,6 @@ function render() {
     const niveles = []; for (let L = s.level; L <= 9; L++) niveles.push(L);
     h += `<label class="f rl-lvl">Espacio de nivel<select id="rlNivel">${niveles.map(L => `<option ${L === R.nivel ? 'selected' : ''}>${L}</option>`).join('')}</select></label>`;
   }
-  // 1. Salvación: qué ha sacado el objetivo
   if (t?.salvacion) {
     h += `<section class="rl-step"><div class="rl-save">${gi('ojo')}<span>El objetivo hace una <b>tirada de salvación de ${esc(t.salvacion)}</b> contra tu CD <b class="k-num">${P.cd ?? '—'}</b>.</span></div>`;
     if (conTS) {
@@ -65,12 +54,10 @@ function render() {
     }
     h += '</section>';
   }
-  // 2. Ataque
   if (t?.ataque) {
     h += `<section class="rl-step"><div class="seg" role="radiogroup" aria-label="Tirada de ataque">${['desventaja', 'normal', 'ventaja'].map(m => `<button type="button" role="radio" aria-checked="${R.modo === m}" data-modo="${m}">${m === 'normal' ? 'Normal' : m.charAt(0).toUpperCase() + m.slice(1)}</button>`).join('')}</div>
       <div class="rl-btns"><button type="button" class="rl-btn" data-roll="ataque">${gi('d20')}<span><b>Ataque ${P.atk == null ? '' : sgn(P.atk)}</b><small>ataque de conjuro ${esc(t.ataque)}</small></span></button></div></section>`;
   }
-  // 3. Daños, curación y dados extra
   const btns = [];
   dados.forEach((dd, i) => {
     const cura = dd.tipo === 'curación', bono = dd.bono + (cura && t.curacion?.mod ? (P.mod || 0) : 0);
@@ -88,7 +75,6 @@ function render() {
   });
   (t?.extras || []).forEach((x, i) => {
     const off = conTS && R.ts !== 'falla' && R.ts !== 'varios' && t.falla.includes(x.frase.slice(0, 30));
-    // el trozo de la frase que habla de esos dados («…y restará 1d4 en la siguiente tirada de salvación…»)
     const k = x.frase.search(new RegExp(`\\b${x.n}d${x.caras}\\b`)), ini = Math.max(0, ...[', ', ' y ', '; '].map(sep => { const v = x.frase.lastIndexOf(sep, k); return v < 0 ? 0 : v + sep.length; }));
     let trozo = x.frase.slice(ini).trim().replace(/^(y|e|o)\s+/, ''); trozo = trozo.charAt(0).toUpperCase() + trozo.slice(1);
     const med = mediaTxt(x.n, x.caras, x.bono);
@@ -105,7 +91,6 @@ function contar(el, total) {
   const paso = now => { const k = Math.min(1, (now - t0) / dur); el.textContent = k < 1 ? d(Math.max(total + 6, 20)) : total; if (k < 1) requestAnimationFrame(paso); };
   requestAnimationFrame(paso);
 }
-/** «media 10,5 · por encima»: discreto, junto al detalle de los dados. */
 const comparaMedia = (valor, n, caras, bono) => { if (n < 2) return ''; const m = media(n, caras, bono), d = valor - m;
   return ` <span class="rl-vsmedia ${d > 0 ? 'sube' : d < 0 ? 'baja' : ''}">media ${fmtMedia(m)} · ${Math.abs(d) < 0.01 ? 'justo en la media' : d > 0 ? 'por encima' : 'por debajo'}</span>`; };
 const dadosHtml = (vals, caras) => vals.map(v => `<b class="die ${v === caras ? 'max' : v === 1 ? 'min' : ''}">${v}</b>`).join('');

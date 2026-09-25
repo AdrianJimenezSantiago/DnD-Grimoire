@@ -1,4 +1,3 @@
-/** Subida de nivel: qué se gana y qué hay que elegir. Módulo puro. */
 import { joinY, norm } from '../core/util.js';
 import { reglas } from './rasgos.js';
 import { conjurosAutomaticos, rasgosEnNivel } from './clases2024.js';
@@ -13,12 +12,10 @@ export function savantSchool(ch) {
   const m = SAVANT.find(([re]) => re.test(ch.subclase || ''));
   return m ? m[1] : '';
 }
-/** Rasgos que se ganan al llegar a un nivel (clase y subclase del borrador, que puede traer la subclase recién elegida). */
 export function featuresAt(ch, draft, to) {
   return rasgosEnNivel({ ...ch, subclase: draft.subclase ?? ch.subclase }, to).map(r => (/^Subclase de /.test(r) ? 'Subclase' : r));
 }
 
-/** Diferencias entre dos perfiles (y sus rasgos) en una frase. */
 export function levelDiff(a, b, chA, chB) {
   const bits = [];
   const d = (x, uno, varios) => `${Math.abs(x)} ${Math.abs(x) === 1 ? uno : varios} ${x > 0 ? 'más' : 'menos'}`;
@@ -40,13 +37,11 @@ export function levelDiff(a, b, chA, chB) {
   return (b.lvl > a.lvl ? 'Al subir de nivel gana: ' : 'Con este cambio: ') + joinY(bits) + '.';
 }
 
-/** Conjuros siempre preparados de clase y subclase (hasta el nivel del personaje) que aún no están en su libro. */
 export function conjurosPendientes(db, ch, compendio) {
   const porNombre = new Map(); for (const x of compendio || []) if (!porNombre.has(norm(x.es))) porNombre.set(norm(x.es), x);
   const tiene = new Set(ch.book.map(e => norm(db.catalog[e.sid]?.es)));
   return clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
 }
-/** Añade al libro los conjuros pendientes, siempre preparados. Devuelve sus nombres. */
 export function anadirPendientes(db, ch, pendientes) {
   for (const c of pendientes) {
     const sid = importSrd(db, c.x);

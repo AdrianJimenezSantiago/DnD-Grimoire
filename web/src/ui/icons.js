@@ -1,4 +1,3 @@
-/** Iconos de trazo (24×24). Dibujados a mano para esta app: vela, luna, pluma, reloj de arena… */
 const P = {
   moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -23,7 +22,6 @@ const P = {
 };
 export const icon = (name, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[name] || ''}</svg>`;
 
-/** Astrolabio decorativo de la cabecera (gira muy despacio). */
 export const ASTROLABE = `<svg class="astrolabe" viewBox="0 0 340 340" aria-hidden="true"><g fill="none" stroke="currentColor">
   <circle cx="170" cy="170" r="164" stroke-width="1"/><circle cx="170" cy="170" r="150" stroke-width=".6" stroke-dasharray="2 6"/>
   <g class="spin"><circle cx="170" cy="170" r="118" stroke-width="1"/><ellipse cx="170" cy="170" rx="118" ry="46" stroke-width=".8"/>

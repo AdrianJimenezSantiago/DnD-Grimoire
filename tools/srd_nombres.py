@@ -1,6 +1,4 @@
-# Nombres en español propuestos para los conjuros del SRD 5.2 (editables en la app).
 N = {
-# trucos
 "Acid Splash":"Salpicadura ácida","Chill Touch":"Toque gélido","Dancing Lights":"Luces danzantes","Druidcraft":"Druidismo",
 "Eldritch Blast":"Descarga sobrenatural","Elementalism":"Elementalismo","Fire Bolt":"Descarga de fuego","Guidance":"Orientación",
 "Light":"Luz","Mage Hand":"Mano de mago","Mending":"Remendar","Message":"Mensaje","Minor Illusion":"Ilusión menor",
@@ -8,7 +6,6 @@ N = {
 "Resistance":"Resistencia","Sacred Flame":"Llama sagrada","Shillelagh":"Garrote","Shocking Grasp":"Agarre electrizante",
 "Sorcerous Burst":"Estallido hechicero","Spare the Dying":"Piedad con los moribundos","Starry Wisp":"Brizna estelar",
 "Thaumaturgy":"Taumaturgia","True Strike":"Golpe certero","Vicious Mockery":"Burla cruel",
-# 1
 "Alarm":"Alarma","Animal Friendship":"Amistad con los animales","Bane":"Perdición","Bless":"Bendecir","Burning Hands":"Manos ardientes",
 "Charm Person":"Hechizar persona","Chromatic Orb":"Orbe cromático","Color Spray":"Rociada de color","Command":"Orden imperiosa",
 "Comprehend Languages":"Comprensión idiomática","Create or Destroy Water":"Crear o destruir agua","Cure Wounds":"Curar heridas",
@@ -24,7 +21,6 @@ N = {
 "Ray of Sickness":"Rayo nauseabundo","Sanctuary":"Santuario","Searing Smite":"Castigo abrasador","Shield":"Escudo","Shield of Faith":"Escudo de fe",
 "Silent Image":"Imagen silenciosa","Sleep":"Dormir","Speak with Animals":"Hablar con los animales","Thunderwave":"Onda atronadora",
 "Unseen Servant":"Sirviente invisible",
-# 2
 "Acid Arrow":"Flecha ácida","Aid":"Auxilio","Alter Self":"Alterar el propio aspecto","Animal Messenger":"Mensajero animal",
 "Arcane Lock":"Cerradura arcana","Arcanist's Magic Aura":"Aura mágica del arcanista","Augury":"Augurio","Barkskin":"Piel robliza",
 "Blindness/Deafness":"Ceguera/sordera","Blur":"Difuminar","Calm Emotions":"Calmar emociones","Continual Flame":"Llama continua",
@@ -40,7 +36,6 @@ N = {
 "Shatter":"Romper","Shining Smite":"Castigo resplandeciente","Silence":"Silencio","Spider Climb":"Trepar cual arácnido",
 "Spike Growth":"Crecimiento espinoso","Spiritual Weapon":"Arma espiritual","Suggestion":"Sugestión","Warding Bond":"Vínculo protector",
 "Web":"Telaraña","Zone of Truth":"Zona de verdad",
-# 3
 "Animate Dead":"Animar a los muertos","Beacon of Hope":"Faro de esperanza","Bestow Curse":"Imponer maldición","Blink":"Intermitencia",
 "Call Lightning":"Llamar al relámpago","Clairvoyance":"Clarividencia","Conjure Animals":"Conjurar animales","Counterspell":"Contraconjuro",
 "Create Food and Water":"Crear comida y agua","Daylight":"Luz del día","Dispel Magic":"Disipar magia","Fear":"Miedo","Fireball":"Bola de fuego",
@@ -51,7 +46,6 @@ N = {
 "Sleet Storm":"Tormenta de aguanieve","Slow":"Ralentizar","Speak with Dead":"Hablar con los muertos","Speak with Plants":"Hablar con las plantas",
 "Spirit Guardians":"Espíritus guardianes","Stinking Cloud":"Nube apestosa","Tiny Hut":"Diminuta cabaña","Tongues":"Don de lenguas",
 "Vampiric Touch":"Toque vampírico","Water Breathing":"Respirar bajo el agua","Water Walk":"Caminar sobre el agua","Wind Wall":"Muro de viento",
-# 4
 "Arcane Eye":"Ojo arcano","Aura of Life":"Aura de vida","Banishment":"Destierro","Black Tentacles":"Tentáculos negros","Blight":"Marchitar",
 "Charm Monster":"Hechizar monstruo","Compulsion":"Compulsión","Confusion":"Confusión","Conjure Minor Elementals":"Conjurar elementales menores",
 "Conjure Woodland Beings":"Conjurar seres del bosque","Control Water":"Controlar agua","Death Ward":"Custodia contra la muerte",
@@ -61,7 +55,6 @@ N = {
 "Ice Storm":"Tormenta de hielo","Locate Creature":"Localizar criatura","Phantasmal Killer":"Asesino fantasmal","Polymorph":"Polimorfar",
 "Private Sanctum":"Santuario privado","Resilient Sphere":"Esfera resistente","Secret Chest":"Cofre secreto","Stone Shape":"Moldear la piedra",
 "Stoneskin":"Piel pétrea","Vitriolic Sphere":"Esfera vitriólica","Wall of Fire":"Muro de fuego",
-# 5
 "Animate Objects":"Animar objetos","Antilife Shell":"Caparazón antivida","Arcane Hand":"Mano arcana","Awaken":"Despertar","Cloudkill":"Nube aniquiladora",
 "Commune":"Comunión","Commune with Nature":"Comunión con la naturaleza","Cone of Cold":"Cono de frío","Conjure Elemental":"Conjurar elemental",
 "Contact Other Plane":"Contactar con otro plano","Contagion":"Contagio","Creation":"Creación","Dispel Evil and Good":"Disipar el bien y el mal",
@@ -71,7 +64,6 @@ N = {
 "Planar Binding":"Vínculo planar","Raise Dead":"Revivir a los muertos","Reincarnate":"Reencarnar","Scrying":"Escudriñar","Seeming":"Apariencia",
 "Summon Dragon":"Invocar dragón","Telekinesis":"Telequinesis","Telepathic Bond":"Vínculo telepático","Teleportation Circle":"Círculo de teletransporte",
 "Tree Stride":"Zancada arbórea","Wall of Force":"Muro de fuerza","Wall of Stone":"Muro de piedra",
-# 6
 "Blade Barrier":"Barrera de cuchillas","Chain Lightning":"Relámpago en cadena","Circle of Death":"Círculo de muerte","Conjure Fey":"Conjurar feérico",
 "Contingency":"Contingencia","Create Undead":"Crear muerto viviente","Disintegrate":"Desintegrar","Eyebite":"Mirada penetrante",
 "Find the Path":"Encontrar el camino","Flesh to Stone":"Carne a piedra","Forbiddance":"Prohibición","Freezing Sphere":"Esfera congelante",
@@ -80,18 +72,15 @@ N = {
 "Mass Suggestion":"Sugestión en masa","Move Earth":"Mover la tierra","Planar Ally":"Aliado planar","Programmed Illusion":"Ilusión programada",
 "Sunbeam":"Rayo de sol","Transport via Plants":"Transporte vegetal","True Seeing":"Visión veraz","Wall of Ice":"Muro de hielo",
 "Wall of Thorns":"Muro de espinas","Wind Walk":"Caminar con el viento","Word of Recall":"Palabra de regreso",
-# 7
 "Arcane Sword":"Espada arcana","Conjure Celestial":"Conjurar celestial","Delayed Blast Fireball":"Bola de fuego de explosión retardada",
 "Divine Word":"Palabra divina","Etherealness":"Excursión etérea","Finger of Death":"Dedo de la muerte","Fire Storm":"Tormenta de fuego",
 "Forcecage":"Jaula de fuerza","Magnificent Mansion":"Mansión magnífica","Mirage Arcane":"Espejismo arcano","Plane Shift":"Desplazamiento entre planos",
 "Prismatic Spray":"Rociada prismática","Project Image":"Proyectar imagen","Regenerate":"Regenerar","Resurrection":"Resurrección",
 "Reverse Gravity":"Invertir la gravedad","Sequester":"Recluir","Simulacrum":"Simulacro","Symbol":"Símbolo","Teleport":"Teletransporte",
-# 8
 "Animal Shapes":"Formas animales","Antimagic Field":"Campo antimagia","Antipathy/Sympathy":"Antipatía/simpatía","Befuddlement":"Ofuscación",
 "Clone":"Clon","Control Weather":"Controlar el clima","Demiplane":"Semiplano","Dominate Monster":"Dominar monstruo","Earthquake":"Terremoto",
 "Glibness":"Labia","Holy Aura":"Aura sagrada","Incendiary Cloud":"Nube incendiaria","Maze":"Laberinto","Mind Blank":"Mente en blanco",
 "Power Word Stun":"Palabra de poder: aturdir","Sunburst":"Resplandor solar","Tsunami":"Tsunami",
-# 9
 "Astral Projection":"Proyección astral","Foresight":"Presciencia","Gate":"Portal","Imprisonment":"Encarcelamiento","Mass Heal":"Curar en masa",
 "Meteor Swarm":"Lluvia de meteoritos","Power Word Heal":"Palabra de poder: curar","Power Word Kill":"Palabra de poder: matar",
 "Prismatic Wall":"Muro prismático","Shapechange":"Cambiar de forma","Storm of Vengeance":"Tormenta de venganza","Time Stop":"Detener el tiempo",

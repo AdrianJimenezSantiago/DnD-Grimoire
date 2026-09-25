@@ -13,21 +13,16 @@ test('multiclase: nivel total, competencia y clases (sin repetir ni pasar de 20)
   const ch = pj('Bárbaro', 5, [{ clase: 'Guerrero', subclase: 'Campeón', nivel: 3 }, { clase: 'Bárbaro', nivel: 2 }, { clase: 'Inventada', nivel: 1 }]);
   assert.deepEqual(clasesDe(ch).map(c => `${c.clase} ${c.nivel}`), ['Bárbaro 5', 'Guerrero 3']);
   assert.equal(nivelTotal(ch), 8); assert.equal(perfil(ch).pb, 3); assert.deepEqual(perfil(ch).slots, {});
-  assert.equal(nivelTotal(pj('Mago', 15, [{ clase: 'Clérigo', nivel: 9 }])), 20);   // el resto no cabe
-  // recursos de las dos clases
+  assert.equal(nivelTotal(pj('Mago', 15, [{ clase: 'Clérigo', nivel: 9 }])), 20);
   assert.deepEqual(reglas(ch).map(r => r.nombre), ['Furia', 'Tomar aliento', 'Acción súbita']);
 });
 test('multiclase: espacios según el Manual del Jugador 2024', () => {
-  // una sola clase lanzadora: su propia tabla a su nivel
   assert.deepEqual(perfil(pj('Mago', 5, [{ clase: 'Guerrero', subclase: 'Campeón', nivel: 3 }])).slots, { 1: 4, 2: 3, 3: 2 });
-  // varias: niveles de lanzador sumados (mitad hacia arriba, tercio hacia abajo) en la tabla completa
-  assert.deepEqual(perfil(pj('Explorador', 5, [{ clase: 'Paladín', nivel: 4 }])).slots, { 1: 4, 2: 3, 3: 2 });          // 3 + 2 = 5
-  assert.deepEqual(perfil(pj('Guerrero', 3, [{ clase: 'Mago', nivel: 1 }], { subclase: 'Caballero arcano' })).slots, { 1: 3 }); // 1 + 1 = 2
-  // pacto aparte (y en el descanso corto solo vuelven los de pacto)
+  assert.deepEqual(perfil(pj('Explorador', 5, [{ clase: 'Paladín', nivel: 4 }])).slots, { 1: 4, 2: 3, 3: 2 });
+  assert.deepEqual(perfil(pj('Guerrero', 3, [{ clase: 'Mago', nivel: 1 }], { subclase: 'Caballero arcano' })).slots, { 1: 3 });
   const P = perfil(pj('Paladín', 5, [{ clase: 'Hechicero', nivel: 3 }, { clase: 'Brujo', nivel: 2 }]));
   assert.deepEqual(P.pact, { level: 1, n: 2 }); assert.deepEqual(P.slots, { 1: 6, 2: 3, 3: 3 });
   assert.equal(P.maxPrep, 6 + 6 + 3); assert.deepEqual(P.listas, ['Paladín', 'Hechicero', 'Brujo']);
-  // si la principal no lanza, manda la aptitud de la que sí
   assert.equal(perfil(pj('Bárbaro', 3, [{ clase: 'Druida', nivel: 2 }])).apKey, 'sab');
 });
 test('multiclase: requisitos, modelo y nivel de druida para Forma salvaje', () => {
@@ -35,16 +30,14 @@ test('multiclase: requisitos, modelo y nivel de druida para Forma salvaje', () =
   assert.deepEqual(requisitosMulticlase(ch), [{ clase: 'Mago', falta: 'Inteligencia 13' }]);
   const c = normChar({ nombre: 'X', clase: 'Druida', nivel: 4, multiclase: [{ clase: 'Druida', nivel: 2 }, { clase: 'Monje', nivel: 40 }, { clase: 'Monje', nivel: 1 }, null], dotes: ['Alerta', ' Alerta ', '', 'Duro'] });
   assert.deepEqual(c.multiclase, [{ clase: 'Monje', subclase: '', nivel: 19 }]); assert.deepEqual(c.dotes, ['Alerta', 'Duro']);
-  assert.equal(limiteFormaSalvaje(pj('Monje', 10, [{ clase: 'Druida', nivel: 4 }])).vd, 0.5);   // nivel 4 de druida, no 14
+  assert.equal(limiteFormaSalvaje(pj('Monje', 10, [{ clase: 'Druida', nivel: 4 }])).vd, 0.5);
 });
 test('dotes: la de origen sale del trasfondo (también de un libro importado) y se suman las elegidas', () => {
   assert.deepEqual(dotesDe({ trasfondo: 'Erudito', dotes: ['Alerta', 'Iniciado en la magia (mago)'] }),
     [{ nombre: 'Iniciado en la magia', detalle: 'mago', origen: 'trasfondo' }, { nombre: 'Alerta', detalle: '', origen: 'elegida' }]);
   assert.equal(dotesDe({ trasfondo: 'Pescador en hielo', dotes: [] }, [{ nombre: 'Pescador en hielo', dote: 'Alerta' }])[0].nombre, 'Alerta');
 });
-// Especie inventada con la forma del libro
 const L = (s, y, h = 12) => ({ s, x: 50, y, h });
-// cada entrada acaba en una línea corta, como en el libro: así se separan los párrafos
 const ESPECIE = [{ p: 1, cols: [[
   L('ATRIBUTOS DE LOS ENANOS', 900, 16), L('Tipo de criatura: humanoide', 880), L('Tamaño: Mediano', 866), L('Velocidad: 9 m', 852),
   L('Como enano, tienes estos atributos especiales:', 838),
@@ -65,7 +58,6 @@ test('especies: atributos del libro (opciones dentro del atributo que las ofrece
   const alerta = rs.find(r => r.fuente === 'dote');
   assert.equal(alerta.nombre, 'Alerta'); assert.equal(alerta.etiqueta, 'Dote de origen · Criminal'); assert.equal(alerta.grupo, 'pasivo');
   assert.deepEqual(agrupar(rs, [], 'especie').flatMap(g => g.rasgos).map(r => r.fuente), ['especie', 'especie', 'especie']);
-  // a nivel 3 llega Legado de la forja
   assert.ok(rasgosEnJuego({ ...ch, multiclase: [{ clase: 'Pícaro', nivel: 1 }] }, lib, []).some(r => r.nombre === 'Legado de la forja'));
 });
 test('en juego: con multiclase, el mismo rasgo de dos clases es una sola tarjeta y la cabecera suma los dados de golpe', () => {

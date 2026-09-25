@@ -1,14 +1,10 @@
-/**
- * Controlador: traduce gestos y botones en casos de uso.
- * Un único despachador de órdenes (data-cmd) sirve al dock del móvil, a la barra de escritorio y a los menús.
- */
 import { esc } from '../core/util.js';
 import { SCHOOLS, perfil, clasesTexto } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
 import { schoolKey } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
-import { invalidateItems, linkCatalog } from '../domain/catalogo.js';
+import { invalidateItems } from '../domain/catalogo.js';
 import { $, on } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { toast, hideToast, toastOpen } from '../ui/toast.js';
@@ -40,16 +36,13 @@ import { avatarHtml } from '../ui/avatar.js';
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
 
-/* ---------------- tema ---------------- */
 export const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 function toggleTheme() {
-  // el tema nuevo se decide antes: la transición aplica el cambio más tarde y se guardaba el anterior
   const nuevo = isDark() ? 'light' : 'dark';
   viewTransition(() => { document.documentElement.dataset.theme = nuevo; setBars(nuevo === 'dark'); });
   storage.set(PREF + '-tema', nuevo);
 }
 
-/* ---------------- menús emergentes ---------------- */
 let openMenu = null, menuY = 0;
 function showMenu(menu, anchor, items) {
   closeMenu(); menu.classList.remove('closing');
@@ -71,7 +64,6 @@ function closeMenu() {
   m.classList.add('closing');
   setTimeout(() => { if (openMenu !== m) m.hidden = true; m.classList.remove('closing'); }, 150);
 }
-/** Menú «Más» compacto: cabecera con el personaje y el tema, rejilla de secciones y utilidades en pequeño. */
 function moreMenuHtml() {
   const ch = S.cur(), dark = isDark();
   const tile = (cmd, ico, label, full, i) => `<button type="button" role="menuitem" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}" aria-label="${esc(full || label)}"><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}</span></button>`;
@@ -100,12 +92,9 @@ function restItems() {
   return [hasShortRest(ch, perfil(ch)) && { cmd: 'short', icon: 'candle', label: 'Descanso corto' }, { cmd: 'long', icon: 'moon', label: 'Descanso largo' }];
 }
 
-/* ---------------- órdenes ---------------- */
 function setEditing(v) { S.editing = v; S.emit('ui'); }
 const COMMANDS = {
   chars: () => openChars(),
-  // un solo sitio para elegir personaje: la portada (el botón del nombre y Más → Personajes llevan allí);
-  // editar, duplicar y borrar quedan en «Gestionar personajes», desde la portada
   home: () => { if (landingVisible()) return; viewTransition(() => { S.editing = false; showLanding(); }); },
   glosario: () => openBiblioteca('reglas'),
   biblioteca: () => openBiblioteca(),
@@ -146,11 +135,10 @@ const COMMANDS = {
 function run(cmd, el) {
   const abierto = openMenu?.id;
   closeMenu();
-  if ((cmd === 'more' && abierto === 'moreMenu') || (cmd === 'rest' && abierto === 'restMenu')) return;   // el mismo botón lo cierra
+  if ((cmd === 'more' && abierto === 'moreMenu') || (cmd === 'rest' && abierto === 'restMenu')) return;
   COMMANDS[cmd]?.(el);
 }
 
-/* ---------------- botón Atrás (Android) ---------------- */
 function back() {
   if (enTour()) return cerrarTour();
   if (openMenu) return closeMenu();
@@ -161,14 +149,11 @@ function back() {
   S.flush(); minimize();
 }
 
-/* ---------------- hoja ---------------- */
-// la clase se quita al terminar: si no, cada repintado de «En juego» (gastar un uso…) repetiría la entrada
 let ejT = 0;
 function animarEnJuego() { const el = $('#enjuego'); pop(el, 'fx-abre'); clearTimeout(ejT); ejT = setTimeout(() => el.classList.remove('fx-abre'), 650); }
 
 function bindSheet() {
   const sheet = $('#sheet'), bar = $('#sbar');
-  // pulsación larga: ficha del conjuro
   let lpTimer = 0, lpFired = false, lpStart = null;
   sheet.addEventListener('pointerdown', e => {
     const z = e.target.closest('.castzone'); if (!z || S.editing) return;
@@ -180,13 +165,11 @@ function bindSheet() {
   sheet.addEventListener('contextmenu', e => { if (e.target.closest('.castzone') && !S.editing) e.preventDefault(); });
 
   on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  // «En juego»: plegar, fijar arriba y leer el rasgo entero
   on(sheet, 'click', '[data-ej="toggle"]', () => { S.edit((db, ch) => { const lanza = !!perfil(ch).c; ch.enJuego ||= {};
     const abierto = lanza ? !!ch.enJuego.abierto : ch.enJuego.abierto !== false; ch.enJuego.abierto = !abierto; }); animarEnJuego(); });
   on(sheet, 'click', '[data-ejfijar]', (e, b) => { const k = b.dataset.ejfijar; S.edit((db, ch) => { ch.enJuego ||= {}; const f = ch.enJuego.fijados || [];
     ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
-  // los usos se llevan en un solo sitio, la tarjeta del recurso: «En juego» solo los muestra y lleva hasta ella
   on(sheet, 'click', '[data-irrec]', (e, b) => {
     const card = [...sheet.querySelectorAll('[data-resid]')].find(x => x.dataset.resid === b.dataset.irrec); if (!card) return;
     card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
@@ -229,7 +212,6 @@ function bindSheet() {
       S.touch();
     }
   });
-  // Al salir de un campo editable: se valida y se deja coherente (0 no es un uso gratis, el alcance mínimo es Toque…)
   let previo = null;
   sheet.addEventListener('focusin', e => { const k = e.target.dataset?.k; if (!k) return; const e2 = S.cur()?.book[+e.target.dataset.bi]; if (!e2) return;
     previo = REL_FIELDS.includes(k) ? e2[k] : S.db.catalog[e2.sid][k]; });
@@ -243,7 +225,6 @@ function bindSheet() {
     S.touch(); S.emit('edit'); previo = null;
     if (aviso) toast(esc(aviso));
   });
-  // Escuela: selector con las ocho escuelas y su color
   let escuelaBi = null;
   on(sheet, 'click', '[data-schoolpick]', (e, b) => {
     escuelaBi = +b.dataset.schoolpick; const actual = S.db.catalog[S.cur().book[escuelaBi].sid].escuela;
@@ -256,14 +237,12 @@ function bindSheet() {
     const h = S.edit(db => { db.catalog[sid].escuela = nueva; }); invalidateItems();
     toast(`<b>${esc(s.es)}</b>: ${esc(nueva.toLowerCase())}.${otros ? ` También cambia en ${otros === 1 ? 'otro personaje' : otros + ' personajes'}.` : ''}`, [A.undoBtn(S, h)]);
   });
-  // Componentes: V, S y M se marcan; siempre queda al menos uno
   on(sheet, 'click', '[data-comp]', (e, b) => {
     const [bi, c] = b.dataset.comp.split('|'), sid = S.cur().book[+bi].sid, act = (S.db.catalog[sid].comp || '').split(' ').filter(Boolean);
     const sig = act.includes(c) ? act.filter(x => x !== c) : [...act, c], { valor } = campo('comp', sig.join(' '));
     if (!valor) return toast('Todo conjuro tiene al menos un componente: verbal (V), somático (S) o material (M).');
     S.edit(db => { db.catalog[sid].comp = valor; if (!valor.includes('M')) db.catalog[sid].coste = ''; }); haptic('light');
   });
-  // Efectos activos: objetivos de la concentración y de los rasgos
   sheet.addEventListener('keydown', e => {
     const t = e.target; if (!t.dataset?.objin || e.key !== 'Enter') return;
     e.preventDefault(); const clave = t.dataset.objin;
@@ -297,11 +276,9 @@ export async function init(store) {
   on(document, 'click', 'dialog [data-close]', (e, b) => closeSheet(b.closest('dialog')));
   document.addEventListener('click', e => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('[data-cmd="more"],[data-cmd="rest"]')) closeMenu(); }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); hideToast(); } });
-  // el menú se cierra al desplazar de verdad la página, no con los pequeños saltos de foco al cerrar una hoja
   addEventListener('resize', closeMenu); addEventListener('scroll', () => { if (openMenu && Math.abs(scrollY - menuY) > 60) closeMenu(); }, { passive: true });
-  // cerrar hojas tocando el fondo
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) closeSheet(d); }));
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setBars(isDark())); } catch { /* navegadores antiguos */ }
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setBars(isDark())); } catch {}
   if (NATIVE) { awake = (await storage.get(PREF + '-awake')) === '1'; keepAwake(awake); }
   return { back, run, COMMANDS, resume: () => { keepAwake(awake); setBars(isDark()); } };
 }

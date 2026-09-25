@@ -1,12 +1,3 @@
-/**
- * Libros incluidos en la APK: lee los PDF de una carpeta (tools/resources) con el mismo lector que la app
- * y deja cada libro ya procesado en JSON, más un índice. La app los añade sola al arrancar si le faltan.
- *
- *   node tools/preparar-libros.mjs tools/resources www/libros
- *
- * Se ejecuta al compilar la APK (.github/workflows/compilar-apk.yml): lo generado no se guarda en el repositorio.
- * Se saltan los punteros de Git LFS sin descargar y los PDF escaneados (sin texto seleccionable).
- */
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -18,14 +9,14 @@ import { componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domai
 
 const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const [origen = path.join(RAIZ, 'tools/resources'), destino = path.join(RAIZ, 'www/libros')] = process.argv.slice(2);
-const MUESTRA = 40;   // páginas para saber si el PDF tiene texto
+const MUESTRA = 40;
 
 const esPdf = f => { const b = Buffer.alloc(5), fd = fs.openSync(f, 'r'); fs.readSync(fd, b, 0, 5, 0); fs.closeSync(fd); return b.toString() === '%PDF-'; };
 
 async function leer(archivo) {
   const doc = await pdfjs.getDocument({ url: archivo, disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise;
   let titulo = '';
-  try { titulo = (await doc.getMetadata())?.info?.Title?.trim() || ''; } catch { /* sin metadatos */ }
+  try { titulo = (await doc.getMetadata())?.info?.Title?.trim() || ''; } catch {}
   if (!titulo || /^(untitled|sin t[ií]tulo)$/i.test(titulo)) titulo = path.basename(archivo).replace(/\.pdf$/i, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
   const paginas = [];
   let conTexto = 0;

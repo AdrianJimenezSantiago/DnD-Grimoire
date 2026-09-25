@@ -1,7 +1,3 @@
-/**
- * Inventario: lo que lleva el personaje, por categorías, con cantidades, peso y carga, monedas, CA con lo equipado,
- * ataque de cada arma, consumibles que se gastan con un toque, y los objetos mágicos con su sintonización y cargas.
- */
 import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, NOMBRE_CAT, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, alternarEquipado, cambiarCantidad,
   quitarObjeto, anadirComun, normObjeto, pesoTotal, capacidadCarga, valorMonedas, claseArmadura, ataqueArma } from '../../domain/equipo.js';
@@ -18,7 +14,6 @@ import { undoBtn } from '../../app/acciones.js';
 import { RAR_K, TIPO_I, abrirObjeto, openBiblioteca } from './biblioteca.js';
 
 let S;
-// Vista: categoría filtrada, búsqueda, formulario abierto (nuevo o editando un objeto) y monedas desplegadas
 const V = { cat: '', q: '', form: null, monedas: false };
 const dlg = () => $('#equipoDlg');
 const kg = n => `${(Math.round((n || 0) * 100) / 100).toLocaleString('es-ES')} kg`;
@@ -88,7 +83,6 @@ function formulario() {
     <label class="f wide">Notas<input id="ivNotas" value="${esc(o.notas || '')}" placeholder="Dónde lo guarda, efectos, usos…" autocomplete="off"></label>
     <div class="inv-form-acts"><button type="button" data-inv="cancelar">Cancelar</button><span class="spacer"></span><button type="button" class="gold" data-inv="guardar">${f.id ? 'Guardar' : 'Añadir al inventario'}</button></div></section>`;
 }
-/** Lee el formulario y devuelve los datos del objeto. */
 function leerFormulario() {
   const v = id => ($(id)?.value ?? '').trim(), o = { ...V.form.o };
   Object.assign(o, { nombre: v('#ivNom'), cat: v('#ivCat') || o.cat, cantidad: v('#ivCant'), peso: v('#ivPeso'), valor: v('#ivValor'), notas: v('#ivNotas') });
@@ -160,13 +154,11 @@ export function init(store) {
   d.addEventListener('input', e => {
     const t = e.target;
     if (t.id === 'ivQ') { V.q = t.value; const pos = t.selectionStart; render(); const i = $('#ivQ'); i.focus(); i.setSelectionRange(pos, pos); }
-    // al elegir un objeto común se rellenan su categoría, peso, valor y datos de arma o armadura
     if (t.id === 'ivNom' && !V.form?.id) { const p = PREDEFINIDOS.find(x => norm(x.nombre) === norm(t.value)); if (p) { V.form.o = { ...JSON.parse(JSON.stringify(p)), cantidad: parseInt($('#ivCant')?.value, 10) || 1 }; render(); $('#ivNom').focus(); } }
   });
   d.addEventListener('change', e => {
     const t = e.target;
     if (t.dataset.moneda) { const k = t.dataset.moneda, v = Math.max(0, parseInt(t.value, 10) || 0); S.edit((db, ch) => { equipoDe(ch).monedas[k] = v; }); repintar(); }
-    // cambiar de categoría o de tipo de armadura muestra sus campos (arma: daño; armadura: CA)
     if (t.id === 'ivCat' || t.id === 'ivArmT') { V.form.o = leerFormulario(); if (t.id === 'ivArmT') V.form.o.armadura.tipo = t.value; render(); }
   });
   d.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest?.('.inv-form') && e.target.tagName === 'INPUT') { e.preventDefault(); d.querySelector('[data-inv="guardar"]')?.click(); } });

@@ -1,4 +1,3 @@
-/** Copia de seguridad: archivo (compartir en Android), texto y carga de copias antiguas. */
 import { esc } from '../../core/util.js';
 import { charFromV1, normDb, SCHEMA } from '../../domain/modelo.js';
 import { linkCatalog, invalidateItems } from '../../domain/catalogo.js';
