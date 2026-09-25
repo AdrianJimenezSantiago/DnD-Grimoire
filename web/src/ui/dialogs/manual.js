@@ -1,4 +1,5 @@
 import { esc } from '../../core/util.js';
+import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/catalogo.js';
 import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/componerLibro.js';
 import { CLASES_ES } from '../../domain/libros.js';
@@ -75,7 +76,10 @@ function lista() {
     : '<p class="note">Aún no has importado ningún libro en este dispositivo.</p>';
   $('#mnBorrar').hidden = true;
 }
-export function openManual() { pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); openSheet(dlg()); }
+export function openManual() {
+  pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); openSheet(dlg());
+  import('../../app/importarManual.js').catch(() => {});
+}
 
 async function guardarLibro(lb) {
   const q = await quitados(); if (q.includes(lb.id)) await fileStore.set(QUITADOS, JSON.stringify(q.filter(x => x !== lb.id)));
@@ -102,7 +106,7 @@ async function importar(file) {
   bar.hidden = false; $('#mnRes').innerHTML = ''; $('#mnElegir').disabled = true;
   const t0 = performance.now();
   try {
-    const { leerLibro } = await import('../../app/importarManual.js');
+    const { leerLibro } = await cargar(() => import('../../app/importarManual.js'));
     const r = await leerLibro(file, p => {
       if (p.fase === 'abrir') { msg.textContent = 'Abriendo el PDF…'; fill.style.width = '3%'; }
       if (p.fase === 'leer') { msg.textContent = `Leyendo página ${p.pagina} de ${p.total}`; fill.style.width = `${3 + 85 * p.pagina / p.total}%`; }
@@ -118,7 +122,8 @@ async function importar(file) {
     const { lb, props, sinNombre } = componerLibro(r);
     if (props.some(p => p.ok) || sinNombre) { pendiente = { lb, props }; pedirSubclases(); } else await guardarLibro(aceptarPropuestas(lb, props));
   } catch (e) {
-    msg.textContent = 'No se pudo importar.'; $('#mnRes').innerHTML = `<p class="ferr">${esc(e.message || e)}</p>`;
+    msg.textContent = esVersionVieja(e) ? 'Hay una versión nueva de la app.' : 'No se pudo importar.';
+    $('#mnRes').innerHTML = `<p class="ferr">${esc(e.message || e)}</p>${esVersionVieja(e) ? '<div class="row-btns"><button type="button" class="gold" data-recargar>Recargar la página</button></div>' : ''}`;
   } finally { $('#mnElegir').disabled = false; }
 }
 function revisarNombres(lb) {
@@ -142,6 +147,7 @@ export function init(store) {
   S = store;
   $('#mnElegir').addEventListener('click', () => $('#mnFile').click());
   $('#mnFile').addEventListener('change', e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importar(f); });
+  on(dlg(), 'click', '[data-recargar]', () => recargar());
   on(dlg(), 'click', '[data-guardarlibro]', async () => {
     const { lb, props } = pendiente;
     dlg().querySelectorAll('[data-rvt]').forEach(inp => { const t = lb.trasfondos[+inp.dataset.rvt], n = inp.value.trim(); if (n) Object.assign(t, { nombre: n, clave: claveNombre(n), revisar: false }); });
