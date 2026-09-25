@@ -51,7 +51,7 @@ function pantalla(tipo, etiqueta, lema, fuerte) {
 }
 
 export function golpe(tipo, n = null, { max = 1, desde = null, hasta = null, cae = false } = {}) {
-  const dianas = [...document.querySelectorAll('.pg-card, .vd-marcador')].filter(el => el.offsetParent);
+  const dianas = [...document.querySelectorAll('.pg-card, .cb-orbe, .vd-marcador')].filter(el => el.offsetParent);
   if (tipo === 'buff' || tipo === 'debuff') dianas.push(...[...document.querySelectorAll('.vt-estados')].filter(el => el.offsetParent));
   if (reducedMotion()) return;
   const v = elegir(tipo), ratio = n ? Math.min(1, n / Math.max(1, max)) : 0;
