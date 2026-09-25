@@ -129,3 +129,9 @@ export function fmtMod(m) {
 }
 
 export function maxExtraTotal(ch) { return (ch.vida?.maxExtra || []).reduce((s, x) => s + (x.n || 0), 0); }
+export function resumenTirada(ch, sobre, { ab = '', hab = '' } = {}, bono = 0) {
+  const todos = modsTirada(ch, { sobre, ab, hab }), mods = todos.filter(m => !m.cond);
+  const plano = mods.filter(m => m.efecto === 'plano').reduce((s, m) => s + (Number(m.valor) || 0), 0);
+  return { total: bono + plano, modo: resolverModo(mods), dados: mods.filter(m => m.efecto === 'dado').map(m => (String(m.valor).startsWith('-') ? `−${String(m.valor).slice(1)}` : `+${m.valor}`)), falla: !!falloAutomatico(mods), cond: todos.some(m => m.cond),
+    fuentes: [...new Set(todos.map(m => m.fuente))] };
+}

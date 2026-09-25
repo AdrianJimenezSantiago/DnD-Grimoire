@@ -1,6 +1,6 @@
 import { esc, norm } from '../core/util.js';
 import { perfil, sgn, magiaPara } from '../domain/reglas2024.js';
-import { reglasVisibles, usosGastados } from '../domain/rasgos.js';
+import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../domain/rasgos.js';
 import { rasgosEnJuego } from '../domain/enJuego.js';
 import { biblioteca } from '../domain/catalogo.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
@@ -11,7 +11,7 @@ import { gi } from './tema.js';
 import { icon } from './icons.js';
 import { runaSvg } from './magia.js';
 import { burst, reducedMotion } from './fx.js';
-import { pgHtml, estadosHtml, vigiliaHtml, placaCa, placaVel } from './vitales.js';
+import { pgHtml, estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml } from './vitales.js';
 import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod } from '../domain/efectos.js';
 import { NOMBRE_ESTADO } from '../domain/vida.js';
 
@@ -42,9 +42,13 @@ function acciones(ch, db) {
     conj.push({ e, bi, s, g });
   });
   conj.sort((a, b) => a.s.level - b.s.level || a.s.es.localeCompare(b.s.es, 'es'));
+  const recupera = reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.efecto === 'recuperar');
   for (const { e, bi, s, g } of conj) {
     const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), niv = s.level ? `Nivel ${s.level}` : 'Truco';
-    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}" data-leer="conj:${bi}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em>${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
+    const rec = s.level > 0 && recupera.find(r => schoolMatch(s, r.escuela));
+    const escTxt = s.escuela ? `<em class="cb-esc">${esc(s.escuela)}</em>` : '';
+    const recTxt = rec ? `<span class="cb-rec" title="${esc(`${rec.nombre}: si lo lanzas con un espacio de nivel ${rec.espacioMin || 1} o más, recuperas un espacio gastado de nivel inferior (máximo ${rec.efectoN || 5}).`)}">${icon('reset')}Recupera espacio</span>` : '';
+    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}" data-leer="conj:${bi}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}${recTxt}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em> · ${escTxt}${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
       <span class="cb-bts"><button type="button" class="cb-roll lanzar" data-cast="${bi}">${gi(ico || 'libro')}Lanzar</button></span></div>`);
   }
   const lib = biblioteca();
@@ -77,7 +81,7 @@ export function combateHtml(ch, db) {
     </header>
     <div class="cb-eco" role="group" aria-label="Lo que has usado este turno">${eco}</div>
     <div class="cb-vital">${pgHtml(ch, { compacto: true })}
-      <div class="cb-rapido"><input id="cbCant" type="number" inputmode="numeric" min="0" placeholder="PG" aria-label="Cantidad de puntos de golpe">
+      <div class="cb-rapido"><input id="cbCant" type="text" inputmode="tel" autocomplete="off" placeholder="PG" aria-label="Cantidad de puntos de golpe">
         <button type="button" class="danger" data-cbpg="dano">${gi('pg')}Daño</button><button type="button" class="vd-cura" data-cbpg="curar">${gi('curacion')}Curar</button></div>
       ${placaCa(ch, 'CA', 'data-leer="ca" aria-label="Clase de armadura: mantén pulsado para ver el desglose"')}
       ${placaVel(ch, 'Velocidad', 'data-leer="vel"')}
@@ -85,6 +89,7 @@ export function combateHtml(ch, db) {
     </div>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}${estadosHtml(ch)}${modsHtml}
+    ${pruebasCombateHtml(ch)}
     <p class="cb-pista">${gi('libro')}<span><b>Mantén pulsado</b> un conjuro, arma, rasgo, estado o acción para leerlo sin salir del combate.</span></p>
     <div class="cb-cols">${col('accion', 'Acción')}${col('adicional', 'Acción adicional')}${col('reaccion', 'Reacción')}</div>
     ${pasivos.length ? `<details class="cb-pasivos"><summary>Siempre activo <small>${pasivos.length}</small>${icon('chevron')}</summary><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(n => `<span class="ej-num">${esc(n.valor)}</span>`).join('')}</button>`).join('')}</div></details>` : ''}
