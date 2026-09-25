@@ -37,7 +37,7 @@ import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
 import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
-import { alternarCaracteristica, abrirPruebas } from '../ui/vitales.js';
+import { mostrarCaracteristica, abrirPruebas } from '../ui/vitales.js';
 import { leer, initLeer } from '../ui/leer.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
@@ -279,7 +279,7 @@ function bindSheet() {
   on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
   on(sheet, 'click', '[data-cbini]', () => iniciativaManual());
   sheet.addEventListener('toggle', e => { if (e.target.classList?.contains('cb-pruebas')) abrirPruebas(e.target.open); }, true);
-  on(sheet, 'click', '[data-crab]', (e, b) => { alternarCaracteristica(b.dataset.crab); S.emit('ui'); haptic('light'); });
+  on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } haptic('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
   on(sheet, 'click', '[data-cbataque]', (e, b) => { const x = arma(b.dataset.cbataque); if (x) tirarPrueba({ titulo: x.o.nombre, sub: 'Tirada de ataque', bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque' }); });
