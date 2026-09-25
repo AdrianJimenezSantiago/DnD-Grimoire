@@ -7,12 +7,16 @@ Creas a tu personaje (clase, subclase, especie, trasfondo, nivel y característi
 ## Qué ofrece
 
 - **Todas las clases y subclases de 2024, del nivel 1 al 20**, con multiclase y un asistente para subir de nivel que te dice qué ganas.
+- **Puntos de golpe y estado:** daño, curación y temporales, dados de golpe, salvaciones contra muerte, estados, agotamiento e inspiración heroica. Si estás concentrado, te da la CD para mantenerlo.
+- **Características, salvaciones y habilidades** calculadas con tu competencia y tus pericias, listas para tirarlas con un toque.
+- **Modo combate:** una vista solo para la pelea, con ronda, iniciativa, lo que has gastado del turno y tus ataques, conjuros y rasgos ordenados por acción, acción adicional y reacción.
+- **Dados** para cualquier tirada, con ventaja y desventaja, y un **buscador** para todo el grimorio.
 - **Libro de conjuros** con un compendio de conjuros del SRD, filtros, rituales, concentración y tiradas de daño y curación.
 - **«En juego»:** los rasgos de tu clase, especie y dotes agrupados por cuándo se usan (acción, acción adicional, reacción…).
 - **Inventario** con armas y armaduras calculadas, monedas, carga y objetos mágicos con sintonización y cargas.
 - **Diario de sesiones y bestiario** para apuntar lo que pasa en la campaña y lo que sabéis de cada criatura.
 - **Tus libros dentro:** importa el PDF de tu Manual del Jugador, de la Guía del Dungeon Master o de una expansión. La app lee en tu dispositivo las descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos y subclases, y nada sale de él.
-- **Varios personajes**, cada uno con el color y el emblema de su clase.
+- **Varios personajes**, cada uno con el color y el emblema de su clase, que puedes exportar por separado para pasarlos a otro dispositivo o a tu DJ.
 
 ## Instalación
 

@@ -14,7 +14,10 @@ import { notaHtml } from './dialogs/diario.js';
 import { rasgosConObjetivo } from '../domain/concentracion.js';
 import { rasgosEnJuego, agrupar, numerosMarciales, FUENTES } from '../domain/enJuego.js';
 import { biblioteca } from '../domain/catalogo.js';
-import { claseArmadura } from '../domain/equipo.js';
+import { vitalesHtml, caracteristicasHtml } from './vitales.js';
+import { combateHtml, escuelaIco } from './combate.js';
+import { combateDe } from '../domain/combate.js';
+import { percepcionPasiva } from '../domain/habilidades.js';
 
 export const slotsOf = (P, n) => P.slots[n] || 0;
 export const usedOf = (ch, P, n) => Math.min(ch.play.used[n] || 0, slotsOf(P, n));
@@ -40,7 +43,7 @@ function candles(ch, P, L) {
 function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="true"' : ''} ${attrs}>${esc(val)}</span>`; }
 
 function heroHtml(ch, P) {
-  const mods = `${P.apKey ? `${ABIL_NAME[P.apKey]} ${sgn(P.mod)}, competencia ${sgn(P.pb)}` : `Competencia ${sgn(P.pb)}`} · CA ${claseArmadura(ch).ca}`;
+  const mods = `Competencia ${sgn(P.pb)}${P.apKey ? ` · ${ABIL_NAME[P.apKey]} ${sgn(P.mod)} para conjuros` : ''} · Percepción pasiva ${percepcionPasiva(ch)}`;
   const t = temaDe(ch);
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
     <div class="hero-id"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
@@ -183,7 +186,7 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
   const lvlSel = editing ? `<label>nivel <select data-lvl="${bi}">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}" ${n === L ? 'selected' : ''}>${n === 0 ? 'truco' : n}</option>`).join('')}</select></label>` : '';
   const cell = (cls, v, key) => `<span class="${cls}">${editing || v ? ce(v, `${k} data-k="${key}"`, editing) : ''}</span>`;
   const escuela = editing ? `<span class="c-school ${trig ? 'trig' : ''}"><button type="button" class="sch-pick" data-schoolpick="${bi}" aria-haspopup="menu"><i class="sch-dot" aria-hidden="true"></i>${esc(s.escuela || 'Escuela')}${icon('chevron')}</button></span>`
-    : cell(`c-school ${trig ? 'trig' : ''}`, s.escuela, 'escuela');
+    : `<span class="c-school ${trig ? 'trig' : ''}">${s.escuela ? `${gi(escuelaIco(s.escuela) || 'libro', 'sch-ico')}<span>${esc(s.escuela)}</span>` : ''}</span>`;
   const comps = editing ? `<span class="c-comp comp-pick" role="group" aria-label="Componentes">${[['V', 'Verbal'], ['S', 'Somático'], ['M', 'Material']].map(([c, t]) => `<button type="button" data-comp="${bi}|${c}" aria-pressed="${(s.comp || '').split(' ').includes(c)}" title="${t}">${c}</button>`).join('')}</span>`
     : cell('c-comp', s.comp, 'comp');
   return `<div class="spell ${castable ? '' : 'dim'}" id="sp-${bi}" data-sc="${schoolKey(s.escuela)}">
@@ -216,20 +219,30 @@ let lastChar = null;
 export function renderBar(S) {
   const ch = S.cur();
   const dockLbl = (id, ic, t) => patch($(id), `${icon(ic)}<span>${t}</span>`);
-  const deskLbl = (id, ic, t) => patch($(id), `${icon(ic)}${t}`);
+  const deskLbl = (id, ic, t) => { patch($(id), `${icon(ic)}${t}`); $(id).title = t; $(id).setAttribute('aria-label', t); };
   dockLbl('#dRest', 'moon', 'Descansar'); dockLbl('#dFilter', 'book', 'Preparados'); dockLbl('#dEdit', 'quill', S.editing ? 'Terminar' : 'Editar');
   dockLbl('#dAdd', 'plus', 'Añadir'); dockLbl('#dHist', 'hourglass', 'Historial');
+  const combate = !!(ch && combateDe(ch).activo);
+  patch($('#dDados'), `${gi('cubilete', 'icon')}<span>Dados</span>`); patch($('#dCombate'), `${gi('combate', 'icon')}<span>${combate ? 'Salir' : 'Combate'}</span>`);
+  patch($('#bDados'), `${gi('cubilete', 'icon')}Dados`); patch($('#bCombate'), `${gi('combate', 'icon')}${combate ? 'Terminar combate' : 'Combate'}`);
+  $('#bDados').title = 'Dados'; $('#bCombate').title = combate ? 'Terminar combate' : 'Modo combate'; $('#bCombate').setAttribute('aria-label', $('#bCombate').title);
+  patch($('#btnBuscar'), gi('buscar', 'icon'));
+  ['#dCombate', '#bCombate'].forEach(id => $(id).setAttribute('aria-pressed', combate));
+  document.body.classList.toggle('combate', combate);
   deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bFilter', 'book', 'Solo preparados'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar conjuros');
   deskLbl('#bAdd', 'plus', 'Añadir conjuro'); deskLbl('#bHist', 'hourglass', 'Historial');
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
   ['#dFilter', '#bFilter'].forEach(id => $(id).setAttribute('aria-pressed', !!ch?.play.onlyPrep));
   $('#dAdd').hidden = !S.editing;
+  $('#dCombate').hidden = $('#bCombate').hidden = $('#dDados').hidden = !ch;
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const conj = conConjuros(ch, P);
   const preparables = P.maxSlot > 0 || ch.book.some(e => (S.db.catalog[e.sid]?.level || 0) > 0);
-  $('#bFilter').hidden = $('#dFilter').hidden = !conj || !preparables; $('#bAdd').hidden = !conj;
-  $('#bEdit').hidden = $('#dEdit').hidden = !conj && !S.editing;
+  $('#bFilter').hidden = $('#dFilter').hidden = !conj || !preparables || combate; $('#bAdd').hidden = !conj || combate;
+  $('#bRest').hidden = $('#dRest').hidden = combate;
+  $('#bEdit').hidden = $('#dEdit').hidden = (!conj && !S.editing) || combate;
+  if (combate) $('#dAdd').hidden = true;
   if (!conj) $('#dAdd').hidden = true;
   aplicarTema(ch);
   patch($('#whoChip'), `${avatarHtml(ch, 'av-chip')}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
@@ -247,7 +260,7 @@ export function renderSheet(S) {
   document.body.classList.toggle('editing', editing);
   if (!ch) {
     patch($('#hero'), `<div class="nochar"><h2>Ningún grimorio abierto</h2><p>Crea un personaje para empezar su libro de conjuros. Los conjuros del catálogo y del compendio se añaden con un toque.</p><button type="button" class="gold" data-cmd="newchar">Nuevo personaje</button></div>`);
-    ['#stats', '#res', '#legend', '#levels', '#foot'].forEach(id => patch($(id), ''));
+    ['#stats', '#res', '#legend', '#levels', '#foot', '#vitales', '#caracs', '#combate'].forEach(id => patch($(id), ''));
     return;
   }
   aplicarTema(ch);
@@ -257,6 +270,11 @@ export function renderSheet(S) {
     lastChar = ch.id; pop($('#hero'), 'fx-enter');
     $('#hero .underline path')?.classList.add('fx-draw');
   } else if (heroChanged) $('#hero .underline path')?.classList.remove('fx-draw');
+  const combate = combateDe(ch).activo;
+  document.body.classList.toggle('combate', combate);
+  patch($('#combate'), combate ? combateHtml(ch, db) : '');
+  patch($('#vitales'), vitalesHtml(ch));
+  patch($('#caracs'), caracteristicasHtml(ch));
   patch($('#stats'), statsHtml(db, ch, P));
   patch($('#res'), resourcesHtml(db, ch, P));
   patch($('#enjuego'), enJuegoHtml(ch, P));

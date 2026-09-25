@@ -1,5 +1,5 @@
 import { esc } from '../core/util.js';
-import { SCHOOLS, perfil, clasesTexto } from '../domain/reglas2024.js';
+import { SCHOOLS, perfil, clasesTexto, ABIL_NAME } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
 import { schoolKey } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
@@ -32,6 +32,14 @@ import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
 import { avatarHtml } from '../ui/avatar.js';
+import { openVida, openEstados, danar, sanar, tirarSalvacionMuerte } from '../ui/dialogs/vida.js';
+import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
+import { openBuscar } from '../ui/dialogs/buscar.js';
+import { transicion } from '../ui/combate.js';
+import { alternarCaracteristica } from '../ui/vitales.js';
+import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
+import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
+import { equipoDe, ataqueArma } from '../domain/equipo.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -115,12 +123,20 @@ const COMMANDS = {
   rest: (el) => S.cur() && showMenu($('#restMenu'), el, restItems()),
   more: (el) => showMenu($('#moreMenu'), el, moreMenuHtml()),
   long: () => A.longRest(S),
-  short: () => A.shortRest(S, openRecovery),
+  short: () => A.shortRest(S, openRecovery, openVida),
   endconc: () => A.endConc(S),
   objetivos: () => A.enfocarObjetivos('conc'),
   formas: () => S.cur() && openFormas('salvaje'),
   verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
   backup: () => openBackup(),
+  vida: () => S.cur() && openVida(),
+  estados: () => S.cur() && openEstados(),
+  dados: () => openDados(),
+  dadoslibres: () => openDados(),
+  buscar: () => openBuscar(),
+  salvmuerte: () => S.cur() && tirarSalvacionMuerte(S),
+  combate: el => alternarCombate(el),
+  turno: () => nuevoTurno(),
   manual: () => openManual(),
   print: () => { setEditing(false); setTimeout(() => print(), 80); },
   theme: () => toggleTheme(),
@@ -137,6 +153,31 @@ function run(cmd, el) {
   closeMenu();
   if ((cmd === 'more' && abierto === 'moreMenu') || (cmd === 'rest' && abierto === 'restMenu')) return;
   COMMANDS[cmd]?.(el);
+}
+
+function alternarCombate(el) {
+  const ch = S.cur(); if (!ch) return;
+  const c = combateDe(ch), activo = c.activo, ronda = c.ronda;
+  transicion(activo ? 'salir' : 'entrar', el, () => {
+    S.editing = false;
+    S.act(activo ? `Fin del combate tras ${ronda} ${ronda === 1 ? 'ronda' : 'rondas'}` : 'Empieza el combate', (db, x) => { if (activo) terminarCombate(x); else empezarCombate(x); });
+    const el2 = activo ? $('#sheet') : $('#combate'), cls = activo ? 'fx-paz' : 'fx-entra';
+    if (!reducedMotion()) { el2.classList.add(cls); setTimeout(() => el2.classList.remove(cls), 1300); }
+  }, { ronda });
+  haptic(activo ? 'light' : 'heavy');
+}
+function nuevoTurno() {
+  const ch = S.cur(); if (!ch) return;
+  S.act(`Ronda ${combateDe(ch).ronda + 1}`, (db, x) => { siguienteTurno(x); });
+  pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
+}
+function tirarDesde(clave) {
+  const ch = S.cur(); if (!ch) return;
+  if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa',
+    alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; }); return 'Guardada como tu iniciativa en este combate.'; } });
+  const [tipo, k] = clave.split(':');
+  if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion' });
+  if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba' });
 }
 
 function back() {
@@ -170,6 +211,16 @@ function bindSheet() {
   on(sheet, 'click', '[data-ejfijar]', (e, b) => { const k = b.dataset.ejfijar; S.edit((db, ch) => { ch.enJuego ||= {}; const f = ch.enJuego.fijados || [];
     ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
+  on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
+  on(sheet, 'click', '[data-crab]', (e, b) => { alternarCaracteristica(b.dataset.crab); S.emit('ui'); haptic('light'); });
+  on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
+  const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
+  on(sheet, 'click', '[data-cbataque]', (e, b) => { const x = arma(b.dataset.cbataque); if (x) tirarPrueba({ titulo: x.o.nombre, sub: 'Tirada de ataque', bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque' }); });
+  on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr }); });
+  const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = parseInt(i?.value, 10); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
+    if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
+  on(sheet, 'click', '[data-cbpg]', (e, b) => pgRapido(b.dataset.cbpg));
+  sheet.addEventListener('keydown', e => { if (e.target.id === 'cbCant' && e.key === 'Enter') { e.preventDefault(); pgRapido('dano'); } });
   on(sheet, 'click', '[data-irrec]', (e, b) => {
     const card = [...sheet.querySelectorAll('[data-resid]')].find(x => x.dataset.resid === b.dataset.irrec); if (!card) return;
     card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
@@ -277,6 +328,7 @@ export async function init(store) {
   document.addEventListener('click', e => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('[data-cmd="more"],[data-cmd="rest"]')) closeMenu(); }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); hideToast(); } });
   addEventListener('resize', closeMenu); addEventListener('scroll', () => { if (openMenu && Math.abs(scrollY - menuY) > 60) closeMenu(); }, { passive: true });
+  let sbT = 0; addEventListener('scroll', () => { if (sbT) return; sbT = requestAnimationFrame(() => { sbT = 0; document.body.classList.toggle('sb-compacta', scrollY > 320); }); }, { passive: true });
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) closeSheet(d); }));
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setBars(isDark())); } catch {}
   if (NATIVE) { awake = (await storage.get(PREF + '-awake')) === '1'; keepAwake(awake); }

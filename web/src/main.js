@@ -17,6 +17,7 @@ import './styles/motion.css';
 import './styles/extras.css';
 import './styles/biblioteca.css';
 import './styles/arcano.css';
+import './styles/juego.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
@@ -48,6 +49,9 @@ import * as area from './ui/dialogs/area.js';
 import * as biblioteca from './ui/dialogs/biblioteca.js';
 import * as equipo from './ui/dialogs/equipo.js';
 import * as formas from './ui/dialogs/formas.js';
+import * as vida from './ui/dialogs/vida.js';
+import * as dados from './ui/dialogs/dados.js';
+import * as buscar from './ui/dialogs/buscar.js';
 import { tour } from './ui/tour.js';
 import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
@@ -71,7 +75,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S);
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); dados.init(S); buscar.init(S);
   const app = await eventos.init(S);
 
   const TOUR_INICIO = [
@@ -85,11 +89,17 @@ async function boot() {
     { sel: '#sbar', titulo: 'Espacios de conjuro', texto: 'Cada círculo lleno es un espacio libre. Tócalo para gastarlo o recuperarlo. El número de la izquierda te lleva a ese nivel.' },
     { sel: '.spell[id] .castzone', titulo: 'Lanzar', texto: '<b>Toca</b> un conjuro para lanzarlo: gasta el espacio adecuado, marca la concentración y te ofrece <b>Tirar</b>. <b>Mantén pulsado</b> para leerlo y elegir nivel o ritual.' },
     { sel: '.spell[id] .prep:not(.none):not(.always), .spell[id] .prep', titulo: 'Preparados', texto: 'El rombo marca los conjuros preparados. En dorado, los que están siempre preparados.' },
+    { sel: '#vitales .pg-card', titulo: 'Puntos de golpe', texto: 'Toca aquí para anotar daño, curación y puntos de golpe temporales, gastar dados de golpe o tirar salvaciones contra muerte. Si estás concentrado, la app te dice la CD para mantenerlo.' },
+    { sel: '#vitales .vt-estados', titulo: 'Estados', texto: 'Envenenado, derribado, agotamiento o inspiración heroica: márcalos aquí y la hoja los tiene en cuenta (el agotamiento resta a tus tiradas y a tu velocidad).' },
+    { sel: '#caracs .cr-grid', titulo: 'Características', texto: 'Cada característica con su salvación y sus habilidades, ya calculadas con tu competencia y tus pericias. <b>Toca</b> cualquiera para tirarla.' },
     { sel: '.hero-av', titulo: 'Tu personaje', texto: 'Toca el retrato para añadir o reencuadrar una imagen. En <b>Historia</b> tienes su trasfondo con índice y búsqueda, y en <b>Diario</b> las notas de cada sesión y su <b>bestiario</b>: lo que sabéis de cada criatura.' },
     { sel: '[data-cmd="equipo"]', titulo: 'Inventario', texto: 'Todo lo que lleva: armas con su ataque y daño, armadura con su CA, equipo, consumibles, comida, tesoro y monedas, con el peso y la carga. Los objetos mágicos traen su sintonización y sus cargas.' },
     { sel: '#res .resources', titulo: 'Rasgos y recursos', texto: 'Los recursos de tu clase y subclase se cuentan aquí y se recuperan solos con los descansos.' },
     { sel: '#dRest, #bRest', titulo: 'Descansar', texto: 'Descanso corto o largo: la app restaura lo que corresponde según tu clase.' },
     { sel: '#dEdit, #bEdit', titulo: 'Editar y añadir', texto: 'En modo edición cambias textos y añades conjuros desde el catálogo o el compendio de 391 conjuros.' },
+    { sel: '#dDados, #bDados', titulo: 'Dados', texto: 'Cualquier tirada: suma dados con un toque o escribe «2d6+3», con ventaja o desventaja y las últimas tiradas a mano.' },
+    { sel: '#dCombate, #bCombate', titulo: 'Modo combate', texto: 'Una vista solo para la pelea: ronda e iniciativa, lo que has gastado del turno, puntos de golpe, ataques y conjuros ordenados por acción, acción adicional y reacción.' },
+    { sel: '#btnBuscar', titulo: 'Buscar', texto: 'Encuentra cualquier cosa del grimorio: conjuros, reglas, objetos, rasgos, inventario o diario. En el ordenador, también con Ctrl+K.' },
     { sel: '#dHist, #bHist', titulo: 'Historial', texto: 'Todo lo que lances, gastes o tires queda anotado, y puedes deshacer varios pasos.' },
     { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
     { sel: '#whoChip', titulo: 'Cambiar de personaje', texto: 'Desde aquí vuelves a la portada para elegir otro personaje. Allí, «Gestionar personajes» los edita, duplica y borra.' },

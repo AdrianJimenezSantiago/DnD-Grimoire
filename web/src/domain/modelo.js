@@ -3,6 +3,9 @@ import { perfil } from './reglas2024.js';
 import { HOJA_THEO } from './ejemplo.js';
 import { limpiarConjuro, usoGratis } from './validar.js';
 import { normEquipo } from './equipo.js';
+import { habilidadesTrasfondo, HABILIDADES } from './habilidades.js';
+import { normVida } from './vida.js';
+import { normCombate } from './combate.js';
 
 export const SCHEMA = 2;
 export const CAT_FIELDS = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
@@ -25,12 +28,13 @@ export function blankChar(over = {}) {
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], rasgosOcultos: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
+    habilidades: null, salvacionesExtra: [], vida: null, combate: null,
     ...clone(over),
   };
 }
 
 export function normChar(c) {
-  const sinOcultos = !Array.isArray(c?.rasgosOcultos);
+  const sinOcultos = !Array.isArray(c?.rasgosOcultos), sinHabilidades = !c?.habilidades || typeof c.habilidades !== 'object';
   c = { ...blankChar(), ...c };
   c.stats = { ...STATS0, ...(c.stats || {}) };
   c.play = { ...PLAY0(), ...(c.play || {}) };
@@ -59,6 +63,11 @@ export function normChar(c) {
     .filter((m, i, a) => a.findIndex(x => x.clase === m.clase) === i).map(m => ({ clase: m.clase, subclase: String(m.subclase || ''), nivel: clamp(parseInt(m.nivel, 10) || 1, 1, 19) }));
   c.dotes = [...new Set((Array.isArray(c.dotes) ? c.dotes : []).map(d => String(d || '').trim()).filter(Boolean))];
   c.book = (c.book || []).filter(e => e && e.sid);
+  if (sinHabilidades) c.habilidades = Object.fromEntries(habilidadesTrasfondo(c).map(k => [k, 1]));
+  c.habilidades = Object.fromEntries(HABILIDADES.map(([k]) => [k, Math.max(0, Math.min(2, parseInt(c.habilidades[k], 10) || 0))]).filter(([, n]) => n));
+  c.salvacionesExtra = [...new Set((Array.isArray(c.salvacionesExtra) ? c.salvacionesExtra : []).filter(k => ['fue', 'des', 'con', 'int', 'sab', 'car'].includes(k)))];
+  c.vida = normVida(c.vida);
+  c.combate = normCombate(c.combate);
   return c;
 }
 
@@ -104,6 +113,16 @@ export function charFromV1(d, v1) {
   if (!isNaN(cd) && P.cd != null && cd !== P.cd) ch.extraCD = cd - P.cd;
   if (!isNaN(at) && P.atk != null && at !== P.atk) ch.extraAtaque = at - P.atk;
   return normChar(ch);
+}
+
+export function importarPersonaje(db, paquete) {
+  const mapa = {};
+  for (const [sid, x] of Object.entries(paquete.conjuros || {})) if (x) mapa[sid] = upsertSpell(db, x);
+  const c = normChar({ ...clone(paquete.personaje), id: uid('c'), prueba: false });
+  c.book = c.book.filter(e => mapa[e.sid]).map(e => ({ ...e, sid: mapa[e.sid] }));
+  if (db.chars.some(x => x.nombre === c.nombre)) c.nombre += ' (importado)';
+  db.chars.push(c); db.activeId = c.id;
+  return c;
 }
 
 export const emptyDb = () => ({ schema: SCHEMA, catalog: {}, chars: [], activeId: null });

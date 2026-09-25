@@ -17,10 +17,14 @@ import { estiloPaleta } from '../../domain/paleta.js';
 import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
-import { fileStore } from '../../platform/native.js';
+import { fileStore, shareJson } from '../../platform/native.js';
+import { gi } from '../tema.js';
+import { SCHEMA } from '../../domain/modelo.js';
+import { HABILIDADES, AB_CORTA, HAB_CLASE, NOMBRE_HAB, habilidadesTrasfondo, competenciasIniciales, periciasDisponibles, bonoHabilidad, salvacionesCompetentes } from '../../domain/habilidades.js';
+import { CLASES_INFO } from '../../domain/clases2024.js';
 
 let S, onCreated;
-let MC = [], DOTES = [];
+let MC = [], DOTES = [], HAB = {}, SALV = [];
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 const fill = (id, arr) => { $(id).innerHTML = arr.map(v => `<option value="${esc(v)}"></option>`).join(''); };
 
@@ -36,7 +40,7 @@ function renderList() {
     return `<div class="ccard ${c.id === S.db.activeId ? 'active' : ''}"><span class="ccard-av paleta-local" style="${estiloPaleta(temaDe(c))}">${avatarHtml(c, 'md')}</span>
       <button type="button" class="cmain" data-openc="${c.id}"><span class="cname">${esc(c.nombre || 'Sin nombre')}</span>
         <span class="cline">${esc(claseLinea(c))}${origenLinea(c) ? '. ' + esc(origenLinea(c)) : ''}. ${nb === 1 ? '1 conjuro' : nb + ' conjuros'} en el libro</span></button>
-      <div class="cacts"><button type="button" data-editc="${c.id}">Editar</button><button type="button" data-dupc="${c.id}">Duplicar</button><button type="button" class="warn" data-delc="${c.id}">Borrar</button></div>
+      <div class="cacts"><button type="button" data-editc="${c.id}">Editar</button><button type="button" data-dupc="${c.id}">Duplicar</button><button type="button" data-expc="${c.id}" aria-label="Exportar a ${esc(c.nombre || "este personaje")}" title="Exportar">${gi("exportar")}<span class="cacts-t">Exportar</span></button><button type="button" class="warn" data-delc="${c.id}">Borrar</button></div>
     </div>`; }).join('') : '<p class="pempty">Todavía no hay personajes.</p>')
     + `<p class="credit">El catálogo compartido tiene ${n === 1 ? '1 conjuro' : n + ' conjuros'}. Lo que añadas a un personaje queda disponible para los demás.</p>`;
 }
@@ -50,6 +54,16 @@ function duplicate(id) {
     db.chars.splice(db.chars.findIndex(x => x.id === id) + 1, 0, c);
   });
   renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [undoBtn(S, h)]);
+}
+export function paqueteDe(db, c) {
+  const conjuros = Object.fromEntries(c.book.map(e => [e.sid, db.catalog[e.sid]]).filter(([, x]) => x));
+  return { tipo: 'grimorio-personaje', version: 1, schema: SCHEMA, fecha: new Date().toISOString(), personaje: clone(c), conjuros };
+}
+async function exportar(id) {
+  const c = S.db.chars.find(x => x.id === id); if (!c) return;
+  const nombre = `${(c.nombre || 'personaje').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'personaje'}.grimorio.json`;
+  try { await shareJson(nombre, JSON.stringify(paqueteDe(S.db, c), null, 1)); toast(`<b>${esc(c.nombre)}</b> exportado. Se abre desde «Cargar copia» en cualquier grimorio.`); }
+  catch (e) { if (!/cancel/i.test(String(e?.message))) toast('No se pudo exportar el personaje.'); }
 }
 async function remove(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
@@ -85,6 +99,10 @@ export function openCharForm(id) {
     <datalist id="dl_dotes"></datalist>
     <p class="hint">La de origen sale de tu trasfondo. Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p></section>
   <section class="fsec"><h3>Características</h3><div class="abil">${abil}</div></section>
+  <section class="fsec"><h3>Competencias</h3><p class="hint comp-hint" id="h_comp" aria-live="polite"></p>
+    <div class="comp-salv" id="f_salv" role="group" aria-label="Tiradas de salvación"></div>
+    <div class="comp-grid" id="f_comp" role="group" aria-label="Habilidades"></div>
+    <p class="hint">Toca una habilidad para pasar de nada a competencia (●) y a pericia (◆◆). <button type="button" class="linkish" id="f_compAuto">Rellenar con las de mi trasfondo y clase</button></p></section>
   <button type="button" class="ghost conj-toggle" id="f_conjOpen" hidden>${icon('plus')}Opciones de conjuros (dotes, especie o multiclase)</button>
   <section class="fsec" id="f_secConj"><h3>Conjuros</h3><div class="frow">
     <label class="f">Característica para conjuros<select id="f_aptitud"></select><span class="hint">Cámbiala solo si la da una dote o especie.</span></label>
@@ -97,7 +115,7 @@ export function openCharForm(id) {
     <label class="f wide">Campaña<input id="f_campana" value="${esc(c.campana)}" autocomplete="off"></label>
     <label class="f wide">Dotes y notas<textarea id="f_notas" rows="3" placeholder="Dotes, rasgos de especie, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
   <section class="fsec"><h3>Resumen</h3><div class="fsum" id="f_sum" aria-live="polite"></div></section>`;
-  MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])];
+  MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])];
   pintarMulticlase(); pintarDotes();
   sync(true); openSheet(charDlg());
   if (!id) setTimeout(() => $('#f_nombre').focus(), 60);
@@ -108,7 +126,7 @@ function readForm() {
   Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: v('#f_subclase'),
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
-    multiclase: clone(MC), dotes: [...DOTES] });
+    multiclase: clone(MC), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
   ABILS.forEach(([k]) => { base.stats[k] = clamp(parseInt(v('#f_' + k), 10) || 10, 1, 30); });
   base.espacios = {}; for (let L = 1; L <= 9; L++) { const n = clamp(parseInt(v('#f_e' + L), 10) || 0, 0, 9); if (n) base.espacios[L] = n; }
   return base;
@@ -123,6 +141,21 @@ function pintarMulticlase() {
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;
   }).join('');
   $('#f_mcAdd').hidden = MC.length >= 3;
+}
+function pintarComp(draft) {
+  const base = new Set(CLASES_INFO[draft.clase]?.salv || []), comp = salvacionesCompetentes(draft);
+  $('#f_salv').innerHTML = '<span class="comp-lbl">Salvaciones</span>' + ['fue', 'des', 'con', 'int', 'sab', 'car'].map(k => base.has(k)
+    ? `<span class="comp-s fija" title="De tu clase">${AB_CORTA[k]}</span>`
+    : `<button type="button" class="comp-s ${comp.has(k) ? 'on' : ''}" data-salv="${k}" aria-pressed="${comp.has(k)}" title="Competencia extra (dote o rasgo)">${AB_CORTA[k]}</button>`).join('');
+  const tras = new Set(habilidadesTrasfondo(draft));
+  $('#f_comp').innerHTML = HABILIDADES.map(([k, n, ab]) => { const nv = HAB[k] || 0;
+    return `<button type="button" class="comp-h n${nv}" data-hab="${k}" aria-label="${esc(n)}: ${['sin competencia', 'competencia', 'pericia'][nv]}"><i class="cr-m n${nv}" aria-hidden="true"></i><span>${esc(n)}<small>${AB_CORTA[ab]}${tras.has(k) ? ' · trasfondo' : ''}</small></span><b>${sgn(bonoHabilidad(draft, k))}</b></button>`; }).join('');
+  const [nClase, lista] = HAB_CLASE[draft.clase] || [0, []], deClase = lista.filter(k => HAB[k] && !tras.has(k)).length, per = periciasDisponibles(draft), usadas = Object.values(HAB).filter(n => n === 2).length;
+  const bits = [];
+  if (tras.size) bits.push(`${draft.trasfondo}: ${[...tras].map(k => NOMBRE_HAB[k]).join(' y ')}.`);
+  if (nClase) bits.push(`${draft.clase} elige ${nClase} de: ${lista.length === HABILIDADES.length ? 'cualquiera' : lista.map(k => NOMBRE_HAB[k]).join(', ')}${deClase < nClase ? ` (llevas ${deClase})` : ''}.`);
+  if (per) bits.push(`Pericias de tu clase: ${per}${usadas !== per ? ` (llevas ${usadas})` : ''}.`);
+  $('#h_comp').textContent = bits.join(' ');
 }
 function pintarDotes() {
   const d = readForm(), origen = dotesDe({ ...d, dotes: [] }, biblioteca().trasfondos)[0];
@@ -173,6 +206,7 @@ function sync(first) {
   }
   if (formId) { const oc = S.db.chars.find(x => x.id === formId), diff = levelDiff(perfil(oc), P, oc, draft); if (diff) notes.push(diff); }
   $('#f_sum').innerHTML = L.map(t => `<p>${esc(t)}</p>`).join('') + notes.map(t => `<p class="note">${esc(t)}</p>`).join('');
+  pintarComp(draft);
 }
 function save() {
   const draft = readForm();
@@ -205,7 +239,11 @@ export function init(store, { onNewCharacterAddSpells }) {
     if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
     if (e.target.id === 'f_clase') { MC = MC.filter(m => m.clase !== e.target.value); pintarMulticlase();
       const v = $('#f_subclase').value, vale = subclasesDe(e.target.value).includes(v); $('#f_subWrap').innerHTML = campoSubclase(e.target.value, vale ? v : '', 'id="f_subclase" aria-label="Subclase"'); }
-    if (e.target.id === 'f_trasfondo') pintarDotes();
+    if (e.target.id === 'f_trasfondo') {
+      for (const k of habilidadesTrasfondo({ trasfondo: e.target.dataset.antes || '' })) if (HAB[k] === 1) delete HAB[k];
+      for (const k of habilidadesTrasfondo({ trasfondo: e.target.value })) HAB[k] ||= 1;
+      e.target.dataset.antes = e.target.value; pintarDotes();
+    }
     if (e.target.id === 'f_manual' && e.target.checked) {
       const P = perfil({ ...readForm(), espaciosManuales: false });
       for (let L = 1; L <= 9; L++) { const i = $('#f_e' + L); if (!i.value) i.value = P.slots[L] || ''; }
@@ -213,6 +251,10 @@ export function init(store, { onNewCharacterAddSpells }) {
     sync(false);
   });
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
+  form.addEventListener('focusin', e => { if (e.target.id === 'f_trasfondo') e.target.dataset.antes = e.target.value; });
+  on(form, 'click', '[data-hab]', (e, b) => { const k = b.dataset.hab, n = ((HAB[k] || 0) + 1) % 3; if (n) HAB[k] = n; else delete HAB[k]; sync(false); });
+  on(form, 'click', '[data-salv]', (e, b) => { const k = b.dataset.salv; SALV = SALV.includes(k) ? SALV.filter(x => x !== k) : [...SALV, k]; sync(false); });
+  on(form, 'click', '#f_compAuto', () => { const d = readForm(), ini = competenciasIniciales(d); for (const [k, n] of Object.entries(ini)) if (!HAB[k]) HAB[k] = n; sync(false); });
   on(form, 'click', '#f_mcAdd', () => { const libre = Object.keys(CLASES).find(k => k !== $('#f_clase').value && !MC.some(m => m.clase === k)); if (!libre) return;
     MC.push({ clase: libre, subclase: '', nivel: 1 }); pintarMulticlase(); sync(false); form.querySelector(`[data-mc="${MC.length - 1}|clase"]`)?.focus(); });
   on(form, 'click', '[data-mcdel]', (e, b) => { MC.splice(+b.dataset.mcdel, 1); pintarMulticlase(); sync(false); });
@@ -229,5 +271,6 @@ export function init(store, { onNewCharacterAddSpells }) {
     if (t.dataset.editc) return openCharForm(t.dataset.editc);
     if (t.dataset.dupc) return duplicate(t.dataset.dupc);
     if (t.dataset.delc) return remove(t.dataset.delc);
+    if (t.dataset.expc) return exportar(t.dataset.expc);
   });
 }

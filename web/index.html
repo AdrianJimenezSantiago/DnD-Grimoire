@@ -24,7 +24,10 @@
       <button type="button" data-cmd="edit" id="bEdit"></button>
       <button type="button" data-cmd="add" id="bAdd" class="edit-only"></button>
       <button type="button" data-cmd="hist" id="bHist"></button>
+      <button type="button" data-cmd="dados" id="bDados"></button>
+      <button type="button" data-cmd="combate" id="bCombate" class="b-combate"></button>
     </span>
+    <button type="button" class="iconbtn" data-cmd="buscar" id="btnBuscar" aria-label="Buscar" title="Buscar (Ctrl+K)"></button>
     <button type="button" class="iconbtn" data-cmd="more" id="btnMore" aria-label="Más opciones" aria-haspopup="menu"></button>
   </div>
   <div class="slots-bar" id="sbar" aria-label="Espacios de conjuro"></div>
@@ -34,12 +37,15 @@
 <main class="wrap">
   <div id="sheet">
     <div class="hero" id="hero"></div>
+    <section class="vitales" id="vitales" aria-label="Puntos de golpe y defensa"></section>
     <div class="stats" id="stats"></div>
+    <section class="caracs" id="caracs" aria-label="Características y habilidades"></section>
     <div id="res"></div>
     <section class="ej" id="enjuego" aria-label="Rasgos en juego"></section>
     <div class="legend" id="legend"></div>
     <div id="levels"></div>
     <footer class="foot" id="foot"></footer>
+    <section class="cb-vista" id="combate" aria-label="Modo combate"></section>
   </div>
 </main>
 
@@ -48,6 +54,8 @@
   <button type="button" class="dockbtn" data-cmd="filter" id="dFilter" aria-pressed="false"></button>
   <button type="button" class="dockbtn" data-cmd="edit" id="dEdit"></button>
   <button type="button" class="dockbtn" data-cmd="add" id="dAdd"></button>
+  <button type="button" class="dockbtn" data-cmd="dados" id="dDados"></button>
+  <button type="button" class="dockbtn d-combate" data-cmd="combate" id="dCombate"></button>
   <button type="button" class="dockbtn" data-cmd="hist" id="dHist"></button>
 </nav>
 
@@ -66,6 +74,31 @@
   <div class="dhead"><h2 id="rlTitle"></h2><div class="dsub" id="rlSub"></div></div>
   <div class="dbody" id="rlBody"></div>
   <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="dadosDlg" class="tall" aria-labelledby="daTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="daTitle">Dados</h2><div class="dsub" id="daSub"></div></div>
+  <div class="dbody" id="daBody"></div>
+  <div class="dfoot"><button type="button" data-cmd="dadoslibres">Dados libres</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="vidaDlg" class="tall" aria-labelledby="vdTitle"><div class="grip"></div>
+  <div class="dhead dhead-av" id="vdHead"></div>
+  <div class="dbody" id="vdBody"></div>
+  <div class="dfoot"><button type="button" data-cmd="estados">Estados</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="estadosDlg" class="tall" aria-labelledby="esTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="esTitle">Estados</h2><div class="dsub" id="esSub"></div></div>
+  <div class="dbody" id="esBody"></div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
+</dialog>
+
+<dialog id="buscarDlg" class="tall" aria-labelledby="bsTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="bsTitle">Buscar</h2><div class="dsub" id="bsSub">Conjuros, reglas, objetos, dotes, rasgos, criaturas, inventario y diario.</div>
+    <input type="search" id="bsQ" class="bs-q" placeholder="Escribe al menos dos letras" aria-label="Buscar" autocomplete="off" enterkeyhint="search"></div>
+  <div class="dbody" id="bsBody"></div>
+  <div class="dfoot"><span class="bs-teclas">↑ ↓ para moverte · Intro para abrir</span><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
 <dialog id="bibDlg" class="tall" aria-labelledby="bibTitle"><div class="grip"></div>
@@ -193,7 +226,7 @@
       <button type="button" id="bkOpen">Abrir archivo</button>
       <input type="file" id="bkFile" class="visually-hidden" accept=".json,application/json,text/plain" tabindex="-1" aria-hidden="true">
     </div>
-    <p class="note">También puedes copiar el texto o pegar el de otra copia y pulsar «Cargar copia». Una copia de la hoja antigua del navegador se añade como un personaje más.</p>
+    <p class="note">También puedes copiar el texto o pegar el de otra copia y pulsar «Cargar copia». Un personaje exportado suelto (desde «Gestionar personajes») o una copia de la hoja antigua se añaden como un personaje más, sin tocar los demás.</p>
     <textarea id="bkText" spellcheck="false" rows="5" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
   </div>
   <div class="dfoot"><button type="button" id="bkCopy">Copiar texto</button><button type="button" id="bkLoad">Cargar copia</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
