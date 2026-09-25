@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { pgMaximo, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, descansoLargoVida, cdConcentracion, pgMaximoCalculado } from '../web/src/domain/vida.js';
+import { pgMaximo, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, descansoLargoVida, cdConcentracion, pgMaximoCalculado, revivir } from '../web/src/domain/vida.js';
 
 const pj = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14 }, ...over }));
 
@@ -46,4 +46,19 @@ test('dados de golpe por clase, gasto y descanso largo (2024: se recuperan todos
   assert.equal(dadosDeGolpe(ch)[0].quedan, 2);
   ch.vida.agotamiento = 2; descansoLargoVida(ch);
   assert.equal(dadosDeGolpe(ch)[0].quedan, 3); assert.equal(pgActuales(ch), pgMaximo(ch)); assert.equal(ch.vida.agotamiento, 1);
+});
+test('muerte: tres fallos, crítico a 0 PG, agotamiento 6 y revivir', () => {
+  const a = pj(); aplicarDano(a, 28); salvacionMuerte(a, 5); salvacionMuerte(a, 1);
+  assert.equal(estadoVital(a), 'muerto'); assert.equal(a.vida.caida.causa, 'salvaciones');
+  assert.equal(curar(a, 10), 0); assert.equal(aplicarDano(a, 5).recibido, 5); assert.equal(pgActuales(a), 0);
+  assert.equal(salvacionMuerte(a, 20), 'muere');
+  revivir(a); assert.equal(estadoVital(a), 'vivo'); assert.equal(pgActuales(a), 1); assert.equal(a.vida.caida, null);
+  const b = pj(); aplicarDano(b, 28); aplicarDano(b, 1, { critico: true }); assert.equal(b.vida.muerte.fallos, 2);
+  const c = pj({ vida: { agotamiento: 6 } }); assert.equal(estadoVital(c), 'muerto'); revivir(c); assert.equal(c.vida.agotamiento, 5);
+});
+test('estable: tres éxitos reinician la cuenta; el daño vuelve a ponerlo en peligro', () => {
+  const ch = pj(); aplicarDano(ch, 28); salvacionMuerte(ch, 12); salvacionMuerte(ch, 15); salvacionMuerte(ch, 18);
+  assert.equal(estadoVital(ch), 'estable'); assert.deepEqual(ch.vida.muerte, { exitos: 0, fallos: 0 });
+  assert.equal(salvacionMuerte(ch, 3), 'nada');
+  aplicarDano(ch, 2); assert.equal(estadoVital(ch), 'moribundo'); assert.equal(ch.vida.muerte.fallos, 1);
 });

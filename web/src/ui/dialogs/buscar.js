@@ -80,6 +80,7 @@ export function init(store) {
     const k = e.key.toLowerCase(), escribiendo = /input|textarea|select/i.test(document.activeElement?.tagName || '') || document.activeElement?.isContentEditable;
     if (((e.ctrlKey || e.metaKey) && k === 'k') || (k === '/' && !escribiendo && !document.querySelector('dialog[open]'))) {
       if (document.body.classList.contains('on-landing') && !S.db.chars.length) return;
+      if (document.body.classList.contains('caido') && !document.body.classList.contains('on-landing')) return;
       e.preventDefault(); if (!dlg().open) openBuscar();
     }
   });

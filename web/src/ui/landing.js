@@ -4,6 +4,7 @@ import { gi, temaDe, aplicarTema } from './tema.js';
 import { estiloPaleta } from '../domain/paleta.js';
 import { icon, ASTROLABE } from './icons.js';
 import { claseLinea } from './sheet.js';
+import { estadoVital } from '../domain/vida.js';
 import { avatarHtml } from './avatar.js';
 import { viewTransition } from './fx.js';
 import { runaSvg, portalDesde, selloEn } from './magia.js';
@@ -17,12 +18,13 @@ function render() {
   const propios = orden.filter(c => !c.prueba), pruebas = orden.filter(c => c.prueba);
   const card = (c, i) => {
     const t = temaDe(c), n = c.book.length;
-    return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''}" data-lopen="${c.id}" style="${estiloPaleta(t)};--i:${i}">
+    const caido = estadoVital(c) === 'muerto';
+    return `<button type="button" class="lcard ${c.id === ult ? 'last' : ''} ${caido ? 'caido' : ''}" data-lopen="${c.id}" style="${estiloPaleta(t)};--i:${i}">
       ${c.retrato ? `<span class="lc-av">${avatarHtml(c, 'lg')}<span class="lc-badge">${gi(t.icono)}</span></span>` : `<span class="lc-emb">${gi(t.icono)}</span>`}
       <span class="lc-txt"><span class="lc-name">${esc(c.nombre || 'Sin nombre')}</span><span class="lc-cls">${esc(claseLinea(c))}</span>
       <span class="lc-meta">${[c.especie, n === 1 ? '1 conjuro' : n + ' conjuros'].filter(Boolean).map(esc).join(' · ')}</span></span>
       <span class="lc-marca" aria-hidden="true">${gi(t.icono)}</span>
-      ${c.id === ult ? '<span class="lc-cont">Continuar</span>' : ''}</button>`;
+      ${caido ? `<span class="lc-caido">${gi('muerte')}Caído</span>` : c.id === ult ? '<span class="lc-cont">Continuar</span>' : ''}</button>`;
   };
   patch($('#landing'), `<div class="l-sky" aria-hidden="true">${ASTROLABE}</div>
     <header class="l-head"><span class="l-mark">${runaSvg({ n: 22, lados: 7, cls: 'l-runa', semillaInicial: 42 })}${gi('libro')}</span><h1>Grimorio</h1><p>Libro de conjuros para D&amp;D 2024</p></header>
