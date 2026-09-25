@@ -360,9 +360,14 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ej { margin: var(--s5) 0 var(--s4); }
 .ej-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 2px 10px;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 45%, transparent) 12%, transparent 80%) left bottom / 100% 1px no-repeat; }
-.ej-head h2 { margin: 0; font: 600 var(--fs-l) / 1 var(--display); letter-spacing: .05em; }
-.ej-head small { color: var(--ink-2); font-size: var(--fs-xs); }
+.ej-head h2 { margin: 0; font: 600 var(--fs-l) / 1 var(--display); letter-spacing: .05em; white-space: nowrap; flex: none; }
+.ej-head small { color: var(--ink-2); font-size: var(--fs-xs); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ej-head:has(.ej-ajustes) { flex-wrap: nowrap; }
 .ej-head .ej-toggle { margin-left: auto; }
+.ej-head .ej-ajustes { margin-left: auto; width: 40px; padding: 0; }
+.ej-head .ej-ajustes + .ej-toggle { margin-left: 0; }
+.rules-tabs { margin-top: 14px; }
+.rules-guia { margin-top: 4px; }
 .ej-emb { display: grid; place-items: center; width: 42px; height: 42px; color: var(--gold-2); }
 .ej-emb .gi { width: 24px; height: 24px; filter: drop-shadow(0 0 8px var(--glow)); }
 .ej-note { margin: 10px 2px 0; }
@@ -384,8 +389,11 @@ dialog#retDlg { width: min(460px, 94vw); }
 :root[data-theme="light"] .ej-num { color: var(--gold) !important; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .ej-num { color: var(--gold) !important; } }
 .ej-num { font: 700 var(--fs-s) / 1 var(--display); color: var(--gold-2); padding: 4px 8px; border-radius: var(--r-pill); border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); background: var(--gold-soft); white-space: nowrap; }
-.ej-use small { opacity: .75; margin-left: 2px; }
-.ej-use[disabled] { opacity: .45; }
+/* usos de un rasgo: solo se muestran; se marcan en la tarjeta del recurso (el toque lleva hasta ella) */
+.ej-usos { min-height: 30px; padding: 0 10px; gap: 4px; border-radius: var(--r-pill); font: 700 var(--fs-s) / 1 var(--display); color: var(--ink);
+  background: transparent; border: 1px dashed color-mix(in srgb, var(--gold) 45%, var(--line)); white-space: nowrap; }
+.ej-usos small { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); }
+.ej-usos.agotado { color: var(--ink-3); border-color: var(--line); }
 .ej-star { min-width: 36px; min-height: 32px; font-size: 16px; line-height: 1; color: var(--ink-3); border: 1px dashed var(--line); background: transparent; border-radius: 10px; margin-top: auto; }
 .ej-grid .ej-it .ej-star[aria-pressed="true"]:not(.dockbtn) { color: var(--gold); border-style: solid; border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); }
 .ej-mover { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; font-size: var(--fs-xs); color: var(--ink-2); }

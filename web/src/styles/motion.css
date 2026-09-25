@@ -35,6 +35,9 @@
 /* hojas: cambio de pestaña o de vista (dialog.js) */
 @keyframes vista-in { from { opacity: 0; transform: translateY(6px); } }
 .dbody.fx-vista > * { animation: vista-in .26s var(--ease-out) both; }
+/* tarjeta de recurso señalada desde «En juego» */
+@keyframes senala { 0%, 100% { box-shadow: var(--shadow-1); } 25%, 60% { box-shadow: 0 0 0 3px var(--gold), 0 0 26px -4px var(--glow); } }
+.res.fx-senala { animation: senala 1.4s var(--ease) both; }
 /* «En juego»: al desplegar o filtrar, los grupos entran escalonados */
 #enjuego.fx-abre :is(.ej-filtro, .ej-note, .ej-grupo) { animation: rise .38s var(--ease-out) both; }
 #enjuego.fx-abre .ej-grupo:nth-of-type(2) { animation-delay: .04s; } #enjuego.fx-abre .ej-grupo:nth-of-type(3) { animation-delay: .08s; }

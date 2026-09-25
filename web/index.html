@@ -16,7 +16,7 @@
 
 <header class="appbar" id="appbar">
   <div class="bar">
-    <button type="button" class="who-chip" data-cmd="home" id="whoChip" aria-label="Inicio: cambiar de personaje"></button>
+    <button type="button" class="who-chip" data-cmd="home" id="whoChip" aria-label="Cambiar de personaje" title="Cambiar de personaje"></button>
     <span class="spacer"></span>
     <span class="act">
       <button type="button" data-cmd="rest" id="bRest"></button>
@@ -132,7 +132,7 @@
 </dialog>
 
 <dialog id="charsDlg" class="tall" aria-labelledby="charsTitle"><div class="grip"></div>
-  <div class="dhead"><h2 id="charsTitle">Personajes</h2><div class="dsub">Toca un personaje para abrir su grimorio.</div></div>
+  <div class="dhead"><h2 id="charsTitle">Gestionar personajes</h2><div class="dsub">Edita, duplica o borra personajes. Toca uno para abrir su grimorio.</div></div>
   <div class="dbody" id="charList"></div>
   <div class="dfoot"><button type="button" data-close>Cerrar</button><span class="spacer"></span><button type="button" class="primary" id="charNew">Nuevo personaje</button></div>
 </dialog>
@@ -166,9 +166,10 @@
 </dialog>
 
 <dialog id="rulesDlg" class="tall" aria-labelledby="rulesTitle"><div class="grip"></div>
-  <div class="dhead"><h2 id="rulesTitle">Rasgos y recursos</h2><div class="dsub" id="rulesSub"></div></div>
+  <div class="dhead"><h2 id="rulesTitle">Rasgos</h2><div class="dsub" id="rulesSub"></div>
+    <div class="seg di-seg rules-tabs" role="tablist" aria-label="Rasgos" id="rulesTabs"></div></div>
   <div class="dbody" id="rulesBody"></div>
-  <div class="dfoot"><button type="button" data-close>Cerrar</button><span class="spacer"></span><button type="button" class="primary" id="ruleNew">Añadir rasgo</button></div>
+  <div class="dfoot"><button type="button" id="rulesJuego">Ir a «En juego»</button><span class="spacer"></span><button type="button" data-close>Cerrar</button><button type="button" class="primary" id="ruleNew">Añadir rasgo</button></div>
 </dialog>
 
 <dialog id="ruleDlg" class="tall" aria-labelledby="ruleTitle"><div class="grip"></div>

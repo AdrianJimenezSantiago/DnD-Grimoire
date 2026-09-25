@@ -78,10 +78,10 @@ function moreMenuHtml() {
   const fila = (cmd, ico, label, extra = '') => `<button type="button" role="menuitem" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
   let i = 0;
   const personaje = ch ? [
-    tile('rules', icon('sliders'), 'Rasgos', 'Rasgos y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Inventario', 'Inventario: objetos, monedas y carga', i++),
+    tile('rules', icon('sliders'), 'Rasgos', 'Rasgos: progresión y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Inventario', 'Inventario: objetos, monedas y carga', i++),
     tile('historia', gi('libro', 'icon'), 'Historia', '', i++), tile('diario', icon('quill'), 'Diario', 'Diario de sesión', i++),
-    tile('bestiario', gi('bestia', 'icon'), 'Bestiario', '', i++), tile('chars', icon('users'), 'Personajes', '', i++),
-  ].join('') : tile('chars', icon('users'), 'Personajes', '', i++);
+    tile('bestiario', gi('bestia', 'icon'), 'Bestiario', '', i++), tile('home', icon('users'), 'Personajes', 'Cambiar de personaje', i++),
+  ].join('') : tile('home', icon('users'), 'Personajes', 'Cambiar de personaje', i++);
   const saber = [tile('biblioteca', gi('biblioteca', 'icon'), 'Biblioteca', '', i++), tile('manual', gi('libro', 'icon'), 'Libros', 'Libros y manuales', i++), tile('hist', icon('hourglass'), 'Historial', 'Historial de la sesión', i++)].join('');
   const util = [
     fila('backup', icon('save'), 'Copia de seguridad'),
@@ -104,7 +104,9 @@ function restItems() {
 function setEditing(v) { S.editing = v; S.emit('ui'); }
 const COMMANDS = {
   chars: () => openChars(),
-  home: () => { setEditing(false); showLanding(); },
+  // un solo sitio para elegir personaje: la portada (el botón del nombre y Más → Personajes llevan allí);
+  // editar, duplicar y borrar quedan en «Gestionar personajes», desde la portada
+  home: () => { if (landingVisible()) return; viewTransition(() => { S.editing = false; showLanding(); }); },
   glosario: () => openBiblioteca('reglas'),
   biblioteca: () => openBiblioteca(),
   equipo: () => S.cur() && openEquipo(),
@@ -184,6 +186,12 @@ function bindSheet() {
   on(sheet, 'click', '[data-ejfijar]', (e, b) => { const k = b.dataset.ejfijar; S.edit((db, ch) => { ch.enJuego ||= {}; const f = ch.enJuego.fijados || [];
     ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
+  // los usos se llevan en un solo sitio, la tarjeta del recurso: «En juego» solo los muestra y lleva hasta ella
+  on(sheet, 'click', '[data-irrec]', (e, b) => {
+    const card = [...sheet.querySelectorAll('[data-resid]')].find(x => x.dataset.resid === b.dataset.irrec); if (!card) return;
+    card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+    pop(card, 'fx-senala'); setTimeout(() => card.classList.remove('fx-senala'), 1600);
+  });
   on(sheet, 'click', '[data-ejfiltro]', (e, b) => { S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.filtro = b.dataset.ejfiltro; }); animarEnJuego(); });
   on(sheet, 'click', '#res [data-ntact]', (e, b) => { const li = b.closest('[data-nt]'); accionNota(S, li.dataset.ses, li.dataset.nt, b.dataset.ntact); });
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {

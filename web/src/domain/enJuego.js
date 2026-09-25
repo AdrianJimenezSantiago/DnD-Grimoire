@@ -17,9 +17,23 @@ export const NOMBRE_GRUPO = Object.fromEntries(GRUPOS);
 // Rasgos de construcción del personaje: no se usan en la partida (se eligen al subir de nivel o ya los cubre la sección de conjuros)
 const NO_JUEGO = /^(mejora de caracteristica|don epico|subclase de |rasgo de subclase|lanzamiento de conjuros|conjuros (del|de|de la) |hechiceria innata)/;
 
+// Sin el libro importado no hay texto que leer: los rasgos de clase del Manual del Jugador 2024 cuyo uso se conoce van a su grupo
+// (Furia es una acción adicional, no algo siempre activo). Con texto manda el texto.
+const GRUPO_SIN_TEXTO = {
+  furia: 'adicional', 'inspiracion bardica': 'adicional', 'forma salvaje': 'adicional', 'enemigo predilecto': 'adicional', 'tomar aliento': 'adicional',
+  'desplazamiento tactico': 'adicional', 'fuente de magia': 'adicional', 'artes marciales': 'adicional', 'concentracion de monje': 'adicional',
+  'imponer las manos': 'adicional', 'toque reparador': 'adicional', 'castigo de paladin': 'adicional', 'accion astuta': 'adicional', 'punteria certera': 'adicional',
+  'canalizar divinidad': 'accion', 'intercesion divina': 'accion', 'intercesion divina mayor': 'accion', 'compañero salvaje': 'accion', 'companero salvaje': 'accion',
+  'abjurar de los enemigos': 'accion', 'accion subita': 'accion',
+  'desviar ataques': 'reaccion', 'desviar energia': 'reaccion', 'caida lenta': 'reaccion', 'esquiva asombrosa': 'reaccion', 'contraencantamiento': 'reaccion',
+  'golpe aturdidor': 'pasivo', 'ataque furtivo': 'pasivo', 'golpe astuto': 'pasivo', 'evasion': 'pasivo', 'indomito': 'pasivo', 'metamagia': 'pasivo',
+  'recuperacion arcana': 'fuera', 'recuperacion magica': 'fuera', 'mente tactica': 'fuera', 'talentos fiables': 'fuera', 'contactar patron': 'fuera', 'astucia magica': 'fuera',
+};
+
 /** Cuándo se usa un rasgo, por su texto: la primera mención de un tipo de acción manda. */
 export function clasificar(texto, nombre = '') {
-  const t = norm(texto || '');
+  const t = norm(texto || ''), conocido = GRUPO_SIN_TEXTO[norm(nombre).replace(/\s*\(.*\)$/, '')];
+  if (!t.trim() && conocido) return conocido;
   const pos = [
     ['reaccion', /\b(como|usar|usa|utilizar|gastar|emplear|realizar|llevar a cabo)( tu| una| la)? reaccion\b|\bcon tu reaccion\b/],
     ['adicional', /\bcomo( una| tu)? accion adicional\b|\busar( tu| una)? accion adicional\b|\bcon una accion adicional\b/],

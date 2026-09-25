@@ -11,6 +11,15 @@ test('en juego: el tipo de acción sale del texto (manda la primera mención)', 
   assert.equal(clasificar('Tienes ventaja en las tiradas de iniciativa.'), 'pasivo');
   assert.equal(clasificar('Conoces un idioma secreto que solo entienden los tuyos.'), 'fuera');
 });
+test('en juego: sin libro, los rasgos de clase conocidos van a su grupo (Furia es acción adicional)', () => {
+  assert.equal(clasificar('', 'Furia'), 'adicional');
+  assert.equal(clasificar('', 'Acción súbita (un uso)'), 'accion');
+  assert.equal(clasificar('', 'Esquiva asombrosa'), 'reaccion');
+  assert.equal(clasificar('', 'Recuperación arcana'), 'fuera');
+  assert.equal(clasificar('Tienes ventaja en las tiradas de iniciativa.', 'Furia'), 'pasivo');   // con texto manda el texto
+  const rs = rasgosEnJuego({ clase: 'Bárbaro', nivel: 3, stats: { con: 14 } }, {});
+  assert.equal(rs.find(r => r.nombre === 'Furia').grupo, 'adicional');
+});
 test('en juego: resumen con la frase de uso o la primera con reglas', () => {
   assert.equal(resumen('Un poder antiguo te recorre. Puedes invocarlo como acción adicional si no llevas armadura. Dura 10 minutos.'), 'Puedes invocarlo como acción adicional si no llevas armadura.');
   assert.equal(resumen('Percibes cuándo algo va mal. Tienes ventaja en las tiradas de salvación de Destreza.'), 'Tienes ventaja en las tiradas de salvación de Destreza.');
