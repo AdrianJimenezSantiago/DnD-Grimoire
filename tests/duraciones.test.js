@@ -68,3 +68,14 @@ test('combate: la iniciativa escrita a mano se recuerda y se limpia al empezar o
   const ch = pj({ combate: { activo: true, iniciativa: 19, iniManual: true } });
   empezarCombate(ch); assert.equal(combateDe(ch).iniciativa, null); assert.equal(combateDe(ch).iniManual, false);
 });
+test('tiradas: el resumen suma agotamiento y efectos, y marca ventaja o desventaja', async () => {
+  const { resumenTirada } = await import('../web/src/domain/efectos.js');
+  const { numLibre } = await import('../web/src/core/util.js');
+  const ch = pj({ vida: { agotamiento: 1, estados: ['envenenado'] } });
+  ponerEfecto(ch, 'bendicion'); ponerEfecto(ch, 'agrandar');
+  const r = resumenTirada(ch, 'prueba', { ab: 'fue' }, 3);
+  assert.equal(r.total, 1); assert.equal(r.modo, 'normal');
+  assert.equal(resumenTirada(ch, 'prueba', { ab: 'int' }, 0).modo, 'desventaja');
+  assert.deepEqual(resumenTirada(ch, 'salvacion', { ab: 'sab' }, 2).dados, ['+1d4']);
+  assert.equal(numLibre('+5'), 5); assert.equal(numLibre(' 12 '), 12); assert.ok(Number.isNaN(numLibre('')));
+});

@@ -1,10 +1,11 @@
-import { esc, norm } from '../../core/util.js';
+import { esc, norm, numLibre } from '../../core/util.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
 import { bonoSalvacion } from '../../domain/habilidades.js';
 import { glosario } from '../../domain/catalogo.js';
 import { rngCripto } from '../../domain/dados.js';
+import { combateDe } from '../../domain/combate.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { icon } from '../icons.js';
@@ -25,7 +26,8 @@ let S;
 const dlg = () => $('#vidaDlg'), edlg = () => $('#estadosDlg');
 const ch = () => S.cur();
 
-export function openVida(foco) { render(); openSheet(dlg()); if (foco !== false) setTimeout(() => $('#vdCant')?.focus({ preventScroll: true }), 280); }
+let enDescanso = false;
+export function openVida(foco, { descanso = false } = {}) { enDescanso = descanso; render(); openSheet(dlg()); dlg().addEventListener('close', () => { enDescanso = false; }, { once: true }); if (foco !== false) setTimeout(() => $('#vdCant')?.focus({ preventScroll: true }), 280); }
 
 function render() {
   const c = ch(); if (!c) return;
@@ -35,19 +37,20 @@ function render() {
     <div class="vd-cifra"><span class="vd-act">${act}</span><span class="vd-max">/ ${max}</span>${v.temp ? `<span class="vd-temp" title="Puntos de golpe temporales">+${v.temp} temp.</span>` : ''}</div>
     <div class="vd-barra" role="meter" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${act}" aria-label="Puntos de golpe"><i style="width:${pctVida(c)}%"></i>${v.temp ? `<b style="width:${Math.min(100, Math.round(v.temp / max * 100))}%"></b>` : ''}</div>
     <p class="vd-estado">${{ vivo: act === max ? 'Ileso.' : `Le faltan ${max - act} PG.`, moribundo: 'A 0 PG: inconsciente. Tira salvaciones contra muerte al empezar tu turno.', estable: 'Estable a 0 PG: inconsciente, sin tirar salvaciones. Recupera 1 PG en 1d4 horas.', muerto: 'Muerto. Solo la magia puede traerlo de vuelta.' }[est]}</p></section>`;
-  h += `<section class="vd-entrada"><label class="f">Cantidad<input id="vdCant" type="number" inputmode="numeric" min="0" placeholder="0" aria-label="Cantidad de puntos de golpe"></label>
+  h += `<section class="vd-entrada"><label class="f">Cantidad<input id="vdCant" type="text" inputmode="tel" autocomplete="off" placeholder="0" aria-label="Cantidad de puntos de golpe"></label>
     <div class="vd-btns"><button type="button" class="danger" data-vd="dano">${gi('pg')}Daño</button><button type="button" class="vd-cura" data-vd="curar">${gi('curacion')}Curar</button><button type="button" data-vd="temp">${icon('plus')}Temporales</button></div>
     ${act === 0 && est !== 'muerto' ? '<label class="chk-line"><input type="checkbox" id="vdCrit"> Fue un golpe crítico: cuenta como dos fallos</label>' : ''}
     <p class="hint">Los temporales no se suman entre sí: te quedas con los más altos, y el daño los gasta primero.</p></section>`;
   if (act === 0 && est !== 'vivo') {
     h += `<section class="vd-muerte">${vigiliaHtml(c)}</section>`;
   }
-  h += `<section class="vd-dados"><h3>${gi('dado_golpe')}Dados de golpe</h3><div class="vd-dg">${dadosDeGolpe(c).map(d => `<div class="vd-dg-it">
-      <b>${d.quedan}<small>/${d.total}</small></b><span>${d.dado}</span><button type="button" data-vddg="${d.dado}" ${d.quedan && act < max && est !== 'muerto' ? '' : 'disabled'}>Gastar y tirar</button></div>`).join('')}</div>
-    <p class="hint">En un descanso corto, cada dado cura su tirada ${sgn(modOf(c.stats?.con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p></section>`;
+  h += `<section class="vd-dados ${enDescanso ? 'descanso' : ''}"><h3>${gi('dado_golpe')}Dados de golpe${enDescanso ? '<small class="vd-dg-tag">Descanso corto</small>' : ''}</h3><div class="vd-dg">${dadosDeGolpe(c).map(d => `<div class="vd-dg-it">
+      <b>${d.quedan}<small>/${d.total}</small></b><span>${d.dado}</span>${enDescanso ? `<button type="button" data-vddg="${d.dado}" ${d.quedan && act < max && est !== 'muerto' ? '' : 'disabled'}>Gastar y tirar</button>` : ''}</div>`).join('')}</div>
+    ${enDescanso ? `<p class="hint">Cada dado cura su tirada ${sgn(modOf(c.stats?.con))} (Con), mínimo 1. Gasta los que quieras mientras dure el descanso; con un descanso largo se recuperan todos.</p>`
+      : `<p class="hint vd-dg-nota">Solo se gastan durante un descanso corto: cada dado cura su tirada ${sgn(modOf(c.stats?.con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p>${combateDe(c).activo || est === 'muerto' ? '' : '<button type="button" class="ghost vd-dg-corto" data-cmd="short">Hacer un descanso corto</button>'}`}</section>`;
   h += `<section class="vd-max-sec"><h3>${gi('pg')}PG máximos aumentados</h3>
     ${v.maxExtra.length ? `<ul class="vd-mx">${v.maxExtra.map(m => `<li><b>+${m.n}</b><span>${esc(m.nombre)}</span><button type="button" data-vdmxq="${esc(m.id)}">Termina</button></li>`).join('')}</ul>` : ''}
-    <div class="vd-mx-add"><input id="vdMxN" type="number" inputmode="numeric" min="1" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
+    <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
     <p class="hint">No son PG temporales: suben tu máximo y tus PG actuales en la misma cantidad. Al terminar, el máximo vuelve a ${pgMaximoBase(c)} y tus PG se quedan como estén si caben. Tu máximo base se ajusta en «Editar personaje».</p></section>`;
   $('#vdBody').innerHTML = h;
 }
@@ -143,13 +146,13 @@ export function alternarEstado(S2, k) {
 export function init(store) {
   S = store;
   const body = $('#vdBody');
-  const cant = () => { const n = parseInt($('#vdCant')?.value, 10); if (!(n > 0)) { $('#vdCant')?.focus(); toast('Escribe primero una cantidad.'); return 0; } return n; };
+  const cant = () => { const n = numLibre($('#vdCant')?.value); if (!(n > 0)) { $('#vdCant')?.focus(); toast('Escribe primero una cantidad.'); return 0; } return n; };
   on(body, 'click', '[data-vd]', (e, b) => {
     const a = b.dataset.vd;
     if (a === 'dano') { const n = cant(); if (n) { danar(S, n, !!$('#vdCrit')?.checked); render(); } }
     if (a === 'curar') { const n = cant(); if (n) { sanar(S, n); render(); } }
     if (a === 'temp') { const n = cant(); if (n) { temporales(S, n); render(); } }
-    if (a === 'mxadd') { const n = parseInt($('#vdMxN').value, 10), nom = $('#vdMxNom').value.trim() || 'Aumento'; if (!(n > 0)) { $('#vdMxN').focus(); return; }
+    if (a === 'mxadd') { const n = numLibre($('#vdMxN').value), nom = $('#vdMxNom').value.trim() || 'Aumento'; if (!(n > 0)) { $('#vdMxN').focus(); return; }
       const desde = pgActuales(S.cur()); S.act(`PG máximos +${n} (${nom})`, (db, x) => { aumentarMax(x, { nombre: nom, n }); }); render(); golpeFx('max', n, { desde, hasta: pgActuales(S.cur()) }); }
     if (['dano', 'curar', 'temp'].includes(a) && $('#vdCant')) { $('#vdCant').value = ''; $('#vdCant').focus({ preventScroll: true }); }
   });
@@ -165,7 +168,7 @@ export function init(store) {
     S.act(`Salvaciones contra muerte: ${tipo === 'exito' ? 'éxitos' : 'fallos'}`, (db, x) => { const v = vidaDe(x), m = v.muerte; m[k] = m[k] === +i + 1 ? +i : +i + 1; v.estable = m.exitos >= 3 && m.fallos < 3; if (m.fallos >= 3) marcarCaida(x, 'salvaciones'); });
     haptic('light');
   });
-  body.addEventListener('keydown', e => { if (e.target.id === 'vdCant' && e.key === 'Enter') { e.preventDefault(); const n = cant(); if (n) { danar(S, n); render(); e.target.value = ''; } } });
+  body.addEventListener('keydown', e => { if (['vdMxN', 'vdMxNom'].includes(e.target.id) && e.key === 'Enter') { e.preventDefault(); body.querySelector('[data-vd=mxadd]')?.click(); return; } if (e.target.id === 'vdCant' && e.key === 'Enter') { e.preventDefault(); const n = cant(); if (n) { danar(S, n); render(); e.target.value = ''; } } });
   S.subscribe(() => { if (dlg().open) { const f = document.activeElement?.id === 'vdCant', val = $('#vdCant')?.value; render(); if (f) { $('#vdCant').value = val; $('#vdCant').focus({ preventScroll: true }); } } if (edlg().open) renderEstados(); });
 
   const eb = $('#esBody');

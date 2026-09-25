@@ -1,5 +1,5 @@
-import { esc } from '../core/util.js';
-import { SCHOOLS, perfil, clasesTexto, ABIL_NAME } from '../domain/reglas2024.js';
+import { esc, numLibre } from '../core/util.js';
+import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
 import { schoolKey } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
@@ -37,7 +37,7 @@ import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
 import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
-import { alternarCaracteristica } from '../ui/vitales.js';
+import { alternarCaracteristica, abrirPruebas } from '../ui/vitales.js';
 import { leer, initLeer } from '../ui/leer.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
@@ -102,7 +102,7 @@ function moreMenuHtml() {
 }
 function restItems() {
   const ch = S.cur(); if (!ch) return [];
-  return [hasShortRest(ch, perfil(ch)) && { cmd: 'short', icon: 'candle', label: 'Descanso corto' }, { cmd: 'long', icon: 'moon', label: 'Descanso largo' }];
+  return [{ cmd: 'short', icon: 'candle', label: hasShortRest(ch, perfil(ch)) ? 'Descanso corto' : 'Descanso corto (dados de golpe)' }, { cmd: 'long', icon: 'moon', label: 'Descanso largo' }];
 }
 
 function setEditing(v) { S.editing = v; S.emit('ui'); }
@@ -230,6 +230,7 @@ function tirarDesde(clave) {
   if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa',
     alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; combateDe(x).iniManual = false; }); return 'Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.'; } });
   const [tipo, k] = clave.split(':');
+  if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${ABIL_NAME[k]}`, sub: 'Prueba de característica', bono: modOf(ch.stats?.[k]), tipo: 'prueba', ab: k });
   if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
   if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
 }
@@ -277,12 +278,13 @@ function bindSheet() {
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
   on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
   on(sheet, 'click', '[data-cbini]', () => iniciativaManual());
+  sheet.addEventListener('toggle', e => { if (e.target.classList?.contains('cb-pruebas')) abrirPruebas(e.target.open); }, true);
   on(sheet, 'click', '[data-crab]', (e, b) => { alternarCaracteristica(b.dataset.crab); S.emit('ui'); haptic('light'); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
   on(sheet, 'click', '[data-cbataque]', (e, b) => { const x = arma(b.dataset.cbataque); if (x) tirarPrueba({ titulo: x.o.nombre, sub: 'Tirada de ataque', bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque' }); });
   on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) }); });
-  const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = parseInt(i?.value, 10); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
+  const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numLibre(i?.value); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
     if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
   on(sheet, 'click', '[data-cbpg]', (e, b) => pgRapido(b.dataset.cbpg));
   sheet.addEventListener('keydown', e => { if (e.target.id === 'cbCant' && e.key === 'Enter') { e.preventDefault(); pgRapido('dano'); } });

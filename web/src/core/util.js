@@ -5,3 +5,4 @@ export const norm = t => String(t ?? '').toLowerCase().normalize('NFD').replace(
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const joinY = arr => arr.join(', ').replace(/, ([^,]*)$/, ' y $1');
 export const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+export const numLibre = v => { const m = /\d+/.exec(String(v ?? '').replace(/\s/g, '')); return m ? parseInt(m[0], 10) : NaN; };

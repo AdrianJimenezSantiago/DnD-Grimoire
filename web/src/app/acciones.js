@@ -201,7 +201,7 @@ export function shortRest(S, openRecovery, openVida) {
   const rec = rs.find(r => r.tipo === 'recuperar' && !recState(S.cur(), r.id).used), c2 = S.cur();
   const dg = dadosDeGolpe(c2).reduce((n, d) => n + d.quedan, 0), herido = pgActuales(c2) < pgMaximo(c2);
   const cambios = opcionesIntercambio(c2, 'corto', { trasfondos: biblioteca().trasfondos });
-  const botones = [herido && dg && openVida && { label: 'Gastar dados de golpe', cls: rec ? '' : 'primary', fn: () => { openVida(false); setTimeout(() => document.querySelector('.vd-dados')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); } },
+  const botones = [herido && dg && openVida && { label: 'Gastar dados de golpe', cls: rec ? '' : 'primary', fn: () => { openVida(false, { descanso: true }); setTimeout(() => document.querySelector('.vd-dados')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); } },
     rec && { label: `Usar ${rec.nombre}`, cls: 'primary', fn: () => openRecovery(rec.id) }, { ...undoBtn(S, h), cls: 'ghost' }].filter(Boolean);
   if (!cambios.length && !bits.length) {
     toast(`Descanso corto.${herido && dg ? ` Te quedan ${dg} dados de golpe para curarte.` : ''}`, botones.map(b => ({ label: b.label, hl: b.cls === 'primary', fn: b.fn })));
