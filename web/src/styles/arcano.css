@@ -3,7 +3,6 @@
   --orn-tr: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-linecap%3D%22round%22%20transform%3D%22translate%2864%200%29%20scale%28-1%201%29%22%3E%3Cpath%20d%3D%22M3%2062V13Q3%203%2013%203H62%22%20stroke-width%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M9%2062V19Q9%209%2019%209H62%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M16%2030C15%2020%2020%2015%2030%2016%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M21%2026c1-4%204-6%207-5.5%202.5.5%202.8%203.4.8%204.2-1.6.7-3-.6-2.3-2%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M34%209q7-6%2014%200M9%2034q-6%207%200%2014%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M3%203l4%20-2%202%204%20-4%202Z%22%20stroke-width%3D%221%22%20transform%3D%22rotate%280%29%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%223%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%223%22%20cy%3D%2262%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%229%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2262%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --orn-bl: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-linecap%3D%22round%22%20transform%3D%22translate%280%2064%29%20scale%281%20-1%29%22%3E%3Cpath%20d%3D%22M3%2062V13Q3%203%2013%203H62%22%20stroke-width%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M9%2062V19Q9%209%2019%209H62%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M16%2030C15%2020%2020%2015%2030%2016%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M21%2026c1-4%204-6%207-5.5%202.5.5%202.8%203.4.8%204.2-1.6.7-3-.6-2.3-2%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M34%209q7-6%2014%200M9%2034q-6%207%200%2014%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M3%203l4%20-2%202%204%20-4%202Z%22%20stroke-width%3D%221%22%20transform%3D%22rotate%280%29%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%223%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%223%22%20cy%3D%2262%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%229%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2262%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --orn-br: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-linecap%3D%22round%22%20transform%3D%22translate%2864%2064%29%20scale%28-1%20-1%29%22%3E%3Cpath%20d%3D%22M3%2062V13Q3%203%2013%203H62%22%20stroke-width%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M9%2062V19Q9%209%2019%209H62%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M16%2030C15%2020%2020%2015%2030%2016%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M21%2026c1-4%204-6%207-5.5%202.5.5%202.8%203.4.8%204.2-1.6.7-3-.6-2.3-2%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M34%209q7-6%2014%200M9%2034q-6%207%200%2014%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M3%203l4%20-2%202%204%20-4%202Z%22%20stroke-width%3D%221%22%20transform%3D%22rotate%280%29%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%223%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%223%22%20cy%3D%2262%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%2262%22%20cy%3D%229%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2262%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
-  --sello: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpolygon%20points%3D%2297.60%2C50.00%2097.31%2C51.24%2096.28%2C52.43%2094.87%2C53.53%2093.56%2C54.58%2092.75%2C55.63%2092.71%2C56.76%2093.39%2C58.04%2094.53%2C59.46%2095.68%2C60.97%2096.39%2C62.43%2096.33%2C63.72%2095.41%2C64.76%2093.82%2C65.52%2091.91%2C66.09%2090.16%2C66.63%2088.94%2C67.34%2088.44%2C68.34%2088.62%2C69.68%2089.19%2C71.28%2089.75%2C72.95%2089.90%2C74.45%2089.39%2C75.58%2088.17%2C76.23%2086.44%2C76.48%2084.54%2C76.50%2082.85%2C76.60%2081.67%2C77.05%2081.13%2C78.03%2081.14%2C79.55%2081.42%2C81.42%2081.64%2C83.34%2081.48%2C84.96%2080.77%2C86.03%2079.51%2C86.44%2077.87%2C86.32%2076.12%2C85.96%2074.56%2C85.74%2073.37%2C85.99%2072.62%2C86.91%2072.20%2C88.45%2071.90%2C90.33%2071.48%2C92.16%2070.76%2C93.53%2069.66%2C94.15%2068.21%2C93.96%2066.56%2C93.14%2064.90%2C92.09%2063.40%2C91.24%2062.14%2C90.99%2061.12%2C91.49%2060.24%2C92.67%2059.40%2C94.20%2058.46%2C95.63%2057.37%2C96.53%2056.14%2C96.62%2054.82%2C95.89%2053.51%2C94.59%2052.26%2C93.14%2051.10%2C92.02%2050.00%2C91.60%2048.90%2C92.02%2047.74%2C93.14%2046.49%2C94.59%2045.18%2C95.89%2043.86%2C96.62%2042.63%2C96.53%2041.54%2C95.63%2040.60%2C94.20%2039.76%2C92.67%2038.88%2C91.49%2037.86%2C90.99%2036.60%2C91.24%2035.10%2C92.09%2033.44%2C93.14%2031.79%2C93.96%2030.34%2C94.15%2029.24%2C93.53%2028.52%2C92.16%2028.10%2C90.33%2027.80%2C88.45%2027.38%2C86.91%2026.63%2C85.99%2025.44%2C85.74%2023.88%2C85.96%2022.13%2C86.32%2020.49%2C86.44%2019.23%2C86.03%2018.52%2C84.96%2018.36%2C83.34%2018.58%2C81.42%2018.86%2C79.55%2018.87%2C78.03%2018.33%2C77.05%2017.15%2C76.60%2015.46%2C76.50%2013.56%2C76.48%2011.83%2C76.23%2010.61%2C75.58%2010.10%2C74.45%2010.25%2C72.95%2010.81%2C71.28%2011.38%2C69.68%2011.56%2C68.34%2011.06%2C67.34%209.84%2C66.63%208.09%2C66.09%206.18%2C65.52%204.59%2C64.76%203.67%2C63.72%203.61%2C62.43%204.32%2C60.97%205.47%2C59.46%206.61%2C58.04%207.29%2C56.76%207.25%2C55.63%206.44%2C54.58%205.13%2C53.53%203.72%2C52.43%202.69%2C51.24%202.40%2C50.00%202.98%2C48.77%204.29%2C47.60%205.96%2C46.53%207.51%2C45.53%208.50%2C44.54%208.70%2C43.46%208.12%2C42.24%207.03%2C40.87%205.87%2C39.41%205.10%2C37.97%205.06%2C36.69%205.82%2C35.64%207.22%2C34.85%208.90%2C34.22%2010.41%2C33.60%2011.37%2C32.80%2011.59%2C31.68%2011.15%2C30.21%2010.34%2C28.47%209.56%2C26.65%209.21%2C25.01%209.57%2C23.74%2010.67%2C22.97%2012.33%2C22.63%2014.20%2C22.53%2015.91%2C22.39%2017.14%2C21.94%2017.78%2C20.99%2017.91%2C19.54%2017.78%2C17.78%2017.74%2C16.00%2018.08%2C14.55%2018.99%2C13.69%2020.44%2C13.49%2022.26%2C13.85%2024.17%2C14.44%2025.87%2C14.89%2027.17%2C14.85%2028.02%2C14.13%2028.50%2C12.75%2028.82%2C11.00%2029.24%2C9.25%2029.93%2C7.91%2030.98%2C7.28%2032.36%2C7.41%2033.92%2C8.11%2035.48%2C9.01%2036.89%2C9.65%2038.05%2C9.67%2038.99%2C8.91%2039.79%2C7.45%2040.57%2C5.64%2041.46%2C3.92%2042.52%2C2.75%2043.73%2C2.41%2045.05%2C2.93%2046.38%2C4.05%2047.66%2C5.37%2048.86%2C6.41%2050.00%2C6.80%2051.14%2C6.41%2052.34%2C5.37%2053.62%2C4.05%2054.95%2C2.93%2056.27%2C2.41%2057.48%2C2.75%2058.54%2C3.92%2059.43%2C5.64%2060.21%2C7.45%2061.01%2C8.91%2061.95%2C9.67%2063.11%2C9.65%2064.52%2C9.01%2066.08%2C8.11%2067.64%2C7.41%2069.02%2C7.28%2070.07%2C7.91%2070.76%2C9.25%2071.18%2C11.00%2071.50%2C12.75%2071.98%2C14.13%2072.83%2C14.85%2074.13%2C14.89%2075.83%2C14.44%2077.74%2C13.85%2079.56%2C13.49%2081.01%2C13.69%2081.92%2C14.55%2082.26%2C16.00%2082.22%2C17.78%2082.09%2C19.54%2082.22%2C20.99%2082.86%2C21.94%2084.09%2C22.39%2085.80%2C22.53%2087.67%2C22.63%2089.33%2C22.97%2090.43%2C23.74%2090.79%2C25.01%2090.44%2C26.65%2089.66%2C28.47%2088.85%2C30.21%2088.41%2C31.68%2088.63%2C32.80%2089.59%2C33.60%2091.10%2C34.22%2092.78%2C34.85%2094.18%2C35.64%2094.94%2C36.69%2094.90%2C37.97%2094.13%2C39.41%2092.97%2C40.87%2091.88%2C42.24%2091.30%2C43.46%2091.50%2C44.54%2092.49%2C45.53%2094.04%2C46.53%2095.71%2C47.60%2097.02%2C48.77%22%2F%3E%3C%2Fsvg%3E");
   --grano: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22180%22%20height%3D%22180%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.85%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.5%20%200%200%200%200%20.4%20%200%200%200%200%20.3%20%200%200%200%20.16%200%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22180%22%20height%3D%22180%22%20filter%3D%22url%28%23n%29%22%2F%3E%3C%2Fsvg%3E");
 }
 /* =========================================================================
@@ -308,12 +307,16 @@ dialog.modal h2 { font: 600 var(--fs-xl) / 1.2 var(--display); letter-spacing: .
 }
 @keyframes hoja-sube { from { transform: translateY(100%); } 72% { transform: translateY(-5px); } to { transform: translateY(0); } }
 
-/* confirmaciones: el icono es un sello de lacre que se estampa */
-.md-icon { width: 68px; height: 68px; border-radius: 0; box-shadow: none; color: hsl(var(--acc-h) calc(55% * var(--acc-k, 1)) 12%);
-  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--gold-2) 80%, #fff), var(--gold) 50%, color-mix(in srgb, var(--gold) 55%, #000));
-  -webkit-mask: var(--sello) center / contain no-repeat; mask: var(--sello) center / contain no-repeat; animation: estampar .55s var(--spring) both .12s; }
-.md-icon .icon { width: 28px; height: 28px; stroke-width: 2; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .35)); }
-dialog.modal.danger .md-icon { color: #FFE9DF; background: radial-gradient(circle at 36% 30%, #E0674F, #A42B1C 55%, #5E130B); box-shadow: none; }
+/* confirmaciones: medallón rúnico (el mismo círculo que rodea el retrato) con el emblema del aviso en el color del personaje;
+   en las peligrosas, en rojo. Sin relleno macizo: línea fina y un brillo suave, como el resto de piezas */
+.md-icon { position: relative; width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; color: var(--gold);
+  background: radial-gradient(circle, color-mix(in srgb, var(--gold) 16%, transparent) 0 30%, transparent 62%); box-shadow: none; }
+.md-icon .md-runa { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .7; filter: drop-shadow(0 0 5px var(--glow)); animation: girar 90s linear infinite; }
+.md-icon .md-runa .r-anillo, .md-icon .md-runa .r-geo { stroke-dasharray: 1; animation: trazar 1s var(--ease-out) both .05s; }
+.md-icon .md-runa .r-runas { animation: aparecer .6s var(--ease) both .45s; }
+.md-icon > .gi { position: relative; width: 34px; height: 34px; filter: drop-shadow(0 0 8px var(--glow)); animation: ignite .6s var(--spring) both .25s; }
+dialog.modal.danger .md-icon { color: var(--danger); background: radial-gradient(circle, color-mix(in srgb, var(--danger) 16%, transparent) 0 30%, transparent 62%); }
+dialog.modal.danger .md-icon .md-runa, dialog.modal.danger .md-icon > .gi { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--danger) 45%, transparent)); }
 @keyframes estampar { from { transform: scale(1.7) rotate(-24deg); opacity: 0; } 60% { transform: scale(.94) rotate(3deg); opacity: 1; } to { transform: none; } }
 
 /* ------------------------------ menús ------------------------------ */
@@ -451,9 +454,11 @@ html.vt-portal::view-transition-new(root) { animation: portal .8s cubic-bezier(.
 .tipos button[aria-checked="true"] { background: var(--gilt); box-shadow: 0 0 14px -4px var(--glow); }
 .ses { border-color: color-mix(in srgb, var(--gold) 14%, var(--line-soft)); transition: transform .25s var(--spring), border-color .25s, box-shadow .25s; }
 .ses:hover { transform: translateX(3px); border-color: color-mix(in srgb, var(--gold) 45%, transparent); box-shadow: 0 0 0 3px var(--gold-soft); }
-.ses-n { width: 44px; height: 44px; border-radius: 0; font: 700 17px / 1 var(--display); color: var(--on-gold);
-  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--gold-2) 80%, #fff), var(--gold) 50%, color-mix(in srgb, var(--gold) 55%, #000));
-  -webkit-mask: var(--sello) center / contain no-repeat; mask: var(--sello) center / contain no-repeat; }
+/* número de sesión: el mismo rombo que numera los niveles de conjuros */
+.ses-n { position: relative; isolation: isolate; width: 44px; height: 44px; border-radius: 0; background: none; font: 700 18px / 1 var(--display); color: var(--gold-2); text-shadow: 0 0 14px var(--glow); }
+.ses-n::before { content: ""; position: absolute; inset: 7px; border: 1.5px solid var(--gold); transform: rotate(45deg); border-radius: 4px; background: var(--gold-soft); box-shadow: 0 0 14px -2px var(--glow); z-index: -1; }
+:root[data-theme="light"] .ses-n { color: var(--gold); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .ses-n { color: var(--gold); } }
 .rec { background: linear-gradient(135deg, var(--gold-soft), transparent 80%); }
 .seg { border-color: color-mix(in srgb, var(--gold) 18%, var(--line-soft)); }
 .seg button[aria-checked="true"] { background: var(--gilt); box-shadow: 0 0 14px -4px var(--glow); }
@@ -500,3 +505,33 @@ html.vt-portal::view-transition-new(root) { animation: portal .8s cubic-bezier(.
   .lcard, .lcard:hover { transform: none !important; }
   .hero-runa, .l-runa { animation: none !important; }
 }
+
+/* ------------------------------ marcos de filigrana ------------------------------ */
+/* Las piezas con esquinas de filigrana (hojas, menús, portada, recursos, listas de conjuros, tutorial) tienen el borde recto:
+   el redondeo chocaba con el marco interior, que es recto, y dejaba las esquinas apretadas contra la curva */
+dialog, dialog.tall, dialog.modal, .menu, .lcard, .tour-card, .res, .list { border-radius: 0; }
+dialog::after { border-radius: 0; }
+@media (max-width: 700px) { dialog, dialog.tall, dialog.modal { border-radius: 0; } }
+
+/* ------------------------------ medallón de clase ------------------------------ */
+/* Sin retrato, el personaje se representa con su emblema en un medallón oscuro con aro fino del color de la clase (como el círculo
+   rúnico de la cabecera), en lugar de un disco macizo de color que chocaba con la barra y las listas */
+.avatar:not(.has-img) { color: var(--gold-2);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--gold) 20%, var(--surface-2)), color-mix(in srgb, var(--gold) 4%, var(--raised)) 72%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent), 0 0 0 1.5px color-mix(in srgb, var(--gold) 75%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--gold) 10%, transparent), 0 0 16px -4px var(--glow); }
+.avatar:not(.has-img) .gi { filter: drop-shadow(0 0 6px var(--glow)); }
+.avatar.av-chip:not(.has-img) { width: 34px; height: 34px; margin: 1px; }
+.avatar.av-chip:not(.has-img) .gi { width: 62%; height: 62%; }
+.avatar.xl:not(.has-img) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent), 0 0 0 2px var(--gold), 0 0 0 6px color-mix(in srgb, var(--gold) 12%, transparent), 0 0 30px -6px var(--glow); }
+:root[data-theme="light"] .avatar:not(.has-img) { color: var(--gold); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .avatar:not(.has-img) { color: var(--gold); } }
+
+/* color propio dentro de una lista (Gestionar personajes): el acento se recalcula con el tono del personaje (estiloPaleta),
+   porque --gold se resuelve en :root y no seguiría a un --acc-h puesto más abajo */
+.paleta-local { --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-d, 66%)); --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-d, 78%));
+  --gold-soft: hsl(var(--acc-h) var(--acc-s) 62% / .14); --glow: hsl(var(--acc-h) var(--acc-s) 62% / .34); }
+:root[data-theme="light"] .paleta-local { --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-l, 32%)); --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-l, 44%));
+  --gold-soft: hsl(var(--acc-h) var(--acc-s) 90%); --glow: hsl(var(--acc-h) var(--acc-s) 45% / .24); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .paleta-local { --gold: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-l, 32%));
+  --gold-2: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl2-l, 44%)); --gold-soft: hsl(var(--acc-h) var(--acc-s) 90%); --glow: hsl(var(--acc-h) var(--acc-s) 45% / .24); } }

@@ -30,6 +30,8 @@ const USO = {
   o_pocion: 'potion-ball', o_vara: 'orb-wand', o_varita: 'crystal-wand', sintonia: 'linked-rings', cofre: 'open-treasure-chest',
   biblioteca: 'bookshelf', dote: 'laurel-crown', trasfondo: 'knapsack', subclase: 'upgrade', bestia: 'beast-eye', criatura: 'spiked-dragon-head',
   eficaz: 'target-arrows', inmune: 'checked-shield', vulnerable: 'cracked-shield',
+  // avisos y confirmaciones (ui/modal.js)
+  md_borrar: 'burning-book', md_tiempo: 'sands-of-time', md_guardar: 'locked-chest', md_pluma: 'quill-ink',
   d20: 'dice-twenty-faces-twenty', dados: 'rolling-dices', libro: 'spell-book', vela: 'candle-light', glosario: 'scroll-unfurled', ojo: 'all-seeing-eye',
 };
 const out = {};
