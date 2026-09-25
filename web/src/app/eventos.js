@@ -41,6 +41,7 @@ import { alternarCaracteristica } from '../ui/vitales.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
+import { efectosDe } from '../domain/efectos.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -173,7 +174,9 @@ function alternarCombate(el) {
 }
 function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
-  S.act(`Ronda ${combateDe(ch).ronda + 1}`, (db, x) => { siguienteTurno(x); });
+  const escudo = (ch.vida?.efectos || []).some(e => e.k === 'escudo');
+  S.act(`Ronda ${combateDe(ch).ronda + 1}${escudo ? ' (termina Escudo)' : ''}`, (db, x) => { siguienteTurno(x); if (x.vida) x.vida.efectos = x.vida.efectos.filter(e => e.k !== 'escudo'); });
+  if (escudo) toast('Empieza tu turno: el conjuro <b>Escudo</b> termina y tu CA vuelve a la normal.');
   pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
 }
 function tirarDesde(clave) {
@@ -181,8 +184,8 @@ function tirarDesde(clave) {
   if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa',
     alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; }); return 'Guardada como tu iniciativa en este combate.'; } });
   const [tipo, k] = clave.split(':');
-  if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion' });
-  if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba' });
+  if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
+  if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
 }
 
 function back() {
@@ -221,7 +224,7 @@ function bindSheet() {
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
   on(sheet, 'click', '[data-cbataque]', (e, b) => { const x = arma(b.dataset.cbataque); if (x) tirarPrueba({ titulo: x.o.nombre, sub: 'Tirada de ataque', bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque' }); });
-  on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr }); });
+  on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) }); });
   const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = parseInt(i?.value, 10); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
     if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
   on(sheet, 'click', '[data-cbpg]', (e, b) => pgRapido(b.dataset.cbpg));
