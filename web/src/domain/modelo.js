@@ -29,13 +29,14 @@ export function blankChar(over = {}) {
     id: uid('c'), nombre: '', especie: '', trasfondo: '', clase: 'Mago', subclase: '', nivel: 1,
     stats: { ...STATS0 }, aptitud: '', extraCD: 0, extraAtaque: 0,
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
-    book: [], rasgos: [], rasgosOff: [], play: PLAY0(), multiclase: [], dotes: [],
+    book: [], rasgos: [], rasgosOff: [], rasgosOcultos: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
     ...clone(over),
   };
 }
 
 export function normChar(c) {
+  const sinOcultos = !Array.isArray(c?.rasgosOcultos);   // datos de antes de separar «ocultar» de «sustituir»
   c = { ...blankChar(), ...c };
   c.stats = { ...STATS0, ...(c.stats || {}) };
   c.play = { ...PLAY0(), ...(c.play || {}) };
@@ -46,6 +47,12 @@ export function normChar(c) {
   if (!Array.isArray(c.play.log)) c.play.log = [];
   if (!Array.isArray(c.rasgos)) c.rasgos = [];
   if (!Array.isArray(c.rasgosOff)) c.rasgosOff = [];
+  // Antes, desactivar una plantilla la apagaba del todo (rasgosOff). Ahora solo se oculta de la hoja (rasgosOcultos);
+  // en rasgosOff quedan solo las sustituidas por una copia personalizada (la que lleva `desde`).
+  if (sinOcultos) {
+    const sust = id => c.rasgos.some(r => r.desde === id);
+    c.rasgosOcultos = c.rasgosOff.filter(id => !sust(id)); c.rasgosOff = c.rasgosOff.filter(sust);
+  }
   // Versiones anteriores: Presagio y Recuperación arcana eran campos fijos
   if (Array.isArray(c.play.presagio) && c.play.presagio.length && !c.play.rec['tpl:adivino.presagio']) c.play.rec['tpl:adivino.presagio'] = { used: 0, dice: c.play.presagio };
   if (c.play.recupUsed && !c.play.rec['tpl:mago.recuperacion']) c.play.rec['tpl:mago.recuperacion'] = { used: 1, dice: [] };

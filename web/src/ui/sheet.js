@@ -1,7 +1,7 @@
 /** Vista de la hoja. Solo pinta: los eventos viven en app/eventos.js. */
 import { esc, norm } from '../core/util.js';
 import { ABIL_NAME, perfil, sgn, clasesDe, clasesTexto } from '../domain/reglas2024.js';
-import { castSchools, castTriggerDesc, reglas, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../domain/rasgos.js';
+import { castSchools, castTriggerDesc, reglasVisibles, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../domain/rasgos.js';
 import { $, patch, patchKeyed } from './dom.js';
 import { icon, ASTROLABE } from './icons.js';
 import { pop } from './fx.js';
@@ -128,7 +128,7 @@ function resourcesHtml(db, ch, P) {
   if (rec.length) h += `<div class="res wide rec-card"><strong>${icon('star')} Para recordar</strong><button type="button" class="ruse" data-cmd="diario">Abrir diario</button><ul class="nts">${rec.slice(0, 4).map(n => notaHtml(n, true)).join('')}</ul>${rec.length > 4 ? `<span class="rnote">Y ${rec.length - 4} más en el diario.</span>` : ''}</div>`;
   h += efectosHtml(ch);
   if (P.pact) h += `<div class="res"><strong>Magia de pacto</strong><span class="rnote">${P.pact.n} ${P.pact.n > 1 ? 'espacios' : 'espacio'} de nivel ${P.pact.level}; se recuperan con un descanso corto o largo.</span></div>`;
-  reglas(ch).forEach(r => { h += r.tipo === 'recurso' ? recursoHtml(ch, r) : r.tipo === 'dados' ? dadosHtml(ch, r) : r.tipo === 'recuperar' ? recuperarHtml(ch, r) : alLanzarHtml(db, ch, r); });
+  reglasVisibles(ch).forEach(r => { h += r.tipo === 'recurso' ? recursoHtml(ch, r) : r.tipo === 'dados' ? dadosHtml(ch, r) : r.tipo === 'recuperar' ? recuperarHtml(ch, r) : alLanzarHtml(db, ch, r); });
   return h ? `<div class="resources">${h}</div>` : '';
 }
 /** Efectos activos: la concentración y los rasgos puestos sobre criaturas, con sus objetivos escritos a mano. */
@@ -150,7 +150,7 @@ function efectosHtml(ch) {
 const iconoFuente = r => (r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, ''));
 /** «En juego»: rasgos de clases, subclases, especie y dotes agrupados por cuándo se usan, con resumen, números y recurso. */
 function enJuegoHtml(ch, P) {
-  const todos = rasgosEnJuego(ch, biblioteca(), reglas(ch)); if (!todos.length) return '';
+  const todos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)); if (!todos.length) return '';
   // plegada por defecto solo si la clase lanza conjuros (un truco de especie no convierte a un bárbaro en lanzador)
   const lanza = !!P.c, abierto = lanza ? !!ch.enJuego?.abierto : ch.enJuego?.abierto !== false;
   const fij = ch.enJuego?.fijados || [], hay = FUENTES.filter(([k]) => !k || todos.some(r => r.fuente === k));

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { reglas, maxFrom, hasShortRest } from '../web/src/domain/rasgos.js';
+import { reglas, reglasVisibles, maxFrom, hasShortRest } from '../web/src/domain/rasgos.js';
 import { perfil } from '../web/src/domain/reglas2024.js';
 import { blankChar, normChar } from '../web/src/domain/modelo.js';
 import { levelDiff } from '../web/src/domain/progresion.js';
@@ -23,6 +23,20 @@ test('plantillas desactivables y rasgos propios', () => {
     rasgos: [{ id: 'r1', tipo: 'recurso', nombre: 'Varita', maxBase: 'fijo', maxN: 7, recarga: 'largo' }] });
   assert.deepEqual(names(ch), ['Varita:7']);
   assert.equal(reglas(ch, true).length, 2);
+});
+test('ocultar un rasgo solo lo quita de la hoja: sigue funcionando', () => {
+  const ch = blankChar({ clase: 'Mago', nivel: 2, rasgosOcultos: ['tpl:mago.recuperacion'],
+    rasgos: [{ id: 'r1', tipo: 'recurso', nombre: 'Varita', maxBase: 'fijo', maxN: 7, recarga: 'largo', off: true }] });
+  assert.deepEqual(reglas(ch).map(r => r.nombre).sort(), ['Recuperación arcana', 'Varita']);   // la lógica los tiene
+  assert.deepEqual(reglasVisibles(ch), []);                                                      // la hoja no los pinta
+});
+test('datos antiguos: lo desactivado pasa a oculto; lo personalizado sigue sustituido', () => {
+  const ch = normChar({ clase: 'Mago', nivel: 6, subclase: 'Adivino', rasgosOff: ['tpl:mago.recuperacion', 'tpl:adivino.presagio'],
+    rasgos: [{ id: 'r1', tipo: 'dados', nombre: 'Mi presagio', maxN: 2, dado: 'd20', desde: 'tpl:adivino.presagio' }] });
+  assert.deepEqual(ch.rasgosOcultos, ['tpl:mago.recuperacion']);
+  assert.deepEqual(ch.rasgosOff, ['tpl:adivino.presagio']);
+  assert.ok(reglas(ch).some(r => r.id === 'tpl:mago.recuperacion' && r.oculto));
+  assert.ok(!reglas(ch).some(r => r.id === 'tpl:adivino.presagio'));
 });
 test('máximos de rasgos propios', () => {
   const ch = blankChar({ nivel: 9, stats: { sab: 16 } });

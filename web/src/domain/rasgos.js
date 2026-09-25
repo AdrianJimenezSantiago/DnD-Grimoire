@@ -196,16 +196,22 @@ export function maxFrom(ch, r) {
   }
 }
 
-/** Plantillas + rasgos propios, ya resueltos. Por defecto solo los activos. */
+/**
+ * Plantillas + rasgos propios, ya resueltos. Todos funcionan (descansos, recuperación, avisos al lanzar); `oculto` solo dice que
+ * el jugador no quiere verlo en la hoja (ch.rasgosOcultos para las plantillas, r.off para los propios).
+ * Una plantilla «personalizada» (ch.rasgosOff) la sustituye su copia: queda fuera, salvo con `todas` (lista de Rasgos).
+ */
 export function reglas(ch, todas = false) {
-  const off = new Set(ch.rasgosOff || []);
+  const sust = new Set(ch.rasgosOff || []), ocultos = new Set(ch.rasgosOcultos || []);
   const list = [
     // los recursos de cada clase, a su nivel (con multiclase, también los de la segunda clase)
-    ...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))).map(r => ({ ...r, off: off.has(r.id) })),
-    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, off: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
+    ...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))).map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
+    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
-  return todas ? list : list.filter(r => !r.off);
+  return todas ? list : list.filter(r => !r.sustituida);
 }
+/** Los que se pintan en la hoja: los que funcionan menos los que el jugador ha ocultado. */
+export const reglasVisibles = ch => reglas(ch).filter(r => !r.oculto);
 
 export function castTriggerDesc(r) {
   const cond = `Al lanzar ${r.escuela ? `un conjuro de ${r.escuela.toLowerCase()}` : 'un conjuro'}${r.espacioMin ? ` con un espacio de nivel ${r.espacioMin} o superior` : ''}`;
