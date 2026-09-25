@@ -50,7 +50,7 @@ function lista() {
       ${s.texto ? `<span class="ses-x">${esc(s.texto.slice(0, 120))}${s.texto.length > 120 ? '…' : ''}</span>` : ''}</span></button>`; }).join('')}</div>`
     : `<p class="pempty">${V.q ? 'Nada coincide con la búsqueda.' : 'Aún no hay sesiones. Crea la primera al empezar la partida y ve apuntando nombres, sucesos y pendientes.'}</p>`;
   $('#diBody').innerHTML = h;
-  $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>';
+  $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" data-close>Cerrar</button>';
 }
 function criaturasSesion(s) {
   const todas = bestiarioDe(ch()).criaturas, aqui = todas.filter(c => c.sesiones.includes(s.id)), otras = todas.filter(c => !c.sesiones.includes(s.id));
@@ -70,7 +70,7 @@ function sesion() {
     ${s.notas.length ? `<ul class="nts">${s.notas.map(n => notaHtml(n)).join('')}</ul>` : '<p class="note">Las notas aparecen aquí. Subraya (S) lo que no quieras olvidar y tacha (T) lo que ya esté resuelto.</p>'}
     ${criaturasSesion(s)}
     <label class="f wide" style="margin-top:14px">Crónica de la sesión<textarea id="diTxt" rows="9" placeholder="Qué pasó, quién apareció, qué dijo el DJ…">${esc(s.texto)}</textarea></label>`;
-  $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrar">Borrar sesión</button><span class="spacer"></span><button type="button" data-di="volver">Sesiones</button><button type="button" class="primary" data-close>Cerrar</button>';
+  $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrar">Borrar sesión</button><span class="spacer"></span><button type="button" data-di="volver">Sesiones</button><button type="button" data-close>Cerrar</button>';
 }
 /* ------------------------------ bestiario ------------------------------ */
 const pestanas = () => `<div class="seg di-seg" role="tablist" aria-label="Diario"><button type="button" role="tab" aria-selected="${V.vista === 'lista'}" data-di="lista">${icon('quill')}Sesiones</button>
@@ -91,7 +91,7 @@ function bestiario() {
   h += lista.length ? `<div class="bx-list">${lista.map(tarjeta).join('')}</div>`
     : `<div class="bib-empty">${gi('bestia')}<p>${V.bq || V.btipo ? 'Ninguna criatura coincide.' : 'Aún no has anotado ninguna criatura.'}</p>${V.bq || V.btipo ? '' : '<p class="note">Cuando os crucéis con algo que merezca recordarse, anótalo: qué daños le hacen más o menos efecto, qué conjuros funcionaron y cómo luchó. Si vuelve a aparecer, lo tendrás a mano.</p>'}</div>`;
   $('#diBody').innerHTML = h;
-  $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>';
+  $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" data-close>Cerrar</button>';
 }
 /** Conjuros del libro que hacen daño o piden salvación: son los que merece la pena anotar. */
 function conjurosUtiles(c) {
@@ -134,7 +134,7 @@ function ficha() {
     <label class="f wide bx-sec">Tácticas y comportamiento<textarea id="bxTac" rows="4" placeholder="Cómo luchó, qué la hizo huir, qué funcionó…">${esc(x.tacticas)}</textarea></label>
     <label class="f wide bx-sec">Notas<textarea id="bxNot" rows="3" placeholder="Dónde vive, quién la controla, qué dijo el DJ…">${esc(x.notas)}</textarea></label>
     ${sesiones.length ? `<div class="bx-sec"><h3>Vista en</h3><div class="bx-est">${sesiones.map(s => `<button type="button" class="chip sm" data-abrir="${s.id}">Sesión ${s.n}${s.titulo ? ': ' + esc(s.titulo) : ''}</button>`).join('')}</div></div>` : ''}`;
-  $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrarcr">Borrar criatura</button><span class="spacer"></span><button type="button" data-di="bestiario">Bestiario</button><button type="button" class="primary" data-close>Cerrar</button>';
+  $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrarcr">Borrar criatura</button><span class="spacer"></span><button type="button" data-di="bestiario">Bestiario</button><button type="button" data-close>Cerrar</button>';
 }
 const norm = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const render = () => ({ sesion, bestiario, criatura: ficha }[V.vista] || lista)();

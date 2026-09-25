@@ -23,7 +23,10 @@ dialog.tall { width: min(760px, 96vw); }
   dialog[open] { animation: sheet-up var(--t-med) var(--ease-out); }
   dialog.closing { animation: sheet-down .2s var(--ease) forwards; }
   .grip { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
-  .dhead { padding-top: 10px; }
+  .dhead { padding-top: 10px; touch-action: pan-x; }
+  /* el asa se arrastra para cerrar (dialog.js): zona de toque más alta que la raya */
+  .grip { touch-action: none; cursor: grab; }
+  .grip::before { content: ""; position: absolute; left: -40px; right: -40px; top: -10px; bottom: -12px; }
 }
 
 /* ------------------------------ formularios ------------------------------ */

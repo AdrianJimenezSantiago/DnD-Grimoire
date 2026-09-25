@@ -33,7 +33,7 @@ function render() {
     const n = $('#trBody').querySelectorAll('mark').length;
     $('#trCount').textContent = V.q.trim().length >= 2 ? (n ? `${n} ${n === 1 ? 'coincidencia' : 'coincidencias'}` : 'Sin coincidencias') : '';
   }
-  $('#trFoot').innerHTML = `${md ? '<button type="button" class="warn" data-tr="borrar">Borrar</button>' : ''}<button type="button" data-tr="importar">Importar</button>${md ? '<button type="button" data-tr="editar">Editar</button>' : ''}<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>`;
+  $('#trFoot').innerHTML = `${md ? '<button type="button" class="warn" data-tr="borrar">Borrar</button>' : ''}<button type="button" data-tr="importar">Importar</button>${md ? '<button type="button" data-tr="editar">Editar</button>' : ''}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
 }
 export function openTrasfondo() { if (!ch()) return; V = { editando: false, q: '' }; $('#trQ').value = ''; render(); openSheet(dlg()); }
 
