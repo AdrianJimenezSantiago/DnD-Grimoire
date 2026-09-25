@@ -13,6 +13,8 @@ import { viewTransition } from '../fx.js';
 import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
 import { avatarHtml } from '../avatar.js';
+import { temaDe } from '../tema.js';
+import { estiloPaleta } from '../../domain/paleta.js';
 import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
@@ -32,8 +34,8 @@ export function openCharacter(id) {
 function renderList() {
   const n = Object.keys(S.db.catalog).length;
   $('#charList').innerHTML = (S.db.chars.length ? S.db.chars.map(c => {
-    const nb = c.book.length, ini = esc((c.nombre || '?').trim().charAt(0).toUpperCase());
-    return `<div class="ccard ${c.id === S.db.activeId ? 'active' : ''}">${c.retrato ? avatarHtml(c, 'md') : `<span class="monogram">${ini}</span>`}
+    const nb = c.book.length;
+    return `<div class="ccard ${c.id === S.db.activeId ? 'active' : ''}"><span class="ccard-av paleta-local" style="${estiloPaleta(temaDe(c))}">${avatarHtml(c, 'md')}</span>
       <button type="button" class="cmain" data-openc="${c.id}"><span class="cname">${esc(c.nombre || 'Sin nombre')}</span>
         <span class="cline">${esc(claseLinea(c))}${origenLinea(c) ? '. ' + esc(origenLinea(c)) : ''}. ${nb === 1 ? '1 conjuro' : nb + ' conjuros'} en el libro</span></button>
       <div class="cacts"><button type="button" data-editc="${c.id}">Editar</button><button type="button" data-dupc="${c.id}">Duplicar</button><button type="button" class="warn" data-delc="${c.id}">Borrar</button></div>

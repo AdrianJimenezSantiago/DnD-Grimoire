@@ -242,7 +242,7 @@ export function renderBar(S) {
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
   ['#dFilter', '#bFilter'].forEach(id => $(id).setAttribute('aria-pressed', !!ch?.play.onlyPrep));
   $('#dAdd').hidden = !S.editing;
-  if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="monogram">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
+  if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   // sin conjuros, «Solo preparados» y «Añadir conjuro» no dicen nada: se ocultan (la hoja ofrece «Añadir conjuros» al pie)
   const conj = conConjuros(ch, P);
@@ -253,7 +253,7 @@ export function renderBar(S) {
   $('#bEdit').hidden = $('#dEdit').hidden = !conj && !S.editing;
   if (!conj) $('#dAdd').hidden = true;
   const tema = aplicarTema(ch);
-  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
+  patch($('#whoChip'), `${avatarHtml(ch, 'av-chip')}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   // en el móvil los espacios van en una sola fila que se desliza de lado: la barra no se come media pantalla

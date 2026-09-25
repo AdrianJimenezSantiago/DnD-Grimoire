@@ -132,7 +132,7 @@ body.touring .toast { display: none; }
 .lc-av .avatar { box-shadow: 0 0 0 2px hsl(var(--acc-h) var(--acc-s) 58%), 0 0 18px hsl(var(--acc-h) var(--acc-s) 50% / .4); }
 .lc-badge { position: absolute; right: -4px; bottom: -4px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: hsl(var(--acc-h) var(--acc-s) 20%); background: hsl(var(--acc-h) var(--acc-s) 66%); }
 .lc-badge .gi { width: 16px; height: 16px; }
-.ccard > .avatar { grid-row: span 2; }
+.ccard > .avatar, .ccard > .ccard-av { grid-row: span 2; display: grid; }
 .f-ret { display: flex; gap: 16px; align-items: center; margin-bottom: 14px; padding: 12px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
 .f-ret .note { margin: 2px 0 8px; } .f-ret button { min-height: 36px; border-radius: var(--r-pill); }
 .ret-stage { position: relative; width: min(320px, 78vw); aspect-ratio: 1; margin: 6px auto 14px; border-radius: 50%; overflow: hidden; touch-action: none; cursor: grab;
