@@ -34,8 +34,8 @@ function fuentes() {
       return { nombre: s.es, texto: s.en, sub: `${s.level ? `Nivel ${s.level}` : 'Truco'} · ${s.escuela || ''}`, ico: escuelaIco(s.escuela) || 'libro', abrir: () => openSpell(bi) }; }) });
     const ag = penalizacionAgotamiento(ch);
     F.push({ clave: 'hab', titulo: 'Tiradas', ico: 'd20', peso: 12, items: [
-      ...HABILIDADES.map(([k, n]) => ({ nombre: n, sub: `Prueba · tirar ${sgn(bonoHabilidad(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: n, sub: 'Prueba de característica', bono: bonoHabilidad(ch, k), tipo: 'prueba' }) })),
-      ...ABILS.map(([k, n]) => ({ nombre: `Salvación de ${n}`, sub: `Tirar ${sgn(bonoSalvacion(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: `Salvación de ${n}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion' }) })),
+      ...HABILIDADES.map(([k, n]) => ({ nombre: n, sub: `Prueba · tirar ${sgn(bonoHabilidad(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: n, sub: 'Prueba de característica', bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k }) })),
+      ...ABILS.map(([k, n]) => ({ nombre: `Salvación de ${n}`, sub: `Tirar ${sgn(bonoSalvacion(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: `Salvación de ${n}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k }) })),
       { nombre: 'Iniciativa', sub: `Tirar ${sgn(iniciativa(ch) - ag)}`, ico: 'iniciativa', abrir: () => tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa' }) }] });
     F.push({ clave: 'rasgos', titulo: 'Rasgos de tu personaje', ico: 'dote', peso: 5, items: rasgosEnJuego(ch, lib, reglasVisibles(ch)).map(r => ({ nombre: r.nombre, texto: r.texto, sub: r.etiqueta, ico: 'dote', abrir: () => abrirRasgoJuego(r.clave) })) });
     F.push({ clave: 'inv', titulo: 'Inventario', ico: 'cofre', peso: 4, items: equipoDe(ch).objetos.map(o => ({ nombre: o.nombre, texto: o.notas, sub: `${o.cantidad > 1 ? `${o.cantidad} × ` : ''}${o.equipado ? 'equipado' : 'en la mochila'}`, ico: 'cofre', abrir: () => openEquipo() })) });

@@ -3,6 +3,7 @@ import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
 import { conObjetivos, objetivosNuevos } from '../../domain/concentracion.js';
 import { dadosPara, media } from '../../domain/tiradas.js';
+import { modsTirada, resolverModo, fmtMod } from '../../domain/efectos.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
@@ -24,7 +25,8 @@ const TS_TXT = { falla: 'Ha fallado', supera: 'Ha superado', varios: 'Varios obj
 
 export function openRoll(bi, nivelEspacio) {
   const ch = S.cur(), s = S.db.catalog[ch.book[bi].sid], P = perfil(ch);
-  R = { bi, nivel: s.level === 0 ? 0 : Math.max(s.level, nivelEspacio || s.level), modo: 'normal', critico: false, ts: null, ultimo: null };
+  const mods = modsTirada(ch, { sobre: 'ataque' });
+  R = { bi, nivel: s.level === 0 ? 0 : Math.max(s.level, nivelEspacio || s.level), modo: resolverModo(mods), mods, critico: false, ts: null, ultimo: null };
   if (s.level > 0 && !nivelEspacio) R.nivel = Math.max(s.level, Math.min(P.maxSlot || s.level, s.level));
   render(); openSheet(dlg());
 }
@@ -55,7 +57,7 @@ function render() {
     h += '</section>';
   }
   if (t?.ataque) {
-    h += `<section class="rl-step"><div class="seg" role="radiogroup" aria-label="Tirada de ataque">${['desventaja', 'normal', 'ventaja'].map(m => `<button type="button" role="radio" aria-checked="${R.modo === m}" data-modo="${m}">${m === 'normal' ? 'Normal' : m.charAt(0).toUpperCase() + m.slice(1)}</button>`).join('')}</div>
+    h += `<section class="rl-step">${R.mods.length ? `<div class="da-mods-ap"><span class="da-mods-t">Se aplica</span>${R.mods.map(m => `<button type="button" class="da-mod ${m.mal ? 'mal' : 'bien'} ${m.on ? '' : 'off'}" data-rlmod="${esc(m.id)}" aria-pressed="${m.on}"><b>${esc(fmtMod(m))}</b><span>${esc(m.fuente)}</span>${m.cond ? `<small>${esc(m.cond)}</small>` : ''}</button>`).join('')}</div>` : ''}<div class="seg" role="radiogroup" aria-label="Tirada de ataque">${['desventaja', 'normal', 'ventaja'].map(m => `<button type="button" role="radio" aria-checked="${R.modo === m}" data-modo="${m}">${m === 'normal' ? 'Normal' : m.charAt(0).toUpperCase() + m.slice(1)}</button>`).join('')}</div>
       <div class="rl-btns"><button type="button" class="rl-btn" data-roll="ataque">${gi('d20')}<span><b>Ataque ${P.atk == null ? '' : sgn(P.atk)}</b><small>ataque de conjuro ${esc(t.ataque)}</small></span></button></div></section>`;
   }
   const btns = [];
@@ -99,10 +101,13 @@ function tirar(tipo, i) {
   let html = '', texto = '', total = 0, clase = '';
   if (tipo === 'ataque') {
     const a = d(20), b = d(20), usa = R.modo === 'ventaja' ? Math.max(a, b) : R.modo === 'desventaja' ? Math.min(a, b) : a;
-    total = usa + (P.atk || 0); clase = usa === 20 ? 'crit' : usa === 1 ? 'pifia' : '';
+    const act = R.mods.filter(m => m.on), extras = act.filter(m => m.efecto === 'dado').map(m => { const neg = String(m.valor).startsWith('-'), [n, c] = String(m.valor).replace(/^[+-]/, '').split('d').map(x => parseInt(x || '1', 10)), vals = Array.from({ length: n }, () => d(c)); return { m, neg, vals, t: vals.reduce((a2, b2) => a2 + b2, 0) }; });
+    const planos = act.filter(m => m.efecto === 'plano'), mas = extras.reduce((a2, x) => a2 + (x.neg ? -x.t : x.t), 0) + planos.reduce((a2, m) => a2 + m.valor, 0);
+    total = usa + (P.atk || 0) + mas; clase = usa === 20 ? 'crit' : usa === 1 ? 'pifia' : '';
+    const extraHtml = extras.map(x => ` <span class="da-extra ${x.m.mal ? 'mal' : 'bien'}">${x.neg ? '−' : '+'} ${x.vals.map(v => `<b class="die">${v}</b>`).join('')}<small>${esc(x.m.fuente)}</small></span>`).join('') + planos.map(m => ` <span class="da-extra ${m.mal ? 'mal' : 'bien'}">${sgn(m.valor)}<small>${esc(m.fuente)}</small></span>`).join('');
     if (usa === 20) R.critico = true;
     html = `<div class="rl-total ${clase}"><span class="rl-num">${total}</span><span class="rl-lbl">para impactar</span></div>
-      <div class="rl-det">d20 <b class="die">${usa}</b>${R.modo !== 'normal' ? ` <span class="rl-alt">(${a} y ${b}, ${R.modo})</span>` : ''} ${sgn(P.atk || 0)}${usa === 20 ? ' <b class="tag-crit">¡Crítico! Los dados de daño se doblan.</b>' : usa === 1 ? ' <b class="tag-pifia">Pifia: falla siempre.</b>' : ''}</div>`;
+      <div class="rl-det">d20 <b class="die">${usa}</b>${R.modo !== 'normal' ? ` <span class="rl-alt">(${a} y ${b}, ${R.modo})</span>` : ''} ${sgn(P.atk || 0)}${extraHtml}${usa === 20 ? ' <b class="tag-crit">¡Crítico! Los dados de daño se doblan.</b>' : usa === 1 ? ' <b class="tag-pifia">Pifia: falla siempre.</b>' : ''}</div>`;
     texto = `${s.es}: ataque ${total} (d20 ${usa}${R.modo !== 'normal' ? ', ' + R.modo : ''} ${sgn(P.atk || 0)})${usa === 20 ? ', crítico' : ''}`;
   } else if (tipo === 'extra') {
     const x = t.extras[i], vals = Array.from({ length: x.n }, () => d(x.caras)); total = vals.reduce((p, q) => p + q, 0) + x.bono;
@@ -132,6 +137,7 @@ export function init(store) {
   const body = $('#rlBody');
   on(body, 'click', '[data-roll]', (e, b) => { if (!b.disabled) tirar(b.dataset.roll, +b.dataset.i || 0); });
   on(body, 'click', '[data-modo]', (e, b) => { R.modo = b.dataset.modo; render(); });
+  on(body, 'click', '[data-rlmod]', (e, b) => { const m = R.mods.find(x => x.id === b.dataset.rlmod); if (!m) return; m.on = !m.on; R.modo = resolverModo(R.mods); render(); });
   on(body, 'click', '[data-ts]', (e, b) => { R.ts = b.dataset.ts; R.ultimo = null; render(); haptic(); });
   const anotar = inp => { const ch = S.cur(), nuevos = objetivosNuevos(inp.value, ch.play.concObj); inp.value = ''; if (!nuevos.length) return;
     S.act(`${ch.play.conc}: sobre ${nuevos.join(', ')}`, (db, c) => { c.play.concObj.push(...nuevos); }); render(); haptic('light'); $('#rlObj')?.focus(); };

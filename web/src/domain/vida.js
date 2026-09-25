@@ -1,4 +1,5 @@
-import { norm } from '../core/util.js';
+import { norm, uid } from '../core/util.js';
+import { normEfectos } from './efectos.js';
 import { modOf, clasesDe, dotesDe, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
 
@@ -21,7 +22,7 @@ export const ESTADOS = [
 export const NOMBRE_ESTADO = Object.fromEntries(ESTADOS.map(([k, n]) => [k, n]));
 export const RESUMEN_ESTADO = Object.fromEntries(ESTADOS.map(([k, , t]) => [k, t]));
 
-export const VIDA0 = () => ({ pg: null, temp: 0, maxManual: null, dadosUsados: {}, muerte: { exitos: 0, fallos: 0 }, estable: false, estados: [], agotamiento: 0, inspiracion: false, caida: null });
+export const VIDA0 = () => ({ pg: null, temp: 0, maxManual: null, dadosUsados: {}, muerte: { exitos: 0, fallos: 0 }, estable: false, estados: [], agotamiento: 0, inspiracion: false, caida: null, efectos: [], maxExtra: [] });
 export function normVida(v) {
   const x = { ...VIDA0(), ...(v && typeof v === 'object' ? v : {}) };
   x.pg = x.pg == null || x.pg === '' ? null : Math.max(0, parseInt(x.pg, 10) || 0);
@@ -33,10 +34,12 @@ export function normVida(v) {
   x.estados = [...new Set((Array.isArray(x.estados) ? x.estados : []).filter(k => NOMBRE_ESTADO[k]))];
   x.agotamiento = Math.max(0, Math.min(6, parseInt(x.agotamiento, 10) || 0));
   x.inspiracion = !!x.inspiracion;
+  x.efectos = normEfectos(x.efectos);
+  x.maxExtra = (Array.isArray(x.maxExtra) ? x.maxExtra : []).filter(m => m && (parseInt(m.n, 10) || 0) > 0).map(m => ({ id: String(m.id || uid('mx')), nombre: String(m.nombre || 'Aumento'), n: parseInt(m.n, 10) }));
   x.caida = x.caida && typeof x.caida === 'object' ? { t: +x.caida.t || 0, causa: String(x.caida.causa || ''), ronda: x.caida.ronda ?? null } : null;
   return x;
 }
-export const vidaDe = ch => (ch.vida && ch.vida.muerte && ch.vida.dadosUsados && Array.isArray(ch.vida.estados) ? ch.vida : (ch.vida = normVida(ch.vida)));
+export const vidaDe = ch => (ch.vida && ch.vida.muerte && ch.vida.dadosUsados && Array.isArray(ch.vida.estados) && Array.isArray(ch.vida.efectos) && Array.isArray(ch.vida.maxExtra) ? ch.vida : (ch.vida = normVida(ch.vida)));
 
 const tieneDote = (ch, nombre) => dotesDe(ch).some(d => norm(d.nombre) === norm(nombre));
 export function pgMaximoCalculado(ch) {
@@ -50,7 +53,25 @@ export function pgMaximoCalculado(ch) {
   if (/^enan/.test(norm(ch.especie || ''))) pg += L;
   return Math.max(1, pg);
 }
-export const pgMaximo = ch => vidaDe(ch).maxManual ?? pgMaximoCalculado(ch);
+export const pgMaximoBase = ch => vidaDe(ch).maxManual ?? pgMaximoCalculado(ch);
+export const maxExtra = ch => vidaDe(ch).maxExtra.reduce((s, m) => s + m.n, 0);
+export const pgMaximo = ch => pgMaximoBase(ch) + maxExtra(ch);
+export function aumentarMax(ch, { id = uid('mx'), nombre = 'Aumento', n }) {
+  const v = vidaDe(ch), k = Math.max(0, parseInt(n, 10) || 0); if (!k || estadoVital(ch) === 'muerto') return null;
+  const antes = pgActuales(ch), lleno = v.pg == null;
+  v.maxExtra = v.maxExtra.filter(m => m.id !== id); v.maxExtra.push({ id, nombre, n: k });
+  if (!lleno) v.pg = antes + k;
+  if (antes === 0 && v.pg > 0) { v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
+  return id;
+}
+export function quitarMax(ch, id) {
+  const v = vidaDe(ch), m = v.maxExtra.find(x => x.id === id); if (!m) return null;
+  const antes = pgActuales(ch);
+  v.maxExtra = v.maxExtra.filter(x => x.id !== id);
+  if (v.pg != null) v.pg = Math.min(v.pg, pgMaximo(ch));
+  else if (antes > pgMaximo(ch)) v.pg = null;
+  return m;
+}
 export const pgActuales = ch => { const v = vidaDe(ch), max = pgMaximo(ch); return v.pg == null ? max : Math.min(v.pg, max); };
 
 export function dadosDeGolpe(ch) {
@@ -104,17 +125,17 @@ export function fijarPg(ch, valor) {
   if (n > 0) { v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
 }
 
-export function salvacionMuerte(ch, d20) {
+export function salvacionMuerte(ch, d20, total = d20) {
   const v = vidaDe(ch), e = estadoVital(ch);
   if (e === 'muerto') return 'muere';
   if (e !== 'moribundo') return 'nada';
   if (d20 === 20) { v.pg = 1; v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; return 'revive'; }
   if (d20 === 1) v.muerte.fallos = Math.min(3, v.muerte.fallos + 2);
-  else if (d20 >= 10) v.muerte.exitos = Math.min(3, v.muerte.exitos + 1);
+  else if (total >= 10) v.muerte.exitos = Math.min(3, v.muerte.exitos + 1);
   else v.muerte.fallos = Math.min(3, v.muerte.fallos + 1);
   if (v.muerte.fallos >= 3) { marcarCaida(ch, 'salvaciones'); return 'muere'; }
   if (v.muerte.exitos >= 3) { v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; return 'estable'; }
-  return d20 >= 10 ? 'exito' : 'fallo';
+  return total >= 10 ? 'exito' : 'fallo';
 }
 export const estadoVital = ch => {
   const v = vidaDe(ch);
@@ -143,6 +164,6 @@ export function descansoLargoVida(ch) {
   const antes = { pg: pgActuales(ch), agotamiento: v.agotamiento, dados: Object.values(v.dadosUsados).reduce((a, b) => a + b, 0) };
   if (estadoVital(ch) === 'muerto') return antes;
   v.pg = null; v.temp = 0; v.dadosUsados = {}; v.muerte = { exitos: 0, fallos: 0 }; v.estable = false;
-  v.agotamiento = Math.max(0, v.agotamiento - 1);
+  v.agotamiento = Math.max(0, v.agotamiento - 1); v.efectos = []; v.maxExtra = [];
   return antes;
 }

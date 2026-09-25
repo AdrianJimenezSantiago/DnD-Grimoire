@@ -18,6 +18,7 @@ import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
 import { fileStore, shareJson } from '../../platform/native.js';
+import { pgMaximoCalculado } from '../../domain/vida.js';
 import { campoElegible, ponerValor, elegirDote, elegirEspecie, elegirTrasfondo } from '../elecciones.js';
 import { gi } from '../tema.js';
 import { SCHEMA } from '../../domain/modelo.js';
@@ -98,6 +99,7 @@ export function openCharForm(id) {
     <button type="button" class="elg-add" id="f_doteAdd">${gi('dote')}<span><b>Añadir una dote</b><small>Elige de la lista, con su texto, o escribe cualquiera</small></span>${icon('plus')}</button>
     <p class="hint">La de origen sale de tu trasfondo. Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p></section>
   <section class="fsec"><h3>Características</h3><div class="abil">${abil}</div></section>
+  <section class="fsec"><h3>Puntos de golpe</h3><div class="frow"><label class="f">PG máximos<input id="f_pgmax" type="number" inputmode="numeric" min="1" value="${c.vida?.maxManual ?? ''}" placeholder=""><span class="hint" id="h_pgmax"></span></label></div></section>
   <section class="fsec"><h3>Competencias</h3><p class="hint comp-hint" id="h_comp" aria-live="polite"></p>
     <div class="comp-salv" id="f_salv" role="group" aria-label="Tiradas de salvación"></div>
     <div class="comp-grid" id="f_comp" role="group" aria-label="Habilidades"></div>
@@ -126,6 +128,7 @@ function readForm() {
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
     multiclase: clone(MC), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
+  const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
   ABILS.forEach(([k]) => { base.stats[k] = clamp(parseInt(v('#f_' + k), 10) || 10, 1, 30); });
   base.espacios = {}; for (let L = 1; L <= 9; L++) { const n = clamp(parseInt(v('#f_e' + L), 10) || 0, 0, 9); if (n) base.espacios[L] = n; }
   return base;
@@ -204,6 +207,8 @@ function sync(first) {
   if (formId) { const oc = S.db.chars.find(x => x.id === formId), diff = levelDiff(perfil(oc), P, oc, draft); if (diff) notes.push(diff); }
   $('#f_sum').innerHTML = L.map(t => `<p>${esc(t)}</p>`).join('') + notes.map(t => `<p class="note">${esc(t)}</p>`).join('');
   pintarComp(draft);
+  $('#f_pgmax').placeholder = String(pgMaximoCalculado({ ...draft, vida: { ...draft.vida, maxManual: null } }));
+  $('#h_pgmax').textContent = `Vacío: la media de cada nivel con tu Constitución (${pgMaximoCalculado(draft)}). Escribe otro si tiras los PG al subir de nivel.`;
 }
 function save() {
   const draft = readForm();

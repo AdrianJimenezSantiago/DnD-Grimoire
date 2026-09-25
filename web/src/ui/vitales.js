@@ -1,8 +1,8 @@
 import { esc } from '../core/util.js';
 import { sgn } from '../domain/reglas2024.js';
-import { claseArmadura } from '../domain/equipo.js';
+import { caEfectiva, velocidadEfectiva, efectosDe } from '../domain/efectos.js';
 import { vidaDe, pgMaximo, pgActuales, dadosDeGolpe, estadoVital, NOMBRE_ESTADO } from '../domain/vida.js';
-import { iniciativa, velocidad, fmtMetros, tablaCaracteristicas, percepcionPasiva, penalizacionAgotamiento } from '../domain/habilidades.js';
+import { iniciativa, fmtMetros, tablaCaracteristicas, percepcionPasiva, penalizacionAgotamiento } from '../domain/habilidades.js';
 import { combateDe } from '../domain/combate.js';
 import { gi } from './tema.js';
 import { icon } from './icons.js';
@@ -44,22 +44,32 @@ export function pgHtml(ch, { compacto = false } = {}) {
 }
 const placa = (cls, ico, valor, lbl, attrs = '', title = '') => `<${attrs ? 'button type="button"' : 'div'} class="vt-placa ${cls}" ${attrs} ${title ? `title="${esc(title)}"` : ''}>${gi(ico, 'vt-ico')}<b>${valor}</b><span>${lbl}</span></${attrs ? 'button' : 'div'}>`;
 
+export function placaCa(ch, lbl, attrs = '') {
+  const ca = caEfectiva(ch);
+  return placa(`ca ${ca.cambia ? (ca.ca > ca.base ? 'sube' : 'baja') : ''}`, 'ca', ca.ca, ca.cambia ? `${lbl} <s>${ca.base}</s>` : lbl, attrs, ca.detalle);
+}
+export function placaVel(ch, lbl) {
+  const v = velocidadEfectiva(ch), nota = v.m === 0 && v.motivo ? v.motivo : v.arrastra ? 'Derribado: te arrastras (cada metro cuesta el doble)' : v.motivo;
+  return placa(`vel ${v.cambia ? (v.m > v.base ? 'sube' : 'baja') : ''} ${v.arrastra ? 'baja' : ''}`, 'velocidad', fmtMetros(v.m), v.m === 0 && v.motivo ? `${lbl} · ${v.motivo.toLowerCase()}` : v.arrastra ? `${lbl} · arrastrándote` : lbl, '', nota);
+}
 export function estadosHtml(ch) {
   const v = vidaDe(ch), chips = [
     v.inspiracion ? `<span class="es-chip insp">${gi('inspiracion')}Inspiración heroica</span>` : '',
     v.agotamiento ? `<span class="es-chip ago">${gi('agotamiento')}Agotamiento ${v.agotamiento}<small>−${penalizacionAgotamiento(ch)} al d20</small></span>` : '',
     ...v.estados.map(k => `<span class="es-chip">${esc(NOMBRE_ESTADO[k])}</span>`),
+    ...efectosDe(ch).map(e => `<span class="es-chip ${e.bueno ? 'buff' : 'debuff'}">${gi(e.ico || 'inspiracion')}${esc(e.nombre)}</span>`),
+    ...v.maxExtra.map(m => `<span class="es-chip buff">${gi('pg')}+${m.n} PG máx.<small>${esc(m.nombre)}</small></span>`),
   ].filter(Boolean);
-  return `<button type="button" class="vt-estados ${chips.length ? 'con' : ''}" data-cmd="estados" aria-label="Estados, agotamiento e inspiración">
-    ${chips.length ? chips.join('') : `<span class="es-vacio">${gi('estados')}Sin estados · sin inspiración</span>`}<span class="es-edit">${icon('quill')}</span></button>`;
+  return `<button type="button" class="vt-estados ${chips.length ? 'con' : ''}" data-cmd="estados" aria-label="Estados y efectos">
+    ${chips.length ? chips.join('') : `<span class="es-vacio">${gi('estados')}Sin estados ni efectos</span>`}<span class="es-edit">${icon('quill')}</span></button>`;
 }
 
 export function vitalesHtml(ch) {
-  const ca = claseArmadura(ch), ini = iniciativa(ch), ag = penalizacionAgotamiento(ch);
+  const ini = iniciativa(ch), ag = penalizacionAgotamiento(ch);
   return `<div class="vt-grid">${pgHtml(ch)}
-      ${placa('ca', 'ca', ca.ca, 'Clase de armadura', 'data-cmd="equipo"', ca.detalle)}
+      ${placaCa(ch, 'Clase de armadura', 'data-cmd="equipo"')}
       ${placa('ini', 'iniciativa', sgn(ini - ag), 'Iniciativa', 'data-tirar="iniciativa"', 'Tocar para tirar iniciativa')}
-      ${placa('vel', 'velocidad', fmtMetros(velocidad(ch)), 'Velocidad')}
+      ${placaVel(ch, 'Velocidad')}
     </div>${estadosHtml(ch)}`;
 }
 
