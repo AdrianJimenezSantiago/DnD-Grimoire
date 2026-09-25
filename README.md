@@ -1,6 +1,6 @@
 # Grimorio
 
-Hoja de personaje y libro de conjuros para **Dungeons & Dragons** con las reglas del **Manual del Jugador de 2024**, pensada para llevarla a la mesa en el móvil o en el ordenador.
+Hoja de personaje y libro de conjuros para **Dungeons & Dragons** , pensada para llevarla a la mesa en el móvil o en el ordenador.
 
 Creas a tu personaje (clase, subclase, especie, trasfondo, nivel y características) y la app calcula por ti lo que dicen las reglas: CD y ataque de conjuro, espacios, conjuros preparados, recursos de clase, clase de armadura, carga… Durante la partida lanzas conjuros con un toque, gastas espacios y usos, marcas la concentración y descansas. La app recupera lo que corresponde en cada descanso.
 
@@ -12,8 +12,7 @@ Creas a tu personaje (clase, subclase, especie, trasfondo, nivel y característi
 - **Inventario** con armas y armaduras calculadas, monedas, carga y objetos mágicos con sintonización y cargas.
 - **Diario de sesiones y bestiario** para apuntar lo que pasa en la campaña y lo que sabéis de cada criatura.
 - **Tus libros dentro:** importa el PDF de tu Manual del Jugador, de la Guía del Dungeon Master o de una expansión. La app lee en tu dispositivo las descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos y subclases, y nada sale de él.
-- **Varios personajes**, cada uno con el color y el emblema de su clase, en tema oscuro o claro.
-- **Sin conexión y sin cuentas:** los datos se guardan en el propio dispositivo, con copia de seguridad en archivo.
+- **Varios personajes**, cada uno con el color y el emblema de su clase.
 
 ## Instalación
 
