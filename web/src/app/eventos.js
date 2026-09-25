@@ -157,6 +157,13 @@ const COMMANDS = {
     const h = S.replace(db); toast('Datos borrados.', [A.undoBtn(S, h)]);
   },
 };
+function lanzadoFx(el) {
+  if (!el || reducedMotion()) return;
+  el.classList.remove('hz-lanza'); void el.offsetWidth; el.classList.add('hz-lanza');
+  setTimeout(() => el.classList.remove('hz-lanza'), 900);
+  const r = el.getBoundingClientRect(), c = getComputedStyle(el).getPropertyValue('--sc').trim() || '#F4D27A';
+  burst(r.left + 28, r.top + r.height / 2, { color: /^#/.test(c) ? c : '#F4D27A', n: 22, speed: 3, up: 1.6, life: 900, size: 2 });
+}
 function alternarInspiracion() {
   const ch = S.cur(); if (!ch) return;
   const gana = !vidaDe(ch).inspiracion;
@@ -306,7 +313,16 @@ function bindSheet() {
     if (d.del) { const bi = +d.del, s = S.db.catalog[S.cur().book[bi].sid]; const h = S.edit((db, ch) => { ch.book.splice(bi, 1); });
       return toast(`<b>${esc(s.es)}</b> quitado del libro. Sigue en el catálogo.`, [A.undoBtn(S, h)]); }
     if (d.text !== undefined) return openSpell(+d.text, { edit: true });
-    if (d.cast !== undefined) { if (S.editing) return; if (lpFired) { lpFired = false; return; } return A.quickCast(S, +d.cast); }
+    if (d.cast !== undefined) {
+      if (S.editing) return; if (lpFired) { lpFired = false; return; }
+      const grupo = t.closest('.cb-grupo'), k = grupo && ['accion', 'adicional', 'reaccion'].find(x => grupo.classList.contains(`g-${x}`));
+      const ok = A.quickCast(S, +d.cast);
+      if (ok && k) {
+        if (!combateDe(S.cur()).turno[k]) S.edit((db, x) => { combateDe(x).turno[k] = true; });
+        requestAnimationFrame(() => lanzadoFx(document.querySelector(`.cb-vista .cb-hz[data-cast="${d.cast}"]`)));
+      }
+      return;
+    }
     if (d.rtick) { const [id, i] = d.rtick.split('|'); return A.tickResource(S, id, +i); }
     if (d.rstep) { const [id, n] = d.rstep.split('|'); return A.stepResource(S, id, +n); }
     if (d.rset) return A.setResource(S, d.rset);
