@@ -90,24 +90,22 @@ body::after, :root[data-theme="dark"] body::after { opacity: 1 !important; backg
 button { transition: background-color var(--t-fast), border-color var(--t-med), color var(--t-fast), transform .18s var(--spring), box-shadow var(--t-med) var(--ease); }
 button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
 button:active:not(:disabled) { transform: scale(.955); }
-button.primary { background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 90%, var(--gold)), var(--ink)); color: var(--raised); border-color: transparent;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent), 0 6px 16px -8px rgba(0, 0, 0, .5); }
-/* Acción principal: sello del color del personaje (fondo teñido, borde fino y texto de acento), como el resto de piezas.
+/* Acción principal (.gold y .primary son la misma): sello del color del personaje (fondo teñido, borde fino y texto de acento), como el resto de piezas.
    --bt: color del sello; lo reutiliza la acción peligrosa en rojo. */
-button.gold, .chip.gold, button.danger { --bt: var(--gold); --bt-ink: var(--gold-2);
+button.gold, button.primary, .chip.gold, button.danger { --bt: var(--gold); --bt-ink: var(--gold-2);
   background: linear-gradient(180deg, color-mix(in srgb, var(--bt) 24%, var(--raised)), color-mix(in srgb, var(--bt) 11%, var(--raised)));
   color: var(--bt-ink); border: 1px solid color-mix(in srgb, var(--bt) 58%, transparent); font-weight: 700; overflow: hidden;
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--bt-ink) 22%, transparent), 0 6px 20px -10px color-mix(in srgb, var(--bt) 70%, transparent); }
-button.gold:hover:not(:disabled), .chip.gold:hover, button.danger:hover:not(:disabled) { border-color: var(--bt);
+button.gold:hover:not(:disabled), button.primary:hover:not(:disabled), .chip.gold:hover, button.danger:hover:not(:disabled) { border-color: var(--bt);
   background: linear-gradient(180deg, color-mix(in srgb, var(--bt) 34%, var(--raised)), color-mix(in srgb, var(--bt) 17%, var(--raised)));
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--bt-ink) 30%, transparent), 0 0 0 3px color-mix(in srgb, var(--bt) 16%, transparent), 0 8px 24px -10px var(--bt); }
 button.danger { --bt: var(--danger); --bt-ink: var(--danger); }
 /* tema claro: el texto del sello, en el tono oscuro del acento */
-:root[data-theme="light"] :is(button.gold, .chip.gold) { --bt-ink: var(--gold); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(button.gold, .chip.gold) { --bt-ink: var(--gold); } }
-button.gold::before, .chip.gold::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+:root[data-theme="light"] :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--gold); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--gold); } }
+button.gold::before, button.primary::before, .chip.gold::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
   background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--bt-ink, #fff) 22%, transparent) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat; transition: background-position .8s var(--ease); }
-button.gold:hover::before, .chip.gold:hover::before { background-position: 150% 0; }
+button.gold:hover::before, button.primary:hover::before, .chip.gold:hover::before { background-position: 150% 0; }
 .chip.gold { animation: destello 7s ease-in-out 3s infinite; }
 .chip.gold::before { animation: barrido 7s ease-in-out 3s infinite; }
 @keyframes barrido { 0%, 80% { background-position: -150% 0; } 92%, 100% { background-position: 150% 0; } }

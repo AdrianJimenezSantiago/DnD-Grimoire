@@ -66,7 +66,8 @@ function heroHtml(ch, P) {
 export const conConjuros = (ch, P) => !!P.apKey || P.maxSlot > 0 || ch.book.length > 0 || !!ch.enJuego?.conjuros;
 function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
-  const st = (v, l, cls = '') => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`;
+  // un valor con texto («3 tipos de arma», «15 · 16») va en un cuerpo menor para que la placa no crezca a lo alto
+  const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
   // sin lanzamiento de clase: los números de la clase que se miran en combate (daño de furia, ataque furtivo, artes
   // marciales…); si hay conjuros de especie o dote con su característica, primero su CD y su ataque
   if (!P.c) {
@@ -235,7 +236,7 @@ export function renderBar(S) {
   const deskLbl = (id, ic, t) => patch($(id), `${icon(ic)}${t}`);
   dockLbl('#dRest', 'moon', 'Descansar'); dockLbl('#dFilter', 'book', 'Preparados'); dockLbl('#dEdit', 'quill', S.editing ? 'Terminar' : 'Editar');
   dockLbl('#dAdd', 'plus', 'Añadir'); dockLbl('#dHist', 'hourglass', 'Historial');
-  deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bFilter', 'book', 'Solo preparados'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar hoja');
+  deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bFilter', 'book', 'Solo preparados'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar conjuros');
   deskLbl('#bAdd', 'plus', 'Añadir conjuro'); deskLbl('#bHist', 'hourglass', 'Historial');
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
   ['#dFilter', '#bFilter'].forEach(id => $(id).setAttribute('aria-pressed', !!ch?.play.onlyPrep));
@@ -244,14 +245,21 @@ export function renderBar(S) {
   const P = perfil(ch);
   // sin conjuros, «Solo preparados» y «Añadir conjuro» no dicen nada: se ocultan (la hoja ofrece «Añadir conjuros» al pie)
   const conj = conConjuros(ch, P);
-  $('#bFilter').hidden = $('#dFilter').hidden = $('#bAdd').hidden = !conj;
+  // «Solo preparados» solo tiene sentido si hay conjuros de nivel 1 o más (un truco de especie no se prepara)
+  const preparables = P.maxSlot > 0 || ch.book.some(e => (S.db.catalog[e.sid]?.level || 0) > 0);
+  $('#bFilter').hidden = $('#dFilter').hidden = !conj || !preparables; $('#bAdd').hidden = !conj;
+  // el modo edición solo toca los conjuros: sin ellos, el botón no haría nada (el personaje se edita desde «Editar personaje»)
+  $('#bEdit').hidden = $('#dEdit').hidden = !conj && !S.editing;
   if (!conj) $('#dAdd').hidden = true;
   const tema = aplicarTema(ch);
   patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span>${icon('chevron')}`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
+  // en el móvil los espacios van en una sola fila que se desliza de lado: la barra no se come media pantalla
+  if (h) h = `<span class="sb-slots">${h}</span>`;
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong>${ch.play.concObj.length ? `<span class="conc-obj">sobre ${esc(ch.play.concObj.join(', '))}</span>` : `<button type="button" class="conc-add" data-cmd="objetivos">¿Sobre quién?</button>`}<button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;
   patch($('#sbar'), h);
+  const fila = $('#sbar .sb-slots'); if (fila) fila.classList.toggle('desborda', fila.scrollWidth > fila.clientWidth + 2);
   document.documentElement.style.setProperty('--appbar-h', `${Math.round($('#appbar').getBoundingClientRect().height - (parseFloat(getComputedStyle($('#appbar')).paddingTop) || 0))}px`);
 }
 

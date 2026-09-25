@@ -43,7 +43,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 
 ### Hoja más coherente, criaturas y efectos activos
 
-- **Escuela con selector.** En «Editar hoja», la escuela se elige de las ocho oficiales, cada una con su color, y los componentes V, S y M se marcan con un toque. Siempre queda al menos uno.
+- **Escuela con selector.** En «Editar conjuros», la escuela se elige de las ocho oficiales, cada una con su color, y los componentes V, S y M se marcan con un toque. Siempre queda al menos uno.
 - **Datos coherentes.** Al editar, y también al cargar datos antiguos o leídos de un PDF:
   - un «0» en usos gratis deja el conjuro sin uso gratis;
   - un alcance de 0 pasa a «Toque» y una duración vacía, a «Instantáneo»;
@@ -121,6 +121,16 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 - **Media esperada en las tiradas.** Con dos dados o más, cada botón de daño o curación indica la media, que se ajusta al potenciar el conjuro (*Nube de dagas*: 10 a nivel 2, 20 a nivel 4). El resultado dice si ha salido por encima o por debajo de la media.
 - **Ficha de personaje.** La sección de conjuros solo aparece si la clase o la subclase lanza conjuros; un bárbaro no la ve. Para dotes, especie o multiclase se abre con «Opciones de conjuros».
 - **Corrección del compendio.** *Guía* e *Impacto certero* tenían el texto en inglés intercambiado (Guidance y True Strike); se corrige solo al abrir la app.
+
+### Navegación más limpia en el móvil y en el PC
+
+- **Un solo estilo de acción principal.** «Guardar», «Nuevo personaje», «Añadir rasgo» o «Siguiente» usan el mismo sello del color del personaje. «Cerrar» ya no destaca: es un botón neutro, porque no es la acción importante de la hoja.
+- **Deslizar para cerrar.** En el móvil, las hojas se cierran arrastrando el asa o la cabecera hacia abajo. Si no se baja lo bastante, la hoja vuelve a su sitio.
+- **Transiciones al cambiar de vista.** Las pestañas de la biblioteca y del diario, abrir una sesión o una criatura y volver hacen un fundido corto. «En juego» despliega y filtra sus grupos de forma escalonada.
+- **Espacios de conjuro en una fila.** En el móvil, la barra de espacios ocupa una sola fila que se desliza de lado, con un difuminado que avisa de que hay más. Antes podía ocupar dos o tres filas fijas.
+- **Accesos del personaje en rejilla.** En el móvil, «Editar personaje», «Rasgos», «Inventario», «Historia», «Diario» y «Subir de nivel» van en dos columnas iguales.
+- **Placas legibles.** Los valores con texto («4 tipos de arma», «15 · 16») usan un cuerpo menor, así que la placa no crece a lo alto.
+- **Botones que no hacen nada, fuera.** «Solo preparados» se oculta si no hay conjuros de nivel 1 o superior (un truco de especie no se prepara). «Editar conjuros» (antes «Editar hoja», que se confundía con «Editar personaje») se oculta si el personaje no tiene conjuros.
 
 ### Rama `development` y personajes de prueba
 

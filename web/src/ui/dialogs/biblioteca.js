@@ -170,7 +170,7 @@ function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) 
   d.className = `tall ficha ${clase}`;
   $('#fiTitle').innerHTML = (ico ? `<span class="fi-ico">${gi(ico)}</span>` : '') + `<span>${esc(titulo)}</span>`;
   $('#fiSub').innerHTML = sub; $('#fiBody').innerHTML = h;
-  $('#fiFoot').innerHTML = `${pie}<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>`;
+  $('#fiFoot').innerHTML = `${pie}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
   openSheet(d); $('#fiBody').scrollTop = 0;
 }
 const fuente = f => (f ? `<p class="fi-src">${gi('libro')}${esc(f)} · importado de tu PDF</p>` : '');

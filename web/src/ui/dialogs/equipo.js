@@ -117,7 +117,7 @@ function render() {
     return `<section class="inv-grupo"><h3>${gi(ico)}${esc(t)}<small>${items.length}${peso ? ` · ${kg(peso)}` : ''}</small></h3><ul class="inv-list">${items.map(o => fila(ch, o, R)).join('')}</ul></section>`;
   }).join('') || '<p class="pempty">Nada coincide con la búsqueda.</p>';
   $('#eqBody').innerHTML = h;
-  $('#eqFoot').innerHTML = `<span class="spacer"></span><button type="button" class="primary" data-close>Cerrar</button>`;
+  $('#eqFoot').innerHTML = `<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
 }
 export function openEquipo() { if (!S.cur()) return; V.form = null; render(); openSheet(dlg()); }
 
