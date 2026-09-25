@@ -102,7 +102,7 @@ async function boot() {
     { sel: '#dEdit, #bEdit', titulo: 'Editar y añadir', texto: 'En modo edición cambias textos y añades conjuros desde el catálogo o el compendio de 391 conjuros.' },
     { sel: '#dHist, #bHist', titulo: 'Historial', texto: 'Todo lo que lances, gastes o tires queda anotado, y puedes deshacer varios pasos.' },
     { sel: '#btnMore', titulo: 'Más opciones', texto: 'Biblioteca, libros, bestiario, copia de seguridad, tema de día o de noche y este tutorial.' },
-    { sel: '#whoChip', titulo: 'Volver al inicio', texto: 'Desde aquí vuelves a la portada para cambiar de personaje.' },
+    { sel: '#whoChip', titulo: 'Cambiar de personaje', texto: 'Desde aquí vuelves a la portada para elegir otro personaje. Allí, «Gestionar personajes» los edita, duplica y borra.' },
   ];
   // Primer arranque: tras el tutorial de la portada, y antes de empezar, la app ofrece importar los libros (una sola vez)
   const OFRECIDO = 'grimorio-libros-ofrecido';

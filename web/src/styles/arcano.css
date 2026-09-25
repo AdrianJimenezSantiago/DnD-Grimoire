@@ -140,7 +140,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .who-chip:hover { box-shadow: 0 0 0 3px var(--gold-soft), 0 0 20px -6px var(--glow); }
 .who-chip .nm { font: 600 16px / 1.1 var(--display); letter-spacing: .02em; }
 .who-chip .icon { transition: transform .3s var(--spring); }
-.who-chip:hover .icon { transform: translateY(2px); }
+.who-chip:hover .icon { transform: scale(1.12); }
+/* el botón del nombre lleva a la portada, a elegir personaje: un icono de personas, no una flecha de desplegable */
+.who-cambiar { display: grid; place-items: center; width: 28px; height: 28px; margin-left: 2px; border-radius: 50%; flex: none;
+  background: var(--gold-soft); color: var(--gold); }
+.who-chip .who-cambiar .icon { color: var(--gold); }
 .sb-l > b { font-family: var(--display); font-weight: 700; color: var(--gold); }
 /* el botón de menú: tres trazos de pluma que se cruzan al abrir */
 #btnMore { color: var(--ink); border-color: color-mix(in srgb, var(--gold) 30%, var(--line)); background: color-mix(in srgb, var(--surface) 70%, transparent); }

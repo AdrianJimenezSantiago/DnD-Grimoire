@@ -93,7 +93,7 @@ function recursoHtml(ch, r) {
     : `<span class="rstep"><button type="button" data-rstep="${r.id}|1" aria-label="Gastar 1 de ${esc(r.nombre)}">−</button><button type="button" class="rleft" data-rset="${r.id}" aria-label="Cambiar lo que queda">${left}<small> / ${r.max}</small></button><button type="button" data-rstep="${r.id}|-1" aria-label="Recuperar 1 de ${esc(r.nombre)}">+</button></span>`;
   // Forma salvaje: acceso directo a las formas conocidas y a las posibles según el nivel
   const formas = r.id === 'tpl:druida.forma' ? `<button type="button" class="ruse" data-cmd="formas">${gi('criatura')}Formas${(ch.formas || []).length + (ch.formasMano || []).length ? ` (${(ch.formas || []).length + (ch.formasMano || []).length})` : ''}</button>` : '';
-  return `<div class="res rr ${left === 0 ? 'empty-res' : ''}"><strong>${esc(r.nombre)}</strong>${ctl}${formas}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
+  return `<div class="res rr ${left === 0 ? 'empty-res' : ''}" data-resid="${esc(r.id)}"><strong>${esc(r.nombre)}</strong>${ctl}${formas}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
 }
 function dadosHtml(ch, r) {
   const st = recState(ch, r.id), sides = parseInt(String(r.dado || 'd20').slice(1), 10) || 20; let h = '';
@@ -163,11 +163,12 @@ function enJuegoHtml(ch, P) {
         <small>${gi(iconoFuente(r), 'ej-ico')}${esc(r.etiqueta)}</small>
         ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
       <div class="ej-side">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
-        ${rec ? `<button type="button" class="ruse ej-use" data-rstep="${rec.id}|1" ${left ? '' : 'disabled'} aria-label="Usar ${esc(rec.nombre)}: quedan ${left} de ${rec.max}">Usar <small>${left}/${rec.max}</small></button>` : ''}
+        ${rec ? `<button type="button" class="ej-usos ${left ? '' : 'agotado'}" data-irrec="${esc(rec.id)}" aria-label="${esc(rec.nombre)}: quedan ${left} de ${rec.max}. Ir a su contador" title="Los usos se marcan en su tarjeta de recursos">${left}/${rec.max}<small>usos</small></button>` : ''}
         <button type="button" class="ej-star" data-ejfijar="${esc(r.clave)}" aria-pressed="${fijo}" aria-label="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}: ${esc(r.nombre)}" title="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}">★</button></div></article>`;
   };
   const sinTextos = todos.every(r => !r.texto), grupos = agrupar(todos, fij, filtro);
   return `<div class="ej-head"><span class="ej-emb">${gi('dote')}</span><h2>En juego</h2><small>${esc(cuenta.join(' · '))}</small>
+      ${abierto ? `<button type="button" class="ruse ej-ajustes" data-cmd="rules" aria-label="Rasgos: progresión de la clase y recursos" title="Progresión y recursos">${icon('sliders')}</button>` : ''}
       <button type="button" class="ruse ej-toggle" data-ej="toggle" aria-expanded="${abierto}">${abierto ? 'Plegar' : 'Desplegar'}</button></div>
     ${abierto ? `${hay.length > 2 ? `<div class="seg sm ej-filtro" role="radiogroup" aria-label="Mostrar rasgos de">${hay.map(([k, t]) => `<button type="button" role="radio" aria-checked="${filtro === k}" data-ejfiltro="${k}">${esc(t)}</button>`).join('')}</div>` : ''}
       ${sinTextos ? `<p class="note ej-note">Importa el Manual del Jugador en <button type="button" class="linkish" data-cmd="manual">Libros y manuales</button> para ver qué hace cada rasgo. Se lee en este dispositivo.</p>` : ''}
@@ -252,7 +253,7 @@ export function renderBar(S) {
   $('#bEdit').hidden = $('#dEdit').hidden = !conj && !S.editing;
   if (!conj) $('#dAdd').hidden = true;
   const tema = aplicarTema(ch);
-  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span>${icon('chevron')}`);
+  patch($('#whoChip'), `${ch.retrato ? avatarHtml(ch, 'av-chip') : `<span class="monogram">${gi(tema.icono) || esc((ch.nombre || '?').trim().charAt(0).toUpperCase())}</span>`}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   // en el móvil los espacios van en una sola fila que se desliza de lado: la barra no se come media pantalla

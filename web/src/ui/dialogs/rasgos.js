@@ -13,22 +13,34 @@ import { slotFx } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../modal.js';
+import { icon } from '../icons.js';
 
-let S, RD = null, REC = null;
+let S, RD = null, REC = null, PESTANA = 'progresion';
 
 /* ---------------- lista ---------------- */
+/* Tres sitios, tres papeles: «En juego» (en la hoja) es para usar los rasgos en la partida; aquí, «Progresión» es la referencia
+   de lo que da la clase nivel a nivel y «Recursos» ajusta lo que la hoja cuenta por ti. */
+const PESTANAS = [['progresion', 'star', 'Progresión'], ['recursos', 'sliders', 'Recursos']];
 function renderRules() {
   const ch = S.cur(), all = reglas(ch, true), tpl = all.filter(r => r.tpl), own = all.filter(r => !r.tpl);
-  $('#rulesSub').textContent = `${ch.nombre}: ${claseLinea(ch)}. Los recursos aparecen en la hoja, bajo el nombre, y se reinician con los descansos.`;
+  $('#rulesSub').textContent = `${ch.nombre}: ${claseLinea(ch)}.`;
+  $('#rulesTabs').innerHTML = PESTANAS.map(([k, ic, t]) => `<button type="button" role="tab" aria-selected="${PESTANA === k}" data-rtab="${k}">${icon(ic)}${t}</button>`).join('');
+  $('#ruleNew').hidden = PESTANA !== 'recursos';
+  const guia = PESTANA === 'progresion'
+    ? '<p class="note rules-guia">Lo que te da tu clase nivel a nivel, para consultar. Para <b>usar</b> tus rasgos en la partida, mira «En juego» en la hoja.</p>'
+    : '<p class="note rules-guia">Lo que la hoja cuenta por ti: usos, dados y avisos. Salen en la hoja, bajo el nombre, y se recuperan solos con los descansos.</p>';
+  if (PESTANA === 'progresion') {
+    $('#rulesBody').innerHTML = guia + clasesDe(ch).map(c => progresionHtml(vistaClase(ch, c), clasesDe(ch).length > 1)).join('');
+    return;
+  }
   const row = r => `<div class="rrow ${r.off ? 'off' : ''}">
     <label class="switch"><input type="checkbox" ${r.tpl ? `data-tploff="${r.id}"` : `data-ownoff="${r.id}"`} ${r.off ? '' : 'checked'} aria-label="Activar ${esc(r.nombre)}"><span></span></label>
     <div class="rtxt"><b>${esc(r.nombre)}</b><span class="rtype">${TIPO_TXT[r.tipo]}</span><span class="rsum">${esc(ruleSummary(r))}</span></div>
     <div class="racts">${r.tpl ? `<button type="button" data-rcustom="${r.id}">Personalizar</button>` : `<button type="button" data-redit="${r.id}">Editar</button><button type="button" class="warn" data-rdel="${r.id}">Borrar</button>`}</div></div>`;
-  $('#rulesBody').innerHTML =
+  $('#rulesBody').innerHTML = guia +
     `<section class="fsec"><h3>De tu clase y subclase</h3>${tpl.length ? tpl.map(row).join('') : '<p class="note">Tu clase no tiene recursos que la app lleve por ti a este nivel.</p>'}
       <p class="note">Se ajustan solos al subir de nivel. Desactiva los que no quieras ver; «Personalizar» crea una copia tuya que puedes cambiar.</p></section>
-     <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>
-     ${clasesDe(ch).map(c => progresionHtml(vistaClase(ch, c), clasesDe(ch).length > 1)).join('')}`;
+     <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>`;
 }
 /** Progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros que dan la clase y la subclase. */
 function progresionHtml(ch, multi = false) {
@@ -46,7 +58,8 @@ function progresionHtml(ch, multi = false) {
         ${pend.length ? `<button type="button" data-rauto>Añadir los ${pend.length} que faltan al libro</button>` : '<p class="note">Todos están en tu libro, siempre preparados.</p>'}` : ''}
     </section>`;
 }
-export function openRules() { renderRules(); openSheet($('#rulesDlg')); }
+/** Abre Rasgos; `pestana` elige «progresion» o «recursos» (si no, la última que se miró). */
+export function openRules(pestana) { if (pestana) PESTANA = pestana; renderRules(); openSheet($('#rulesDlg')); }
 
 /* ---------------- editor ---------------- */
 function openRuleForm(r, fromTpl) {
@@ -173,6 +186,14 @@ export function init(store) {
     renderRules(); toast(`Añadidos siempre preparados: ${esc(nombres.join(', '))}.`, [undoBtn(S, h)]);
   });
   $('#ruleNew').addEventListener('click', () => openRuleForm(null));
+  on($('#rulesTabs'), 'click', '[data-rtab]', (ev, b) => { PESTANA = b.dataset.rtab; renderRules(); $('#rulesBody').scrollTop = 0; });
+  // de la referencia a la mesa: cierra y lleva a «En juego», desplegado
+  $('#rulesJuego').addEventListener('click', () => {
+    closeSheet($('#rulesDlg'));
+    const lanza = !!perfil(S.cur()).c;
+    if (lanza && !S.cur().enJuego?.abierto) S.edit((db, c) => { c.enJuego ||= {}; c.enJuego.abierto = true; });
+    setTimeout(() => $('#enjuego')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 220);
+  });
   $('#ruleForm').addEventListener('input', ev => {
     const t = ev.target, k = t.dataset.rf; if (!k) return;
     RD[k] = t.type === 'checkbox' ? t.checked : t.value;

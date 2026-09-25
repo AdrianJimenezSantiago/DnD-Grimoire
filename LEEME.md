@@ -17,7 +17,7 @@ El grimorio de Theo (y de quien quieras) convertido en una app de Android indepe
 
 La app guarda varios personajes. Cada uno tiene su propio libro de conjuros, sus espacios gastados y su concentración. Los datos de cada conjuro (nombre, escuela, alcance…) viven en un **catálogo compartido**: si Theo tiene *Clarividencia* y otro personaje la aprende, se añade con un toque y ya viene completa. Si corriges un conjuro en modo edición, se corrige para todos los que lo tengan.
 
-- **Personajes:** botón «Cambiar de personaje» bajo el nombre, o Más → Personajes. Desde ahí se crean, editan, duplican y borran (con Deshacer).
+- **Personajes:** se eligen en la portada, a la que llevan el botón del nombre (arriba a la izquierda) y Más → Personajes. En la portada, «Gestionar personajes» los edita, duplica y borra (con Deshacer).
 - **Ficha del personaje:** nombre, especie, trasfondo, clase, subclase, nivel, características, lema y campaña. Con eso la app calcula, según el Manual del Jugador de 2024, estos datos:
   - bonificador de competencia, CD y ataque de conjuro;
   - espacios de conjuro de lanzadores completos, medios y de un tercio, y la magia de pacto del brujo;
@@ -33,7 +33,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 ## Novedades 2.3: progresión completa de todas las clases
 
 - **Las 12 clases, del nivel 1 al 20.** La app conoce todos los rasgos de clase del Manual del Jugador 2024 y los de sus 48 subclases, más las 8 subclases de Héroes de Faerûn: Colegio de la luna, Dominio del conocimiento, Caminante invernal, Abanderado, Hechicería del fuego mágico, Hojacantante, Juramento de los genios nobles y Vástago de los Tres. Los nombres están revisados contra los PDF.
-- **Rasgos → «Tu clase a nivel N».** Muestra:
+- **Rasgos → Progresión («Tu clase a nivel N»).** Muestra:
   - los valores que escalan con el nivel: puntos de golpe medios, dados de golpe, salvaciones, daño de Furia, Ataque furtivo, Artes marciales, invocaciones, Arcanum místico, ataques por acción…;
   - los rasgos ganados nivel a nivel, con los de la subclase resaltados;
   - los conjuros siempre preparados de la clase y la subclase (dominios, juramentos, patrones, círculos…), con un botón para añadir al libro los que falten.
@@ -93,7 +93,7 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
   - Sin conjuros, la barra ya no ofrece «Solo preparados» ni «Añadir conjuro».
   - Algunos recursos de clase guardaban su nota vacía como «undefined».
 - **«En juego»: los rasgos de tu clase, listos para la mesa.** Debajo de los recursos, la hoja agrupa los rasgos de clase y subclase por cuándo se usan: **Acción, Acción adicional, Reacción, Siempre activo y Fuera de combate**.
-  - Cada rasgo muestra su nivel, una línea con lo que hace y sus números ya calculados (Furia +2, Ataque furtivo 4d6, Artes marciales d8…). Si gasta un recurso, trae el botón «Usar» con lo que queda.
+  - Cada rasgo muestra su nivel, una línea con lo que hace y sus números ya calculados (Furia +2, Ataque furtivo 4d6, Artes marciales d8…). Si gasta un recurso, muestra lo que queda («4/4 usos»); los usos se marcan en la tarjeta del recurso, y tocar el número lleva hasta ella.
   - El grupo sale solo del texto del libro («como acción adicional», «llevar a cabo una reacción»…). Si alguno no te encaja, ábrelo y cámbialo en «Mostrar en».
   - La estrella ★ sube un rasgo a «Fijados», arriba del todo.
   - Los textos vienen del Manual del Jugador importado: ahora la importación también lee los **rasgos de clase** (170 de las 12 clases). Sin libro, la sección muestra nombres, niveles, números y recursos, y avisa de que falta el texto.
@@ -131,6 +131,17 @@ Si tenías datos de la versión anterior, se convierten solos al abrir la app. L
 - **Accesos del personaje en rejilla.** En el móvil, «Editar personaje», «Rasgos», «Inventario», «Historia», «Diario» y «Subir de nivel» van en dos columnas iguales.
 - **Placas legibles.** Los valores con texto («4 tipos de arma», «15 · 16») usan un cuerpo menor, así que la placa no crece a lo alto.
 - **Botones que no hacen nada, fuera.** «Solo preparados» se oculta si no hay conjuros de nivel 1 o superior (un truco de especie no se prepara). «Editar conjuros» (antes «Editar hoja», que se confundía con «Editar personaje») se oculta si el personaje no tiene conjuros.
+
+### Cada cosa en su sitio
+
+- **Los usos se llevan en un solo sitio.** Las tarjetas de recursos (Furia, Tomar aliento, Canalizar divinidad…) son donde se marcan los usos. En «En juego», el rasgo solo muestra lo que queda («4/4 usos»); al tocarlo, la hoja baja hasta su tarjeta y la resalta.
+- **Rasgos: referencia y ajustes; «En juego»: la mesa.** El diálogo «Rasgos» tiene dos pestañas:
+  - **Progresión:** lo que da la clase nivel a nivel, para consultar.
+  - **Recursos:** lo que la hoja cuenta por ti, con sus interruptores, «Personalizar» y los rasgos añadidos.
+
+  Cada pestaña dice para qué sirve, y el pie lleva «Ir a «En juego»». Desde la cabecera de «En juego», el botón de ajustes abre «Rasgos».
+- **Un solo sitio para elegir personaje: la portada.** El botón del nombre y Más → Personajes llevan a ella, con transición. El botón del nombre lleva ahora un icono de personas en lugar de la flecha de desplegable. Editar, duplicar y borrar quedan en «Gestionar personajes», dentro de la portada.
+- **Rasgos de clase sin libro, en su grupo.** Sin el Manual del Jugador importado, los rasgos de clase cuyo uso se conoce van a su grupo de «En juego»: Furia, Inspiración bárdica o Acción astuta a «Acción adicional», Esquiva asombrosa o Desviar ataques a «Reacción»… Antes Furia salía en «Siempre activo». Con el libro importado manda su texto.
 
 ### Rama `development` y personajes de prueba
 
