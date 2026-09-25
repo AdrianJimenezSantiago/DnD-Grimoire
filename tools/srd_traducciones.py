@@ -1,5 +1,3 @@
-# Traducción al español del texto del SRD 5.2 (CC-BY 4.0) para los conjuros de Theo.
-# Clave = nombre en inglés del SRD. Valor = (descripción, a niveles superiores / mejora de truco)
 T = {
 "Fire Bolt": (
 "Lanzas una mota de fuego a una criatura u objeto dentro del alcance. Haz un ataque de conjuro a distancia contra el objetivo. Si impacta, el objetivo recibe 1d10 de daño de fuego. Un objeto inflamable alcanzado por este conjuro empieza a arder si nadie lo lleva puesto ni lo transporta.",

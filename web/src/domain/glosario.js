@@ -1,7 +1,3 @@
-/**
- * Glosario de reglas del Manual del Jugador (apéndice): entradas con su categoría
- * ([ESTADO], [ACCIÓN], [PELIGRO], [ÁREA DE EFECTO], [ACTITUD]). Puro, como manual.js.
- */
 import { claveNombre } from './manual.js';
 
 const letters = s => s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
@@ -41,7 +37,6 @@ export function parseGlosario(pages) {
   return entradas.map(e => ({ clave: claveNombre(e.nombre), nombre: e.nombre, cat: e.cat, texto: e.paras.join('\n\n') }));
 }
 
-/** Formas con las que aparece cada estado en los textos (género y número). */
 export function formasDeEstado(nombre) {
   const base = claveNombre(nombre);
   if (/o$/.test(base)) { const r = base.slice(0, -1); return [r + 'o', r + 'a', r + 'os', r + 'as']; }

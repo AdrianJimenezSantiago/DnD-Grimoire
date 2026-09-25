@@ -1,15 +1,9 @@
-/**
- * Rasgos y recursos como reglas configurables.
- * Tipos: recurso (usos) · dados (anotados) · recuperar (espacios) · al_lanzar (disparador).
- * Las plantillas de clase se calculan con el nivel; los rasgos propios los define el jugador.
- */
 import { clamp, norm } from '../core/util.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase } from './reglas2024.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
 export const RECARGA_CORTA = { largo: 'Descanso largo', corto: 'Descanso corto o largo', corto1: 'Recupera 1 con descanso corto', nunca: 'No se recarga' };
-/** Recarga con dados: «recupera 1d3 cargas al amanecer». */
 export const dadoRecarga = r => { const m = /^(\d*)d(\d+)$/i.exec(String(r.recDado || '').trim()); const n = +(m?.[1] || 1), caras = +(m?.[2] || 0);
   return m && n >= 1 && caras >= 1 ? { n, caras, bono: parseInt(r.recBono, 10) || 0 } : null; };
 export function etiquetaRecarga(r, larga = false) {
@@ -17,7 +11,6 @@ export function etiquetaRecarga(r, larga = false) {
     return larga ? `recupera ${txt} ${r.recMomento === 'corto' ? 'con cada descanso corto o largo' : 'al amanecer (descanso largo)'}` : `Recupera ${txt} ${r.recMomento === 'corto' ? 'por descanso' : 'al amanecer'}`; }
   return (larga ? RECARGA_TXT : RECARGA_CORTA)[r.recarga] || (larga ? RECARGA_TXT.largo : RECARGA_CORTA.largo);
 }
-/** Cuánto recupera un recurso en un descanso. Devuelve {usados, tirada} (tirada = texto si se tiraron dados). */
 export function recuperarEnDescanso(r, usados, tipo, tirar = c => 1 + Math.floor(Math.random() * c)) {
   if (!usados) return { usados: 0, tirada: '' };
   switch (r.recarga) {
@@ -177,13 +170,11 @@ export function plantillas(ch) {
   }
   return T;
 }
-/** Guerrero psiónico y rebanaalmas comparten tabla de dados de energía. */
 function dadosPsionicos(L) {
   const [n, d] = L >= 17 ? [12, 'd12'] : L >= 13 ? [10, 'd10'] : L >= 11 ? [8, 'd10'] : L >= 9 ? [8, 'd8'] : L >= 5 ? [6, 'd8'] : [4, 'd6'];
   return { max: n, nota: `Dado: ${d}.` };
 }
 
-/** Máximo de un rasgo propio según su base (número fijo, nivel, modificador…). */
 export function maxFrom(ch, r) {
   const L = nivelDe(ch), n = parseInt(r.maxN, 10);
   switch (r.maxBase) {
@@ -196,21 +187,14 @@ export function maxFrom(ch, r) {
   }
 }
 
-/**
- * Plantillas + rasgos propios, ya resueltos. Todos funcionan (descansos, recuperación, avisos al lanzar); `oculto` solo dice que
- * el jugador no quiere verlo en la hoja (ch.rasgosOcultos para las plantillas, r.off para los propios).
- * Una plantilla «personalizada» (ch.rasgosOff) la sustituye su copia: queda fuera, salvo con `todas` (lista de Rasgos).
- */
 export function reglas(ch, todas = false) {
   const sust = new Set(ch.rasgosOff || []), ocultos = new Set(ch.rasgosOcultos || []);
   const list = [
-    // los recursos de cada clase, a su nivel (con multiclase, también los de la segunda clase)
     ...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))).map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
     ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.sustituida);
 }
-/** Los que se pintan en la hoja: los que funcionan menos los que el jugador ha ocultado. */
 export const reglasVisibles = ch => reglas(ch).filter(r => !r.oculto);
 
 export function castTriggerDesc(r) {
@@ -233,7 +217,6 @@ export const castSchools = ch => reglas(ch).filter(r => r.tipo === 'al_lanzar' &
 export const hasShortRest = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.espaciosManuales)
   || reglas(ch).some(r => (r.tipo === 'recurso' && ['corto', 'corto1'].includes(r.recarga)) || (r.recarga === 'dado' && r.recMomento === 'corto') || r.tipo === 'recuperar');
 
-/** Estado de juego de un rasgo (se crea al vuelo). */
 export function recState(ch, id) {
   ch.play.rec = ch.play.rec || {};
   return (ch.play.rec[id] = ch.play.rec[id] || { used: 0, dice: [] });

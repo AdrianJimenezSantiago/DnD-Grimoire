@@ -1,7 +1,3 @@
-/**
- * Libros y manuales: importa PDFs (Manual del Jugador y expansiones con el mismo formato) en el dispositivo.
- * Cada libro aporta textos de conjuros, conjuros nuevos, glosario y subclases. Se pueden quitar uno a uno.
- */
 import { esc } from '../../core/util.js';
 import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/catalogo.js';
 import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/componerLibro.js';
@@ -18,13 +14,12 @@ import { openBiblioteca } from './biblioteca.js';
 
 const pl = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 const INDICE = 'libros.json', archivo = id => `libro-${id}.json`;
-let S, pendiente = null;   // libro leído a la espera de confirmar subclases
+let S, pendiente = null;
 const dlg = () => $('#manualDlg');
 
 async function guardarTodo(lista) {
   await fileStore.set(INDICE, JSON.stringify(lista.map(l => ({ id: l.id, titulo: l.titulo, fecha: l.fecha }))));
 }
-/** Carga los libros guardados (y convierte el formato anterior del manual si existe). */
 export async function cargarLibros() {
   let lista = [];
   try {
@@ -43,15 +38,9 @@ export async function cargarLibros() {
   setLibros(lista);
   return lista.length > 0;
 }
-export const cargarManualGuardado = cargarLibros;   // compatibilidad
 
-/* ---- libros incluidos en la APK (los PDF de tools/resources, leídos al compilar) ---- */
 const QUITADOS = 'libros-incluidos-quitados.json';
 const quitados = async () => { try { return JSON.parse((await fileStore.get(QUITADOS)) || '[]'); } catch { return []; } };
-/**
- * Al arrancar: añade los libros incluidos que falten o cuya lectura haya mejorado con una versión nueva de la app.
- * Nunca pisa un libro importado a mano ni vuelve a poner uno que el usuario quitó. Devuelve los añadidos.
- */
 export async function aplicarIncluidos() {
   let idx;
   try { const r = await fetch('libros/indice.json', { cache: 'no-cache' }); if (!r.ok) return []; idx = await r.json(); } catch { return []; }
@@ -89,7 +78,6 @@ function lista() {
 export function openManual() { pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); openSheet(dlg()); }
 
 async function guardarLibro(lb) {
-  // importarlo a mano otra vez lo recupera aunque se hubiera quitado
   const q = await quitados(); if (q.includes(lb.id)) await fileStore.set(QUITADOS, JSON.stringify(q.filter(x => x !== lb.id)));
   const L = libros().filter(l => l.id !== lb.id).concat(lb);
   await fileStore.set(archivo(lb.id), JSON.stringify(lb)); await guardarTodo(L);
@@ -133,7 +121,6 @@ async function importar(file) {
     msg.textContent = 'No se pudo importar.'; $('#mnRes').innerHTML = `<p class="ferr">${esc(e.message || e)}</p>`;
   } finally { $('#mnElegir').disabled = false; }
 }
-/* Entradas cuyo título no se pudo leer (en el PDF está dentro de una ilustración): se piden a mano, con una pista. */
 function revisarNombres(lb) {
   const tr = lb.trasfondos.map((t, i) => [t, i]).filter(([t]) => t.revisar), sc = lb.subTextos.map((t, i) => [t, i]).filter(([t]) => t.revisar);
   if (!tr.length && !sc.length) return '';
@@ -169,7 +156,7 @@ export function init(store) {
     const lb = libros().find(l => l.id === b.dataset.quitar); if (!lb) return;
     if (!(await confirmar({ titulo: `¿Quitar «${lb.titulo}»?`, texto: 'Se borran de este dispositivo sus descripciones, glosario, subclases y conjuros nuevos. Los conjuros que ya tengas en tu libro siguen ahí.', ok: 'Quitar', peligro: true }))) return;
     const L = libros().filter(l => l.id !== lb.id); await fileStore.remove(archivo(lb.id)); await guardarTodo(L); setLibros(L);
-    if (lb.incluido) await fileStore.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));   // no vuelve al arrancar
+    if (lb.incluido) await fileStore.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));
     lista(); S.emit('manual'); toast(`«${lb.titulo}» quitado.`);
   });
   $('#mnSoloNombres').addEventListener('click', () => {

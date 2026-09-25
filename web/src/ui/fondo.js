@@ -1,21 +1,3 @@
-/**
- * Fondo vivo: una escena animada por clase y subclase, pintada en un único lienzo fijo detrás de la hoja.
- *
- *   astral  · adivino, mago, estrellas, luna  → estrellas que titilan, constelaciones que se trazan, fugaces
- *   ascuas  · evocador, hechicero, dracónica, bárbaro, infernal → brasas que suben
- *   vacío   · brujo, aberrante, sombra, pícaro → niebla lenta y motas que derivan
- *   halo    · clérigo, paladín, luz, vida, celestial → rayos de luz y polvo dorado
- *   arboleda· druida, explorador, tierra, feérico → luciérnagas y alguna hoja
- *   canción · bardo → notas que flotan sobre un pentagrama ondulante
- *   calma   · monje → ondas de tinta que se expanden
- *   forja   · guerrero, mecánica → chispas que saltan del yunque
- *   guarda  · abjurador → retícula hexagonal que late
- *   prisma  · ilusionista, salvaje → pompas irisadas
- *   (cada subclase del Manual y de Héroes de Faerûn tiene su escena en ESCENA, según su emblema)
- *
- * Coste: ~30 fps, sprites precalculados (sin gradientes por partícula y fotograma), se detiene con la app
- * en segundo plano o con una hoja a pantalla completa. «Reducir movimiento» pinta un único fotograma quieto.
- */
 import { tinteDe } from '../domain/paleta.js';
 import { reducedMotion } from './fx.js';
 
@@ -42,7 +24,6 @@ const oscuro = () => {
   return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-/* ---------- sprites de brillo (uno por color, reutilizados) ---------- */
 const sprites = new Map();
 function glow(h, s, l, a = 1) {
   const k = `${h|0}|${s|0}|${l|0}|${a}`;
@@ -58,9 +39,8 @@ function glow(h, s, l, a = 1) {
 }
 const dot = (spr, x, y, r, a) => { ctx.globalAlpha = a; ctx.drawImage(spr, x - r, y - r, r * 2, r * 2); };
 
-/* ---------- escenas: cada una tiene semilla (s) y paso (p) ---------- */
 const densidad = base => Math.round(base * Math.min(2.2, Math.max(.6, (W * H) / (390 * 844))));
-const L = () => (E.dark ? 62 : 38);   // luminosidad del acento según tema
+const L = () => (E.dark ? 62 : 38);
 
 const ESCENAS = {
   astral: {
@@ -75,7 +55,6 @@ const ESCENAS = {
         p.f += dt * p.v; const a = E.dark ? .35 + Math.sin(p.f) * .25 : .1 + Math.sin(p.f) * .08;
         dot(p.oro ? sOro : sBla, p.x, p.y, p.r * (p.oro ? 7 : 4) * (E.dark ? 1 : .8), Math.max(0, a));
       }
-      // constelaciones: se trazan, brillan y se desvanecen
       const X = E.extra;
       X.prox -= dt;
       if (X.prox <= 0 && X.cons.length < 2) {
@@ -95,7 +74,6 @@ const ESCENAS = {
         ctx.stroke();
         c.pts.forEach((q, i) => i <= hasta && dot(sOro, q.x, q.y, 6, .8 * vida));
       }
-      // estrella fugaz de vez en cuando
       if (!X.fug && Math.random() < dt * .08) X.fug = { x: rnd(W * .2, W), y: rnd(0, H * .4), vx: -rnd(380, 560), vy: rnd(140, 220), t: 0 };
       if (X.fug) {
         const f = X.fug; f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt;
@@ -288,14 +266,12 @@ function nuevaHoja(inicio) { return { x: rnd(0, W), y: inicio ? rnd(0, H) : -20,
 function nuevaNota(inicio) { return { x: rnd(W * .05, W * .95), y: inicio ? rnd(H * .3, H) : H + 20, v: rnd(16, 34), g: '♪♫♩♬'[(Math.random() * 4) | 0], size: rnd(16, 30) | 0, t: inicio ? rnd(0, 6) : 0, max: rnd(14, 22), f: rnd(0, 6) }; }
 function nuevaPompa(inicio) { return { x: rnd(0, W), y: inicio ? rnd(0, H) : H + 40, v: rnd(8, 20), r: rnd(10, 34), t: 0, f: rnd(0, 6), dh: rnd(0, 120) }; }
 
-/* ---------- lienzo y bucle ---------- */
 function tamano() {
   dpr = Math.min(1.5, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ESCENAS[E.nombre]?.s(); pintar(0);
 }
 function tapado() {
-  // una hoja alta en el móvil cubre la pantalla: no hace falta pintar detrás
   return innerWidth < 700 && !!document.querySelector('dialog.tall[open]');
 }
 function pintar(dt) {
@@ -308,7 +284,7 @@ function pintar(dt) {
 function bucle(t) {
   raf = requestAnimationFrame(bucle);
   const dt = Math.min(.1, (t - (last || t)) / 1000); last = t; acc += dt;
-  if (acc < 1 / 30 || document.hidden || tapado()) return;   // ~30 fps es de sobra para un fondo
+  if (acc < 1 / 30 || document.hidden || tapado()) return;
   pintar(acc); acc = 0;
 }
 function arrancar() {
@@ -317,10 +293,8 @@ function arrancar() {
   raf = requestAnimationFrame(bucle);
 }
 
-/** Cambia la escena (idempotente: solo reinicia si cambia clase, tono o tema). */
 export function setEscena(t) {
   if (!cv) return;
-  // las partículas se apagan como la estructura en los tonos que se perciben más intensos (rojos, magentas)
   const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 220, s = Math.round((t?.s ?? 8) * (0.45 + 0.55 * tinteDe(h)));
   if (nombre === E.nombre && h === E.h && dark === E.dark) return;
   const cambiaEscena = nombre !== E.nombre;
@@ -337,6 +311,6 @@ export function initFondo() {
   tamano();
   const re = () => { const n = E.nombre; E.nombre = ''; setEscena({ h: E.h, s: E.s, icono: Object.keys(ESCENA).find(k => ESCENA[k] === n) }); };
   new MutationObserver(re).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', re); } catch { /* antiguos */ }
-  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', arrancar); } catch { /* antiguos */ }
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', re); } catch {}
+  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', arrancar); } catch {}
 }

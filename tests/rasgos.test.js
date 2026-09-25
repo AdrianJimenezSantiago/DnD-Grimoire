@@ -27,8 +27,8 @@ test('plantillas desactivables y rasgos propios', () => {
 test('ocultar un rasgo solo lo quita de la hoja: sigue funcionando', () => {
   const ch = blankChar({ clase: 'Mago', nivel: 2, rasgosOcultos: ['tpl:mago.recuperacion'],
     rasgos: [{ id: 'r1', tipo: 'recurso', nombre: 'Varita', maxBase: 'fijo', maxN: 7, recarga: 'largo', off: true }] });
-  assert.deepEqual(reglas(ch).map(r => r.nombre).sort(), ['Recuperación arcana', 'Varita']);   // la lógica los tiene
-  assert.deepEqual(reglasVisibles(ch), []);                                                      // la hoja no los pinta
+  assert.deepEqual(reglas(ch).map(r => r.nombre).sort(), ['Recuperación arcana', 'Varita']);
+  assert.deepEqual(reglasVisibles(ch), []);
 });
 test('datos antiguos: lo desactivado pasa a oculto; lo personalizado sigue sustituido', () => {
   const ch = normChar({ clase: 'Mago', nivel: 6, subclase: 'Adivino', rasgosOff: ['tpl:mago.recuperacion', 'tpl:adivino.presagio'],

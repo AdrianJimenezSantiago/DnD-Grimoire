@@ -1,4 +1,3 @@
-/** Personajes: lista (abrir, editar, duplicar, borrar) y ficha de creación/edición. */
 import { clamp, clone, esc, joinY, uid } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, ESPECIES, TRASFONDOS, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase } from '../../domain/reglas2024.js';
 import { reglas } from '../../domain/rasgos.js';
@@ -21,7 +20,6 @@ import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
 import { fileStore } from '../../platform/native.js';
 
 let S, onCreated;
-// Mientras la ficha está abierta: clases de multiclase y dotes elegidas (se guardan al pulsar Guardar)
 let MC = [], DOTES = [];
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 const fill = (id, arr) => { $(id).innerHTML = arr.map(v => `<option value="${esc(v)}"></option>`).join(''); };
@@ -57,11 +55,10 @@ async function remove(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
   if (!(await confirmar({ titulo: `¿Borrar a ${c.nombre || 'este personaje'}?`, texto: 'Se borran su ficha, su libro y su historial. Los conjuros siguen en el catálogo para los demás personajes.', ok: 'Borrar personaje', peligro: true }))) return;
   const h = S.edit(db => { db.chars = db.chars.filter(x => x.id !== id); if (db.activeId === id) db.activeId = db.chars[0]?.id ?? null; });
-  fileStore.remove(`retrato-${id}.txt`);   // el original del retrato; la miniatura vuelve con Deshacer
+  fileStore.remove(`retrato-${id}.txt`);
   renderList(); toast(`${esc(c.nombre || 'Personaje')} borrado.`, [undoBtn(S, h)]);
 }
 
-/* ---------------- ficha ---------------- */
 let formId = null, conjAbierto = false;
 export function openCharForm(id) {
   formId = id || null; conjAbierto = false;
@@ -116,7 +113,6 @@ function readForm() {
   base.espacios = {}; for (let L = 1; L <= 9; L++) { const n = clamp(parseInt(v('#f_e' + L), 10) || 0, 0, 9); if (n) base.espacios[L] = n; }
   return base;
 }
-/* ---------------- multiclase y dotes ---------------- */
 function pintarMulticlase() {
   const principal = $('#f_clase').value;
   $('#f_mc').innerHTML = MC.map((m, i) => {
@@ -157,7 +153,6 @@ function sync(first) {
   ABILS.forEach(([k]) => { $('#m_' + k).textContent = sgn(modOf($('#f_' + k).value)); });
   $('#h_sub').textContent = draft.nivel < 3 ? 'Se elige al llegar a nivel 3.' : (cls.subCast && !P.viaSub ? `Solo ${cls.subCast.nombre} lanza conjuros.` : '');
   $('#f_slots').hidden = !$('#f_manual').checked;
-  // La sección de conjuros solo aparece si la clase (o la subclase elegida) lanza conjuros, o si ya se usa por dotes o multiclase
   const lanza = !!cls.cast || !!(cls.subCast && cls.subCast.re.test(draft.subclase || ''));
   const enUso = draft.espaciosManuales || !!draft.aptitud || !!draft.extraCD || !!draft.extraAtaque;
   const verConj = lanza || enUso || conjAbierto;

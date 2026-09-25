@@ -1,4 +1,3 @@
-/** Portada: selección de personaje, animada y con el color de cada clase. */
 import { esc } from '../core/util.js';
 import { $, on, patch } from './dom.js';
 import { gi, temaDe, aplicarTema } from './tema.js';
@@ -66,7 +65,6 @@ export function init(store, callbacks) {
   on($('#landing'), 'click', '[data-lcmd]', (e, b) => {
     const c = b.dataset.lcmd;
     if (c !== 'revisarPruebas') return cbs.cmd(c);
-    // «Revisar clases de prueba»: la primera vez los crea; luego muestra u oculta su sección
     if (!S.db.chars.some(x => x.prueba)) { verPruebas = true; cbs.cmd('pruebas'); } else { verPruebas = !verPruebas; render(); }
     if (verPruebas) setTimeout(() => $('#landing .l-pruebas-nota')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   });

@@ -1,12 +1,3 @@
-/**
- * Personajes de prueba (rama development): uno por cada subclase del Manual del Jugador 2024 y de Héroes de Faerûn,
- * todos al mismo nivel (8 por defecto) y montados de forma automática con las reglas de la app:
- *   características (matriz estándar + trasfondo + mejoras de característica), especie, trasfondo y dote de origen,
- *   trucos, conjuros preparados, conjuros siempre preparados de clase y subclase, libro del mago y Experto en su escuela,
- *   invocaciones, rasgos propios, objetos mágicos (con cargas y sintonización), diario, bestiario e historia.
- * Sirven para revisar de un vistazo colores, emblemas, fondos, recursos de clase y progresión de todas las combinaciones.
- * Módulo puro: recibe el compendio y modifica la base de datos que se le pasa.
- */
 import { norm, uid } from '../core/util.js';
 import { CLASES, ESPECIES, TRASFONDOS_2024, competencia, perfil } from './reglas2024.js';
 import { CLASES_INFO, SUBCLASES, conjurosAutomaticos, progresion, subclaseDe } from './clases2024.js';
@@ -20,7 +11,6 @@ import { claveNombre } from './manual.js';
 export const NIVEL_PRUEBA = 8;
 const ABN = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
 const MATRIZ = [15, 14, 13, 12, 10, 8];
-/** Un nombre por personaje de prueba (en el orden de las subclases). */
 const NOMBRES = ['Brunhild', 'Korgan', 'Yara', 'Tormund', 'Lirael', 'Odrin', 'Seraphine', 'Cassius', 'Nimue',
   'Auriel', 'Fenwick', 'Mordaine', 'Vessa', 'Gareth', 'Solenne', 'Elowen', 'Quillon', 'Aldous',
   'Rowan', 'Terrin', 'Astra', 'Maris', 'Umbra', 'Hale', 'Briar', 'Kestrel', 'Frida',
@@ -28,14 +18,12 @@ const NOMBRES = ['Brunhild', 'Korgan', 'Yara', 'Tormund', 'Lirael', 'Odrin', 'Se
   'Theodora', 'Orla', 'Ember', 'Mirage', 'Aerith', 'Jun', 'Mei', 'Kage', 'Tenzin',
   'Galahad', 'Aurelia', 'Sylvan', 'Vengar', 'Zahir', 'Silas', 'Wren', 'Nim', 'Vex', 'Mordecai'];
 
-/** Conjuros de especie (linaje por defecto): [nombre, nivel de personaje, uso gratis]. */
 const ESPECIE_CONJUROS = {
   'Aasimar': [['Luz', 1, '']],
-  'Elfo': [['Prestidigitación', 1, ''], ['Detectar magia', 3, '1/DL'], ['Paso brumoso', 5, '1/DL']],          // linaje de alto elfo
-  'Gnomo': [['Ilusión menor', 1, ''], ['Hablar con los animales', 1, 'BC/DL']],                                 // gnomo del bosque
-  'Tiefling': [['Taumaturgia', 1, ''], ['Reprensión infernal', 3, '1/DL'], ['Oscuridad', 5, '1/DL']],           // legado infernal
+  'Elfo': [['Prestidigitación', 1, ''], ['Detectar magia', 3, '1/DL'], ['Paso brumoso', 5, '1/DL']],
+  'Gnomo': [['Ilusión menor', 1, ''], ['Hablar con los animales', 1, 'BC/DL']],
+  'Tiefling': [['Taumaturgia', 1, ''], ['Reprensión infernal', 3, '1/DL'], ['Oscuridad', 5, '1/DL']],
 };
-/** Elecciones de clase que no cambian la hoja pero se anotan (y algunas dan conjuros). */
 const ELECCIONES = {
   'Bardo': ['Pericia: Interpretación y Persuasión'],
   'Brujo': ['Invocaciones: Descarga agónica, Pacto del grimorio, Máscara de los mil rostros, Mente sobrenatural, Vista del diablo'],
@@ -58,7 +46,6 @@ const EXTRA_SUB = {
   'Círculo de la tierra': 'Terreno: árido',
   'Vástago de los Tres': 'Lealtad aterradora: Bhaal (resistencia al veneno, Guardia de cuchillas)',
 };
-/** Trucos que dan elecciones de clase: [nombre, fuente, lista]. */
 const TRUCOS_EXTRA = {
   'Clérigo': [[null, 'Taumaturgo', 'Clérigo']],
   'Druida': [[null, 'Naturalista', 'Druida']],
@@ -67,17 +54,14 @@ const TRUCOS_EXTRA = {
 };
 const RITUALES_BRUJO = [['Encontrar familiar', 'Pacto del grimorio'], ['Detectar magia', 'Pacto del grimorio'], ['Disfrazarse', 'Máscara de los mil rostros']];
 
-/** Índice del compendio por nombre (sin tildes) y nivel. */
 function indice(compendio) {
   const porNombre = new Map();
   for (const x of compendio) { const k = norm(x.es); if (!porNombre.has(k)) porNombre.set(k, []); porNombre.get(k).push(x); }
   return (nombre, nivel) => { const xs = porNombre.get(norm(nombre)) || []; return (nivel == null ? xs[0] : xs.find(x => x.l === nivel)) || xs[0] || null; };
 }
-/** Los conjuros con dados (daño o curación) van primero: así la bandeja de tiradas se prueba con casi todos. */
 const conDados = x => /\d+d\d+/.test(`${x.d || ''} ${x.h || ''}`) ? 0 : 1;
 const orden = (a, b) => conDados(a) - conDados(b) || a.es.localeCompare(b.es, 'es');
 
-/** Características: matriz estándar por prioridad, +2/+1 del trasfondo y las mejoras de característica hasta el nivel. */
 export function statsPrueba(prio, trasfondo, clase, nivel) {
   const st = {}; prio.forEach((k, i) => { st[k] = MATRIZ[i]; });
   const [tr] = TRASFONDOS_2024[trasfondo] || [[prio[0], prio[1]]];
@@ -92,20 +76,14 @@ export function statsPrueba(prio, trasfondo, clase, nivel) {
   return { stats: st, notas, trasfondoTxt: `${ABN[t1]} +2, ${ABN[t2]} +1` };
 }
 
-/** Trasfondo que encaja con las dos características principales (rota entre los que valen). */
 function trasfondoPara(prio, i) {
   const ok = Object.keys(TRASFONDOS_2024).filter(t => TRASFONDOS_2024[t][0].includes(prio[0]) && TRASFONDOS_2024[t][0].includes(prio[1]));
   const lista = ok.length ? ok : Object.keys(TRASFONDOS_2024).filter(t => TRASFONDOS_2024[t][0].includes(prio[0]));
   return lista[i % lista.length];
 }
 
-/** Todas las combinaciones clase + subclase que se prueban. */
 export const combinaciones = () => Object.entries(SUBCLASES).flatMap(([clase, subs]) => subs.map(sc => ({ clase, sc })));
 
-/**
- * Crea un personaje de prueba completo. Devuelve {ch, faltan} (faltan = conjuros que no están en el compendio).
- * `db` recibe los conjuros en su catálogo.
- */
 export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_PRUEBA) {
   const buscar = indice(compendio), faltan = [];
   const info = CLASES_INFO[clase], prio = sc.prio || info.prio;
@@ -125,11 +103,9 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   const porNombre = (nombre, rel, nivelConj) => { const x = buscar(nombre, nivelConj); if (!x) { faltan.push(nombre); return false; } return add(x, rel); };
   const deLista = (l, cls) => compendio.filter(x => x.l === l && (x.cl || []).includes(cls)).sort(orden);
 
-  // 1. Conjuros automáticos de clase y subclase (siempre preparados)
   for (const c of conjurosAutomaticos(ch)) porNombre(c.nombre, { always: true, prep: true, fuente: c.fuente, gratis: c.gratis, ritualSolo: c.ritual || undefined });
   if (sc.nombre === 'Colegio de la luna') { const x = deLista(0, 'Druida').find(y => !claves.has(y.k)); add(x, { always: true, fuente: 'Conocimientos primigenios' }); }
 
-  // 2. Especie y dote de origen
   for (const [nombre, desde, gratis] of ESPECIE_CONJUROS[especie] || []) if (nivel >= desde) porNombre(nombre, { always: true, prep: true, fuente: especie, gratis: gratis.replace('BC', pb) });
   const dote = TRASFONDOS_2024[trasfondo][1], mi = /Iniciado en la magia \((\w+)\)/.exec(dote);
   if (mi) {
@@ -139,7 +115,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   }
   if (dote === 'Afortunado') ch.rasgos.push({ id: uid('r'), tipo: 'recurso', nombre: 'Puntos de suerte', nota: 'Dote Afortunado: ventaja en una prueba con d20 o desventaja a un ataque contra ti.', maxBase: 'comp', maxN: 1, maxAb: 'car', recarga: 'largo', dado: 'd20', nivMax: 5, escuela: '', espacioMin: 0, soloEspacio: true, efecto: 'aviso', efectoN: 5, texto: '' });
 
-  // 3. Trucos de clase (y los que dan elecciones de clase)
   if (P.maxCant && lista) {
     let n = 0; for (const x of deLista(0, lista)) { if (n >= P.maxCant) break; if (add(x, { fuente: P.listaNombre })) n++; }
   }
@@ -149,7 +124,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   }
   if (clase === 'Brujo') for (const [nombre, fuente] of RITUALES_BRUJO) porNombre(nombre, { always: true, fuente, gratis: fuente.startsWith('Máscara') ? 'a voluntad' : '' }, 1);
 
-  // 4. Conjuros preparados (o libro del mago), repartidos por nivel de espacio
   const nuevosDe = l => deLista(l, lista).filter(x => !claves.has(x.k));
   const repartir = (total, rel) => {
     const pools = {}; for (let l = 1; l <= P.maxSlot; l++) pools[l] = nuevosDe(l);
@@ -158,7 +132,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     return n;
   };
   if (clase === 'Mago') {
-    // Experto en su escuela: 2 conjuros de nivel 1–2 a nivel 3 y uno más por cada nivel de espacio nuevo
     const escuela = sc.escuela;
     if (escuela && nivel >= 3) {
       const gratis = []; const de = l => compendio.filter(x => x.l === l && x.esc === escuela && (x.cl || []).includes('Mago') && !claves.has(x.k)).sort(orden);
@@ -168,17 +141,15 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     }
     const libro = 6 + 2 * (nivel - 1);
     const antes = book.length; repartir(libro, { fuente: 'Libro' });
-    book.slice(antes, antes + P.maxPrep).forEach(e => { e.prep = true; });   // el reparto va por niveles: prepara de todos
+    book.slice(antes, antes + P.maxPrep).forEach(e => { e.prep = true; });
   } else if (P.maxPrep && lista) {
     repartir(P.maxPrep, { prep: true, fuente: P.listaNombre });
   }
   book.forEach(e => { if (e.ritualSolo) { e.fuente += ' (solo ritual)'; } delete e.ritualSolo; });
 
-  // 5. Notas: elecciones de clase, subclase, trasfondo y mejoras
   const notas = [`Trasfondo ${trasfondo}: ${trasfondoTxt}; dote de origen ${dote}.`, ...(ELECCIONES[clase] || []), ...(EXTRA_SUB[sc.nombre] ? [EXTRA_SUB[sc.nombre]] : []), ...notasAsi];
   ch.notas = notas.map(t => t.replace(/\.?$/, '.')).join('\n');
 
-  // 6. Objetos mágicos: poción, capa sintonizada y, según la clase, varita con cargas o arma +1
   equipoInicial(ch);
   const obj = (nombre, tipo, rareza, extra = {}) => anadirObjeto(ch, { clave: claveNombre(nombre), nombre, tipo, rareza, sintonia: !!extra.sintonia, cargas: extra.cargas || null });
   obj('Poción de curación', 'Poción', 'Común');
@@ -186,7 +157,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   if (P.c) obj('Varita de proyectiles mágicos', 'Varita', 'Infrecuente', { cargas: { max: 7, recarga: '1d6+1' } });
   else obj('Arma +1', 'Arma', 'Infrecuente');
 
-  // 7. Diario, bestiario e historia: una sesión con cada tipo de nota, una criatura y un capítulo
   const hoy = new Date().toISOString().slice(0, 10);
   const nt = (tipo, texto, extra = {}) => ({ ...nuevaNota(tipo, texto), ...extra });
   ch.diario.sesiones.push({ id: uid('ses'), n: 1, fecha: hoy, titulo: 'Sesión de prueba', texto: `Primera sesión de ${ch.nombre}. Comprobar recursos, descansos y tiradas.`,
@@ -198,7 +168,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   return { ch: normChar(ch), faltan };
 }
 
-// Equipo inicial por clase (Manual del Jugador 2024, simplificado): [nombre, cantidad]; las armas y armaduras primeras van equipadas
 const KIT = {
   'Bárbaro': [['Hacha a dos manos', 1], ['Hacha de mano', 4]], 'Bardo': [['Estoque', 1], ['Armadura de cuero', 1], ['Laúd', 1]],
   'Brujo': [['Daga', 2], ['Armadura de cuero', 1], ['Foco arcano (orbe)', 1]], 'Clérigo': [['Maza', 1], ['Cota de escamas', 1], ['Escudo', 1], ['Símbolo sagrado (amuleto)', 1]],
@@ -214,17 +183,12 @@ export function equipoInicial(ch) {
   for (const [nombre, cantidad] of [...(KIT[ch.clase] || []), ...AVENTURERO]) {
     const p = PREDEFINIDOS.find(x => x.nombre === nombre); if (!p) continue;
     const o = anadirComun(ch, { ...JSON.parse(JSON.stringify(p)), cantidad });
-    // se equipa la primera arma, la primera armadura y el escudo
     const hueco = p.arma ? 'arma' : p.armadura ? p.armadura.tipo === 'escudo' ? 'escudo' : 'armadura' : '';
     if (hueco && !puestos.has(hueco)) { alternarEquipado(ch, o.id); puestos.add(hueco); }
   }
   Object.assign(equipoDe(ch).monedas, { po: 25, pp: 12, pc: 30 });
 }
 
-/**
- * Sustituye los personajes de prueba de la base de datos por una tanda nueva (uno por subclase). Los demás no se tocan.
- * Devuelve {creados, faltan}.
- */
 export function sembrarPruebas(db, compendio, nivel = NIVEL_PRUEBA) {
   if (!compendio || !compendio.length) return { creados: 0, faltan: [] };
   db.chars = db.chars.filter(c => !c.prueba);
@@ -234,7 +198,6 @@ export function sembrarPruebas(db, compendio, nivel = NIVEL_PRUEBA) {
     const { ch, faltan: f } = personajePrueba(db, compendio, clase, sc, i, nivel);
     f.forEach(x => faltan.add(x)); db.chars.push(ch); creados++;
   });
-  // y uno con multiclase, especie y dotes (Bárbaro 5 / Guerrero 3), para revisar «En juego» con todas sus fuentes
   const berserker = combinaciones().find(x => x.clase === 'Bárbaro' && /berserk/i.test(x.sc.nombre));
   if (berserker) {
     const { ch } = personajePrueba(db, compendio, 'Bárbaro', berserker.sc, creados, Math.max(1, nivel - 3));

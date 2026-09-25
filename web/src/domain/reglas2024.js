@@ -1,7 +1,3 @@
-/**
- * Reglas del Manual del Jugador 2024 que necesita la hoja.
- * Módulo puro: sin DOM ni estado. Todo lo derivado de un personaje sale de perfil().
- */
 import { clamp, norm } from '../core/util.js';
 
 export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
@@ -12,10 +8,6 @@ export const sgn = n => (n >= 0 ? '+' : '') + n;
 export const nivelDe = ch => clamp(parseInt(ch.nivel, 10) || 1, 1, 20);
 export const competencia = L => 2 + Math.floor((L - 1) / 4);
 
-/**
- * Clases del personaje: la principal (clase, subclase, nivel) y las de multiclase (ch.multiclase = [{clase, subclase, nivel}]).
- * Una clase repetida o desconocida se ignora; el nivel total no pasa de 20.
- */
 export function clasesDe(ch) {
   const out = [{ clase: ch.clase, subclase: ch.subclase || '', nivel: nivelDe(ch), principal: true }];
   for (const m of ch.multiclase || []) {
@@ -26,38 +18,31 @@ export function clasesDe(ch) {
   return out;
 }
 export const nivelTotal = ch => clasesDe(ch).reduce((n, c) => n + c.nivel, 0);
-/** El personaje visto desde una sola de sus clases (para rasgos, recursos y conjuros de esa clase). */
 export const vistaClase = (ch, c) => ({ ...ch, clase: c.clase, subclase: c.subclase, nivel: c.nivel, multiclase: [] });
-/** Multiclase: característica mínima (13) de cada clase; «o» cuando basta una de ellas (Guerrero). */
 export const REQ_MULTICLASE = { 'Bárbaro': [['fue']], 'Bardo': [['car']], 'Brujo': [['car']], 'Clérigo': [['sab']], 'Druida': [['sab']], 'Explorador': [['des'], ['sab']],
   'Guerrero': [['fue', 'des']], 'Hechicero': [['car']], 'Mago': [['int']], 'Monje': [['des'], ['sab']], 'Paladín': [['fue'], ['car']], 'Pícaro': [['des']] };
-/** Clases (de las del personaje) que no cumplen el requisito de 13: [{clase, falta: 'Fuerza 13'}]. Solo aviso: la mesa decide. */
 export function requisitosMulticlase(ch) {
   const cs = clasesDe(ch); if (cs.length < 2) return [];
   const N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
   return cs.flatMap(c => (REQ_MULTICLASE[c.clase] || []).filter(alts => !alts.some(k => (ch.stats?.[k] || 0) >= 13))
     .map(alts => ({ clase: c.clase, falta: alts.map(k => `${N[k]} 13`).join(' o ') })));
 }
-/** Texto corto de las clases: «Bárbaro 5 / Guerrero 3». */
 export const clasesTexto = ch => { const cs = clasesDe(ch); return cs.length > 1 ? cs.map(c => `${c.clase} ${c.nivel}`).join(' / ') : `${ch.clase}, nivel ${cs[0].nivel}`; };
 
-// Espacios por nivel de personaje (índice 0 = nivel 1). Cada fila: espacios de nivel 1, 2, 3…
 const FULL = [[2], [3], [4, 2], [4, 3], [4, 3, 2], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2], [4, 3, 3, 3, 2, 1], [4, 3, 3, 3, 2, 1],
   [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1, 1], [4, 3, 3, 3, 3, 1, 1, 1, 1], [4, 3, 3, 3, 3, 2, 1, 1, 1], [4, 3, 3, 3, 3, 2, 2, 1, 1]];
 const HALF = [[2], [2], [3], [3], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3, 2], [4, 3, 2], [4, 3, 3], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2], [4, 3, 3, 3, 2]];
 const THIRD = [[], [], [2], [3], [3], [3], [4, 2], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3], [4, 3, 2], [4, 3, 2], [4, 3, 2], [4, 3, 3], [4, 3, 3], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 1]];
 const PACT_N = [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4];
 const PACT_L = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
-// Conjuros preparados de nivel 1+ (índice 0 = nivel 1)
 const PREP = {
   mago: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 18, 19, 21, 22, 23, 24, 25],
-  div: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],   // bardo, clérigo, druida
+  div: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
   hech: [2, 4, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
   brujo: [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15],
-  medio: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],        // paladín, explorador
-  tercio: [0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13],          // caballero y embaucador arcanos
+  medio: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],
+  tercio: [0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13],
 };
-// cant: [base, niveles en los que se gana un truco más]. Subclases del Manual del Jugador y, al final, las de Héroes de Faerûn.
 export const CLASES = {
   'Bárbaro': { subs: ['Senda del Árbol del Mundo', 'Senda del berserker', 'Senda del corazón salvaje', 'Senda del fanático'] },
   'Bardo': { cast: { tipo: 'full', ap: 'car', prep: 'div', cant: [2, 4, 10] }, subs: ['Colegio de la danza', 'Colegio del conocimiento', 'Colegio del glamour', 'Colegio del valor', 'Colegio de la luna'] },
@@ -76,7 +61,6 @@ export const CLASES = {
 };
 export const ESPECIES = ['Aasimar', 'Dracónido', 'Elfo', 'Enano', 'Gnomo', 'Goliat', 'Humano', 'Mediano', 'Orco', 'Tiefling'];
 export const TRASFONDOS = ['Acólito', 'Animador', 'Artesano', 'Campesino', 'Charlatán', 'Comerciante', 'Criminal', 'Ermitaño', 'Erudito', 'Escriba', 'Guardia', 'Guía', 'Marinero', 'Noble', 'Soldado', 'Vagabundo'];
-/** Trasfondos de 2024: características que mejoran y dote de origen. */
 export const TRASFONDOS_2024 = {
   'Acólito': [['int', 'sab', 'car'], 'Iniciado en la magia (clérigo)'], 'Animador': [['fue', 'des', 'car'], 'Músico'],
   'Artesano': [['fue', 'des', 'int'], 'Fabricante'], 'Campesino': [['fue', 'con', 'sab'], 'Duro'], 'Charlatán': [['des', 'con', 'car'], 'Habilidoso'],
@@ -85,10 +69,6 @@ export const TRASFONDOS_2024 = {
   'Guía': [['des', 'con', 'sab'], 'Iniciado en la magia (druida)'], 'Marinero': [['fue', 'des', 'sab'], 'Matón de taberna'], 'Noble': [['fue', 'int', 'car'], 'Habilidoso'],
   'Soldado': [['fue', 'des', 'con'], 'Atacante salvaje'], 'Vagabundo': [['des', 'sab', 'car'], 'Afortunado'],
 };
-/**
- * Dotes del personaje: la de origen de su trasfondo (del Manual del Jugador o de un libro importado) y las elegidas (ch.dotes).
- * [{nombre, detalle, origen: 'trasfondo'|'elegida'}]; «Iniciado en la magia (mago)» → nombre «Iniciado en la magia», detalle «mago».
- */
 export function dotesDe(ch, trasfondosLib = []) {
   const partir = t => { const m = /^(.+?)\s*\(([^)]+)\)\s*$/.exec(t); return m ? { nombre: m[1], detalle: m[2] } : { nombre: t, detalle: '' }; };
   const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
@@ -100,16 +80,11 @@ export function dotesDe(ch, trasfondosLib = []) {
 }
 export const LISTAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
 
-/**
- * La CD y el ataque que tocan a un conjuro según su fuente en el libro («Hechicero (nivel 6)», «Embaucador arcano», «Libro»…).
- * Con una sola característica de lanzamiento, el perfil tal cual.
- */
 export function magiaPara(P, fuente = '') {
   if (!P.cds || P.cds.length < 2) return P;
   const f = norm(fuente), x = P.cds.find(c => c.claves.some(k => k && f.includes(k))) || P.cds[0];
   return { ...P, apKey: x.ap, mod: x.mod, cd: x.cd, atk: x.atk };
 }
-/** Lanzamiento de conjuros de una clase a su nivel (la subclase puede darlo: Caballero y Embaucador arcanos). */
 function lanzamientoDe(c) {
   const cls = CLASES[c.clase] || {};
   if (cls.cast) return { cast: cls.cast, viaSub: false, nombre: c.clase, lista: c.clase };
@@ -118,14 +93,6 @@ function lanzamientoDe(c) {
 }
 const FACTOR = { full: L => L, half: L => Math.ceil(L / 2), third: L => Math.floor(L / 3) };
 
-/**
- * Todo lo que la hoja necesita saber de un personaje. Con multiclase (Manual del Jugador 2024):
- *  - la competencia va por el nivel total;
- *  - con una sola clase lanzadora, sus espacios son los de su tabla a su nivel;
- *  - con varias, se suman los niveles de lanzador (completos, la mitad hacia arriba de paladín y explorador,
- *    un tercio hacia abajo de caballero y embaucador arcanos) y se usa la tabla completa;
- *  - la magia de pacto del brujo va aparte; preparados y trucos se suman por clase.
- */
 export function perfil(ch) {
   const clases = clasesDe(ch), lvl = clases.reduce((n, c) => n + c.nivel, 0);
   const lanzan = clases.map(c => ({ c, l: lanzamientoDe(c) })).filter(x => x.l);
@@ -146,7 +113,6 @@ export function perfil(ch) {
     row.forEach((n, i) => { if (n) slots[i + 1] = n; });
     if (pact) slots[pact.level] = (slots[pact.level] || 0) + pact.n;
   }
-  // cada clase lanza con su característica (Embaucador arcano con Inteligencia, Hechicero con Carisma): una CD por característica
   const cds = [];
   for (const { c: k, l } of lanzan) {
     const ap = ch.aptitud || l.cast.ap, claves = [norm(k.clase), norm(l.nombre), ...(l.lista === 'Mago' || k.clase === 'Mago' ? ['libro', 'experto'] : []), ...(k.clase === 'Brujo' ? ['pacto'] : [])];
@@ -165,6 +131,6 @@ export function perfil(ch) {
     slots, pact, maxSlot: Math.max(0, ...Object.keys(slots).map(Number)),
     maxPrep: lanzan.reduce((n, { c: k, l }) => n + PREP[l.cast.prep][k.nivel - 1], 0),
     maxCant: lanzan.reduce((n, x) => n + trucos(x), 0),
-    ritualLibro: clases.some(x => x.clase === 'Mago'),   // Adepto en rituales
+    ritualLibro: clases.some(x => x.clase === 'Mago'),
   };
 }

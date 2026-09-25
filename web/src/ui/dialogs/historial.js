@@ -1,4 +1,3 @@
-/** Historial de la sesión: lo anotado por el store, con «Deshacer hasta aquí». */
 import { esc } from '../../core/util.js';
 import { $, on } from '../dom.js';
 import { openSheet } from '../dialog.js';

@@ -1,4 +1,3 @@
-/* ============================ diálogos propios ============================ */
 dialog.modal { width: min(420px, 92vw); padding: 26px 24px 20px; text-align: center; margin: auto; border-radius: var(--r-l); }
 dialog.modal[open] { display: block; animation: pop-in var(--t-med) var(--spring); }
 .md-icon { width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; color: var(--gold); background: var(--gold-soft); box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 8%, transparent); }
@@ -12,8 +11,6 @@ dialog.modal input { margin-bottom: 16px; text-align: center; font: 700 22px / 1
 button.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 @media (max-width: 700px) { dialog.modal { width: min(420px, 92vw); margin: auto; border-radius: var(--r-l); border-bottom: 1px solid var(--line); max-height: none; }
   dialog.modal[open] { animation: pop-in var(--t-med) var(--spring); } dialog.modal.closing { animation: sheet-out .18s var(--ease) forwards; } }
-
-/* ============================ portada ============================ */
 body.on-landing { overflow: hidden; }
 body.on-landing .appbar, body.on-landing .dock, body.on-landing main, body.on-landing .toast:not(.show) { display: none; }
 .landing { position: fixed; inset: 0; z-index: 40; overflow: auto; padding: calc(var(--sat) + 28px) 20px calc(var(--sab) + 40px);
@@ -52,8 +49,6 @@ body.landing-in .l-head > * { animation: rise .6s var(--ease-out) both; }
 body.landing-in .l-head > *:nth-child(2) { animation-delay: .06s; } body.landing-in .l-head > *:nth-child(3) { animation-delay: .12s; }
 body.landing-in .lcard { animation: rise .55s var(--ease-out) both; animation-delay: calc(.15s + min(var(--i), 12) * 70ms); }
 body.landing-in .l-actions { animation: rise .6s var(--ease-out) both .3s; }
-
-/* ============================ tiradas ============================ */
 .dmg { display: inline-grid; place-items: center; color: var(--dmg, var(--gold)); vertical-align: middle; }
 .dmg .gi { width: 18px; height: 18px; }
 .dmg.sm { margin-left: 6px; } .dmg.sm .gi { width: 15px; height: 15px; }
@@ -88,8 +83,6 @@ body.landing-in .l-actions { animation: rise .6s var(--ease-out) both .3s; }
 .die { display: inline-grid; place-items: center; min-width: 28px; height: 28px; margin: 0 3px; padding: 0 6px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font: 700 14px / 1 var(--sans); }
 .die.max { border-color: var(--gold); color: var(--gold); } .die.min { color: var(--ink-3); }
 .tag-crit { color: var(--gold); } .tag-pifia { color: var(--danger); }
-
-/* ============================ glosario ============================ */
 button.term { display: inline; min-height: 0; padding: 0 2px; margin: 0 -1px; border: 0; border-radius: 4px; background: transparent; font: inherit; color: inherit;
   text-decoration: underline dotted var(--gold); text-decoration-thickness: 2px; text-underline-offset: 3px; cursor: help; }
 button.term:hover { background: var(--gold-soft); color: var(--gold); }
@@ -97,10 +90,7 @@ button.term:active { transform: none; }
 .gl-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .gl-item { min-height: 38px; border-radius: var(--r-pill); padding: 0 14px; font-size: var(--fs-s); }
 .gl-item.estado { border-color: var(--gold); color: var(--gold); }
-.tm-cat { font: 700 11px / 1 var(--sans); color: var(--gold); border: 1px solid var(--gold); border-radius: var(--r-pill); padding: 3px 9px; }
 .srcnote .gi { width: 14px; height: 14px; }
-
-/* ============================ tutorial ============================ */
 .tour { position: fixed; inset: 0; z-index: 80; display: none; }
 .tour.on { display: block; }
 .tour-hole { position: fixed; border-radius: 14px; box-shadow: 0 0 0 200vmax rgba(4, 6, 12, .72), 0 0 0 2px var(--gold), 0 0 26px var(--glow); pointer-events: none;
@@ -113,8 +103,6 @@ button.term:active { transform: none; }
 .tour-btns { display: flex; gap: 8px; align-items: center; } .tour-btns span { flex: 1; }
 .tour-btns button { min-height: 40px; border-radius: var(--r-pill); }
 body.touring .toast { display: none; }
-
-/* ============================ retrato ============================ */
 .avatar { display: inline-grid; place-items: center; flex: none; border-radius: 50%; overflow: hidden; color: var(--gold);
   background: radial-gradient(circle at 35% 30%, var(--gold-soft), var(--surface-2)); box-shadow: 0 0 0 2px var(--gold), 0 0 16px var(--glow); }
 .avatar { position: relative; }
@@ -143,8 +131,6 @@ body.touring .toast { display: none; }
 .ret-stage:not(.empty) .ret-vacio { display: none; }
 .ret-zoom { max-width: 320px; margin: 0 auto; } .ret-zoom input { padding: 0; min-height: 30px; accent-color: var(--gold); }
 dialog#retDlg { width: min(460px, 94vw); }
-
-/* ============================ historia ============================ */
 .dhead-av { display: flex; gap: 14px; align-items: center; }
 .dhead-av h2 { margin: 0; } .dhead-av .iconbtn { font-size: 26px; }
 .tr-tools { padding: 0 22px 8px; display: grid; gap: 8px; }
@@ -163,8 +149,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .doc mark { background: var(--gold); color: var(--on-gold); border-radius: 3px; padding: 0 2px; }
 .tr-edit { min-height: 55vh; font: 400 15px / 1.55 ui-monospace, Menlo, Consolas, monospace; }
 .tr-empty { text-align: center; padding: 30px 6px; font: 400 var(--fs-l) / 1.5 var(--sans); } .tr-empty .avatar { margin-bottom: 12px; }
-
-/* ============================ diario ============================ */
 .di-bar { display: flex; gap: 8px; margin: 4px 0 12px; } .di-bar input { flex: 1; } .di-bar button { border-radius: var(--r-pill); white-space: nowrap; }
 .ses-list { display: flex; flex-direction: column; gap: 8px; }
 .ses { display: flex; gap: 14px; align-items: flex-start; text-align: left; padding: 12px 14px; min-height: 64px; border-radius: var(--r-m); background: var(--surface); }
@@ -194,7 +178,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .nts .nt-b[aria-pressed="true"] { background: var(--gold) !important; color: var(--on-gold) !important; border-color: var(--gold) !important; }
 .rec-card .nts { flex-basis: 100%; }
 .rec-card { border-color: color-mix(in srgb, var(--gold) 45%, transparent); background: linear-gradient(135deg, var(--gold-soft), var(--surface) 70%); }
-/* bandeja de dados: flujo */
 .rl-step { margin-bottom: 14px; }
 .rl-q { font: 500 var(--fs-m) / 1.3 var(--sans); margin: 10px 0 8px; }
 .seg-ts { display: flex; flex-wrap: wrap; }
@@ -212,7 +195,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .rl-split b { font: 700 22px / 1 var(--serif); color: var(--gold); }
 .rl-ctx { margin-top: 10px; font: 400 var(--fs-s) / 1.5 var(--serif); color: var(--ink-2); text-align: left; }
 .rl-big { width: 34px; height: 34px; color: var(--gold); }
-/* texto de conjuros: palabras clave */
 .k-dice { font: 700 .92em / 1 var(--sans); color: var(--gold); background: var(--gold-soft); border-radius: 5px; padding: 1px 5px; white-space: nowrap; }
 .k-dmg { font-weight: 700; color: var(--dmg, var(--gold)); white-space: nowrap; }
 .k-dmg .gi { width: .95em; height: .95em; margin-right: 2px; vertical-align: -.1em; }
@@ -221,7 +203,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .k-dist { font-weight: 600; color: var(--ink); white-space: nowrap; }
 .sp-text b.lead, .rl-efecto b.lead, .doc b.lead { color: var(--gold); font-weight: 700; }
 :root[data-theme="light"] .k-dmg { filter: saturate(1.3) brightness(.72); }
-/* cuadrícula de áreas */
 .ar-open { margin-bottom: 12px; width: 100%; }
 .ar-ico { flex: none; width: 30px; height: 30px; border-radius: 6px; background:
   linear-gradient(var(--gold-soft), var(--gold-soft)) 8px 8px / 14px 14px no-repeat,
@@ -240,8 +221,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ar-svg .shape .pt { fill: var(--gold-2); }
 .ar-svg .range { fill: none; stroke: #7FA6FF; stroke-width: 2; stroke-dasharray: 6 6; opacity: .8; }
 .ar-svg .tok circle { fill: var(--surface); stroke: var(--ink); stroke-width: 2.5; }
-
-/* libros */
 .lb-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .lb { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
 .lb-t { flex: 1; display: flex; flex-direction: column; gap: 3px; } .lb-t b { font: 500 var(--fs-l) / 1.2 var(--serif); } .lb-t small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }
@@ -250,8 +229,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .sc-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 12px; }
 .sc { display: grid; grid-template-columns: auto 140px 1fr; gap: 8px; align-items: center; }
 .sc input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold); }
-
-/* Rasgos → progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros de clase y subclase */
 .prog-vals { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 8px 0 14px; }
 .prog-vals div { border: 1px solid var(--line-soft); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
 .prog-vals dt { font: 500 var(--fs-xs) / 1.2 var(--sans); color: var(--ink-2); }
@@ -265,8 +242,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .prog-conj span { border: 1px solid var(--line-soft); border-radius: 999px; padding: 3px 10px; font-size: var(--fs-s); }
 .prog-conj span.falta { border-style: dashed; color: var(--ink-2); }
 .prog-conj small { margin-left: 6px; color: var(--ink-2); font-size: var(--fs-xs); }
-
-/* Edición de la hoja: escuela con selector de color y componentes V S M como interruptores */
 .sch-pick { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px 0 8px; border-radius: var(--r-pill); font: 500 var(--fs-s) / 1 var(--sans);
   color: var(--sc); border: 1px solid color-mix(in srgb, var(--sc) 45%, var(--line)); background: color-mix(in srgb, var(--sc) 8%, var(--raised)); }
 .sch-pick .icon { width: 14px; height: 14px; opacity: .7; }
@@ -279,8 +254,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .comp-pick { display: inline-flex; gap: 4px; }
 .comp-pick button { min-width: 30px; min-height: 30px; padding: 0 6px; border-radius: 8px; font: 700 var(--fs-xs) / 1 var(--display); color: var(--ink-3); border: 1px dashed var(--line); background: transparent; }
 .comp-pick button[aria-pressed="true"] { color: var(--raised); background: var(--sc, var(--ink)); border: 1px solid transparent; }
-
-/* Efectos activos: sobre quién está cada efecto */
 .ef-card { display: grid; gap: 10px; }
 .ef-row { display: grid; gap: 6px; padding: 8px 0; border-top: 1px dashed var(--line-soft); }
 .ef-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
@@ -298,18 +271,12 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ef-pedir { font-size: var(--fs-xs); color: var(--ink-2); }
 .conc-obj { color: var(--ink-2); font-weight: 400; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .conc .conc-add { background: transparent; border-style: dashed; }
-
-/* Tiradas: media esperada, discreta */
 .rl-btn { position: relative; }
 .rl-avg { margin-left: auto; align-self: center; padding-left: 10px; font: 400 var(--fs-xs) / 1.2 var(--sans); font-style: normal; color: var(--ink-2); white-space: nowrap; }
 .rl-vsmedia { font-size: var(--fs-xs); color: var(--ink-2); margin-left: 6px; }
 .rl-vsmedia.sube::before { content: "▲ "; color: var(--sc-nig); } .rl-vsmedia.baja::before { content: "▼ "; color: var(--sc-evo); }
-
-/* Ficha de personaje: la sección de conjuros aparece solo si hace falta */
 .conj-toggle { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 12px; font-size: var(--fs-s); color: var(--ink-2); border-style: dashed; }
 .conj-toggle .icon { width: 14px; height: 14px; }
-
-/* Criaturas del conjuro y bloque de estadísticas */
 .sp-cria .cr-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
 .cr-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: var(--r-pill); font-size: var(--fs-s);
   border: 1px solid color-mix(in srgb, var(--sc, var(--gold)) 35%, var(--line)); background: var(--raised); }
@@ -329,22 +296,17 @@ dialog#retDlg { width: min(460px, 94vw); }
 .sb h5 { margin: 10px 0 2px; padding-bottom: 2px; font: 600 var(--fs-s) / 1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--sc, var(--ink));
   border-bottom: 1px solid color-mix(in srgb, var(--sc, var(--gold)) 30%, transparent); }
 @media (max-width: 420px) { .sb .sb-car { grid-template-columns: repeat(3, 1fr); row-gap: 8px; } }
-
-/* Portada: clases de prueba bajo su propio botón */
 .l-pruebas-nota { width: min(720px, 100%); margin: -4px auto 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
   text-align: center; font-size: var(--fs-s); color: var(--ink-2); }
 .l-pruebas-nota button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-size: var(--fs-xs); }
 .l-pruebas-nota .gi, .l-pruebas-nota .icon { width: 16px; height: 16px; }
 .l-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .l-foot .gi { width: 18px; height: 18px; }
-
-/* Bestiario: perfil importado de un libro */
 .bx-perfil { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 4px; padding: 10px 12px; border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); background: var(--gold-soft); }
 .bx-perfil > .gi { width: 26px; height: 26px; color: var(--gold); }
 .bx-perfil span { display: grid; flex: 1 1 180px; } .bx-perfil small { color: var(--ink-2); font-size: var(--fs-xs); }
 .bx-perfil button { min-height: 32px; font-size: var(--fs-xs); }
-/* Formas de bestia */
 .fm-list li { display: flex; align-items: stretch; gap: 6px; } .fm-list .bib-it { flex: 1; }
 .fm-star { min-width: 44px; font-size: 20px; line-height: 1; color: var(--ink-3); border: 1px dashed var(--line); background: transparent; border-radius: 10px; }
 .fm-list .fm-it .fm-star[aria-pressed="true"]:not(.dockbtn) { color: var(--gold); border-style: solid; border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); }
@@ -354,8 +316,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .fm-mano summary { cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; min-height: 36px; }
 .fm-mano .frow { margin-top: 8px; } .fm-mano > button { margin-top: 10px; }
 .fm-list div.bib-it { cursor: default; }
-
-/* ------------------------------ «En juego» ------------------------------ */
 .ej:empty { display: none; }
 .ej { margin: var(--s5) 0 var(--s4); }
 .ej-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 2px 10px;
@@ -389,7 +349,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 :root[data-theme="light"] .ej-num { color: var(--gold) !important; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .ej-num { color: var(--gold) !important; } }
 .ej-num { font: 700 var(--fs-s) / 1 var(--display); color: var(--gold-2); padding: 4px 8px; border-radius: var(--r-pill); border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); background: var(--gold-soft); white-space: nowrap; }
-/* usos de un rasgo: solo se muestran; se marcan en la tarjeta del recurso (el toque lleva hasta ella) */
 .ej-usos { min-height: 30px; padding: 0 10px; gap: 4px; border-radius: var(--r-pill); font: 700 var(--fs-s) / 1 var(--display); color: var(--ink);
   background: transparent; border: 1px dashed color-mix(in srgb, var(--gold) 45%, var(--line)); white-space: nowrap; }
 .ej-usos small { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); }
@@ -402,12 +361,9 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ej-filtro { margin: 12px 0 2px; width: fit-content; max-width: 100%; }
 .ej-main small { display: inline-flex; align-items: center; gap: 5px; }
 .ej-ico { width: 14px; height: 14px; opacity: .8; flex: none; }
-/* color de la fuente: clase en dorado, subclase en el tono de la subclase, especie en verde, dotes en violeta */
 .ej-it.f-especie::before { background: var(--sc-con); opacity: .8; }
 .ej-it.f-dote::before { background: var(--sc-ilu); opacity: .8; }
 .ej-it.o-multiclase::before { background: var(--gold-2); opacity: .45; }
-
-/* ---------------------- ficha: multiclase y dotes ---------------------- */
 .mc-list { display: grid; gap: 8px; margin-top: 10px; }
 .mc-row { grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(150px, auto) auto; align-items: end; padding: 10px 10px 8px; border: 1px dashed color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: 12px; }
 .mc-del { align-self: center; min-width: 40px; min-height: 40px; font-size: 20px; }
@@ -422,8 +378,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .dote-chip small { color: var(--ink-3); font-size: var(--fs-xs); }
 .dote-add { display: flex; gap: 8px; } .dote-add input { flex: 1; min-width: 0; }
 @media (max-width: 640px) { .mc-row { grid-template-columns: 1fr 1fr; } .mc-row .mc-del { justify-self: end; } }
-
-/* ------------------------------ inventario ------------------------------ */
 .inv-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 2px 0 12px; }
 .inv-card { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 10px 12px; border-radius: 12px; text-align: left;
   border: 1px solid color-mix(in srgb, var(--gold) 16%, var(--line-soft)); background: var(--raised); color: var(--ink); font: inherit; }
@@ -462,8 +416,6 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
 .inv-mon { align-items: flex-start; justify-content: flex-start; }
 .inv-form-acts .gold { margin-left: auto; }
 @media (max-width: 520px) { .inv-sum { grid-template-columns: 1fr 1fr; } .inv-card b { font-size: 20px; } .inv-acts { width: 100%; justify-content: flex-end; } }
-
-/* ------------------------ selector de subclase ------------------------ */
 .scp { position: relative; display: flex; align-items: center; }
 .scp input { width: 100%; padding-left: 50px; padding-right: 42px; }
 .scp-sello { --sh: var(--acc-h); --ss: 30%; position: absolute; left: 8px; z-index: 1; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; pointer-events: none;
@@ -499,8 +451,6 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
 .scp-info:hover, .scp-info:focus-visible { background: hsl(var(--sh) var(--ss) 45% / .3); outline: none; }
 .scp-card.on + .scp-info { bottom: 8px; }
 .scp-ok { position: absolute; right: 12px; top: 8px; }
-
-/* resumen de clase o subclase */
 #fichaDlg.rz { --sh: 40; --ss: 50%; }
 #fichaDlg.rz .fi-ico { color: hsl(var(--sh) var(--ss) 66%); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .3), transparent 72%); }
 #fichaDlg.rz .dhead { background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent); }
@@ -522,8 +472,6 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
 .rz-r .sp-text { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
 .rz-conj { display: grid; gap: 6px; margin: 0; }
 .rz-conj div { display: flex; gap: 10px; } .rz-conj dt { flex: none; min-width: 64px; font-weight: 600; color: hsl(var(--sh) var(--ss) 66%); } .rz-conj dd { margin: 0; }
-
-/* ------------------------- selector de clase ------------------------- */
 .ccp { position: relative; }
 .ccp-nativo { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 .ccp-btn { --sh: 40; --ss: 50%; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 6px 10px 6px 8px; text-align: left; font: inherit; color: var(--ink);

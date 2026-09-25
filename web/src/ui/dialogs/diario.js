@@ -1,8 +1,3 @@
-/**
- * Diario de sesión del personaje. Lista de sesiones con «Para recordar» arriba y editor de cada sesión:
- * notas rápidas (nombre, suceso, pendiente, nota) que se tachan al cumplirse o se subrayan para destacarlas,
- * y una crónica libre. Los textos se guardan mientras escribes.
- */
 import { esc } from '../../core/util.js';
 import { TIPOS, diarioDe, nuevaSesion, nuevaNota, paraRecordar, buscarDiario, fechaLarga } from '../../domain/diario.js';
 import { $, on } from '../dom.js';
@@ -18,7 +13,7 @@ import { iconoDano } from './tiradas.js';
 import { biblioteca, criaturaImportada } from '../../domain/catalogo.js';
 import { aBestiario, vdTexto } from '../../domain/monstruos.js';
 import { abrirCriatura } from './biblioteca.js';
-import { TIPOS_CRIATURA, DANOS, ESTADOS, SALVACIONES, AMENAZAS, ESTADO_CRIATURA, REL_DANO, CICLO_DANO, REL_CONJ, bestiarioDe, nuevaCriatura, criatura, buscarCriaturas, resumenCriatura } from '../../domain/bestiario.js';
+import { TIPOS_CRIATURA, DANOS, ESTADOS, SALVACIONES, AMENAZAS, ESTADO_CRIATURA, REL_DANO, CICLO_DANO, bestiarioDe, nuevaCriatura, criatura, buscarCriaturas } from '../../domain/bestiario.js';
 import { tiradasConjuro } from '../../domain/catalogo.js';
 import { marcarNota, quemar } from '../magia.js';
 
@@ -72,7 +67,6 @@ function sesion() {
     <label class="f wide" style="margin-top:14px">Crónica de la sesión<textarea id="diTxt" rows="9" placeholder="Qué pasó, quién apareció, qué dijo el DJ…">${esc(s.texto)}</textarea></label>`;
   $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrar">Borrar sesión</button><span class="spacer"></span><button type="button" data-di="volver">Sesiones</button><button type="button" data-close>Cerrar</button>';
 }
-/* ------------------------------ bestiario ------------------------------ */
 const pestanas = () => `<div class="seg di-seg" role="tablist" aria-label="Diario"><button type="button" role="tab" aria-selected="${V.vista === 'lista'}" data-di="lista">${icon('quill')}Sesiones</button>
   <button type="button" role="tab" aria-selected="${V.vista === 'bestiario'}" data-di="bestiario">${gi('bestia')}Bestiario<small>${bestiarioDe(ch()).criaturas.length || ''}</small></button></div>`;
 const chipsRel = c => DANOS.filter(d => c.danos[d]).map(d => `<span class="bx-mini rel-${c.danos[d]}" title="${REL_DANO[c.danos[d]]} al ${d}">${iconoDano(d)}</span>`).join('');
@@ -93,7 +87,6 @@ function bestiario() {
   $('#diBody').innerHTML = h;
   $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" data-close>Cerrar</button>';
 }
-/** Conjuros del libro que hacen daño o piden salvación: son los que merece la pena anotar. */
 function conjurosUtiles(c) {
   const out = [], vistos = new Set();
   for (const e of c.book) { const s = S.db.catalog[e.sid]; if (!s || vistos.has(s.id)) continue; vistos.add(s.id);
@@ -110,7 +103,6 @@ function ficha() {
     return `<li class="bx-cj ${rel}"><span class="bx-cjn"><b>${esc(u.s.es)}</b><small>${u.s.level ? 'Nivel ' + u.s.level : 'Truco'}${u.tipos.length ? ' · ' + u.tipos.map(esc).join(', ') : ''}${aviso ? ` · <span class="rel-${aviso}">${REL_DANO[aviso].toLowerCase()}</span>` : ''}</small></span>
       <span class="seg xs">${[['eficaz', 'Funcionó'], ['ineficaz', 'No funcionó']].map(([v, t]) => `<button type="button" aria-pressed="${rel === v}" data-bxcj="${u.s.id}" data-v="${v}">${t}</button>`).join('')}</span></li>`; };
   const sesiones = diarioDe(c).sesiones.filter(s => x.sesiones.includes(s.id));
-  // perfil de un libro importado: se sugiere al escribir el nombre y rellena lo que se sabe de la criatura
   const perfiles = biblioteca().criaturas, pf = criaturaImportada(x.perfil || x.nombre);
   const perfilHtml = pf ? `<div class="bx-perfil">${gi('criatura')}<span><b>${esc(pf.nombre)}</b><small>${esc(pf.tipo)}${pf.vdNum != null ? ` · VD ${vdTexto(pf.vdNum)}` : ''} · CA ${pf.ca ?? '—'} · PG ${pf.pgMedia ?? '—'}</small></span>
       <button type="button" data-bxperfil="${esc(pf.clave)}">Ver perfil</button>${x.perfil === pf.clave ? '' : `<button type="button" class="gold" data-bxrellenar="${esc(pf.clave)}">Rellenar con su perfil</button>`}</div>`
@@ -147,7 +139,6 @@ function anadir() {
   S.edit(() => { ses().notas.unshift(nt); }); haptic();
   sesion(); $('#diNota').focus(); marcarNota(nt.id, 'nueva');
 }
-/** Tachar / subrayar desde la tarjeta «Para recordar» de la hoja. */
 export function accionNota(store, sid, nid, act) {
   let activa = false;
   store.edit((db, c) => { const s = diarioDe(c).sesiones.find(x => x.id === sid), n = s?.notas.find(x => x.id === nid); if (!n) return;
@@ -173,7 +164,6 @@ export function init(store) {
   on(root, 'click', '[data-bxrellenar]', (e, b) => {
     const pf = criaturaImportada(b.dataset.bxrellenar); if (!pf) return;
     const d = aBestiario(pf);
-    // lo anotado a mano se respeta; el perfil completa lo que falte
     conCriatura(x => { x.perfil = pf.clave; x.tipo ||= d.tipo; x.ca ||= d.ca; x.pg ||= d.pg; x.danos = { ...d.danos, ...x.danos }; x.estados = [...new Set([...x.estados, ...d.estados])]; x.salv = { ...d.salv, ...x.salv }; });
     toast(`${esc(pf.nombre)}: tipo, CA, PG, daños, estados y salvaciones rellenados con su perfil.`);
   });
@@ -215,6 +205,5 @@ export function init(store) {
     if (t.id === 'diTxt') { s.texto = t.value; S.touch(); }
     if (t.id === 'diFecha' && t.value) { s.fecha = t.value; S.touch(); }
   });
-  // al cerrar, la hoja refleja lo apuntado («Para recordar»)
   root.addEventListener('close', () => S.emit('diario'));
 }

@@ -1,4 +1,3 @@
-/* ------------------------------ recursos ------------------------------ */
 .resources { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--s2); margin: var(--s3) 0 var(--s2); }
 .res { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); padding: 12px 14px; box-shadow: var(--shadow-1);
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font: 400 var(--fs-s) / 1.4 var(--sans); }
@@ -29,16 +28,12 @@
 .aa-lv { font: 700 15px / 1.3 var(--serif); color: var(--gold); }
 .aa-nm { font: 400 15px / 1.3 var(--serif); }
 .aa-note { font-size: var(--fs-xs); color: var(--ink-2); font-style: italic; margin-left: 6px; }
-
-/* ------------------------------ leyenda ------------------------------ */
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: var(--s4) 0 var(--s2); font: 400 var(--fs-xs) / 1.4 var(--sans); color: var(--ink-2); }
 .legend .howto { flex-basis: 100%; font-size: var(--fs-s); color: var(--ink); }
 .legend details summary { cursor: pointer; color: var(--ink-2); list-style: none; }
 .legend details summary::-webkit-details-marker { display: none; }
 .legend .keys { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; }
-
-/* ------------------------------ niveles ------------------------------ */
-.level { margin-top: var(--s5); content-visibility: auto; contain-intrinsic-size: auto 600px; overflow-clip-margin: var(--s7); }  /* margen para el velo de la franja de nivel */
+.level { margin-top: var(--s5); content-visibility: auto; contain-intrinsic-size: auto 600px; overflow-clip-margin: var(--s7); }
 .lvl-head { position: sticky; top: calc(var(--sat) + var(--appbar-h, 104px)); z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 10px 2px 8px; }
 .lvl-num { font: 700 38px / .9 var(--serif); color: var(--gold); min-width: 30px; text-shadow: 0 0 22px var(--glow); }
@@ -50,8 +45,6 @@ body.editing .addrow { display: inline-flex; align-items: center; gap: 6px; }
 .list { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); box-shadow: var(--shadow-1); overflow: hidden; }
 .list-head { display: none; }
 .empty-row { padding: 14px 16px; color: var(--ink-2); font: 400 var(--fs-s) / 1.4 var(--sans); }
-
-/* ------------------------------ fila de conjuro ------------------------------ */
 .spell { --sc: var(--sc-none); position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-areas: "prep name" "prep meta" "prep src";
   padding: 12px 14px 12px 6px; border-top: 1px solid var(--line-soft); }
 .spell:first-child { border-top: 0; }
@@ -95,8 +88,6 @@ body.editing .bd { cursor: pointer; }
 
 .free-use { display: inline-flex; align-items: center; gap: 6px; font: 700 var(--fs-xs) / 1 var(--sans); color: var(--gold); }
 .free-use .tick { width: 20px; height: 20px; border-color: var(--gold); border-radius: 6px; }
-
-/* edición */
 body.editing [contenteditable="true"] { background: var(--surface-2); border-radius: 4px; outline: 1px dashed var(--line); outline-offset: 1px; min-width: 16px; display: inline-block; }
 .edit-only { display: none !important; }
 body.editing .edit-only { display: flex !important; }
@@ -110,8 +101,6 @@ body.editing .edit-only { display: flex !important; }
 .nochar { padding: 60px 10px; text-align: center; }
 .nochar h2 { font: 500 var(--fs-2xl) / 1.1 var(--serif); margin: 0 0 8px; }
 .nochar p { font-family: var(--sans); color: var(--ink-2); max-width: 44ch; margin: 0 auto 18px; }
-
-/* ------------------------------ escritorio / tableta horizontal: tabla ------------------------------ */
 @media (min-width: 900px) {
   .list-head, .spell { grid-template-columns: 44px minmax(190px, 2.3fr) 1.1fr 1fr .8fr 1fr .6fr 1.5fr 1.3fr;
     grid-template-areas: none; column-gap: 12px; align-items: start; }

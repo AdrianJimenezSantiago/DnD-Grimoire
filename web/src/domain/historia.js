@@ -1,12 +1,6 @@
-/**
- * Trasfondo o historia de un personaje, en Markdown sencillo:
- *   # Título · ## Capítulo · ### Apartado · *subtítulo en cursiva* · --- (cambio de escena) · > cita
- * Incluye conversores desde texto plano y desde las líneas de un PDF. Puro.
- */
 const sinTildes = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 export const slug = s => sinTildes(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'capitulo';
 
-/** Capítulos para el índice. */
 export function capitulos(md) {
   const out = [], vistos = new Map();
   for (const l of String(md || '').split('\n')) {
@@ -21,7 +15,6 @@ const FIN = /[.!?»”…:)]$/;
 const esMayus = s => { const l = s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, ''); return l.length >= 3 && l === l.toUpperCase(); };
 const titular = s => { const t = s.toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); };
 
-/** Texto plano (líneas partidas a un ancho) → Markdown con párrafos, títulos y separadores. */
 export function textoAMarkdown(texto) {
   const lineas = String(texto).replace(/\r/g, '').split('\n').map(l => l.replace(/\s+$/, ''));
   const ancho = Math.max(40, ...lineas.map(l => l.length).sort((a, b) => b - a).slice(0, Math.max(1, lineas.length >> 3)));
@@ -37,7 +30,7 @@ export function textoAMarkdown(texto) {
       continue;
     }
     if (out.length && /^##\s/.test(out[out.length - 1]) && !par && l.length < 70 && FIN.test(l)) { out.push(`*${l}*`); continue; }
-    if (par && /:$/.test(par) && /^[«"“]/.test(l)) cerrar();          // cita tras dos puntos: párrafo propio
+    if (par && /:$/.test(par) && /^[«"“]/.test(l)) cerrar();
     par = par ? (par.endsWith('-') ? par.slice(0, -1) + l : par + ' ' + l) : l;
     if (/^[«“]/.test(par) && /[»”][.,]?$/.test(l)) { cerrar(); continue; }
     if (FIN.test(l) && l.length < ancho * 0.85) cerrar();
@@ -47,10 +40,6 @@ export function textoAMarkdown(texto) {
   return out.join('\n\n').replace(/\n\n---\n\n(##)/g, '\n\n$1');
 }
 
-/**
- * Páginas de un PDF ([{items:[{s,x,y,h}], alto}]) → Markdown.
- * Quita cabeceras y pies repetidos, detecta títulos por tamaño y párrafos por separación vertical.
- */
 export function pdfAMarkdown(paginas) {
   const clave = s => s.replace(/\d+/g, '#').replace(/\s+/g, ' ').trim();
   const lineasDe = pg => {
@@ -59,7 +48,6 @@ export function pdfAMarkdown(paginas) {
     return L.map(l => ({ ...l, s: l.s.replace(/\s+/g, ' ').trim() }));
   };
   const pags = paginas.map(lineasDe);
-  // Cabeceras y pies: solo cuentan las líneas del borde superior o inferior de cada página que se repiten
   const borde = L => { if (!L.length) return new Set(); const ys = L.map(l => l.y), top = Math.max(...ys), bot = Math.min(...ys), m = (top - bot) * 0.07 + 1;
     return new Set(L.filter(l => l.y >= top - m || l.y <= bot + m)); };
   const bordes = pags.map(borde), rep = new Map();

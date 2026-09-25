@@ -1,19 +1,10 @@
-/**
- * Estado único de la app (patrón Store + Command).
- *
- * Toda mutación pasa por aquí:
- *   act(texto, fn)  acción de juego: se anota en el historial del personaje y se puede deshacer.
- *   edit(fn)        edición de datos: se puede deshacer, pero no se anota.
- *   touch()         cambio ya aplicado que no necesita repintar (texto mientras se escribe).
- * Cada cambio guarda con retardo y avisa a los suscriptores (la vista repinta lo que cambió).
- */
 import { clone, uid } from './util.js';
 
 const MAX_HIST = 60, MAX_LOG = 120;
 
 export function createStore({ storage, key, db }) {
   const listeners = new Set();
-  const hist = [];              // [{id, before}] instantáneas en memoria para deshacer
+  const hist = [];
   let timer = null, dirty = false;
 
   const S = {
@@ -44,11 +35,9 @@ export function createStore({ storage, key, db }) {
       return { id: null, before };
     },
     touch() { S.save(); },
-    /** Anota en el historial algo que no cambia la hoja (una tirada, por ejemplo). */
     note(text) { const ch = S.cur(); if (!ch) return; ch.play.log.push({ id: uid('n'), t: Date.now(), x: String(text) }); if (ch.play.log.length > MAX_LOG) ch.play.log.splice(0, ch.play.log.length - MAX_LOG); S.save(); },
     replace(db) { const before = clone(S.db); S.db = db; S.save(); S.emit('replace'); return { id: null, before }; },
 
-    /** Vuelve al estado anterior a una acción (y descarta todo lo posterior). */
     undo(h) {
       const i = hist.findIndex(x => x.before === h.before);
       if (i >= 0) hist.length = i;

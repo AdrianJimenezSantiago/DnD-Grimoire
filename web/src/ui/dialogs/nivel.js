@@ -1,9 +1,5 @@
-/**
- * Subida de nivel guiada. Máquina de pasos: cada paso se decide a partir de lo que cambia
- * (subclase, mejora, libro, experto, preparados, trucos) y nada se guarda hasta confirmar.
- */
 import { clone, esc, joinY, norm } from '../../core/util.js';
-import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE, requisitosMulticlase } from '../../domain/reglas2024.js';
+import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas2024.js';
 import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
 import { allSpellItems, biblioteca, compendio, itemMeta, itemToSid, listFilter } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
@@ -20,9 +16,7 @@ let S, LV = null;
 const dlg = () => $('#lvlDlg');
 const TITLE = { clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
 const char = () => S.db.chars.find(c => c.id === LV.id);
-/** La clase en la que se sube: la principal, una de multiclase o una nueva (nivel 0 → 1). */
 const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase === LV.clase); return c || { clase: LV.clase, subclase: '', nivel: 0, principal: false, nueva: true }; };
-/** Lista de conjuros de la clase en la que se sube (el Caballero y el Embaucador arcanos usan la de mago). */
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
 
 function draft() {
@@ -42,7 +36,6 @@ function plan() {
   const vista = vistaClase(d, { clase: o.clase, subclase: LV.subclase, nivel: to }), sch = savantSchool(vista);
   Object.assign(LV, { A, B, d, sch,
     o, vista, lista: listaDe(o.clase, LV.subclase),
-    // un mago nuevo (también por multiclase) empieza con 6 conjuros en el libro; después, 2 por nivel
     nLibro: o.clase === 'Mago' ? (to === 1 ? 6 : 2) : 0,
     nSavant: !sch ? 0 : (to === 3 ? 2 : (B.maxSlot > A.maxSlot ? 1 : 0)),
     savantMax: to === 3 ? 2 : B.maxSlot, savantExact: to !== 3,
@@ -62,7 +55,6 @@ export function openLevelUp() {
   elegirClase(ch.clase);
   render(); openSheet(dlg());
 }
-/** Cambia la clase en la que se sube y reinicia lo que depende de ella. */
 function elegirClase(clase) {
   LV.clase = clase; const o = objetivo();
   Object.assign(LV, { to: o.nivel + 1, subclase: o.subclase || '', asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [] });

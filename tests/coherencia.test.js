@@ -24,7 +24,6 @@ test('validación: componentes y escuelas siempre válidos', () => {
   assert.equal(campo('comp', '').valor, null); assert.match(campo('comp', '').aviso, /al menos un componente/);
   assert.equal(escuelaOficial('Ilusión'), 'Ilusionismo'); assert.equal(escuelaOficial('evoc.'), 'Evocación'); assert.equal(escuelaOficial('xyz'), '');
   assert.equal(campo('escuela', 'patata').valor, null);
-  // el compendio, ya limpio, solo usa las ocho escuelas y siempre tiene componentes
   for (const x of conjuros) { assert.ok(SCHOOLS.includes(x.esc), x.es); assert.ok(componentes(x.co), x.es); }
 });
 test('validación: los datos guardados se corrigen al cargar', () => {
@@ -61,9 +60,8 @@ test('criaturas: los espíritus escalan con el espacio y usan tu ataque y tu CD'
   assert.match(perfilDe('dragon', { n: 5, cd: 15 }).acciones[2][1], /CD 15/);
   assert.equal(perfilDe('celestial', { n: 5, v: 'defensor' }).ca, 18);
   assert.equal(perfilDe('corcel', { n: 4, v: 'feérico' }).vel, '18 m, volar 18 m');
-  assert.equal(perfilDe('elemental', { n: 1 }).n, 4);   // nunca por debajo del nivel del conjuro
+  assert.equal(perfilDe('elemental', { n: 1 }).n, 4);
   for (const [id, e] of Object.entries(ESPIRITUS)) for (const v of e.variantes.length ? e.variantes : [undefined]) assert.ok(perfilDe(id, { n: 9, v }).acciones.length, `${id} ${v}`);
-  // todos los conjuros con criaturas existen en el compendio
   for (const n of ['Encontrar familiar', 'Hallar corcel', 'Corcel fantasma', 'Animar a los muertos', 'Invocar bestia', 'Invocar feérico', 'Invocar muerto viviente', 'Invocar aberración',
     'Invocar autómata', 'Invocar elemental', 'Invocar celestial', 'Invocar dragón', 'Invocar infernal']) { assert.ok(conjuros.some(c => c.es === n), n); assert.ok(criaturasDe(n), n); }
 });

@@ -1,4 +1,3 @@
-/** Hojas modales con animación de entrada y salida, y pila para el botón Atrás. */
 import { reducedMotion } from './fx.js';
 const stack = [];
 export function openSheet(d) {
@@ -16,8 +15,6 @@ export function closeSheet(d) {
 }
 export const topSheet = () => stack[stack.length - 1] || null;
 
-/* Deslizar hacia abajo para cerrar: en el móvil las hojas salen desde abajo y el asa (y la cabecera) se arrastran como en
-   cualquier app. Si no se baja lo bastante, la hoja vuelve a su sitio. */
 const comoHoja = typeof matchMedia === 'function' ? matchMedia('(max-width: 700px)') : { matches: false };
 const NO_ARRASTRA = 'button, input, select, textarea, a, label, [contenteditable], [role="tab"], [role="radio"], .seg, .tr-toc, .bib-tabs';
 let drag = null;
@@ -43,8 +40,6 @@ const soltar = e => {
 document.addEventListener('pointerup', soltar);
 document.addEventListener('pointercancel', soltar);
 
-/* Cambio de vista dentro de una hoja (pestañas, abrir una sesión o una criatura, volver): el contenido nuevo entra con un
-   fundido corto en lugar de aparecer de golpe. Se engancha en captura, antes de que el diálogo repinte. */
 const VISTA = '[role="tab"], [data-abrir], [data-bx], [data-di="volver"], [data-di="lista"], [data-di="bestiario"], [data-di="nueva"], [data-di="nuevacr"]';
 document.addEventListener('click', e => {
   const t = e.target.closest?.(VISTA), d = t?.closest('dialog[open]'); if (!d || reducedMotion() || t.getAttribute('aria-selected') === 'true') return;

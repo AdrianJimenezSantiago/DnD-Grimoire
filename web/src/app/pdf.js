@@ -1,7 +1,3 @@
-/**
- * Apertura de PDF con pdf.js, compartida por el importador del manual y el de historias.
- * Se carga bajo demanda. En el archivo único de Windows (file://) pdf.js trabaja en el hilo principal.
- */
 import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -15,7 +11,6 @@ export async function abrirPdf(file) {
   const data = new Uint8Array(await file.arrayBuffer());
   return pdfjs.getDocument({ data, disableFontFace: true, isEvalSupported: false }).promise;
 }
-/** Todas las páginas como fragmentos sencillos {s,x,y,h,w}. */
 export async function paginasSimples(file, onProgress = () => {}) {
   const doc = await abrirPdf(file), out = [];
   for (let p = 1; p <= doc.numPages; p++) {

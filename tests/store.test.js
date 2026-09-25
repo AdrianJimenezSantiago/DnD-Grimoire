@@ -12,7 +12,7 @@ test('act anota en el historial del personaje y se puede deshacer', () => {
   S.act('Contraconjuro', (db, ch) => { ch.play.used[3] = 1; });
   assert.equal(S.cur().play.log.length, 2); assert.equal(renders, 2);
   assert.ok(S.undoable(h1.id));
-  S.undo(h1);                                   // deshace esta y la posterior
+  S.undo(h1);
   assert.deepEqual(S.cur().play.used, {}); assert.equal(S.cur().play.log.length, 0);
   assert.equal(S.history().length, 0);
 });
@@ -33,7 +33,7 @@ test('fromStored: v2, v1 y datos corruptos', () => {
   assert.equal(fromStored(v2, null).migrated, false);
   const v1 = JSON.stringify({ meta: { nombre: 'Theo', sub: 'Mago adivino, nivel 6', cd: '16' }, levels: [{ level: 1, slots: 4, spells: [{ es: 'Escudo', en: 'Shield', prep: true }] }] });
   const r = fromStored(null, v1); assert.equal(r.migrated, true); assert.equal(r.db.chars[0].extraCD, 1);
-  const vacio = fromStored('{roto', null).db;            // la app empieza sin personajes
+  const vacio = fromStored('{roto', null).db;
   assert.equal(vacio.chars.length, 0); assert.equal(vacio.activeId, null);
   assert.equal(fromStored(null, null).db.chars.length, 0);
 });

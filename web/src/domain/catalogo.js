@@ -1,8 +1,3 @@
-/**
- * Catálogo compartido de conjuros y compendio (va dentro de la app):
- * nombres y datos técnicos oficiales del Manual del Jugador 2024, texto en inglés del SRD 5.2 (CC-BY 4.0)
- * y, si el usuario lo importa desde su PDF, las descripciones del manual (se guardan solo en su dispositivo).
- */
 import { esc, norm, uid } from '../core/util.js';
 import { tiradasDe } from './tiradas.js';
 import { formasDeEstado } from './glosario.js';
@@ -13,8 +8,6 @@ import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
 let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null, SUBS = {};
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
-/** Carga el compendio desde una URL (Android/web) o desde datos ya incluidos (archivo único de Windows). */
-/* ---- libros importados: se suman al compendio base ---- */
 let LIBROS = [];
 function reindexar() {
   const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
@@ -24,13 +17,11 @@ function reindexar() {
   (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
   itemsMemo = null; tirMemo.clear();
 }
-/** Datos técnicos coherentes aunque vengan de un PDF leído con OCR («18 m |», «36m *», escuela abreviada…). */
 const LIMPIOS = new WeakSet();
 function limpiarDatos(x) {
   if (LIMPIOS.has(x)) return; LIMPIOS.add(x);
   x.a = alcance(x.a); x.du = duracion(x.du); x.co = componentes(x.co) || x.co; x.esc = escuelaOficial(x.esc) || x.esc;
 }
-/** Aplica los libros importados: textos, conjuros nuevos, glosario y subclases (el primero que aporta algo manda). */
 export function setLibros(libros) {
   LIBROS = libros || [];
   const textos = {}, glos = [], vistosG = new Set(); SUBS = {};
@@ -40,20 +31,14 @@ export function setLibros(libros) {
     for (const sc of lb.subclases || []) if (sc.clase) (SUBS[sc.clase] ||= new Set()).add(sc.nombre);
   }
   setManual(textos); setGlosario(glos); reindexar();
-  // biblioteca: objetos mágicos, dotes, trasfondos y subclases (el primer libro que aporta una entrada manda)
   const junta = campo => { const m = new Map(); for (const lb of LIBROS) for (const e of lb[campo] || []) { const k = (e.clase ? e.clase + '|' : '') + e.clave; if (e.clave && !m.has(k)) m.set(k, { ...e, fuente: lb.titulo, libro: lb.id }); } return [...m.values()]; };
   BIB = { objetos: junta('objetos'), dotes: junta('dotes'), trasfondos: junta('trasfondos'), subclases: junta('subTextos'), rasgosClase: junta('rasgosClase'), especies: junta('especies'), criaturas: junta('criaturas') };
 }
 let BIB = { objetos: [], dotes: [], trasfondos: [], subclases: [], rasgosClase: [], especies: [], criaturas: [] };
-/** Perfil de criatura importado (Manual de Monstruos, apéndice B del Manual del Jugador…) por su clave o su nombre. */
 export const criaturaImportada = k => BIB.criaturas.find(c => c.clave === k) || BIB.criaturas.find(c => norm(c.nombre) === norm(k)) || null;
-/** Contenido de biblioteca de los libros importados: objetos, dotes, trasfondos y subclases. */
 export const biblioteca = () => BIB;
-export const objetoPorClave = k => BIB.objetos.find(o => o.clave === k) || null;
 export const libros = () => LIBROS;
-/** Subclases de una clase: las oficiales más las de los libros importados. */
 export const subclasesDe = clase => [...new Set([...(CLASES[clase]?.subs || []), ...(SUBS[clase] || [])])];
-/** Lo leído de un libro: textos de conjuros conocidos y conjuros nuevos con sus datos técnicos. */
 export function emparejarLibro(spells, idLibro, titulo) {
   const porClave = new Map((BASE || []).map(x => [claveEs(x.es, x.l), x]));
   const textos = {}, nuevos = [];
@@ -76,22 +61,12 @@ export async function loadSrd(fuente) {
     return true;
   } catch (e) { SRD = null; console.warn('Compendio SRD no disponible', e); return false; }
 }
-export const srdReady = () => !!SRD;
 export const compendio = () => SRD || [];
 
-/* ---- descripciones del manual importadas por el usuario ---- */
 export const setManual = m => { MANUAL = m && Object.keys(m).length ? m : null; };
 export const manualFor = x => (MANUAL && x ? MANUAL[x.k] || null : null);
 export const manualCount = () => (MANUAL ? Object.keys(MANUAL).length : 0);
 const claveEs = (nombre, nivel) => `${norm(nombre).replace(/[^a-z0-9]+/g, ' ').trim()}|${nivel}`;
-/** Empareja lo leído del PDF con el compendio. Devuelve {mapa:{k:{d,h}}, sinPareja:[nombres]} */
-export function emparejarManual(spells) {
-  const porClave = new Map((SRD || []).map(x => [claveEs(x.es, x.l), x]));
-  const mapa = {}, sinPareja = [];
-  spells.forEach(sp => { const x = porClave.get(claveEs(sp.nombre, sp.nivel)); if (x) mapa[x.k] = { d: sp.desc, h: sp.sup }; else sinPareja.push(sp.nombre); });
-  return { mapa, sinPareja };
-}
-/** Pone nombres y datos técnicos oficiales a los conjuros del catálogo enlazados con el compendio. No toca textos propios. */
 export function oficializar(db) {
   const cambios = [];
   Object.values(db.catalog).forEach(s => {
@@ -111,7 +86,6 @@ export function srdFor(s) {
   return SRDN[(ALIAS[en] || en) + '|' + s.level] || null;
 }
 
-/** Enlaza el catálogo con el compendio y rellena en español lo que siga vacío. */
 export function linkCatalog(db) {
   if (!SRD) return 0; let n = 0;
   Object.values(db.catalog).forEach(s => {
@@ -133,7 +107,6 @@ export function importSrd(db, x) {
   return id;
 }
 
-/* Lista unificada catálogo + compendio. Se memoriza: la reconstruimos solo si cambia el catálogo. */
 let itemsMemo = null, memoKey = '';
 export function allSpellItems(db) {
   const key = Object.keys(db.catalog).length + '|' + Object.values(db.catalog).reduce((a, s) => a + (s.es || '').length + s.level, 0);
@@ -152,18 +125,15 @@ export const itemToSid = (db, it) => (it.src === 'cat' ? it.s.id : importSrd(db,
 export const itemMeta = it => [it.en !== it.es ? it.en : '', it.l === 0 ? 'Truco' : 'Nivel ' + it.l, it.esc, it.ri ? 'ritual' : '', it.c ? 'concentración' : ''].filter(Boolean).map(esc).join(', ');
 export const itemTag = it => (it.src === 'srd' ? (it.x.fuente ? it.x.fuente.split(/[:(]/)[0].trim().slice(0, 18) : it.x.phb ? 'Manual' : 'SRD') : '');
 export const listFilter = (it, cls) => !cls || !it.cl || it.cl.includes(cls);
-/** Vista de un conjuro del compendio con la forma de un conjuro del catálogo (para la ficha). */
 export const srdAsSpell = x => ({ es: x.es, en: x.en, level: x.l, escuela: x.esc, tiempo: x.t, alcance: x.a, duracion: x.du, comp: x.co, coste: x.cs,
   ritual: !!x.ri, conc: !!x.c, efecto: '', desc: x.dEs || '', sup: x.hEs || '' });
 
-/* ---- glosario de reglas importado (estados, acciones…) ---- */
 let GLOS = null, RE_EST = null;
 export function setGlosario(lista) {
   GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, e])) : null; RE_EST = null;
 }
 export const glosario = () => (GLOS ? [...GLOS.values()] : []);
 export const termino = clave => GLOS?.get(clave) || null;
-/* Términos del glosario que se enlazan en los textos: los estados y una selección de reglas útiles en mesa. */
 const CURADOS = {
   'vision ciega': ['visión ciega'], 'vision verdadera': ['visión verdadera'], 'vision en la oscuridad': ['visión en la oscuridad'],
   'sentir vibraciones': ['sentir vibraciones'], 'luz brillante': ['luz brillante'], 'luz tenue': ['luz tenue'], 'oscuridad': ['oscuridad'],
@@ -188,7 +158,6 @@ export function estadosRegex() {
 const sinTildes = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ');
 export const claveDeForma = palabra => RE_EST?.formas.get(sinTildes(palabra)) || null;
 
-/* ---- tiradas de cada conjuro (texto propio > manual > traducción > SRD) ---- */
 const tirMemo = new Map();
 export function tiradasConjuro(s) {
   if (!s) return null;

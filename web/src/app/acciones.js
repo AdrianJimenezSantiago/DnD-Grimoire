@@ -1,8 +1,3 @@
-/**
- * Casos de uso de la mesa. Cada acción:
- *   1) muta el estado a través del store (queda en el historial y se puede deshacer),
- *   2) da respuesta: aviso, vibración y efecto visual.
- */
 import { esc, joinY } from '../core/util.js';
 import { perfil } from '../domain/reglas2024.js';
 import { reglas, recState, schoolMatch, recuperarEnDescanso } from '../domain/rasgos.js';
@@ -19,7 +14,6 @@ import { openRoll } from '../ui/dialogs/tiradas.js';
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
 
-/** Efectos de rasgos «al lanzar» (Adivino avezado, avisos…). */
 function castEffects(S, ch, P, s, mode, L) {
   let msg = ''; const extra = [];
   reglas(ch).filter(r => r.tipo === 'al_lanzar').forEach(r => {
@@ -106,8 +100,6 @@ export function endConc(S) {
   toast(`Concentración en ${esc(c)} terminada.`, [undoBtn(S, h)]);
 }
 
-/* ---------------- objetivos de la concentración y efectos activos ---------------- */
-/** Lleva a la casilla donde se escriben los objetivos (clave 'conc' o id de un efecto). */
 export function enfocarObjetivos(clave) {
   const i = document.querySelector(`[data-objin="${clave}"]`); if (!i) return;
   i.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => i.focus({ preventScroll: true }), 250);
@@ -165,7 +157,6 @@ export function shortRest(S, openRecovery) {
     if (r.recarga === 'corto' && st.used) bits.push(r.nombre);
     if (r.recarga === 'corto1' && st.used) bits.push(`1 de ${r.nombre}`); });
   const h = S.act(`Descanso corto${bits.length ? ': ' + bits.join(', ') : ''}`, (db, c) => {
-    // solo vuelven los de pacto: con multiclase, ese nivel puede tener también espacios normales
     if (P.pact) c.play.used[P.pact.level] = Math.max(0, (c.play.used[P.pact.level] || 0) - P.pact.n);
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
@@ -178,7 +169,6 @@ export function shortRest(S, openRecovery) {
     [rec && { label: `Usar ${rec.nombre}`, hl: true, fn: () => openRecovery(rec.id) }, undoBtn(S, h)]);
 }
 
-/* ---- recursos de rasgos ---- */
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);
 export function tickResource(S, id, i) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max), left = r.max - used, spend = i < left;

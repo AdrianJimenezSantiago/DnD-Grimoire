@@ -25,8 +25,6 @@ jobs:
           java-version: 21
           cache: gradle
 
-      # Solo lo que necesita el proyecto (compileSdk 36). El paquete «tools» ya no existe
-      # en las cmdline-tools recientes y hacía fallar la instalación por defecto.
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36'
@@ -46,9 +44,6 @@ jobs:
           npm run build:windows
           cp dist-windows/grimorio.html "grimorio-windows-1.0.${{ github.run_number }}.html"
 
-      # Libros incluidos: los PDF de tools/resources (Git LFS) se leen aquí con el mismo lector de la app y van
-      # dentro de la APK ya procesados; al arrancar, la app añade los que le falten. Se guardan en caché y solo
-      # se vuelven a leer si cambian los PDF, el lector o el compendio.
       - name: Libros incluidos (caché)
         id: libros
         uses: actions/cache@v4
@@ -56,7 +51,6 @@ jobs:
           path: libros-generados
           key: libros-${{ hashFiles('tools/resources/*.pdf', 'tools/preparar-libros.mjs', 'web/src/domain/**', 'web/public/data/compendio.json') }}
 
-      # El Manual de Monstruos está escaneado (sin texto): no se descarga (1 GB); sus criaturas van a mano en la app.
       - name: Descargar los PDF (Git LFS)
         if: steps.libros.outputs.cache-hit != 'true'
         run: git lfs pull --exclude "tools/resources/*Monstruos*"

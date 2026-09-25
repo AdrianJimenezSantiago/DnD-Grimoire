@@ -1,4 +1,3 @@
-/** Vista de la hoja. Solo pinta: los eventos viven en app/eventos.js. */
 import { esc, norm } from '../core/util.js';
 import { ABIL_NAME, perfil, sgn, clasesDe, clasesTexto } from '../domain/reglas2024.js';
 import { castSchools, castTriggerDesc, reglasVisibles, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../domain/rasgos.js';
@@ -17,7 +16,6 @@ import { rasgosEnJuego, agrupar, numerosMarciales, FUENTES } from '../domain/enJ
 import { biblioteca } from '../domain/catalogo.js';
 import { claseArmadura } from '../domain/equipo.js';
 
-/* ---------- consultas de la hoja ---------- */
 export const slotsOf = (P, n) => P.slots[n] || 0;
 export const usedOf = (ch, P, n) => Math.min(ch.play.used[n] || 0, slotsOf(P, n));
 export const freeOf = (ch, P, n) => slotsOf(P, n) - usedOf(ch, P, n);
@@ -25,14 +23,12 @@ export function firstFreeFrom(ch, P, n) { for (let L = Math.max(1, n); L <= 9; L
 export const isPrepared = e => !!(e.prep || e.always);
 export const prepCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level > 0 && e.prep && !e.always; }).length;
 export const cantCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level === 0 && !e.always; }).length;
-// «Bárbaro (Senda del fanático), nivel 8» o, con multiclase, «Bárbaro 5 (Senda del berserker) / Guerrero 3 (Campeón)»
 export const claseLinea = ch => { const cs = clasesDe(ch); return cs.length > 1 ? cs.map(c => `${c.clase} ${c.nivel}${c.subclase ? ` (${c.subclase})` : ''}`).join(' / ') : `${ch.clase}${ch.subclase ? ` (${ch.subclase})` : ''}, nivel ${ch.nivel}`; };
 export const origenLinea = ch => [ch.especie, ch.trasfondo].filter(Boolean).join(', ');
 const SC = { abj: 'abj', adi: 'adi', con: 'con', enc: 'enc', evo: 'evo', ilu: 'ilu', nig: 'nig', tra: 'tra' };
 export const schoolKey = esc2 => SC[norm(esc2).slice(0, 3)] || '';
 const lemaHtml = t => esc(t).replace(/_(.+?)_/g, '<span class="u">$1</span>');
 
-/* ---------- piezas ---------- */
 function candles(ch, P, L) {
   const s = slotsOf(P, L), free = freeOf(ch, P, L); let h = '';
   for (let i = 0; i < s; i++) {
@@ -44,7 +40,6 @@ function candles(ch, P, L) {
 function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="true"' : ''} ${attrs}>${esc(val)}</span>`; }
 
 function heroHtml(ch, P) {
-  // CA con lo equipado en el inventario (o la defensa sin armadura)
   const mods = `${P.apKey ? `${ABIL_NAME[P.apKey]} ${sgn(P.mod)}, competencia ${sgn(P.pb)}` : `Competencia ${sgn(P.pb)}`} · CA ${claseArmadura(ch).ca}`;
   const t = temaDe(ch);
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
@@ -62,25 +57,19 @@ function heroHtml(ch, P) {
       ${P.lvl < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${P.lvl + 1}</button>` : ''}
     </div>`;
 }
-/** ¿Se enseña la parte de conjuros? Si la clase o la subclase lanza, si hay conjuros en el libro o si se pidió al pie de la hoja. */
 export const conConjuros = (ch, P) => !!P.apKey || P.maxSlot > 0 || ch.book.length > 0 || !!ch.enJuego?.conjuros;
 function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
-  // un valor con texto («3 tipos de arma», «15 · 16») va en un cuerpo menor para que la placa no crezca a lo alto
   const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
-  // sin lanzamiento de clase: los números de la clase que se miran en combate (daño de furia, ataque furtivo, artes
-  // marciales…); si hay conjuros de especie o dote con su característica, primero su CD y su ataque
   if (!P.c) {
     const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }] : [];
     return [...magia, ...numerosMarciales(ch)].slice(0, 4).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
   }
-  // multiclase con distintas características de lanzamiento: una CD y un ataque por cada una («15 · 16», «Int · Car»)
   const AB = { fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' }, varias = (P.cds || []).length > 1;
   const cd = varias ? st(P.cds.map(x => x.cd).join(' · '), `CD (${P.cds.map(x => AB[x.ap]).join(' · ')})`, 'key') : st(P.cd ?? '—', 'CD de salvación', 'key');
   const at = varias ? st(P.cds.map(x => sgn(x.atk)).join(' · '), `Ataque (${P.cds.map(x => AB[x.ap]).join(' · ')})`, 'key') : st(P.atk == null ? '—' : sgn(P.atk), 'Ataque de conjuro', 'key');
-  // sin trucos en la clase (paladín, explorador) ni en el libro: en su lugar, un número de la clase
   const sinTrucos = !P.maxCant && !cc, marcial = sinTrucos ? numerosMarciales(ch).filter(n => !/^(Competencia|Dado de golpe)$/.test(n.nombre))
-    .sort((a, b) => (a.nombre === 'Maestría con armas') - (b.nombre === 'Maestría con armas'))[0] : null;   // el Aura de protección antes que la maestría
+    .sort((a, b) => (a.nombre === 'Maestría con armas') - (b.nombre === 'Maestría con armas'))[0] : null;
   return cd + at
     + (marcial ? st(esc(marcial.valor), esc(marcial.nombre)) : st(P.c?.cant ? `${cc}/${P.maxCant}` : cc, 'Trucos', P.c?.cant && cc > P.maxCant ? 'over' : ''))
     + st(P.c ? `${pc}/${P.maxPrep}` : pc, 'Preparados', P.c && pc > P.maxPrep ? 'over' : '');
@@ -91,7 +80,6 @@ function recursoHtml(ch, r) {
   const ctl = r.max <= 10
     ? `<span class="rticks">${Array.from({ length: r.max }, (_, i) => `<button type="button" class="rtick ${i >= left ? 'on' : ''}" data-rtick="${r.id}|${i}" aria-label="${esc(r.nombre)}: uso ${i + 1} ${i >= left ? 'gastado' : 'disponible'}"></button>`).join('')}</span>`
     : `<span class="rstep"><button type="button" data-rstep="${r.id}|1" aria-label="Gastar 1 de ${esc(r.nombre)}">−</button><button type="button" class="rleft" data-rset="${r.id}" aria-label="Cambiar lo que queda">${left}<small> / ${r.max}</small></button><button type="button" data-rstep="${r.id}|-1" aria-label="Recuperar 1 de ${esc(r.nombre)}">+</button></span>`;
-  // Forma salvaje: acceso directo a las formas conocidas y a las posibles según el nivel
   const formas = r.id === 'tpl:druida.forma' ? `<button type="button" class="ruse" data-cmd="formas">${gi('criatura')}Formas${(ch.formas || []).length + (ch.formasMano || []).length ? ` (${(ch.formas || []).length + (ch.formasMano || []).length})` : ''}</button>` : '';
   return `<div class="res rr ${left === 0 ? 'empty-res' : ''}" data-resid="${esc(r.id)}"><strong>${esc(r.nombre)}</strong>${ctl}${formas}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
 }
@@ -131,7 +119,6 @@ function resourcesHtml(db, ch, P) {
   reglasVisibles(ch).forEach(r => { h += r.tipo === 'recurso' ? recursoHtml(ch, r) : r.tipo === 'dados' ? dadosHtml(ch, r) : r.tipo === 'recuperar' ? recuperarHtml(ch, r) : alLanzarHtml(db, ch, r); });
   return h ? `<div class="resources">${h}</div>` : '';
 }
-/** Efectos activos: la concentración y los rasgos puestos sobre criaturas, con sus objetivos escritos a mano. */
 function efectosHtml(ch) {
   const pl = ch.play, sug = rasgosConObjetivo(ch);
   if (!pl.conc && !pl.efectos.length && !sug.length) return '';
@@ -146,12 +133,9 @@ function efectosHtml(ch) {
   return `<div class="res wide ef-card"><strong>${gi('ojo')} Efectos activos</strong>${h || '<span class="rnote">Nada activo. Marca un rasgo cuando lo uses sobre alguien, o concéntrate en un conjuro.</span>'}${add}
     ${pl.conc ? `<label class="chk-line ef-pedir"><input type="checkbox" data-pedirobj ${pl.pedirObjetivos ? 'checked' : ''}> Preguntar sobre quién al concentrarme en un conjuro con objetivos</label>` : ''}</div>`;
 }
-// Icono de la fuente de cada rasgo: el de su clase, la especie o la dote
 const iconoFuente = r => (r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, ''));
-/** «En juego»: rasgos de clases, subclases, especie y dotes agrupados por cuándo se usan, con resumen, números y recurso. */
 function enJuegoHtml(ch, P) {
   const todos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)); if (!todos.length) return '';
-  // plegada por defecto solo si la clase lanza conjuros (un truco de especie no convierte a un bárbaro en lanzador)
   const lanza = !!P.c, abierto = lanza ? !!ch.enJuego?.abierto : ch.enJuego?.abierto !== false;
   const fij = ch.enJuego?.fijados || [], hay = FUENTES.filter(([k]) => !k || todos.some(r => r.fuente === k));
   const filtro = hay.some(([k]) => k === ch.enJuego?.filtro) ? ch.enJuego.filtro : '';
@@ -198,7 +182,6 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
   const ritualOnly = ch.play.onlyPrep && L > 0 && !isPrepared(e) && s.ritual && P.ritualLibro;
   const lvlSel = editing ? `<label>nivel <select data-lvl="${bi}">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}" ${n === L ? 'selected' : ''}>${n === 0 ? 'truco' : n}</option>`).join('')}</select></label>` : '';
   const cell = (cls, v, key) => `<span class="${cls}">${editing || v ? ce(v, `${k} data-k="${key}"`, editing) : ''}</span>`;
-  // En edición, la escuela se elige de las ocho oficiales y los componentes se marcan: así los colores y los datos siempre cuadran
   const escuela = editing ? `<span class="c-school ${trig ? 'trig' : ''}"><button type="button" class="sch-pick" data-schoolpick="${bi}" aria-haspopup="menu"><i class="sch-dot" aria-hidden="true"></i>${esc(s.escuela || 'Escuela')}${icon('chevron')}</button></span>`
     : cell(`c-school ${trig ? 'trig' : ''}`, s.escuela, 'escuela');
   const comps = editing ? `<span class="c-comp comp-pick" role="group" aria-label="Componentes">${[['V', 'Verbal'], ['S', 'Somático'], ['M', 'Material']].map(([c, t]) => `<button type="button" data-comp="${bi}|${c}" aria-pressed="${(s.comp || '').split(' ').includes(c)}" title="${t}">${c}</button>`).join('')}</span>`
@@ -229,7 +212,6 @@ function levelHtml(db, ch, P, L, rows, schools, editing) {
     <div class="list"><div class="list-head"><span>Conjuro</span><span>Escuela</span><span>Lanzamiento</span><span>Alcance</span><span>Duración</span><span>Comp.</span><span>Material</span><span>Fuente y usos</span></div>${body}</div>`;
 }
 
-/* ---------- render principal ---------- */
 let lastChar = null;
 export function renderBar(S) {
   const ch = S.cur();
@@ -244,19 +226,15 @@ export function renderBar(S) {
   $('#dAdd').hidden = !S.editing;
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
-  // sin conjuros, «Solo preparados» y «Añadir conjuro» no dicen nada: se ocultan (la hoja ofrece «Añadir conjuros» al pie)
   const conj = conConjuros(ch, P);
-  // «Solo preparados» solo tiene sentido si hay conjuros de nivel 1 o más (un truco de especie no se prepara)
   const preparables = P.maxSlot > 0 || ch.book.some(e => (S.db.catalog[e.sid]?.level || 0) > 0);
   $('#bFilter').hidden = $('#dFilter').hidden = !conj || !preparables; $('#bAdd').hidden = !conj;
-  // el modo edición solo toca los conjuros: sin ellos, el botón no haría nada (el personaje se edita desde «Editar personaje»)
   $('#bEdit').hidden = $('#dEdit').hidden = !conj && !S.editing;
   if (!conj) $('#dAdd').hidden = true;
-  const tema = aplicarTema(ch);
+  aplicarTema(ch);
   patch($('#whoChip'), `${avatarHtml(ch, 'av-chip')}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
-  // en el móvil los espacios van en una sola fila que se desliza de lado: la barra no se come media pantalla
   if (h) h = `<span class="sb-slots">${h}</span>`;
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong>${ch.play.concObj.length ? `<span class="conc-obj">sobre ${esc(ch.play.concObj.join(', '))}</span>` : `<button type="button" class="conc-add" data-cmd="objetivos">¿Sobre quién?</button>`}<button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;
   patch($('#sbar'), h);
@@ -284,7 +262,6 @@ export function renderSheet(S) {
   patch($('#enjuego'), enJuegoHtml(ch, P));
   const lanza = conConjuros(ch, P);
   if (!lanza) {
-    // sin ninguna fuente de conjuros: la parte de conjuros queda al pie, a un toque, por si llega por especie, dote o multiclase
     patch($('#legend'), ''); patchKeyed($('#levels'), []);
     patch($('#foot'), `<div class="foot-conj"><button type="button" class="ruse" data-cmd="verConjuros">${icon('plus')}Añadir conjuros</button><span>Por especie, dote, objeto o multiclase.</span></div>${ch.campana ? `<span>${esc(ch.campana)}</span>` : ''}`);
     return;
@@ -296,7 +273,6 @@ export function renderSheet(S) {
   for (let L = 1; L <= P.maxSlot; L++) levels.add(L);
   patchKeyed($('#levels'), [...levels].sort((a, b) => a - b).map(L => ({ key: 'L' + L, cls: 'level', html: levelHtml(db, ch, P, L, byL[L] || [], schools, editing) })));
   const foot = [ch.campana, P.c ? 'Componentes sin coste: los cubre el foco de lanzamiento' : ''].filter(Boolean);
-  // conjuros mostrados a mano y aún vacíos: se pueden volver a esconder
   const ocultar = ch.enJuego?.conjuros && !P.apKey && !P.maxSlot && !ch.book.length ? `<div class="foot-conj"><button type="button" class="ruse" data-cmd="verConjuros">Ocultar conjuros</button></div>` : '';
   patch($('#foot'), ocultar + foot.map(t => `<span>${esc(t)}</span>`).join(''));
 }

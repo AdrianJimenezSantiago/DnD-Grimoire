@@ -1,10 +1,3 @@
-/**
- * Extrae las tiradas de un conjuro a partir de su texto (español del manual o inglés del SRD).
- * Cada daño lleva su contexto: la frase de la que sale, si depende de la tirada de salvación, del ataque
- * o es automático, y la condición en la que se aplica (p. ej. «si al objetivo le falta algún punto de golpe»).
- * También reconoce la mitad del daño al superar la salvación, los dados que no son daño (el 1d4 de
- * Fragmento mental) y las frases de «si falla» / «si la supera». Heurístico pero conservador.
- */
 const TIPOS_ES = ['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'];
 const EN2ES = { acid: 'ácido', bludgeoning: 'contundente', slashing: 'cortante', cold: 'frío', fire: 'fuego', force: 'fuerza', necrotic: 'necrótico',
   piercing: 'perforante', psychic: 'psíquico', radiant: 'radiante', lightning: 'relámpago', thunder: 'trueno', poison: 'veneno' };
@@ -19,14 +12,12 @@ const RE_FALLA = /\b(?:si|cuando|en caso de que)\s+(?:la\s+|lo\s+)?(?:falla|frac
 const RE_SUPERA = /\b(?:si|cuando)\s+(?:la\s+|lo\s+)?supera|si tiene éxito|con éxito|on a successful save|if (?:it|the target|a creature) succeeds/i;
 const RE_MITAD = /mitad (?:de ese |del |de |de dicho )?daño|la mitad|half as much damage|half damage|half the damage/i;
 
-/** Frases de un texto con su posición (para situar cada dado). */
 function frases(t) {
   const out = []; const re = /[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g; let m;
   while ((m = re.exec(t))) { const lead = m[0].length - m[0].trimStart().length; out.push({ s: m[0].trim(), i: m.index + lead, f: m.index + m[0].length }); }
   return out;
 }
 const fraseEn = (F, pos) => { const k = F.findIndex(f => pos >= f.i && pos < f.f); return k < 0 ? F.length - 1 : k; };
-/** Condición que precede a los dados dentro de su frase: «Si al objetivo le falta…, sufre 1d12…». */
 function condicionDe(frase, posEnFrase) {
   const m = /\b(?:si|if)\s+([^,;]{6,120})[,;]/i.exec(frase.slice(0, posEnFrase));
   return m ? m[1].trim() : '';
@@ -42,7 +33,6 @@ export function analizarTiradas(desc = '', sup = '') {
   r.mitad = !!r.salvacion && RE_MITAD.test(t);
   r.falla = F.filter(f => RE_FALLA.test(f.s)).map(f => f.s).join(' ');
   r.supera = F.filter(f => RE_SUPERA.test(f.s)).map(f => f.s).join(' ');
-  // «debe superar una tirada de salvación de X o sufrirá…»: la propia frase es el efecto de fallar
   if (!r.falla && r.salvacion) r.falla = F.filter(f => /superar una tirada de salvaci[^.]*\bo\b|succeed on a[^.]*saving throw or/i.test(f.s)).map(f => f.s).join(' ');
 
   const usados = [], vistos = new Set();
@@ -58,8 +48,6 @@ export function analizarTiradas(desc = '', sup = '') {
   };
   for (const m of t.matchAll(new RegExp(`(\\d+)d(\\d+)(?:\\s*\\+\\s*(\\d+))?[^.;\\d]{0,25}?de daño (?:de |por )?(${TIPOS_ES.join('|')})`, 'gi'))) add(m, m[1], m[2], m[3], m[4].toLowerCase());
   for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (Acid|Bludgeoning|Slashing|Cold|Fire|Force|Necrotic|Piercing|Psychic|Radiant|Lightning|Thunder|Poison) damage/gi)) add(m, m[1], m[2], m[3], EN2ES[m[4].toLowerCase()]);
-  // Si hay salvación pero ninguna frase de daño la menciona (texto escueto), el daño principal depende de ella,
-  // salvo que sea un daño «al comenzar su turno» o por estar expuesto (Telaraña en llamas): ese es automático.
   if (r.salvacion && !r.ataque && r.danos.length && !r.danos.some(d => d.via === 'salvacion') && !RE_TURNO.test(r.danos[0].frase))
     r.danos[0].via = 'salvacion';
 
@@ -70,13 +58,11 @@ export function analizarTiradas(desc = '', sup = '') {
     const d = /(\d+)d(\d+)/.exec(cu[0]); usados.push(cu.index + (d ? cu[0].indexOf(d[0]) : 0));
   }
 
-  // Otros dados que no son daño ni curación (p. ej. «resta 1d4 a su siguiente tirada de salvación»)
   for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/g)) {
     if (usados.some(u => Math.abs(u - m.index) < 4) || r.extras.length >= 3) continue;
     const fr = F[fraseEn(F, m.index)], resto = fr.s.slice(m.index - fr.i, m.index - fr.i + 45);
     if (/^\S+(?:\s*\+\s*\d+)?[^.;\d]{0,25}?(de daño|damage)|puntos de golpe|hit points/i.test(resto)) continue;
     if (r.danos.some(d => d.n === +m[1] && d.caras === +m[2])) continue;
-    // «…sufre 1d12 en su lugar»: alternativa del daño anterior, con su condición
     if (r.danos.length && (/en su lugar|instead/i.test(fr.s) || /(?:daño|damage)[^.]{0,30}(?:aumenta|pasa|sube|increases)[^.]{0,6}(?:a|to)\s*$/i.test(fr.s.slice(0, m.index - fr.i)))) {
       const base = r.danos[r.danos.length - 1];
       r.danos.push({ ...dado(m[1], m[2], m[3]), tipo: base.tipo, frase: fr.s, via: base.via, cond: condicionDe(fr.s, m.index - fr.i) || 'en su lugar' });
@@ -95,7 +81,6 @@ export function analizarTiradas(desc = '', sup = '') {
 }
 export const tieneTiradas = r => !!(r && (r.ataque || r.danos.length || r.curacion || r.extras?.length));
 
-/** Prueba varias fuentes de texto en orden y se queda con la primera que da tiradas. */
 export function tiradasDe(fuentes) {
   let mejor = null;
   for (const [d, h] of fuentes) {
@@ -107,7 +92,6 @@ export function tiradasDe(fuentes) {
   return mejor;
 }
 
-/** Daños (o curación) escalados al nivel del personaje o del espacio. */
 export function dadosPara(r, { nivelPj = 1, nivelEspacio = null, nivelConjuro = 0 } = {}) {
   const base = r.danos.length ? r.danos : r.curacion ? [{ ...r.curacion, tipo: 'curación', via: 'auto', cond: '', frase: '' }] : [];
   const tiers = [5, 11, 17].filter(x => nivelPj >= x).length;
@@ -120,5 +104,4 @@ export function dadosPara(r, { nivelPj = 1, nivelEspacio = null, nivelConjuro = 
   });
 }
 
-/** Media esperada de n dados de c caras más un bono (2d6 + 3 → 10). */
 export const media = (n, caras, bono = 0) => n * (caras + 1) / 2 + bono;

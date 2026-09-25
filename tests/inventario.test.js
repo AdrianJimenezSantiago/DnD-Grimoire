@@ -20,28 +20,28 @@ test('inventario: lo repetido se apila, las armaduras se equipan de una en una y
   assert.equal(equipoDe(ch).objetos.find(o => o.nombre === 'Raciones (1 día)').cantidad, 5);
   const cota = anadirComun(ch, de('Cota de mallas')), cuero = anadirComun(ch, de('Armadura de cuero')), escudo = anadirComun(ch, de('Escudo'));
   alternarEquipado(ch, cota.id); alternarEquipado(ch, escudo.id); alternarEquipado(ch, cuero.id);
-  assert.deepEqual([cota.equipado, cuero.equipado, escudo.equipado], [false, true, true]);   // la nueva sustituye a la anterior; el escudo sigue
+  assert.deepEqual([cota.equipado, cuero.equipado, escudo.equipado], [false, true, true]);
   const r = equipoDe(ch).objetos.find(o => o.nombre === 'Raciones (1 día)');
   for (let i = 0; i < 7; i++) cambiarCantidad(ch, r.id, -1);
   assert.equal(r.cantidad, 0);
 });
 test('inventario: CA con armadura, escudo y defensa sin armadura', () => {
   const ch = pj(); const cota = anadirComun(ch, de('Cota de mallas')), esc = anadirComun(ch, de('Escudo'));
-  assert.equal(claseArmadura(ch).ca, 12);                            // 10 + Des 2, sin nada puesto
+  assert.equal(claseArmadura(ch).ca, 12);
   alternarEquipado(ch, cota.id); assert.equal(claseArmadura(ch).ca, 16);
   alternarEquipado(ch, esc.id); assert.equal(claseArmadura(ch).ca, 18);
-  const media = pj({ stats: { des: 18 } }); alternarEquipado(media, anadirComun(media, de('Coraza')).id); assert.equal(claseArmadura(media).ca, 16);   // 14 + máx. 2
+  const media = pj({ stats: { des: 18 } }); alternarEquipado(media, anadirComun(media, de('Coraza')).id); assert.equal(claseArmadura(media).ca, 16);
   const barb = pj({ clase: 'Bárbaro', stats: { des: 14, con: 16 } }); assert.equal(claseArmadura(barb).ca, 15);
   const monje = pj({ clase: 'Monje', stats: { des: 16, sab: 16 } }); assert.equal(claseArmadura(monje).ca, 16);
-  alternarEquipado(monje, anadirComun(monje, de('Escudo')).id); assert.equal(claseArmadura(monje).ca, 15);   // con escudo, el monje pierde su defensa
+  alternarEquipado(monje, anadirComun(monje, de('Escudo')).id); assert.equal(claseArmadura(monje).ca, 15);
 });
 test('inventario: ataque y daño de cada arma, peso, carga y monedas', () => {
   const ch = pj({ stats: { fue: 16, des: 18 } });
   assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Espada larga'))), { ataque: '+6', dano: '1d8 + 3 cortante' });
-  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Estoque'))), { ataque: '+7', dano: '1d8 + 4 perforante' });   // sutil: Destreza
+  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Estoque'))), { ataque: '+7', dano: '1d8 + 4 perforante' });
   assert.deepEqual(ataqueArma(ch, anadirComun(ch, { ...de('Arco largo'), arma: { ...de('Arco largo').arma, bono: 1 } })), { ataque: '+8', dano: '1d8 + 5 perforante' });
   const p = pj(); anadirComun(p, { ...de('Antorcha'), cantidad: 4 }); equipoDe(p).monedas.po = 100;
-  assert.equal(pesoTotal(p), 3);                                      // 4 × 0,5 + 100 monedas (1 kg)
+  assert.equal(pesoTotal(p), 3);
   assert.equal(valorMonedas({ equipo: { objetos: [], monedas: { ppt: 1, po: 2, pp: 5, pc: 30 } } }), 12.8);
   assert.equal(capacidadCarga(pj()), 120); assert.equal(capacidadCarga(pj({ especie: 'Goliat' })), 240);
   normEquipo(p); assert.equal(p.equipo.objetos.length, 1);

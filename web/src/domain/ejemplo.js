@@ -1,4 +1,3 @@
-/** Hoja original de Theo, nivel 6 (formato antiguo v1; se convierte al cargar). */
 export const HOJA_THEO = {
   meta:{nombre:'Theo', sub:'Mago adivino, nivel 6', cd:'15', ataque:'+7', mod:'+4', maxprep:'10', recup:'3'},
   levels:[

@@ -1,4 +1,3 @@
-/** Rasgos y recursos: lista con plantillas, editor de rasgos propios y recuperación de espacios. */
 import { clone, esc, uid } from '../../core/util.js';
 import { ABILS, SCHOOLS, perfil, clasesDe, vistaClase } from '../../domain/reglas2024.js';
 import { dadoRecarga, maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
@@ -17,9 +16,6 @@ import { icon } from '../icons.js';
 
 let S, RD = null, REC = null, PESTANA = 'progresion';
 
-/* ---------------- lista ---------------- */
-/* Tres sitios, tres papeles: «En juego» (en la hoja) es para usar los rasgos en la partida; aquí, «Progresión» es la referencia
-   de lo que da la clase nivel a nivel y «Recursos» ajusta lo que la hoja cuenta por ti. */
 const PESTANAS = [['progresion', 'star', 'Progresión'], ['recursos', 'sliders', 'Recursos']];
 function renderRules() {
   const ch = S.cur(), all = reglas(ch, true), tpl = all.filter(r => r.tpl), own = all.filter(r => !r.tpl);
@@ -33,7 +29,6 @@ function renderRules() {
     $('#rulesBody').innerHTML = guia + clasesDe(ch).map(c => progresionHtml(vistaClase(ch, c), clasesDe(ch).length > 1)).join('');
     return;
   }
-  // el interruptor muestra u oculta en la hoja; la plantilla sustituida por una copia tuya no tiene interruptor (manda la copia)
   const row = r => `<div class="rrow ${r.oculto || r.sustituida ? 'off' : ''}">
     ${r.sustituida ? '<span class="switch-hueco" aria-hidden="true"></span>' : `<label class="switch" title="${r.oculto ? 'Oculto en la hoja; sigue funcionando' : 'Visible en la hoja'}"><input type="checkbox" ${r.tpl ? `data-tploff="${r.id}"` : `data-ownoff="${r.id}"`} ${r.oculto ? '' : 'checked'} aria-label="Mostrar ${esc(r.nombre)} en la hoja"><span></span></label>`}
     <div class="rtxt"><b>${esc(r.nombre)}</b><span class="rtype">${TIPO_TXT[r.tipo]}${r.sustituida ? ' · sustituido por tu versión' : r.oculto ? ' · oculto en la hoja' : ''}</span><span class="rsum">${esc(ruleSummary(r))}</span></div>
@@ -43,10 +38,8 @@ function renderRules() {
       <p class="note">Se ajustan solos al subir de nivel. Oculta los que no quieras ver en la hoja: siguen contando y recuperándose igual. «Personalizar» crea una copia tuya que puedes cambiar y que sustituye a la original.</p></section>
      <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>`;
 }
-/** Progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros que dan la clase y la subclase. */
 function progresionHtml(ch, multi = false) {
   const vals = escalas(ch); if (!vals.length) return '';
-  // con multiclase, cada clase lleva su sección; los conjuros pendientes son solo los de esa clase
   const prog = progresion(ch), sc = subclaseDe(ch), auto = conjurosAutomaticos(ch), deEsta = new Set(auto.map(c => c.nombre));
   const pend = conjurosPendientes(S.db, S.cur(), compendio()).filter(c => deEsta.has(c.nombre));
   const faltan = new Set(pend.map(c => c.nombre));
@@ -59,10 +52,8 @@ function progresionHtml(ch, multi = false) {
         ${pend.length ? `<button type="button" data-rauto>Añadir los ${pend.length} que faltan al libro</button>` : '<p class="note">Todos están en tu libro, siempre preparados.</p>'}` : ''}
     </section>`;
 }
-/** Abre Rasgos; `pestana` elige «progresion» o «recursos» (si no, la última que se miró). */
 export function openRules(pestana) { if (pestana) PESTANA = pestana; renderRules(); openSheet($('#rulesDlg')); }
 
-/* ---------------- editor ---------------- */
 function openRuleForm(r, fromTpl) {
   RD = r ? clone(r) : { id: uid('r'), tipo: 'recurso', nombre: '', nota: '', maxBase: 'fijo', maxN: 1, maxAb: 'car', recarga: 'largo', dado: 'd20', nivMax: 5, escuela: '', espacioMin: 0, soloEspacio: true, efecto: 'aviso', efectoN: 5, texto: '' };
   RD._nuevo = !r || !!fromTpl; RD._tpl = fromTpl ? r.desde : null;
@@ -99,7 +90,6 @@ function renderForm() {
   h += `<div class="fsum" style="margin-top:16px"><p>${esc(ruleSummary(preview()))}</p></div>`;
   $('#ruleForm').innerHTML = h;
 }
-/** Un rasgo que no se puede usar nunca no es un rasgo: sin usos, sin dados o con una recarga imposible. */
 export function errorRasgo(r) {
   if ((r.tipo === 'recurso' && ['fijo', 'nivelx'].includes(r.maxBase)) && !(parseInt(r.maxN, 10) >= 1)) return 'Tiene que tener al menos un uso.';
   if (r.tipo === 'dados' && !(parseInt(r.maxN, 10) >= 1 && parseInt(r.maxN, 10) <= 6)) return 'Entre 1 y 6 dados.';
@@ -127,7 +117,6 @@ function saveRule() {
   toast(`«${esc(rule.nombre)}» ${nuevo ? 'añadido' : 'guardado'}.${tpl ? ' La plantilla original queda sustituida por tu versión.' : ''}`, [undoBtn(S, h)]);
 }
 
-/* ---------------- recuperar espacios ---------------- */
 export function openRecovery(id) {
   const ch = S.cur(), r = reglas(ch).find(x => x.id === id); if (!r) return;
   if (recState(ch, id).used) {
@@ -168,7 +157,6 @@ export function init(store) {
     const t = ev.target;
     if (!t.dataset.tploff && !t.dataset.ownoff) return;
     S.edit((db, ch) => {
-      // ocultar no apaga el rasgo: descansos, recuperación y avisos siguen igual; solo deja de pintarse en la hoja
       if (t.dataset.tploff) { const s = new Set(ch.rasgosOcultos); t.checked ? s.delete(t.dataset.tploff) : s.add(t.dataset.tploff); ch.rasgosOcultos = [...s]; }
       else { const r = ch.rasgos.find(x => x.id === t.dataset.ownoff); r.off = !t.checked; }
     });
@@ -178,7 +166,6 @@ export function init(store) {
     const ch = S.cur();
     if (b.dataset.redit) return openRuleForm(ch.rasgos.find(x => x.id === b.dataset.redit));
     if (b.dataset.rdel) { const r = ch.rasgos.find(x => x.id === b.dataset.rdel); if (!(await confirmar({ titulo: `¿Borrar «${r.nombre}»?`, texto: 'Se quita de este personaje. Puedes deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
-      // si era la versión personalizada de una plantilla, la original vuelve a funcionar
       const h = S.edit((db, c) => { c.rasgos = c.rasgos.filter(x => x.id !== r.id); if (r.desde) c.rasgosOff = c.rasgosOff.filter(x => x !== r.desde); }); renderRules(); toast(`«${esc(r.nombre)}» borrado.`, [undoBtn(S, h)]); return; }
     const t = reglas(ch, true).find(x => x.id === b.dataset.rcustom);
     openRuleForm({ id: uid('r'), tipo: t.tipo, nombre: t.nombre, nota: t.nota || '', maxBase: 'fijo', maxN: t.max, maxAb: 'car', recarga: t.recarga || 'largo', dado: t.dado || 'd20', nivMax: t.nivMax || 5,
@@ -190,7 +177,6 @@ export function init(store) {
   });
   $('#ruleNew').addEventListener('click', () => openRuleForm(null));
   on($('#rulesTabs'), 'click', '[data-rtab]', (ev, b) => { PESTANA = b.dataset.rtab; renderRules(); $('#rulesBody').scrollTop = 0; });
-  // de la referencia a la mesa: cierra y lleva a «En juego», desplegado
   $('#rulesJuego').addEventListener('click', () => {
     closeSheet($('#rulesDlg'));
     const lanza = !!perfil(S.cur()).c;

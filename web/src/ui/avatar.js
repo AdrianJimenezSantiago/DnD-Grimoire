@@ -1,4 +1,3 @@
-/** Retrato del personaje (o su emblema de clase si no tiene), reutilizado en toda la app. */
 import { esc } from '../core/util.js';
 import { gi, temaDe } from './tema.js';
 export const avatarHtml = (ch, cls = '') => {

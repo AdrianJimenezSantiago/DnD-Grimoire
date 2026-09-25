@@ -13,10 +13,8 @@ facts = json.load(open('tools/manual_datos.json'))
 srd = json.load(open('tools/srd52-spells-open5e.json'))
 CLS = {'wizard':'Mago','sorcerer':'Hechicero','bard':'Bardo','druid':'Druida','cleric':'Clérigo','warlock':'Brujo','ranger':'Explorador','paladin':'Paladín'}
 ESC = {'abjuration':'Abjuración','conjuration':'Conjuración','divination':'Adivinación','enchantment':'Encantamiento','evocation':'Evocación','illusion':'Ilusionismo','necromancy':'Nigromancia','transmutation':'Transmutación'}
-# emparejamientos que la similitud de nombres no resuelve bien
 FORZADOS = {'Shillelagh':'Shillelagh','Guidance':'Guía','True Strike':'Impacto certero','Mending':'Reparar','Enthrall':'Embelesar','Zone of Truth':'Zona de la verdad','Blink':'Desplazamiento',
             'Faithful Hound':'Mastín fiel de Mordenkainen','Transport via Plants':'Viajar mediante plantas'}
-# nombres en inglés de los conjuros del manual que no están en el SRD
 EN = {'Amistad':'Friends','Armadura de Agathys':'Armor of Agathys','Aura de pureza':'Aura of Purity','Aura de vitalidad':'Aura of Vitality','Brazos de Hadar':'Arms of Hadar',
  'Carcaj veloz':'Swift Quiver','Castigo abrumador':'Staggering Smite','Castigo atronador':'Thunderous Smite','Castigo cegador':'Blinding Smite','Castigo desterrador':'Banishing Smite',
  'Castigo furioso':'Wrathful Smite','Círculo de poder':'Circle of Power','Conjurar descarga de proyectiles':'Conjure Barrage','Conjurar lluvia de flechas':'Conjure Volley',

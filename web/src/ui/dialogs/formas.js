@@ -1,9 +1,3 @@
-/**
- * Formas de bestia: Forma salvaje del druida (formas conocidas y posibles según su nivel y el Círculo de la luna),
- * Polimorfar (bestias hasta un VD) y Polimorfar verdadero o Cambiar de forma (cualquier criatura hasta un VD).
- * Los perfiles vienen de los libros importados; cada forma abre su perfil completo.
- * Las formas que no están en ningún libro importado se anotan a mano (nombre, VD, CA, PG y velocidad).
- */
 import { esc, norm, uid } from '../../core/util.js';
 import { biblioteca } from '../../domain/catalogo.js';
 import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/monstruos.js';
@@ -19,7 +13,6 @@ const dlg = () => $('#formasDlg');
 const VDS = [0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 const TIT = { salvaje: 'Forma salvaje', polimorfar: 'Polimorfar', verdadero: 'Polimorfar verdadero' };
 
-/** Abre el selector. modo: 'salvaje' (del personaje), 'polimorfar' (bestias) o 'verdadero' (cualquier criatura). */
 export function openFormas(modo = 'salvaje') {
   const ch = S.cur(); if (!ch) return;
   F = { modo, q: '', abrirMano: false, solo: modo === 'salvaje' && (ch.formas || []).length > 0, vd: modo === 'salvaje' ? limiteFormaSalvaje(ch).vd : Math.min(20, parseInt(ch.nivel, 10) || 1) };
@@ -46,7 +39,6 @@ function pintar() {
     <div class="bib-sel una">${lim ? '' : `<select id="fmVd" aria-label="VD máximo">${VDS.map(v => `<option value="${v}" ${v === F.vd ? 'selected' : ''}>VD ${vdTexto(v)} o menos</option>`).join('')}</select>`}
       ${lim && todas.length ? `<button type="button" class="chip" id="fmSolo" aria-pressed="${F.solo}">${gi('dote')}Solo las que conozco</button>` : ''}</div>`;
   const q = norm(F.q.trim());
-  // formas anotadas a mano: siempre conocidas, sin perfil de libro
   const propias = lim ? mano(ch).filter(m => !q || norm(m.nombre).includes(q)) : [];
   const filaMano = m => `<li class="fm-it conocida"><div class="bib-it"><b>${esc(m.nombre)}</b><small>VD ${vdTexto(m.vd)} · CA ${esc(m.ca || '—')} · PG ${esc(m.pg || '—')}${m.vel ? ' · ' + esc(m.vel) : ''} · anotada a mano</small></div>
       <button type="button" class="fm-star" data-fmquitar="${esc(m.id)}" aria-pressed="true" aria-label="Olvidar ${esc(m.nombre)}" title="Olvidar">★</button></li>`;

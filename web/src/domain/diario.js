@@ -1,8 +1,3 @@
-/**
- * Diario de sesión de un personaje. Cada sesión tiene texto libre y notas rápidas
- * (nombre, suceso, pendiente, nota). Como en el cuaderno de Theo: lo tachado queda cumplido
- * y lo subrayado se destaca para recordarlo en la siguiente sesión. Puro.
- */
 import { uid } from '../core/util.js';
 
 export const TIPOS = { nombre: 'Nombre', suceso: 'Suceso', pendiente: 'Pendiente', nota: 'Nota' };
@@ -15,7 +10,6 @@ export function nuevaSesion(ch) {
   d.sesiones.unshift(s); return s;
 }
 export const nuevaNota = (tipo, texto) => ({ id: uid('nt'), tipo: TIPOS[tipo] ? tipo : 'nota', texto: String(texto).trim(), hecho: false, fijada: tipo === 'pendiente' });
-/** Lo que conviene tener presente al empezar: subrayado o pendiente sin tachar, de cualquier sesión. */
 export function paraRecordar(ch) {
   const out = [];
   for (const s of diarioDe(ch).sesiones) for (const nt of s.notas) if (!nt.hecho && (nt.fijada || nt.tipo === 'pendiente')) out.push({ ...nt, sesion: s });

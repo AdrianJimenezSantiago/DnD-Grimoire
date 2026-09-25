@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { analizarTiradas, dadosPara, tiradasDe, tieneTiradas } from '../web/src/domain/tiradas.js';
 import { formasDeEstado } from '../web/src/domain/glosario.js';
 
-// Textos inventados con la misma forma que las descripciones.
 test('truco con ataque que escala con el nivel del personaje', () => {
   const r = analizarTiradas('Haz un ataque de conjuro a distancia. Si impacta, sufre 1d10 de daño de fuego.', 'El daño aumenta en 1d10 cuando alcanzas los niveles 5 (2d10), 11 y 17.');
   assert.equal(r.ataque, 'a distancia'); assert.deepEqual(r.danos.map(d => `${d.n}d${d.caras} ${d.tipo}`), ['1d10 fuego']);

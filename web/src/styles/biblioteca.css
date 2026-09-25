@@ -1,7 +1,3 @@
-/* =========================================================================
-   Biblioteca, fichas de lectura, tablas, objetos mágicos y bestiario.
-   Rarezas en tonos de pigmento (verdín, lapislázuli, amatista, oro de vela, carmín), no de videojuego.
-   ========================================================================= */
 :root, :root[data-theme="light"] {
   --rar-comun: #61687F; --rar-infrec: #38754F; --rar-raro: #3565AE; --rar-muyraro: #7449B0; --rar-legend: #955B0D; --rar-artef: #AD3445; --rar-varia: #4C5572;
   --acc-l: 36%;
@@ -20,8 +16,6 @@
 .r-legend { --rar: var(--rar-legend); } .r-artef { --rar: var(--rar-artef); } .r-varia { --rar: var(--rar-varia); }
 .gi.icon { width: 20px; height: 20px; flex: none; }
 .menu .gi { width: 20px; height: 20px; color: var(--ink-2); }
-
-/* ------------------------------ pestañas ------------------------------ */
 .bib-tabs { display: flex; width: 100%; margin: 14px 0 0; overflow-x: auto; scrollbar-width: none; }
 .bib-tabs::-webkit-scrollbar { display: none; }
 .bib-tabs button { flex: 1 0 auto; gap: 7px; font-size: var(--fs-s); padding: 0 12px; }
@@ -49,22 +43,16 @@
 .bib-empty p { font: 400 var(--fs-m) / 1.5 var(--sans); margin: 10px 0 0; }
 .bib-empty .note { color: var(--ink-2); font-size: var(--fs-s); }
 .bib-empty button { margin-top: 16px; min-height: 44px; border-radius: var(--r-pill); padding: 0 18px; }
-.bib-list, .obj-list, .eq-list, .bx-cjs { list-style: none; margin: 0; padding: 0; }
+.bib-list, .obj-list, .bx-cjs { list-style: none; margin: 0; padding: 0; }
 .bib-it { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; width: 100%; padding: 11px 6px; border-bottom: 1px solid var(--line-soft); border-radius: 8px; }
 .bib-it:hover { background: var(--surface-2); } .bib-it:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .bib-it b { font: 500 var(--fs-l) / 1.2 var(--serif); }
 .bib-it small { grid-column: 1; font: 400 var(--fs-xs) / 1.35 var(--sans); color: var(--ink-2); }
-.bib-src { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: 500 10.5px / 1 var(--sans); color: var(--ink-3); max-width: 120px; text-align: right; }
-
-/* ------------------------------ objetos ------------------------------ */
 .obj-list li + li { border-top: 1px solid var(--line-soft); }
-/* lista de la biblioteca: grupos con cabecera y, dentro, una rejilla de tarjetas del mismo ancho */
 .obj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 6px; }
 .obj-grid li + li { border-top: 0; }
 .obj-grid .obj { height: 100%; background: color-mix(in srgb, var(--surface-2) 55%, transparent); border: 1px solid var(--line-soft); border-radius: 10px; }
 .obj-grid .obj:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--rar) 40%, var(--line-soft)); }
-/* cabecera fija de cada grupo: pegada al borde superior de la lista (el -6px anula el relleno de .dbody, que dejaba un hueco
-   por el que asomaban las tarjetas), a todo el ancho de la hoja y con un velo que desenfoca y funde lo que pasa por debajo */
 .obj-g { position: sticky; top: -6px; z-index: 2; padding: 10px 24px 8px; margin: 14px -22px 6px;
   background: color-mix(in srgb, var(--raised) 86%, transparent); -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
   border-bottom: 1px solid transparent; border-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 38%, var(--line-soft)) 20%, color-mix(in srgb, var(--gold) 38%, var(--line-soft)) 80%, transparent) 1; }
@@ -73,9 +61,7 @@
 .obj-g:first-child { margin-top: 0; }
 .obj-g .rar-pt { width: 10px; height: 10px; border-radius: 50%; background: var(--rar); box-shadow: 0 0 8px color-mix(in srgb, var(--rar) 60%, transparent); }
 .obj-g[class*=" r-"], .obj-g[style] { color: var(--rar); }
-/* libro de la entrada cuando no es el Manual del Jugador */
 .bc-lib { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: var(--r-pill); font: 500 10px / 1.4 var(--sans); color: var(--ink-2); background: color-mix(in srgb, var(--ink) 9%, transparent); vertical-align: 1px; }
-/* reglas: la misma rejilla, en baldosas más pequeñas */
 #bibBody .gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; margin-bottom: 4px; }
 #bibBody .gl-item { border-radius: 10px; justify-content: flex-start; text-align: left; padding: 0 12px; background: color-mix(in srgb, var(--surface-2) 55%, transparent); border-color: var(--line-soft); }
 #bibBody .gl-item:hover { background: var(--surface-2); border-color: var(--line); }
@@ -94,8 +80,6 @@
 .obj-sin, .obj-lo { flex: none; color: var(--ink-3); display: grid; place-items: center; }
 .obj-sin .gi, .obj-lo .icon { width: 18px; height: 18px; }
 .obj-lo { color: var(--gold); }
-
-/* ------------------------------ ficha de lectura ------------------------------ */
 dialog.ficha .dhead { border-bottom: 1px solid var(--line-soft); padding-bottom: 14px; }
 dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix(in srgb, var(--rar) 9%, transparent), transparent); }
 #fiTitle { display: flex; align-items: center; gap: 12px; }
@@ -120,16 +104,12 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .fi-dl div { display: contents; }
 .fi-dl dt { font: 500 var(--fs-xs) / 1.5 var(--sans); color: var(--ink-2); }
 .fi-dl dd { margin: 0; font: 400 var(--fs-m) / 1.45 var(--sans); }
-
-/* ------------------------------ texto enriquecido ------------------------------ */
 .sp-text .md-h { font: 500 var(--fs-l) / 1.25 var(--serif); color: var(--gold); margin: 1.3em 0 .45em; scroll-margin-top: 12px; }
 .sp-text .md-h.rasgo { display: flex; align-items: baseline; gap: 10px; padding-top: .9em; border-top: 1px solid var(--line-soft); color: var(--ink); }
 .sp-text .md-h.rasgo .lvl-pill { flex: none; font: 700 12px / 1 var(--sans); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 50%, transparent); border-radius: var(--r-pill); padding: 4px 8px; transform: translateY(-2px); }
 .md-ul { margin: 0 0 .8em; padding-left: 1.2em; }
 .md-ul li { margin: .25em 0; padding-left: .2em; }
 .md-ul li::marker { content: "✦ "; color: var(--gold); font-size: .8em; }
-
-/* tablas: papel de libro, cabecera en tinta suave, filas de dado con número en oro */
 .tb { position: relative; margin: 1em 0 1.2em; }
 .tb-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-s); background: var(--surface); -webkit-overflow-scrolling: touch; }
 .tb table { width: 100%; border-collapse: collapse; font: 400 var(--fs-m) / 1.45 var(--sans); }
@@ -148,30 +128,15 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .tb-roll.rolled .gi { animation: tb-spin .5s var(--ease-out); }
 @keyframes tb-hit { from { background: color-mix(in srgb, var(--gold) 38%, transparent); } }
 @keyframes tb-spin { from { transform: rotate(-200deg) scale(.7); } }
-
-/* ------------------------------ objetos del personaje ------------------------------ */
 .chip-n { font: 700 11px / 1 var(--sans); color: var(--gold); margin-left: 2px; }
-.sig-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 0 16px; }
 .sig { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; }
-.sig-ring { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); border: 1.5px dashed var(--line); }
-.sig-ring .gi { width: 26px; height: 26px; }
-.sig.on .sig-ring { border: 1.5px solid var(--gold); color: var(--gold); background: radial-gradient(circle, var(--gold-soft), transparent 70%); box-shadow: 0 0 22px var(--glow); animation: ignite .6s var(--spring) both; }
 .sig small { font: 500 var(--fs-xs) / 1.25 var(--sans); color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .eq { position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 0 6px 12px; border-bottom: 1px solid var(--line-soft); }
-.eq-main { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; flex: 1 1 220px; min-width: 0; padding: 6px 0; border-radius: 8px; }
-.eq-main:disabled { cursor: default; }
-.eq-acts { display: flex; align-items: center; gap: 6px; margin-left: auto; }
-.eq-acts .chip { min-height: 34px; font-size: var(--fs-xs); }
-.eq-nosin { font: 400 var(--fs-xs) / 1 var(--sans); color: var(--ink-3); padding: 0 6px; }
 .iconbtn.sm { width: 36px; min-width: 36px; min-height: 36px; font-size: 20px; color: var(--ink-3); }
-
-/* ------------------------------ revisión al importar ------------------------------ */
 .sc.rev { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; }
 .sc.rev small { grid-column: 2; font: 400 var(--fs-xs) / 1.35 var(--sans); color: var(--ink-2); }
 .rev-k { display: inline-flex; align-items: center; gap: 6px; font: 500 var(--fs-xs) / 1 var(--sans); color: var(--gold); }
 .rev-k .gi { width: 16px; height: 16px; }
-
-/* ------------------------------ bestiario ------------------------------ */
 .di-seg { display: flex; width: 100%; }
 .di-seg button { flex: 1; gap: 7px; }
 .di-seg .gi, .di-seg .icon { width: 18px; height: 18px; }
@@ -221,8 +186,6 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .bx-ses { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
 .bx-ses h3 .gi { width: 20px; height: 20px; color: var(--gold); align-self: center; }
 @media (max-width: 560px) { .bx-salv { grid-template-columns: repeat(3, 1fr); } }
-
-/* pie del conjuro: lo que sabe el bestiario, discreto y al final */
 .bx-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 22px 0 4px; padding-top: 12px; border-top: 1px dashed var(--line); }
 .bx-foot > .gi { width: 16px; height: 16px; color: var(--ink-3); }
 .bx-foot-l { font: 500 11.5px / 1 var(--sans); color: var(--ink-3); margin-right: 4px; }
@@ -232,10 +195,8 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .bx-chip.rel-res em, .bx-chip.rel-inm em, .bx-chip.rel-ineficaz em { color: var(--rel-vul); }
 .bx-chip.apagada { opacity: .6; }
 .bx-foot-mas { font: 400 11.5px / 1 var(--sans); color: var(--ink-3); }
-@media (prefers-reduced-motion: reduce) { .tb tr.hit td, .tb-roll.rolled .gi, .sig.on .sig-ring { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tb tr.hit td, .tb-roll.rolled .gi { animation: none; } }
 @media print { .tb-roll, .bx-foot { display: none; } }
-
-/* móvil: pestañas con el icono encima y filtros en una sola fila desplazable */
 .bib-sel.una { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .bib-sel.una::-webkit-scrollbar { display: none; }
 .bib-sel.una > * { flex: none; }
@@ -247,5 +208,4 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 }
 .di-bar input { min-width: 0; }
 .di-bar select { width: auto; flex: 0 1 140px; min-width: 0; border-radius: var(--r-pill); }
-.eq-main { flex: 1 1 170px; }
 .di-bar input[type="search"] { flex: 1 1 150px; }

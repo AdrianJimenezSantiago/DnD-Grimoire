@@ -1,4 +1,3 @@
-/** Añadir conjuros: busca a la vez en el catálogo y en el compendio SRD. */
 import { esc, norm, uid } from '../../core/util.js';
 import { LISTAS, SCHOOLS, perfil } from '../../domain/reglas2024.js';
 import { allSpellItems, itemMeta, itemTag, itemToSid, listFilter, invalidateItems } from '../../domain/catalogo.js';
@@ -15,7 +14,7 @@ const pressed = id => $(id).getAttribute('aria-pressed') === 'true';
 
 export function defaultRel(ch, s) {
   const P = perfil(ch), sinClase = !P.c;
-  const autoPrep = !!P.c && ch.clase !== 'Mago' && s.level > 0 && prepCount(S.db, ch) < P.maxPrep;   // quien prepara de su lista lo añade ya preparado
+  const autoPrep = !!P.c && ch.clase !== 'Mago' && s.level > 0 && prepCount(S.db, ch) < P.maxPrep;
   return { prep: autoPrep, always: sinClase, fuente: ch.clase === 'Mago' ? 'Libro' : (sinClase ? '' : P.listaNombre), gratis: sinClase && s.level > 0 ? '1/DL' : '', used: false };
 }
 export function addToBook(sidOrItem) {

@@ -1,8 +1,3 @@
-/**
- * Efectos visuales. Un único lienzo para partículas que solo anima mientras hay algo vivo
- * (sin bucle permanente), y utilidades para animaciones CSS puntuales.
- * Todo respeta «reducir movimiento».
- */
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 export const reducedMotion = () => mq.matches;
 
@@ -30,7 +25,6 @@ function loop(t) {
   if (!raf) ctx.clearRect(0, 0, innerWidth, innerHeight);
 }
 function hslOf(color) {
-  // acepta #rrggbb y devuelve [h,s,l]
   const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(String(color).trim());
   if (!m) return [40, 80, 60];
   let [r, g, b] = m.slice(1).map(x => parseInt(x, 16) / 255);
@@ -39,7 +33,6 @@ function hslOf(color) {
     h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
   return [h, s * 100, l * 100];
 }
-/** Chispas que brotan de (x,y). */
 export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, spread = 1, life = 900, size = 2.2, gravity = -0.02 } = {}) {
   if (reducedMotion()) return;
   ensure(); const [h, s, l] = hslOf(color);
@@ -52,7 +45,6 @@ export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, 
 }
 const center = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r]; };
 export function burstFrom(el, opts) { if (!el) return; const [x, y] = center(el); burst(x, y, opts); }
-/** Chispas a lo largo del nombre de un conjuro (lanzar). */
 export function castFx(row, color) {
   if (!row || reducedMotion()) return;
   row.classList.remove('fx-cast'); void row.offsetWidth; row.classList.add('fx-cast');
@@ -62,7 +54,6 @@ export function castFx(row, color) {
   document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'lanzar', x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, color } }));
   for (let i = 0; i < 4; i++) setTimeout(() => burst(r.left + r.width * (0.15 + 0.7 * Math.random()), r.top + r.height / 2, { color, n: 9, speed: 2.2, up: 2.4, life: 1000, size: 1.8 }), i * 70);
 }
-/** Vela que se apaga o se enciende. */
 export function slotFx(level, index, kind) {
   const btn = document.querySelector(`#sbar [data-slotbtn="${level}:${index}"]`) || document.querySelector(`[data-slotbtn="${level}:${index}"]`);
   if (!btn) return;
@@ -71,7 +62,6 @@ export function slotFx(level, index, kind) {
   if (kind !== 'ignite') burstFrom(btn, { color: '#9aa0b3', n: 8, speed: 0.8, up: 2.6, life: 900, size: 2.4, gravity: -0.03 });
   else burstFrom(btn, { color: '#F4C567', n: 10, speed: 1.6, up: 1.2, life: 600, size: 1.6 });
 }
-/** Amanecer: descanso largo. */
 export function dawn() {
   if (reducedMotion()) return;
   const d = document.createElement('div'); d.className = 'dawn'; document.body.appendChild(d);
@@ -79,7 +69,6 @@ export function dawn() {
   setTimeout(() => d.remove(), 1400);
   document.querySelectorAll('.slotbtn').forEach((b, i) => { b.style.setProperty('--i', i % 12); b.classList.add('fx-ignite'); setTimeout(() => b.classList.remove('fx-ignite'), 1300); });
 }
-/** Ascenso: subir de nivel. */
 export function ascend(el) {
   if (!el || reducedMotion()) return;
   const [x, y, r] = center(el);
@@ -88,10 +77,8 @@ export function ascend(el) {
   for (let i = 0; i < 6; i++) setTimeout(() => burst(r.left + Math.random() * r.width, r.bottom, { n: 10, speed: 1.4, up: 3.4, life: 1500, size: 1.8 }), 120 + i * 90);
 }
 export function pop(el, cls) { if (!el || reducedMotion()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-/** Transición de vista si el motor la admite (cambio de personaje, tema). */
 export function viewTransition(fn) {
   if (reducedMotion() || !document.startViewTransition) { fn(); return; }
   document.startViewTransition(fn);
 }
-/** Lee un color de escuela desde las variables CSS actuales. */
 export const schoolColor = key => getComputedStyle(document.documentElement).getPropertyValue(`--sc-${key || 'adi'}`).trim() || '#E7B85F';

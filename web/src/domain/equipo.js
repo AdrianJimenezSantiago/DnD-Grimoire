@@ -1,28 +1,14 @@
-/**
- * Inventario del personaje: todo lo que lleva encima (armas, armaduras, equipo, herramientas, consumibles, objetos mágicos,
- * comida, tesoro…), con cantidad, peso y valor; monedas; carga según la Fuerza; la CA con lo equipado y el ataque de cada arma.
- * Los objetos mágicos conservan la sintonización (máximo 3) y sus cargas, que se llevan como un rasgo propio (recurso con
- * recarga) para gastarse y recuperarse desde la hoja como el resto. Puro.
- *
- * ch.equipo = { objetos: [Objeto], monedas: {pc, pp, pe, po, ppt} }
- * Objeto = { id, nombre, cat, cantidad, peso (kg por unidad), valor, notas, equipado,
- *            arma?: {dano, tipo, props: [], maestria, distancia}, armadura?: {base, dex: 'todo'|'max2'|'no', tipo, bono},
- *            clave?, tipo?, rareza?, sintonia?, sintonizado?, rasgo?, magico? }   (los de la biblioteca traen clave, tipo y rareza)
- */
 import { uid, norm } from '../core/util.js';
 import { modOf, clasesDe, perfil } from './reglas2024.js';
 
 export const MAX_SINTONIA = 3;
-/** Categorías del inventario: [clave, nombre, icono]. */
 export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras y escudos', 'o_armadura'], ['equipo', 'Equipo', 'cofre'],
   ['herramienta', 'Herramientas', 'dote'], ['consumible', 'Consumibles', 'o_pocion'], ['magico', 'Objetos mágicos', 'o_maravilloso'],
   ['comida', 'Comida y agua', 'curacion'], ['tesoro', 'Tesoro', 'o_anillo'], ['otro', 'Otros', 'libro']];
 export const NOMBRE_CAT = Object.fromEntries(CATEGORIAS.map(([k, t]) => [k, t]));
 export const MONEDAS = [['ppt', 'Platino', 10], ['po', 'Oro', 1], ['pe', 'Electro', 0.5], ['pp', 'Plata', 0.1], ['pc', 'Cobre', 0.01]];
-// Del tipo de un objeto mágico de la biblioteca a su categoría en el inventario
 const CAT_TIPO = { Arma: 'arma', Armadura: 'armadura', Escudo: 'armadura', 'Poción': 'consumible', Pergamino: 'consumible', 'Munición': 'consumible' };
 
-// Objetos comunes del Manual del Jugador 2024 (peso en kg por unidad, valor orientativo). Base para añadir rápido; todo se puede editar.
 const A = (nombre, dano, tipo, peso, valor, props = [], maestria = '', distancia = '') => ({ nombre, cat: 'arma', peso, valor, arma: { dano, tipo, props, maestria, distancia } });
 const R = (nombre, base, dex, tipo, peso, valor) => ({ nombre, cat: 'armadura', peso, valor, armadura: { base, dex, tipo, bono: 0 } });
 const E = (nombre, cat, peso, valor = '', extra = {}) => ({ nombre, cat, peso, valor, ...extra });
@@ -66,7 +52,6 @@ export const sintonizados = ch => equipoDe(ch).objetos.filter(o => o.sintonizado
 export const tieneObjeto = (ch, clave) => equipoDe(ch).objetos.some(o => o.clave === clave);
 const num = (v, def = 0) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : def; };
 
-/** Un objeto con todos sus campos, también los antiguos (solo objetos mágicos) y los que llegan a mano. */
 export function normObjeto(o) {
   const cat = CATEGORIAS.some(([k]) => k === o.cat) ? o.cat : o.clave ? (CAT_TIPO[o.tipo] || 'magico') : 'otro';
   return { ...o, id: o.id || uid('ob'), nombre: String(o.nombre || 'Objeto').trim(), cat, cantidad: Math.max(0, Math.round(num(o.cantidad, 1))), peso: Math.max(0, num(o.peso)),
@@ -79,7 +64,6 @@ export function normEquipo(ch) {
   return eq;
 }
 
-/** Rasgo de cargas a partir de lo leído en el libro («7 cargas, recupera 1d6 + 1 al amanecer»). */
 export function rasgoDeCargas(o) {
   const c = o.cargas; if (!c || !c.max) return null;
   const m = /^(\d+d\d+)(?:\+(\d+))?$/.exec(c.recarga || '');
@@ -89,7 +73,6 @@ export function rasgoDeCargas(o) {
   if (/^\d+$/.test(c.recarga || '')) return { ...base, recarga: 'dado', recDado: `${c.recarga}d1`, recBono: 0, recMomento: 'largo' };
   return { ...base, recarga: 'nunca' };
 }
-/** Añade un objeto mágico de la biblioteca al personaje. Devuelve la entrada creada. */
 export function anadirObjeto(ch, o) {
   const e = normObjeto({ clave: o.clave, nombre: o.nombre, tipo: o.tipo, rareza: o.rareza, sintonia: !!o.sintonia, magico: true, cantidad: 1, rasgo: null });
   const r = rasgoDeCargas(o);
@@ -97,7 +80,6 @@ export function anadirObjeto(ch, o) {
   equipoDe(ch).objetos.push(e);
   return e;
 }
-/** Añade un objeto cualquiera (de la lista de comunes o escrito a mano). Si ya hay uno igual sin equipar, suma la cantidad. */
 export function anadirComun(ch, datos) {
   const eq = equipoDe(ch), nuevo = normObjeto({ ...datos, id: undefined });
   const igual = eq.objetos.find(x => !x.clave && !x.equipado && norm(x.nombre) === norm(nuevo.nombre) && x.cat === nuevo.cat && !x.arma === !nuevo.arma);
@@ -110,13 +92,11 @@ export function quitarObjeto(ch, id) {
   if (e.rasgo) { ch.rasgos = (ch.rasgos || []).filter(r => r.id !== e.rasgo); if (ch.play?.rec) delete ch.play.rec[e.rasgo]; }
   return e;
 }
-/** Sintonizar o dejar de estarlo. Devuelve false si ya hay tres objetos sintonizados. */
 export function alternarSintonia(ch, id) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return false;
   if (!e.sintonizado && sintonizados(ch).length >= MAX_SINTONIA) return false;
   e.sintonizado = !e.sintonizado; return true;
 }
-/** Equipar o quitarse: solo una armadura (no escudo) y un escudo a la vez. */
 export function alternarEquipado(ch, id) {
   const eq = equipoDe(ch), e = eq.objetos.find(x => x.id === id); if (!e) return;
   if (!e.equipado && e.armadura) {
@@ -125,26 +105,18 @@ export function alternarEquipado(ch, id) {
   }
   e.equipado = !e.equipado;
 }
-/** Gasta (−1) o suma (+1) unidades; un consumible a 0 se queda en la lista para reponerlo. */
 export function cambiarCantidad(ch, id, d) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return null;
   e.cantidad = Math.max(0, e.cantidad + d); return e;
 }
 
-/* ---------------------------------- cálculos ---------------------------------- */
-/** Peso de lo que lleva (kg): cada objeto por su cantidad, más las monedas (50 monedas pesan 0,5 kg). */
 export function pesoTotal(ch) {
   const eq = equipoDe(ch), monedas = Object.values(eq.monedas).reduce((s, n) => s + (n || 0), 0);
   return Math.round((eq.objetos.reduce((s, o) => s + (o.peso || 0) * (o.cantidad || 0), 0) + monedas / 50 * 0.5) * 10) / 10;
 }
-/** Capacidad de carga (2024): Fuerza × 7,5 kg; el goliat (Constitución poderosa) cuenta como una talla más: el doble. */
 export const capacidadCarga = ch => (ch.stats?.fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? 2 : 1);
 export const valorMonedas = ch => Math.round(MONEDAS.reduce((s, [k, , v]) => s + (equipoDe(ch).monedas[k] || 0) * v, 0) * 100) / 100;
 
-/**
- * Clase de armadura con lo equipado: armadura (base + Destreza según su tipo) y escudo; sin armadura, 10 + Des,
- * o la Defensa sin armadura del bárbaro (+ Con, admite escudo) o del monje (+ Sab, sin escudo). Devuelve {ca, detalle}.
- */
 export function claseArmadura(ch) {
   const eq = equipoDe(ch), st = ch.stats || {}, des = modOf(st.des), clases = clasesDe(ch).map(c => c.clase);
   const arm = eq.objetos.find(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo'), esc = eq.objetos.find(o => o.equipado && o.armadura?.tipo === 'escudo');
@@ -158,7 +130,6 @@ export function claseArmadura(ch) {
   if (clases.includes('Monje') && !esc) opciones.push({ ca: 10 + des + modOf(st.sab), detalle: 'Defensa sin armadura (10 + Des + Sab)' });
   return opciones.sort((a, b) => b.ca - a.ca)[0];
 }
-/** Ataque y daño de un arma: Fuerza (o Destreza si es sutil y es mejor, o si es a distancia) + competencia. */
 export function ataqueArma(ch, o) {
   const a = o.arma; if (!a) return null;
   const st = ch.stats || {}, fue = modOf(st.fue), des = modOf(st.des), props = (a.props || []).map(norm);
