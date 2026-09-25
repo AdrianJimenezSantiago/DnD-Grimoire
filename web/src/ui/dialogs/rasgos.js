@@ -28,18 +28,19 @@ function renderRules() {
   $('#ruleNew').hidden = PESTANA !== 'recursos';
   const guia = PESTANA === 'progresion'
     ? '<p class="note rules-guia">Lo que te da tu clase nivel a nivel, para consultar. Para <b>usar</b> tus rasgos en la partida, mira «En juego» en la hoja.</p>'
-    : '<p class="note rules-guia">Lo que la hoja cuenta por ti: usos, dados y avisos. Salen en la hoja, bajo el nombre, y se recuperan solos con los descansos.</p>';
+    : '<p class="note rules-guia">Lo que la hoja cuenta por ti: usos, dados y avisos. Se recuperan solos con los descansos. El interruptor solo decide si se <b>ve</b> en la hoja: oculto, sigue funcionando.</p>';
   if (PESTANA === 'progresion') {
     $('#rulesBody').innerHTML = guia + clasesDe(ch).map(c => progresionHtml(vistaClase(ch, c), clasesDe(ch).length > 1)).join('');
     return;
   }
-  const row = r => `<div class="rrow ${r.off ? 'off' : ''}">
-    <label class="switch"><input type="checkbox" ${r.tpl ? `data-tploff="${r.id}"` : `data-ownoff="${r.id}"`} ${r.off ? '' : 'checked'} aria-label="Activar ${esc(r.nombre)}"><span></span></label>
-    <div class="rtxt"><b>${esc(r.nombre)}</b><span class="rtype">${TIPO_TXT[r.tipo]}</span><span class="rsum">${esc(ruleSummary(r))}</span></div>
-    <div class="racts">${r.tpl ? `<button type="button" data-rcustom="${r.id}">Personalizar</button>` : `<button type="button" data-redit="${r.id}">Editar</button><button type="button" class="warn" data-rdel="${r.id}">Borrar</button>`}</div></div>`;
+  // el interruptor muestra u oculta en la hoja; la plantilla sustituida por una copia tuya no tiene interruptor (manda la copia)
+  const row = r => `<div class="rrow ${r.oculto || r.sustituida ? 'off' : ''}">
+    ${r.sustituida ? '<span class="switch-hueco" aria-hidden="true"></span>' : `<label class="switch" title="${r.oculto ? 'Oculto en la hoja; sigue funcionando' : 'Visible en la hoja'}"><input type="checkbox" ${r.tpl ? `data-tploff="${r.id}"` : `data-ownoff="${r.id}"`} ${r.oculto ? '' : 'checked'} aria-label="Mostrar ${esc(r.nombre)} en la hoja"><span></span></label>`}
+    <div class="rtxt"><b>${esc(r.nombre)}</b><span class="rtype">${TIPO_TXT[r.tipo]}${r.sustituida ? ' · sustituido por tu versión' : r.oculto ? ' · oculto en la hoja' : ''}</span><span class="rsum">${esc(ruleSummary(r))}</span></div>
+    <div class="racts">${r.tpl ? (r.sustituida ? '' : `<button type="button" data-rcustom="${r.id}">Personalizar</button>`) : `<button type="button" data-redit="${r.id}">Editar</button><button type="button" class="warn" data-rdel="${r.id}">Borrar</button>`}</div></div>`;
   $('#rulesBody').innerHTML = guia +
     `<section class="fsec"><h3>De tu clase y subclase</h3>${tpl.length ? tpl.map(row).join('') : '<p class="note">Tu clase no tiene recursos que la app lleve por ti a este nivel.</p>'}
-      <p class="note">Se ajustan solos al subir de nivel. Desactiva los que no quieras ver; «Personalizar» crea una copia tuya que puedes cambiar.</p></section>
+      <p class="note">Se ajustan solos al subir de nivel. Oculta los que no quieras ver en la hoja: siguen contando y recuperándose igual. «Personalizar» crea una copia tuya que puedes cambiar y que sustituye a la original.</p></section>
      <section class="fsec"><h3>Añadidos por ti</h3>${own.length ? own.map(row).join('') : '<p class="note">Rasgos de dotes, objetos o reglas de tu mesa. Por ejemplo, 3 cargas de una varita que se recargan con un descanso largo, o un aviso cada vez que lanzas un conjuro de nigromancia.</p>'}</section>`;
 }
 /** Progresión de la clase: valores que escalan, rasgos nivel a nivel y conjuros que dan la clase y la subclase. */
@@ -123,7 +124,7 @@ function saveRule() {
     if (tpl) { ch.rasgosOff = [...new Set([...ch.rasgosOff, tpl])]; if (ch.play.rec[tpl]) ch.play.rec[rule.id] = ch.play.rec[tpl]; }
   });
   closeSheet($('#ruleDlg')); renderRules();
-  toast(`«${esc(rule.nombre)}» ${nuevo ? 'añadido' : 'guardado'}.${tpl ? ' La plantilla original queda desactivada.' : ''}`, [undoBtn(S, h)]);
+  toast(`«${esc(rule.nombre)}» ${nuevo ? 'añadido' : 'guardado'}.${tpl ? ' La plantilla original queda sustituida por tu versión.' : ''}`, [undoBtn(S, h)]);
 }
 
 /* ---------------- recuperar espacios ---------------- */
@@ -167,7 +168,8 @@ export function init(store) {
     const t = ev.target;
     if (!t.dataset.tploff && !t.dataset.ownoff) return;
     S.edit((db, ch) => {
-      if (t.dataset.tploff) { const s = new Set(ch.rasgosOff); t.checked ? s.delete(t.dataset.tploff) : s.add(t.dataset.tploff); ch.rasgosOff = [...s]; }
+      // ocultar no apaga el rasgo: descansos, recuperación y avisos siguen igual; solo deja de pintarse en la hoja
+      if (t.dataset.tploff) { const s = new Set(ch.rasgosOcultos); t.checked ? s.delete(t.dataset.tploff) : s.add(t.dataset.tploff); ch.rasgosOcultos = [...s]; }
       else { const r = ch.rasgos.find(x => x.id === t.dataset.ownoff); r.off = !t.checked; }
     });
     renderRules();
@@ -176,7 +178,8 @@ export function init(store) {
     const ch = S.cur();
     if (b.dataset.redit) return openRuleForm(ch.rasgos.find(x => x.id === b.dataset.redit));
     if (b.dataset.rdel) { const r = ch.rasgos.find(x => x.id === b.dataset.rdel); if (!(await confirmar({ titulo: `¿Borrar «${r.nombre}»?`, texto: 'Se quita de este personaje. Puedes deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
-      const h = S.edit((db, c) => { c.rasgos = c.rasgos.filter(x => x.id !== r.id); }); renderRules(); toast(`«${esc(r.nombre)}» borrado.`, [undoBtn(S, h)]); return; }
+      // si era la versión personalizada de una plantilla, la original vuelve a funcionar
+      const h = S.edit((db, c) => { c.rasgos = c.rasgos.filter(x => x.id !== r.id); if (r.desde) c.rasgosOff = c.rasgosOff.filter(x => x !== r.desde); }); renderRules(); toast(`«${esc(r.nombre)}» borrado.`, [undoBtn(S, h)]); return; }
     const t = reglas(ch, true).find(x => x.id === b.dataset.rcustom);
     openRuleForm({ id: uid('r'), tipo: t.tipo, nombre: t.nombre, nota: t.nota || '', maxBase: 'fijo', maxN: t.max, maxAb: 'car', recarga: t.recarga || 'largo', dado: t.dado || 'd20', nivMax: t.nivMax || 5,
       escuela: t.escuela || '', espacioMin: t.espacioMin || 0, soloEspacio: !!t.soloEspacio, efecto: t.efecto || 'aviso', efectoN: t.efectoN || 5, texto: t.texto || '', desde: t.id }, true);

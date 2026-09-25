@@ -19,7 +19,7 @@ import { bestiarioDe, nuevaCriatura } from '../../domain/bestiario.js';
 import { undoBtn } from '../../app/acciones.js';
 import { rasgosEnJuego, GRUPOS, resumenClase, resumenSubclase } from '../../domain/enJuego.js';
 import { TEMAS } from '../../domain/clases2024.js';
-import { reglas } from '../../domain/rasgos.js';
+import { reglasVisibles } from '../../domain/rasgos.js';
 
 let S;
 const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'tipo', ctipo: '', cvd: '' };
@@ -236,7 +236,7 @@ export function abrirResumen(clase, subclase = '') {
 /** Rasgo de «En juego»: el texto completo del libro y dónde se muestra en la hoja (se puede cambiar de grupo). */
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
-  const r = rasgosEnJuego(ch, biblioteca(), reglas(ch)).find(x => x.clave === clave); if (!r) return;
+  const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
   FICHA = { tipo: 'rasgo', clave };
   const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
   ficha({ titulo: r.nombre, ico: r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : r.origen === 'subclase' ? 'subclase' : norm(r.clase || '').replace(/[^a-z]/g, ''),
