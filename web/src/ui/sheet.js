@@ -18,6 +18,7 @@ import { vitalesHtml, caracteristicasHtml } from './vitales.js';
 import { combateHtml, escuelaIco } from './combate.js';
 import { combateDe } from '../domain/combate.js';
 import { percepcionPasiva } from '../domain/habilidades.js';
+import { actualizarLuto, memorialHtml } from './luto.js';
 
 export const slotsOf = (P, n) => P.slots[n] || 0;
 export const usedOf = (ch, P, n) => Math.min(ch.play.used[n] || 0, slotsOf(P, n));
@@ -260,7 +261,8 @@ export function renderSheet(S) {
   document.body.classList.toggle('editing', editing);
   if (!ch) {
     patch($('#hero'), `<div class="nochar"><h2>Ningún grimorio abierto</h2><p>Crea un personaje para empezar su libro de conjuros. Los conjuros del catálogo y del compendio se añaden con un toque.</p><button type="button" class="gold" data-cmd="newchar">Nuevo personaje</button></div>`);
-    ['#stats', '#res', '#legend', '#levels', '#foot', '#vitales', '#caracs', '#combate'].forEach(id => patch($(id), ''));
+    ['#stats', '#res', '#legend', '#levels', '#foot', '#vitales', '#caracs', '#combate', '#memorial'].forEach(id => patch($(id), ''));
+    actualizarLuto(null);
     return;
   }
   aplicarTema(ch);
@@ -270,6 +272,7 @@ export function renderSheet(S) {
     lastChar = ch.id; pop($('#hero'), 'fx-enter');
     $('#hero .underline path')?.classList.add('fx-draw');
   } else if (heroChanged) $('#hero .underline path')?.classList.remove('fx-draw');
+  patch($('#memorial'), actualizarLuto(ch) ? memorialHtml(ch) : '');
   const combate = combateDe(ch).activo;
   document.body.classList.toggle('combate', combate);
   patch($('#combate'), combate ? combateHtml(ch, db) : '');

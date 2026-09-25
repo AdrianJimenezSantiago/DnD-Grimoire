@@ -475,3 +475,82 @@ body.on-landing.combate::before { display: none; }
   .vg-pistas { gap: 6px 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .vigilia::before { animation: none; opacity: .5; } }
+
+@property --luto-r { syntax: '<length>'; inherits: true; initial-value: 0px; }
+.luto { position: fixed; inset: 0; z-index: 46; pointer-events: none; opacity: 0; visibility: hidden;
+  -webkit-backdrop-filter: grayscale(1) contrast(1.05) brightness(.92); backdrop-filter: grayscale(1) contrast(1.05) brightness(.92);
+  transition: none; }
+body.caido .luto { opacity: 1; visibility: visible; transition: opacity 2.2s var(--ease) .4s, visibility 0s; }
+body.on-landing .luto { display: none; }
+body.reviviendo .luto { opacity: 1; visibility: visible; transition: none; -webkit-mask: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--luto-r), #000 calc(var(--luto-r) + 120px)); mask: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--luto-r), #000 calc(var(--luto-r) + 120px)); animation: luto-abre 1.3s cubic-bezier(.6, 0, .2, 1) forwards; }
+@keyframes luto-abre { from { --luto-r: 0px; } to { --luto-r: 160vmax; } }
+
+.memorial { display: none; }
+body.caido #sheet > #memorial.memorial { display: block !important; }
+body.caido.caido #sheet > :not(#memorial) { display: none !important; }
+body.caido .dock, body.caido .bar .act, body.caido .slots-bar, body.caido .editbanner { display: none !important; }
+body.caido::before { display: none; }
+body.caido .appbar::after { animation: none; background: linear-gradient(90deg, transparent, var(--ink-3), transparent); }
+
+.mm-lapida { position: relative; max-width: 620px; margin: var(--s6) auto 0; padding: 44px 30px 34px; text-align: center;
+  border: 1px solid var(--line); background: radial-gradient(90% 60% at 50% 0, color-mix(in srgb, var(--ink) 7%, transparent), transparent 70%), linear-gradient(180deg, var(--surface-2), var(--surface));
+  box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--surface) 85%, transparent), inset 0 0 0 6px color-mix(in srgb, var(--ink) 14%, transparent), var(--shadow-2);
+  clip-path: polygon(0 34px, 34px 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 0 100%); animation: lapida-in 1.4s var(--ease-out) both .2s; }
+@keyframes lapida-in { from { opacity: 0; transform: translateY(26px); filter: blur(6px); } }
+.mm-sello { position: relative; display: inline-grid; place-items: center; width: 150px; height: 150px; margin-bottom: 10px; color: var(--ink-2); }
+.mm-sello .avatar.xl { width: 96px; height: 96px; filter: grayscale(1) brightness(.85); }
+.mm-runa { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .45; animation: girar 200s linear infinite; }
+.mm-aqui { margin: 0; font: 500 var(--fs-xs) / 1 var(--display); letter-spacing: .4em; text-transform: uppercase; color: var(--ink-3); }
+.mm-nombre { margin: 10px 0 6px; font: 700 clamp(34px, 9vw, 58px) / 1 var(--display-deco); letter-spacing: .04em; color: var(--ink); }
+.mm-clase { margin: 0; font: 400 var(--fs-m) / 1.3 var(--sans); color: var(--ink-2); }
+.mm-orla { display: flex; align-items: center; gap: 14px; margin: 22px auto 16px; max-width: 320px; color: var(--ink-3); }
+.mm-orla i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, currentColor); }
+.mm-orla i:last-child { background: linear-gradient(90deg, currentColor, transparent); }
+.mm-orla .gi { width: 26px; height: 26px; }
+.mm-causa { margin: 0; font: italic 400 var(--fs-l) / 1.4 var(--serif); color: var(--ink); }
+.mm-fecha { margin: 6px 0 0; font: 500 var(--fs-s) / 1 var(--display); letter-spacing: .12em; color: var(--ink-3); }
+.mm-lema { margin: 22px auto 0; max-width: 46ch; font: italic 400 var(--fs-m) / 1.5 var(--serif); color: var(--ink-2); }
+.mm-nota { margin: 26px auto 0; max-width: 52ch; font: 400 var(--fs-xs) / 1.5 var(--sans); color: var(--ink-3); }
+.mm-acc { position: relative; z-index: 47; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 22px auto var(--s7); animation: lapida-in 1.4s var(--ease-out) both .6s; }
+.mm-otro { filter: grayscale(1); }
+body.reviviendo .mm-acc { animation: lapida-out .5s var(--ease) forwards; }
+.mm-acc button { min-height: 48px; padding: 0 22px; }
+.mm-revivir { gap: 10px; font: 700 var(--fs-m) / 1 var(--display); letter-spacing: .06em; color: #FFE7A8;
+  border: 1px solid #D9A93D; background: radial-gradient(120% 160% at 50% 0, rgba(255, 214, 120, .32), transparent 70%), #3a2a0e;
+  box-shadow: 0 0 0 1px rgba(255, 220, 140, .25) inset, 0 0 30px -6px rgba(244, 196, 90, .8); animation: esperanza 3.2s ease-in-out infinite; }
+.mm-revivir .gi { width: 22px; height: 22px; color: #FFD46E; filter: drop-shadow(0 0 8px rgba(255, 210, 110, .9)); }
+.mm-revivir:hover:not(:disabled) { border-color: #FFD46E; box-shadow: 0 0 0 3px rgba(255, 212, 110, .2), 0 0 40px -4px rgba(244, 196, 90, .9); }
+:root[data-theme="light"] .mm-revivir { color: #5a3c06; background: radial-gradient(120% 160% at 50% 0, rgba(255, 226, 150, .9), transparent 70%), #f6e2ad; border-color: #b8871f; }
+:root[data-theme="light"] .mm-revivir .gi { color: #8a5d05; }
+@keyframes esperanza { 0%, 100% { box-shadow: 0 0 0 1px rgba(255, 220, 140, .25) inset, 0 0 24px -8px rgba(244, 196, 90, .7); } 50% { box-shadow: 0 0 0 1px rgba(255, 220, 140, .35) inset, 0 0 40px -2px rgba(244, 196, 90, .95); } }
+
+.lcard.caido { filter: grayscale(1) brightness(.8); }
+.lcard.caido:hover { filter: grayscale(.6) brightness(.95); }
+.lc-caido { position: absolute; top: 10px; right: 12px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; font: 700 10.5px / 1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--surface); }
+.lc-caido .gi { width: 13px; height: 13px; }
+
+.caida-fx { position: fixed; inset: 0; z-index: 95; cursor: pointer; display: grid; place-items: center; }
+.cf-velo { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(14, 12, 12, .9), rgba(0, 0, 0, .98) 70%);
+  -webkit-mask: radial-gradient(circle at 50% 45%, #000 var(--luto-r), transparent calc(var(--luto-r) + 30vmax)); mask: radial-gradient(circle at 50% 45%, #000 var(--luto-r), transparent calc(var(--luto-r) + 30vmax));
+  animation: cf-cierra 1.6s cubic-bezier(.3, 0, .2, 1) forwards; }
+@keyframes cf-cierra { from { --luto-r: 0px; opacity: 0; } 25% { opacity: 1; } to { --luto-r: 120vmax; opacity: 1; } }
+.cf-centro { position: relative; display: grid; justify-items: center; gap: 8px; color: #d9d4ca; text-align: center; opacity: 0; animation: cf-aparece 3.4s var(--ease-out) .5s forwards; }
+.cf-runa { position: absolute; left: 50%; top: 60px; width: 230px; height: 230px; margin: -115px 0 0 -115px; color: #8f8a80; opacity: .6; animation: girar 30s linear infinite reverse; }
+.cf-runa .r-anillo, .cf-runa .r-geo { stroke-dasharray: 1; animation: trazar 2s var(--ease-out) both .6s; }
+.cf-ico { position: relative; width: 120px; height: 120px; display: grid; place-items: center; }
+.cf-ico .gi { width: 70px; height: 70px; filter: drop-shadow(0 0 20px rgba(200, 60, 40, .55)); color: #c9453a; animation: cf-apaga 3s ease-in forwards 1.2s; }
+@keyframes cf-apaga { to { color: #7b7770; filter: drop-shadow(0 0 0 transparent); } }
+.cf-tit { margin-top: 22px; font: 700 clamp(30px, 8vw, 52px) / 1 var(--display-deco); letter-spacing: .16em; color: #e8e2d6; text-shadow: 0 0 30px rgba(0, 0, 0, .9); animation: letras 2s var(--ease-out) .7s both; }
+.cf-nombre { font: 500 var(--fs-l) / 1 var(--display); letter-spacing: .3em; text-transform: uppercase; color: #a39d92; }
+@keyframes cf-aparece { 0% { opacity: 0; transform: scale(1.08); filter: blur(10px); } 20% { opacity: 1; transform: none; filter: none; } 85% { opacity: 1; } 100% { opacity: .9; } }
+.caida-fx.fuera { animation: cf-fuera .7s var(--ease) forwards; }
+@keyframes cf-fuera { to { opacity: 0; } }
+
+.revive-fx { position: fixed; inset: 0; z-index: 95; pointer-events: none; }
+.rv-luz { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 246, 220, .95), rgba(255, 214, 120, .55) 35%, rgba(255, 190, 80, .12) 60%, transparent 70%); animation: rv-luz 1.5s cubic-bezier(.3, 0, .2, 1) forwards; }
+@keyframes rv-luz { 0% { width: 0; height: 0; opacity: 1; } 45% { opacity: 1; } 100% { width: 320vmax; height: 320vmax; opacity: 0; } }
+.rv-runa { position: absolute; left: var(--x); top: var(--y); width: 260px; height: 260px; margin: -130px 0 0 -130px; color: #FFD46E; filter: drop-shadow(0 0 12px rgba(255, 210, 110, .9)); animation: rv-runa 1.6s var(--ease-out) forwards; }
+@keyframes rv-runa { 0% { transform: scale(.2) rotate(-90deg); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(2.4) rotate(40deg); opacity: 0; } }
+body.reviviendo .mm-lapida { animation: lapida-out .7s var(--ease) forwards; }
+@keyframes lapida-out { to { opacity: 0; transform: translateY(-14px) scale(.98); filter: blur(4px) brightness(1.6); } }

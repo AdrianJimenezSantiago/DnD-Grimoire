@@ -36,6 +36,7 @@ import { openVida, openEstados, danar, sanar, tirarSalvacionMuerte, estabilizar,
 import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
+import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
 import { alternarCaracteristica } from '../ui/vitales.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
@@ -77,7 +78,7 @@ function moreMenuHtml() {
   const tile = (cmd, ico, label, full, i) => `<button type="button" role="menuitem" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}" aria-label="${esc(full || label)}"><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}</span></button>`;
   const fila = (cmd, ico, label, extra = '') => `<button type="button" role="menuitem" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
   let i = 0;
-  const personaje = ch ? [
+  const personaje = ch && estaMuerto(ch) ? tile('home', icon('users'), 'Personajes', 'Cambiar de personaje', i++) : ch ? [
     tile('rules', icon('sliders'), 'Rasgos', 'Rasgos: progresión y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Inventario', 'Inventario: objetos, monedas y carga', i++),
     tile('historia', gi('libro', 'icon'), 'Historia', '', i++), tile('diario', icon('quill'), 'Diario', 'Diario de sesión', i++),
     tile('bestiario', gi('bestia', 'icon'), 'Bestiario', '', i++), tile('home', icon('users'), 'Personajes', 'Cambiar de personaje', i++),
@@ -138,6 +139,7 @@ const COMMANDS = {
   estabilizar: () => S.cur() && estabilizar(S),
   revivir: () => S.cur() && revivir(S),
   combate: el => alternarCombate(el),
+  revivido: el => S.cur() && resucitar(el, () => revivir(S)),
   turno: () => nuevoTurno(),
   manual: () => openManual(),
   print: () => { setEditing(false); setTimeout(() => print(), 80); },
@@ -153,6 +155,7 @@ const COMMANDS = {
 function run(cmd, el) {
   const abierto = openMenu?.id;
   closeMenu();
+  if (estaMuerto(S.cur()) && !ordenPermitida(cmd)) { toast(`<b>${esc(S.cur().nombre)}</b> ha caído: su hoja queda sellada hasta que alguien lo traiga de vuelta.`, [{ label: 'He sido revivido', hl: true, fn: () => run('revivido', document.querySelector('.mm-revivir')) }]); return; }
   if ((cmd === 'more' && abierto === 'moreMenu') || (cmd === 'rest' && abierto === 'restMenu')) return;
   COMMANDS[cmd]?.(el);
 }

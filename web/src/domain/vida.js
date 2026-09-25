@@ -21,7 +21,7 @@ export const ESTADOS = [
 export const NOMBRE_ESTADO = Object.fromEntries(ESTADOS.map(([k, n]) => [k, n]));
 export const RESUMEN_ESTADO = Object.fromEntries(ESTADOS.map(([k, , t]) => [k, t]));
 
-export const VIDA0 = () => ({ pg: null, temp: 0, maxManual: null, dadosUsados: {}, muerte: { exitos: 0, fallos: 0 }, estable: false, estados: [], agotamiento: 0, inspiracion: false });
+export const VIDA0 = () => ({ pg: null, temp: 0, maxManual: null, dadosUsados: {}, muerte: { exitos: 0, fallos: 0 }, estable: false, estados: [], agotamiento: 0, inspiracion: false, caida: null });
 export function normVida(v) {
   const x = { ...VIDA0(), ...(v && typeof v === 'object' ? v : {}) };
   x.pg = x.pg == null || x.pg === '' ? null : Math.max(0, parseInt(x.pg, 10) || 0);
@@ -33,6 +33,7 @@ export function normVida(v) {
   x.estados = [...new Set((Array.isArray(x.estados) ? x.estados : []).filter(k => NOMBRE_ESTADO[k]))];
   x.agotamiento = Math.max(0, Math.min(6, parseInt(x.agotamiento, 10) || 0));
   x.inspiracion = !!x.inspiracion;
+  x.caida = x.caida && typeof x.caida === 'object' ? { t: +x.caida.t || 0, causa: String(x.caida.causa || ''), ronda: x.caida.ronda ?? null } : null;
   return x;
 }
 export const vidaDe = ch => (ch.vida && ch.vida.muerte && ch.vida.dadosUsados && Array.isArray(ch.vida.estados) ? ch.vida : (ch.vida = normVida(ch.vida)));
@@ -61,19 +62,24 @@ export function dadosDeGolpe(ch) {
 
 export const cdConcentracion = dano => Math.min(30, Math.max(10, Math.floor(dano / 2)));
 
-export function aplicarDano(ch, cantidad) {
+export const CAUSAS = { salvaciones: 'Tres fallos en las salvaciones contra muerte', masivo: 'Daño masivo', agotamiento: 'Agotamiento extremo', dano: 'Heridas recibidas a 0 PG' };
+export function marcarCaida(ch, causa) {
+  const v = vidaDe(ch); if (v.caida) return;
+  v.caida = { t: Date.now(), causa, ronda: ch.combate?.activo ? ch.combate.ronda : null };
+}
+export function aplicarDano(ch, cantidad, { critico = false } = {}) {
   const v = vidaDe(ch), max = pgMaximo(ch), antes = pgActuales(ch), n = Math.max(0, Math.floor(cantidad) || 0);
   const r = { absorbido: 0, recibido: n, cayo: false, muerte: false, fallo: false, concentracion: null };
-  if (!n) return r;
+  if (!n || estadoVital(ch) === 'muerto') return r;
   r.absorbido = Math.min(v.temp, n); v.temp -= r.absorbido;
   const resto = n - r.absorbido;
   if (antes === 0 && resto > 0) {
-    if (resto >= max) { v.muerte.fallos = 3; r.muerte = true; }
-    else { v.muerte.fallos = Math.min(3, v.muerte.fallos + 1); r.fallo = true; if (v.muerte.fallos >= 3) r.muerte = true; }
+    if (resto >= max) { v.muerte.fallos = 3; r.muerte = true; marcarCaida(ch, 'masivo'); }
+    else { v.muerte.fallos = Math.min(3, v.muerte.fallos + (critico ? 2 : 1)); r.fallo = true; if (v.muerte.fallos >= 3) { r.muerte = true; marcarCaida(ch, 'dano'); } }
     v.estable = false;
   } else if (resto > 0) {
     const queda = antes - resto;
-    if (queda <= 0) { r.cayo = true; if (-queda >= max) { r.muerte = true; v.muerte = { exitos: 0, fallos: 3 }; } else v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
+    if (queda <= 0) { r.cayo = true; if (-queda >= max) { r.muerte = true; v.muerte = { exitos: 0, fallos: 3 }; marcarCaida(ch, 'masivo'); } else v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
     v.pg = Math.max(0, queda);
   }
   if (ch.play?.conc && n > 0) r.concentracion = { cd: cdConcentracion(n), conjuro: ch.play.conc };
@@ -82,7 +88,7 @@ export function aplicarDano(ch, cantidad) {
 }
 export function curar(ch, cantidad) {
   const v = vidaDe(ch), max = pgMaximo(ch), antes = pgActuales(ch), n = Math.max(0, Math.floor(cantidad) || 0);
-  if (!n || v.muerte.fallos >= 3) return 0;
+  if (!n || estadoVital(ch) === 'muerto') return 0;
   const despues = Math.min(max, antes + n);
   v.pg = despues >= max ? null : despues;
   if (antes === 0 && despues > 0) { v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
@@ -99,18 +105,20 @@ export function fijarPg(ch, valor) {
 }
 
 export function salvacionMuerte(ch, d20) {
-  const v = vidaDe(ch);
+  const v = vidaDe(ch), e = estadoVital(ch);
+  if (e === 'muerto') return 'muere';
+  if (e !== 'moribundo') return 'nada';
   if (d20 === 20) { v.pg = 1; v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; return 'revive'; }
   if (d20 === 1) v.muerte.fallos = Math.min(3, v.muerte.fallos + 2);
   else if (d20 >= 10) v.muerte.exitos = Math.min(3, v.muerte.exitos + 1);
   else v.muerte.fallos = Math.min(3, v.muerte.fallos + 1);
-  if (v.muerte.fallos >= 3) return 'muere';
-  if (v.muerte.exitos >= 3) { v.estable = true; return 'estable'; }
+  if (v.muerte.fallos >= 3) { marcarCaida(ch, 'salvaciones'); return 'muere'; }
+  if (v.muerte.exitos >= 3) { v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; return 'estable'; }
   return d20 >= 10 ? 'exito' : 'fallo';
 }
 export const estadoVital = ch => {
   const v = vidaDe(ch);
-  if (v.muerte.fallos >= 3) return 'muerto';
+  if (v.muerte.fallos >= 3 || v.agotamiento >= 6) return 'muerto';
   if (pgActuales(ch) > 0) return 'vivo';
   return v.estable ? 'estable' : 'moribundo';
 };
@@ -124,10 +132,16 @@ export function gastarDadoGolpe(ch, dado, tirada) {
   return { total, ganado };
 }
 
+export function revivir(ch) {
+  const v = vidaDe(ch);
+  v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; v.pg = 1; v.temp = 0; v.caida = null;
+  if (v.agotamiento >= 6) v.agotamiento = 5;
+  v.estados = v.estados.filter(k => k !== 'inconsciente');
+}
 export function descansoLargoVida(ch) {
   const v = vidaDe(ch);
   const antes = { pg: pgActuales(ch), agotamiento: v.agotamiento, dados: Object.values(v.dadosUsados).reduce((a, b) => a + b, 0) };
-  if (v.muerte.fallos >= 3) return antes;
+  if (estadoVital(ch) === 'muerto') return antes;
   v.pg = null; v.temp = 0; v.dadosUsados = {}; v.muerte = { exitos: 0, fallos: 0 }; v.estable = false;
   v.agotamiento = Math.max(0, v.agotamiento - 1);
   return antes;
