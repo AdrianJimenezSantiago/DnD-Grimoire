@@ -78,6 +78,7 @@ export function cast(S, bi, mode, L) {
   haptic();
   toast(msg + fx.msg, [...extra, undoBtn(S, h)]);
   if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' ? L : null), 350);
+  return true;
 }
 
 function aplicarmeConjuro(S, ef, s, L) {
@@ -94,8 +95,8 @@ export function quickCast(S, bi, force) {
     const fx = castEffects(S, ch, P, s, 'truco', 0);
     S.act(`${s.es} (truco)`, () => {});
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
-    if (tieneTiradas(tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return; }
-    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return;
+    if (tieneTiradas(tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return true; }
+    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return true;
   }
   if (!force && !isPrepared(e)) {
     if (s.ritual && P.ritualLibro) return cast(S, bi, 'ritual');

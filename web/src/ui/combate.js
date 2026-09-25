@@ -1,8 +1,10 @@
 import { esc, norm } from '../core/util.js';
-import { perfil, sgn, magiaPara } from '../domain/reglas2024.js';
+import { perfil, sgn, magiaPara, nivelTotal } from '../domain/reglas2024.js';
 import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../domain/rasgos.js';
 import { rasgosEnJuego } from '../domain/enJuego.js';
-import { biblioteca } from '../domain/catalogo.js';
+import { biblioteca, tiradasConjuro } from '../domain/catalogo.js';
+import { tieneTiradas, dadosPara } from '../domain/tiradas.js';
+import { slotsOf, freeOf, firstFreeFrom } from './sheet.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo } from '../domain/combate.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../domain/habilidades.js';
@@ -24,15 +26,35 @@ function ticks(ch, r) {
   return `<span class="rticks">${Array.from({ length: r.max }, (_, i) => `<button type="button" class="rtick ${i >= left ? 'on' : ''}" data-rtick="${r.id}|${i}" aria-label="${esc(r.nombre)}: uso ${i + 1} ${i >= left ? 'gastado' : 'disponible'}"></button>`).join('')}</span>`;
 }
 
+const AB3 = { fuerza: 'Fue', destreza: 'Des', 'constitución': 'Con', inteligencia: 'Int', 'sabiduría': 'Sab', carisma: 'Car', fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' };
+const dadoTxt = d => `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? `+${d.bono}` : d.bono) : ''}`;
+function datosConjuro(ch, P, s, Pm) {
+  const r = tiradasConjuro(s); if (!r || !tieneTiradas(r)) return { clave: Pm.cd != null && /salvaci|saving/i.test(s.desc || '') ? `CD ${Pm.cd}` : '', dano: '' };
+  const clave = r.ataque ? `${sgn(Pm.atk ?? P.atk)} ataque` : r.salvacion ? `CD ${Pm.cd ?? P.cd} ${AB3[norm(r.salvacion)] || AB3[String(r.salvacion).toLowerCase()] || ''}`.trim() : '';
+  const ds = dadosPara(r, { nivelPj: nivelTotal(ch), nivelConjuro: s.level, nivelEspacio: s.level || null });
+  const dano = ds.length ? `${dadoTxt(ds[0])}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
+  return { clave, dano, cura: !!r.curacion && !r.danos.length, mitad: r.mitad };
+}
+function pipsEspacio(ch, P, L) {
+  const tot = slotsOf(P, L); if (!tot) return '';
+  const libres = freeOf(ch, P, L);
+  return `<span class="cb-pips" title="${libres} de ${tot} espacios de nivel ${L} libres">${Array.from({ length: tot }, (_, i) => `<i class="${i < libres ? 'on' : ''}"></i>`).join('')}</span>`;
+}
+
 function acciones(ch, db) {
   const P = perfil(ch), mAt = modsTirada(ch, { sobre: 'ataque' }).filter(m => !/^Agotamiento/.test(m.fuente)), modo = resolverModo(mAt);
   const marca = modo === 'normal' ? mAt.filter(m => m.efecto === 'dado' || m.efecto === 'plano').map(m => `<i class="cb-at-m ${m.mal ? 'mal' : 'bien'}" title="${esc(m.fuente)}">${esc(fmtMod(m))}</i>`).join('')
     : `<i class="cb-at-m ${modo === 'ventaja' ? 'bien' : 'mal'}" title="${esc(mAt.filter(m => m.efecto === modo).map(m => m.fuente).join(', '))}">${modo === 'ventaja' ? '▲' : '▼'}</i>` + mAt.filter(m => m.efecto === 'dado').map(m => `<i class="cb-at-m ${m.mal ? 'mal' : 'bien'}">${esc(fmtMod(m))}</i>`).join('');
-  const grupos = { accion: [], adicional: [], reaccion: [] };
+  const nuevo = () => ({ armas: [], trucos: [], niveles: {}, rasgos: [] });
+  const grupos = { accion: nuevo(), adicional: nuevo(), reaccion: nuevo() };
+  let n = 0;
   for (const o of equipoDe(ch).objetos.filter(x => x.arma).sort((a, b) => b.equipado - a.equipado)) {
-    const a = ataqueArma(ch, o);
-    grupos.accion.push(`<div class="cb-it arma ${o.equipado ? 'eq' : ''}" data-leer="arma:${o.id}"><span class="cb-ico">${gi('o_arma')}</span><span class="cb-t"><b>${esc(o.nombre)}</b><small>${esc([o.arma.distancia, ...(o.arma.props || []).slice(0, 3), o.arma.maestria ? `maestría: ${o.arma.maestria}` : ''].filter(Boolean).join(' · '))}</small></span>
-      <span class="cb-bts"><button type="button" class="cb-roll" data-cbataque="${o.id}">${gi('d20')}${esc(a.ataque)}${marca}</button><button type="button" class="cb-roll dano" data-cbdano="${o.id}">${gi('dados')}${esc(a.dano)}</button></span></div>`);
+    const a = ataqueArma(ch, o), props = (o.arma.props || []).map(x => x.replace(/\s*\(.*$/, ''));
+    grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
+      <span class="cb-a-ico">${gi('o_arma')}</span>
+      <span class="cb-a-t"><b>${esc(o.nombre)}</b><small>${o.equipado ? '<em class="cb-eq">en mano</em>' : ''}${esc([o.arma.distancia, ...props.slice(0, 3)].filter(Boolean).join(' · '))}</small>
+        ${o.arma.maestria ? `<span class="cb-maes" title="Maestría">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}</span>
+      <span class="cb-a-bts"><button type="button" class="cb-tir at" data-cbataque="${o.id}"><small>Ataque</small><b>${esc(a.ataque)}</b>${marca}</button><button type="button" class="cb-tir dn" data-cbdano="${o.id}"><small>Daño</small><b>${esc(a.dano.replace(/\s+\S+$/, ''))}</b><em>${esc(a.tipo || '')}</em></button></span></div>`);
   }
   const conj = [];
   if (db) ch.book.forEach((e, bi) => {
@@ -44,21 +66,47 @@ function acciones(ch, db) {
   conj.sort((a, b) => a.s.level - b.s.level || a.s.es.localeCompare(b.s.es, 'es'));
   const recupera = reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.efecto === 'recuperar');
   for (const { e, bi, s, g } of conj) {
-    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), niv = s.level ? `Nivel ${s.level}` : 'Truco';
+    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm);
     const rec = s.level > 0 && recupera.find(r => schoolMatch(s, r.escuela));
-    const escTxt = s.escuela ? `<em class="cb-esc">${esc(s.escuela)}</em>` : '';
-    const recTxt = rec ? `<span class="cb-rec" title="${esc(`${rec.nombre}: si lo lanzas con un espacio de nivel ${rec.espacioMin || 1} o más, recuperas un espacio gastado de nivel inferior (máximo ${rec.efectoN || 5}).`)}">${icon('reset')}Recupera espacio</span>` : '';
-    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}" data-leer="conj:${bi}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}${recTxt}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em> · ${escTxt}${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
-      <span class="cb-bts"><button type="button" class="cb-roll lanzar" data-cast="${bi}">${gi(ico || 'libro')}Lanzar</button></span></div>`);
+    const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !firstFreeFrom(ch, P, s.level);
+    const flags = [s.conc ? '<i class="hz-f conc" title="Concentración">C</i>' : '', s.ritual ? '<i class="hz-f rit" title="Ritual">R</i>' : '', gratis ? '<i class="hz-f gratis" title="Uso gratis disponible">gratis</i>' : '',
+      rec ? `<i class="hz-f rec" title="${esc(`${rec.nombre}: con un espacio de nivel ${rec.espacioMin || 1} o más recuperas un espacio gastado de nivel inferior (máximo ${rec.efectoN || 5}).`)}">${icon('reset')}espacio</i>` : ''].join('');
+    const html = `<button type="button" class="cb-hz ${sinEsp ? 'agotado' : ''} ${ch.play.conc === s.es ? 'activo' : ''}" style="--i:${n++}" data-sc="${ico.slice(4)}" data-cast="${bi}" data-leer="conj:${bi}" aria-label="Lanzar ${esc(s.es)}${sinEsp ? ' (sin espacios)' : ''}">
+      <span class="hz-ico">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}">${s.level || 'T'}</i></span>
+      <span class="hz-t"><b>${esc(s.es)}</b><small><em class="cb-esc">${esc(s.escuela || '')}</em>${s.alcance ? ` · ${esc(s.alcance)}` : ''}</small><span class="hz-flags">${flags}</span></span>
+      <span class="hz-dato">${d.clave ? `<b>${esc(d.clave)}</b>` : ''}${d.dano ? `<small class="${d.cura ? 'cura' : ''}">${esc(d.dano)}${d.mitad ? ' · ½' : ''}</small>` : ''}${sinEsp ? '<small class="sin">sin espacios</small>' : ''}</span>
+      <span class="hz-go" aria-hidden="true">${gi(ico || 'libro')}</span></button>`;
+    if (s.level) (grupos[g].niveles[s.level] ||= []).push(html); else grupos[g].trucos.push(html);
   }
   const lib = biblioteca();
   for (const r of rasgosEnJuego(ch, lib, reglasVisibles(ch))) {
     if (!grupos[r.grupo]) continue;
-    grupos[r.grupo].push(`<div class="cb-it rasgo" data-leer="rasgo:${esc(r.clave)}"><span class="cb-ico">${gi(r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, '') || 'dote')}</span>
-      <button type="button" class="cb-t cb-leer" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b><small>${esc(r.resumen || r.etiqueta)}</small></button>
-      <span class="cb-bts">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}${r.recurso ? ticks(ch, r.recurso) : ''}</span></div>`);
+    const agot = r.recurso && usosGastados(ch, r.recurso) >= r.recurso.max;
+    grupos[r.grupo].rasgos.push(`<div class="cb-rg ${agot ? 'agotado' : ''}" style="--i:${n++}" data-leer="rasgo:${esc(r.clave)}"><span class="cb-rg-ico">${gi(r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, '') || 'dote')}</span>
+      <button type="button" class="cb-rg-t" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b><small>${esc(r.resumen || r.etiqueta)}</small></button>
+      ${r.numeros.length || r.recurso ? `<span class="cb-rg-num">${r.numeros.map(x => `<span class="ej-num" title="${esc(x.nombre)}">${esc(x.valor)}</span>`).join('')}${r.recurso ? ticks(ch, r.recurso) : ''}</span>` : ''}</div>`);
   }
   return grupos;
+}
+function ataquesPorAccion(ch) {
+  const r = rasgosEnJuego(ch, biblioteca(), []).find(x => /^ataque (adicional|extra)/.test(norm(x.nombre)));
+  if (!r) return 1;
+  const v = parseInt(r.numeros.find(x => /ataques/i.test(x.nombre))?.valor, 10);
+  return v > 1 ? v : 2;
+}
+const SIGILO = { accion: 'e-accion', adicional: 'e-adicional', reaccion: 'e-reaccion' };
+const VACIO = { accion: 'Atacar, esquivar, correr, destrabarse, ayudar, esconderse, buscar, usar un objeto…', adicional: 'Nada que la use ahora mismo.', reaccion: 'Ataque de oportunidad cuando un enemigo sale de tu alcance.' };
+function grupoHtml(ch, P, c, k, t, g, extra = '') {
+  const subs = [];
+  if (g.armas.length) subs.push(['Armas', 'armas', g.armas, `${ataquesPorAccion(ch) > 1 ? `<span class="cb-sub-n">${ataquesPorAccion(ch)} ataques por acción</span>` : ''}`]);
+  if (g.trucos.length) subs.push(['Trucos', '', g.trucos, '<span class="cb-sub-n">a voluntad</span>']);
+  for (const L of Object.keys(g.niveles).map(Number).sort((a, b) => a - b)) subs.push([`Nivel ${L}`, `n${L}`, g.niveles[L], pipsEspacio(ch, P, L)]);
+  if (g.rasgos.length) subs.push(['Rasgos', 'rasgos', g.rasgos, '']);
+  const gastada = c.turno[k];
+  return `<section class="cb-grupo g-${k} ${gastada ? 'gastada' : ''}" aria-label="${t}">
+    <header class="cb-g-cab"><i class="cb-g-sig ${SIGILO[k]}" aria-hidden="true"></i><h3>${t}</h3>${extra}
+      <button type="button" class="cb-g-estado" data-eco="${k}" aria-pressed="${gastada}" title="Marcar como ${gastada ? 'disponible' : 'usada'}">${gastada ? 'usada' : 'disponible'}</button></header>
+    ${subs.length ? subs.map(([tt, cls, items, cola]) => `<div class="cb-sub ${cls}"><h4><span>${tt}</span>${cola}</h4><div class="cb-sub-g">${items.join('')}</div></div>`).join('') : `<p class="cb-vacio">${VACIO[k]}</p>`}</section>`;
 }
 
 const ECO_CORTO = { adicional: 'Adicional', movimiento: 'Mover' };
@@ -80,8 +128,6 @@ export function combateHtml(ch, db) {
   const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b e-${k} ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" aria-label="${t}${c.turno[k] ? ': gastada' : ''}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i><span>${ECO_CORTO[k] ? `<em class="l-larga">${t}</em><em class="l-corta">${ECO_CORTO[k]}</em>` : t}</span></button>`).join('');
   const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b></span>
     <button type="button" data-tirar="salv:con">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
-  const col = (k, t) => `<section class="cb-col cb-${k} ${c.turno[k] ? 'gastada' : ''}"><h3><span>${t}</span><small>${c.turno[k] ? 'usada este turno' : 'disponible'}</small></h3>
-    ${g[k].length ? g[k].join('') : `<p class="cb-vacio">${k === 'accion' ? 'Atacar, lanzar, esquivar, correr, ayudar, esconderse, buscar, usar un objeto…' : k === 'adicional' ? 'Nada que la use ahora mismo.' : 'Ataque de oportunidad cuando un enemigo sale de tu alcance.'}</p>`}</section>`;
   return `<section class="cb-mando" aria-label="Estado del combate">
     ${orbeHtml(ch)}
     <header class="cb-m-cab">
@@ -101,11 +147,11 @@ export function combateHtml(ch, db) {
     </div>
   </section>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
-    ${conc}${estadosHtml(ch)}${modsHtml}
+    ${conc}<section class="cb-cond">${estadosHtml(ch)}${modsHtml}</section>
     ${pruebasCombateHtml(ch)}
-    <p class="cb-pista">${gi('libro')}<span><b>Mantén pulsado</b> un conjuro, arma, rasgo, estado o acción para leerlo sin salir del combate.</span></p>
-    <div class="cb-cols">${col('accion', 'Acción')}${col('adicional', 'Acción adicional')}${col('reaccion', 'Reacción')}</div>
-    ${pasivos.length ? `<details class="cb-pasivos"><summary>Siempre activo <small>${pasivos.length}</small>${icon('chevron')}</summary><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(n => `<span class="ej-num">${esc(n.valor)}</span>`).join('')}</button>`).join('')}</div></details>` : ''}
+    <div class="cb-ars-cab"><h3>${gi('combate')}Qué puedes hacer</h3><span class="cb-pista"><b>Toca</b> para usar · <b>mantén</b> para leer</span></div>
+    <div class="cb-ars">${grupoHtml(ch, P, c, 'accion', 'Acción', g.accion)}${grupoHtml(ch, P, c, 'adicional', 'Acción adicional', g.adicional)}${grupoHtml(ch, P, c, 'reaccion', 'Reacción', g.reaccion, '<span class="cb-g-nota">también en turnos ajenos</span>')}</div>
+    ${pasivos.length ? `<section class="cb-siempre"><h3>${gi('estrellas')}Siempre activo</h3><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}" data-leer="rasgo:${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(x => `<span class="ej-num">${esc(x.valor)}</span>`).join('')}</button>`).join('')}</div></section>` : ''}
     <div class="cb-fin"><button type="button" class="cb-salir" data-cmd="combate">${gi('gloria')}Terminar combate</button></div>`;
 }
 
