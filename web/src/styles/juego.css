@@ -429,3 +429,8 @@ body.on-landing.combate::before { display: none; }
   .bar .act button .icon { width: 20px; height: 20px; }
   .bar .act #bCombate[aria-pressed="true"] { font-size: var(--fs-s); gap: 8px; }
 }
+@media (min-width: 701px) {
+  dialog .dfoot { padding: 14px 38px 22px; }
+  dialog.modal { padding: 30px 34px 30px; }
+}
+.md-btns button { border-radius: var(--r-s); }
