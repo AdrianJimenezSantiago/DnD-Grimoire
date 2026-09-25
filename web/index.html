@@ -104,6 +104,14 @@
   <div class="dfoot"><span class="bs-teclas">↑ ↓ para moverte · Intro para abrir</span><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
+<dialog id="elegirDlg" class="tall" aria-labelledby="elTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="elTitle"></h2><div class="dsub" id="elSub"></div>
+    <input type="search" id="elQ" class="el-q" autocomplete="off" enterkeyhint="done" aria-label="Buscar">
+    <div class="seg el-grupos" role="tablist" aria-label="Grupos" id="elGrupos"></div></div>
+  <div class="dbody" id="elBody"></div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cancelar</button></div>
+</dialog>
+
 <dialog id="bibDlg" class="tall" aria-labelledby="bibTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="bibTitle">Biblioteca</h2><div class="dsub" id="bibSub"></div>
     <div class="seg bib-tabs" role="tablist" aria-label="Secciones de la biblioteca" id="bibTabs"></div></div>
@@ -260,6 +268,6 @@
   <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
-<datalist id="dl_especie"></datalist><datalist id="dl_trasfondo"></datalist>
+
 </body>
 </html>

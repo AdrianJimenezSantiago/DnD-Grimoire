@@ -52,6 +52,7 @@ import * as formas from './ui/dialogs/formas.js';
 import * as vida from './ui/dialogs/vida.js';
 import * as dados from './ui/dialogs/dados.js';
 import * as buscar from './ui/dialogs/buscar.js';
+import * as elegir from './ui/dialogs/elegir.js';
 import { tour } from './ui/tour.js';
 import { initFondo } from './ui/fondo.js';
 import { initMagia } from './ui/magia.js';
@@ -75,7 +76,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); dados.init(S); buscar.init(S);
+  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); dados.init(S); buscar.init(S); elegir.init();
   const app = await eventos.init(S);
 
   const TOUR_INICIO = [

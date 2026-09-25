@@ -1,3 +1,4 @@
+import { campoElegible, ponerValor, elegirCriatura } from '../elecciones.js';
 import { esc } from '../../core/util.js';
 import { TIPOS, diarioDe, nuevaSesion, nuevaNota, paraRecordar, buscarDiario, fechaLarga } from '../../domain/diario.js';
 import { $, on } from '../dom.js';
@@ -107,8 +108,8 @@ function ficha() {
   const perfilHtml = pf ? `<div class="bx-perfil">${gi('criatura')}<span><b>${esc(pf.nombre)}</b><small>${esc(pf.tipo)}${pf.vdNum != null ? ` · VD ${vdTexto(pf.vdNum)}` : ''} · CA ${pf.ca ?? '—'} · PG ${pf.pgMedia ?? '—'}</small></span>
       <button type="button" data-bxperfil="${esc(pf.clave)}">Ver perfil</button>${x.perfil === pf.clave ? '' : `<button type="button" class="gold" data-bxrellenar="${esc(pf.clave)}">Rellenar con su perfil</button>`}</div>`
     : perfiles.length ? '' : '<p class="note bx-sinperfil">Anota a mano lo que sepas. Con el Manual del Jugador importado, al escribir el nombre de una criatura de su apéndice la app rellena tipo, CA, PG, daños, estados y salvaciones.</p>';
-  $('#diBody').innerHTML = `${perfiles.length ? `<datalist id="bxSug">${perfiles.map(p => `<option value="${esc(p.nombre)}">`).join('')}</datalist>` : ''}
-    <div class="frow"><label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off" ${perfiles.length ? 'list="bxSug"' : ''}></label>
+  $('#diBody').innerHTML = `
+    <div class="frow">${perfiles.length ? `<div class="f"><span>Nombre</span>${campoElegible('id="bxNom" aria-label="Nombre de la criatura"', x.nombre, 'criatura', 'bestia', 'Por ejemplo: trol del puente')}</div>` : `<label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off"></label>`}
       <label class="f">Tipo<select id="bxTip"><option value="">Sin clasificar</option>${TIPOS_CRIATURA.map(t => `<option ${x.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
     <div class="frow" style="margin-top:10px"><label class="f">CA aproximada<input id="bxCa" value="${esc(x.ca)}" inputmode="numeric" placeholder="¿?" autocomplete="off"></label>
       <label class="f">Puntos de golpe aprox.<input id="bxPg" value="${esc(x.pg)}" placeholder="Aguantó unos 60" autocomplete="off"></label></div>
@@ -174,6 +175,7 @@ export function init(store) {
   on(root, 'click', '[data-bxsalv]', (e, b) => conCriatura(x => { const k = b.dataset.bxsalv, v = { '': 'debil', debil: 'fuerte', fuerte: '' }[x.salv[k] || '']; if (v) x.salv[k] = v; else delete x.salv[k]; }));
   on(root, 'click', '[data-bxset]', (e, b) => conCriatura(x => { x[b.dataset.bxset] = b.dataset.v; }));
   on(root, 'click', '[data-bxcj]', (e, b) => conCriatura(x => { const k = b.dataset.bxcj; if (x.conjuros[k] === b.dataset.v) delete x.conjuros[k]; else x.conjuros[k] = b.dataset.v; }));
+  on(root, 'click', '[data-elegir="criatura"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirCriatura(inp.value); if (v != null) ponerValor(inp, v); });
   root.addEventListener('change', e => {
     if (e.target.id === 'bxLink' && e.target.value) { const id = e.target.value; S.edit((db, c) => { const x = criatura(c, id); if (x && !x.sesiones.includes(V.sid)) x.sesiones.push(V.sid); }); sesion(); }
     if (e.target.id === 'bxTipo') { V.btipo = e.target.value; bestiario(); }

@@ -1,5 +1,5 @@
 import { clamp, clone, esc, joinY, uid } from '../../core/util.js';
-import { ABILS, ABIL_NAME, CLASES, ESPECIES, TRASFONDOS, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase } from '../../domain/reglas2024.js';
+import { ABILS, ABIL_NAME, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase } from '../../domain/reglas2024.js';
 import { reglas } from '../../domain/rasgos.js';
 import { levelDiff } from '../../domain/progresion.js';
 import { blankChar, normChar, THEO } from '../../domain/modelo.js';
@@ -18,6 +18,7 @@ import { subclasesDe, biblioteca } from '../../domain/catalogo.js';
 import { openRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases } from '../subclases.js';
 import { fileStore, shareJson } from '../../platform/native.js';
+import { campoElegible, ponerValor, elegirDote, elegirEspecie, elegirTrasfondo } from '../elecciones.js';
 import { gi } from '../tema.js';
 import { SCHEMA } from '../../domain/modelo.js';
 import { HABILIDADES, AB_CORTA, HAB_CLASE, NOMBRE_HAB, habilidadesTrasfondo, competenciasIniciales, periciasDisponibles, bonoHabilidad, salvacionesCompetentes } from '../../domain/habilidades.js';
@@ -26,7 +27,6 @@ import { CLASES_INFO } from '../../domain/clases2024.js';
 let S, onCreated;
 let MC = [], DOTES = [], HAB = {}, SALV = [];
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
-const fill = (id, arr) => { $(id).innerHTML = arr.map(v => `<option value="${esc(v)}"></option>`).join(''); };
 
 export function openCharacter(id) {
   if (!S.db.chars.some(c => c.id === id)) return;
@@ -84,8 +84,8 @@ export function openCharForm(id) {
   $('#charForm').innerHTML = `
   <section class="fsec"><h3>Quién es</h3>${id ? `<div class="f-ret">${avatarHtml(c, 'lg')}<div><b>Retrato</b><p class="note">${c.retrato ? 'Puedes reencuadrarlo o cambiarlo cuando quieras.' : 'Añade una imagen de tu personaje: aparece en la portada, la hoja y la barra superior.'}</p><button type="button" data-retrato>${c.retrato ? 'Editar retrato' : 'Añadir retrato'}</button></div></div>` : '<p class="note">Podrás añadir un retrato, su historia y su diario en cuanto lo crees.</p>'}<div class="frow">
     <label class="f" id="w_nombre">Nombre<input id="f_nombre" value="${esc(c.nombre)}" autocomplete="off" required></label>
-    <label class="f">Especie<input id="f_especie" list="dl_especie" value="${esc(c.especie)}" autocomplete="off"></label>
-    <label class="f">Trasfondo<input id="f_trasfondo" list="dl_trasfondo" value="${esc(c.trasfondo)}" autocomplete="off"></label></div></section>
+    <div class="f"><span>Especie</span>${campoElegible('id="f_especie" aria-label="Especie"', c.especie, 'especie', 'criatura', 'Elige o escribe')}</div>
+    <div class="f"><span>Trasfondo</span>${campoElegible('id="f_trasfondo" aria-label="Trasfondo"', c.trasfondo, 'trasfondo', 'trasfondo', 'Elige o escribe')}</div></div></section>
   <section class="fsec"><h3>Clase y nivel</h3><div class="frow">
     <div class="f"><span>Clase</span>${campoClase('id="f_clase" aria-label="Clase"', c.clase, Object.keys(CLASES))}<span class="hint"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende</button></span></div>
     <div class="f">Subclase<span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
@@ -95,8 +95,7 @@ export function openCharForm(id) {
     <p class="hint" id="h_mc" aria-live="polite"></p></section>
   <section class="fsec"><h3>Dotes</h3>
     <div class="dote-chips" id="f_dotes"></div>
-    <div class="dote-add"><input id="f_doteIn" list="dl_dotes" placeholder="Añadir una dote: Alerta, Iniciado en la magia (mago)…" autocomplete="off" aria-label="Añadir dote"><button type="button" id="f_doteAdd">Añadir</button></div>
-    <datalist id="dl_dotes"></datalist>
+    <button type="button" class="elg-add" id="f_doteAdd">${gi('dote')}<span><b>Añadir una dote</b><small>Elige de la lista, con su texto, o escribe cualquiera</small></span>${icon('plus')}</button>
     <p class="hint">La de origen sale de tu trasfondo. Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p></section>
   <section class="fsec"><h3>Características</h3><div class="abil">${abil}</div></section>
   <section class="fsec"><h3>Competencias</h3><p class="hint comp-hint" id="h_comp" aria-live="polite"></p>
@@ -162,13 +161,11 @@ function pintarDotes() {
   $('#f_dotes').innerHTML = (origen ? `<span class="dote-chip fija" title="Dote de origen de tu trasfondo">${esc(origen.detalle ? `${origen.nombre} (${origen.detalle})` : origen.nombre)}<small>trasfondo</small></span>` : '')
     + DOTES.map((n, i) => `<button type="button" class="dote-chip" data-dotedel="${i}" aria-label="Quitar la dote ${esc(n)}">${esc(n)}<span aria-hidden="true">×</span></button>`).join('')
     || '<span class="hint">Sin dotes todavía.</span>';
-  const lib = biblioteca().dotes;
-  fill('#dl_dotes', lib.length ? lib.map(x => x.nombre) : ['Alerta', 'Afortunado', 'Atacante salvaje', 'Duro', 'Fabricante', 'Habilidoso', 'Iniciado en la magia (clérigo)', 'Iniciado en la magia (druida)', 'Iniciado en la magia (mago)', 'Matón de taberna', 'Músico', 'Sanador']);
 }
-function anadirDote() {
-  const i = $('#f_doteIn'), n = i.value.trim(); if (!n) { i.focus(); return; }
+async function anadirDote() {
+  const n = await elegirDote({ ...readForm(), dotes: DOTES }, { titulo: 'Añadir una dote' }); if (!n) return;
   if (!DOTES.some(x => x.toLowerCase() === n.toLowerCase())) DOTES.push(n);
-  i.value = ''; pintarDotes(); sync(false); i.focus();
+  pintarDotes(); sync(false);
 }
 function slotText(P) {
   if (P.pact && !Object.keys(P.slots).some(L => +L !== P.pact.level)) return `${P.pact.n} ${P.pact.n > 1 ? 'espacios' : 'espacio'} de pacto de nivel ${P.pact.level}, que vuelven con un descanso corto.`;
@@ -230,7 +227,6 @@ function save() {
 
 export function init(store, { onNewCharacterAddSpells }) {
   S = store; onCreated = onNewCharacterAddSpells; initSubclases();
-  fill('#dl_especie', ESPECIES); fill('#dl_trasfondo', TRASFONDOS);
   const form = $('#charForm');
   const leerMc = t => { if (!t.dataset.mc) return false; const [i, k] = t.dataset.mc.split('|'); MC[+i][k] = k === 'nivel' ? clamp(parseInt(t.value, 10) || 1, 1, 19) : t.value.trim();
     if (k === 'clase') { MC[+i].subclase = ''; pintarMulticlase(); } return true; };
@@ -260,8 +256,11 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-mcdel]', (e, b) => { MC.splice(+b.dataset.mcdel, 1); pintarMulticlase(); sync(false); });
   on(form, 'click', '[data-mcstep]', (e, b) => { const [i, d] = b.dataset.mcstep.split('|').map(Number); MC[i].nivel = clamp((parseInt(MC[i].nivel, 10) || 1) + d, 1, 19); pintarMulticlase(); sync(false); });
   on(form, 'click', '#f_doteAdd', anadirDote);
+  on(form, 'click', '[data-elegir]', async (e, b) => {
+    const inp = b.closest('.elg').querySelector('input'), v = await (b.dataset.elegir === 'especie' ? elegirEspecie(inp.value) : elegirTrasfondo(inp.value));
+    if (v != null) ponerValor(inp, v);
+  });
   on(form, 'click', '[data-dotedel]', (e, b) => { DOTES.splice(+b.dataset.dotedel, 1); pintarDotes(); sync(false); });
-  form.addEventListener('keydown', e => { if (e.target.id === 'f_doteIn' && e.key === 'Enter') { e.preventDefault(); anadirDote(); } });
   on(form, 'click', '#f_conjOpen', () => { conjAbierto = true; sync(false); $('#f_aptitud').focus(); });
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);
