@@ -21,28 +21,37 @@ export const REGLAS_ESTADO = {
 };
 
 export const EFECTOS = [
-  { k: 'bendicion', nombre: 'Bendición', bueno: true, ico: 'inspiracion', texto: '+1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '1d4' }), R('salvacion', 'dado', { valor: '1d4' })] },
-  { k: 'guia', nombre: 'Guía', bueno: true, ico: 'inspiracion', texto: '+1d4 a las pruebas de la habilidad elegida.', reglas: [R('prueba', 'dado', { valor: '1d4', cond: 'si es de la habilidad elegida' })] },
-  { k: 'acelerar', nombre: 'Acelerar', bueno: true, ico: 'velocidad', texto: '+2 a la CA, ventaja en salvaciones de Destreza, velocidad doble y una acción más (limitada).', ca: 2, velX: 2, reglas: [R('salvacion', 'ventaja', { ab: 'des' })] },
-  { k: 'escudofe', nombre: 'Escudo de la fe', bueno: true, ico: 'ca', texto: '+2 a la CA.', ca: 2, reglas: [] },
-  { k: 'escudo', nombre: 'Escudo', bueno: true, ico: 'ca', texto: '+5 a la CA hasta el inicio de tu siguiente turno.', ca: 5, reglas: [] },
-  { k: 'pielrobliza', nombre: 'Piel robliza', bueno: true, ico: 'ca', texto: 'Tu CA no puede ser inferior a 17.', caMin: 17, reglas: [] },
-  { k: 'agrandar', nombre: 'Agrandar', bueno: true, ico: 'fuerza', texto: 'Ventaja en pruebas y salvaciones de Fuerza y +1d4 al daño con armas.', danoArma: '1d4',
+  { k: 'bendicion', dur: 10, conjuro: /^bendici[oó]n$/i, nombre: 'Bendición', bueno: true, ico: 'inspiracion', texto: '+1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '1d4' }), R('salvacion', 'dado', { valor: '1d4' })] },
+  { k: 'guia', dur: 10, conjuro: /^gu[ií]a$/i, nombre: 'Guía', bueno: true, ico: 'inspiracion', texto: '+1d4 a las pruebas de la habilidad elegida.', reglas: [R('prueba', 'dado', { valor: '1d4', cond: 'si es de la habilidad elegida' })] },
+  { k: 'acelerar', dur: 10, conjuro: /^acelerar$/i, nombre: 'Acelerar', bueno: true, ico: 'velocidad', texto: '+2 a la CA, ventaja en salvaciones de Destreza, velocidad doble y una acción más (limitada).', ca: 2, velX: 2, reglas: [R('salvacion', 'ventaja', { ab: 'des' })] },
+  { k: 'escudofe', dur: 100, conjuro: /^escudo de (la )?fe$/i, nombre: 'Escudo de la fe', bueno: true, ico: 'ca', texto: '+2 a la CA.', ca: 2, reglas: [] },
+  { k: 'escudo', dur: 1, conjuro: /^escudo$/i, nombre: 'Escudo', bueno: true, ico: 'ca', texto: '+5 a la CA hasta el inicio de tu siguiente turno.', ca: 5, reglas: [] },
+  { k: 'pielrobliza', dur: 600, conjuro: /^piel (robliza|de corteza)$/i, nombre: 'Piel robliza', bueno: true, ico: 'ca', texto: 'Tu CA no puede ser inferior a 17.', caMin: 17, reglas: [] },
+  { k: 'agrandar', dur: 10, nombre: 'Agrandar', bueno: true, ico: 'fuerza', texto: 'Ventaja en pruebas y salvaciones de Fuerza y +1d4 al daño con armas.', danoArma: '1d4',
     reglas: [R('prueba', 'ventaja', { ab: 'fue' }), R('salvacion', 'ventaja', { ab: 'fue' })] },
-  { k: 'zancada', nombre: 'Zancada prodigiosa', bueno: true, ico: 'velocidad', texto: '+3 m de velocidad.', vel: 3, reglas: [] },
-  { k: 'pasarsinrastro', nombre: 'Pasar sin rastro', bueno: true, ico: 'ojo', texto: '+10 a las pruebas de Destreza (Sigilo).', reglas: [R('prueba', 'plano', { valor: 10, hab: 'sigilo' })] },
-  { k: 'heroismo', nombre: 'Heroísmo', bueno: true, ico: 'inspiracion', texto: 'Inmune a asustado; al empezar cada turno ganas PG temporales iguales al modificador de quien lo lanzó.', reglas: [] },
-  { k: 'auxilio', nombre: 'Auxilio', bueno: true, ico: 'pg', texto: 'Tus PG máximos y actuales aumentan en 5 (5 más por cada nivel de espacio por encima de 2).', maxPg: 5, reglas: [] },
-  { k: 'proteccion', nombre: 'Protección contra el bien y el mal', bueno: true, ico: 'esc_abj', texto: 'Aberraciones, celestiales, elementales, feéricos, infernales y muertos vivientes tienen desventaja al atacarte y no pueden encantarte, asustarte ni poseerte.', reglas: [] },
-  { k: 'perdicion', nombre: 'Perdición', bueno: false, ico: 'muerte', texto: '−1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '-1d4' }), R('salvacion', 'dado', { valor: '-1d4' })] },
-  { k: 'ralentizar', nombre: 'Ralentizar', bueno: false, ico: 'md_tiempo', texto: '−2 a la CA y a las salvaciones de Destreza, velocidad a la mitad y sin reacciones.', ca: -2, velX: 0.5, reglas: [R('salvacion', 'plano', { valor: -2, ab: 'des' })] },
-  { k: 'maleficio', nombre: 'Maleficio', bueno: false, ico: 'esc_nig', texto: 'Desventaja en las pruebas de la característica que elija quien lo lanzó.', reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' })] },
+  { k: 'zancada', dur: 600, conjuro: /^zancada prodigiosa$/i, nombre: 'Zancada prodigiosa', bueno: true, ico: 'velocidad', texto: '+3 m de velocidad.', vel: 3, reglas: [] },
+  { k: 'pasarsinrastro', dur: 600, conjuro: /^pasar sin rastro$/i, nombre: 'Pasar sin rastro', bueno: true, ico: 'ojo', texto: '+10 a las pruebas de Destreza (Sigilo).', reglas: [R('prueba', 'plano', { valor: 10, hab: 'sigilo' })] },
+  { k: 'heroismo', dur: 10, conjuro: /^hero[ií]smo$/i, nombre: 'Heroísmo', bueno: true, ico: 'inspiracion', texto: 'Inmune a asustado; al empezar cada turno ganas PG temporales iguales al modificador de quien lo lanzó.', reglas: [] },
+  { k: 'auxilio', dur: 4800, conjuro: /^auxilio$/i, nombre: 'Auxilio', bueno: true, ico: 'pg', texto: 'Tus PG máximos y actuales aumentan en 5 (5 más por cada nivel de espacio por encima de 2).', maxPg: 5, reglas: [] },
+  { k: 'proteccion', dur: 100, conjuro: /^protecci[oó]n contra el bien y el mal$/i, nombre: 'Protección contra el bien y el mal', bueno: true, ico: 'esc_abj', texto: 'Aberraciones, celestiales, elementales, feéricos, infernales y muertos vivientes tienen desventaja al atacarte y no pueden encantarte, asustarte ni poseerte.', reglas: [] },
+  { k: 'perdicion', dur: 10, nombre: 'Perdición', bueno: false, ico: 'muerte', texto: '−1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '-1d4' }), R('salvacion', 'dado', { valor: '-1d4' })] },
+  { k: 'ralentizar', dur: 10, nombre: 'Ralentizar', bueno: false, ico: 'md_tiempo', texto: '−2 a la CA y a las salvaciones de Destreza, velocidad a la mitad y sin reacciones.', ca: -2, velX: 0.5, reglas: [R('salvacion', 'plano', { valor: -2, ab: 'des' })] },
+  { k: 'maleficio', dur: 600, nombre: 'Maleficio', bueno: false, ico: 'esc_nig', texto: 'Desventaja en las pruebas de la característica que elija quien lo lanzó.', reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' })] },
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
+const sinTildes = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+export const efectoDeConjuro = nombre => { const n = sinTildes(nombre); return EFECTOS.find(e => e.conjuro && (e.conjuro.test(n) || e.conjuro.test(String(nombre || '').trim()))) || null; };
+export function fmtRondas(r) {
+  if (r == null) return '';
+  if (r <= 10) return r === 1 ? '1 ronda' : `${r} rondas`;
+  if (r % 600 === 0) return r === 600 ? '1 hora' : `${r / 600} horas`;
+  return `${Math.ceil(r / 10)} min`;
+}
 
 const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0; };
 export function normEfectos(lista) {
   return (Array.isArray(lista) ? lista : []).filter(e => e && (EFECTO[e.k] || e.propio)).map(e => ({ id: e.id || uid('ef'), k: e.k, nombre: String(e.nombre || EFECTO[e.k]?.nombre || 'Efecto'),
+    rondas: Number.isFinite(+e.rondas) && e.rondas !== null && e.rondas !== '' && +e.rondas > 0 ? Math.round(+e.rondas) : null, conc: e.conc ? String(e.conc) : '',
     propio: e.propio ? { ca: num(e.propio.ca), vel: num(e.propio.vel), ataque: String(e.propio.ataque || ''), salvacion: String(e.propio.salvacion || ''), prueba: String(e.propio.prueba || '') } : null }));
 }
 const esDado = v => /^[+-]?\d*d\d+$/i.test(String(v).replace(/\s/g, ''));
@@ -56,7 +65,7 @@ function reglasPropias(p) {
 }
 export function efectosDe(ch) {
   const v = ch.vida || {};
-  return (v.efectos || []).map(e => { const d = EFECTO[e.k]; return d ? { ...d, id: e.id } : { k: e.k || 'propio', id: e.id, nombre: e.nombre, bueno: true, ico: 'inspiracion', propio: e.propio,
+  return (v.efectos || []).map(e => { const d = EFECTO[e.k]; return d ? { ...d, id: e.id, rondas: e.rondas ?? null, conc: e.conc || '' } : { k: e.k || 'propio', id: e.id, nombre: e.nombre, bueno: true, ico: 'inspiracion', propio: e.propio, rondas: e.rondas ?? null, conc: e.conc || '',
     texto: [e.propio?.ca && `CA ${e.propio.ca > 0 ? '+' : ''}${e.propio.ca}`, e.propio?.ataque && `ataques ${e.propio.ataque}`, e.propio?.salvacion && `salvaciones ${e.propio.salvacion}`, e.propio?.prueba && `pruebas ${e.propio.prueba}`, e.propio?.vel && `velocidad ${e.propio.vel > 0 ? '+' : ''}${e.propio.vel} m`].filter(Boolean).join(', ') || 'Efecto propio.',
     ca: e.propio?.ca || 0, vel: e.propio?.vel || 0, reglas: reglasPropias(e.propio || {}) }; });
 }

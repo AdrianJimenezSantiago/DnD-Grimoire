@@ -6,11 +6,16 @@ import { toast } from '../ui/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
 import { haptic } from '../platform/native.js';
 import { pedir } from '../ui/modal.js';
-import { manualFor, srdFor, tiradasConjuro } from '../domain/catalogo.js';
-import { conObjetivos, empezarConc, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
+import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalogo.js';
+import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
-import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo } from '../domain/vida.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc } from '../domain/vida.js';
+import { combateDe } from '../domain/combate.js';
+import { golpe } from '../ui/golpes.js';
+import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
+import { efectosDe, efectoDeConjuro, fmtRondas } from '../domain/efectos.js';
+import { avisar } from '../ui/dialogs/aviso.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -49,14 +54,21 @@ export function cast(S, bi, mode, L) {
       if (L > s.level) msg += ` <span style="opacity:.8">(${noLeft && slotsOf(P, s.level) ? 'no quedaban de nivel ' + s.level : 'potenciado'})</span>`; }
   }
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
-  const fx = castEffects(S, ch, P, s, mode, L);
+  const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
+  const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro');
+  let fuera = [];
+  if (solo) msg += ` <span class="tnote"><b>${esc(ef.nombre)}</b> te afecta: ${esc(ef.texto.replace(/\.$/, ''))}${ef.dur ? ` (${esc(fmtRondas(ef.dur))})` : ''}.</span>`;
   const h = S.act(msg, (db, c) => {
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
-    if (s.conc) empezarConc(c.play, s.es);
+    if (s.conc) fuera = cambiarConc(c, s.es);
+    if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
   });
+  if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
+  if (solo) setTimeout(() => golpe('buff'), 200);
   const extra = [...fx.extra];
+  if (ef && !solo) extra.unshift({ label: ef.k === 'escudo' ? 'Aplicarme +5 CA' : 'Me lo aplico', hl: true, fn: () => aplicarmeConjuro(S, ef, s, mode === 'slot' ? L : s.level) });
   const x = srdFor(s), apunta = s.conc && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d]);
   if (apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
   else if (apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
@@ -66,6 +78,14 @@ export function cast(S, bi, mode, L) {
   haptic();
   toast(msg + fx.msg, [...extra, undoBtn(S, h)]);
   if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' ? L : null), 350);
+}
+
+function aplicarmeConjuro(S, ef, s, L) {
+  const n = ef.maxPg ? 5 * Math.max(1, (L || 2) - 1) : 0;
+  S.act(`${ef.nombre} sobre ti`, (db, c) => { ponerEfecto(c, ef.k, { conc: s.conc && c.play.conc === s.es ? s.es : '', n }); });
+  golpe(n ? 'max' : 'buff', n || null, { max: pgMaximo(S.cur()) });
+  haptic('light');
+  toast(`<b>${esc(ef.nombre)}</b> sobre ti: ${esc(ef.texto)}${ef.dur ? ` Dura ${esc(fmtRondas(ef.dur))}${s.conc ? ' o hasta que pierdas la concentración' : ''}.` : ''}`);
 }
 
 export function quickCast(S, bi, force) {
@@ -97,8 +117,9 @@ export function toggleSlot(S, L, i) {
 
 export function endConc(S) {
   const c = S.cur().play.conc;
-  const h = S.act(`Termina la concentración en ${c}`, (db, ch) => { terminarConc(ch.play); });
-  toast(`Concentración en ${esc(c)} terminada.`, [undoBtn(S, h)]);
+  let fuera = [];
+  const h = S.act(`Termina la concentración en ${c}`, (db, ch) => { fuera = soltarConc(ch); });
+  toast(`Concentración en ${esc(c)} terminada.${fuera.length ? ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.` : ''}`, [undoBtn(S, h)]);
 }
 
 export function enfocarObjetivos(clave) {
@@ -130,10 +151,11 @@ export function terminarEfecto(S, id) {
 
 export function longRest(S) {
   const ch = S.cur(); if (!ch) return;
-  const rs = reglas(ch), dados = rs.filter(r => r.tipo === 'dados');
-  const tiradas = []; let vida = null;
+  const rs = reglas(ch), dados = rs.filter(r => r.tipo === 'dados'), P = perfil(ch), eran = efectosDe(ch).length;
+  const tiradas = []; let vida = null, inspira = false;
   const h = S.act('Descanso largo', (db, c) => {
     vida = descansoLargoVida(c);
+    if (esHumano(c) && !vidaDe(c).inspiracion) { vidaDe(c).inspiracion = true; inspira = true; }
     c.play.used = {}; terminarConc(c.play); c.play.efectos = []; c.book.forEach(e => { e.used = false; });
     const rec = {};
     reglas(c).forEach(r => { const st = c.play.rec?.[r.id];
@@ -142,14 +164,23 @@ export function longRest(S) {
   });
   if (tiradas.length) S.note(tiradas.join('; '));
   dawn(); haptic('medium');
-  const bits = ['puntos de golpe', 'dados de golpe', 'espacios', 'usos gratis']; if (rs.some(r => r.tipo === 'recurso' || r.tipo === 'recuperar')) bits.push('rasgos');
-  if (vida?.agotamiento) bits.push(`un nivel de agotamiento (queda ${vida.agotamiento - 1})`);
-  let msg = `Descanso largo: ${joinY(bits)} restaurados.${tiradas.length ? ' ' + esc(tiradas.join('. ')) + '.' : ''}`;
-  if (dados.length) {
-    msg += ` Anota tus dados de ${joinY(dados.map(r => esc(r.nombre)))}.`;
-    setTimeout(() => { document.querySelectorAll('.pdie').forEach(p => p.classList.add('fresh')); document.querySelector('[data-dv]')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 400);
-  }
-  toast(msg, [undoBtn(S, h)]);
+  const c2 = S.cur(), max = pgMaximo(c2), rec = [
+    { ico: 'pg', titulo: 'Puntos de golpe al máximo', texto: vida && vida.pg < max ? `De ${vida.pg} a ${max}.` : `${max} de ${max}.` },
+    vida?.dados ? { ico: 'dado_golpe', titulo: 'Dados de golpe', texto: `Recuperas ${vida.dados === 1 ? 'el dado gastado' : `los ${vida.dados} dados gastados`}.` } : null,
+    P.maxSlot > 0 ? { ico: 'esc_evo', titulo: P.pact ? 'Espacios de pacto' : 'Espacios de conjuro', texto: 'Todos vuelven a estar libres, igual que los usos gratis.' } : null,
+    rs.some(r => r.tipo === 'recurso' || r.tipo === 'recuperar') ? { ico: 'dote', titulo: 'Rasgos', texto: tiradas.length ? `${tiradas.join('. ')}.` : 'Los usos de tus rasgos se restauran.' } : null,
+    vida?.agotamiento ? { ico: 'agotamiento', titulo: 'Agotamiento', texto: `Baja un nivel: queda en ${vida.agotamiento - 1}.` } : null,
+    eran ? { ico: 'estados', titulo: 'Efectos terminados', texto: 'Los efectos temporales sobre ti se han disipado.' } : null,
+    inspira ? { ico: 'inspiracion', titulo: 'Inspiración heroica', texto: 'Como humano, recuperas la inspiración heroica (Ingenioso).', tono: 'oro' } : null,
+  ].filter(Boolean);
+  if (dados.length) setTimeout(() => { document.querySelectorAll('.pdie').forEach(p => p.classList.add('fresh')); }, 400);
+  if (inspira) setTimeout(() => document.querySelector('.hero-insp')?.classList.add('gana'), 250);
+  const cambios = opcionesIntercambio(c2, 'largo', { trasfondos: biblioteca().trasfondos });
+  avisar({ ico: 'vela', titulo: 'Descanso largo', sub: `${esc(c2.nombre || 'Tu personaje')} amanece con fuerzas renovadas.`,
+    secciones: [{ titulo: 'Recuperas', ico: 'pg', items: rec },
+      dados.length ? { titulo: 'Anota tus dados', ico: 'dados', nota: `Tira de nuevo tus dados de ${joinY(dados.map(r => r.nombre))} y anótalos en la hoja.` } : null,
+      { titulo: 'Ahora puedes cambiar', ico: 'libro', cls: 'av-cambios', items: cambios }].filter(Boolean),
+    botones: [{ ...undoBtn(S, h), cls: 'ghost' }] });
 }
 
 export function shortRest(S, openRecovery, openVida) {
@@ -169,9 +200,17 @@ export function shortRest(S, openRecovery, openVida) {
   if (P.pact) document.querySelectorAll(`[data-slotbtn^="${P.pact.level}:"]`).forEach(b => pop(b, 'fx-ignite'));
   const rec = rs.find(r => r.tipo === 'recuperar' && !recState(S.cur(), r.id).used), c2 = S.cur();
   const dg = dadosDeGolpe(c2).reduce((n, d) => n + d.quedan, 0), herido = pgActuales(c2) < pgMaximo(c2);
-  toast(`Descanso corto${bits.length ? `: recuperas ${esc(joinY(bits))}` : ''}.${herido && dg ? ` Te quedan ${dg} dados de golpe para curarte.` : ''}`,
-    [herido && dg && openVida && { label: 'Gastar dados de golpe', hl: !rec, fn: () => { openVida(false); setTimeout(() => document.querySelector('.vd-dados')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); } },
-      rec && { label: `Usar ${rec.nombre}`, hl: true, fn: () => openRecovery(rec.id) }, undoBtn(S, h)].filter(Boolean));
+  const cambios = opcionesIntercambio(c2, 'corto', { trasfondos: biblioteca().trasfondos });
+  const botones = [herido && dg && openVida && { label: 'Gastar dados de golpe', cls: rec ? '' : 'primary', fn: () => { openVida(false); setTimeout(() => document.querySelector('.vd-dados')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); } },
+    rec && { label: `Usar ${rec.nombre}`, cls: 'primary', fn: () => openRecovery(rec.id) }, { ...undoBtn(S, h), cls: 'ghost' }].filter(Boolean);
+  if (!cambios.length && !bits.length) {
+    toast(`Descanso corto.${herido && dg ? ` Te quedan ${dg} dados de golpe para curarte.` : ''}`, botones.map(b => ({ label: b.label, hl: b.cls === 'primary', fn: b.fn })));
+    return;
+  }
+  avisar({ ico: 'md_tiempo', tono: 'azul', titulo: 'Descanso corto', sub: herido && dg ? `Te quedan ${dg} dados de golpe para curarte.` : 'Una hora de respiro.',
+    secciones: [{ titulo: 'Recuperas', ico: 'pg', items: bits.map(b => ({ ico: 'dote', titulo: b[0].toUpperCase() + b.slice(1) })) },
+      { titulo: 'Ahora puedes cambiar', ico: 'libro', cls: 'av-cambios', items: cambios }],
+    botones });
 }
 
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);

@@ -20,10 +20,8 @@
     <span class="spacer"></span>
     <span class="act">
       <button type="button" data-cmd="rest" id="bRest"></button>
-      <button type="button" data-cmd="filter" id="bFilter" aria-pressed="false"></button>
       <button type="button" data-cmd="edit" id="bEdit"></button>
       <button type="button" data-cmd="add" id="bAdd" class="edit-only"></button>
-      <button type="button" data-cmd="hist" id="bHist"></button>
       <button type="button" data-cmd="dados" id="bDados"></button>
       <button type="button" data-cmd="combate" id="bCombate" class="b-combate"></button>
     </span>
@@ -104,6 +102,11 @@
   <div class="dfoot"><span class="bs-teclas">↑ ↓ para moverte · Intro para abrir</span><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
+<dialog id="avisoDlg" class="aviso" aria-labelledby="avTitle"><div class="grip"></div>
+  <div class="dhead av-head" id="avHead"></div>
+  <div class="dbody" id="avBody"></div>
+  <div class="dfoot" id="avFoot"></div>
+</dialog>
 <dialog id="elegirDlg" class="tall" aria-labelledby="elTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="elTitle"></h2><div class="dsub" id="elSub"></div>
     <input type="search" id="elQ" class="el-q" autocomplete="off" enterkeyhint="done" aria-label="Buscar">

@@ -1,6 +1,6 @@
 import { esc } from '../core/util.js';
 import { sgn } from '../domain/reglas2024.js';
-import { caEfectiva, velocidadEfectiva, efectosDe } from '../domain/efectos.js';
+import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas } from '../domain/efectos.js';
 import { vidaDe, pgMaximo, pgActuales, dadosDeGolpe, estadoVital, NOMBRE_ESTADO } from '../domain/vida.js';
 import { iniciativa, fmtMetros, tablaCaracteristicas, percepcionPasiva, penalizacionAgotamiento } from '../domain/habilidades.js';
 import { combateDe } from '../domain/combate.js';
@@ -42,22 +42,23 @@ export function pgHtml(ch, { compacto = false } = {}) {
     ${act === 0 && est !== 'vivo' ? `<span class="pg-muerte">${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'Moribundo'} ${pipsMuerte(ch)}</span>` : compacto ? '' : `<span class="pg-dg">Dados de golpe ${esc(dg)}</span>`}
   </button>`;
 }
-const placa = (cls, ico, valor, lbl, attrs = '', title = '') => `<${attrs ? 'button type="button"' : 'div'} class="vt-placa ${cls}" ${attrs} ${title ? `title="${esc(title)}"` : ''}>${gi(ico, 'vt-ico')}<b>${valor}</b><span>${lbl}</span></${attrs ? 'button' : 'div'}>`;
+const placa = (cls, ico, valor, lbl, attrs = '', title = '', extra = '') => `<${attrs ? 'button type="button"' : 'div'} class="vt-placa ${cls}" ${attrs} ${title ? `title="${esc(title)}"` : ''}>${gi(ico, 'vt-ico')}<b>${valor}</b><span>${lbl}</span>${extra}</${attrs ? 'button' : 'div'}>`;
 
 export function placaCa(ch, lbl, attrs = '') {
   const ca = caEfectiva(ch);
   return placa(`ca ${ca.cambia ? (ca.ca > ca.base ? 'sube' : 'baja') : ''}`, 'ca', ca.ca, ca.cambia ? `${lbl} <s>${ca.base}</s>` : lbl, attrs, ca.detalle);
 }
 export function placaVel(ch, lbl) {
-  const v = velocidadEfectiva(ch), nota = v.m === 0 && v.motivo ? v.motivo : v.arrastra ? 'Derribado: te arrastras (cada metro cuesta el doble)' : v.motivo;
-  return placa(`vel ${v.cambia ? (v.m > v.base ? 'sube' : 'baja') : ''} ${v.arrastra ? 'baja' : ''}`, 'velocidad', fmtMetros(v.m), v.m === 0 && v.motivo ? `${lbl} · ${v.motivo.toLowerCase()}` : v.arrastra ? `${lbl} · arrastrándote` : lbl, '', nota);
+  const v = velocidadEfectiva(ch), cas = Math.floor(v.m / 1.5 + 1e-9), nota = v.m === 0 && v.motivo ? v.motivo : v.arrastra ? 'Derribado: te arrastras (cada metro cuesta el doble)' : v.motivo;
+  return placa(`vel ${v.cambia ? (v.m > v.base ? 'sube' : 'baja') : ''} ${v.arrastra ? 'baja' : ''}`, 'velocidad', fmtMetros(v.m), v.m === 0 && v.motivo ? `${lbl} · ${v.motivo.toLowerCase()}` : v.arrastra ? `${lbl} · arrastrándote` : lbl, '', nota || `${cas} casillas de 1,5 m`,
+    `<em class="vt-cas" aria-label="${cas} casillas">${cas}<i>${cas === 1 ? 'casilla' : 'casillas'}</i></em>`);
 }
 export function estadosHtml(ch) {
   const v = vidaDe(ch), chips = [
-    v.inspiracion ? `<span class="es-chip insp">${gi('inspiracion')}Inspiración heroica</span>` : '',
+    v.inspiracion && combateDe(ch).activo ? `<span class="es-chip insp">${gi('inspiracion')}Inspiración heroica</span>` : '',
     v.agotamiento ? `<span class="es-chip ago">${gi('agotamiento')}Agotamiento ${v.agotamiento}<small>−${penalizacionAgotamiento(ch)} al d20</small></span>` : '',
     ...v.estados.map(k => `<span class="es-chip">${esc(NOMBRE_ESTADO[k])}</span>`),
-    ...efectosDe(ch).map(e => `<span class="es-chip ${e.bueno ? 'buff' : 'debuff'}">${gi(e.ico || 'inspiracion')}${esc(e.nombre)}</span>`),
+    ...efectosDe(ch).map(e => `<span class="es-chip ${e.bueno ? 'buff' : 'debuff'} ${e.rondas != null && e.rondas <= 1 ? 'acaba' : ''}">${gi(e.ico || 'inspiracion')}${esc(e.nombre)}${e.rondas != null ? `<small class="es-dur" title="Duración restante">${esc(fmtRondas(e.rondas))}</small>` : ''}</span>`),
     ...v.maxExtra.map(m => `<span class="es-chip buff">${gi('pg')}+${m.n} PG máx.<small>${esc(m.nombre)}</small></span>`),
   ].filter(Boolean);
   return `<button type="button" class="vt-estados ${chips.length ? 'con' : ''}" data-cmd="estados" aria-label="Estados y efectos">

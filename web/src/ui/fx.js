@@ -9,6 +9,11 @@ function ensure() {
   const size = () => { dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
   size(); addEventListener('resize', size);
 }
+export function alFrente(el) {
+  if (!el?.showPopover) return;
+  if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
+  try { if (el.matches(':popover-open')) el.hidePopover(); el.showPopover(); } catch { /* sin top layer */ }
+}
 function loop(t) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -35,7 +40,8 @@ function hslOf(color) {
 }
 export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, spread = 1, life = 900, size = 2.2, gravity = -0.02 } = {}) {
   if (reducedMotion()) return;
-  ensure(); const [h, s, l] = hslOf(color);
+  ensure(); if (document.querySelector('dialog[open]') || cv.matches?.(':popover-open')) alFrente(cv);
+  const [h, s, l] = hslOf(color);
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, v = (0.4 + Math.random()) * speed;
     parts.push({ x, y, vx: Math.cos(a) * v * spread, vy: Math.sin(a) * v * 0.6 - up * Math.random() * 2, drag: 0.94, g: gravity,

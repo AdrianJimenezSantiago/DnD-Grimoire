@@ -1,5 +1,5 @@
 import { norm, uid } from '../core/util.js';
-import { normEfectos } from './efectos.js';
+import { normEfectos, EFECTO } from './efectos.js';
 import { modOf, clasesDe, dotesDe, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
 
@@ -166,4 +166,37 @@ export function descansoLargoVida(ch) {
   v.pg = null; v.temp = 0; v.dadosUsados = {}; v.muerte = { exitos: 0, fallos: 0 }; v.estable = false;
   v.agotamiento = Math.max(0, v.agotamiento - 1); v.efectos = []; v.maxExtra = [];
   return antes;
+}
+
+export function ponerEfecto(ch, k, { rondas, conc = '', n = 0, nombre } = {}) {
+  const v = vidaDe(ch), e = EFECTO[k]; if (!e) return null;
+  const previo = v.efectos.find(x => x.k === k);
+  if (previo && e.maxPg) quitarMax(ch, previo.id);
+  const id = uid('ef'), r = rondas === undefined ? e.dur ?? null : rondas;
+  v.efectos = normEfectos([...v.efectos.filter(x => x.k !== k), { id, k, nombre: nombre || e.nombre, rondas: r, conc }]);
+  if (n && e.maxPg) aumentarMax(ch, { id, nombre: e.nombre, n });
+  return id;
+}
+function quitarEfectos(ch, fuera) {
+  const v = vidaDe(ch), ids = new Set(fuera.map(e => e.id));
+  for (const e of fuera) quitarMax(ch, e.id);
+  v.efectos = v.efectos.filter(e => !ids.has(e.id));
+  return fuera.map(e => ({ id: e.id, k: e.k, nombre: e.nombre, bueno: EFECTO[e.k]?.bueno ?? true, ico: EFECTO[e.k]?.ico || 'inspiracion', conc: e.conc || '' }));
+}
+export function pasarRonda(ch) {
+  const v = vidaDe(ch), fuera = [];
+  for (const e of v.efectos) { if (e.rondas == null) continue; e.rondas -= 1; if (e.rondas <= 0) fuera.push(e); }
+  return quitarEfectos(ch, fuera);
+}
+export function efectosDeConc(ch, conjuro) { return vidaDe(ch).efectos.filter(e => e.conc && (conjuro == null || e.conc === conjuro)); }
+export function soltarConc(ch) {
+  const c = ch.play?.conc || '';
+  if (ch.play) { ch.play.conc = ''; ch.play.concObj = []; }
+  return c ? quitarEfectos(ch, efectosDeConc(ch, c)) : [];
+}
+export function cambiarConc(ch, nombre) {
+  const antes = ch.play.conc, fuera = antes && antes !== nombre ? quitarEfectos(ch, efectosDeConc(ch, antes)) : [];
+  if (antes !== nombre) ch.play.concObj = [];
+  ch.play.conc = nombre;
+  return fuera;
 }
