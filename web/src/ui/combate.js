@@ -31,7 +31,7 @@ function acciones(ch, db) {
   const grupos = { accion: [], adicional: [], reaccion: [] };
   for (const o of equipoDe(ch).objetos.filter(x => x.arma).sort((a, b) => b.equipado - a.equipado)) {
     const a = ataqueArma(ch, o);
-    grupos.accion.push(`<div class="cb-it arma ${o.equipado ? 'eq' : ''}"><span class="cb-ico">${gi('o_arma')}</span><span class="cb-t"><b>${esc(o.nombre)}</b><small>${esc([o.arma.distancia, ...(o.arma.props || []).slice(0, 3), o.arma.maestria ? `maestría: ${o.arma.maestria}` : ''].filter(Boolean).join(' · '))}</small></span>
+    grupos.accion.push(`<div class="cb-it arma ${o.equipado ? 'eq' : ''}" data-leer="arma:${o.id}"><span class="cb-ico">${gi('o_arma')}</span><span class="cb-t"><b>${esc(o.nombre)}</b><small>${esc([o.arma.distancia, ...(o.arma.props || []).slice(0, 3), o.arma.maestria ? `maestría: ${o.arma.maestria}` : ''].filter(Boolean).join(' · '))}</small></span>
       <span class="cb-bts"><button type="button" class="cb-roll" data-cbataque="${o.id}">${gi('d20')}${esc(a.ataque)}${marca}</button><button type="button" class="cb-roll dano" data-cbdano="${o.id}">${gi('dados')}${esc(a.dano)}</button></span></div>`);
   }
   const conj = [];
@@ -44,13 +44,13 @@ function acciones(ch, db) {
   conj.sort((a, b) => a.s.level - b.s.level || a.s.es.localeCompare(b.s.es, 'es'));
   for (const { e, bi, s, g } of conj) {
     const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), niv = s.level ? `Nivel ${s.level}` : 'Truco';
-    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em>${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
+    grupos[g].push(`<div class="cb-it conj" data-sc="${ico.slice(4)}" data-leer="conj:${bi}"><span class="cb-ico esc">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}" aria-hidden="true" title="${niv}">${s.level || 'T'}</i></span><span class="cb-t"><b>${esc(s.es)}</b><small><em class="cb-niv-t ${s.level ? '' : 'truco'}">${niv}</em>${s.conc ? ' · concentración' : ''}${s.alcance ? ` · ${esc(s.alcance)}` : ''}${Pm.cd != null ? ` · CD ${Pm.cd}` : ''}</small></span>
       <span class="cb-bts"><button type="button" class="cb-roll lanzar" data-cast="${bi}">${gi(ico || 'libro')}Lanzar</button></span></div>`);
   }
   const lib = biblioteca();
   for (const r of rasgosEnJuego(ch, lib, reglasVisibles(ch))) {
     if (!grupos[r.grupo]) continue;
-    grupos[r.grupo].push(`<div class="cb-it rasgo"><span class="cb-ico">${gi(r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, '') || 'dote')}</span>
+    grupos[r.grupo].push(`<div class="cb-it rasgo" data-leer="rasgo:${esc(r.clave)}"><span class="cb-ico">${gi(r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, '') || 'dote')}</span>
       <button type="button" class="cb-t cb-leer" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b><small>${esc(r.resumen || r.etiqueta)}</small></button>
       <span class="cb-bts">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}${r.recurso ? ticks(ch, r.recurso) : ''}</span></div>`);
   }
@@ -63,28 +63,29 @@ export function combateHtml(ch, db) {
       ${incap.length ? `<p class="cb-incap">${gi('estados')}<span><b>${esc(incap.map(k => NOMBRE_ESTADO[k]).join(', '))}</b>: no puedes llevar a cabo acciones, acciones adicionales ni reacciones.</span></p>` : ''}
       ${lineas.map(l => `<div class="cb-mod-l"><span>${esc(l.titulo)}</span>${l.piezas.map(p => `<b class="cb-mod ${p.mal ? 'mal' : 'bien'}" title="${esc(p.cond ? `Solo ${p.cond}` : p.fuente)}">${esc(p.texto)}<small>${esc(p.fuente)}${p.cond ? ' *' : ''}</small></b>`).join('')}</div>`).join('')}</section>` : '';
   const g = acciones(ch, db), pasivos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).filter(r => r.grupo === 'pasivo');
-  const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" aria-pressed="${c.turno[k]}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i>${t}</button>`).join('');
-  const conc = ch.play.conc ? `<div class="cb-conc"><span>${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b></span>
+  const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i>${t}</button>`).join('');
+  const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b></span>
     <button type="button" data-tirar="salv:con">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
   const col = (k, t) => `<section class="cb-col cb-${k} ${c.turno[k] ? 'gastada' : ''}"><h3><span>${t}</span><small>${c.turno[k] ? 'usada este turno' : 'disponible'}</small></h3>
     ${g[k].length ? g[k].join('') : `<p class="cb-vacio">${k === 'accion' ? 'Atacar, lanzar, esquivar, correr, ayudar, esconderse, buscar, usar un objeto…' : k === 'adicional' ? 'Nada que la use ahora mismo.' : 'Ataque de oportunidad cuando un enemigo sale de tu alcance.'}</p>`}</section>`;
   return `<header class="cb-cab">
       <span class="cb-emb">${runaSvg({ n: 12, lados: 5, cls: 'cb-runa', semillaInicial: 11 })}${gi('combate')}</span>
       <div class="cb-tit"><h2>Combate</h2><span class="cb-ronda">Ronda <b data-ronda="${c.ronda}">${c.ronda}</b></span></div>
-      <div class="cb-ini">${c.iniciativa == null ? `<button type="button" class="gold" data-tirar="iniciativa">${gi('iniciativa')}Tirar iniciativa ${sgn(iniciativa(ch) - ag)}</button>`
-        : `<button type="button" class="cb-ini-v" data-tirar="iniciativa" title="Volver a tirar">${gi('iniciativa')}<b>${c.iniciativa}</b><small>iniciativa</small></button>`}</div>
+      <div class="cb-ini ${c.iniciativa == null ? 'falta' : ''}">${c.iniciativa == null ? `<button type="button" class="gold" data-tirar="iniciativa">${gi('iniciativa')}Tirar iniciativa ${sgn(iniciativa(ch) - ag)}</button>`
+        : `<button type="button" class="cb-ini-v" data-tirar="iniciativa" title="Volver a tirar">${gi('iniciativa')}<b>${c.iniciativa}</b><small>iniciativa${c.iniManual ? ' · a mano' : ''}</small></button>`}<button type="button" class="cb-ini-e" data-cbini aria-label="Escribir la iniciativa a mano" title="Escribir la iniciativa a mano (por ejemplo, si la intercambias con un aliado)">${icon('quill')}</button></div>
       <button type="button" class="cb-turno" data-cmd="turno">${gi('md_tiempo')}Siguiente turno</button>
     </header>
     <div class="cb-eco" role="group" aria-label="Lo que has usado este turno">${eco}</div>
     <div class="cb-vital">${pgHtml(ch, { compacto: true })}
       <div class="cb-rapido"><input id="cbCant" type="number" inputmode="numeric" min="0" placeholder="PG" aria-label="Cantidad de puntos de golpe">
         <button type="button" class="danger" data-cbpg="dano">${gi('pg')}Daño</button><button type="button" class="vd-cura" data-cbpg="curar">${gi('curacion')}Curar</button></div>
-      ${placaCa(ch, 'CA')}
-      ${placaVel(ch, 'Velocidad')}
+      ${placaCa(ch, 'CA', 'data-leer="ca" aria-label="Clase de armadura: mantén pulsado para ver el desglose"')}
+      ${placaVel(ch, 'Velocidad', 'data-leer="vel"')}
       ${P.cd != null ? `<div class="vt-placa cd">${gi('ojo', 'vt-ico')}<b>${P.cd}</b><span>CD · ataque ${sgn(P.atk)}</span></div>` : ''}
     </div>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}${estadosHtml(ch)}${modsHtml}
+    <p class="cb-pista">${gi('libro')}<span><b>Mantén pulsado</b> un conjuro, arma, rasgo, estado o acción para leerlo sin salir del combate.</span></p>
     <div class="cb-cols">${col('accion', 'Acción')}${col('adicional', 'Acción adicional')}${col('reaccion', 'Reacción')}</div>
     ${pasivos.length ? `<details class="cb-pasivos"><summary>Siempre activo <small>${pasivos.length}</small>${icon('chevron')}</summary><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(n => `<span class="ej-num">${esc(n.valor)}</span>`).join('')}</button>`).join('')}</div></details>` : ''}
     <div class="cb-fin"><button type="button" class="cb-salir" data-cmd="combate">${gi('gloria')}Terminar combate</button></div>`;
