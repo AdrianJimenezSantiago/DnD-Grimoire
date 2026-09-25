@@ -6,7 +6,7 @@ import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { icon } from '../icons.js';
 import { openSheet } from '../dialog.js';
-import { burstFrom, reducedMotion } from '../fx.js';
+import { burst, reducedMotion } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 
 let S, V = null;
@@ -77,20 +77,41 @@ function lanzar() {
     + (r.bono ? ` ${sgn(r.bono)}` : '')
     + extras.map(x => ` <span class="da-extra ${x.m.mal ? 'mal' : 'bien'}">${x.neg ? '−' : '+'} ${x.t.grupos.map(g => dadosHtml(g)).join('')}<small>${esc(x.m.fuente)}</small></span>`).join('')
     + planos.map(m => ` <span class="da-extra ${m.mal ? 'mal' : 'bien'}">${sgn(m.valor)}<small>${esc(m.fuente)}</small></span>`).join('')
-    + (crit ? ` <b class="tag-crit">${V.tipo === 'ataque' ? '¡Crítico! Los dados de daño se doblan.' : '¡20 natural!'}</b>` : pifia ? ` <b class="tag-pifia">${V.tipo === 'ataque' ? 'Pifia: falla siempre.' : '1 natural'}</b>` : '')
+    + (esD20() && (r.bono || extras.length || planos.length) ? ` <span class="rl-igual">= ${total}</span>` : '')
     + (V.tipo === 'dano' && !V.critico && p.grupos.some(g => g.n > 1) ? ` <span class="rl-alt">media ${fmt(media(p))}</span>` : '');
   const clase = falla ? 'pifia' : crit ? 'crit' : pifia ? 'pifia' : '';
-  V.ultimo = { total, html: `<div class="rl-total ${clase}"><span class="rl-num">${total}</span><span class="rl-lbl">${esc(lbl)}</span></div><div class="rl-det">${det}</div>${efecto ? `<div class="da-efecto">${efecto}</div>` : ''}` };
+  V.ultimo = { total, nat: crit ? 20 : pifia ? 1 : null, html: `${crit || pifia ? natHtml(crit ? 20 : 1) : ''}<div class="rl-total ${clase}"><span class="rl-num">${total}</span><span class="rl-lbl">${esc(lbl)}</span></div><div class="rl-det">${det}</div>${efecto ? `<div class="da-efecto">${efecto}</div>` : ''}` };
   const que = V.tipo === 'libre' ? texto(p) + (r.d20 ? ` (${V.modo})` : '') : `${V.titulo}${V.tipo === 'dano' ? '' : ` ${sgn(V.bono || 0)}`}${r.d20 ? `, ${V.modo}` : ''}${act.length ? `, ${act.map(m => m.fuente).join(', ')}` : ''}${V.critico ? ', crítico' : ''}${falla ? ', fallo automático' : ''}`;
   HIST.unshift({ que, total, estado: { ...V, ultimo: null } }); if (HIST.length > 20) HIST.pop();
   S.note(`${que}: ${total}${r.d20 ? ` (d20 ${r.d20.usa})` : nat != null ? ` (d20 ${nat})` : ''}`);
   if (V.tipo === 'dano') V.critico = false;
-  render(); haptic(crit ? 'heavy' : 'light');
-  const num = $('#daOut .rl-num'); if (num) { contar(num, total); if (crit) burstFrom(num, { n: 40, speed: 4.5, life: 1200 }); }
+  render(); haptic(crit || pifia ? 'heavy' : 'light');
+  const num = $('#daOut .rl-num'); if (num) contar(num, total, crit || pifia ? 900 : 480);
+  if (crit || pifia) natFx(crit ? 20 : 1);
 }
-function contar(el, total) {
+const NOTA_NAT = {
+  20: { ataque: 'Impacto crítico: los dados de daño se tiran dos veces.', muerte: 'Recuperas 1 punto de golpe y vuelves en ti.', otro: 'El mejor resultado posible del dado. En pruebas y salvaciones no es un éxito automático: cuenta el total.' },
+  1: { ataque: 'Fallo automático, sea cual sea el total.', muerte: 'Cuenta como dos fallos.', otro: 'El peor resultado posible del dado. En pruebas y salvaciones no es un fallo automático: cuenta el total.' },
+};
+function natHtml(n) {
+  const nota = NOTA_NAT[n][V.tipo === 'ataque' ? 'ataque' : V.tipo === 'muerte' ? 'muerte' : 'otro'];
+  const titulo = n === 20 ? (V.tipo === 'ataque' ? '¡Crítico!' : '¡20 natural!') : (V.tipo === 'ataque' ? '¡Pifia!' : '1 natural');
+  return `<div class="da-nat n${n}" role="status"><span class="dn-d20" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon class="dn-c" points="50,3 93,27 93,73 50,97 7,73 7,27"/>
+    <polygon class="dn-t" points="50,24 77,70 23,70"/><path class="dn-l" d="M50 3 50 24M93 27 77 70M7 27 23 70M93 73 77 70M7 73 23 70M50 97 23 70M50 97 77 70M50 3 7 27M50 3 93 27M7 27 50 24M93 27 50 24"/>
+    ${n === 1 ? '<path class="dn-grieta" d="M30 18 42 40 36 52 50 64 46 80 58 94" pathLength="1"/>' : ''}<text x="50" y="58">${n}</text></svg>${n === 20 ? '<i class="dn-rayos"></i>' : ''}</span>
+    <span class="dn-txt"><b>${titulo}</b><small>${esc(nota)}</small></span></div>`;
+}
+function natFx(n) {
+  if (reducedMotion()) return;
+  const d = $('#daOut .dn-d20'); if (!d) return;
+  const r = d.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+  if (n === 20) { setTimeout(() => burst(x, y, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 }), 380); setTimeout(() => burst(x, y, { color: '#FFF3C8', n: 30, speed: 3, up: 2.5, life: 1200, size: 1.8, gravity: -0.03 }), 620); }
+  else { setTimeout(() => { burst(x, y, { color: '#FF5A45', n: 26, speed: 3.2, up: -0.4, life: 1100, size: 2.4, gravity: 0.14 }); burst(x, y, { color: '#6b6f7d', n: 18, speed: 2.4, up: 0.4, life: 1300, size: 3, gravity: 0.18 }); }, 420);
+    const dl = dlg(); dl.classList.remove('dn-sacude'); void dl.offsetWidth; dl.classList.add('dn-sacude'); setTimeout(() => dl.classList.remove('dn-sacude'), 900); }
+}
+function contar(el, total, dur = 480) {
   if (reducedMotion()) { el.textContent = total; return; }
-  const t0 = performance.now(), dur = 480, tope = Math.max(Math.abs(total) + 6, 20);
+  const t0 = performance.now(), tope = Math.max(Math.abs(total) + 6, 20);
   const paso = now => { const k = Math.min(1, (now - t0) / dur); el.textContent = k < 1 ? 1 + Math.floor(Math.random() * tope) : total; if (k < 1) requestAnimationFrame(paso); };
   requestAnimationFrame(paso);
 }
