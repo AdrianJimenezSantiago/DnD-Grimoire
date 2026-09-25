@@ -75,7 +75,7 @@ export function vitalesHtml(ch) {
 }
 
 let abierta = null;
-export const alternarCaracteristica = k => { abierta = abierta === k ? null : k; };
+export const mostrarCaracteristica = k => { abierta = k; };
 const marcaComp = n => `<i class="cr-m n${n}" aria-hidden="true" title="${['Sin competencia', 'Competencia', 'Pericia'][n]}"></i>`;
 const marcasTirada = r => `${r.falla ? '<i class="cr-v falla" title="Fallo automático">falla</i>' : r.modo !== 'normal' ? `<i class="cr-v ${r.modo}" title="${r.modo === 'ventaja' ? 'Ventaja' : 'Desventaja'}">${r.modo === 'ventaja' ? '▲' : '▼'}</i>` : ''}${r.dados.map(d => `<i class="cr-d">${esc(d)}</i>`).join('')}${r.cond ? '<i class="cr-cond" title="Hay modificadores que solo se aplican a veces: se eligen al tirar">*</i>' : ''}`;
 export function filaTirada(ch, { tirar, sobre, ab = '', hab = '', nombre, bono, comp = 0, cls = '', aria = '' }) {
@@ -83,7 +83,6 @@ export function filaTirada(ch, { tirar, sobre, ab = '', hab = '', nombre, bono, 
   return `<button type="button" class="cr-fila ${comp ? 'comp' : ''} ${cls} ${cambia ? 'mod' : ''}" data-tirar="${tirar}" ${aria ? `aria-label="${esc(aria)}"` : ''} ${r.fuentes.length ? `title="${esc(r.fuentes.join(', '))}"` : ''}>${marcaComp(comp)}<span>${esc(nombre)}</span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b></button>`;
 }
 const filasCar = (ch, c) => [
-  filaTirada(ch, { tirar: `car:${c.k}`, sobre: 'prueba', ab: c.k, nombre: 'Prueba', bono: c.mod, cls: 'cr-prueba', aria: `Tirar prueba de ${c.nombre}` }),
   filaTirada(ch, { tirar: `salv:${c.k}`, sobre: 'salvacion', ab: c.k, nombre: 'Salvación', bono: c.salvacion.bono, comp: c.salvacion.competente ? 1 : 0, cls: 'cr-salv', aria: `Tirar salvación de ${c.nombre}` }),
   ...c.habilidades.map(h => filaTirada(ch, { tirar: `hab:${h.k}`, sobre: 'prueba', hab: h.k, nombre: h.nombre, bono: h.bono, comp: h.nivel, aria: `Tirar ${h.nombre}` })),
 ].join('');
@@ -91,21 +90,21 @@ export function caracteristicasHtml(ch) {
   const t = tablaCaracteristicas(ch), ag = penalizacionAgotamiento(ch);
   const tarjeta = c => { const r = resumenTirada(ch, 'prueba', { ab: c.k }, c.mod);
     return `<article class="cr-car ${abierta === c.k ? 'abierta' : ''} ${c.salvacion.competente ? 'salv' : ''}" data-car="${c.k}">
-      <button type="button" class="cr-cab" data-crab="${c.k}" aria-expanded="${abierta === c.k}" aria-controls="cr-det-${c.k}">
-        <span class="cr-nom">${c.corto}<small>${esc(c.nombre)}</small></span><b class="cr-mod">${sgn(c.mod)}</b><span class="cr-val">${c.valor}</span>${r.modo !== 'normal' || r.dados.length ? `<em class="cr-mk cr-mk-cab">${marcasTirada(r)}</em>` : ''}</button>
+      <button type="button" class="cr-cab" data-crab="${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}: d20 ${sgn(r.total)}" title="Prueba de ${esc(c.nombre)}: d20 ${sgn(r.total)}${r.fuentes.length ? ` (${esc(r.fuentes.join(', '))})` : ''}">
+        <span class="cr-nom">${c.corto}<small>${esc(c.nombre)}</small></span><b class="cr-mod">${sgn(c.mod)}</b><span class="cr-val">${c.valor}</span><span class="cr-d20" aria-hidden="true">${gi('d20')}</span>${r.modo !== 'normal' || r.dados.length ? `<em class="cr-mk cr-mk-cab">${marcasTirada(r)}</em>` : ''}</button>
       <div class="cr-det" id="cr-det-${c.k}">${filasCar(ch, c)}</div></article>`; };
   return `<div class="cr-head"><span class="cr-emb">${gi('d20')}</span><h2>Características</h2>
       <small>Percepción pasiva <b>${percepcionPasiva(ch)}</b>${ag ? ` · agotamiento −${ag}` : ''}</small>
       <button type="button" class="ruse cr-ed" data-cmd="editchar" aria-label="Editar características y competencias" title="Editar">${icon('quill')}</button></div>
     <div class="cr-grid">${t.map(tarjeta).join('')}</div>
     ${abierta ? (c => `<div class="cr-panel" data-car="${c.k}"><h3>${esc(c.nombre)} <small>${c.valor} · ${sgn(c.mod)}</small></h3>${filasCar(ch, c)}</div>`)(t.find(x => x.k === abierta)) : ''}
-    <p class="cr-leyenda"><span>${marcaComp(1)}competencia</span><span>${marcaComp(2)}pericia</span><span><i class="cr-v ventaja">▲</i><i class="cr-v desventaja">▼</i>ventaja o desventaja por estados y efectos</span><span>Toca una tirada para lanzar el d20.</span></p>`;
+    <p class="cr-leyenda"><span>${marcaComp(1)}competencia</span><span>${marcaComp(2)}pericia</span><span><i class="cr-v ventaja">▲</i><i class="cr-v desventaja">▼</i>ventaja o desventaja por estados y efectos</span><span>Toca una característica para su prueba, o una tirada de la lista.</span></p>`;
 }
 let pruebasAbiertas = false;
 export const abrirPruebas = v => { pruebasAbiertas = v; };
 export function pruebasCombateHtml(ch) {
   const t = tablaCaracteristicas(ch);
   return `<details class="cb-pruebas" ${pruebasAbiertas ? 'open' : ''}><summary>${gi('d20')}Pruebas y salvaciones<small>con tus estados y efectos</small>${icon('chevron')}</summary>
-    <div class="cb-pr-grid">${t.map(c => `<section class="cb-pr-car"><h4>${c.corto}<small>${c.valor}</small></h4>${filasCar(ch, c)}</section>`).join('')}</div></details>`;
+    <div class="cb-pr-grid">${t.map(c => `<section class="cb-pr-car"><button type="button" class="cb-pr-cab" data-tirar="car:${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}">${(r => `<span class="cb-pr-n">${c.corto}<small>${c.valor}</small></span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b>`)(resumenTirada(ch, 'prueba', { ab: c.k }, c.mod))}${gi('d20', 'cb-pr-d20')}</button>${filasCar(ch, c)}</section>`).join('')}</div></details>`;
 }
 export const enCombate = ch => !!combateDe(ch).activo;
