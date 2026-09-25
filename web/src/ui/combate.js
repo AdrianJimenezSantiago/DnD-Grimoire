@@ -6,12 +6,12 @@ import { biblioteca } from '../domain/catalogo.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo } from '../domain/combate.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../domain/habilidades.js';
-import { pgActuales, estadoVital } from '../domain/vida.js';
+import { pgActuales, pgMaximo, estadoVital, vidaDe } from '../domain/vida.js';
 import { gi } from './tema.js';
 import { icon } from './icons.js';
 import { runaSvg } from './magia.js';
 import { burst, reducedMotion } from './fx.js';
-import { pgHtml, estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml } from './vitales.js';
+import { estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml, pctVida, tonoVida, pipsMuerte } from './vitales.js';
 import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod } from '../domain/efectos.js';
 import { NOMBRE_ESTADO } from '../domain/vida.js';
 
@@ -61,32 +61,45 @@ function acciones(ch, db) {
   return grupos;
 }
 
+const ECO_CORTO = { adicional: 'Adicional', movimiento: 'Mover' };
+function orbeHtml(ch) {
+  const v = vidaDe(ch), max = pgMaximo(ch), act = pgActuales(ch), est = estadoVital(ch), pct = pctVida(ch), temp = v.temp ? Math.min(100, Math.round(v.temp / max * 100)) : 0;
+  return `<button type="button" class="cb-orbe ${tonoVida(ch)} ${est}" data-cmd="vida" aria-label="Puntos de golpe: ${act} de ${max}${v.temp ? `, más ${v.temp} temporales` : ''}. Tocar para cambiarlos">
+    <svg class="cb-anillo" viewBox="0 0 120 120" aria-hidden="true"><circle class="a-marcas" cx="60" cy="60" r="44" pathLength="100"/><circle class="a-pista" cx="60" cy="60" r="52"/>
+      <circle class="a-vida" cx="60" cy="60" r="52" pathLength="100" style="stroke-dasharray:${pct} 100"/>${temp ? `<circle class="a-temp" cx="60" cy="60" r="58" pathLength="100" style="stroke-dasharray:${temp} 100"/>` : ''}</svg>
+    <span class="pg-cifra"><b>${act}</b><small>/ ${max}</small></span>
+    <span class="cb-orbe-l">${act === 0 && est !== 'vivo' ? `${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'Moribundo'}` : 'Puntos de golpe'}</span>
+    ${v.temp ? `<span class="cb-orbe-t">+${v.temp}</span>` : ''}${act === 0 && est !== 'vivo' ? `<span class="cb-orbe-p">${pipsMuerte(ch)}</span>` : ''}</button>`;
+}
 export function combateHtml(ch, db) {
   const c = combateDe(ch), P = perfil(ch), ag = penalizacionAgotamiento(ch), est = estadoVital(ch), incap = incapacitado(ch);
   const lineas = resumenMods(ch), modsHtml = lineas.length || incap.length ? `<section class="cb-mods" aria-label="Lo que te afecta">
       ${incap.length ? `<p class="cb-incap">${gi('estados')}<span><b>${esc(incap.map(k => NOMBRE_ESTADO[k]).join(', '))}</b>: no puedes llevar a cabo acciones, acciones adicionales ni reacciones.</span></p>` : ''}
       ${lineas.map(l => `<div class="cb-mod-l"><span>${esc(l.titulo)}</span>${l.piezas.map(p => `<b class="cb-mod ${p.mal ? 'mal' : 'bien'}" title="${esc(p.cond ? `Solo ${p.cond}` : p.fuente)}">${esc(p.texto)}<small>${esc(p.fuente)}${p.cond ? ' *' : ''}</small></b>`).join('')}</div>`).join('')}</section>` : '';
   const g = acciones(ch, db), pasivos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).filter(r => r.grupo === 'pasivo');
-  const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i>${t}</button>`).join('');
+  const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b e-${k} ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" aria-label="${t}${c.turno[k] ? ': gastada' : ''}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i><span>${ECO_CORTO[k] ? `<em class="l-larga">${t}</em><em class="l-corta">${ECO_CORTO[k]}</em>` : t}</span></button>`).join('');
   const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b></span>
     <button type="button" data-tirar="salv:con">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
   const col = (k, t) => `<section class="cb-col cb-${k} ${c.turno[k] ? 'gastada' : ''}"><h3><span>${t}</span><small>${c.turno[k] ? 'usada este turno' : 'disponible'}</small></h3>
     ${g[k].length ? g[k].join('') : `<p class="cb-vacio">${k === 'accion' ? 'Atacar, lanzar, esquivar, correr, ayudar, esconderse, buscar, usar un objeto…' : k === 'adicional' ? 'Nada que la use ahora mismo.' : 'Ataque de oportunidad cuando un enemigo sale de tu alcance.'}</p>`}</section>`;
-  return `<header class="cb-cab">
+  return `<section class="cb-mando" aria-label="Estado del combate">
+    ${orbeHtml(ch)}
+    <header class="cb-m-cab">
       <span class="cb-emb">${runaSvg({ n: 12, lados: 5, cls: 'cb-runa', semillaInicial: 11 })}${gi('combate')}</span>
       <div class="cb-tit"><h2>Combate</h2><span class="cb-ronda">Ronda <b data-ronda="${c.ronda}">${c.ronda}</b></span></div>
       <div class="cb-ini ${c.iniciativa == null ? 'falta' : ''}">${c.iniciativa == null ? `<button type="button" class="gold" data-tirar="iniciativa">${gi('iniciativa')}Tirar iniciativa ${sgn(iniciativa(ch) - ag)}</button>`
-        : `<button type="button" class="cb-ini-v" data-tirar="iniciativa" title="Volver a tirar">${gi('iniciativa')}<b>${c.iniciativa}</b><small>iniciativa${c.iniManual ? ' · a mano' : ''}</small></button>`}<button type="button" class="cb-ini-e" data-cbini aria-label="Escribir la iniciativa a mano" title="Escribir la iniciativa a mano (por ejemplo, si la intercambias con un aliado)">${icon('quill')}</button></div>
-      <button type="button" class="cb-turno" data-cmd="turno">${gi('md_tiempo')}Siguiente turno</button>
+        : `<button type="button" class="cb-ini-v" data-tirar="iniciativa" title="Iniciativa${c.iniManual ? ' escrita a mano' : ''}: toca para volver a tirar"><b>${c.iniciativa}</b><small>${c.iniManual ? 'a mano' : 'inic.'}</small></button>`}<button type="button" class="cb-ini-e" data-cbini aria-label="Escribir la iniciativa a mano" title="Escribir la iniciativa a mano (por ejemplo, si la intercambias con un aliado)">${icon('quill')}</button></div>
+      <button type="button" class="cb-turno" data-cmd="turno">${gi('md_tiempo')}<span>Siguiente turno</span></button>
     </header>
     <div class="cb-eco" role="group" aria-label="Lo que has usado este turno">${eco}</div>
-    <div class="cb-vital">${pgHtml(ch, { compacto: true })}
+    <div class="cb-base">
       <div class="cb-rapido"><input id="cbCant" type="text" inputmode="tel" autocomplete="off" placeholder="PG" aria-label="Cantidad de puntos de golpe">
-        <button type="button" class="danger" data-cbpg="dano">${gi('pg')}Daño</button><button type="button" class="vd-cura" data-cbpg="curar">${gi('curacion')}Curar</button></div>
-      ${placaCa(ch, 'CA', 'data-leer="ca" aria-label="Clase de armadura: mantén pulsado para ver el desglose"')}
-      ${placaVel(ch, 'Velocidad', 'data-leer="vel"')}
-      ${P.cd != null ? `<div class="vt-placa cd">${gi('ojo', 'vt-ico')}<b>${P.cd}</b><span>CD · ataque ${sgn(P.atk)}</span></div>` : ''}
+        <button type="button" class="danger" data-cbpg="dano" aria-label="Daño">${gi('pg')}<span>Daño</span></button><button type="button" class="vd-cura" data-cbpg="curar" aria-label="Curar">${gi('curacion')}<span>Curar</span></button></div>
+      <div class="cb-sellos">${placaCa(ch, 'CA', 'data-leer="ca" aria-label="Clase de armadura: mantén pulsado para ver el desglose"')}
+        ${placaVel(ch, 'Velocidad', 'data-leer="vel"')}
+        ${P.cd != null ? `<div class="vt-placa cd">${gi('ojo', 'vt-ico')}<b>${P.cd}</b><span>CD · ataque ${sgn(P.atk)}</span></div>` : ''}</div>
     </div>
+  </section>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}${estadosHtml(ch)}${modsHtml}
     ${pruebasCombateHtml(ch)}
