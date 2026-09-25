@@ -136,5 +136,5 @@ export function ataqueArma(ch, o) {
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
   const mod = distancia ? des : sutil ? Math.max(fue, des) : fue, pb = perfil(ch).pb, bono = parseInt(a.bono, 10) || 0;
   const s = n => (n >= 0 ? `+${n}` : String(n));
-  return { ataque: s(mod + pb + bono), dano: `${a.dano || '1d4'}${mod + bono ? ` ${s(mod + bono).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim() };
+  return { expr: `${a.dano || '1d4'}${mod + bono ? s(mod + bono) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono), dano: `${a.dano || '1d4'}${mod + bono ? ` ${s(mod + bono).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim() };
 }

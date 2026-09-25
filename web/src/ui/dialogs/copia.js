@@ -1,5 +1,5 @@
 import { esc } from '../../core/util.js';
-import { charFromV1, normDb, SCHEMA } from '../../domain/modelo.js';
+import { charFromV1, normDb, importarPersonaje, SCHEMA } from '../../domain/modelo.js';
 import { linkCatalog, invalidateItems } from '../../domain/catalogo.js';
 import { $ } from '../dom.js';
 import { openSheet, closeSheet } from '../dialog.js';
@@ -18,6 +18,15 @@ export function loadBackup(text) {
     const db = normDb(d); linkCatalog(db); invalidateItems();
     S.editing = false; const h = S.replace(db); closeSheet($('#backupDlg'));
     toast(`Copia cargada: ${d.chars.length === 1 ? '1 personaje' : d.chars.length + ' personajes'} y ${Object.keys(db.catalog).length} conjuros.`, [undoBtn(S, h)]); return;
+  }
+  if (d?.tipo === 'grimorio-personaje' && d.personaje) {
+    let nombre = '';
+    const h = S.edit(db => {
+      nombre = importarPersonaje(db, d).nombre; normDb(db); linkCatalog(db);
+    });
+    invalidateItems(); closeSheet($('#backupDlg'));
+    document.dispatchEvent(new CustomEvent('grimorio:abierto'));
+    toast(`<b>${esc(nombre)}</b> añadido a tus personajes.`, [undoBtn(S, h)]); return;
   }
   if (d?.levels && d?.meta) {
     let nombre = '';

@@ -10,6 +10,7 @@ import { manualFor, srdFor, tiradasConjuro } from '../domain/catalogo.js';
 import { conObjetivos, empezarConc, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo } from '../domain/vida.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -130,8 +131,9 @@ export function terminarEfecto(S, id) {
 export function longRest(S) {
   const ch = S.cur(); if (!ch) return;
   const rs = reglas(ch), dados = rs.filter(r => r.tipo === 'dados');
-  const tiradas = [];
+  const tiradas = []; let vida = null;
   const h = S.act('Descanso largo', (db, c) => {
+    vida = descansoLargoVida(c);
     c.play.used = {}; terminarConc(c.play); c.play.efectos = []; c.book.forEach(e => { e.used = false; });
     const rec = {};
     reglas(c).forEach(r => { const st = c.play.rec?.[r.id];
@@ -140,7 +142,8 @@ export function longRest(S) {
   });
   if (tiradas.length) S.note(tiradas.join('; '));
   dawn(); haptic('medium');
-  const bits = ['espacios', 'usos gratis']; if (rs.some(r => r.tipo === 'recurso' || r.tipo === 'recuperar')) bits.push('rasgos');
+  const bits = ['puntos de golpe', 'dados de golpe', 'espacios', 'usos gratis']; if (rs.some(r => r.tipo === 'recurso' || r.tipo === 'recuperar')) bits.push('rasgos');
+  if (vida?.agotamiento) bits.push(`un nivel de agotamiento (queda ${vida.agotamiento - 1})`);
   let msg = `Descanso largo: ${joinY(bits)} restaurados.${tiradas.length ? ' ' + esc(tiradas.join('. ')) + '.' : ''}`;
   if (dados.length) {
     msg += ` Anota tus dados de ${joinY(dados.map(r => esc(r.nombre)))}.`;
@@ -149,7 +152,7 @@ export function longRest(S) {
   toast(msg, [undoBtn(S, h)]);
 }
 
-export function shortRest(S, openRecovery) {
+export function shortRest(S, openRecovery, openVida) {
   const ch = S.cur(); if (!ch) return;
   const P = perfil(ch), rs = reglas(ch), bits = [];
   if (P.pact) bits.push('espacios de pacto'); else if (ch.clase === 'Brujo' && ch.espaciosManuales) bits.push('espacios');
@@ -164,9 +167,11 @@ export function shortRest(S, openRecovery) {
   });
   haptic();
   if (P.pact) document.querySelectorAll(`[data-slotbtn^="${P.pact.level}:"]`).forEach(b => pop(b, 'fx-ignite'));
-  const rec = rs.find(r => r.tipo === 'recuperar' && !recState(S.cur(), r.id).used);
-  toast(`Descanso corto${bits.length ? `: recuperas ${esc(joinY(bits))}` : ''}.`,
-    [rec && { label: `Usar ${rec.nombre}`, hl: true, fn: () => openRecovery(rec.id) }, undoBtn(S, h)]);
+  const rec = rs.find(r => r.tipo === 'recuperar' && !recState(S.cur(), r.id).used), c2 = S.cur();
+  const dg = dadosDeGolpe(c2).reduce((n, d) => n + d.quedan, 0), herido = pgActuales(c2) < pgMaximo(c2);
+  toast(`Descanso corto${bits.length ? `: recuperas ${esc(joinY(bits))}` : ''}.${herido && dg ? ` Te quedan ${dg} dados de golpe para curarte.` : ''}`,
+    [herido && dg && openVida && { label: 'Gastar dados de golpe', hl: !rec, fn: () => { openVida(false); setTimeout(() => document.querySelector('.vd-dados')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); } },
+      rec && { label: `Usar ${rec.nombre}`, hl: true, fn: () => openRecovery(rec.id) }, undoBtn(S, h)].filter(Boolean));
 }
 
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);

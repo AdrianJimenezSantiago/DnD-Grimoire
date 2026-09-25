@@ -23,6 +23,9 @@ const USO = {
   o_pocion: 'potion-ball', o_vara: 'orb-wand', o_varita: 'crystal-wand', sintonia: 'linked-rings', cofre: 'open-treasure-chest',
   biblioteca: 'bookshelf', dote: 'laurel-crown', trasfondo: 'knapsack', subclase: 'upgrade', bestia: 'beast-eye', criatura: 'spiked-dragon-head',
   eficaz: 'target-arrows', inmune: 'checked-shield', vulnerable: 'cracked-shield',
+  esc_abj: 'magic-shield', esc_adi: 'third-eye', esc_con: 'magic-portal', esc_enc: 'puppet', esc_evo: 'fire-ray', esc_ilu: 'drama-masks', esc_nig: 'skull-staff', esc_tra: 'transform',
+  pg: 'heart-beats', ca: 'shield', iniciativa: 'lightning-helix', velocidad: 'walking-boot', inspiracion: 'star-swirl', estados: 'aura', agotamiento: 'tired-eye',
+  muerte: 'grim-reaper', dado_golpe: 'heart-drop', cubilete: 'rolling-dice-cup', combate: 'crossed-sabres', buscar: 'magnifying-glass', exportar: 'scroll-unfurled',
   md_borrar: 'burning-book', md_tiempo: 'sands-of-time', md_guardar: 'locked-chest', md_pluma: 'quill-ink',
   d20: 'dice-twenty-faces-twenty', dados: 'rolling-dices', libro: 'spell-book', vela: 'candle-light', glosario: 'scroll-unfurled', ojo: 'all-seeing-eye',
 };

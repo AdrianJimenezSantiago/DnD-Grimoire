@@ -172,17 +172,17 @@ export function abrirObjeto(clave) {
     pie: ch ? (ya ? `<span class="fi-ya">${icon('user')}${esc(ch.nombre)} ya lo lleva</span><button type="button" data-cmd="equipo">Ver sus objetos</button>`
       : `<button type="button" class="gold" data-fi="anadir">${icon('plus')}Añadir a ${esc(ch.nombre)}</button>`) : '' });
 }
-function abrirDote(clave) {
+export function abrirDote(clave) {
   const d = biblioteca().dotes.find(x => x.clave === clave); if (!d) return;
   ficha({ titulo: d.nombre, ico: 'dote', sub: `<div class="fi-pills"><span class="rar-pill">${esc(d.cat)}</span>${d.req ? `<span>Requisitos: ${esc(d.req)}</span>` : ''}</div>`, cuerpo: `<section class="sp-text">${md(d.texto)}</section>${fuente(d.fuente)}` });
 }
-function abrirTrasfondo(clave) {
+export function abrirTrasfondo(clave) {
   const t = biblioteca().trasfondos.find(x => x.clave === clave); if (!t) return;
   const filas = [['Características', t.caracteristicas], ['Dote', t.dote], ['Habilidades', t.habilidades], ['Herramientas', t.herramientas], ['Equipo', t.equipo]].filter(f => f[1]);
   ficha({ titulo: t.nombre || 'Trasfondo sin nombre', ico: 'trasfondo', sub: '',
     cuerpo: `<dl class="fi-dl">${filas.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><section class="sp-text">${md(t.texto)}</section>${fuente(t.fuente)}` });
 }
-function abrirSubclase(k) {
+export function abrirSubclase(k) {
   const [clase, clave] = k.split('|'), s = biblioteca().subclases.find(x => x.clase === clase && x.clave === clave); if (!s) return;
   const ch = S.cur();
   ficha({ titulo: s.nombre, ico: norm(s.clase).replace(/[^a-z]/g, ''), sub: `<div class="fi-pills"><span class="rar-pill">${esc(s.clase)}</span>${[...new Map(s.rasgos.map(r => [r.nivel, r])).values()].map(r => `<a class="lvl-pill ${ch && ch.clase === s.clase && ch.nivel >= r.nivel ? 'on' : ''}" href="#rs-${r.nivel}-${norm(r.nombre).replace(/\W+/g, '-')}">${r.nivel}</a>`).join('')}</div>${s.lema ? `<p class="fi-lema">${esc(s.lema)}</p>` : ''}`,

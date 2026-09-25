@@ -1,3 +1,4 @@
+import { competenciasIniciales, periciasDisponibles, abDe } from './habilidades.js';
 import { norm, uid } from '../core/util.js';
 import { CLASES, ESPECIES, TRASFONDOS_2024, competencia, perfil } from './reglas2024.js';
 import { CLASES_INFO, SUBCLASES, conjurosAutomaticos, progresion, subclaseDe } from './clases2024.js';
@@ -93,6 +94,9 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     nombre: NOMBRES[i % NOMBRES.length], clase, subclase: sc.nombre, nivel, especie, trasfondo, stats, prueba: true,
     lema: `Personaje de prueba generado automáticamente (${sc.libro}).`, campana: 'Pruebas de la rama development',
   });
+  ch.habilidades = competenciasIniciales(ch);
+  const pericias = periciasDisponibles(ch), hab = Object.keys(ch.habilidades).sort((x, y) => prio.indexOf(abDe(x)) - prio.indexOf(abDe(y)));
+  hab.slice(0, pericias).forEach(k => { ch.habilidades[k] = 2; });
   const P = perfil(ch), lista = P.lista, pb = competencia(nivel);
   const book = ch.book, enLibro = new Set(), claves = new Set();
   const add = (x, rel) => {
