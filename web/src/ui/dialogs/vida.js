@@ -17,7 +17,7 @@ import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { tirarPrueba } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
-import { pctVida, tonoVida, pipsMuerte } from '../vitales.js';
+import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../vitales.js';
 
 let S, editarMax = false;
 const dlg = () => $('#vidaDlg'), edlg = () => $('#estadosDlg');
@@ -37,10 +37,7 @@ function render() {
     <div class="vd-btns"><button type="button" class="danger" data-vd="dano">${gi('pg')}Daño</button><button type="button" class="vd-cura" data-vd="curar">${gi('curacion')}Curar</button><button type="button" data-vd="temp">${icon('plus')}Temporales</button></div>
     <p class="hint">Los temporales no se suman entre sí: te quedas con los más altos, y el daño los gasta primero.</p></section>`;
   if (act === 0 && est !== 'vivo') {
-    h += `<section class="vd-muerte ${est}"><h3>${gi('muerte')}Salvaciones contra muerte</h3>${pipsMuerte(c, true)}
-      <div class="vd-btns">${est === 'moribundo' ? `<button type="button" class="gold" data-vd="salvmuerte">${gi('d20')}Tirar salvación</button>` : ''}
-      ${est === 'muerto' ? '<button type="button" data-vd="revivir">Traer de vuelta (1 PG)</button>' : ''}${est !== 'muerto' ? '<button type="button" data-vd="estabilizar">Estabilizar</button>' : ''}</div>
-      <p class="hint">10 o más: éxito. Menos de 10: fallo. Un 1 cuenta como dos fallos; un 20 te devuelve 1 PG. Recibir daño a 0 PG es un fallo.</p></section>`;
+    h += `<section class="vd-muerte">${vigiliaHtml(c)}</section>`;
   }
   h += `<section class="vd-dados"><h3>${gi('dado_golpe')}Dados de golpe</h3><div class="vd-dg">${dadosDeGolpe(c).map(d => `<div class="vd-dg-it">
       <b>${d.quedan}<small>/${d.total}</small></b><span>${d.dado}</span><button type="button" data-vddg="${d.dado}" ${d.quedan && act < max && est !== 'muerto' ? '' : 'disabled'}>Gastar y tirar</button></div>`).join('')}</div>
@@ -93,6 +90,8 @@ export function tirarSalvacionMuerte(S2) {
       return { muere: '<b class="ko">Tercer fallo: muere.</b>', estable: '<b class="ok">Tercer éxito: queda estable.</b>', exito: 'Un éxito más.', fallo: nat === 1 ? 'Dos fallos.' : 'Un fallo más.' }[r] + ` ${pipsMuerte(S2.cur())}`; } });
 }
 
+export function estabilizar(S2) { S2.act('Estabilizado a 0 PG', (db, x) => { const v = vidaDe(x); v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; }); haptic('light'); }
+export function revivir(S2) { S2.act('Vuelve a la vida con 1 PG', (db, x) => { const v = vidaDe(x); v.muerte = { exitos: 0, fallos: 0 }; v.pg = 1; v.estable = false; }); golpeFx('cura'); }
 export function openEstados() { renderEstados(); openSheet(edlg()); }
 function renderEstados() {
   const c = ch(); if (!c) return; const v = vidaDe(c), glos = glosario();
@@ -122,9 +121,6 @@ export function init(store) {
     if (a === 'dano') { const n = cant(); if (n) { danar(S, n); render(); } }
     if (a === 'curar') { const n = cant(); if (n) { sanar(S, n); render(); } }
     if (a === 'temp') { const n = cant(); if (n) { temporales(S, n); render(); } }
-    if (a === 'salvmuerte') tirarSalvacionMuerte(S);
-    if (a === 'estabilizar') { S.act('Estabilizado a 0 PG', (db, x) => { const v = vidaDe(x); v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; }); render(); }
-    if (a === 'revivir') { S.act('Vuelve a la vida con 1 PG', (db, x) => { const v = vidaDe(x); v.muerte = { exitos: 0, fallos: 0 }; v.pg = 1; v.estable = false; }); render(); }
     if (a === 'editarmax') { editarMax = true; render(); $('#vdMax')?.select(); }
     if (a === 'cancelarmax') { editarMax = false; render(); }
     if (a === 'guardarmax') { const n = Math.max(1, parseInt($('#vdMax').value, 10) || 1); S.act(`PG máximos: ${n}`, (db, x) => { vidaDe(x).maxManual = n === pgMaximoCalculado(x) ? null : n; }); editarMax = false; render(); }
@@ -139,10 +135,10 @@ export function init(store) {
     if (!g) return; golpeFx('cura'); haptic('light'); render();
     toast(`Dado de golpe ${dado}: <b>${t}</b> ${sgn(modOf(S.cur().stats?.con))} = recupera <b>${g.ganado}</b> PG.`, [undoBtn(S, h)]);
   });
-  on(body, 'click', '[data-pip]', (e, b) => {
+  on(document, 'click', '[data-pip]', (e, b) => {
     const [tipo, i] = b.dataset.pip.split('|'), k = tipo === 'exito' ? 'exitos' : 'fallos';
-    S.act(`Salvaciones contra muerte: ${tipo === 'exito' ? 'éxitos' : 'fallos'}`, (db, x) => { const m = vidaDe(x).muerte; m[k] = m[k] === +i + 1 ? +i : +i + 1; if (k === 'exitos' && m.exitos >= 3) vidaDe(x).estable = true; });
-    render();
+    S.act(`Salvaciones contra muerte: ${tipo === 'exito' ? 'éxitos' : 'fallos'}`, (db, x) => { const v = vidaDe(x), m = v.muerte; m[k] = m[k] === +i + 1 ? +i : +i + 1; v.estable = m.exitos >= 3 && m.fallos < 3; });
+    haptic('light');
   });
   body.addEventListener('keydown', e => { if (e.target.id === 'vdCant' && e.key === 'Enter') { e.preventDefault(); const n = cant(); if (n) { danar(S, n); render(); e.target.value = ''; } } });
   S.subscribe(() => { if (dlg().open && !editarMax) { const f = document.activeElement?.id === 'vdCant', val = $('#vdCant')?.value; render(); if (f) { $('#vdCant').value = val; $('#vdCant').focus({ preventScroll: true }); } } if (edlg().open) renderEstados(); });

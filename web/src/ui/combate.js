@@ -11,7 +11,7 @@ import { gi } from './tema.js';
 import { icon } from './icons.js';
 import { runaSvg } from './magia.js';
 import { burst, reducedMotion } from './fx.js';
-import { pgHtml, estadosHtml, pipsMuerte } from './vitales.js';
+import { pgHtml, estadosHtml, vigiliaHtml } from './vitales.js';
 
 const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc', evo: 'esc_evo', ilu: 'esc_ilu', nig: 'esc_nig', tra: 'esc_tra' };
 export const escuelaIco = esc2 => ESC_ICO[norm(esc2 || '').slice(0, 3)] || '';
@@ -71,7 +71,7 @@ export function combateHtml(ch, db) {
       <div class="vt-placa vel">${gi('velocidad', 'vt-ico')}<b>${fmtMetros(velocidad(ch))}</b><span>Velocidad</span></div>
       ${P.cd != null ? `<div class="vt-placa cd">${gi('ojo', 'vt-ico')}<b>${P.cd}</b><span>CD · ataque ${sgn(P.atk)}</span></div>` : ''}
     </div>
-    ${est !== 'vivo' && pgActuales(ch) === 0 ? `<div class="cb-muerte ${est}">${gi('muerte')}<span><b>${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'A 0 PG: salvación contra muerte'}</b>${pipsMuerte(ch)}</span>${est === 'moribundo' ? '<button type="button" class="gold" data-cmd="salvmuerte">Tirar</button>' : ''}</div>` : ''}
+    ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}${estadosHtml(ch)}
     <div class="cb-cols">${col('accion', 'Acción')}${col('adicional', 'Acción adicional')}${col('reaccion', 'Reacción')}</div>
     ${pasivos.length ? `<details class="cb-pasivos"><summary>Siempre activo <small>${pasivos.length}</small>${icon('chevron')}</summary><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(n => `<span class="ej-num">${esc(n.valor)}</span>`).join('')}</button>`).join('')}</div></details>` : ''}

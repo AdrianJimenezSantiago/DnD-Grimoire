@@ -32,7 +32,7 @@ import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
 import { avatarHtml } from '../ui/avatar.js';
-import { openVida, openEstados, danar, sanar, tirarSalvacionMuerte } from '../ui/dialogs/vida.js';
+import { openVida, openEstados, danar, sanar, tirarSalvacionMuerte, estabilizar, revivir } from '../ui/dialogs/vida.js';
 import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
@@ -135,6 +135,8 @@ const COMMANDS = {
   dadoslibres: () => openDados(),
   buscar: () => openBuscar(),
   salvmuerte: () => S.cur() && tirarSalvacionMuerte(S),
+  estabilizar: () => S.cur() && estabilizar(S),
+  revivir: () => S.cur() && revivir(S),
   combate: el => alternarCombate(el),
   turno: () => nuevoTurno(),
   manual: () => openManual(),

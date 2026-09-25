@@ -6,6 +6,7 @@ import { iniciativa, velocidad, fmtMetros, tablaCaracteristicas, percepcionPasiv
 import { combateDe } from '../domain/combate.js';
 import { gi } from './tema.js';
 import { icon } from './icons.js';
+import { runaSvg } from './magia.js';
 
 export const pctVida = c => { const m = pgMaximo(c); return m ? Math.max(0, Math.min(100, Math.round(pgActuales(c) / m * 100))) : 0; };
 export const tonoVida = c => { const p = pctVida(c); return p <= 0 ? 'cero' : p <= 25 ? 'critico' : p <= 50 ? 'herido' : 'sano'; };
@@ -17,6 +18,20 @@ export function pipsMuerte(c, interactivo = false) {
   return `<span class="pips"><span class="pips-g" title="Éxitos">${[0, 1, 2].map(i => pip('exito', i, i < m.exitos)).join('')}</span><span class="pips-g" title="Fallos">${[0, 1, 2].map(i => pip('fallo', i, i < m.fallos)).join('')}</span></span>`;
 }
 
+export function vigiliaHtml(ch) {
+  const m = vidaDe(ch).muerte, est = estadoVital(ch);
+  const pista = (tipo, n, lbl) => `<div class="vg-pista ${tipo}"><span class="vg-lbl">${lbl}</span><span class="vg-pips">${[0, 1, 2].map(i => `<button type="button" class="vg-pip ${i < n ? 'on' : ''}" data-pip="${tipo}|${i}" aria-pressed="${i < n}" aria-label="${lbl}: ${i + 1}"><i></i></button>`).join('')}</span></div>`;
+  const txt = { moribundo: ['A las puertas de la muerte', 'Inconsciente a 0 PG. Al empezar tu turno tira un d20: 10 o más es un éxito; un 1, dos fallos; un 20, vuelves con 1 PG.'],
+    estable: ['Estable', 'Inconsciente, pero fuera de peligro. Recupera 1 PG en 1d4 horas si nadie le cura antes.'],
+    muerto: ['Ha caído', 'Tres fallos. Solo la magia puede traerle de vuelta.'] }[est] || ['', ''];
+  const acc = est === 'moribundo' ? `<button type="button" class="gold vg-tirar" data-cmd="salvmuerte">${gi('d20')}Tirar salvación</button><button type="button" data-cmd="estabilizar">Estabilizar</button>`
+    : est === 'estable' ? '<button type="button" data-cmd="vida">Curar</button>' : '<button type="button" data-cmd="revivir">Traer de vuelta (1 PG)</button>';
+  return `<div class="vigilia ${est}">
+    <span class="vg-emb">${runaSvg({ n: 12, lados: 6, cls: 'vg-runa', semillaInicial: 13 })}${gi('muerte')}</span>
+    <div class="vg-cuerpo"><b class="vg-tit">${txt[0]}</b><small>${txt[1]}</small>
+      <div class="vg-pistas">${pista('exito', m.exitos, 'Éxitos')}${pista('fallo', m.fallos, 'Fallos')}</div></div>
+    <div class="vg-acc">${acc}</div></div>`;
+}
 export function pgHtml(ch, { compacto = false } = {}) {
   const v = vidaDe(ch), max = pgMaximo(ch), act = pgActuales(ch), est = estadoVital(ch);
   const dg = dadosDeGolpe(ch).map(d => `${d.quedan}${d.dado}`).join(' + ');
