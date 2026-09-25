@@ -94,29 +94,36 @@ export function tirarSalvacionMuerte(S2) {
 
 export function estabilizar(S2) { S2.act('Estabilizado a 0 PG', (db, x) => { const v = vidaDe(x); v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; }); haptic('light'); }
 export function revivir(S2) { S2.act('Vuelve a la vida con 1 PG', (db, x) => { revivirDom(x); }); }
-export function openEstados() { renderEstados(); openSheet(edlg()); }
+export function openEstados() { Q = ''; $('#esQ').value = ''; renderEstados(); openSheet(edlg()); }
+let Q = '';
+const marca = (texto, q) => { const t = String(texto || ''); if (!q) return esc(t); const i = norm(t).indexOf(q); return i < 0 ? esc(t) : `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + q.length))}</mark>${esc(t.slice(i + q.length))}`; };
 function renderEstados() {
-  const c = ch(); if (!c) return; const v = vidaDe(c), glos = glosario();
+  const c = ch(); if (!c) return; const v = vidaDe(c), glos = glosario(), q = norm(Q.trim()), ve = t => !q || t.some(x => norm(x).includes(q));
   const regla = k => glos.find(e => e.cat === 'Estado' && norm(e.nombre) === norm(NOMBRE_ESTADO[k]))?.clave;
   $('#esSub').textContent = `${c.nombre}: lo que le afecta ahora. Se quita tocándolo de nuevo.`;
-  const ago = v.agotamiento;
-  $('#esBody').innerHTML = `<section class="es-top">
-      <button type="button" class="es-insp ${v.inspiracion ? 'on' : ''}" data-es="inspiracion" aria-pressed="${v.inspiracion}">${gi('inspiracion')}<span><b>Inspiración heroica</b><small>${v.inspiracion ? 'La tienes: gástala para repetir un d20.' : 'Sin inspiración.'}</small></span></button>
-      <div class="es-ago"><span class="es-ago-t">${gi('agotamiento')}<span><b>Agotamiento</b><small>${ago ? `Nivel ${ago}: −${ago * 2} a las pruebas de d20 y −${String(ago * 1.5).replace('.', ',')} m de velocidad.${ago >= 6 ? ' Nivel 6: muerte.' : ''}` : 'Sin agotamiento.'}</small></span></span>
-        <div class="stepper"><button type="button" data-esago="-1" aria-label="Quitar un nivel" ${ago ? '' : 'disabled'}>−</button><output>${ago}</output><button type="button" data-esago="1" aria-label="Añadir un nivel" ${ago >= 6 ? 'disabled' : ''}>+</button></div></div></section>
-    <section class="es-lista">${ESTADOS.map(([k, n]) => { const on = v.estados.includes(k), cl = regla(k);
-      return `<div class="es-it ${on ? 'on' : ''}"><button type="button" class="es-tog" data-estado="${k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${esc(n)}</b><small>${esc(RESUMEN_ESTADO[k])}</small></span></button>${cl ? `<button type="button" class="linkish es-regla" data-esregla="${esc(cl)}">Regla</button>` : ''}</div>`; }).join('')}</section>
-    ${glos.length ? '' : '<p class="note">Resúmenes de la app. Importa el Manual del Jugador para leer cada regla completa.</p>'}
-    <h3 class="es-h">${gi('inspiracion')}Efectos sobre ti</h3>
-    <p class="hint">Conjuros y rasgos que te han lanzado (tú u otro). La hoja los suma sola a tus tiradas, a tu CA y a tu velocidad. Cada uno dura lo que dice su conjuro: en combate se descuenta al pasar de ronda y te avisa al terminar. También se quitan con un descanso largo o tocándolos.</p>
-    ${[[true, 'Beneficiosos'], [false, 'Perjudiciales']].map(([bueno, t]) => `<h4 class="es-sub">${t}</h4><section class="es-lista ef">${EFECTOS.filter(e => e.bueno === bueno).map(e => { const x = v.efectos.find(y => y.k === e.k), on = !!x;
-      return `<div class="es-it ${on ? 'on' : ''} ${bueno ? 'bueno' : 'malo'}"><button type="button" class="es-tog" data-efk="${e.k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${gi(e.ico, 'es-ico')}${esc(e.nombre)}${on && x.rondas != null ? `<em class="es-dur">quedan ${esc(fmtRondas(x.rondas))}</em>` : !on && e.dur ? `<em class="es-dur apag">${esc(fmtRondas(e.dur))}</em>` : ''}${x?.conc ? '<em class="es-dur conc">concentración</em>' : ''}</b><small>${esc(e.texto)}</small></span></button></div>`; }).join('')}</section>`).join('')}
-    <h4 class="es-sub">Propios</h4>
-    ${v.efectos.filter(x => x.propio).map(x => `<div class="es-it on bueno"><div class="es-tog"><i class="es-marca" aria-hidden="true"></i><span><b>${esc(x.nombre)}</b><small>${esc(efectosDe(c).find(e => e.id === x.id)?.texto || '')}</small></span></div><button type="button" class="linkish es-regla" data-efq="${esc(x.id)}">Quitar</button></div>`).join('')}
-    <div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off">
+  const ago = v.agotamiento, txtAgo = ago ? `Nivel ${ago}: −${ago * 2} a las pruebas de d20 y −${String(ago * 1.5).replace('.', ',')} m de velocidad.${ago >= 6 ? ' Nivel 6: muerte.' : ''}` : 'Sin agotamiento.';
+  const insp = ve(['Inspiración heroica', 'repetir d20']) ? `<button type="button" class="es-insp ${v.inspiracion ? 'on' : ''}" data-es="inspiracion" aria-pressed="${v.inspiracion}">${gi('inspiracion')}<span><b>${marca('Inspiración heroica', q)}</b><small>${v.inspiracion ? 'La tienes: gástala para repetir un d20.' : 'Sin inspiración.'}</small></span></button>` : '';
+  const agoH = ve(['Agotamiento', txtAgo, 'cansancio']) ? `<div class="es-ago"><span class="es-ago-t">${gi('agotamiento')}<span><b>${marca('Agotamiento', q)}</b><small>${txtAgo}</small></span></span>
+        <div class="stepper"><button type="button" data-esago="-1" aria-label="Quitar un nivel" ${ago ? '' : 'disabled'}>−</button><output>${ago}</output><button type="button" data-esago="1" aria-label="Añadir un nivel" ${ago >= 6 ? 'disabled' : ''}>+</button></div></div>` : '';
+  const estados = ESTADOS.filter(([k, n]) => ve([n, RESUMEN_ESTADO[k]])).map(([k, n]) => { const on = v.estados.includes(k), cl = regla(k);
+    return `<div class="es-it ${on ? 'on' : ''}"><button type="button" class="es-tog" data-estado="${k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${marca(n, q)}</b><small>${marca(RESUMEN_ESTADO[k], q)}</small></span></button>${cl ? `<button type="button" class="linkish es-regla" data-esregla="${esc(cl)}">Regla</button>` : ''}</div>`; });
+  const efectos = [[true, 'Beneficiosos'], [false, 'Perjudiciales']].map(([bueno, t]) => { const xs = EFECTOS.filter(e => e.bueno === bueno && ve([e.nombre, e.texto]));
+    return xs.length ? `<h4 class="es-sub">${t}</h4><section class="es-lista ef">${xs.map(e => { const x = v.efectos.find(y => y.k === e.k), on = !!x;
+      return `<div class="es-it ${on ? 'on' : ''} ${bueno ? 'bueno' : 'malo'}"><button type="button" class="es-tog" data-efk="${e.k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${gi(e.ico, 'es-ico')}${marca(e.nombre, q)}${on && x.rondas != null ? `<em class="es-dur">quedan ${esc(fmtRondas(x.rondas))}</em>` : !on && e.dur ? `<em class="es-dur apag">${esc(fmtRondas(e.dur))}</em>` : ''}${x?.conc ? '<em class="es-dur conc">concentración</em>' : ''}</b><small>${marca(e.texto, q)}</small></span></button></div>`; }).join('')}</section>` : ''; }).join('');
+  const propios = v.efectos.filter(x => x.propio && ve([x.nombre])).map(x => `<div class="es-it on bueno"><div class="es-tog"><i class="es-marca" aria-hidden="true"></i><span><b>${marca(x.nombre, q)}</b><small>${esc(efectosDe(c).find(e => e.id === x.id)?.texto || '')}</small></span></div><button type="button" class="linkish es-regla" data-efq="${esc(x.id)}">Quitar</button></div>`).join('');
+  const nada = q && !insp && !agoH && !estados.length && !efectos && !propios;
+  $('#esCuenta').textContent = q ? (nada ? 'Sin coincidencias' : `${estados.length + (efectos.match(/data-efk/g) || []).length + (propios.match(/data-efq/g) || []).length + (insp ? 1 : 0) + (agoH ? 1 : 0)} coincidencias`) : '';
+  $('#esBody').innerHTML = nada ? `<p class="el-vacio">Nada coincide con «${esc(Q.trim())}». Prueba con parte del nombre o con lo que hace, como «velocidad» o «ventaja».</p>` : `${insp || agoH ? `<section class="es-top">${insp}${agoH}</section>` : ''}
+    ${estados.length ? `${q ? `<h3 class="es-h">${gi('estados')}Estados</h3>` : ''}<section class="es-lista">${estados.join('')}</section>` : ''}
+    ${!q && !glos.length ? '<p class="note">Resúmenes de la app. Importa el Manual del Jugador para leer cada regla completa.</p>' : ''}
+    ${efectos || propios || !q ? `<h3 class="es-h">${gi('inspiracion')}Efectos sobre ti</h3>` : ''}
+    ${q ? '' : '<p class="hint">Conjuros y rasgos que te han lanzado (tú u otro). La hoja los suma sola a tus tiradas, a tu CA y a tu velocidad. Cada uno dura lo que dice su conjuro: en combate se descuenta al pasar de ronda y te avisa al terminar. También se quitan con un descanso largo o tocándolos.</p>'}
+    ${efectos}
+    ${propios || !q ? '<h4 class="es-sub">Propios</h4>' : ''}${propios}
+    ${q ? '' : `<div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off">
       <label>CA<input id="efCa" inputmode="numeric" placeholder="+2"></label><label>Ataques<input id="efAt" placeholder="1d4 o +1"></label>
       <label>Salvaciones<input id="efSv" placeholder="+3"></label><label>Pruebas<input id="efPr" placeholder="1d4"></label><label>Velocidad (m)<input id="efVel" inputmode="decimal" placeholder="+3"></label><label>Rondas<input id="efRd" inputmode="numeric" placeholder="∞" title="Duración en rondas de combate (10 = 1 minuto). Vacío: hasta que lo quites."></label>
-      <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`;
+      <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`}`;
 }
 export async function alternarEfecto(S2, k) {
   const c = S2.cur(), v = vidaDe(c), ya = v.efectos.find(x => x.k === k), e = EFECTO[k];
@@ -162,6 +169,7 @@ export function init(store) {
   S.subscribe(() => { if (dlg().open) { const f = document.activeElement?.id === 'vdCant', val = $('#vdCant')?.value; render(); if (f) { $('#vdCant').value = val; $('#vdCant').focus({ preventScroll: true }); } } if (edlg().open) renderEstados(); });
 
   const eb = $('#esBody');
+  $('#esQ').addEventListener('input', e => { Q = e.target.value; renderEstados(); eb.scrollTop = 0; });
   on(eb, 'click', '[data-estado]', (e, b) => alternarEstado(S, b.dataset.estado));
   on(eb, 'click', '[data-efk]', (e, b) => alternarEfecto(S, b.dataset.efk));
   on(eb, 'click', '[data-efq]', (e, b) => { const id = b.dataset.efq; S.act('Quita un efecto propio', (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.id !== id); }); });

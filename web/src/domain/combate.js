@@ -1,11 +1,12 @@
 import { norm } from '../core/util.js';
 
 export const ECONOMIA = [['accion', 'Acción'], ['adicional', 'Acción adicional'], ['reaccion', 'Reacción'], ['movimiento', 'Movimiento']];
-export const COMBATE0 = () => ({ activo: false, ronda: 1, iniciativa: null, turno: { accion: false, adicional: false, reaccion: false, movimiento: false } });
+export const COMBATE0 = () => ({ activo: false, ronda: 1, iniciativa: null, iniManual: false, turno: { accion: false, adicional: false, reaccion: false, movimiento: false } });
 export function normCombate(c) {
   const x = { ...COMBATE0(), ...(c && typeof c === 'object' ? c : {}) };
   x.activo = !!x.activo; x.ronda = Math.max(1, parseInt(x.ronda, 10) || 1);
   x.iniciativa = x.iniciativa == null || x.iniciativa === '' ? null : parseInt(x.iniciativa, 10) || 0;
+  x.iniManual = !!x.iniManual && x.iniciativa != null;
   x.turno = Object.fromEntries(ECONOMIA.map(([k]) => [k, !!x.turno?.[k]]));
   return x;
 }

@@ -61,3 +61,10 @@ test('descansos: qué conjuros y opciones puedes cambiar según tu clase', () =>
   assert.ok(titulos(pj({ especie: 'Alto elfo' }), 'largo').includes('Cambiar tu truco élfico'));
   assert.ok(esHumano(pj({ especie: 'Humano' }))); assert.ok(!esHumano(pj({ especie: 'Mediano' })));
 });
+test('combate: la iniciativa escrita a mano se recuerda y se limpia al empezar otro', async () => {
+  const { normCombate, empezarCombate, combateDe } = await import('../web/src/domain/combate.js');
+  assert.equal(normCombate({ iniciativa: '17', iniManual: true }).iniManual, true);
+  assert.equal(normCombate({ iniciativa: null, iniManual: true }).iniManual, false);
+  const ch = pj({ combate: { activo: true, iniciativa: 19, iniManual: true } });
+  empezarCombate(ch); assert.equal(combateDe(ch).iniciativa, null); assert.equal(combateDe(ch).iniManual, false);
+});

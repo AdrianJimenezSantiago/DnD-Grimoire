@@ -12,7 +12,7 @@ import { closeSheet, openSheet, topSheet } from '../ui/dialog.js';
 import { pop, viewTransition, reducedMotion, burst } from '../ui/fx.js';
 import { NATIVE, haptic, keepAwake, minimize, setBars, storage } from '../platform/native.js';
 import * as A from './acciones.js';
-import { confirmar } from '../ui/modal.js';
+import { confirmar, pedir } from '../ui/modal.js';
 import { openChars, openCharForm } from '../ui/dialogs/personajes.js';
 import { openPicker } from '../ui/dialogs/buscador.js';
 import { openSpell } from '../ui/dialogs/conjuro.js';
@@ -38,6 +38,7 @@ import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
 import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
 import { alternarCaracteristica } from '../ui/vitales.js';
+import { leer, initLeer } from '../ui/leer.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
@@ -187,9 +188,23 @@ function alternarCombate(el) {
     if (!reducedMotion()) { el2.classList.add(cls); setTimeout(() => el2.classList.remove(cls), 1300); }
   }, { ronda });
   haptic(activo ? 'light' : 'heavy');
+  if (!activo) setTimeout(() => { const x = S.cur(); if (x && combateDe(x).activo && combateDe(x).iniciativa == null && !topSheet()) tirarDesde('iniciativa'); }, reducedMotion() ? 200 : 1900);
+}
+async function iniciativaManual() {
+  const ch = S.cur(); if (!ch) return;
+  const c = combateDe(ch), alerta = (ch.dotes || []).some(d => /^alerta/i.test(d)) || /alerta/i.test(JSON.stringify(ch.trasfondo || ''));
+  const r = await pedir({ titulo: 'Iniciativa a mano', texto: `Escribe tu iniciativa para este combate.${alerta ? ' Con la dote Alerta puedes intercambiarla con un aliado dispuesto: pon aquí la suya.' : ' Útil si la intercambias con un aliado o tu DJ la ajusta.'}`,
+    valor: c.iniciativa != null ? String(c.iniciativa) : '', tipo: 'number', min: -10, max: 60, ok: 'Guardar' });
+  if (r == null || r === '') return;
+  const n = parseInt(r, 10); if (!Number.isFinite(n)) return;
+  const antes = c.iniciativa;
+  const h = S.act(`Iniciativa a mano: ${n}${antes != null ? ` (antes ${antes})` : ''}`, (db, x) => { combateDe(x).iniciativa = n; combateDe(x).iniManual = true; });
+  pop(document.querySelector('.cb-ini-v'), 'fx-pop'); haptic('light');
+  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.`, [A.undoBtn(S, h)]);
 }
 function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
+  if (combateDe(ch).iniciativa == null) { toast('Antes de pasar de ronda, tira tu iniciativa (o escríbela con el lápiz).'); tirarDesde('iniciativa'); return; }
   let fuera = [];
   const ronda = combateDe(ch).ronda + 1;
   const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); });
@@ -213,7 +228,7 @@ function avisoFinEfectos(fuera, ronda, h) {
 function tirarDesde(clave) {
   const ch = S.cur(); if (!ch) return;
   if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa',
-    alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; }); return 'Guardada como tu iniciativa en este combate.'; } });
+    alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; combateDe(x).iniManual = false; }); return 'Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.'; } });
   const [tipo, k] = clave.split(':');
   if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
   if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
@@ -235,14 +250,24 @@ function animarEnJuego() { const el = $('#enjuego'); pop(el, 'fx-abre'); clearTi
 function bindSheet() {
   const sheet = $('#sheet'), bar = $('#sbar');
   let lpTimer = 0, lpFired = false, lpStart = null;
+  let lpEl = null, lpVis = 0;
+  const soltar = () => { clearTimeout(lpTimer); clearTimeout(lpVis); lpEl?.classList.remove('lp-carga'); lpEl = null; };
   sheet.addEventListener('pointerdown', e => {
-    const z = e.target.closest('.castzone'); if (!z || S.editing) return;
-    lpFired = false; lpStart = [e.clientX, e.clientY];
-    lpTimer = setTimeout(() => { lpFired = true; haptic('medium'); openSpell(+z.dataset.cast); }, 460);
+    if (S.editing || e.button > 0) return;
+    const L = e.target.closest('[data-leer]'), z = L ? null : e.target.closest('.castzone'); if (!L && !z) return;
+    soltar(); lpFired = false; lpStart = [e.clientX, e.clientY];
+    if (L) { lpEl = L; lpVis = setTimeout(() => L.classList.add('lp-carga'), 110); }
+    lpTimer = setTimeout(() => { lpFired = true; haptic('medium'); const k = L?.dataset.leer; soltar(); if (k) leer(k); else openSpell(+z.dataset.cast); }, 460);
   });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => sheet.addEventListener(t, () => clearTimeout(lpTimer)));
-  sheet.addEventListener('pointermove', e => { if (lpStart && Math.hypot(e.clientX - lpStart[0], e.clientY - lpStart[1]) > 10) clearTimeout(lpTimer); });
-  sheet.addEventListener('contextmenu', e => { if (e.target.closest('.castzone') && !S.editing) e.preventDefault(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => sheet.addEventListener(t, soltar));
+  sheet.addEventListener('pointermove', e => { if (lpStart && Math.hypot(e.clientX - lpStart[0], e.clientY - lpStart[1]) > 10) soltar(); });
+  sheet.addEventListener('click', e => { if (lpFired && e.target.closest('[data-leer], .castzone')) { lpFired = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  sheet.addEventListener('contextmenu', e => {
+    if (S.editing) return;
+    const L = e.target.closest('[data-leer]');
+    if (L) { e.preventDefault(); if (!lpFired) { soltar(); lpFired = e.pointerType !== 'mouse' && matchMedia('(pointer: coarse)').matches; leer(L.dataset.leer); } return; }
+    if (e.target.closest('.castzone')) e.preventDefault();
+  });
 
   on(bar, 'click', '[data-jump]', (e, t) => document.querySelector(`[data-key="L${t.dataset.jump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   on(sheet, 'click', '[data-ej="toggle"]', () => { S.edit((db, ch) => { const lanza = !!perfil(ch).c; ch.enJuego ||= {};
@@ -251,6 +276,7 @@ function bindSheet() {
     ch.enJuego.fijados = f.includes(k) ? f.filter(x => x !== k) : [...f, k]; }); haptic(); });
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
   on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
+  on(sheet, 'click', '[data-cbini]', () => iniciativaManual());
   on(sheet, 'click', '[data-crab]', (e, b) => { alternarCaracteristica(b.dataset.crab); S.emit('ui'); haptic('light'); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
@@ -359,7 +385,7 @@ function bindSheet() {
 }
 
 export async function init(store) {
-  S = store;
+  S = store; initLeer(store);
   bindSheet();
   on(document, 'click', '[data-cmd]', (e, b) => run(b.dataset.cmd, b));
   on(document, 'click', '[data-mcmd]', (e, b) => run(b.dataset.mcmd, b));

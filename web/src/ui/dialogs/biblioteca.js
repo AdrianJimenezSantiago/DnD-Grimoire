@@ -151,7 +151,7 @@ export function openBiblioteca(tab) {
 }
 
 let FICHA = null;
-function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) {
+export function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) {
   const d = $('#fichaDlg');
   d.className = `tall ficha ${clase}`;
   $('#fiTitle').innerHTML = (ico ? `<span class="fi-ico">${gi(ico)}</span>` : '') + `<span>${esc(titulo)}</span>`;
