@@ -192,3 +192,19 @@ test('conjuros gratis por rasgo: Marca del cazador gasta Enemigo predilecto ante
   assert.equal(recursoParaConjuro(pj({ clase: 'Paladín', nivel: 2 }), 'Castigo divino').nombre, 'Castigo de paladín');
   assert.equal(recursoParaConjuro(pj({ clase: 'Mago', nivel: 5 }), 'Bola de fuego'), null);
 });
+
+test('conjuros de las dotes: Iniciado en la magia, Influencia feérica y su uso gratis', async () => {
+  const { conjurosDeDote, dotesConConjuros, filtroEleccion } = await import('../web/src/domain/conjurosDote.js');
+  const { recursoParaConjuro } = await import('../web/src/domain/rasgos.js');
+  const im = conjurosDeDote({ nombre: 'Iniciado en la magia', detalle: 'clérigo' });
+  assert.deepEqual(im.elegir.map(e => [e.k, e.n, e.nivel, e.lista]), [['trucos', 2, 0, 'Clérigo'], ['nivel1', 1, 1, 'Clérigo']]);
+  const fe = conjurosDeDote({ nombre: 'Influencia feérica' });
+  assert.deepEqual(fe.fijos, ['Paso brumoso']);
+  assert.equal(filtroEleccion(fe.elegir[0])({ l: 1, esc: 'Encantamiento' }), true);
+  assert.equal(filtroEleccion(fe.elegir[0])({ l: 1, esc: 'Evocación' }), false);
+  const theo = pj({ clase: 'Mago', nivel: 4, trasfondo: 'Erudito', dotes: ['Alerta', 'Influencia feérica'] });
+  assert.deepEqual(dotesConConjuros(theo).map(d => d.fuente), ['Iniciado en la magia (mago)', 'Influencia feérica']);
+  assert.equal(recursoParaConjuro(theo, 'Detectar magia', 'Iniciado en la magia (mago)').id, 'tpl:dote.iniciado.mago');
+  assert.equal(recursoParaConjuro(theo, 'Bendición', 'Influencia feérica').id, 'tpl:dote.feerica');
+  assert.equal(recursoParaConjuro(theo, 'Bendición', 'Libro'), null);
+});

@@ -18,11 +18,12 @@ import { NIVEL_ESTILO, ALTERNATIVAS, opcionesEstilo, estilosDe, esAlternativa } 
 import { md } from './conjuro.js';
 import { cupoEn, cupoMaestrias } from '../../domain/maestria.js';
 import { ORDENES, ordenDe } from '../../domain/ordenes.js';
+import { conjurosDeDote, filtroEleccion } from '../../domain/conjurosDote.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 
 let S, LV = null;
 const dlg = () => $('#lvlDlg');
-const TITLE = { orden: 'Orden de tu clase', maestria: 'Maestría con armas', estilo: 'Estilo de combate', estiloTrucos: 'Trucos de tu estilo', clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
+const TITLE = { orden: 'Orden de tu clase', doteConj: 'Conjuros de la dote', maestria: 'Maestría con armas', estilo: 'Estilo de combate', estiloTrucos: 'Trucos de tu estilo', clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
 const char = () => S.db.chars.find(c => c.id === LV.id);
 const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase === LV.clase); return c || { clase: LV.clase, subclase: '', nivel: 0, principal: false, nueva: true }; };
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
@@ -75,6 +76,10 @@ function plan() {
     nTrucos: Math.max(0, B.maxCant - A.maxCant) });
   LV.nEstTrucos = alt ? 2 : 0; LV.estLista = alt?.lista || '';
   if (LV.nEstTrucos) steps.push('estiloTrucos');
+  // La dote elegida da conjuros (Iniciado en la magia, Influencia feérica…)
+  const pd = /^(.+?)\s*(?:\(([^)]+)\))?\s*$/.exec(LV.asi.modo === 'dote' && steps.includes('mejora') ? LV.asi.dote || '' : '');
+  LV.doteConj = pd && pd[1] ? conjurosDeDote({ nombre: pd[1], detalle: pd[2] || '' }) : null;
+  if (LV.doteConj) { for (const e of LV.doteConj.elegir) LV[`dc:${e.k}`] = (LV[`dc:${e.k}`] || []).slice(0, e.n); steps.push('doteConj'); }
   if (LV.nSavant) steps.push('experto');
   if (LV.nLibro) steps.push('libro');
   if (LV.nPrep) steps.push('preparados');
@@ -94,7 +99,7 @@ function elegirClase(clase) {
   Object.assign(LV, { orden: '', to: o.nivel + 1, subclase: o.subclase || '', maes: null, asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' } });
 }
 function chooser(key, n, filterFn, hint) {
-  const chosen = LV[key], others = new Set(['libro', 'savant', 'prep', 'trucos', 'estTrucos'].filter(k => k !== key).flatMap(k => LV[k]));
+  const chosen = LV[key] ||= [], others = new Set(['libro', 'savant', 'prep', 'trucos', 'estTrucos', ...Object.keys(LV).filter(k => k.startsWith('dc:'))].filter(k => k !== key).flatMap(k => LV[k] || []));
   const have = new Set(char().book.map(e => 'c:' + e.sid)), q = norm(LV.q[key] || '');
   const items = allSpellItems(S.db).filter(it => !have.has(it.id) && !others.has(it.id) && filterFn(it) && (!q || norm(it.es).includes(q) || norm(it.en).includes(q)))
     .sort((a, b) => (chosen.includes(b.id) - chosen.includes(a.id)) || b.l - a.l || a.es.localeCompare(b.es, 'es'));
@@ -107,7 +112,7 @@ function chooser(key, n, filterFn, hint) {
         <button type="button" class="pview" data-lvview="${esc(it.id)}">Ver</button></div>`; }).join('')
       : '<p class="pempty">No hay conjuros que encajen. Si falta alguno de otro manual, créalo después con «Añadir conjuro».</p>'}</div></div>`;
 }
-function names(key) { const all = allSpellItems(S.db); return LV[key].map(id => all.find(i => i.id === id)?.es).filter(Boolean); }
+function names(key) { const all = allSpellItems(S.db); return (LV[key] || []).map(id => all.find(i => i.id === id)?.es).filter(Boolean); }
 function render() {
   plan();
   const ch = char(), step = LV.steps[LV.i], { A, B, d, to } = { ...LV, to: LV.to };
@@ -170,6 +175,11 @@ function render() {
   }
   if (step === 'maestria') h = `<p class="note">${esc(o.clase)} ${to === 1 ? 'te da' : 'amplía'} la Maestría con armas: ahora dominas ${LV.cupoMaes} ${LV.cupoMaes === 1 ? 'arma' : 'armas'}. Elige ${LV.cupoMaes - LV.maes.length > 0 ? `${LV.cupoMaes - LV.maes.length} más` : 'las que quieras cambiar'}.</p>`
     + maestriasHtml(d, LV.maes, { attr: 'data-lvmaes', cupo: LV.cupoMaes, destacar: (ch.equipo?.objetos || []).filter(x => x.arma).map(x => x.nombre) });
+  if (step === 'doteConj') {
+    const dc = LV.doteConj;
+    h = dc.elegir.map(e => chooser(`dc:${e.k}`, e.n, filtroEleccion(e), `${esc(dc.fuente)}: ${e.nivel ? `${e.n === 1 ? 'un conjuro' : `${e.n} conjuros`} de nivel ${e.nivel}${e.escuelas ? ` de ${e.escuelas.join(' o ').toLowerCase()}` : e.lista ? ` de ${e.lista.toLowerCase()}` : ''}` : `${e.n} trucos de ${(e.lista || '').toLowerCase()}`}. Siempre preparados; el de nivel 1 lo lanzas una vez sin espacio por descanso largo.`)).join('')
+      + (dc.fijos.length ? `<p class="note">Además tienes siempre preparado: ${esc(joinY(dc.fijos))}.</p>` : '');
+  }
   if (step === 'estiloTrucos') h = chooser('estTrucos', LV.nEstTrucos, it => it.l === 0 && listFilter(it, LV.estLista), `${esc(LV.estilo.nuevo)}: aprendes dos trucos de ${LV.estLista.toLowerCase()}. Cuentan como conjuros de ${o.clase.toLowerCase()} y no ocupan preparados.`);
   const escL = LV.sch.toLowerCase();
   if (step === 'experto') h = chooser('savant', LV.nSavant, it => it.l > 0 && (LV.savantExact ? it.l === LV.savantMax : it.l <= LV.savantMax) && it.esc === LV.sch && listFilter(it, 'Mago'),
@@ -195,6 +205,7 @@ function render() {
     if (LV.savant.length) L.push(`Gratis por Experto en ${escL}: ${names('savant').join(', ')}.`);
     if (LV.prep.length) L.push(`Nuevos preparados: ${names('prep').join(', ')}.`);
     if (LV.trucos.length) L.push(`Trucos: ${names('trucos').join(', ')}.`);
+    if (LV.doteConj) L.push(`Conjuros de ${LV.doteConj.fuente}: ${[...LV.doteConj.elegir.flatMap(e => names(`dc:${e.k}`)), ...LV.doteConj.fijos].join(', ') || 'sin elegir'}.`);
     const pend = []; if (LV.libro.length < LV.nLibro) pend.push(`${LV.nLibro - LV.libro.length} conjuro(s) de libro`); if (LV.savant.length < LV.nSavant) pend.push(`${LV.nSavant - LV.savant.length} de Experto`); if (LV.trucos.length < LV.nTrucos) pend.push(`${LV.nTrucos - LV.trucos.length} truco(s)`);
     h = `<div class="fsum">${L.map(t => `<p>${esc(t)}</p>`).join('')}</div>
       ${pend.length ? `<p class="note">Quedan por elegir: ${esc(pend.join(', '))}. Puedes añadirlos más tarde desde «Añadir conjuro».</p>` : ''}
@@ -220,6 +231,9 @@ function apply() {
     const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
       if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, ...rel }); });
     add(LV.estTrucos, { fuente: LV.estilo.nuevo, always: true, prep: true });
+    if (LV.doteConj) { const dc = LV.doteConj;
+      for (const e of dc.elegir) add(LV[`dc:${e.k}`] || [], { fuente: dc.fuente, always: true, prep: true });
+      for (const n of dc.fijos) { const it = all.find(x => norm(x.es) === norm(n)); if (it) add([it.id], { fuente: dc.fuente, always: true, prep: true }); } }
     if (LV.estilo.nuevo) c.dotes = d.dotes;
     if (LV.steps.includes('maestria')) c.maestrias = [...LV.maes];
     // El mago prepara del libro: los conjuros nuevos quedan preparados mientras haya hueco
@@ -260,7 +274,7 @@ export function init(store) {
     if (t.id === 'lvB') { LV.asi.b = t.value; return render(); }
     if (t.id === 'lvC') { LV.asi.c = t.value; return render(); }
     if (t.id === 'lvDote') { LV.asi.dote = t.value.trim(); const ops = aumentosDote(LV.asi.dote); LV.asi.c = ops?.length === 1 ? ops[0] : ''; return render(); }
-    if (t.dataset.chk) { const k = t.dataset.chk; LV[k] = t.checked ? [...new Set([...LV[k], t.value])] : LV[k].filter(x => x !== t.value);
+    if (t.dataset.chk) { const k = t.dataset.chk; LV[k] ||= []; LV[k] = t.checked ? [...new Set([...LV[k], t.value])] : LV[k].filter(x => x !== t.value);
       const y = body.scrollTop; render(); body.scrollTop = y; haptic(); }
   });
   on(body, 'click', '[data-lvmaes]', (ev, b) => { LV.maes = alternarMaes(LV.maes, b.dataset.lvmaes, LV.cupoMaes); const y = body.scrollTop; render(); body.scrollTop = y; haptic(); });

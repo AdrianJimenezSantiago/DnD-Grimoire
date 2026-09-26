@@ -108,7 +108,7 @@ export function quickCast(S, bi, force) {
     return toast(`<b>${esc(s.es)}</b> no está preparado.`, [{ label: 'Lanzar igualmente', fn: () => quickCast(S, bi, true) }]);
   }
   if (e.gratis && !e.used) return cast(S, bi, 'free');
-  const rec = recursoParaConjuro(ch, s.es);
+  const rec = recursoParaConjuro(ch, s.es, e.fuente);
   if (rec) return cast(S, bi, 'recurso', s.level, rec);
   const L = firstFreeFrom(ch, P, s.level);
   if (L) return cast(S, bi, 'slot', L);

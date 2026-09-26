@@ -33,6 +33,7 @@ import { anadirComun, equipoDe } from '../../domain/equipo.js';
 import { previewSpell } from './conjuro.js';
 import { estadoEstilo, trucosAlternativa, estiloDe, esAlternativa } from '../../domain/estilos.js';
 import { ORDENES, ordenesPendientes } from '../../domain/ordenes.js';
+import { dotesConConjuros, filtroEleccion } from '../../domain/conjurosDote.js';
 import { cupoMaestrias } from '../../domain/maestria.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 
@@ -202,6 +203,7 @@ function pendientes(d) {
     if (c.libro > CONJ.libro.length) P.conj.push(`${c.libro - CONJ.libro.length} para el libro de conjuros.`);
     if (c.estilo > CONJ.estilo.length) P.conj.push(`${c.estilo - CONJ.estilo.length} ${c.estilo - CONJ.estilo.length === 1 ? 'truco' : 'trucos'} de ${joinY(trucosAlternativa(d).map(a => a.nombre))}.`);
     if (c.prep > CONJ.prep.length) P.conj.push(`${c.prep - CONJ.prep.length} ${c.prep - CONJ.prep.length === 1 ? 'conjuro preparado' : 'conjuros preparados'}.`);
+    for (const dc of dotesConConjuros(d, lib().trasfondos)) for (const e of dc.elegir) { const k = `dote:${dc.clave}:${e.k}`, n = e.n - (CONJ[k] || []).length; if (n > 0) P.conj.push(`${n} de ${dc.fuente}.`); }
   }
   return P;
 }
@@ -253,7 +255,7 @@ function pintarOrigenExtra(d) {
   $('#f_origenExtra').innerHTML = h;
 }
 function chooser(key, n, filtro, titulo) {
-  const all = allSpellItems(S.db), sel = CONJ[key], otros = new Set(Object.entries(CONJ).filter(([k]) => k !== key).flatMap(([, v]) => v)), q = norm(CQ[key] || ''), lleno = sel.length >= n;
+  const all = allSpellItems(S.db), sel = CONJ[key] ||= [], otros = new Set(Object.entries(CONJ).filter(([k]) => k !== key).flatMap(([, v]) => v)), q = norm(CQ[key] || ''), lleno = sel.length >= n;
   const items = all.filter(it => !otros.has(it.id) && filtro(it) && (!q || norm(it.es).includes(q) || norm(it.en || '').includes(q)))
     .sort((a, b) => (sel.includes(b.id) - sel.includes(a.id)) || a.l - b.l || a.es.localeCompare(b.es, 'es'));
   return `<section class="fsec cc-conj"><div class="ch-head"><h3>${titulo}</h3><b class="ch-count ${lleno ? 'ok' : ''}">${sel.length} de ${n}</b></div>
@@ -263,10 +265,19 @@ function chooser(key, n, filtro, titulo) {
         <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${itemMeta(it)}</span></span></label>
         <button type="button" class="pview" data-ccver="${esc(it.id)}">Ver</button></div>`; }).join('') : '<p class="pempty">No hay conjuros que encajen.</p>'}</div></section>`;
 }
+// Conjuros de las dotes (Iniciado en la magia, Influencia feérica…): los fijos se añaden solos y el resto se eligen aquí
+function conjurosDotesHtml(d) {
+  let h = '';
+  for (const dc of dotesConConjuros(d, lib().trasfondos)) {
+    for (const e of dc.elegir) h += chooser(`dote:${dc.clave}:${e.k}`, e.n, filtroEleccion(e), `${dc.fuente}: ${e.nivel ? `conjuro de nivel ${e.nivel}` : 'trucos'} (${e.n})`);
+    if (dc.fijos.length) h += `<p class="hint">${esc(dc.fuente)} te da siempre preparado: ${esc(joinY(dc.fijos))}.</p>`;
+  }
+  return h ? `<h4 class="cc-sub">Conjuros de tus dotes</h4>${h}<p class="hint">Quedan siempre preparados; el de nivel 1 lo lanzas una vez sin espacio por descanso largo.</p>` : '';
+}
 function pintarConj(d) {
   const c = cupoConjuros(d), P = c.P;
   if (!CREANDO) { $('#f_conj').innerHTML = `<div class="cc-aviso">Tus conjuros se gestionan en el libro de la hoja, con «Editar conjuros». ${P.c ? `Preparas ${P.maxPrep} y sabes ${P.maxCant} trucos.` : ''}</div>`; return; }
-  if (!P.c) { $('#f_conj').innerHTML = `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si una dote o tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>`; return; }
+  if (!P.c) { $('#f_conj').innerHTML = `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>${conjurosDotesHtml(d)}`; return; }
   const lista = P.lista;
   let h = `<div class="cc-aviso ok">Lanzas conjuros de ${esc(lista.toLowerCase())} con ${esc(ABIL_NAME[P.apKey])}: CD ${P.cd}, ataque ${sgn(P.atk)}. Espacios hasta nivel ${P.maxSlot}.</div>`;
   if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && listFilter(it, lista), `Trucos (${c.trucos})`);
@@ -277,6 +288,7 @@ function pintarConj(d) {
   if (c.prep) h += chooser('prep', c.prep, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, lista), `Conjuros preparados (${c.prep})`);
   const auto = conjurosPendientes(S.db, d, compendio()).map(x => x.x.es);
   if (auto.length) h += `<p class="hint">Siempre preparados por tu clase o subclase: ${esc(joinY(auto))}.</p>`;
+  h += conjurosDotesHtml(d);
   $('#f_conj').innerHTML = h;
 }
 
@@ -497,13 +509,17 @@ async function save() {
   } else {
     const faltan = Object.values(pendientes(draft)).flat();
     if (faltan.length && !(await confirmar({ titulo: 'Quedan cosas por elegir', texto: `${faltan.join(' ')} Puedes crearlo igualmente y completarlo luego desde «Editar».`, ok: 'Crear igualmente', cancelar: 'Seguir eligiendo' }))) return;
-    const c = normChar(draft), all = allSpellItems(S.db), P = perfil(c);
+    const c = normChar(draft), all = allSpellItems(S.db), P = perfil(c), dotesC = dotesConConjuros(c, lib().trasfondos);
     const { items, po } = equipoInicial(c, { claseOpcion: EQ.clase, trasfondoOpcion: EQ.trasfondo, elecciones: ELEC, oroTirado: EQ.oro?.total });
     const h = S.edit(db => {
       const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
         if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, fuente: P.listaNombre || c.clase, ...rel }); });
       add(CONJ.trucos, {}); add(CONJ.libro.slice(0, P.maxPrep), { fuente: 'Libro', prep: true }); add(CONJ.libro.slice(P.maxPrep), { fuente: 'Libro' }); add(CONJ.prep, { prep: true });
       add(CONJ.estilo, { fuente: trucosAlternativa(c)[0]?.nombre || 'Estilo de combate', always: true, prep: true });
+      for (const dc of dotesC) {
+        for (const e of dc.elegir) add(CONJ[`dote:${dc.clave}:${e.k}`] || [], { fuente: dc.fuente, always: true, prep: true });
+        for (const nombre of dc.fijos) { const it = all.find(x => norm(x.es) === norm(nombre)); if (it) add([it.id], { fuente: dc.fuente, always: true, prep: true }); }
+      }
       anadirPendientes(db, c, conjurosPendientes(db, c, compendio()));
       for (const [n, q] of items) anadirComun(c, datosObjeto(n, q));
       equipoDe(c).monedas.po += po;
@@ -563,7 +579,7 @@ export function init(store, { onNewCharacterAddSpells }) {
     const t = e.target;
     if (t.matches('textarea, input:not([type="checkbox"]):not([type="radio"])') && t.id !== 'f_trasfondo' && t.id !== 'f_especie' && !t.dataset.ccchk) return;
     if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
-    if (e.target.dataset.ccchk) { const k = e.target.dataset.ccchk, v = e.target.value; CONJ[k] = e.target.checked ? [...new Set([...CONJ[k], v])] : CONJ[k].filter(x => x !== v);
+    if (e.target.dataset.ccchk) { const k = e.target.dataset.ccchk, v = e.target.value; CONJ[k] ||= []; CONJ[k] = e.target.checked ? [...new Set([...CONJ[k], v])] : CONJ[k].filter(x => x !== v);
       const y = $('#charForm').scrollTop; sync(false); $('#charForm').scrollTop = y; return; }
     if (e.target.dataset.ccq) return;
     if ((e.target.id === 'f_trasfondo' || e.target.id === 'f_especie') && e.target.dataset.sync === e.target.value) return;
