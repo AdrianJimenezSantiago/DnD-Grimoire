@@ -105,7 +105,7 @@ export function openCharForm(id) {
     <input type="hidden" id="f_clase" value="${esc(c.clase)}">
     <div class="cc-clases" id="f_clases" role="radiogroup" aria-label="Clase"></div>
     <section class="fsec"><div class="frow">
-      <div class="f">Subclase<span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
+      <div class="f">Subclase<span class="cc-subbloq" id="f_subLock">Se elige al llegar a nivel 3</span><span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
       <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
       <div id="f_mc" class="mc-list"></div>
       <button type="button" class="ghost mc-add" id="f_mcAdd">${icon('plus')}Añadir otra clase (multiclase)</button>
@@ -297,10 +297,10 @@ function pintarHero(d, first) {
 function readForm() {
   const base = formId ? clone(S.db.chars.find(x => x.id === formId)) : blankChar();
   const v = id => $(id).value.trim();
-  Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: v('#f_subclase'),
+  Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: (parseInt(v('#f_nivel'), 10) || 1) >= 3 ? v('#f_subclase') : '',
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
-    multiclase: clone(MC), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
+    multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
   const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
   const bonos = limpiarBonos(CAR.bonos, permitidas(base)), sinTirar = CAR.metodo === 'tiradas' && !CAR.tiradas.length;
   base.stats = conBonos(sinTirar ? {} : CAR.base, bonos);
@@ -313,7 +313,7 @@ function pintarMulticlase() {
   $('#f_mc').innerHTML = MC.map((m, i) => {
     const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k)));
     return `<div class="frow mc-row"><div class="f"><span>Clase ${i + 2}</span>${campoClase(`data-mc="${i}|clase" aria-label="Clase ${i + 2}"`, m.clase, opts)}<span class="hint"><button type="button" class="linkish" data-verclase="${esc(m.clase)}">Ver qué aprende</button></span></div>
-      <div class="f">Subclase${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</div>
+      <div class="f">Subclase<span class="cc-subbloq" data-mcsublock="${i}">Se elige al llegar a nivel 3</span><span data-mcsub="${i}">${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</span></div>
       <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;
   }).join('');
@@ -338,7 +338,9 @@ function sync(first, { sinCar = false } = {}) {
   sel.innerHTML = `<option value="">${autoAp ? `Según la clase (${ABIL_NAME[autoAp]})` : 'Ninguna'}</option>` + ['int', 'sab', 'car'].map(k => `<option value="${k}">${ABIL_NAME[k]}</option>`).join('');
   sel.value = keep;
   const draft = readForm(), P = perfil(draft);
-  $('#h_sub').textContent = draft.nivel < 3 ? 'Se elige al llegar a nivel 3.' : (cls.subCast && !P.viaSub ? `Solo ${cls.subCast.nombre} lanza conjuros.` : '');
+  const sinSub = draft.nivel < 3; $('#f_subWrap').hidden = sinSub; $('#f_subLock').hidden = !sinSub;
+  MC.forEach((m, i) => { const bajo = (parseInt(m.nivel, 10) || 1) < 3, w = $(`[data-mcsub="${i}"]`), l = $(`[data-mcsublock="${i}"]`); if (w) w.hidden = bajo; if (l) l.hidden = !bajo; });
+  $('#h_sub').textContent = !sinSub && cls.subCast && !P.viaSub ? `Solo ${cls.subCast.nombre} lanza conjuros.` : '';
   $('#f_slots').hidden = !$('#f_manual').checked;
   const lanza = !!cls.cast || !!(cls.subCast && cls.subCast.re.test(draft.subclase || ''));
   const enUso = draft.espaciosManuales || !!draft.aptitud || !!draft.extraCD || !!draft.extraAtaque;
