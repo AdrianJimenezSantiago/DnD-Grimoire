@@ -219,7 +219,7 @@ function apply() {
 export function init(store) {
   S = store;
   const body = $('#lvBody');
-  on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(char(), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
+  on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(draft(), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
   body.addEventListener('input', ev => {
     const t = ev.target;
     if (t.dataset.chq) { LV.q[t.dataset.chq] = t.value; const pos = t.selectionStart; render(); const n = body.querySelector(`[data-chq="${t.dataset.chq}"]`); n?.focus(); n?.setSelectionRange(pos, pos); return; }
