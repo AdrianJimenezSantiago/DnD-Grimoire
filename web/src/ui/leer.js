@@ -1,6 +1,6 @@
 import { esc, norm } from '../core/util.js';
 import { glosario } from '../domain/catalogo.js';
-import { equipoDe, ataqueArma } from '../domain/equipo.js';
+import { equipoDe, ataqueArma, armaCombate } from '../domain/equipo.js';
 import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas, REGLAS_ESTADO } from '../domain/efectos.js';
 import { NOMBRE_ESTADO, RESUMEN_ESTADO } from '../domain/vida.js';
 import { fmtMetros } from '../domain/habilidades.js';
@@ -17,14 +17,16 @@ const pills = xs => `<div class="fi-pills">${xs.filter(Boolean).map(x => `<span>
 const lista = xs => `<dl class="lr-lista">${xs.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${d}</dd></div>`).join('')}</dl>`;
 
 function arma(id) {
-  const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); if (!o?.arma) return;
+  const ch = S.cur(), o = armaCombate(ch, id); if (!o?.arma) return;
   const a = ataqueArma(ch, o), props = o.arma.props || [];
   const texto = n => { const g = delGlosario(n); return g ? md(g.texto) : esc(textoPropiedad(n) || 'Sin descripción: importa el Manual del Jugador para leerla.'); };
   const m = o.arma.maestria, gm = m && delGlosario(m);
   ficha({ titulo: o.nombre, ico: 'o_arma', sub: pills([`Ataque ${a.ataque}`, `Daño ${a.dano}`, o.arma.distancia, o.equipado ? 'Equipada' : '']),
     cuerpo: `${props.length ? `<h4 class="md-h">Propiedades</h4>${lista(props.map(p => [p, texto(p)]))}` : ''}
       ${m ? `<h4 class="md-h">Maestría</h4>${lista([[m, gm ? md(gm.texto) : esc(textoMaestria(m) || 'Sin descripción.')]])}<p class="note">Solo si tu clase te da la maestría de esta arma.</p>` : ''}
-      ${a.estilos?.length ? `<h4 class="md-h">Estilo de combate</h4><p class="sp-text">${esc(a.estilos.join('. '))}.</p>` : ''}
+      ${a.estilos?.length ? `<h4 class="md-h">Estilo de combate y rasgos</h4><p class="sp-text">${esc(a.estilos.join('. '))}.</p>` : ''}
+      ${a.notas?.length ? `<h4 class="md-h">Cómo se calcula</h4><p class="sp-text">${esc(a.notas.join('. '))}.</p>` : ''}
+      ${o.sinArmas ? '<p class="note">Todo el mundo puede dar un golpe sin armas: 1 + tu modificador de Fuerza de daño contundente, o lo que den tus rasgos y dotes.</p>' : ''}
       ${o.notas ? `<h4 class="md-h">Notas</h4><div class="sp-text">${md(o.notas)}</div>` : ''}` });
 }
 function estado(k) {

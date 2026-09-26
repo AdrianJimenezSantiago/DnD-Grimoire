@@ -1,6 +1,8 @@
 import { norm } from '../core/util.js';
 import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
+import { biblioteca } from './catalogo.js';
+import { ordenDe } from './ordenes.js';
 
 export const HABILIDADES = [
   ['acrobacias', 'Acrobacias', 'des'], ['arcanos', 'Arcanos', 'int'], ['atletismo', 'Atletismo', 'fue'], ['engano', 'Engaño', 'car'],
@@ -37,9 +39,23 @@ export const HAB_CLASE = {
 export const PERICIAS_CLASE = { 'Pícaro': [[1, 2], [6, 2]], 'Bardo': [[2, 2], [9, 2]], 'Explorador': [[2, 1], [9, 2]], 'Mago': [[2, 1]] };
 
 const claveTrasfondo = t => Object.keys(HAB_TRASFONDO).find(k => norm(k) === norm(t));
-export const habilidadesTrasfondo = ch => HAB_TRASFONDO[claveTrasfondo(ch.trasfondo)] || [];
+// Nombre de habilidad tal y como lo escriben los libros («Conocimiento arcano», con restos de OCR como «Intim idación»)
+const ALIAS_HAB = { conocimientoarcano: 'arcanos', arcanos: 'arcanos' };
+const pegado = t => norm(t).replace(/1/g, 'i').replace(/[^a-z]/g, '');
+export function habilidadesDeTexto(texto) {
+  const t = pegado(texto), out = [];
+  for (const [k, nombre] of HABILIDADES) { const n = pegado(nombre); if (t.includes(n) || Object.entries(ALIAS_HAB).some(([a, kk]) => kk === k && t.includes(a))) out.push([t.indexOf(n) >= 0 ? t.indexOf(n) : t.indexOf('conocimientoarcano'), k]); }
+  return out.sort((a, b) => a[0] - b[0]).map(([, k]) => k);
+}
+export function habilidadesTrasfondo(ch) {
+  const k = claveTrasfondo(ch.trasfondo); if (k) return HAB_TRASFONDO[k];
+  const x = norm(ch.trasfondo || '') && biblioteca().trasfondos.find(t => t.nombre && norm(t.nombre) === norm(ch.trasfondo));
+  return x ? habilidadesDeTexto(x.habilidades || '').slice(0, 2) : [];
+}
+const PERICIA_DOTE = { 'experto en habilidades': 1, 'don de la habilidad': 1 };
 export function periciasDisponibles(ch) {
-  return clasesDe(ch).reduce((n, c) => n + (PERICIAS_CLASE[c.clase] || []).filter(([L]) => c.nivel >= L).reduce((s, [, k]) => s + k, 0), 0);
+  return clasesDe(ch).reduce((n, c) => n + (PERICIAS_CLASE[c.clase] || []).filter(([L]) => c.nivel >= L).reduce((s, [, k]) => s + k, 0), 0)
+    + dotesDe(ch).reduce((n, d) => n + (PERICIA_DOTE[norm(d.nombre)] || 0), 0);
 }
 
 export function competenciasIniciales(ch) {
@@ -58,20 +74,36 @@ const tieneDote = (ch, nombre) => dotesDe(ch).some(d => norm(d.nombre) === norm(
 const esBardo = ch => clasesDe(ch).some(c => c.clase === 'Bardo' && c.nivel >= 2);
 export const penalizacionAgotamiento = ch => 2 * Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
 
+const KS = ABILS.map(([k]) => k), AB_DE_NOMBRE = Object.fromEntries(ABILS.map(([k, n]) => [norm(n), k]));
+// Competencias en salvaciones: la primera clase, Mente escurridiza (pícaro 15), Superviviente disciplinado (monje 14) y la dote Resiliente
 export function salvacionesCompetentes(ch) {
-  const base = CLASES_INFO[clasesDe(ch)[0].clase]?.salv || [];
-  return new Set([...base, ...(ch.salvacionesExtra || [])]);
+  const out = new Set([...(CLASES_INFO[clasesDe(ch)[0].clase]?.salv || []), ...(ch.salvacionesExtra || [])]);
+  for (const c of clasesDe(ch)) {
+    if (c.clase === 'Pícaro' && c.nivel >= 15) { out.add('sab'); out.add('car'); }
+    if (c.clase === 'Monje' && c.nivel >= 14) KS.forEach(k => out.add(k));
+  }
+  for (const d of dotesDe(ch)) if (norm(d.nombre) === 'resiliente' && AB_DE_NOMBRE[norm(d.detalle)]) out.add(AB_DE_NOMBRE[norm(d.detalle)]);
+  return out;
+}
+const INCAP = ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'];
+// Aura de protección (paladín 6): suma el Carisma (mínimo +1) a tus salvaciones salvo si estás incapacitado
+export function auraProteccion(ch) {
+  if (!clasesDe(ch).some(c => c.clase === 'Paladín' && c.nivel >= 6)) return 0;
+  if ((ch.vida?.estados || []).some(k => INCAP.includes(k))) return 0;
+  return Math.max(1, modOf(ch.stats?.car));
 }
 export function bonoSalvacion(ch, ab) {
   const pb = competencia(nivelTotal(ch));
-  return modOf(ch.stats?.[ab]) + (salvacionesCompetentes(ch).has(ab) ? pb : 0);
+  return modOf(ch.stats?.[ab]) + (salvacionesCompetentes(ch).has(ab) ? pb : 0) + auraProteccion(ch);
 }
 export function nivelHabilidad(ch, k) { return Math.max(0, Math.min(2, parseInt(ch.habilidades?.[k], 10) || 0)); }
 export function bonoHabilidad(ch, k) {
   const pb = competencia(nivelTotal(ch)), n = nivelHabilidad(ch, k);
   const extra = n === 2 ? pb * 2 : n === 1 ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0;
-  return modOf(ch.stats?.[abDe(k)]) + extra;
+  return modOf(ch.stats?.[abDe(k)]) + extra + bonoOrden(ch, k);
 }
+// Taumaturgo y Naturalista suman la Sabiduría (mínimo +1) a sus dos habilidades de Inteligencia
+export const bonoOrden = (ch, k) => clasesDe(ch).some(c => ordenDe(ch, c.clase)?.habilidades?.includes(k)) ? Math.max(1, modOf(ch.stats?.sab)) : 0;
 export function iniciativa(ch) {
   const pb = competencia(nivelTotal(ch));
   return modOf(ch.stats?.des) + (tieneDote(ch, 'Alerta') ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0);
@@ -81,10 +113,13 @@ export const investigacionPasiva = ch => 10 + bonoHabilidad(ch, 'investigacion')
 export const perspicaciaPasiva = ch => 10 + bonoHabilidad(ch, 'perspicacia');
 
 const VEL_ESPECIE = { goliat: 10.5 };
+const DOTES_VEL = { veloz: 3, 'don de la velocidad': 9 };
 export function velocidad(ch) {
   const especie = norm(ch.especie || '').split(/[\s(]/)[0];
-  let m = VEL_ESPECIE[especie] || 9;
-  const armado = (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo');
+  let m = VEL_ESPECIE[especie] || (especie === 'elfo' && /silvan|bosque/.test(norm(ch.especie)) ? 10.5 : 9);
+  for (const d of dotesDe(ch)) m += DOTES_VEL[norm(d.nombre)] || 0;
+  // Movimiento sin armadura: ni armadura ni escudo
+  const armado = (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura);
   const conArmaduraPesada = (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura?.tipo === 'pesada');
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Bárbaro' && c.nivel >= 5 && !conArmaduraPesada) m += 3;

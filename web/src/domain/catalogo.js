@@ -46,8 +46,8 @@ export function emparejarLibro(spells, idLibro, titulo) {
     const x = porClave.get(claveEs(sp.nombre, sp.nivel));
     if (x) { textos[x.k] = { d: sp.desc, h: sp.sup }; continue; }
     const k = `lib:${idLibro}:${claveNombre(sp.nombre).replace(/\s+/g, '-')}`;
-    const dur = sp.duracion.replace(/^Concentración,\s*h/, 'H').replace(/(\d+) minutos?/, '$1 min').replace(/(\d+) horas?/, '$1 h');
-    nuevos.push({ k, en: '', es: sp.nombre, l: sp.nivel, esc: sp.escuela, t: sp.tiempo.split(',')[0].trim(), a: sp.alcance, du: dur, co: sp.comp,
+    const dur = sp.duracion.replace(/\b[li](?=\s*(?:minuto|hora|ronda|día))/g, '1').replace(/\s+,/g, ',').replace(/^Concentración,\s*h/, 'H').replace(/(\d+) minutos?/, '$1 min').replace(/(\d+) horas?/, '$1 h');
+    nuevos.push({ k, en: '', es: sp.nombre, l: sp.nivel, esc: sp.escuela, t: sp.tiempo.split(',')[0].trim() || 'Acción', a: sp.alcance, du: dur, co: sp.comp,
       cs: /\d\s*po\b/.test(sp.material) ? sp.material : '', ri: sp.ritual ? 1 : 0, c: sp.conc ? 1 : 0, cl: sp.clases, d: '', h: '', fuente: titulo });
     textos[k] = { d: sp.desc, h: sp.sup };
   }

@@ -6,7 +6,7 @@ import { rasgosEnJuego } from '../domain/enJuego.js';
 import { biblioteca, tiradasConjuro } from '../domain/catalogo.js';
 import { tieneTiradas, dadosPara } from '../domain/tiradas.js';
 import { slotsOf, freeOf, firstFreeFrom } from './sheet.js';
-import { equipoDe, ataqueArma } from '../domain/equipo.js';
+import { armasCombate, ataqueArma } from '../domain/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo } from '../domain/combate.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../domain/habilidades.js';
 import { pgActuales, pgMaximo, estadoVital, vidaDe } from '../domain/vida.js';
@@ -33,7 +33,7 @@ function datosConjuro(ch, P, s, Pm) {
   const r = tiradasConjuro(s); if (!r || !tieneTiradas(r)) return { clave: Pm.cd != null && /salvaci|saving/i.test(s.desc || '') ? `CD ${Pm.cd}` : '', dano: '' };
   const clave = r.ataque ? `${sgn(Pm.atk ?? P.atk)} ataque` : r.salvacion ? `CD ${Pm.cd ?? P.cd} ${AB3[norm(r.salvacion)] || AB3[String(r.salvacion).toLowerCase()] || ''}`.trim() : '';
   const ds = dadosPara(r, { nivelPj: nivelTotal(ch), nivelConjuro: s.level, nivelEspacio: s.level || null });
-  const dano = ds.length ? `${dadoTxt(ds[0])}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
+  const dano = ds.length ? `${ds[0].veces > 1 ? `${ds[0].veces}× ` : ''}${dadoTxt({ ...ds[0], bono: ds[0].bono + (ds[0].mod ? Pm.mod || 0 : 0) })}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
   return { clave, dano, cura: !!r.curacion && !r.danos.length, mitad: r.mitad };
 }
 function pipsEspacio(ch, P, L) {
@@ -49,12 +49,12 @@ function acciones(ch, db) {
   const nuevo = () => ({ armas: [], trucos: [], niveles: {}, rasgos: [] });
   const grupos = { accion: nuevo(), adicional: nuevo(), reaccion: nuevo() };
   let n = 0;
-  for (const o of equipoDe(ch).objetos.filter(x => x.arma).sort((a, b) => b.equipado - a.equipado)) {
+  for (const o of armasCombate(ch).sort((a, b) => b.equipado - a.equipado)) {
     const a = ataqueArma(ch, o), props = (o.arma.props || []).map(x => x.replace(/\s*\(.*$/, ''));
     grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''} ${a.domina ? 'maestra' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
       <span class="cb-a-ico">${gi('o_arma')}</span>
       <span class="cb-a-t"><b>${esc(o.nombre)}</b><small>${o.equipado ? '<em class="cb-eq">en mano</em>' : ''}${esc([o.arma.distancia, ...props.slice(0, 3)].filter(Boolean).join(' · '))}</small>
-        ${o.arma.maestria ? `<span class="cb-maes ${a.domina ? 'domina' : 'sin'}" title="${a.domina ? `Dominas su maestría: ${esc(o.arma.maestria)}` : 'No dominas la maestría de esta arma'}">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}${a.estilos.length ? `<span class="cb-maes cb-estilo" title="Estilo de combate">${gi('ca')}${esc(a.estilos[0])}</span>` : ''}</span>
+        ${o.arma.maestria ? `<span class="cb-maes ${a.domina ? 'domina' : 'sin'}" title="${a.domina ? `Dominas su maestría: ${esc(o.arma.maestria)}` : 'No dominas la maestría de esta arma'}">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}${a.estilos.length ? `<span class="cb-maes cb-estilo" title="${esc(a.estilos.join('. '))}">${gi('ca')}${esc(a.estilos[0])}</span>` : ''}${a.notas.length ? `<span class="cb-maes ${a.competente ? 'cb-estilo' : 'sin'}" title="${esc(a.notas.join('. '))}">${gi(a.competente ? 'dote' : 'muerte')}${esc(a.notas[0])}</span>` : ''}</span>
       <span class="cb-a-bts"><button type="button" class="cb-tir at" data-cbataque="${o.id}"><small>Ataque</small><b>${esc(a.ataque)}</b>${marca}</button><button type="button" class="cb-tir dn" data-cbdano="${o.id}"><small>Daño</small><b>${esc(a.dano.replace(/\s+\S+$/, ''))}</b><em>${esc(a.tipo || '')}</em></button></span></div>`);
   }
   const conj = [];

@@ -32,11 +32,12 @@ import { conjurosPendientes, anadirPendientes } from '../../domain/progresion.js
 import { anadirComun, equipoDe } from '../../domain/equipo.js';
 import { previewSpell } from './conjuro.js';
 import { estadoEstilo, trucosAlternativa, estiloDe, esAlternativa } from '../../domain/estilos.js';
+import { ORDENES, ordenesPendientes } from '../../domain/ordenes.js';
 import { cupoMaestrias } from '../../domain/maestria.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 
 let S, onCreated;
-let MC = [], DOTES = [], HAB = {}, SALV = [];
+let MC = [], DOTES = [], HAB = {}, SALV = [], ORD = {};
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 
 export function openCharacter(id) {
@@ -153,7 +154,7 @@ export function openCharForm(id, { clase = '' } = {}) {
       <label class="f wide">Campaña<input id="f_campana" value="${esc(c.campana)}" autocomplete="off"></label>
       <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
-  MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
+  MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; ORD = { ...(c.ordenes || {}) }; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
   MAES = [...(c.maestrias || [])]; ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
@@ -190,6 +191,7 @@ function pendientes(d) {
   if (r.pericia.faltan) P.comp.push(`${r.pericia.faltan} ${r.pericia.faltan === 1 ? 'pericia' : 'pericias'}.`);
   if (versatilPendiente(d, lib().dotes)) P.dotes.push('Humano: una dote de origen (Versátil).');
   const est = estadoEstilo(d, lib().dotes); if (est.faltan) P.dotes.push(`Estilo de combate de ${joinY(est.fuentes)}.`);
+  for (const k of ordenesPendientes(d, clasesDe(d).map(c => c.clase))) P.clase.push(`${k}: elige tu ${ORDENES[k].rasgo.toLowerCase()} (en Dotes).`);
   { const cupo = cupoMaestrias(d); if (MAES.length < cupo) P.clase.push(`Maestría con armas: elige ${cupo - MAES.length} ${cupo - MAES.length === 1 ? 'arma' : 'armas'}.`); }
   for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
   if (CREANDO) {
@@ -382,7 +384,11 @@ function pintarDotes(d) {
   if (!d.trasfondo) av.push(['', 'Tu dote de origen depende del trasfondo: elígelo en <button type="button" class="linkish" data-irpaso="1">Origen</button>.']);
   else if (origen) av.push(['ok', `<b>${esc(d.trasfondo)}</b> te da <b>${esc(origen.nombre)}</b>. No hace falta añadirla.`]);
   const est = estadoEstilo(d, lib().dotes);
-  if (est.puede) av.push([est.faltan ? 'falta' : 'ok', `${est.faltan ? '<b class="cc-num">1</b> ' : ''}<b>${esc(joinY(est.fuentes))}</b> tiene el rasgo Estilo de combate: ${est.faltan ? 'elige una dote de estilo de combate.' : 'ya lo tienes elegido.'} <button type="button" class="linkish" data-elegirestilo>${est.faltan ? 'Elegir estilo' : 'Cambiar de estilo'}</button>`]);
+  if (est.puede) av.push([est.faltan ? 'falta' : 'ok', `${est.faltan ? `<b class="cc-num">${est.faltan}</b> ` : ''}<b>${esc(joinY(est.fuentes))}</b> ${est.total > 1 ? `te dan ${est.total} estilos de combate` : 'tiene el rasgo Estilo de combate'}: ${est.faltan ? `elige ${est.faltan === 1 ? 'una dote' : `${est.faltan} dotes`} de estilo de combate.` : 'ya lo tienes elegido.'} <button type="button" class="linkish" data-elegirestilo>${est.faltan ? 'Elegir estilo' : 'Cambiar de estilo'}</button>`]);
+  for (const c of clasesDe(d).filter(c => ORDENES[c.clase])) {
+    const def = ORDENES[c.clase], sel = d.ordenes?.[c.clase];
+    av.push([sel ? 'ok' : 'falta', `${sel ? '' : '<b class="cc-num">1</b> '}<b>${esc(c.clase)}</b> · ${esc(def.rasgo)}: ${def.opciones.map(o => `<button type="button" class="cc-pill ${sel === o.nombre ? 'on' : ''}" data-orden="${esc(c.clase)}|${esc(o.nombre)}" aria-pressed="${sel === o.nombre}" title="${esc(o.texto)}">${esc(o.nombre)}</button>`).join(' ')}${sel ? ` <small>${esc(def.opciones.find(o => o.nombre === sel).texto)}</small>` : ''}`]);
+  }
   if (versatilPendiente(d, lib().dotes)) av.push(['falta', '<b class="cc-num">1</b> <b>Humano</b> (Versátil): elige una dote de origen más. No puede repetir la de tu trasfondo.']);
   if (m.asi) av.push(['', `A nivel ${m.nivel} tu clase te ha dado ${m.asi} ${m.asi === 1 ? 'mejora' : 'mejoras'} de característica${m.epico ? ` y ${m.epico === 1 ? 'un don épico' : `${m.epico} dones épicos`}` : ''}. En cada una eliges una dote general o subir características (+2 o +1 y +1): si subiste características, súmalas en <button type="button" class="linkish" data-irpaso="2">Características</button> con «A mano».`]);
   $('#h_dotes').innerHTML = av.map(([c, t]) => `<div class="cc-aviso ${c}">${t}</div>`).join('');
@@ -406,7 +412,7 @@ function readForm() {
   Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: (parseInt(v('#f_nivel'), 10) || 1) >= 3 ? v('#f_subclase') : '',
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
-    multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
+    multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], ordenes: { ...ORD }, habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
   base.herramientas = [...new Set([...herramientasDe(base, ELEC), ...HERR])];
   base.idiomas = ['Común', ...IDI]; base.maestrias = [...MAES];
   const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
@@ -612,9 +618,13 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-mcdel]', (e, b) => { MC.splice(+b.dataset.mcdel, 1); pintarMulticlase(); sync(false); });
   on(form, 'click', '[data-mcstep]', (e, b) => { const [i, d] = b.dataset.mcstep.split('|').map(Number); MC[i].nivel = clamp((parseInt(MC[i].nivel, 10) || 1) + d, 1, 19); pintarMulticlase(); sync(false); });
   on(form, 'click', '#f_doteAdd', anadirDote);
+  on(form, 'click', '[data-orden]', (e, b) => { const [k, v] = b.dataset.orden.split('|'); ORD = { ...ORD, [k]: ORD[k] === v ? undefined : v }; if (!ORD[k]) delete ORD[k]; CONJ.trucos = CONJ.trucos.slice(0, cupoConjuros(readForm()).trucos); sync(false); });
   on(form, 'click', '[data-elegirestilo]', async () => {
-    const d = readForm(), n = await elegirEstilo({ ...d, dotes: DOTES.filter(x => !estiloDe(x, lib().dotes) && !esAlternativa(x)) }, estadoEstilo(d, lib().dotes).fuentes[0]); if (!n) return;
-    DOTES = [...DOTES.filter(x => !estiloDe(x, lib().dotes) && !esAlternativa(x)), n]; CONJ.estilo = []; sync(false);
+    // Si falta alguno (varias clases con el rasgo, o el Campeón a nivel 7) se añade; si no, se cambia el último
+    const d = readForm(), est = estadoEstilo(d, lib().dotes), esEst = x => estiloDe(x, lib().dotes) || esAlternativa(x);
+    const suyos = DOTES.filter(esEst), quedan = est.faltan ? suyos : suyos.slice(0, -1);
+    const n = await elegirEstilo({ ...d, dotes: [...DOTES.filter(x => !esEst(x)), ...quedan] }, est.fuentes[0]); if (!n) return;
+    DOTES = [...DOTES.filter(x => !esEst(x)), ...quedan, n]; CONJ.estilo = []; sync(false);
   });
   on(form, 'click', '[data-elegir]', async (e, b) => {
     const inp = b.closest('.elg').querySelector('input'), v = await (b.dataset.elegir === 'especie' ? elegirEspecie(inp.value) : elegirTrasfondo(inp.value));

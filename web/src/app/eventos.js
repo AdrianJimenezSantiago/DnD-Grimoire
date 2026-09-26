@@ -42,7 +42,7 @@ import { leer, initLeer } from '../ui/leer.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia, registrarAtaque } from '../domain/combate.js';
 import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
-import { equipoDe, ataqueArma } from '../domain/equipo.js';
+import { equipoDe, ataqueArma, armaCombate } from '../domain/equipo.js';
 import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
 import { pasarRonda, vidaDe } from '../domain/vida.js';
 import { avisar } from '../ui/dialogs/aviso.js';
@@ -291,7 +291,7 @@ function bindSheet() {
   sheet.addEventListener('toggle', e => { if (e.target.classList?.contains('cb-pruebas')) abrirPruebas(e.target.open); }, true);
   on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } haptic('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
-  const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
+  const arma = id => { const ch = S.cur(), o = armaCombate(ch, id); return o ? { o, a: ataqueArma(ch, o) } : null; };
   const danoArma = (x, critico = false, aviso = '') => tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) });
   const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
   on(sheet, 'click', '[data-cbataque]', (e, b) => {
