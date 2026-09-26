@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra } from '../web/src/domain/efectos.js';
+import { modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra, lanzadorTira, soloSobreTi, efectoDeConjuro, EFECTOS } from '../web/src/domain/efectos.js';
 import { pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida } from '../web/src/domain/vida.js';
 
 const pj = vida => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, vida }));
@@ -43,4 +43,28 @@ test('PG máximos aumentados: suben máximo y actuales, y al terminar se ajustan
   quitarMax(ch, 'aux'); assert.equal(pgMaximo(ch), base); assert.equal(pgActuales(ch), base - 5);
   const lleno = pj(); aumentarMax(lleno, { id: 'x', n: 5 }); assert.equal(pgActuales(lleno), base + 5); quitarMax(lleno, 'x'); assert.equal(pgActuales(lleno), base);
   aumentarMax(lleno, { id: 'y', n: 5 }); descansoLargoVida(lleno); assert.equal(pgMaximo(lleno), base);
+});
+
+test('Bendición y compañía: el dado lo tira quien está bajo el conjuro, no quien lo lanza', () => {
+  const soloDado = { danos: [], extras: [{ n: 1, caras: 4 }] };
+  for (const n of ['Bendición', 'Guía', 'Resistencia', 'Perdición']) assert.equal(lanzadorTira(n, soloDado), false, n);
+  assert.equal(lanzadorTira('Nube de dagas', soloDado), true);
+  assert.equal(lanzadorTira('Saeta guía', { ataque: 'a distancia', danos: [{ tipo: 'radiante' }] }), true);
+  assert.equal(lanzadorTira('Bendición', null), false);
+});
+test('conjuros de alcance Lanzador se reconocen como solo sobre ti', () => {
+  assert.ok(soloSobreTi('Lanzador'));
+  assert.ok(soloSobreTi('Personal'));
+  assert.ok(!soloSobreTi('9 m'));
+  assert.ok(!soloSobreTi('Toque'));
+});
+test('perjuicios: se reconocen al lanzarlos y se aplican a las tiradas', () => {
+  assert.equal(efectoDeConjuro('Perdición').k, 'perdicion');
+  assert.equal(efectoDeConjuro('Rayo debilitador').k, 'rayodebil');
+  assert.equal(resolverModo(modsTirada(pj({ efectos: [{ k: 'rayodebil' }] }), { sobre: 'salvacion', ab: 'fue' })), 'desventaja');
+  assert.equal(velocidadEfectiva(pj({ efectos: [{ k: 'escarcha' }] })).m, 6);
+  assert.deepEqual(danoArmaExtra(pj({ efectos: [{ k: 'favordivino' }] })), ['1d4']);
+  const ks = EFECTOS.map(e => e.k);
+  assert.equal(new Set(ks).size, ks.length, 'claves repetidas');
+  assert.ok(EFECTOS.some(e => !e.bueno) && EFECTOS.filter(e => !e.bueno).length >= 10);
 });

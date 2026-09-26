@@ -8,13 +8,12 @@ import { haptic } from '../platform/native.js';
 import { pedir } from '../ui/modal.js';
 import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalogo.js';
 import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
-import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
 import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion } from '../domain/vida.js';
 import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
-import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO } from '../domain/efectos.js';
+import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
@@ -70,10 +69,12 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
   if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
-  const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro');
+  // Conjuros que solo pueden afectarte a ti (alcance Lanzador): se activan solos al lanzarlos
+  const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro' || (ef.bueno && soloSobreTi(s.alcance || srdFor(s)?.a)));
   let fuera = [];
   const concRondas = s.conc ? rondasDeDuracion(s.duracion || srdFor(s)?.du) : null;
   if (solo) msg += ` <span class="tnote"><b>${esc(ef.nombre)}</b> te afecta: ${esc(ef.texto.replace(/\.$/, ''))}${ef.dur ? ` (${esc(fmtRondas(ef.dur))})` : ''}.</span>`;
+  else msg += notaObjetivo(ef, s);
   const h = S.act(msg, (db, c) => {
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
@@ -86,7 +87,7 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
   if (solo) setTimeout(() => golpe('buff'), 200);
   const extra = [...fx.extra];
-  if (ef && !solo) extra.unshift({ label: ef.k === 'escudo' ? 'Aplicarme +5 CA' : 'Me lo aplico', hl: true, fn: () => aplicarmeConjuro(S, ef, s, mode === 'slot' ? L : s.level) });
+  if (!solo) extra.unshift(...botonAplicarme(S, ef, s, mode === 'slot' ? L : s.level));
   const x = srdFor(s), apunta = s.conc && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d]);
   if (apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
   else if (apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
@@ -96,9 +97,12 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   if (snuffIdx >= 0) slotFx(L, snuffIdx, 'snuff');
   haptic();
   toast(msg + fx.msg, [...extra, undoBtn(S, h)]);
-  if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' || mode === 'recurso' ? L || s.level : null), 350);
+  if (mode !== 'ritual' && lanzadorTira(s.es, tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' || mode === 'recurso' ? L || s.level : null), 350);
   return true;
 }
+
+const notaObjetivo = (ef, s) => (ef?.tiraObjetivo ? ` <span class="tnote"><b>${esc(ef.nombre)}</b> en marcha${s.conc ? ' mientras te concentres' : ''}: el dado lo tira cada objetivo al hacer su tirada, no tú.${ef.bueno ? ' Si te incluyes, la app te lo suma sola a tus tiradas.' : ''}</span>` : '');
+const botonAplicarme = (S, ef, s, L) => (ef?.bueno ? [{ label: ef.k === 'escudo' ? 'Aplicarme +5 CA' : ef.tiraObjetivo ? 'Me incluyo' : 'Me lo aplico', hl: true, fn: () => aplicarmeConjuro(S, ef, s, L) }] : []);
 
 function aplicarmeConjuro(S, ef, s, L) {
   const n = ef.maxPg ? 5 * Math.max(1, (L || 2) - 1) : 0;
@@ -111,11 +115,14 @@ function aplicarmeConjuro(S, ef, s, L) {
 export function quickCast(S, bi, force) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
   if (s.level === 0) {
-    const fx = castEffects(S, ch, P, s, 'truco', 0);
-    S.act(`${s.es} (truco)`, (db, c) => { lanzarEnCombate(c, { tiempo: s.tiempo }); });
+    const fx = castEffects(S, ch, P, s, 'truco', 0), ef = efectoDeConjuro(s.es), antes = ch.play.conc;
+    // Guía y Resistencia son trucos de concentración
+    let fuera = [];
+    const h = S.act(`${s.es} (truco)`, (db, c) => { lanzarEnCombate(c, { tiempo: s.tiempo }); if (s.conc) fuera = cambiarConc(c, s.es, rondasDeDuracion(s.duracion || srdFor(s)?.du)); });
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
-    if (tieneTiradas(tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return true; }
-    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return true;
+    if (lanzadorTira(s.es, tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return true; }
+    const conc = s.conc ? `${antes && antes !== s.es ? ` Pierdes la concentración en ${esc(antes)}.` : ''}${fuera.length ? ` Terminan sobre ti: ${esc(joinY(fuera.map(x => x.nombre)))}.` : ''}` : '';
+    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${conc}${notaObjetivo(ef, s)}${fx.msg}`, [...botonAplicarme(S, ef, s, 0), undoBtn(S, h)]); return true;
   }
   if (!force && !isPrepared(e)) {
     if (s.ritual && P.ritualLibro) return cast(S, bi, 'ritual');

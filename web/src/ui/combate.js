@@ -4,7 +4,7 @@ import { perfil, sgn, magiaPara, nivelTotal } from '../domain/reglas2024.js';
 import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../domain/rasgos.js';
 import { rasgosEnJuego } from '../domain/enJuego.js';
 import { biblioteca, tiradasConjuro } from '../domain/catalogo.js';
-import { tieneTiradas, dadosPara } from '../domain/tiradas.js';
+import { dadosPara } from '../domain/tiradas.js';
 import { slotsOf, freeOf, firstFreeFrom } from './sheet.js';
 import { armasCombate, ataqueArma } from '../domain/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo } from '../domain/combate.js';
@@ -15,7 +15,7 @@ import { icon } from './icons.js';
 import { runaSvg } from './magia.js';
 import { burst, reducedMotion } from './fx.js';
 import { estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml, pctVida, tonoVida, pipsMuerte } from './vitales.js';
-import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod, fmtRondas } from '../domain/efectos.js';
+import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod, fmtRondas, lanzadorTira, efectosDe } from '../domain/efectos.js';
 import { NOMBRE_ESTADO } from '../domain/vida.js';
 
 const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc', evo: 'esc_evo', ilu: 'esc_ilu', nig: 'esc_nig', tra: 'esc_tra' };
@@ -30,7 +30,7 @@ function ticks(ch, r) {
 const AB3 = { fuerza: 'Fue', destreza: 'Des', 'constitución': 'Con', inteligencia: 'Int', 'sabiduría': 'Sab', carisma: 'Car', fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' };
 const dadoTxt = d => `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? `+${d.bono}` : d.bono) : ''}`;
 function datosConjuro(ch, P, s, Pm) {
-  const r = tiradasConjuro(s); if (!r || !tieneTiradas(r)) return { clave: Pm.cd != null && /salvaci|saving/i.test(s.desc || '') ? `CD ${Pm.cd}` : '', dano: '' };
+  const r = tiradasConjuro(s); if (!r || !lanzadorTira(s.es, r)) return { clave: Pm.cd != null && /salvaci|saving/i.test(s.desc || '') ? `CD ${Pm.cd}` : '', dano: '' };
   const clave = r.ataque ? `${sgn(Pm.atk ?? P.atk)} ataque` : r.salvacion ? `CD ${Pm.cd ?? P.cd} ${AB3[norm(r.salvacion)] || AB3[String(r.salvacion).toLowerCase()] || ''}`.trim() : '';
   const ds = dadosPara(r, { nivelPj: nivelTotal(ch), nivelConjuro: s.level, nivelEspacio: s.level || null });
   const dano = ds.length ? `${ds[0].veces > 1 ? `${ds[0].veces}× ` : ''}${dadoTxt({ ...ds[0], bono: ds[0].bono + (ds[0].mod ? Pm.mod || 0 : 0) })}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
@@ -117,6 +117,16 @@ function orbeHtml(ch) {
     <span class="cb-orbe-l">${act === 0 && est !== 'vivo' ? `${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'Moribundo'}` : 'Puntos de golpe'}</span>
     ${v.temp ? `<span class="cb-orbe-t">+${v.temp}</span>` : ''}${act === 0 && est !== 'vivo' ? `<span class="cb-orbe-p">${pipsMuerte(ch)}</span>` : ''}</button>`;
 }
+// Dos accesos rápidos para marcar lo que te han lanzado: beneficios y perjuicios
+function efectosCombateHtml(ch) {
+  const efs = efectosDe(ch), boton = (bueno, cmd, titulo, vacio, ico) => {
+    const xs = efs.filter(e => !!e.bueno === bueno), n = xs.length;
+    return `<button type="button" class="cb-efx-b ${bueno ? 'bueno' : 'malo'} ${n ? 'con' : ''}" data-cmd="${cmd}" aria-label="${titulo}: ${n ? `${n} activo${n > 1 ? 's' : ''}` : 'ninguno'}. Tocar para marcar">
+      <span class="cb-efx-sello">${gi(ico)}${n ? `<em>${n}</em>` : ''}</span>
+      <span class="cb-efx-t"><b>${titulo}</b><small>${n ? esc(xs.map(e => e.nombre).join(' · ')) : vacio}</small></span>${icon('chevron')}</button>`;
+  };
+  return `<div class="cb-efx" role="group" aria-label="Conjuros sobre ti">${boton(true, 'beneficios', 'Beneficios', 'Bendición, Acelerar, Escudo de la fe…', 'inspiracion')}${boton(false, 'perjuicios', 'Perjuicios', 'Perdición, Ralentizar, Maleficio…', 'esc_nig')}</div>`;
+}
 export function combateHtml(ch, db) {
   const c = combateDe(ch), P = perfil(ch), ag = penalizacionAgotamiento(ch), est = estadoVital(ch), incap = incapacitado(ch);
   const lineas = resumenMods(ch), modsHtml = lineas.length || incap.length ? `<section class="cb-mods" aria-label="Lo que te afecta">
@@ -146,6 +156,7 @@ export function combateHtml(ch, db) {
   </section>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}<section class="cb-cond">${estadosHtml(ch)}${modsHtml}</section>
+    ${efectosCombateHtml(ch)}
     ${pruebasCombateHtml(ch)}
     <div class="cb-ars-cab"><h3>${gi('combate')}Qué puedes hacer</h3><span class="cb-pista"><b>Toca</b> para usar · <b>mantén</b> para leer</span></div>
     <div class="cb-ars">${grupoHtml(ch, P, c, 'accion', 'Acción', g.accion)}${grupoHtml(ch, P, c, 'adicional', 'Acción adicional', g.adicional)}${grupoHtml(ch, P, c, 'reaccion', 'Reacción', g.reaccion, '<span class="cb-g-nota">también en turnos ajenos</span>')}</div>

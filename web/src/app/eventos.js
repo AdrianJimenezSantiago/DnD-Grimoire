@@ -32,6 +32,7 @@ import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
 import { avatarHtml } from '../ui/avatar.js';
+import { openEfectos } from '../ui/dialogs/efectos.js';
 import { openVida, openEstados, danar, sanar, pedirConcentracion, tirarSalvacionMuerte, estabilizar, revivir } from '../ui/dialogs/vida.js';
 import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
@@ -139,6 +140,8 @@ const COMMANDS = {
   vida: () => S.cur() && openVida(),
   inspiracion: () => alternarInspiracion(),
   estados: () => S.cur() && openEstados(),
+  beneficios: () => S.cur() && openEfectos('bueno'),
+  perjuicios: () => S.cur() && openEfectos('malo'),
   dados: () => openDados(),
   dadoslibres: () => openDados(),
   buscar: () => openBuscar(),

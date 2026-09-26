@@ -23,8 +23,8 @@ export const REGLAS_ESTADO = {
 };
 
 export const EFECTOS = [
-  { k: 'bendicion', dur: 10, conjuro: /^bendici[oó]n$/i, nombre: 'Bendición', bueno: true, ico: 'inspiracion', texto: '+1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '1d4' }), R('salvacion', 'dado', { valor: '1d4' })] },
-  { k: 'guia', dur: 10, conjuro: /^gu[ií]a$/i, nombre: 'Guía', bueno: true, ico: 'inspiracion', texto: '+1d4 a las pruebas de la habilidad elegida.', reglas: [R('prueba', 'dado', { valor: '1d4', cond: 'si es de la habilidad elegida' })] },
+  { k: 'bendicion', dur: 10, conjuro: /^bendici[oó]n$/i, nombre: 'Bendición', bueno: true, tiraObjetivo: true, ico: 'inspiracion', texto: '+1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '1d4' }), R('salvacion', 'dado', { valor: '1d4' })] },
+  { k: 'guia', dur: 10, conjuro: /^gu[ií]a$/i, nombre: 'Guía', bueno: true, tiraObjetivo: true, ico: 'inspiracion', texto: '+1d4 a las pruebas de la habilidad elegida.', reglas: [R('prueba', 'dado', { valor: '1d4', cond: 'si es de la habilidad elegida' })] },
   { k: 'acelerar', dur: 10, conjuro: /^acelerar$/i, nombre: 'Acelerar', bueno: true, ico: 'velocidad', texto: '+2 a la CA, ventaja en salvaciones de Destreza, velocidad doble y una acción más (limitada).', ca: 2, velX: 2, reglas: [R('salvacion', 'ventaja', { ab: 'des' })] },
   { k: 'escudofe', dur: 100, conjuro: /^escudo de (la )?fe$/i, nombre: 'Escudo de la fe', bueno: true, ico: 'ca', texto: '+2 a la CA.', ca: 2, reglas: [] },
   { k: 'escudo', dur: 1, conjuro: /^escudo$/i, nombre: 'Escudo', bueno: true, ico: 'ca', texto: '+5 a la CA hasta el inicio de tu siguiente turno.', ca: 5, reglas: [] },
@@ -52,15 +52,31 @@ export const EFECTOS = [
   { k: 'protenergia', dur: 600, conjuro: /^protecci[oó]n contra (la )?energ[ií]a$/i, nombre: 'Protección contra energía', bueno: true, ico: 'esc_abj', texto: 'Resistencia al tipo de daño elegido: ácido, frío, fuego, relámpago o trueno.', reglas: [] },
   { k: 'guardamuerte', dur: 4800, conjuro: /^guarda contra la muerte$/i, nombre: 'Guarda contra la muerte', bueno: true, ico: 'pg', texto: 'La primera vez que fueras a caer a 0 PG, te quedas a 1; o anula un efecto que te mataría al instante.', reglas: [] },
   { k: 'santuario', dur: 10, conjuro: /^santuario$/i, nombre: 'Santuario', bueno: true, ico: 'esc_abj', texto: 'Quien quiera atacarte o afectarte con un conjuro debe superar una salvación de Sabiduría o elegir otro objetivo. Termina si atacas o haces daño.', reglas: [] },
-  { k: 'resistenciat', dur: 10, conjuro: /^resistencia$/i, nombre: 'Resistencia', bueno: true, ico: 'esc_abj', texto: 'Una vez por turno, reduces en 1d4 el daño que recibas del tipo elegido.', reglas: [] },
+  { k: 'resistenciat', dur: 10, conjuro: /^resistencia$/i, nombre: 'Resistencia', bueno: true, tiraObjetivo: true, ico: 'esc_abj', texto: 'Una vez por turno, reduces en 1d4 el daño que recibas del tipo elegido.', reglas: [] },
   { k: 'escudofuego', dur: 100, conjuro: /^escudo de fuego$/i, nombre: 'Escudo de fuego', bueno: true, ico: 'esc_evo', texto: 'Resistencia al frío o al fuego; quien te acierte cuerpo a cuerpo a 1,5 m sufre 2d8 de daño de fuego o de frío.', reglas: [] },
   { k: 'libertad', dur: 600, conjuro: /^libertad de movimiento$/i, nombre: 'Libertad de movimiento', bueno: true, ico: 'velocidad', texto: 'El terreno difícil no te frena y la magia no puede reducir tu velocidad ni dejarte paralizado o apresado.', reglas: [] },
   { k: 'retirada', dur: 100, conjuro: /^retirada expeditiva$/i, nombre: 'Retirada expeditiva', bueno: true, ico: 'velocidad', texto: 'Puedes correr como acción adicional.', reglas: [] },
   { k: 'imagen', dur: 10, conjuro: /^imagen m[uú]ltiple$/i, nombre: 'Imagen múltiple', bueno: true, ico: 'ojo', texto: 'Tres duplicados ilusorios: cada ataque que te alcance puede dar a uno de ellos.', reglas: [] },
   { k: 'desplazamiento', dur: 10, conjuro: /^desplazamiento$/i, nombre: 'Desplazamiento', bueno: true, ico: 'ojo', texto: 'Al final de cada turno tiras 1d6: con 4-6 pasas al Plano Etéreo hasta tu siguiente turno.', reglas: [] },
-  { k: 'perdicion', dur: 10, nombre: 'Perdición', bueno: false, ico: 'muerte', texto: '−1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '-1d4' }), R('salvacion', 'dado', { valor: '-1d4' })] },
-  { k: 'ralentizar', dur: 10, nombre: 'Ralentizar', bueno: false, ico: 'md_tiempo', texto: '−2 a la CA y a las salvaciones de Destreza, velocidad a la mitad y sin reacciones.', ca: -2, velX: 0.5, reglas: [R('salvacion', 'plano', { valor: -2, ab: 'des' })] },
-  { k: 'maleficio', dur: 600, nombre: 'Maleficio', bueno: false, ico: 'esc_nig', texto: 'Desventaja en las pruebas de la característica que elija quien lo lanzó.', reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' })] },
+  { k: 'favordivino', dur: 10, conjuro: /^favor divino$/i, nombre: 'Favor divino', bueno: true, ico: 'radiante', texto: 'Tus ataques con arma hacen 1d4 de daño radiante adicional al impactar.', danoArma: '1d4', reglas: [] },
+  { k: 'armamagica', dur: 600, conjuro: /^arma m[aá]gica$/i, nombre: 'Arma mágica', bueno: true, ico: 'cortante', texto: '+1 a las tiradas de ataque y de daño con el arma encantada (más con espacios superiores).', reglas: [R('ataque', 'plano', { valor: 1, cond: 'con el arma encantada' })] },
+  { k: 'protveneno', dur: 600, conjuro: /^protecci[oó]n contra (el )?veneno$/i, nombre: 'Protección contra veneno', bueno: true, ico: 'veneno', texto: 'Resistencia al daño de veneno y ventaja en las salvaciones para no quedar envenenado.', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] },
+  { k: 'vision', dur: 4800, conjuro: /^visi[oó]n en la oscuridad$/i, nombre: 'Visión en la oscuridad', bueno: true, ico: 'ojo', texto: 'Visión en la oscuridad hasta 45 m.', reglas: [] },
+  { k: 'perdicion', dur: 10, conjuro: /^perdici[oó]n$/i, nombre: 'Perdición', bueno: false, tiraObjetivo: true, ico: 'muerte', texto: '−1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '-1d4' }), R('salvacion', 'dado', { valor: '-1d4' })] },
+  { k: 'ralentizar', dur: 10, conjuro: /^ralentizar$/i, nombre: 'Ralentizar', bueno: false, ico: 'md_tiempo', texto: '−2 a la CA y a las salvaciones de Destreza, velocidad a la mitad y sin reacciones.', ca: -2, velX: 0.5, reglas: [R('salvacion', 'plano', { valor: -2, ab: 'des' })] },
+  { k: 'maleficio', dur: 600, conjuro: /^maleficio$/i, nombre: 'Maleficio', bueno: false, ico: 'esc_nig', texto: 'Desventaja en las pruebas de la característica que elija quien lo lanzó.', reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' })] },
+  { k: 'rayodebil', dur: 10, conjuro: /^rayo debilitador$/i, nombre: 'Rayo debilitador', bueno: false, ico: 'fuerza', texto: 'Desventaja en las pruebas de d20 de Fuerza y restas 1d8 a tus tiradas de daño.',
+    reglas: [R('ataque', 'desventaja', { cond: 'si el ataque usa Fuerza' }), R('prueba', 'desventaja', { ab: 'fue' }), R('salvacion', 'desventaja', { ab: 'fue' })] },
+  { k: 'fuegoferico', dur: 10, conjuro: /^fuego fe[eé]rico$/i, nombre: 'Fuego feérico', bueno: false, ico: 'fuego', texto: 'Brillas: quien te ataque y pueda verte tiene ventaja, y no te beneficias de ser invisible.', reglas: [] },
+  { k: 'saetaguia', dur: 1, conjuro: /^saeta gu[ií]a$/i, nombre: 'Saeta guía', bueno: false, ico: 'radiante', texto: 'El siguiente ataque contra ti antes de que acabe el siguiente turno de quien la lanzó tiene ventaja.', reglas: [] },
+  { k: 'burla', dur: 1, conjuro: /^burla (da[ñn]ina|cruel)$/i, nombre: 'Burla dañina', bueno: false, ico: 'psiquico', texto: 'Desventaja en tu siguiente tirada de ataque antes de que acabe tu siguiente turno.', reglas: [R('ataque', 'desventaja', { cond: 'solo en la siguiente' })] },
+  { k: 'toquehelado', dur: 1, conjuro: /^toque helado$/i, nombre: 'Toque helado', bueno: false, ico: 'necrotico', texto: 'No puedes recuperar puntos de golpe hasta el final del siguiente turno de quien lo lanzó.', reglas: [] },
+  { k: 'escarcha', dur: 1, conjuro: /^rayo de escarcha$/i, nombre: 'Rayo de escarcha', bueno: false, ico: 'frio', texto: 'Tu velocidad se reduce 3 m hasta el inicio del siguiente turno de quien lo lanzó.', vel: -3, reglas: [] },
+  { k: 'maldicion', dur: 10, conjuro: /^imponer maldici[oó]n$/i, nombre: 'Imponer maldición', bueno: false, ico: 'esc_nig', texto: 'Según la maldición: desventaja en pruebas y salvaciones de una característica, en tus ataques contra quien la lanzó, o pierdes turnos.',
+    reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' }), R('salvacion', 'desventaja', { cond: 'si es de la característica elegida' })] },
+  { k: 'calentar', dur: 10, conjuro: /^calentar metal$/i, nombre: 'Calentar metal', bueno: false, ico: 'fuego', texto: 'Mientras sigas sosteniendo o llevando el objeto ardiente tienes desventaja en ataques y pruebas de característica.',
+    reglas: [R('ataque', 'desventaja', { cond: 'si sigues con el objeto' }), R('prueba', 'desventaja', { cond: 'si sigues con el objeto' })] },
+  { k: 'confusion', dur: 10, conjuro: /^confusi[oó]n$/i, nombre: 'Confusión', bueno: false, ico: 'psiquico', texto: 'No puedes hacer reacciones y al empezar cada turno tiras 1d10 para ver qué haces. Repites la salvación al final de cada turno.', reglas: [] },
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
 // Rasgos con usos que, al gastarse, ponen un efecto sobre ti
@@ -91,6 +107,14 @@ export function pasivosDe(ch) {
 }
 const sinTildes = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 export const efectoDeConjuro = nombre => { const n = sinTildes(nombre); return EFECTOS.find(e => e.conjuro && (e.conjuro.test(n) || e.conjuro.test(String(nombre || '').trim()))) || null; };
+// Bendición, Guía, Resistencia, Perdición…: el dado lo tira cada objetivo al hacer su tirada, no quien lanza el conjuro
+export function lanzadorTira(nombre, t) {
+  if (!t) return false;
+  if (t.ataque || t.danos?.length || t.curacion) return true;
+  return !!t.extras?.length && !efectoDeConjuro(nombre)?.tiraObjetivo;
+}
+// Alcance «Lanzador» (Personal): el conjuro solo puede afectarte a ti
+export const soloSobreTi = alcance => /^(lanzador|personal|uno mismo|self)\b/i.test(sinTildes(alcance));
 export function fmtRondas(r) {
   if (r == null) return '';
   if (r <= 10) return r === 1 ? '1 ronda' : `${r} rondas`;
