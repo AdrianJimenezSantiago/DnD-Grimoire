@@ -282,12 +282,16 @@ export const hasShortRest = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.e
 // Conjuros que un rasgo o una dote deja lanzar sin gastar espacio: al tocarlos se gasta ese uso antes que un espacio
 export const RECURSO_DE_CONJURO = {
   'marca del cazador': ['tpl:explorador.enemigo'], 'castigo divino': ['tpl:paladin.castigo'], 'hallar corcel': ['tpl:paladin.corcel'],
-  'paso brumoso': ['tpl:feerico.pasos', 'tpl:errante.brumoso', 'tpl:dote.feerica'], 'saeta guia': ['tpl:estrellas.mapa'], 'invocar feerico': ['tpl:errante.refuerzos', 'tpl:ilusionista.criaturas'],
+  'paso brumoso': ['tpl:feerico.pasos', 'tpl:errante.brumoso'], 'saeta guia': ['tpl:estrellas.mapa'], 'invocar feerico': ['tpl:errante.refuerzos', 'tpl:ilusionista.criaturas'],
   'invocar bestia': ['tpl:ilusionista.criaturas'], 'contactar con otro plano': ['tpl:brujo.contactar'], 'telequinesis': ['tpl:psionico.maestro'], 'invocar dragon': ['tpl:draconica.companero'],
-  'detectar pensamientos': ['tpl:dote.telepatico'], 'sentidos de la bestia': ['tpl:dote.enclave'], 'baile irresistible de otto': ['tpl:dote.jolgorio'], 'invisibilidad': ['tpl:dote.sombria'],
+  'sentidos de la bestia': ['tpl:dote.enclave'], 'baile irresistible de otto': ['tpl:dote.jolgorio'],
 };
-export function recursoParaConjuro(ch, nombre) {
-  const ids = RECURSO_DE_CONJURO[norm(nombre)] || []; if (!ids.length) return null;
+// Los conjuros que da una dote llevan su nombre como fuente: su uso gratis sale del contador de la dote
+const RECURSO_DE_FUENTE = [[/^iniciado en la magia(?: \((.+)\))?/, m => `tpl:dote.iniciado.${norm(m[1] || '')}`], [/^influencia feerica/, () => 'tpl:dote.feerica'],
+  [/^influencia sombria/, () => 'tpl:dote.sombria'], [/^telepatico/, () => 'tpl:dote.telepatico']];
+export function recursoParaConjuro(ch, nombre, fuente = '') {
+  const f = norm(fuente), porFuente = RECURSO_DE_FUENTE.map(([re, id]) => { const m = re.exec(f); return m ? id(m) : null; }).filter(Boolean);
+  const ids = [...porFuente, ...(RECURSO_DE_CONJURO[norm(nombre)] || [])]; if (!ids.length) return null;
   return reglas(ch).find(r => ids.includes(r.id) && r.tipo === 'recurso' && usosGastados(ch, r) < r.max) || null;
 }
 export function recState(ch, id) {
