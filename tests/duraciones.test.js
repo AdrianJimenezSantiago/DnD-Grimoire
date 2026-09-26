@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blankChar, normChar } from '../web/src/domain/modelo.js';
 import { caEfectiva, efectoDeConjuro, fmtRondas, efectosDe } from '../web/src/domain/efectos.js';
-import { pgMaximo, ponerEfecto, pasarRonda, soltarConc, cambiarConc } from '../web/src/domain/vida.js';
+import { pgMaximo, ponerEfecto, pasarRonda, soltarConc, cambiarConc, rondasDeDuracion, cdConcentracion, aplicarDano } from '../web/src/domain/vida.js';
 import { opcionesIntercambio, nivelCambia, esHumano } from '../web/src/domain/intercambios.js';
 
 const pj = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
@@ -44,6 +44,27 @@ test('concentración: al perderla terminan los efectos que dependían de ella', 
   assert.equal(ch.play.conc, '');
   assert.deepEqual(efectosDe(ch).map(e => e.k), ['auxilio']);
   assert.equal(pgMaximo(ch), max + 5);
+});
+test('concentración: termina sola al agotarse la duración del conjuro', () => {
+  assert.equal(rondasDeDuracion('Hasta 1 min'), 10); assert.equal(rondasDeDuracion('Concentración, hasta 10 minutos'), 100);
+  assert.equal(rondasDeDuracion('Hasta 1 h'), 600); assert.equal(rondasDeDuracion('Hasta 6 asaltos'), 6); assert.equal(rondasDeDuracion('Hasta 1 día'), 14400);
+  assert.equal(rondasDeDuracion('Instantáneo'), null); assert.equal(rondasDeDuracion('Hasta que se disipe'), null);
+  const ch = pj({ play: { conc: '' } });
+  cambiarConc(ch, 'Bendición', 10); ponerEfecto(ch, 'bendicion', { conc: 'Bendición' });
+  for (let i = 0; i < 9; i++) assert.deepEqual(pasarRonda(ch), []);
+  assert.equal(ch.play.concRondas, 1);
+  const fuera = pasarRonda(ch);
+  assert.deepEqual(fuera.map(e => [e.nombre, !!e.finConc]), [['Bendición', true], ['Bendición', false]]);
+  assert.equal(ch.play.conc, ''); assert.equal(ch.play.concRondas, null); assert.deepEqual(efectosDe(ch), []);
+  cambiarConc(ch, 'Nube de oscurecimiento');
+  for (let i = 0; i < 50; i++) pasarRonda(ch);
+  assert.equal(ch.play.conc, 'Nube de oscurecimiento');
+});
+test('concentración: CD por daño y salvación pedida al recibirlo', () => {
+  assert.equal(cdConcentracion(1), 10); assert.equal(cdConcentracion(21), 10); assert.equal(cdConcentracion(23), 11); assert.equal(cdConcentracion(100), 30);
+  const ch = pj({ play: { conc: 'Bendición' } });
+  assert.deepEqual(aplicarDano(ch, 25).concentracion, { cd: 12, conjuro: 'Bendición' });
+  assert.equal(aplicarDano(ch, 999).concentracion.perdida, true);
 });
 test('descansos: qué conjuros y opciones puedes cambiar según tu clase', () => {
   const titulos = (ch, m, o) => opcionesIntercambio(ch, m, o).map(x => x.titulo);

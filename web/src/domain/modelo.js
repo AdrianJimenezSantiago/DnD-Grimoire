@@ -17,7 +17,7 @@ export const THEO = {
   campana: 'Crónicas de La Argos, Aequus. Temporada 2026/2027',
 };
 const STATS0 = { fue: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 };
-const PLAY0 = () => ({ used: {}, conc: '', concObj: [], efectos: [], rec: {}, log: [], onlyPrep: false });
+const PLAY0 = () => ({ used: {}, conc: '', concObj: [], concRondas: null, efectos: [], rec: {}, log: [], onlyPrep: false });
 
 export const spellKey = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
 
@@ -42,6 +42,7 @@ export function normChar(c) {
   if (!Array.isArray(c.play.concObj)) c.play.concObj = [];
   if (!Array.isArray(c.play.efectos)) c.play.efectos = [];
   if (!c.play.conc) c.play.concObj = [];
+  c.play.concRondas = c.play.conc && c.play.concRondas != null ? Math.max(1, parseInt(c.play.concRondas, 10) || 1) : null;
   if (!Array.isArray(c.play.log)) c.play.log = [];
   if (!Array.isArray(c.rasgos)) c.rasgos = [];
   if (!Array.isArray(c.rasgosOff)) c.rasgosOff = [];

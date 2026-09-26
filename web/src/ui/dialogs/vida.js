@@ -1,6 +1,6 @@
 import { esc, norm, numLibre } from '../../core/util.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
-import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom,
+import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
 import { bonoSalvacion } from '../../domain/habilidades.js';
 import { glosario } from '../../domain/catalogo.js';
@@ -64,18 +64,31 @@ export function danar(S2, n, critico = false) {
   else if (r.cayo) msg = `<b>${n}</b> de daño: cae a 0 PG, inconsciente.${r.concentracion?.perdida ? ` Pierde la concentración en ${esc(r.concentracion.conjuro)}.` : ''}`;
   else if (r.fallo) msg = `Daño a 0 PG: un fallo en las salvaciones contra muerte.`;
   if (r.concentracion && !r.concentracion.perdida) {
-    const cd = r.concentracion.cd, conj = r.concentracion.conjuro, bono = bonoSalvacion(c2, 'con');
+    const { cd, conjuro: conj } = r.concentracion;
     msg += ` Concentración en <b>${esc(conj)}</b>: salvación de Constitución CD <b>${cd}</b>.`;
-    acts.unshift({ label: `Tirar ${sgn(bono)}`, hl: true, fn: () => tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución contra CD ${cd} · ${conj}`, bono, tipo: 'salvacion', ab: 'con', cd,
-      alTirar: total => { if (total >= cd) return `<b class="ok">Mantienes la concentración</b> en ${esc(conj)}.`;
-        if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { soltarConc(x); });
-        return `<b class="ko">Pierdes la concentración</b> en ${esc(conj)}.`; } }) });
+    acts.unshift({ label: `Tirar ${sgn(bonoSalvacion(c2, 'con'))}`, hl: true, fn: () => tirarConcentracion(S2, n) });
     acts.splice(1, 0, { label: 'La pierdo', fn: () => S2.act(`Pierde la concentración en ${conj}`, (db, x) => { soltarConc(x); }) });
+    setTimeout(() => { if (S2.cur()?.play.conc === conj) tirarConcentracion(S2, n); }, 450);
   }
   haptic(r.cayo || r.muerte ? 'heavy' : 'medium');
   golpeFx('dano', n, { desde, hasta: pgActuales(S2.cur()), cae: r.cayo || r.muerte });
   toast(msg, acts);
   return r;
+}
+export function tirarConcentracion(S2, dano) {
+  const c = S2.cur(), conj = c?.play.conc; if (!conj) return;
+  const cd = cdConcentracion(dano);
+  tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución CD ${cd} (${dano} de daño) · ${conj}`, bono: bonoSalvacion(c, 'con'), tipo: 'salvacion', ab: 'con', cd,
+    alTirar: total => { if (total >= cd) return `<b class="ok">Mantienes la concentración</b> en ${esc(conj)}.`;
+      if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { soltarConc(x); });
+      return `<b class="ko">Pierdes la concentración</b> en ${esc(conj)}.`; } });
+}
+export async function pedirConcentracion(S2) {
+  const conj = S2.cur()?.play.conc; if (!conj) return;
+  const r = await pedir({ titulo: `Concentración en ${conj}`, texto: '¿Cuánto daño has recibido? La CD es la mitad del daño (redondeando hacia abajo), mínimo 10 y máximo 30. Si el daño viene de varias fuentes, tira una salvación por cada una.',
+    tipo: 'number', min: 1, max: 999, ok: 'Tirar' });
+  const n = numLibre(r); if (!(n > 0)) return;
+  tirarConcentracion(S2, n);
 }
 export function sanar(S2, n) {
   const desde = pgActuales(S2.cur()); let g = 0; const h = S2.act(`Recupera ${n} PG`, (db, x) => { g = curar(x, n); });
@@ -139,7 +152,9 @@ export async function alternarEfecto(S2, k) {
 }
 export function alternarEstado(S2, k) {
   const on = vidaDe(S2.cur()).estados.includes(k);
-  S2.act(`${on ? 'Deja de estar' : 'Queda'} ${NOMBRE_ESTADO[k].toLowerCase()}`, (db, x) => { const v = vidaDe(x); v.estados = on ? v.estados.filter(e => e !== k) : [...v.estados, k]; });
+  const conj = !on && ESTADOS_INCAP.includes(k) ? S2.cur().play.conc : '';
+  S2.act(`${on ? 'Deja de estar' : 'Queda'} ${NOMBRE_ESTADO[k].toLowerCase()}`, (db, x) => { const v = vidaDe(x); v.estados = on ? v.estados.filter(e => e !== k) : [...v.estados, k]; if (conj) soltarConc(x); });
+  if (conj) toast(`${esc(NOMBRE_ESTADO[k])}: pierdes la concentración en <b>${esc(conj)}</b>.`);
   haptic('light');
 }
 

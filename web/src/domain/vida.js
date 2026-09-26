@@ -186,17 +186,29 @@ function quitarEfectos(ch, fuera) {
 export function pasarRonda(ch) {
   const v = vidaDe(ch), fuera = [];
   for (const e of v.efectos) { if (e.rondas == null) continue; e.rondas -= 1; if (e.rondas <= 0) fuera.push(e); }
-  return quitarEfectos(ch, fuera);
+  const out = quitarEfectos(ch, fuera), pl = ch.play;
+  if (pl?.conc && pl.concRondas != null) {
+    pl.concRondas -= 1;
+    if (pl.concRondas <= 0) { const nombre = pl.conc; out.unshift({ id: 'conc', k: '', nombre, bueno: true, ico: 'esc_adi', conc: nombre, finConc: true }, ...soltarConc(ch)); }
+  }
+  return out;
 }
+const UNIDAD = [[/^(asaltos?|rondas?|rounds?)$/, 1], [/^(min|minutos?|minutes?)$/, 10], [/^(h|horas?|hours?)$/, 600], [/^(d[ií]as?|days?)$/, 14400]];
+export function rondasDeDuracion(texto) {
+  const m = String(texto || '').toLowerCase().match(/(\d+)\s*([a-záéíóúñ]+)/); if (!m) return null;
+  const u = UNIDAD.find(([re]) => re.test(m[2]));
+  return u ? parseInt(m[1], 10) * u[1] : null;
+}
+export const ESTADOS_INCAP = ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'];
 export function efectosDeConc(ch, conjuro) { return vidaDe(ch).efectos.filter(e => e.conc && (conjuro == null || e.conc === conjuro)); }
 export function soltarConc(ch) {
   const c = ch.play?.conc || '';
-  if (ch.play) { ch.play.conc = ''; ch.play.concObj = []; }
+  if (ch.play) { ch.play.conc = ''; ch.play.concObj = []; ch.play.concRondas = null; }
   return c ? quitarEfectos(ch, efectosDeConc(ch, c)) : [];
 }
-export function cambiarConc(ch, nombre) {
+export function cambiarConc(ch, nombre, rondas = null) {
   const antes = ch.play.conc, fuera = antes && antes !== nombre ? quitarEfectos(ch, efectosDeConc(ch, antes)) : [];
   if (antes !== nombre) ch.play.concObj = [];
-  ch.play.conc = nombre;
+  ch.play.conc = nombre; ch.play.concRondas = rondas;
   return fuera;
 }
