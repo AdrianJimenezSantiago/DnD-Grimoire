@@ -96,6 +96,14 @@
   <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
+<dialog id="efectosDlg" class="tall" aria-labelledby="efxTitle"><div class="grip"></div>
+  <div class="dhead efx-head"><h2 id="efxTitle">Beneficios</h2><div class="dsub" id="efxSub"></div>
+    <div class="efx-tabs" id="efxTabs" role="tablist" aria-label="Tipo de efecto"></div>
+    <div class="es-busca"><input type="search" id="efxQ" class="el-q" autocomplete="off" enterkeyhint="search" placeholder="Buscar un conjuro: Bendición, CA, velocidad…" aria-label="Buscar conjuros"><small id="efxCuenta" aria-live="polite"></small></div></div>
+  <div class="dbody" id="efxBody"></div>
+  <div class="dfoot"><button type="button" data-cmd="estados">Todos los estados</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
+</dialog>
+
 <dialog id="buscarDlg" class="tall" aria-labelledby="bsTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="bsTitle">Buscar</h2><div class="dsub" id="bsSub">Conjuros, reglas, objetos, dotes, rasgos, criaturas, inventario y diario.</div>
     <input type="search" id="bsQ" class="bs-q" placeholder="Escribe al menos dos letras" aria-label="Buscar" autocomplete="off" enterkeyhint="search"></div>

@@ -1,7 +1,7 @@
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas2024.js';
 import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
-import { tieneTiradas } from '../../domain/tiradas.js';
+import { lanzadorTira } from '../../domain/efectos.js';
 import { gi } from '../tema.js';
 import { openRoll, iconoDano } from './tiradas.js';
 import { openArea } from './area.js';
@@ -133,7 +133,7 @@ function render() {
     if (sup) h += `<section class="sp-text ${en ? 'en' : ''}"><h3>${s.level === 0 ? 'Mejora del truco' : 'Con espacios de nivel superior'}</h3>${md(sup)}</section>`;
     { const man = manualFor(x), textos = [man?.d, s.desc, x?.dEs, x?.d].filter(Boolean), ar = parseArea(textos.join(' '), s.alcance);
       if (ar) h += `<button type="button" class="rl-open ar-open" data-areaopen><span class="ar-ico" aria-hidden="true"></span><span><b>Ver área en la cuadrícula</b><small>${esc(describir(ar))}</small></span></button>`; }
-    if (SP.mode === 'book') { const t = tiradasConjuro(s); if (tieneTiradas(t)) h += `<section class="sp-cast"><h3>Tiradas</h3><button type="button" class="rl-open" data-rollopen>${t.danos[0] ? iconoDano(t.danos[0].tipo) : t.curacion ? iconoDano('curación') : ''}<span><b>${t.ataque ? 'Atacar y tirar daño' : t.curacion && !t.danos.length ? 'Tirar curación' : 'Tirar daño'}</b><small>${[t.ataque ? 'ataque ' + t.ataque : '', t.salvacion ? 'salvación de ' + t.salvacion : ''].filter(Boolean).join(', ') || 'dados del conjuro'}</small></span></button></section>`; h += castOptions(SP.bi); }
+    if (SP.mode === 'book') { const t = tiradasConjuro(s); if (lanzadorTira(s.es, t)) h += `<section class="sp-cast"><h3>Tiradas</h3><button type="button" class="rl-open" data-rollopen>${t.danos[0] ? iconoDano(t.danos[0].tipo) : t.curacion ? iconoDano('curación') : ''}<span><b>${t.ataque ? 'Atacar y tirar daño' : t.curacion && !t.danos.length ? 'Tirar curación' : 'Tirar daño'}</b><small>${[t.ataque ? 'ataque ' + t.ataque : '', t.salvacion ? 'salvación de ' + t.salvacion : ''].filter(Boolean).join(', ') || 'dados del conjuro'}</small></span></button></section>`; h += castOptions(SP.bi); }
     h += criaturasHtml(s);
     h += pieBestiario(s);
     if (x && en) h += `<p class="credit">Texto del System Reference Document 5.2 de Wizards of the Coast, licencia CC-BY 4.0.</p>`;
