@@ -14,7 +14,7 @@ import { icon } from './icons.js';
 import { runaSvg } from './magia.js';
 import { burst, reducedMotion } from './fx.js';
 import { estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml, pctVida, tonoVida, pipsMuerte } from './vitales.js';
-import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod } from '../domain/efectos.js';
+import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod, fmtRondas } from '../domain/efectos.js';
 import { NOMBRE_ESTADO } from '../domain/vida.js';
 
 const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc', evo: 'esc_evo', ilu: 'esc_ilu', nig: 'esc_nig', tra: 'esc_tra' };
@@ -126,8 +126,8 @@ export function combateHtml(ch, db) {
       ${lineas.map(l => `<div class="cb-mod-l"><span>${esc(l.titulo)}</span>${l.piezas.map(p => `<b class="cb-mod ${p.mal ? 'mal' : 'bien'}" title="${esc(p.cond ? `Solo ${p.cond}` : p.fuente)}">${esc(p.texto)}<small>${esc(p.fuente)}${p.cond ? ' *' : ''}</small></b>`).join('')}</div>`).join('')}</section>` : '';
   const g = acciones(ch, db), pasivos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).filter(r => r.grupo === 'pasivo');
   const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b e-${k} ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" aria-label="${t}${c.turno[k] ? ': gastada' : ''}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i><span>${ECO_CORTO[k] ? `<em class="l-larga">${t}</em><em class="l-corta">${ECO_CORTO[k]}</em>` : t}</span></button>`).join('');
-  const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b></span>
-    <button type="button" data-tirar="salv:con">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
+  const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b>${ch.play.concRondas != null ? `<small class="cb-conc-q">· quedan ${fmtRondas(ch.play.concRondas)}</small>` : ''}</span>
+    <button type="button" data-cmd="tiraconc" aria-label="Salvación de concentración: te pedirá el daño recibido">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
   return `<section class="cb-mando" aria-label="Estado del combate">
     ${orbeHtml(ch)}
     <header class="cb-m-cab">

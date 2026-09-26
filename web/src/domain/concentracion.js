@@ -19,7 +19,7 @@ export function empezarConc(play, nombre) {
   if (play.conc !== nombre) play.concObj = [];
   play.conc = nombre;
 }
-export function terminarConc(play) { play.conc = ''; play.concObj = []; }
+export function terminarConc(play) { play.conc = ''; play.concObj = []; play.concRondas = null; }
 
 export function objetivosNuevos(texto, ya = []) {
   const vistos = new Set(ya.map(x => norm(x)));

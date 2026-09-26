@@ -32,7 +32,7 @@ import { showLanding, landingVisible } from '../ui/landing.js';
 import { enTour, cerrarTour } from '../ui/tour.js';
 import { gi } from '../ui/tema.js';
 import { avatarHtml } from '../ui/avatar.js';
-import { openVida, openEstados, danar, sanar, tirarSalvacionMuerte, estabilizar, revivir } from '../ui/dialogs/vida.js';
+import { openVida, openEstados, danar, sanar, pedirConcentracion, tirarSalvacionMuerte, estabilizar, revivir } from '../ui/dialogs/vida.js';
 import { openDados, tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
 import { openBuscar } from '../ui/dialogs/buscar.js';
 import { transicion } from '../ui/combate.js';
@@ -130,6 +130,7 @@ const COMMANDS = {
   long: () => A.longRest(S),
   short: () => A.shortRest(S, openRecovery, openVida),
   endconc: () => A.endConc(S),
+  tiraconc: () => S.cur() && pedirConcentracion(S),
   objetivos: () => A.enfocarObjetivos('conc'),
   formas: () => S.cur() && openFormas('salvaje'),
   verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
@@ -216,7 +217,7 @@ function nuevoTurno() {
   const ronda = combateDe(ch).ronda + 1;
   const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); });
   if (fuera.length) {
-    S.note(`Terminan: ${fuera.map(e => e.nombre).join(', ')}`);
+    S.note(`Terminan: ${fuera.map(e => (e.finConc ? `concentración en ${e.nombre}` : e.nombre)).join(', ')}`);
     setTimeout(() => avisoFinEfectos(fuera, ronda, h), 380);
   }
   pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
@@ -224,11 +225,12 @@ function nuevoTurno() {
 function avisoFinEfectos(fuera, ronda, h) {
   const buenos = fuera.filter(e => e.bueno), malos = fuera.filter(e => !e.bueno);
   const ca = caEfectiva(S.cur()), vel = velocidadEfectiva(S.cur());
-  const cierra = e => ({ ico: e.ico, titulo: e.nombre, texto: e.k === 'escudo' ? `Tu CA vuelve a ${ca.ca}.` : EFECTO[e.k]?.ca ? `Tu CA queda en ${ca.ca}.` : EFECTO[e.k]?.vel || EFECTO[e.k]?.velX ? `Tu velocidad queda en ${String(vel.m).replace('.', ',')} m.` : EFECTO[e.k]?.maxPg ? 'Tus PG máximos vuelven a su valor.' : 'Su duración se ha agotado.', tono: `fin ${e.bueno ? 'buena' : 'mala'}` });
-  avisar({ ico: 'md_tiempo', tono: malos.length && !buenos.length ? 'verde' : 'azul', titulo: fuera.length === 1 ? `Termina ${fuera[0].nombre}` : 'Terminan tus efectos',
-    sub: `Empieza la ronda ${ronda}: ${fuera.length === 1 ? 'se agota la duración de un efecto' : `se agota la duración de ${fuera.length} efectos`}.`,
+  const fin = fuera.find(e => e.finConc);
+  const cierra = e => ({ ico: e.ico, titulo: e.finConc ? `Concentración en ${e.nombre}` : e.nombre, texto: e.finConc ? 'Se agota la duración del conjuro: dejas de concentrarte.' : e.conc && fin?.conc === e.conc ? `Terminaba con tu concentración en ${e.conc}.` : e.k === 'escudo' ? `Tu CA vuelve a ${ca.ca}.` : EFECTO[e.k]?.ca ? `Tu CA queda en ${ca.ca}.` : EFECTO[e.k]?.vel || EFECTO[e.k]?.velX ? `Tu velocidad queda en ${String(vel.m).replace('.', ',')} m.` : EFECTO[e.k]?.maxPg ? 'Tus PG máximos vuelven a su valor.' : 'Su duración se ha agotado.', tono: `fin ${e.bueno ? 'buena' : 'mala'}` });
+  avisar({ ico: 'md_tiempo', tono: malos.length && !buenos.length ? 'verde' : 'azul', titulo: fin ? `Termina ${fin.nombre}` : fuera.length === 1 ? `Termina ${fuera[0].nombre}` : 'Terminan tus efectos',
+    sub: `Empieza la ronda ${ronda}: ${fin ? `se agota la duración de ${fin.nombre} y dejas de concentrarte` : fuera.length === 1 ? 'se agota la duración de un efecto' : `se agota la duración de ${fuera.length} efectos`}.`,
     secciones: [{ titulo: 'Ya no te ayuda', ico: 'inspiracion', items: buenos.map(cierra) }, { titulo: 'Te libras de', ico: 'estados', items: malos.map(cierra) },
-      { titulo: 'Sigue activo', ico: 'md_tiempo', items: efectosDe(S.cur()).map(e => ({ ico: e.ico, titulo: e.nombre, texto: e.rondas != null ? `Quedan ${fmtRondas(e.rondas)}.` : 'Hasta que lo quites o descanses.' })) }],
+      { titulo: 'Sigue activo', ico: 'md_tiempo', items: [...(S.cur().play.conc ? [{ ico: 'esc_adi', titulo: `Concentración en ${S.cur().play.conc}`, texto: S.cur().play.concRondas != null ? `Quedan ${fmtRondas(S.cur().play.concRondas)}.` : 'Hasta que la termines o la pierdas.' }] : []), ...efectosDe(S.cur()).map(e => ({ ico: e.ico, titulo: e.nombre, texto: e.rondas != null ? `Quedan ${fmtRondas(e.rondas)}.` : 'Hasta que lo quites o descanses.' }))] }],
     botones: [{ ...A.undoBtn(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
   haptic('light');
 }

@@ -266,6 +266,7 @@ body.combate .appbar::after { background: linear-gradient(90deg, transparent, va
 .cb-conc > span { flex: 1 1 200px; display: flex; align-items: center; gap: 8px; font: 400 var(--fs-s) / 1.3 var(--sans); }
 .cb-conc .gi { width: 18px; height: 18px; color: var(--gold); }
 .cb-conc button { min-height: 36px; font-size: var(--fs-xs); }
+.cb-conc-q { font-size: var(--fs-xs); opacity: .75; }
 .cb-vacio { margin: 0; padding: 14px; font: italic 400 var(--fs-s) / 1.45 var(--serif); color: var(--ink-3); }
 .cb-pasivo { min-height: 36px; gap: 8px; font-size: var(--fs-s); }
 .cb-fin { display: flex; justify-content: center; margin: var(--s5) 0 var(--s2); }

@@ -10,7 +10,7 @@ import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalog
 import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
-import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc } from '../domain/vida.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion } from '../domain/vida.js';
 import { combateDe } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
@@ -57,12 +57,13 @@ export function cast(S, bi, mode, L) {
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
   const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro');
   let fuera = [];
+  const concRondas = s.conc ? rondasDeDuracion(s.duracion || srdFor(s)?.du) : null;
   if (solo) msg += ` <span class="tnote"><b>${esc(ef.nombre)}</b> te afecta: ${esc(ef.texto.replace(/\.$/, ''))}${ef.dur ? ` (${esc(fmtRondas(ef.dur))})` : ''}.</span>`;
   const h = S.act(msg, (db, c) => {
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
-    if (s.conc) fuera = cambiarConc(c, s.es);
+    if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
   });
   if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
