@@ -179,10 +179,11 @@
   <div class="dfoot"><button type="button" data-close>Cerrar</button><span class="spacer"></span><button type="button" class="primary" id="charNew">Nuevo personaje</button></div>
 </dialog>
 
-<dialog id="charDlg" class="tall" aria-labelledby="charTitle"><div class="grip"></div>
-  <div class="dhead"><h2 id="charTitle">Nuevo personaje</h2><div class="dsub">Reglas del Manual del Jugador de 2024. Lo que se calcula solo aparece en el resumen del final.</div></div>
+<dialog id="charDlg" class="tall paleta-local cc-dlg" aria-labelledby="charTitle"><div class="grip"></div>
+  <div class="dhead"><div class="cc-hero"><div class="cc-sello" id="charSello" aria-hidden="true"></div><div class="cc-tit"><h2 id="charTitle">Nuevo personaje</h2><div class="dsub" id="charSub">Reglas del Manual del Jugador de 2024.</div></div></div>
+    <nav class="cc-pasos" id="charPasos" role="tablist" aria-label="Pasos"></nav></div>
   <div class="dbody" id="charForm"></div>
-  <div class="dfoot"><span class="ferr" id="charErr" role="alert"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="charSave">Guardar</button></div>
+  <div class="dfoot"><span class="ferr" id="charErr" role="alert"></span><button type="button" data-close>Cancelar</button><button type="button" class="ghost" id="charBack">Atrás</button><button type="button" class="primary" id="charNext">Siguiente</button><button type="button" class="primary" id="charSave">Guardar</button></div>
 </dialog>
 
 <dialog id="pickDlg" class="tall" aria-labelledby="pickTitle"><div class="grip"></div>

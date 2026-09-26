@@ -73,7 +73,7 @@ export function dotesDe(ch, trasfondosLib = []) {
   const partir = t => { const m = /^(.+?)\s*\(([^)]+)\)\s*$/.exec(t); return m ? { nombre: m[1], detalle: m[2] } : { nombre: t, detalle: '' }; };
   const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   const out = [];
-  const tr = trasfondosLib.find(x => n(x.nombre) === n(ch.trasfondo))?.dote || (TRASFONDOS_2024[Object.keys(TRASFONDOS_2024).find(k => n(k) === n(ch.trasfondo))] || [])[1];
+  const tr = n(ch.trasfondo) && (trasfondosLib.find(x => n(x.nombre) && n(x.nombre) === n(ch.trasfondo))?.dote || (TRASFONDOS_2024[Object.keys(TRASFONDOS_2024).find(k => n(k) === n(ch.trasfondo))] || [])[1]);
   if (tr) out.push({ ...partir(tr), origen: 'trasfondo' });
   for (const d of ch.dotes || []) { const x = partir(d); if (x.nombre && !out.some(o => n(o.nombre) === n(x.nombre) && n(o.detalle) === n(x.detalle))) out.push({ ...x, origen: 'elegida' }); }
   return out;
