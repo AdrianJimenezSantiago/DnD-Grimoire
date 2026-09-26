@@ -9,6 +9,7 @@ import { elegir } from './dialogs/elegir.js';
 import { md } from './dialogs/conjuro.js';
 import { gi } from './tema.js';
 import { esRepetible } from '../domain/creacion.js';
+import { faltaRequisito } from '../domain/origen.js';
 
 export const campoElegible = (attrs, valor, tipo, ico, placeholder = '') => `<div class="elg"><span class="elg-ico" aria-hidden="true">${gi(ico)}</span><input ${attrs} value="${esc(valor || '')}" autocomplete="off" placeholder="${esc(placeholder)}"><button type="button" class="elg-b" data-elegir="${tipo}" aria-label="Ver la lista">${gi('biblioteca')}<span>Lista</span></button></div>`;
 export function ponerValor(input, valor) {
@@ -28,16 +29,16 @@ const DOTES_BASE = [['Alerta', 'Sumas tu bonificador de competencia a la iniciat
   ['Sanador', 'Con un kit de sanador curas con dados de golpe y repites unos al curar.']];
 
 const BLOQ = 'Ya la tienes. Esta dote no se puede elegir dos veces.';
-const nivelReq = req => { const m = /nivel\s*(\d+)/i.exec(req || ''); return m ? +m[1] : 0; };
 export function elegirDote(ch, { titulo = 'Elegir dote', grupoInicial = '', excluirOrigen = false } = {}) {
-  const lib = biblioteca().dotes, L = ch ? nivelTotal(ch) : 1, suyas = ch ? dotesDe(ch, biblioteca().trasfondos) : [];
+  const lib = biblioteca().dotes, suyas = ch ? dotesDe(ch, biblioteca().trasfondos) : [];
   const tiene = new Set(suyas.map(d => norm(d.detalle ? `${d.nombre} (${d.detalle})` : d.nombre))), tieneBase = new Set(suyas.map(d => norm(d.nombre)));
   const items = lib.length ? lib.filter(d => !(excluirOrigen && d.cat === 'Origen')).map(d => {
-    const n = nivelReq(d.req), ya = tiene.has(norm(d.nombre)) || (!esRepetible(d.nombre, lib) && tieneBase.has(norm(d.nombre)));
+    const ya = tiene.has(norm(d.nombre)) || (!esRepetible(d.nombre, lib) && tieneBase.has(norm(d.nombre)));
+    const falta = ch ? faltaRequisito(d.req || (d.cat === 'Don épico' ? 'nivel 19' : d.cat === 'General' ? 'nivel 4' : d.cat === 'Estilo de combate' ? 'rasgo Estilo de combate' : ''), ch) : '';
     return { nombre: d.nombre, grupo: GRUPO_DOTE[d.cat] || d.cat || 'Otras', tono: TONO_DOTE[d.cat], ico: 'dote', sub: d.req ? `Requisitos: ${d.req}` : resumen(d.texto).slice(0, 110),
-      tag: ya ? 'la tienes' : '', bloqueado: ya && !esRepetible(d.nombre, lib) ? BLOQ : '', aviso: n > L ? `Pide nivel ${n}; tu personaje es de nivel ${L}.` : '', buscar: d.texto.slice(0, 400),
+      tag: ya ? 'la tienes' : falta ? 'no cumples' : '', bloqueado: ya && !esRepetible(d.nombre, lib) ? BLOQ : falta ? `No puedes elegirla: ${falta.charAt(0).toLowerCase()}${falta.slice(1)}` : '', buscar: d.texto.slice(0, 400),
       detalle: `<div class="sp-text">${md(d.texto)}</div>${d.fuente ? `<p class="el-fuente">${esc(d.fuente)}</p>` : ''}` };
-  }) : DOTES_BASE.map(([n, t]) => { const ya = tiene.has(norm(n)) || (!esRepetible(n) && tieneBase.has(norm(n)));
+  }).sort((a, b) => !!a.bloqueado - !!b.bloqueado) : DOTES_BASE.map(([n, t]) => { const ya = tiene.has(norm(n)) || (!esRepetible(n) && tieneBase.has(norm(n)));
     return { nombre: n, grupo: 'Dotes de origen', tono: 42, sub: t, tag: ya ? 'la tienes' : '', bloqueado: ya && !esRepetible(n) ? BLOQ : '' }; });
   return elegir({ titulo, ico: 'dote', items, grupos: [...Object.values(GRUPO_DOTE), 'Otras'], grupoInicial, placeholder: 'Buscar una dote',
     sub: lib.length ? 'Toca una para leerla antes de elegirla. También puedes escribir otra.' : 'Sin libros importados solo salen las dotes de origen. Importa el Manual del Jugador para verlas todas, o escribe cualquier otra.' });

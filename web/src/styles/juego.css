@@ -1086,3 +1086,12 @@ button.vt-placa[data-leer] { cursor: help; }
 #combate.fx-entra .cb-grupo { animation: cb-col .6s var(--ease-out) both; }
 #combate.fx-entra .cb-grupo.g-adicional { animation-delay: .38s; } #combate.fx-entra .cb-grupo.g-reaccion { animation-delay: .46s; } #combate.fx-entra .cb-grupo.g-accion { animation-delay: .3s; }
 
+.el-card[aria-disabled="true"] { opacity: .62; border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+.el-card[aria-disabled="true"] .el-tag { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+.el-card[aria-disabled="true"] .el-ico { filter: grayscale(1); }
+.el-item.abierto .el-bloq { color: var(--danger); }
+.cr-otras { display: grid; gap: 4px; margin: 10px 0 0; padding: 10px 14px; border-radius: var(--r-m); background: var(--surface-2); font: 400 var(--fs-s) / 1.4 var(--sans); }
+.cr-otras div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; }
+.cr-otras dt { font: 600 var(--fs-xs) / 1.6 var(--sans); color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+.cr-otras dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 480px) { .cr-otras div { grid-template-columns: 1fr; gap: 0; } }
