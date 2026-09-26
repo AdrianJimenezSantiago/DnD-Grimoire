@@ -20,6 +20,7 @@ import './styles/arcano.css';
 import './styles/juego.css';
 import './styles/dados.css';
 import './styles/creacion.css';
+import './styles/impacto.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';

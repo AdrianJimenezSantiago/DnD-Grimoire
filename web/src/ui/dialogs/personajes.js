@@ -32,6 +32,8 @@ import { conjurosPendientes, anadirPendientes } from '../../domain/progresion.js
 import { anadirComun, equipoDe } from '../../domain/equipo.js';
 import { previewSpell } from './conjuro.js';
 import { estadoEstilo, trucosAlternativa, estiloDe, esAlternativa } from '../../domain/estilos.js';
+import { cupoMaestrias } from '../../domain/maestria.js';
+import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 
 let S, onCreated;
 let MC = [], DOTES = [], HAB = {}, SALV = [];
@@ -87,7 +89,7 @@ async function remove(id) {
 const PASOS = [['clase', 'Clase'], ['origen', 'Origen'], ['car', 'Características'], ['comp', 'Competencias'], ['dotes', 'Dotes'], ['conj', 'Conjuros'], ['fin', 'Detalles']];
 const ICO_PASO = { origen: 'trasfondo', car: 'd20', comp: 'eficaz', dotes: 'dote', conj: 'libro', fin: 'md_pluma' };
 let formId = null, conjAbierto = false, CREANDO = false, PASO = 0, VISTOS = new Set(), CAR = null, TEMA = '';
-let ELEC = {}, EQ = { clase: 'A', trasfondo: 'A', oro: null }, HERR = [], IDI = [], CONJ = { trucos: [], prep: [], libro: [], estilo: [] }, CQ = {};
+let MAES = [], ELEC = {}, EQ = { clase: 'A', trasfondo: 'A', oro: null }, HERR = [], IDI = [], CONJ = { trucos: [], prep: [], libro: [], estilo: [] }, CQ = {};
 const lib = () => biblioteca();
 
 function cargarCar(c) {
@@ -152,7 +154,7 @@ export function openCharForm(id) {
       <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
   MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
-  ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
+  MAES = [...(c.maestrias || [])]; ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
   sync(true); openSheet(charDlg());
@@ -186,6 +188,7 @@ function pendientes(d) {
   if (r.pericia.faltan) P.comp.push(`${r.pericia.faltan} ${r.pericia.faltan === 1 ? 'pericia' : 'pericias'}.`);
   if (versatilPendiente(d, lib().dotes)) P.dotes.push('Humano: una dote de origen (Versátil).');
   const est = estadoEstilo(d, lib().dotes); if (est.faltan) P.dotes.push(`Estilo de combate de ${joinY(est.fuentes)}.`);
+  { const cupo = cupoMaestrias(d); if (MAES.length < cupo) P.clase.push(`Maestría con armas: elige ${cupo - MAES.length} ${cupo - MAES.length === 1 ? 'arma' : 'armas'}.`); }
   for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
   if (CREANDO) {
     if (IDI.length < 2) P.origen.push(`Elige ${2 - IDI.length} ${IDI.length === 1 ? 'idioma' : 'idiomas'} más.`);
@@ -219,6 +222,9 @@ function pintarClaseExtra(d) {
   let h = `<dl class="cc-dl cc-entreno"><div><dt>Entrenamiento</dt><dd>${esc([e.armas, e.armaduras].filter(Boolean).join('. '))}.</dd></div>
     ${c?.herramientas.some(x => typeof x === 'string') ? `<div><dt>Herramientas</dt><dd>${esc(c.herramientas.filter(x => typeof x === 'string').join(', '))}</dd></div>` : ''}</dl>`;
   h += elecs.map(eleccionHtml).join('');
+  const cupo = cupoMaestrias(d);
+  if (cupo) { const lleva = CREANDO ? equipoInicial(d, { claseOpcion: EQ.clase, trasfondoOpcion: EQ.trasfondo, elecciones: ELEC }).items.map(([n]) => n) : (d.equipo?.objetos || []).filter(o => o.arma).map(o => o.nombre);
+    h += maestriasHtml(d, MAES, { cupo, destacar: lleva }); }
   if (CREANDO && c) {
     const t = c.tirada, oro = `<button type="button" role="radio" class="cc-opcion ${EQ.clase === 'oro' ? 'on' : ''}" aria-checked="${EQ.clase === 'oro'}" data-eqclase="oro"><b>Tirar el oro</b><span>${t[0]}d${t[1]}${t[2] > 1 ? ` × ${t[2]}` : ''} po (variante de 2014)${EQ.oro ? `: <strong>${EQ.oro.total} po</strong> (${EQ.oro.dados.join(' + ')})` : ''}</span></button>`;
     h += `<h4 class="cc-sub">Equipo inicial de ${esc(d.clase)}</h4>${opcionesHtml(c.opciones, EQ.clase, 'data-eqclase', oro)}
@@ -400,7 +406,7 @@ function readForm() {
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
     multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
   base.herramientas = [...new Set([...herramientasDe(base, ELEC), ...HERR])];
-  base.idiomas = ['Común', ...IDI];
+  base.idiomas = ['Común', ...IDI]; base.maestrias = [...MAES];
   const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
   const bonos = limpiarBonos(CAR.bonos, permitidas(base)), sinTirar = CAR.metodo === 'tiradas' && !CAR.tiradas.length;
   base.stats = conBonos(sinTirar ? {} : CAR.base, bonos);
@@ -429,7 +435,7 @@ function slotText(P) {
   const parts = Object.keys(P.slots).map(Number).sort((a, b) => a - b).map(L => `${P.slots[L]} de nivel ${L}`);
   return parts.length ? `Espacios: ${joinY(parts)}.` : 'Sin espacios de conjuro.';
 }
-const FOCO = ['data-herr', 'data-idioma', 'data-eqclase', 'data-eqtras', 'data-ccchk', 'data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
+const FOCO = ['data-maes', 'data-herr', 'data-idioma', 'data-eqclase', 'data-eqtras', 'data-ccchk', 'data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
 function sync(first, { sinCar = false } = {}) {
   const a = document.activeElement, attr = a && charDlg().contains(a) ? FOCO.find(k => a.hasAttribute(k)) : null, val = attr && a.getAttribute(attr);
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
@@ -507,7 +513,7 @@ function cambiarClase(nueva) {
   const r = repartoHabilidades(antes), lista = (HAB_CLASE[nueva] || [0, []])[1];
   if (CREANDO) for (const [k, f] of Object.entries(r.fuente)) if (f === 'clase' && HAB[k] === 1 && !lista.includes(k)) delete HAB[k];
   $('#f_clase').value = nueva; MC = MC.filter(m => m.clase !== nueva); pintarMulticlase();
-  CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null;
+  CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null; if (CREANDO) MAES = [];
   const v = $('#f_subclase').value, vale = subclasesDe(nueva).includes(v); $('#f_subWrap').innerHTML = campoSubclase(nueva, vale ? v : '', 'id="f_subclase" aria-label="Subclase"');
   if (CAR.auto && CAR.metodo !== 'libre' && !(CAR.metodo === 'tiradas' && !CAR.tiradas.length)) CAR.base = repartoSugerido(nueva, ABILS.map(([k]) => CAR.base[k]));
   sync(false);
@@ -569,6 +575,7 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
   on(form, 'click', '[data-herr]', (e, b) => { const [id, v] = b.dataset.herr.split('|'), el = eleccionesHerramienta(readForm()).find(x => x.id === id); if (!el) return;
     const cur = ELEC[id] || []; ELEC[id] = cur.includes(v) ? cur.filter(x => x !== v) : el.n === 1 ? [v] : cur.length < el.n ? [...cur, v] : cur; sync(false); });
+  on(form, 'click', '[data-maes]', (e, b) => { MAES = alternarMaes(MAES, b.dataset.maes, cupoMaestrias(readForm())); sync(false); });
   on(form, 'click', '[data-herrlimpia]', () => { HERR = []; sync(false); });
   on(form, 'click', '[data-idioma]', (e, b) => { const v = b.dataset.idioma; IDI = IDI.includes(v) ? IDI.filter(x => x !== v) : [...IDI, v]; sync(false); });
   on(form, 'click', '[data-eqclase]', (e, b) => { EQ.clase = b.dataset.eqclase; sync(false); });

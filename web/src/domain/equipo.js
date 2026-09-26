@@ -1,6 +1,7 @@
 import { uid, norm } from '../core/util.js';
 import { modOf, clasesDe, perfil } from './reglas2024.js';
 import { tieneEstilo } from './estilos.js';
+import { tieneMaestria } from './maestria.js';
 
 export const MAX_SINTONIA = 3;
 export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras y escudos', 'o_armadura'], ['equipo', 'Equipo', 'cofre'],
@@ -148,5 +149,5 @@ export function ataqueArma(ch, o) {
   if (!distancia && (dosManos || props.some(p => p.startsWith('versatil'))) && tieneEstilo(ch, 'grandes')) estilos.push('a dos manos, los 1 y 2 del daño cuentan como 3');
   if (props.includes('ligera') && tieneEstilo(ch, 'dosarmas')) estilos.push('el ataque adicional con arma ligera suma el modificador al daño');
   const md = mod + bono + dmg;
-  return { expr: `${a.dano || '1d4'}${md ? s(md) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono + atk), dano: `${a.dano || '1d4'}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim(), estilos };
+  return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr: `${a.dano || '1d4'}${md ? s(md) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono + atk), dano: `${a.dano || '1d4'}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim(), estilos };
 }

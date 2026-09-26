@@ -8,6 +8,7 @@ import { gi } from '../tema.js';
 import { icon } from '../icons.js';
 import { openSheet } from '../dialog.js';
 import { burst, reducedMotion } from '../fx.js';
+import { fxImpacto, nivelImpacto } from '../impacto.js';
 import { haptic } from '../../platform/native.js';
 
 let S, V = null, SEQ = 0, TOKEN = 0, agitar = null;
@@ -28,13 +29,15 @@ export function openDados() {
 // alTirar: se llama una vez por tirada con el resultado. Si no es «repetible» (aplica cambios
 // en la ficha), cambiar ventaja o modificadores después no recalcula: vale para la siguiente.
 // siguiente: { texto, fn(critico) } para encadenar otra tirada, como el daño tras un ataque.
-export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null }) {
+export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null }) {
   const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab }) : [];
-  V = { tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, res: null };
+  V = { tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, res: null };
   montar(); abrir(); lanzar();
 }
-export function tirarDano({ titulo, sub = '', expr, critico = false, extras = [] }) {
-  V = { tipo: 'dano', titulo, sub, expr, critico, res: null, mods: extras.map((x, i) => ({ id: 'e' + i, fuente: x.fuente, efecto: 'dado', valor: x.valor, on: true })) };
+const CLAVES = ['cortante', 'contundente', 'perforante', 'fuego', 'frio', 'relampago', 'trueno', 'acido', 'veneno', 'necrotico', 'radiante', 'psiquico', 'fuerza', 'curacion'];
+const claveDe = t => { const n = String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); return CLAVES.find(k => n.includes(k)) || ''; };
+export function tirarDano({ titulo, sub = '', expr, critico = false, extras = [], clave = '', aviso = '' }) {
+  V = { tipo: 'dano', titulo, sub, expr, critico, clave, aviso, res: null, mods: extras.map((x, i) => ({ id: 'e' + i, fuente: x.fuente, efecto: 'dado', valor: x.valor, on: true })) };
   montar(); abrir(); lanzar();
 }
 function abrir() { openSheet(dlg()); armarAgitar(); }
@@ -175,13 +178,17 @@ function pintarOut(anim = false) {
   const n = x.crit ? 20 : x.pifia ? 1 : null, tipoNota = V.tipo === 'ataque' ? 'ataque' : V.tipo === 'muerte' ? 'muerte' : 'otro';
   const cdTxt = x.cd != null && !x.falla ? `<span class="dd-cd ${x.total >= x.cd ? 'ok' : 'ko'}">CD ${x.cd} · ${x.total >= x.cd ? 'superada' : 'fallada'}</span>` : '';
   const nat = n ? `<div class="dd-nat n${n} dd-rev" style="--r:0"><b>${n === 20 ? (V.tipo === 'ataque' ? '¡Crítico!' : '¡20 natural!') : V.tipo === 'ataque' ? '¡Pifia!' : '1 natural'}</b><small>${esc(NOTA_NAT[n][tipoNota])}</small></div>` : '';
-  const sig = V.siguiente && !x.falla && !(V.tipo === 'ataque' && x.pifia)
+  const imp = V.tipo === 'ataque' && V.impacto && !x.falla && !x.decidido, rozar = V.impacto?.maestria?.alFallar;
+  const sig = imp ? `<div class="dd-impacto dd-rev" style="--r:3">${x.pifia ? '' : `<button type="button" class="dd-sig ${x.crit ? 'crit' : ''}" data-daimpacta>${gi('cortante')}<span>Impacta${x.crit ? ' · crítico' : ''}<small>${V.siguiente ? 'y tirar daño' : 'aplicar efectos'}</small></span></button>`}
+      <button type="button" class="dd-falla" data-dafalla>${gi('muerte')}<span>Falla${rozar ? `<small>${esc(V.impacto.maestria.nombre)} se activa</small>` : ''}</span></button></div>`
+    : V.siguiente && !x.falla && !x.decidido && !(V.tipo === 'ataque' && x.pifia)
     ? `<button type="button" class="dd-sig dd-rev ${x.crit ? 'crit' : ''}" style="--r:3" data-dasig>${gi('cortante')}${esc(V.siguiente.texto)}${x.crit ? ' crítico' : ''}</button>` : '';
+  const aviso = x.aviso || V.aviso ? `<div class="da-maes dd-rev" style="--r:1">${x.aviso || V.aviso}</div>` : '';
   el.className = `dd-out ${x.estado} ${n ? `n${n}` : ''} ${x.viejo ? 'viejo' : ''}`;
   el.innerHTML = `<div class="dd-hero">${sello(x.total, { n })}
       <div class="dd-lbl">${esc(x.lbl)}${cdTxt}</div></div>
     ${nat}<div class="dd-ec">${ecuacion(x)}</div>${x.falla ? '' : probHtml(x.dist, x.tope ? x.res.total : x.total, { cd: x.cd })}
-    ${x.efecto ? `<div class="da-efecto dd-rev" style="--r:2">${x.efecto}</div>` : ''}${sig}`;
+    ${x.efecto ? `<div class="da-efecto dd-rev" style="--r:2">${x.efecto}</div>` : ''}${aviso}${sig}`;
   if (!anim) { sellar(el, x.total, false); asentar(el, x, false); return; }
   dlg().classList.add('rodando');
   rodar(el, { total: x.total, antes: x.antes, lo: x.dist ? x.dist.min : 1, hi: x.dist ? maxDist(x.dist) : Math.max(20, x.total), nuevo: x.nuevo, vivo: () => tok === TOKEN, fin: () => asentar(el, x, true) });
@@ -207,6 +214,7 @@ function asentar(el, x, anim) {
   if (reducedMotion()) return;
   if (x.crit || x.pifia) { fxNatural(el, x.crit ? 20 : 1, $('#daBody')); return; }
   if (!x.nuevo) return;
+  if (V.tipo === 'dano') fxImpacto(el.querySelector('.dd-hero'), { clave: V.clave || claveDe(V.sub), cura: /curaci/i.test(V.sub || ''), nivel: nivelImpacto(x.total, x.dist), caja: $('#daBody') });
   const [cx, cy] = centro(el.querySelector('.dd-sello')), max = x.dist && x.total >= maxDist(x.dist);
   const col = x.estado === 'exito' ? '#6ECB9D' : x.estado === 'fallo' ? '#F2826F' : getComputedStyle(el).getPropertyValue('--gold').trim();
   burst(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
@@ -300,6 +308,18 @@ export function init(store) {
   on(body, 'click', '[data-daver]', () => { V.verTodo = !V.verTodo; pintarHist(); });
   on(body, 'click', '[data-daborra]', () => { cronica().length = 0; V.verTodo = false; pintarHist(); });
   on(body, 'click', '[data-dasig]', () => { const s = V.siguiente, c = !!V.res?.crit; if (s) s.fn(c); });
+  const avisoMaes = (m, txt) => m && txt ? `<b>${gi('dote')}Maestría: ${esc(m.nombre)}</b><span>${esc(txt)}</span>` : '';
+  on(body, 'click', '[data-daimpacta]', () => {
+    const m = V.impacto?.maestria, aviso = avisoMaes(m, m?.alImpactar || m?.siempre), c = !!V.res?.crit;
+    haptic('medium'); V.impacto?.alImpactar?.();
+    if (V.siguiente) return V.siguiente.fn(c, aviso);
+    V.res.decidido = true; V.res.aviso = aviso || 'Impacto.'; pintarOut();
+  });
+  on(body, 'click', '[data-dafalla]', () => {
+    const m = V.impacto?.maestria; V.impacto?.alFallar?.();
+    V.res.decidido = true; V.res.aviso = avisoMaes(m, m?.alFallar) || 'Fallo. El ataque no impacta.'; pintarOut();
+    if (m?.alFallar) { const hero = $('#daOut .dd-hero'); fxImpacto(hero, { clave: V.impacto.clave, nivel: 'bueno' }); }
+  });
   body.addEventListener('input', e => { if (e.target.id !== 'daExpr') return; V.expr = e.target.value; caducar(); sincLibre(false); });
   body.addEventListener('keydown', e => { if (e.target.id === 'daExpr' && e.key === 'Enter') { e.preventDefault(); V.expr = e.target.value.trim(); lanzar(true); } });
   body.addEventListener('change', e => { if (e.target.id !== 'daCrit') return; V.critico = e.target.checked; haptic('light'); if (V.res && V.tipo === 'dano') lanzar(false); else actualizarBoton(); });

@@ -449,8 +449,12 @@ button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color
 .scp-info { position: absolute; right: 8px; bottom: 8px; min-height: 28px; padding: 0 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 600;
   color: hsl(var(--sh) var(--ss) 70%); border: 1px solid hsl(var(--sh) var(--ss) 58% / .45); background: hsl(var(--sh) var(--ss) 40% / .14); }
 .scp-info:hover, .scp-info:focus-visible { background: hsl(var(--sh) var(--ss) 45% / .3); outline: none; }
-.scp-card.on + .scp-info { bottom: 8px; }
-.scp-ok { position: absolute; right: 12px; top: 8px; }
+.scp-card.on + .scp-info { bottom: auto; }
+/* Las tarjetas de una misma fila miden lo mismo y «Ver» queda centrado dentro de la tarjeta */
+.scp-grid .scp-item, .scp-panel .scp-item { display: flex; }
+.scp-grid .scp-card, .scp-panel .scp-card { flex: 1; height: 100%; }
+.scp-info { top: 50%; bottom: auto; transform: translateY(-50%); }
+.scp-ok { position: absolute; right: 54px; top: 50%; transform: translateY(-50%); }
 #fichaDlg.rz { --sh: 40; --ss: 50%; }
 #fichaDlg.rz .fi-ico { color: hsl(var(--sh) var(--ss) 66%); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .3), transparent 72%); }
 #fichaDlg.rz .dhead { background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent); }
