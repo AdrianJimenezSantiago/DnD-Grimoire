@@ -1,0 +1,267 @@
+/* ===== Ventana de dados ===== */
+#dadosDlg { --dd-oro: #F4D27A; --dd-ok: var(--ok); --dd-ko: var(--danger); }
+:root[data-theme="light"] #dadosDlg { --dd-oro: #9a6a08; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) #dadosDlg { --dd-oro: #9a6a08; } }
+#daBody.dd-cambia > * { animation: vista-in .38s var(--ease-out) both; }
+#daBody.dd-cambia > :nth-child(2) { animation-delay: .06s; }
+#daBody.dd-sacude { animation: gp-medio .5s var(--ease-out); }
+
+/* --- Dados poliédricos --- */
+.dd { position: relative; display: inline-grid; place-items: center; flex: none; width: 36px; height: 36px; margin: 0 1px; vertical-align: middle; color: var(--ink); }
+.dd svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dd .c { fill: var(--surface); stroke: color-mix(in srgb, var(--gold) 38%, var(--line)); stroke-width: 2; stroke-linejoin: round; transition: fill .3s, stroke .3s; }
+.dd .f { fill: none; stroke: color-mix(in srgb, var(--gold) 18%, transparent); stroke-width: 1.1; stroke-linejoin: round; }
+.dd[data-f="d20"] .f { stroke-opacity: .55; }
+.dd b { position: relative; font: 700 14px / 1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.dd[data-f="d4"] b { transform: translateY(5px); font-size: 12px; }
+.dd[data-f="d20"] b { transform: translateY(1.5px); font-size: 13px; }
+.dd[data-f="d10"] b { transform: translateY(-1px); }
+.dd.mini { width: 26px; height: 26px; } .dd.mini b { font-size: 10.5px; } .dd.mini[data-f="d4"] b { font-size: 9px; transform: translateY(4px); }
+.dd.max .c { stroke: var(--gold); fill: color-mix(in srgb, var(--gold) 20%, var(--surface)); }
+.dd.max b { color: var(--gold-2); }
+:root[data-theme="light"] .dd.max b { color: var(--gold); }
+.dd.min b { color: var(--ink-3); }
+.dd.fuera { opacity: .4; transition: opacity .3s .1s; }
+.dd.fuera::after { content: ""; position: absolute; left: 8%; right: 8%; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--ink-2); transform: rotate(-38deg); }
+.dd.rueda { animation: dd-cae .5s var(--spring) var(--d, 0ms) both; }
+.dd.rueda svg { animation: dd-gira .5s var(--ease-out) var(--d, 0ms) both; }
+.dd.rueda:not(.posado) b { opacity: .7; }
+.dd.posado .c { animation: dd-destello .5s ease-out; }
+.dd.rueda.fuera { animation: dd-cae .5s var(--spring) var(--d, 0ms) both, dd-apaga .3s ease-out calc(var(--d, 0ms) + .5s) both; }
+.dd.rueda.fuera::after { animation: dd-tacha .25s var(--ease-out) calc(var(--d, 0ms) + .55s) both; }
+@keyframes dd-cae { 0% { transform: translateY(-24px) scale(.45); opacity: 0; } 55% { transform: translateY(3px) scale(1.1); opacity: 1; } 78% { transform: translateY(-2px) scale(.98); } 100% { transform: none; } }
+@keyframes dd-gira { from { transform: rotate(-320deg); } }
+@keyframes dd-apaga { from { opacity: 1; } }
+@keyframes dd-tacha { from { transform: rotate(-38deg) scaleX(0); } }
+@keyframes dd-destello { 0% { filter: drop-shadow(0 0 0 transparent); } 30% { filter: drop-shadow(0 0 6px var(--glow)); } }
+.dd.flota { width: 54px; height: 54px; opacity: .55; animation: dd-flota 3.2s ease-in-out infinite; } .dd.flota b { font-size: 18px; color: var(--ink-3); }
+@keyframes dd-flota { 50% { transform: translateY(-5px) rotate(8deg); } }
+
+/* --- Tirada libre --- */
+.dd-caras { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.dd-cara { position: relative; flex-direction: column; gap: 0; min-height: 64px; padding: 6px 0 4px; border-radius: var(--r-m); background: linear-gradient(180deg, var(--surface-2), var(--surface)); transition: transform .2s var(--spring), border-color .2s, box-shadow .2s; }
+.dd-cara svg { width: 30px; height: 30px; overflow: visible; }
+.dd-cara .c { fill: color-mix(in srgb, var(--gold) 8%, transparent); stroke: color-mix(in srgb, var(--gold) 55%, var(--line)); stroke-width: 2.2; stroke-linejoin: round; transition: fill .2s; }
+.dd-cara .f { fill: none; stroke: color-mix(in srgb, var(--gold) 28%, transparent); stroke-width: 1.3; stroke-linejoin: round; }
+.dd-cara b { margin-top: 3px; font: 600 var(--fs-s) / 1 var(--display); color: var(--gold-2); }
+:root[data-theme="light"] .dd-cara b { color: var(--gold); }
+.dd-cara i { position: absolute; top: 3px; right: 3px; min-width: 18px; height: 16px; padding: 0 4px; border-radius: var(--r-pill); background: var(--gold); color: var(--on-gold); font: 700 10px / 16px var(--sans); font-style: normal; animation: pop-in .25s var(--spring); }
+.dd-cara:hover { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft), 0 8px 18px -10px var(--glow); transform: translateY(-2px); }
+.dd-cara:hover .c { fill: color-mix(in srgb, var(--gold) 18%, transparent); }
+.dd-cara:active { transform: scale(.93) rotate(-6deg); }
+.dd-cara.pulso svg { animation: dd-salta .45s var(--spring); }
+@keyframes dd-salta { 40% { transform: translateY(-7px) rotate(-25deg) scale(1.12); } }
+.dd-vuela { position: absolute; z-index: 20; width: 28px; height: 28px; overflow: visible; pointer-events: none; filter: drop-shadow(0 0 8px var(--glow)); }
+.dd-vuela .c { fill: color-mix(in srgb, var(--gold) 30%, var(--surface)); stroke: var(--gold); stroke-width: 2.4; }
+.dd-vuela .f { fill: none; stroke: var(--gold); stroke-width: 1.2; opacity: .5; }
+.dd-expr { display: flex; gap: 8px; }
+.dd-expr input { flex: 1; min-width: 0; min-height: 52px; font: 600 var(--fs-xl) / 1 var(--display); text-align: center; letter-spacing: .04em; transition: border-color .2s, box-shadow .2s; }
+.dd-expr input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.dd-expr input[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent); }
+.dd-ajuste { display: flex; gap: 6px; }
+.dd-ajuste button { min-width: 46px; min-height: 52px; padding: 0 10px; font: 600 var(--fs-m) / 1 var(--display); }
+.dd-info { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-height: 30px; margin: 8px 2px 12px; }
+.dd-bandeja { display: flex; flex-wrap: wrap; gap: 5px; }
+.dd-ficha { gap: 5px; min-height: 28px; padding: 0 6px 0 10px; border-radius: var(--r-pill); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); background: var(--gold-soft); font: 600 var(--fs-xs) / 1 var(--display); animation: pop-in .25s var(--spring); }
+.dd-ficha small { font: 400 10.5px / 1 var(--sans); color: var(--ink-2); }
+.dd-ficha i { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 700 12px / 1 var(--sans); font-style: normal; color: var(--ink-2); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.dd-ficha:hover i { background: var(--danger); color: #fff; }
+.dd-ficha.atajo { padding: 0 10px; border-style: dashed; background: transparent; }
+.dd-ayuda { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-3); } .dd-ayuda b { color: var(--ink); font-weight: 700; }
+.dd-ayuda.mal { color: var(--danger); }
+
+/* --- Ventaja / desventaja --- */
+.dd-modo { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin-bottom: 12px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--line-soft)); isolation: isolate; }
+.dd-modo::before { content: ""; position: absolute; z-index: -1; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 16px) / 3); border-radius: calc(var(--r-m) - 4px); background: var(--gilt); box-shadow: 0 0 18px -4px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .25);
+  transform: translateX(calc(var(--i, 1) * (100% + 4px))); transition: transform .42s var(--spring), background .35s, box-shadow .35s; }
+.dd-modo[data-modo="ventaja"]::before { background: linear-gradient(180deg, #8fe0b4, #3d9a6d); box-shadow: 0 0 18px -4px rgba(110, 203, 157, .6), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.dd-modo[data-modo="desventaja"]::before { background: linear-gradient(180deg, #f7a291, #c24d3c); box-shadow: 0 0 18px -4px rgba(242, 130, 111, .6), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.dd-modo button { flex-direction: column; gap: 3px; min-height: 50px; padding: 4px 6px; border: 0; background: transparent; color: var(--ink-2); transition: color .3s; }
+.dd-modo button:active { transform: scale(.96); }
+.dd-modo button b { font: 600 var(--fs-s) / 1 var(--sans); }
+.dd-modo button small { font: 400 10.5px / 1 var(--sans); opacity: .75; }
+.dd-modo button[aria-checked="true"] { color: var(--on-gold); }
+.dd-modo[data-modo="ventaja"] button[aria-checked="true"] { color: #06170e; }
+.dd-modo[data-modo="desventaja"] button[aria-checked="true"] { color: #200704; }
+
+/* --- Crítico --- */
+.dd-crit { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 12px; border-radius: var(--r-m); border: 1px solid var(--line-soft); background: var(--surface-2); cursor: pointer; transition: border-color .3s, background .3s; }
+.dd-crit input { position: absolute; opacity: 0; pointer-events: none; }
+.dd-sw { position: relative; flex: none; width: 42px; height: 24px; border-radius: var(--r-pill); background: var(--line); transition: background .3s; }
+.dd-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .35s var(--spring); }
+.dd-crit b { display: block; font: 600 var(--fs-s) / 1.2 var(--sans); } .dd-crit small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-3); }
+.dd-crit:has(input:checked) { border-color: color-mix(in srgb, var(--dd-oro) 55%, transparent); background: linear-gradient(90deg, color-mix(in srgb, var(--dd-oro) 14%, transparent), var(--surface-2)); }
+.dd-crit input:checked + .dd-sw { background: var(--gilt); } .dd-crit input:checked + .dd-sw::after { transform: translateX(18px); }
+.dd-crit input:focus-visible + .dd-sw { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* --- Botón de tirar --- */
+.dd-acciones { display: flex; flex-direction: column; gap: 6px; }
+.dd-tirar { position: relative; overflow: hidden; width: 100%; min-height: 54px; gap: 10px; font: 600 var(--fs-m) / 1 var(--sans); letter-spacing: .02em; }
+.dd-tirar .gi { width: 24px; height: 24px; transition: transform .45s var(--spring); }
+.dd-tirar:hover .gi { transform: rotate(-24deg) scale(1.1); }
+.dd-tirar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .45) 50%, transparent 65%); background-size: 250% 100%; background-position: 120% 0; pointer-events: none; }
+.dd-tirar:hover::after, #dadosDlg.rodando .dd-tirar::after { animation: sweep .9s var(--ease-out); }
+#dadosDlg.rodando .dd-tirar .gi { animation: dd-cubilete .5s ease-in-out infinite; }
+@keyframes dd-cubilete { 25% { transform: rotate(-22deg) translateY(-2px); } 75% { transform: rotate(18deg) translateY(1px); } }
+.dd-pista { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; min-height: 16px; margin: 0; font: 400 var(--fs-xs) / 1.35 var(--sans); color: var(--ink-3); text-align: center; }
+.dd-pista kbd { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; margin-right: 3px; border-radius: 4px; border: 1px solid var(--line); border-bottom-width: 2px; font: 600 10px / 1 var(--sans); color: var(--ink-2); }
+@media (pointer: coarse) { .dd-kbd { display: none; } }
+@media (pointer: fine) { .dd-agita { display: none; } }
+
+/* --- Resultado --- */
+.dd-out { position: relative; margin-top: 14px; padding: 18px 14px 14px; border-radius: var(--r-l); text-align: center; overflow: hidden; isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line-soft));
+  background: radial-gradient(70% 80% at 50% 0%, var(--gold-soft), transparent 72%), var(--surface-2);
+  transition: border-color .5s, box-shadow .5s, opacity .3s, filter .3s; }
+.dd-out::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--gold) 30%, transparent) 1px, transparent 1.6px); background-size: 16px 16px;
+  -webkit-mask: radial-gradient(60% 70% at 50% 30%, #000, transparent 75%); mask: radial-gradient(60% 70% at 50% 30%, #000, transparent 75%); }
+.dd-out.vacio { padding: 22px 14px; }
+.dd-espera { display: flex; flex-direction: column; align-items: center; gap: 10px; } .dd-espera p { margin: 0; font: 400 var(--fs-s) / 1.4 var(--sans); color: var(--ink-3); }
+.dd-out.viejo { opacity: .5; filter: saturate(.5); }
+.dd-out.crit { border-color: color-mix(in srgb, var(--dd-oro) 60%, transparent); box-shadow: 0 0 36px -10px color-mix(in srgb, var(--dd-oro) 70%, transparent); background: radial-gradient(70% 80% at 50% 0%, color-mix(in srgb, var(--dd-oro) 22%, transparent), transparent 72%), var(--surface-2); }
+.dd-out.pifia { border-color: color-mix(in srgb, var(--dd-ko) 55%, transparent); background: radial-gradient(70% 80% at 50% 0%, color-mix(in srgb, var(--dd-ko) 16%, transparent), transparent 72%), var(--surface-2); }
+.dd-out.exito { border-color: color-mix(in srgb, var(--dd-ok) 50%, transparent); background: radial-gradient(70% 80% at 50% 0%, color-mix(in srgb, var(--dd-ok) 16%, transparent), transparent 72%), var(--surface-2); }
+.dd-out.fallo { border-color: color-mix(in srgb, var(--dd-ko) 40%, transparent); background: radial-gradient(70% 80% at 50% 0%, color-mix(in srgb, var(--dd-ko) 12%, transparent), transparent 72%), var(--surface-2); }
+
+.dd-hero { display: flex; flex-direction: column; align-items: center; }
+.dd-sello { position: relative; display: grid; place-items: center; width: 136px; height: 136px; color: var(--gold); }
+.crit .dd-sello { color: var(--dd-oro); } .pifia .dd-sello, .fallo .dd-sello { color: var(--dd-ko); } .exito .dd-sello { color: var(--dd-ok); }
+.dd-anillo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dd-anillo circle { fill: none; stroke: currentColor; }
+.dd-anillo .a1 { stroke-width: 1.2; opacity: .5; stroke-dasharray: 100; stroke-dashoffset: 100; animation: dd-traza 1s var(--ease-out) forwards; }
+.dd-anillo .a-marcas { stroke: currentColor; stroke-width: 1.2; opacity: .38; transform-origin: 70px 70px; animation: girar 80s linear infinite; }
+.dd-anillo .a-rombos { fill: currentColor; opacity: .55; transform-origin: 70px 70px; animation: girar 40s linear infinite reverse; }
+.dd-anillo .a2 { stroke-width: 1; stroke-dasharray: 1.5 5.5; opacity: .55; transform-origin: 70px 70px; animation: girar 30s linear infinite; }
+.dd-anillo .a3 { stroke-width: 2.2; opacity: .9; stroke-dasharray: 100; stroke-dashoffset: 100; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 70px 70px; }
+.listo .dd-anillo .a3 { animation: dd-traza .6s var(--ease-out) forwards; }
+.girando .dd-anillo .a2, .girando .dd-anillo .a-rombos { animation-duration: 1.4s; }
+.girando .dd-anillo { animation: dd-zumba .12s linear infinite; }
+@keyframes dd-traza { to { stroke-dashoffset: 0; } }
+@keyframes dd-zumba { 50% { transform: rotate(1.2deg) scale(1.01); } }
+.dd-num { position: relative; z-index: 1; font: 700 58px / 1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.girando .dd-num { color: var(--ink-3); filter: blur(.5px); }
+.sella .dd-num { animation: dd-sella .6s var(--spring) both; }
+.crit .dd-num { color: var(--dd-oro); text-shadow: 0 0 26px color-mix(in srgb, var(--dd-oro) 70%, transparent); }
+.listo.crit .dd-num { animation: dd-sella .6s var(--spring) both, latido 1.6s ease-in-out .6s infinite; }
+.pifia .dd-num, .fallo .dd-num { color: var(--dd-ko); } .exito .dd-num { color: var(--dd-ok); }
+.sella .dd-sello::after { content: ""; position: absolute; inset: 20px; border-radius: 50%; border: 2px solid currentColor; opacity: 0; pointer-events: none; animation: dd-onda .8s var(--ease-out); }
+@keyframes dd-sella { 0% { transform: scale(1.55); filter: blur(4px); opacity: .2; } 100% { transform: none; filter: none; opacity: 1; } }
+@keyframes dd-onda { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.45); opacity: 0; } }
+.dd-rayos { position: absolute; inset: -34px; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--dd-oro) 50%, transparent) 0 6deg, transparent 6deg 22deg);
+  -webkit-mask: radial-gradient(circle, transparent 30%, #000 40%, transparent 72%); mask: radial-gradient(circle, transparent 30%, #000 40%, transparent 72%);
+  opacity: 0; transform: scale(.4); }
+.listo .dd-rayos { animation: girar 12s linear infinite, dd-rayos .9s var(--ease-out) forwards; }
+@keyframes dd-rayos { to { opacity: .8; transform: scale(1); } }
+.dd-grieta { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+.dd-grieta path { fill: none; stroke: var(--bg); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--dd-ko) 90%, transparent)); }
+.dd-grieta path + path { stroke-width: 2; }
+.listo .dd-grieta path { animation: dd-traza .35s cubic-bezier(.2, .9, .2, 1) forwards; } .listo .dd-grieta path + path { animation-delay: .2s; }
+.dd-lbl { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 8px; margin-top: 2px; font: 400 var(--fs-m) / 1.3 var(--sans); color: var(--ink-2); }
+.dd-cd { padding: 4px 9px; border-radius: var(--r-pill); font: 700 10.5px / 1 var(--sans); letter-spacing: .07em; text-transform: uppercase; }
+.dd-cd.ok { color: var(--dd-ok); background: color-mix(in srgb, var(--dd-ok) 15%, transparent); border: 1px solid color-mix(in srgb, var(--dd-ok) 40%, transparent); }
+.dd-cd.ko { color: var(--dd-ko); background: color-mix(in srgb, var(--dd-ko) 13%, transparent); border: 1px solid color-mix(in srgb, var(--dd-ko) 40%, transparent); }
+
+/* Aparecen escalonados cuando el total se sella */
+.dd-rev { transition: opacity .4s var(--ease-out), transform .4s var(--ease-out); transition-delay: calc(var(--r, 0) * 90ms); }
+.dd-out:not(.listo) .dd-rev { opacity: 0; transform: translateY(8px); transition: none; }
+
+.dd-nat { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 12px auto 0; max-width: 440px; padding: 10px 16px; border-radius: var(--r-m); }
+.dd-nat b { font: 700 var(--fs-xl) / 1 var(--display); letter-spacing: .08em; }
+.dd-nat small { font: 400 var(--fs-xs) / 1.45 var(--sans); color: var(--ink-2); }
+.dd-nat.n20 { border: 1px solid color-mix(in srgb, var(--dd-oro) 50%, transparent); background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--dd-oro) 14%, transparent), transparent); }
+.dd-nat.n20 b { color: var(--dd-oro); text-shadow: 0 0 18px color-mix(in srgb, var(--dd-oro) 55%, transparent); }
+.dd-nat.n1 { border: 1px solid color-mix(in srgb, var(--dd-ko) 45%, transparent); background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--dd-ko) 7%, transparent) 10px 11px); }
+.dd-nat.n1 b { color: var(--dd-ko); }
+.listo .dd-nat b { animation: dd-titulo .8s var(--ease-out) both; }
+@keyframes dd-titulo { from { letter-spacing: .4em; opacity: 0; } }
+
+/* Ecuación: dados + modificadores = total */
+.dd-ec { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 5px; margin-top: 14px; }
+.dd-grupo { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+.dd-op { font: 600 var(--fs-m) / 1 var(--display); font-style: normal; color: var(--ink-3); padding: 0 1px; }
+.dd-bono { display: inline-grid; place-items: center; min-width: 30px; height: 28px; padding: 0 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font: 700 14px / 1 var(--display); }
+.dd-par { display: inline-flex; align-items: center; gap: 2px; padding: 2px 9px 2px 3px; border-radius: var(--r-pill); border: 1px dashed var(--line); }
+.dd-par small { margin-left: 3px; font: 700 9.5px / 1 var(--sans); letter-spacing: .09em; text-transform: uppercase; }
+.dd-par.ventaja { border-color: color-mix(in srgb, var(--dd-ok) 55%, transparent); background: color-mix(in srgb, var(--dd-ok) 8%, transparent); } .dd-par.ventaja small { color: var(--dd-ok); }
+.dd-par.desventaja { border-color: color-mix(in srgb, var(--dd-ko) 55%, transparent); background: color-mix(in srgb, var(--dd-ko) 8%, transparent); } .dd-par.desventaja small { color: var(--dd-ko); }
+.dd-fx { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px 2px 3px; border-radius: var(--r-pill); }
+.dd-fx small { margin-left: 2px; font: 500 11px / 1.1 var(--sans); color: var(--ink-2); max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd-fx .dd-bono { height: 24px; min-width: 26px; font-size: 13px; }
+.dd-fx.bien { border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); background: var(--gold-soft); }
+.dd-fx.mal { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 9%, transparent); }
+.dd-res { display: inline-grid; place-items: center; min-width: 36px; height: 30px; padding: 0 10px; border-radius: 9px; background: var(--gilt); color: var(--on-gold); font: 700 var(--fs-m) / 1 var(--display); box-shadow: 0 0 14px -4px var(--glow); }
+.dd-igual { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+
+/* Probabilidad */
+.dd-prob { margin: 22px auto 0; max-width: 380px; }
+.dd-prob svg { display: block; width: 100%; height: 46px; overflow: visible; }
+.dd-prob rect { fill: color-mix(in srgb, var(--ink-3) 32%, transparent); transform-box: fill-box; transform-origin: 50% 100%; }
+.listo .dd-prob rect { animation: dd-barra .55s var(--ease-out) calc(var(--i) * 10ms) both; }
+.dd-prob rect.bajo { fill: color-mix(in srgb, var(--gold) 42%, transparent); }
+.dd-prob rect.pasa { fill: color-mix(in srgb, var(--dd-ok) 40%, transparent); }
+.dd-prob rect.no { fill: color-mix(in srgb, var(--dd-ko) 26%, transparent); }
+.dd-prob rect.tu { fill: var(--gold); filter: drop-shadow(0 0 4px var(--glow)); }
+.crit .dd-prob rect.tu { fill: var(--dd-oro); } .exito .dd-prob rect.tu { fill: var(--dd-ok); } .fallo .dd-prob rect.tu, .pifia .dd-prob rect.tu { fill: var(--dd-ko); }
+.dd-prob line.cd { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }
+.dd-prob { position: relative; }
+.dd-cdmarca { position: absolute; top: -14px; transform: translateX(-50%); padding: 1px 5px; border-radius: 4px; background: var(--surface-2); font: 700 9.5px / 1.2 var(--sans); letter-spacing: .05em; color: var(--ink-2); white-space: nowrap; }
+@keyframes dd-barra { from { transform: scaleY(0); } }
+.dd-prob figcaption { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-top: 6px; font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.dd-prob figcaption .c { display: flex; flex-direction: column; gap: 2px; color: var(--ink-2); }
+.dd-prob figcaption b { color: var(--ink); } .dd-prob figcaption small { font-size: 11px; color: var(--ink-3); }
+
+.da-efecto { margin: 14px auto 0; max-width: 460px; padding: 10px 12px 0; border-top: 1px solid color-mix(in srgb, var(--gold) 18%, var(--line-soft)); font: 400 var(--fs-m) / 1.5 var(--serif); }
+.dd-sig { gap: 8px; margin: 14px auto 0; min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--gold-soft); font: 600 var(--fs-s) / 1 var(--sans); }
+.dd-sig .gi { width: 20px; height: 20px; color: var(--gold); }
+.dd-sig:hover { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft), 0 0 22px -8px var(--glow); }
+.dd-sig.crit { background: var(--gilt); color: var(--on-gold); border-color: transparent; box-shadow: 0 0 24px -6px var(--glow); }
+.dd-sig.crit .gi { color: currentColor; }
+.listo .dd-sig.crit { animation: breathe 2s ease-in-out 1s infinite; }
+
+/* --- Crónica --- */
+.dd-cron { margin-top: 20px; }
+.dd-cron header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-bottom: 10px; }
+.dd-cron h3 { margin: 0; font: 600 var(--fs-s) / 1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.dd-cron-n { min-width: 20px; padding: 3px 6px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line-soft); font: 700 10.5px / 1 var(--sans); color: var(--ink-3); text-align: center; }
+.dd-cron-med { font: 400 var(--fs-xs) / 1.2 var(--sans); color: var(--ink-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .dd-cron-med b { color: var(--gold-2); }
+:root[data-theme="light"] .dd-cron-med b { color: var(--gold); }
+.dd-cron-x { margin-left: auto; min-height: 28px; padding: 0 10px; border-color: var(--line-soft); background: transparent; font-size: var(--fs-xs); color: var(--ink-3); }
+.dd-cron-x:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+.dd-cron ol { position: relative; display: grid; gap: 6px; margin: 0; padding: 0 0 0 16px; list-style: none; }
+.dd-cron ol::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: 12px; width: 1px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 55%, transparent), transparent); }
+.dd-cron li { position: relative; }
+.dd-cron li::before { content: ""; position: absolute; left: -15px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--surface-2); border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--line)); }
+.dd-cron li.crit::before { background: var(--dd-oro); border-color: var(--dd-oro); box-shadow: 0 0 8px var(--dd-oro); }
+.dd-cron li.pifia::before, .dd-cron li.fallo::before { background: var(--dd-ko); border-color: var(--dd-ko); }
+.dd-cron li.exito::before { background: var(--dd-ok); border-color: var(--dd-ok); }
+.dd-cron li.actual::before { box-shadow: 0 0 0 3px var(--gold-soft); }
+.dd-cron li button { justify-content: flex-start; gap: 10px; width: 100%; min-height: 50px; padding: 6px 12px 6px 8px; text-align: left; border-color: var(--line-soft); background: color-mix(in srgb, var(--surface) 55%, transparent); font-weight: 400; transition: border-color .2s, background .2s, transform .2s var(--spring); }
+.dd-cron li button:hover { border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); background: var(--surface); transform: translateX(2px); }
+.dd-cron li.actual button { border-color: color-mix(in srgb, var(--gold) 40%, var(--line-soft)); background: linear-gradient(90deg, var(--gold-soft), color-mix(in srgb, var(--surface) 55%, transparent) 70%); }
+.dd-cron li.nuevo { animation: dd-entra .55s var(--ease-out) both; }
+@keyframes dd-entra { from { opacity: 0; transform: translateY(-10px); max-height: 0; } to { max-height: 80px; } }
+.dd-cron .t { display: flex; flex: 1; flex-direction: column; gap: 4px; min-width: 0; }
+.dd-cron .t > b { overflow: hidden; font: 500 var(--fs-s) / 1.2 var(--serif); color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+.dd-cron .t small { display: flex; flex-wrap: wrap; gap: 3px; }
+.dd-cron .t small i { padding: 2px 6px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line-soft); font: 400 10.5px / 1 var(--sans); font-style: normal; color: var(--ink-3); }
+.dd-cron .t small i.ventaja { color: var(--dd-ok); border-color: color-mix(in srgb, var(--dd-ok) 35%, transparent); }
+.dd-cron .t small i.desventaja { color: var(--dd-ko); border-color: color-mix(in srgb, var(--dd-ko) 35%, transparent); }
+.dd-cron .v { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.dd-cron .v b { font: 700 var(--fs-l) / 1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.dd-cron .v time { font: 400 10.5px / 1 var(--sans); color: var(--ink-3); white-space: nowrap; }
+.dd-cron li.crit .v b { color: var(--dd-oro); } .dd-cron li.pifia .v b, .dd-cron li.fallo .v b { color: var(--dd-ko); } .dd-cron li.exito .v b { color: var(--dd-ok); }
+.dd-cron-mas { display: flex; margin: 8px auto 0; min-height: 32px; padding: 0 14px; border-style: dashed; background: transparent; font-size: var(--fs-xs); color: var(--ink-2); }
+
+@media (max-width: 420px) {
+  .dd-caras { gap: 4px; } .dd-cara { min-height: 58px; } .dd-cara svg { width: 26px; height: 26px; }
+  .dd-sello { width: 120px; height: 120px; } .dd-num { font-size: 50px; }
+  .dd-modo button small { display: none; }
+  .dd-ajuste button { min-width: 40px; padding: 0 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #dadosDlg *, #dadosDlg *::before, #dadosDlg *::after { animation: none !important; transition: none !important; }
+  .dd-anillo .a1, .dd-anillo .a3, .dd-grieta path { stroke-dashoffset: 0; }
+  .dd-rayos { opacity: 1; transform: none; }
+}

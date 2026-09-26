@@ -18,6 +18,7 @@ import './styles/extras.css';
 import './styles/biblioteca.css';
 import './styles/arcano.css';
 import './styles/juego.css';
+import './styles/dados.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
