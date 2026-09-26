@@ -8,7 +8,8 @@ import { runaSvg } from './magia.js';
 import { aplicarTema, gi, temaDe } from './tema.js';
 import { tiradasConjuro } from '../domain/catalogo.js';
 import { iconoDano } from './dialogs/tiradas.js';
-import { avatarHtml } from './avatar.js';
+import { avatarHtml, botonYo } from './avatar.js';
+import { efectoDeConjuro } from '../domain/efectos.js';
 import { paraRecordar } from '../domain/diario.js';
 import { notaHtml } from './dialogs/diario.js';
 import { rasgosConObjetivo } from '../domain/concentracion.js';
@@ -17,7 +18,7 @@ import { biblioteca } from '../domain/catalogo.js';
 import { vitalesHtml, caracteristicasHtml } from './vitales.js';
 import { combateHtml, escuelaIco } from './combate.js';
 import { combateDe } from '../domain/combate.js';
-import { vidaDe } from '../domain/vida.js';
+import { vidaDe, esYo } from '../domain/vida.js';
 import { percepcionPasiva } from '../domain/habilidades.js';
 import { actualizarLuto, memorialHtml } from './luto.js';
 
@@ -131,10 +132,11 @@ function resourcesHtml(db, ch, P) {
 function efectosHtml(ch) {
   const pl = ch.play, sug = rasgosConObjetivo(ch);
   if (!pl.conc && !pl.efectos.length && !sug.length) return '';
-  const chips = (clave, lista) => lista.map((o, i) => `<button type="button" class="obj-chip" data-objdel="${clave}|${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('');
+  const chips = (clave, lista, conYo) => lista.map((o, i) => `<button type="button" class="obj-chip ${conYo && esYo(ch, o) ? 'yo' : ''}" data-objdel="${clave}|${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('');
+  const yo = (clave, nombre, lista) => (efectoDeConjuro(nombre)?.bueno ? botonYo(ch, lista, `data-objyo="${clave}"`) : '');
   const entrada = (clave, ph) => `<input class="obj-in" data-objin="${clave}" placeholder="${ph}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo">`;
   const fila = (clave, nombre, nota, lista, fin) => `<div class="ef-row"><div class="ef-h"><b>${esc(nombre)}</b>${nota ? `<small>${esc(nota)}</small>` : ''}${fin}</div>
-    <div class="objt-list">${chips(clave, lista)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
+    <div class="objt-list">${yo(clave, nombre, lista)}${chips(clave, lista, !!efectoDeConjuro(nombre)?.bueno)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
   let h = '';
   if (pl.conc) h += fila('conc', pl.conc, 'Concentración', pl.concObj, '<button type="button" class="ruse" data-cmd="endconc">Terminar</button>');
   pl.efectos.forEach(e => { h += fila(e.id, e.nombre, e.nota, e.objetivos, `<button type="button" class="ruse" data-eferm="${e.id}">Terminar</button>`); });

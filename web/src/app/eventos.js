@@ -401,6 +401,7 @@ function bindSheet() {
     else t.value = '';
   });
   sheet.addEventListener('focusout', e => { const t = e.target; if (t.dataset?.objin && t.value.trim()) A.anadirObjetivos(S, t.dataset.objin, t.value); });
+  on(sheet, 'click', '[data-objyo]', (e, b) => A.alternarYo(S, b.dataset.objyo));
   on(sheet, 'click', '[data-objdel],[data-efnuevo],[data-eferm]', (e, b) => {
     if (b.dataset.objdel) { const [clave, i] = b.dataset.objdel.split('|'); return A.quitarObjetivo(S, clave, +i); }
     if (b.dataset.efnuevo) return A.marcarEfecto(S, b.dataset.efnuevo);
