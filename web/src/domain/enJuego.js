@@ -1,3 +1,4 @@
+import { estiloDe, esAlternativa } from './estilos.js';
 import { norm } from '../core/util.js';
 import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
 import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
@@ -95,7 +96,8 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
     const x = dotePorNombre(lib, d.nombre), nombre = d.detalle ? `${d.nombre} (${d.detalle})` : d.nombre;
     const etiqueta = d.origen === 'trasfondo' ? `Dote de origen · ${ch.trasfondo}` : `Dote elegida${x?.cat ? ` · ${x.cat.toLowerCase()}` : ''}`;
     const recurso = recursos.find(r => r.tipo === 'recurso' && norm(r.nota || '').includes(`dote ${n}`)) || null;
-    nuevo(`dote:${norm(nombre)}`, { nombre, nivel: 0, origen: 'dote', etiqueta }, x ? { texto: x.texto, fuente: x.fuente } : null, [], recurso);
+    const est = x ? null : estiloDe(d.nombre) || esAlternativa(d.nombre);
+    nuevo(`dote:${norm(nombre)}`, { nombre, nivel: 0, origen: 'dote', etiqueta: est ? 'Estilo de combate' : etiqueta }, x ? { texto: x.texto, fuente: x.fuente } : est ? { texto: est.texto, fuente: 'Manual del Jugador' } : null, [], recurso);
   }
   return out;
 }

@@ -1,3 +1,4 @@
+import { ataquesPorAccion } from '../domain/maestria.js';
 import { esc, norm } from '../core/util.js';
 import { perfil, sgn, magiaPara, nivelTotal } from '../domain/reglas2024.js';
 import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../domain/rasgos.js';
@@ -50,10 +51,10 @@ function acciones(ch, db) {
   let n = 0;
   for (const o of equipoDe(ch).objetos.filter(x => x.arma).sort((a, b) => b.equipado - a.equipado)) {
     const a = ataqueArma(ch, o), props = (o.arma.props || []).map(x => x.replace(/\s*\(.*$/, ''));
-    grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
+    grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''} ${a.domina ? 'maestra' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
       <span class="cb-a-ico">${gi('o_arma')}</span>
       <span class="cb-a-t"><b>${esc(o.nombre)}</b><small>${o.equipado ? '<em class="cb-eq">en mano</em>' : ''}${esc([o.arma.distancia, ...props.slice(0, 3)].filter(Boolean).join(' · '))}</small>
-        ${o.arma.maestria ? `<span class="cb-maes" title="Maestría">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}</span>
+        ${o.arma.maestria ? `<span class="cb-maes ${a.domina ? 'domina' : 'sin'}" title="${a.domina ? `Dominas su maestría: ${esc(o.arma.maestria)}` : 'No dominas la maestría de esta arma'}">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}${a.estilos.length ? `<span class="cb-maes cb-estilo" title="Estilo de combate">${gi('ca')}${esc(a.estilos[0])}</span>` : ''}</span>
       <span class="cb-a-bts"><button type="button" class="cb-tir at" data-cbataque="${o.id}"><small>Ataque</small><b>${esc(a.ataque)}</b>${marca}</button><button type="button" class="cb-tir dn" data-cbdano="${o.id}"><small>Daño</small><b>${esc(a.dano.replace(/\s+\S+$/, ''))}</b><em>${esc(a.tipo || '')}</em></button></span></div>`);
   }
   const conj = [];
@@ -88,17 +89,12 @@ function acciones(ch, db) {
   }
   return grupos;
 }
-function ataquesPorAccion(ch) {
-  const r = rasgosEnJuego(ch, biblioteca(), []).find(x => /^ataque (adicional|extra)/.test(norm(x.nombre)));
-  if (!r) return 1;
-  const v = parseInt(r.numeros.find(x => /ataques/i.test(x.nombre))?.valor, 10);
-  return v > 1 ? v : 2;
-}
 const SIGILO = { accion: 'e-accion', adicional: 'e-adicional', reaccion: 'e-reaccion' };
 const VACIO = { accion: 'Atacar, esquivar, correr, destrabarse, ayudar, esconderse, buscar, usar un objeto…', adicional: 'Nada que la use ahora mismo.', reaccion: 'Ataque de oportunidad cuando un enemigo sale de tu alcance.' };
 function grupoHtml(ch, P, c, k, t, g, extra = '') {
   const subs = [];
-  if (g.armas.length) subs.push(['Armas', 'armas', g.armas, `${ataquesPorAccion(ch) > 1 ? `<span class="cb-sub-n">${ataquesPorAccion(ch)} ataques por acción</span>` : ''}`]);
+  if (g.armas.length) { const n = ataquesPorAccion(ch), a = c.ataques, usados = a ? a.usados : c.turno.accion ? n : 0;
+    subs.push(['Armas', 'armas', g.armas, `<span class="cb-sub-n cb-ataques" title="Ataques de tu acción de Ataque">${n > 1 ? `${n} ataques por acción` : 'acción de Ataque'}<span class="cb-at-pips">${Array.from({ length: a ? a.max : n }, (_, i) => `<i class="${i < usados ? 'usado' : ''}"></i>`).join('')}</span>${a?.mella ? '<em class="cb-at-extra">+ Mella</em>' : a?.extra ? '<em class="cb-at-extra">+ ligera</em>' : ''}</span>`]); }
   if (g.trucos.length) subs.push(['Trucos', '', g.trucos, '<span class="cb-sub-n">a voluntad</span>']);
   for (const L of Object.keys(g.niveles).map(Number).sort((a, b) => a - b)) subs.push([`Nivel ${L}`, `n${L}`, g.niveles[L], pipsEspacio(ch, P, L)]);
   if (g.rasgos.length) subs.push(['Rasgos', 'rasgos', g.rasgos, '']);
