@@ -66,7 +66,7 @@ export function danar(S2, n, critico = false) {
   if (r.concentracion && !r.concentracion.perdida) {
     const cd = r.concentracion.cd, conj = r.concentracion.conjuro, bono = bonoSalvacion(c2, 'con');
     msg += ` Concentración en <b>${esc(conj)}</b>: salvación de Constitución CD <b>${cd}</b>.`;
-    acts.unshift({ label: `Tirar ${sgn(bono)}`, hl: true, fn: () => tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución contra CD ${cd} · ${conj}`, bono, tipo: 'salvacion', ab: 'con',
+    acts.unshift({ label: `Tirar ${sgn(bono)}`, hl: true, fn: () => tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución contra CD ${cd} · ${conj}`, bono, tipo: 'salvacion', ab: 'con', cd,
       alTirar: total => { if (total >= cd) return `<b class="ok">Mantienes la concentración</b> en ${esc(conj)}.`;
         if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { soltarConc(x); });
         return `<b class="ko">Pierdes la concentración</b> en ${esc(conj)}.`; } }) });
