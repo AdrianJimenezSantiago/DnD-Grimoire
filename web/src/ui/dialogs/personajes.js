@@ -102,7 +102,7 @@ function cargarCar(c) {
 const permitidas = d => caracteristicasTrasfondo(d.trasfondo, lib().trasfondos);
 const hex = (h, s, l) => { s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); }; return `#${f(0)}${f(8)}${f(4)}`; };
 
-export function openCharForm(id) {
+export function openCharForm(id, { clase = '' } = {}) {
   formId = id || null; conjAbierto = false; CREANDO = !id; PASO = 0; VISTOS = new Set([0]); TEMA = '';
   const c = id ? S.db.chars.find(x => x.id === id) : blankChar({ campana: S.cur()?.campana || THEO.campana });
   $('#charTitle').textContent = id ? `Editar a ${c.nombre || 'personaje'}` : 'Nuevo personaje';
@@ -157,7 +157,9 @@ export function openCharForm(id) {
   MAES = [...(c.maestrias || [])]; ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
-  sync(true); openSheet(charDlg());
+  sync(true);
+  if (!id && CLASES[clase]) cambiarClase(clase);
+  openSheet(charDlg());
 }
 
 function irA(i, primera = false) {

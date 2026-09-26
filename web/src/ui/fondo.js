@@ -12,6 +12,7 @@ const ESCENA = {
   bardo: 'cancion', danza: 'cancion', saber: 'cancion', glamour: 'cancion', valor: 'cancion',
   monje: 'calma', manoabierta: 'calma', misericordia: 'calma', mar: 'calma',
   guerrero: 'forja', mecanica: 'forja', guerra: 'forja', campeon: 'forja', maestro: 'forja',
+  portada: 'nexo',
   abjurador: 'guarda', caballero: 'guarda', ilusionista: 'prisma', salvaje: 'prisma', hojacantante: 'prisma', genios: 'prisma', embaucador: 'prisma',
 };
 export const escenaDe = t => ESCENA[t?.icono] || ESCENA[t?.clase] || 'astral';
@@ -39,6 +40,17 @@ function glow(h, s, l, a = 1) {
 }
 const dot = (spr, x, y, r, a) => { ctx.globalAlpha = a; ctx.drawImage(spr, x - r, y - r, r * 2, r * 2); };
 
+const NX = { cx: 0, cy: 0, h: 40, s: 62, tonos: [{ h: 40, s: 62 }] };
+export function nexo({ cx, cy, h, s, tonos } = {}) {
+  if (cx != null) { NX.cx = cx; NX.cy = cy; }
+  if (h != null) { NX.h = h; NX.s = s ?? NX.s; }
+  if (tonos?.length) { const cambia = tonos.length !== NX.tonos.length; NX.tonos = tonos; if (cambia && E.nombre === 'nexo') ESCENAS.nexo.s(); }
+}
+const tonoDe = i => NX.tonos[i % NX.tonos.length];
+const orbita = (p, cx, cy) => {
+  const x = Math.cos(p.a) * p.R, y = Math.sin(p.a) * p.R * .4, c = Math.cos(-.2), s = Math.sin(-.2);
+  return [cx + x * c - y * s, cy + x * s + y * c];
+};
 const densidad = base => Math.round(base * Math.min(2.2, Math.max(.6, (W * H) / (390 * 844))));
 const L = () => (E.dark ? 62 : 38);
 
@@ -257,6 +269,52 @@ const ESCENAS = {
         g.addColorStop(0, `hsl(${hue} 80% ${E.dark ? 70 : 45}%)`); g.addColorStop(.5, `hsl(${(hue + 90) % 360} 80% ${E.dark ? 70 : 45}%)`); g.addColorStop(1, `hsl(${(hue + 200) % 360} 80% ${E.dark ? 70 : 45}%)`);
         ctx.strokeStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.stroke();
         dot(glow(hue, 60, E.dark ? 85 : 60), p.x - p.r * .35, p.y - p.r * .4, p.r * .35, a * 1.4);
+      }
+    },
+  },
+  nexo: {
+    s() {
+      const lejos = Math.hypot(W, H) * .62;
+      E.ps = Array.from({ length: densidad(84) }, (_, i) => ({ a: rnd(0, 6.283), R: 70 + Math.pow(Math.random(), .75) * lejos, f: rnd(0, 6.28), v: rnd(.5, 1.6), r: rnd(.6, 1.9), c: i }));
+      E.extra = { chispas: [], prox: 1.2, hv: NX.h, sv: NX.s };
+    },
+    p(dt) {
+      E.t += dt;
+      const X = E.extra, dark = E.dark, cx = NX.cx || W / 2, cy = NX.cy || H * .22, base = Math.min(W, H);
+      X.hv += ((((NX.h - X.hv) % 360) + 540) % 360 - 180) * Math.min(1, dt * 1.6); X.sv += (NX.s - X.sv) * Math.min(1, dt * 1.6);
+      for (let k = 0; k < 3; k++) {
+        const t = tonoDe(k * 4 + ((E.t / 9) | 0)), ang = E.t * .04 + k * 2.094;
+        dot(glow(k ? t.h : Math.round(X.hv / 6) * 6, (k ? t.s : Math.round(X.sv / 4) * 4) * .9, dark ? 36 : 62, .55), cx + Math.cos(ang) * base * .3, cy + Math.sin(ang) * base * .14 + base * .12, base * (k ? .55 : .75), dark ? .2 : .12);
+      }
+      const lAnillo = dark ? 66 : 40;
+      ctx.lineWidth = 1;
+      [150, 250, 380].forEach((R, i) => {
+        const r = R * Math.min(1.35, Math.max(.75, base / 560));
+        ctx.globalAlpha = dark ? .1 - i * .02 : .12 - i * .025; ctx.strokeStyle = `hsl(${X.hv} ${X.sv}% ${lAnillo}%)`;
+        ctx.beginPath(); ctx.ellipse(cx, cy, r, r * .4, -.2, 0, 6.283); ctx.stroke();
+        const a = E.t * (.22 - i * .05) + i * 2, t = tonoDe(i * 5 + 2), [px, py] = orbita({ a, R: r }, cx, cy);
+        dot(glow(t.h, t.s, dark ? 64 : 42), px, py, dark ? 14 : 10, dark ? .9 : .7);
+      });
+      for (const p of E.ps) {
+        p.a += dt * .9 / Math.sqrt(p.R); p.f += dt * p.v;
+        const [x, y] = orbita(p, cx, cy), cerca = Math.min(1, Math.max(0, (p.R - 60) / 90)), t = tonoDe(p.c);
+        const a = (dark ? .42 + Math.sin(p.f) * .3 : .3 + Math.sin(p.f) * .18) * cerca;
+        if (a > .02) dot(glow(t.h, Math.max(t.s, 40), dark ? 64 : 42), x, y, p.r * (dark ? 5.5 : 4.5), a);
+      }
+      X.prox -= dt;
+      if (X.prox <= 0 && X.chispas.length < 3) { X.chispas.push({ a: rnd(0, 6.283), R: base * rnd(.55, .9), c: (Math.random() * 12) | 0, t: 0, cola: [] }); X.prox = rnd(1.6, 3.4); }
+      ctx.lineCap = 'round';
+      X.chispas = X.chispas.filter(c => c.R > 26);
+      for (const c of X.chispas) {
+        c.t += dt; c.a += dt * 38 / Math.sqrt(c.R) * .12; c.R *= Math.pow(.62, dt);
+        const pos = orbita(c, cx, cy), t = tonoDe(c.c); c.cola.push(pos); if (c.cola.length > 16) c.cola.shift();
+        const vida = Math.min(1, c.t * 2) * Math.min(1, (c.R - 26) / 50);
+        ctx.strokeStyle = `hsl(${t.h} ${Math.max(t.s, 50)}% ${dark ? 70 : 42}%)`;
+        for (let i = 1; i < c.cola.length; i++) {
+          ctx.globalAlpha = (i / c.cola.length) * vida * (dark ? .55 : .45); ctx.lineWidth = 1 + i / c.cola.length * 1.4;
+          ctx.beginPath(); ctx.moveTo(...c.cola[i - 1]); ctx.lineTo(...c.cola[i]); ctx.stroke();
+        }
+        dot(glow(t.h, Math.max(t.s, 50), dark ? 70 : 45), pos[0], pos[1], dark ? 9 : 7, vida);
       }
     },
   },

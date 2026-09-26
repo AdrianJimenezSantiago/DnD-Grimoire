@@ -6,6 +6,7 @@ import { paleta } from '../domain/paleta.js';
 const CLASE = TEMAS.clase;
 const temaSub = ch => { const sc = subclaseDe(ch); return sc ? TEMAS.sub[sc.nombre] || null : null; };
 export const DEFECTO = { h: 220, s: 8, icono: 'libro' };
+export const PORTADA = { h: 40, s: 62, icono: 'portada' };
 
 export function temaDe(ch) {
   if (!ch) return DEFECTO;
@@ -14,7 +15,7 @@ export function temaDe(ch) {
   return m ? { h: m[0], s: m[1], icono: m[2] || icono, clase: icono } : { h, s, icono, clase: icono };
 }
 export function aplicarTema(ch) {
-  const t = temaDe(document.body.classList.contains('on-landing') ? null : ch), r = document.documentElement.style;
+  const t = document.body.classList.contains('on-landing') ? PORTADA : temaDe(ch), r = document.documentElement.style;
   if (r.getPropertyValue('--acc-h') !== String(t.h) || r.getPropertyValue('--acc-s') !== t.s + '%') { r.setProperty('--acc-h', t.h); r.setProperty('--acc-s', t.s + '%'); }
   for (const [k, v] of Object.entries(paleta(t, t === DEFECTO))) if (r.getPropertyValue(k) !== v) r.setProperty(k, v);
   setEscena(t);

@@ -324,24 +324,6 @@ dialog.modal.danger .md-icon .md-runa, dialog.modal.danger .md-icon > .gi { filt
 .toast button { border-color: hsl(var(--acc-h) calc(50% * var(--acc-k, 1)) 70% / .3); }
 .toast button.hl { background: linear-gradient(180deg, hsl(var(--acc-h) calc(85% * var(--acc-k, 1)) 78%), hsl(var(--acc-h) calc(75% * var(--acc-k, 1)) 62%)); }
 .toast b { color: hsl(var(--acc-h) calc(85% * var(--acc-k, 1)) 76%); }
-.landing { background: transparent; }
-.l-sky .astrolabe { opacity: .07; }
-.l-mark { position: relative; width: 136px; height: 136px; background: radial-gradient(circle, var(--gold-soft), transparent 62%); filter: none; }
-.l-mark > .gi { width: 46px; height: 46px; filter: drop-shadow(0 0 16px var(--glow)); }
-.l-runa { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--gold); opacity: .75; animation: girar 110s linear infinite; }
-body.landing-in .l-runa .r-anillo, body.landing-in .l-runa .r-geo { stroke-dasharray: 1; animation: trazar 1.8s var(--ease-out) both .15s; }
-body.landing-in .l-runa .r-runas { animation: aparecer 1s var(--ease) both 1s; }
-body.landing-in .l-mark > .gi { animation: ignite .9s var(--spring) both .6s; }
-.l-head h1 { font: 700 clamp(44px, 12.5vw, 80px) / 1 var(--display-deco); letter-spacing: .01em; margin-top: 14px;
-  background: linear-gradient(100deg, var(--ink) 38%, var(--gold-2) 50%, var(--ink) 62%) 0 0 / 260% 100% no-repeat;
-  -webkit-background-clip: text; background-clip: text; color: transparent; }
-body.landing-in .l-head h1 { animation: rise .6s var(--ease-out) both .06s, brillo 2.2s var(--ease) both .9s; }
-@keyframes brillo { from { background-position: 100% 0; } to { background-position: 0 0; } }
-.l-head p { font-style: italic; font-family: var(--serif); font-size: var(--fs-l); }
-.l-h2 { font: 600 var(--fs-m) / 1 var(--display); letter-spacing: .06em; color: var(--gold); display: flex; align-items: center; gap: 14px; width: min(720px, 100%); justify-content: center; }
-.l-h2::before, .l-h2::after { content: ""; flex: 1; max-width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
-.l-h2::after { transform: scaleX(-1); }
-.l-h2 small { font: 400 var(--fs-s, .8em) / 1 var(--sans); color: var(--ink-2); letter-spacing: 0; }
 .lcard { --orn: 22px; border-radius: 16px; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform .35s var(--ease-out), box-shadow .3s, border-color .3s; will-change: transform; }
 .lcard::before { background: linear-gradient(135deg, hsl(var(--acc-h) var(--acc-s) 72%), hsl(var(--acc-h) var(--acc-s) 50%)); opacity: .6; }

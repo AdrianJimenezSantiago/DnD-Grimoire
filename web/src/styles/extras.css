@@ -15,15 +15,6 @@ body.on-landing { overflow: hidden; }
 body.on-landing .appbar, body.on-landing .dock, body.on-landing main, body.on-landing .toast:not(.show) { display: none; }
 .landing { position: fixed; inset: 0; z-index: 40; overflow: auto; padding: calc(var(--sat) + 28px) 20px calc(var(--sab) + 40px);
   background: var(--bg) var(--sky) no-repeat; display: flex; flex-direction: column; align-items: center; }
-.l-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.l-sky .astrolabe { position: absolute; left: 50%; top: 40px; width: min(620px, 140vw); height: min(620px, 140vw); transform: translateX(-50%); right: auto; opacity: .12; }
-.l-head { position: relative; text-align: center; margin: 24px 0 26px; }
-.l-mark { display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; color: var(--gold);
-  background: radial-gradient(circle, var(--gold-soft), transparent 70%); filter: drop-shadow(0 0 20px var(--glow)); }
-.l-mark .gi { width: 44px; height: 44px; }
-.l-head h1 { font: 500 clamp(48px, 13vw, 84px) / .95 var(--serif); margin: 8px 0 6px; letter-spacing: -.01em; }
-.l-head p { font: 400 var(--fs-m) / 1.3 var(--sans); color: var(--ink-2); margin: 0; }
-.l-h2 { position: relative; font: 500 var(--fs-l) / 1 var(--sans); color: var(--ink-2); margin: 6px 0 12px; }
 .l-grid { position: relative; width: min(720px, 100%); display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
 .lcard { position: relative; display: flex; align-items: center; gap: 14px; text-align: left; min-height: 96px; padding: 16px 18px; border-radius: var(--r-l);
   background: linear-gradient(135deg, hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) 50% / calc(.2 * var(--acc-k, .7))), var(--surface) 60%); border: 1px solid hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) 50% / calc(.5 * var(--acc-k, .7)));
@@ -40,13 +31,10 @@ body.on-landing .appbar, body.on-landing .dock, body.on-landing main, body.on-la
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .lc-cls, :root:not([data-theme="dark"]) .lc-emb { color: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) calc(var(--gl-l, 34%) - 7%)); } }
 .lc-meta { font: 400 var(--fs-xs) / 1.3 var(--sans); color: color-mix(in srgb, var(--ink) 45%, var(--ink-2)); }
 .lc-cont { position: absolute; top: 10px; right: 12px; font: 700 10.5px / 1 var(--sans); color: hsl(var(--acc-h) calc(var(--acc-sg, var(--acc-s)) * .8) 12%); background: hsl(var(--acc-h) var(--acc-sg, var(--acc-s)) var(--gl-d, 66%)); border-radius: var(--r-pill); padding: 4px 9px; }
-.l-empty { position: relative; text-align: center; max-width: 420px; font: 400 var(--fs-l) / 1.5 var(--sans); }
 .l-actions { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; max-width: 720px; }
 .l-actions button { min-height: 46px; border-radius: var(--r-pill); padding: 0 18px; font-size: var(--fs-m); }
 .l-actions .gi { width: 18px; height: 18px; }
 .l-foot { position: relative; margin-top: auto; padding-top: 30px; }
-body.landing-in .l-head > * { animation: rise .6s var(--ease-out) both; }
-body.landing-in .l-head > *:nth-child(2) { animation-delay: .06s; } body.landing-in .l-head > *:nth-child(3) { animation-delay: .12s; }
 body.landing-in .lcard { animation: rise .55s var(--ease-out) both; animation-delay: calc(.15s + min(var(--i), 12) * 70ms); }
 body.landing-in .l-actions { animation: rise .6s var(--ease-out) both .3s; }
 .dmg { display: inline-grid; place-items: center; color: var(--dmg, var(--gold)); vertical-align: middle; }

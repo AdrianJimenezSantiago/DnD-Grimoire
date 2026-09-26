@@ -18,6 +18,7 @@ import './styles/extras.css';
 import './styles/biblioteca.css';
 import './styles/arcano.css';
 import './styles/juego.css';
+import './styles/portada.css';
 import './styles/dados.css';
 import './styles/creacion.css';
 import './styles/impacto.css';
@@ -84,7 +85,8 @@ async function boot() {
   const app = await eventos.init(S);
 
   const TOUR_INICIO = [
-    { titulo: 'Bienvenido al grimorio', texto: 'Tu libro de conjuros para D&amp;D 2024: espacios, preparados, rasgos de clase, tiradas y descripciones del manual, en el móvil o en el PC.' },
+    { titulo: 'Bienvenido al grimorio', texto: 'Tu compañero de mesa para D&amp;D 2024: hoja de personaje, libro de conjuros, modo combate, dados, diario de campaña y las descripciones de tus manuales, en el móvil o en el PC.' },
+    { sel: '.l-rueda', titulo: 'La rueda de clases', texto: 'Las doce clases, cada una con su color y su emblema. Toca una para crear un personaje que ya empiece con ella.' },
     { sel: '.l-grid, .l-empty', titulo: 'Tus personajes', texto: 'Cada tarjeta lleva el color y el emblema de su clase. Toca una para abrir su hoja.' },
     { sel: '[data-lcmd="nuevo"]', titulo: 'Crear un personaje', texto: 'Nombre, clase, subclase, nivel y características: la app calcula CD, ataque, espacios, preparados y recursos con las reglas de 2024.' },
     { sel: '[data-lcmd="manual"]', titulo: 'Tus libros, dentro', texto: 'Importa el PDF de tu Manual del Jugador, de la Guía del DM o de una expansión: la app lee en tu dispositivo conjuros, reglas, objetos mágicos, dotes, trasfondos y subclases.' },
@@ -131,7 +133,7 @@ async function boot() {
   };
   landing.init(S, {
     pruebasAuto: PRUEBAS,
-    cmd: c => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => app.run('newchar'), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? personajes.openCharForm(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });

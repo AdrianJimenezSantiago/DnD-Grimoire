@@ -43,7 +43,7 @@ Si el proyecto está publicado en Vercel, basta con abrir su dirección en el na
 
 ## Primeros pasos
 
-1. En la portada, pulsa **Nuevo personaje** y rellena su ficha.
+1. En la portada, pulsa **Nuevo personaje** (o toca una clase de la rueda para empezar con ella) y rellena su ficha.
 2. Añade conjuros con **Editar conjuros → Añadir**, desde el catálogo o el compendio.
 3. En la mesa, **toca** un conjuro para lanzarlo y **mantén pulsado** para leerlo o elegir a qué nivel lanzarlo.
 4. Si quieres las descripciones oficiales, importa tus PDF desde **Más → Libros**.
