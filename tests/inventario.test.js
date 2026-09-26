@@ -37,9 +37,9 @@ test('inventario: CA con armadura, escudo y defensa sin armadura', () => {
 });
 test('inventario: ataque y daño de cada arma, peso, carga y monedas', () => {
   const ch = pj({ stats: { fue: 16, des: 18 } });
-  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Espada larga'))), { expr: '1d8+3', tipo: 'cortante', ataque: '+6', dano: '1d8 + 3 cortante' });
-  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Estoque'))), { expr: '1d8+4', tipo: 'perforante', ataque: '+7', dano: '1d8 + 4 perforante' });
-  assert.deepEqual(ataqueArma(ch, anadirComun(ch, { ...de('Arco largo'), arma: { ...de('Arco largo').arma, bono: 1 } })), { expr: '1d8+5', tipo: 'perforante', ataque: '+8', dano: '1d8 + 5 perforante' });
+  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Espada larga'))), { expr: '1d8+3', tipo: 'cortante', ataque: '+6', dano: '1d8 + 3 cortante', estilos: [] });
+  assert.deepEqual(ataqueArma(ch, anadirComun(ch, de('Estoque'))), { expr: '1d8+4', tipo: 'perforante', ataque: '+7', dano: '1d8 + 4 perforante', estilos: [] });
+  assert.deepEqual(ataqueArma(ch, anadirComun(ch, { ...de('Arco largo'), arma: { ...de('Arco largo').arma, bono: 1 } })), { expr: '1d8+5', tipo: 'perforante', ataque: '+8', dano: '1d8 + 5 perforante', estilos: [] });
   const p = pj(); anadirComun(p, { ...de('Antorcha'), cantidad: 4 }); equipoDe(p).monedas.po = 100;
   assert.equal(pesoTotal(p), 3);
   assert.equal(valorMonedas({ equipo: { objetos: [], monedas: { ppt: 1, po: 2, pp: 5, pc: 30 } } }), 12.8);

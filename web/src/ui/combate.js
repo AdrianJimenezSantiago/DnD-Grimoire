@@ -53,7 +53,7 @@ function acciones(ch, db) {
     grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
       <span class="cb-a-ico">${gi('o_arma')}</span>
       <span class="cb-a-t"><b>${esc(o.nombre)}</b><small>${o.equipado ? '<em class="cb-eq">en mano</em>' : ''}${esc([o.arma.distancia, ...props.slice(0, 3)].filter(Boolean).join(' · '))}</small>
-        ${o.arma.maestria ? `<span class="cb-maes" title="Maestría">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}</span>
+        ${o.arma.maestria ? `<span class="cb-maes" title="Maestría">${gi('dote')}${esc(o.arma.maestria)}</span>` : ''}${a.estilos.length ? `<span class="cb-maes cb-estilo" title="Estilo de combate">${gi('ca')}${esc(a.estilos[0])}</span>` : ''}</span>
       <span class="cb-a-bts"><button type="button" class="cb-tir at" data-cbataque="${o.id}"><small>Ataque</small><b>${esc(a.ataque)}</b>${marca}</button><button type="button" class="cb-tir dn" data-cbdano="${o.id}"><small>Daño</small><b>${esc(a.dano.replace(/\s+\S+$/, ''))}</b><em>${esc(a.tipo || '')}</em></button></span></div>`);
   }
   const conj = [];

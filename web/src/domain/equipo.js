@@ -1,5 +1,6 @@
 import { uid, norm } from '../core/util.js';
 import { modOf, clasesDe, perfil } from './reglas2024.js';
+import { tieneEstilo } from './estilos.js';
 
 export const MAX_SINTONIA = 3;
 export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras y escudos', 'o_armadura'], ['equipo', 'Equipo', 'cofre'],
@@ -127,7 +128,8 @@ export function claseArmadura(ch) {
   const bonoEsc = esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0;
   if (arm) {
     const a = arm.armadura, d = a.dex === 'no' ? 0 : a.dex === 'max2' ? Math.min(2, des) : des;
-    return { ca: (a.base || 10) + (a.bono || 0) + d + bonoEsc, detalle: [`${arm.nombre} ${a.base + (a.bono || 0)}`, a.dex !== 'no' ? `Des ${d >= 0 ? '+' : ''}${d}` : '', esc ? `escudo +${bonoEsc}` : ''].filter(Boolean).join(', ') };
+    const def = tieneEstilo(ch, 'defensa') ? 1 : 0;
+    return { ca: (a.base || 10) + (a.bono || 0) + d + bonoEsc + def, detalle: [`${arm.nombre} ${a.base + (a.bono || 0)}`, a.dex !== 'no' ? `Des ${d >= 0 ? '+' : ''}${d}` : '', esc ? `escudo +${bonoEsc}` : '', def ? 'Defensa +1' : ''].filter(Boolean).join(', ') };
   }
   const opciones = [{ ca: 10 + des + bonoEsc, detalle: `10 + Des${esc ? ', escudo' : ''}` }];
   if (clases.includes('Bárbaro')) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Defensa sin armadura (10 + Des + Con)${esc ? ', escudo' : ''}` });
@@ -139,6 +141,12 @@ export function ataqueArma(ch, o) {
   const st = ch.stats || {}, fue = modOf(st.fue), des = modOf(st.des), props = (a.props || []).map(norm);
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
   const mod = distancia ? des : sutil ? Math.max(fue, des) : fue, pb = perfil(ch).pb, bono = parseInt(a.bono, 10) || 0;
-  const s = n => (n >= 0 ? `+${n}` : String(n));
-  return { expr: `${a.dano || '1d4'}${mod + bono ? s(mod + bono) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono), dano: `${a.dano || '1d4'}${mod + bono ? ` ${s(mod + bono).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim() };
+  const s = n => (n >= 0 ? `+${n}` : String(n)), dosManos = props.includes('dos manos'), estilos = [];
+  const atk = distancia && tieneEstilo(ch, 'arqueria') ? (estilos.push('Arquería +2 al ataque'), 2) : 0;
+  const dmg = !distancia && !dosManos && tieneEstilo(ch, 'duelo') ? (estilos.push('Duelo +2 al daño (en una mano, sin otra arma)'), 2) : 0;
+  if (props.includes('arrojadiza') && tieneEstilo(ch, 'arrojadizas')) estilos.push('+2 al daño al lanzarla (Combate con armas arrojadizas)');
+  if (!distancia && (dosManos || props.some(p => p.startsWith('versatil'))) && tieneEstilo(ch, 'grandes')) estilos.push('a dos manos, los 1 y 2 del daño cuentan como 3');
+  if (props.includes('ligera') && tieneEstilo(ch, 'dosarmas')) estilos.push('el ataque adicional con arma ligera suma el modificador al daño');
+  const md = mod + bono + dmg;
+  return { expr: `${a.dano || '1d4'}${md ? s(md) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono + atk), dano: `${a.dano || '1d4'}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim(), estilos };
 }

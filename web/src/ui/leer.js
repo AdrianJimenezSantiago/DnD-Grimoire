@@ -24,6 +24,7 @@ function arma(id) {
   ficha({ titulo: o.nombre, ico: 'o_arma', sub: pills([`Ataque ${a.ataque}`, `Daño ${a.dano}`, o.arma.distancia, o.equipado ? 'Equipada' : '']),
     cuerpo: `${props.length ? `<h4 class="md-h">Propiedades</h4>${lista(props.map(p => [p, texto(p)]))}` : ''}
       ${m ? `<h4 class="md-h">Maestría</h4>${lista([[m, gm ? md(gm.texto) : esc(textoMaestria(m) || 'Sin descripción.')]])}<p class="note">Solo si tu clase te da la maestría de esta arma.</p>` : ''}
+      ${a.estilos?.length ? `<h4 class="md-h">Estilo de combate</h4><p class="sp-text">${esc(a.estilos.join('. '))}.</p>` : ''}
       ${o.notas ? `<h4 class="md-h">Notas</h4><div class="sp-text">${md(o.notas)}</div>` : ''}` });
 }
 function estado(k) {

@@ -14,10 +14,12 @@ import { previewSpell } from './conjuro.js';
 import { tarjetasSubclase, campoClase } from '../subclases.js';
 import { gi } from '../tema.js';
 import { aumentoDeDote, faltaRequisito } from '../../domain/origen.js';
+import { NIVEL_ESTILO, ALTERNATIVAS, opcionesEstilo, estilosDe, esAlternativa } from '../../domain/estilos.js';
+import { md } from './conjuro.js';
 
 let S, LV = null;
 const dlg = () => $('#lvlDlg');
-const TITLE = { clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
+const TITLE = { estilo: 'Estilo de combate', estiloTrucos: 'Trucos de tu estilo', clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
 const char = () => S.db.chars.find(c => c.id === LV.id);
 const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase === LV.clase); return c || { clase: LV.clase, subclase: '', nivel: 0, principal: false, nueva: true }; };
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
@@ -33,6 +35,8 @@ function draft() {
   if (a.modo === 'dos') up(a.a, 2);
   if (a.modo === 'uno') { up(a.a, 1); if (a.b !== a.a) up(a.b, 1); }
   if (a.modo === 'dote') up(a.c, 1);
+  const e = LV.estilo || {};
+  if (e.nuevo) d.dotes = [...(d.dotes || []).filter(x => x !== e.quitar), e.nuevo];
   return d;
 }
 function plan() {
@@ -40,6 +44,10 @@ function plan() {
   const steps = [...(LV.elegirClase ? ['clase'] : []), 'resumen'];
   if (to === 3 && (cls.subs || []).length) steps.push('subclase');
   if (esMejora(o.clase, to) || to === 19) steps.push('mejora');
+  const nEst = NIVEL_ESTILO[o.clase], suyos = [...estilosDe(ch, biblioteca().dotes).map(x => (ch.dotes || []).find(n => norm(n).startsWith(norm(x.nombre))) || x.nombre), ...(ch.dotes || []).filter(esAlternativa)];
+  LV.estiloGana = !!nEst && to === nEst; LV.estiloSuyos = suyos;
+  if (LV.estiloGana || (nEst && to > nEst && suyos.length)) steps.push('estilo');
+  const alt = esAlternativa(LV.estilo?.nuevo || '');
   const vista = vistaClase(d, { clase: o.clase, subclase: LV.subclase, nivel: to }), sch = savantSchool(vista);
   Object.assign(LV, { A, B, d, sch,
     o, vista, lista: listaDe(o.clase, LV.subclase),
@@ -48,26 +56,28 @@ function plan() {
     savantMax: to === 3 ? 2 : B.maxSlot, savantExact: to !== 3,
     nPrep: (B.c && o.clase !== 'Mago') ? Math.max(0, B.maxPrep - A.maxPrep) : 0,
     nTrucos: Math.max(0, B.maxCant - A.maxCant) });
+  LV.nEstTrucos = alt ? 2 : 0; LV.estLista = alt?.lista || '';
+  if (LV.nEstTrucos) steps.push('estiloTrucos');
   if (LV.nSavant) steps.push('experto');
   if (LV.nLibro) steps.push('libro');
   if (LV.nPrep) steps.push('preparados');
   if (LV.nTrucos) steps.push('trucos');
   steps.push('confirmar');
   LV.steps = steps;
-  LV.libro = LV.libro.slice(0, LV.nLibro); LV.savant = LV.savant.slice(0, LV.nSavant); LV.prep = LV.prep.slice(0, LV.nPrep); LV.trucos = LV.trucos.slice(0, LV.nTrucos);
+  LV.estTrucos = LV.estTrucos.slice(0, LV.nEstTrucos); LV.libro = LV.libro.slice(0, LV.nLibro); LV.savant = LV.savant.slice(0, LV.nSavant); LV.prep = LV.prep.slice(0, LV.nPrep); LV.trucos = LV.trucos.slice(0, LV.nTrucos);
 }
 export function openLevelUp() {
   const ch = S.cur(); if (!ch || nivelTotal(ch) >= 20) return;
-  LV = { id: ch.id, i: 0, elegirClase: (ch.multiclase || []).length > 0, libro: [], savant: [], prep: [], trucos: [], q: {} };
+  LV = { id: ch.id, i: 0, elegirClase: (ch.multiclase || []).length > 0, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' }, q: {} };
   elegirClase(ch.clase);
   render(); openSheet(dlg());
 }
 function elegirClase(clase) {
   LV.clase = clase; const o = objetivo();
-  Object.assign(LV, { to: o.nivel + 1, subclase: o.subclase || '', asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [] });
+  Object.assign(LV, { to: o.nivel + 1, subclase: o.subclase || '', asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' } });
 }
 function chooser(key, n, filterFn, hint) {
-  const chosen = LV[key], others = new Set(['libro', 'savant', 'prep', 'trucos'].filter(k => k !== key).flatMap(k => LV[k]));
+  const chosen = LV[key], others = new Set(['libro', 'savant', 'prep', 'trucos', 'estTrucos'].filter(k => k !== key).flatMap(k => LV[k]));
   const have = new Set(char().book.map(e => 'c:' + e.sid)), q = norm(LV.q[key] || '');
   const items = allSpellItems(S.db).filter(it => !have.has(it.id) && !others.has(it.id) && filterFn(it) && (!q || norm(it.es).includes(q) || norm(it.en).includes(q)))
     .sort((a, b) => (chosen.includes(b.id) - chosen.includes(a.id)) || b.l - a.l || a.es.localeCompare(b.es, 'es'));
@@ -127,6 +137,15 @@ function render() {
           return `${falta ? `<p class="note warn-txt">${esc(falta)}</p>` : ''}<label class="f lv-aum">${ops ? `${esc(x.nombre)} sube en 1 una característica. ¿Cuál?` : 'Si la dote sube una característica, elige cuál (+1)'}<select id="lvC"><option value="">${ops ? 'Elige' : 'Ninguna'}</option>${lista}</select></label>`; })()}<span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></div>` : ''}
       </div>${B.apKey && B.mod !== A.mod ? `<div class="fsum" style="margin-top:14px">Tu ${ABIL_NAME[B.apKey]} pasa a ${sgn(B.mod)}: CD ${B.cd} y ataque ${sgn(B.atk)}.</div>` : ''}`;
   }
+  if (step === 'estilo') {
+    const e = LV.estilo, ops = opcionesEstilo(ch, biblioteca().dotes, o.clase), cambia = !LV.estiloGana;
+    h = `<p class="note">${cambia ? `Cada vez que subes de nivel en ${esc(o.clase.toLowerCase())} puedes cambiar tu dote de estilo de combate por otra. Es opcional.` : `A nivel ${to}, ${esc(o.clase.toLowerCase())} gana el rasgo Estilo de combate: eliges una dote de estilo de combate.${ALTERNATIVAS[o.clase] ? ` También puedes elegir ${esc(ALTERNATIVAS[o.clase].nombre)} y aprender dos trucos.` : ''}`}</p>
+      ${cambia ? `<div class="opts lv-estilo-q">${LV.estiloSuyos.map(n => `<button type="button" data-lvquitar="${esc(n)}" aria-pressed="${e.quitar === n}">Cambiar ${esc(n)}</button>`).join('')}<button type="button" data-lvquitar="" aria-pressed="${!e.quitar}">Mantener mi estilo</button></div>` : ''}
+      ${!cambia || e.quitar ? `<div class="lv-estilos">${ops.map(x => { const on = e.nuevo === x.nombre, bloq = x.ya && x.nombre !== e.quitar;
+        return `<button type="button" class="lv-estilo ${on ? 'on' : ''} ${x.alternativa ? 'alt' : ''}" data-lvestilo="${esc(x.nombre)}" aria-pressed="${on}" ${bloq ? 'disabled' : ''}>
+          <span class="lv-estilo-ico">${gi(x.alternativa ? 'libro' : 'ca')}</span><b>${esc(x.nombre)}${bloq ? ' <small>la tienes</small>' : ''}</b><span class="sp-text">${md(x.texto)}</span></button>`; }).join('')}</div>` : ''}`;
+  }
+  if (step === 'estiloTrucos') h = chooser('estTrucos', LV.nEstTrucos, it => it.l === 0 && listFilter(it, LV.estLista), `${esc(LV.estilo.nuevo)}: aprendes dos trucos de ${LV.estLista.toLowerCase()}. Cuentan como conjuros de ${o.clase.toLowerCase()} y no ocupan preparados.`);
   const escL = LV.sch.toLowerCase();
   if (step === 'experto') h = chooser('savant', LV.nSavant, it => it.l > 0 && (LV.savantExact ? it.l === LV.savantMax : it.l <= LV.savantMax) && it.esc === LV.sch && listFilter(it, 'Mago'),
     to === 3 ? `Experto en ${escL}: 2 conjuros de mago de ${escL}, de nivel 2 o inferior, gratis.` : `Experto en ${escL}: acabas de acceder a espacios de nivel ${LV.savantMax}; añade gratis un conjuro de ${escL} de ese nivel.`);
@@ -142,6 +161,8 @@ function render() {
       if (a.modo === 'dote') L.push(a.dote ? `Dote: ${a.dote}${a.c ? ` (${ABIL_NAME[a.c]} ${ch.stats[a.c]} → ${d.stats[a.c]})` : ''}.` : 'Dote sin nombre: puedes anotarla después en la ficha.');
       else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} ${ch.stats[k]} → ${d.stats[k]}`); L.push(bits.length ? `Mejora de característica: ${bits.join(', ')}.` : 'Mejora de característica sin elegir.'); }
     }
+    if (LV.estilo.nuevo) L.push(`Estilo de combate: ${LV.estilo.quitar ? `${LV.estilo.quitar} → ` : ''}${LV.estilo.nuevo}.`);
+    if (LV.estTrucos.length) L.push(`Trucos de ${LV.estilo.nuevo}: ${names('estTrucos').join(', ')}.`);
     if (LV.libro.length) L.push(`Al libro: ${names('libro').join(', ')}.`);
     if (LV.savant.length) L.push(`Gratis por Experto en ${escL}: ${names('savant').join(', ')}.`);
     if (LV.prep.length) L.push(`Nuevos preparados: ${names('prep').join(', ')}.`);
@@ -161,6 +182,7 @@ function apply() {
   const ch = char(), d = draft(), to = LV.to, o = objetivo(), notes = [], total = nivelTotal(ch) + 1;
   if (!o.principal) notes.push(o.nueva ? `multiclase: ${o.clase} 1` : `${o.clase} ${to}`);
   if (LV.subclase !== (o.subclase || '')) notes.push(`subclase ${LV.subclase}`);
+  if (LV.estilo.nuevo) notes.push(`estilo de combate ${LV.estilo.quitar ? `${LV.estilo.quitar} → ` : ''}${LV.estilo.nuevo}`);
   if (LV.steps.includes('mejora')) {
     if (LV.asi.modo === 'dote') { if (LV.asi.dote) notes.push(`dote ${LV.asi.dote}${LV.asi.c ? ` (+1 ${ABIL_NAME[LV.asi.c]})` : ''}`); }
     else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} +${d.stats[k] - ch.stats[k]}`); if (bits.length) notes.push(`mejora de característica (${bits.join(', ')})`); }
@@ -169,6 +191,8 @@ function apply() {
   const h = S.act(`Sube a nivel ${total}${notes.length ? ': ' + notes.join('; ') : ''}`, (db, c) => {
     const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
       if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, ...rel }); });
+    add(LV.estTrucos, { fuente: LV.estilo.nuevo, always: true, prep: true });
+    if (LV.estilo.nuevo) c.dotes = d.dotes;
     add(picks.libro, { fuente: 'Libro' });
     add(picks.savant, { fuente: `Experto en ${sch.toLowerCase()}` });
     add(picks.prep, { fuente: B.listaNombre, prep: true });
@@ -205,6 +229,8 @@ export function init(store) {
     if (t.dataset.chk) { const k = t.dataset.chk; LV[k] = t.checked ? [...new Set([...LV[k], t.value])] : LV[k].filter(x => x !== t.value);
       const y = body.scrollTop; render(); body.scrollTop = y; haptic(); }
   });
+  on(body, 'click', '[data-lvestilo]', (ev, b) => { LV.estilo.nuevo = LV.estilo.nuevo === b.dataset.lvestilo ? '' : b.dataset.lvestilo; LV.estTrucos = []; const y = body.scrollTop; render(); body.scrollTop = y; haptic(); });
+  on(body, 'click', '[data-lvquitar]', (ev, b) => { LV.estilo = { nuevo: '', quitar: b.dataset.lvquitar }; LV.estTrucos = []; render(); });
   on(body, 'click', '[data-lvclase]', (ev, b) => { elegirClase(b.dataset.lvclase); render(); });
   on(body, 'click', '[data-lvmulti]', () => { LV.elegirClase = true; LV.i = 0; render(); body.scrollTop = 0; });
   body.addEventListener('change', ev => { if (ev.target.id === 'lvNueva' && ev.target.value) { elegirClase(ev.target.value); render(); } });
@@ -217,6 +243,8 @@ export function init(store) {
     if (step === 'mejora' && LV.asi.modo !== 'dote' && !LV.asi.a) { toast('Elige qué característica mejora, o marca «Otra dote».'); return; }
     if (step === 'mejora' && LV.asi.modo === 'dote' && LV.asi.dote && aumentosDote(LV.asi.dote) && !LV.asi.c) { toast('Esa dote sube una característica: elige cuál.'); return; }
     if (step === 'clase' && !LV.clase) { toast('Elige la clase en la que subes.'); return; }
+    if (step === 'estilo' && LV.estiloGana && !LV.estilo.nuevo) { toast('Elige tu estilo de combate.'); return; }
+    if (step === 'estilo' && LV.estilo.quitar && !LV.estilo.nuevo) { toast('Elige el estilo nuevo, o marca «Mantener mi estilo».'); return; }
     if (LV.i === LV.steps.length - 1) return apply();
     LV.i++; render(); body.scrollTop = 0;
   });

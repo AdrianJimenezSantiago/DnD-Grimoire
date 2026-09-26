@@ -10,6 +10,7 @@ import { md } from './dialogs/conjuro.js';
 import { gi } from './tema.js';
 import { esRepetible } from '../domain/creacion.js';
 import { faltaRequisito } from '../domain/origen.js';
+import { opcionesEstilo } from '../domain/estilos.js';
 
 export const campoElegible = (attrs, valor, tipo, ico, placeholder = '') => `<div class="elg"><span class="elg-ico" aria-hidden="true">${gi(ico)}</span><input ${attrs} value="${esc(valor || '')}" autocomplete="off" placeholder="${esc(placeholder)}"><button type="button" class="elg-b" data-elegir="${tipo}" aria-label="Ver la lista">${gi('biblioteca')}<span>Lista</span></button></div>`;
 export function ponerValor(input, valor) {
@@ -94,4 +95,12 @@ export function elegirCriatura(actual = '') {
   const items = [...cs].sort((a, b) => (a.vdNum ?? 99) - (b.vdNum ?? 99) || a.nombre.localeCompare(b.nombre, 'es')).map(c => ({ nombre: c.nombre, grupo: c.tipoBase || 'Otras', ico: 'criatura',
     sub: [c.vdNum != null ? `VD ${vdTexto(c.vdNum)}` : '', c.tamano].filter(Boolean).join(' · ') }));
   return elegir({ titulo: 'Criaturas de tus libros', ico: 'bestia', items, grupos: tipos, actual, placeholder: 'Buscar una criatura', sub: 'Elige una para rellenar su perfil, o escribe cualquier nombre.' });
+}
+
+export function elegirEstilo(ch, clase, { titulo = 'Estilo de combate' } = {}) {
+  const items = opcionesEstilo(ch, biblioteca().dotes, clase).map(e => ({ nombre: e.nombre, grupo: e.alternativa ? 'En lugar de un estilo' : 'Estilos de combate', ico: e.alternativa ? 'libro' : 'ca',
+    tono: e.alternativa ? 150 : 4, sub: resumen(e.texto).slice(0, 120), tag: e.ya ? 'la tienes' : '', bloqueado: e.ya ? BLOQ : '',
+    detalle: `<div class="sp-text">${md(e.texto)}</div>${e.fuente ? `<p class="el-fuente">${esc(e.fuente)}</p>` : ''}` }));
+  return elegir({ titulo, ico: 'ca', items, libre: false, grupos: ['Estilos de combate', 'En lugar de un estilo'], placeholder: 'Buscar un estilo',
+    sub: `${clase ? `${clase}: ` : ''}elige una dote de estilo de combate. Toca una para leerla.` });
 }
