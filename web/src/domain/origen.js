@@ -1,6 +1,8 @@
 import { norm } from '../core/util.js';
-import { ABILS, CLASES, clasesDe, nivelTotal, perfil } from './reglas2024.js';
+import { ABILS, CLASES, clasesDe, dotesDe, nivelTotal, perfil } from './reglas2024.js';
 import { PREDEFINIDOS } from './equipo.js';
+import { armadurasDe, marcialesDe } from './competencias.js';
+import { biblioteca } from './catalogo.js';
 
 // Herramientas, idiomas y equipo inicial del Manual del Jugador de 2024
 export const JUEGOS = ['Juego de dados', 'Juego de naipes', 'Ajedrez de dragones', 'Ante de los tres dragones'];
@@ -53,7 +55,55 @@ export const CLASE_EXTRA = {
   'Pícaro': C(['Herramientas de ladrón'], ['ligera'], [O('A', ['Armadura de cuero', ['Daga', 2], 'Espada corta', 'Arco corto', ['Flechas', 20], 'Carcaj', 'Herramientas de ladrón', 'Paquete de ladrón'], 8), O('B', [], 100)], [4, 4, 10]),
 };
 const clave = (mapa, n) => Object.keys(mapa).find(k => norm(k) === norm(n));
-export const extraTrasfondo = t => TRASFONDO_EXTRA[clave(TRASFONDO_EXTRA, t)] || null;
+export const extraTrasfondo = t => TRASFONDO_EXTRA[clave(TRASFONDO_EXTRA, t)] || extraDeLibro(t);
+
+// Trasfondos de otros libros (Héroes de Faerûn…): herramienta y equipo A/B leídos del texto importado
+const OTRAS_HERR = ['Herramientas de ladrón', 'Herramientas de navegante', 'Kit de falsificación', 'Kit de disfraz', 'Kit de herborista', 'Kit de envenenador'];
+const SINONIMOS = [[/^(utiles|kit) para disfrazarse$|^utiles de disfraz$/, 'Kit de disfraz'], [/^(utiles|kit) para falsificar$|^utiles de falsificacion$/, 'Kit de falsificación'],
+  [/^(utiles|kit) de herborista$/, 'Kit de herborista'], [/^utiles de cocinero$/, 'Utensilios de cocinero'], [/^ropas? de viaje$/, 'Ropa de viaje'], [/^ropas? de calidad$|^ropa fina$/, 'Ropa fina'],
+  [/^petate$/, 'Saco de dormir'], [/^linterna (de ojo de buey|sorda)$/, 'Linterna sorda'], [/^esposas$/, 'Grilletes'], [/^tienda$/, 'Tienda de campaña'], [/^cuerda$/, 'Cuerda de cáñamo (15 m)'], [/^aceite$/, 'Aceite (frasco)'], [/^pergaminos?$/, 'Pergamino (hoja)']];
+const CORTAS = new Set(['a', 'o', 'y', 'e', 'u', 'de', 'la', 'el', 'en', 'un', 'al', 'lo', 'le', 'se', 'su', 'mi', 'tu', 'es', 'da', 'po', 'pp', 'pc', 'ya', 'no']);
+let VOCAB = null;
+const vocab = () => VOCAB ||= new Set([...PREDEFINIDOS.map(x => x.nombre), ...ARTESANO, ...INSTRUMENTOS, ...JUEGOS, ...OTRAS_HERR, 'herramientas útiles suministros mochila petate cantimplora bolsa garfio escalada yesquero frascos flechas virotes tienda ropas calidad disfrazarse falsificar herborista cartógrafo símbolo sagrado esposas linterna manta pergamino tinta pluma libro']
+  .flatMap(t => norm(t).split(/[^a-z]+/)).filter(w => w.length > 2));
+// Une palabras partidas por el OCR («herram ientas», «bo lsa», «d isfrazarse») si juntas forman una palabra conocida o un trozo es suelto
+export function sinCortes(t) {
+  const ws = String(t || '').split(/\s+/).filter(Boolean), out = [], letras = w => norm(w).replace(/[^a-z]/g, '');
+  const trozo = w => /^[a-záéíóúñ]{1,2}$/i.test(w) && !CORTAS.has(norm(w));
+  for (let i = 0; i < ws.length; i++) {
+    const w = ws[i], prev = out[out.length - 1], next = ws[i + 1];
+    const pal = x => x && /^[a-záéíóúñ]+[,.]?$/i.test(x);
+    if (pal(prev) && pal(w) && pal(next) && vocab().has(letras(prev) + letras(w) + letras(next).replace(/s$/, '')) || pal(prev) && pal(w) && pal(next) && vocab().has(letras(prev) + letras(w) + letras(next))) { out[out.length - 1] = prev + w + next; i++; continue; }
+    const conSig = pal(w) && pal(next) && vocab().has(letras(w) + letras(next));
+    const conAnt = pal(prev) && pal(w) && vocab().has(letras(prev) + letras(w));
+    if (conSig || (trozo(w) && next && /^[a-záéíóúñ]/.test(next) && !conAnt && letras(w).length === 1)) { ws[i + 1] = w + next; continue; }
+    if (conAnt || (prev && trozo(w) && /[a-záéíóúñ]$/i.test(prev))) { out[out.length - 1] = prev + w; continue; }
+    out.push(w);
+  }
+  return out.join(' ');
+}
+const nombreHerr = t => { const n = norm(sinCortes(t)).trim(), syn = SINONIMOS.find(([re]) => re.test(n)), todos = [...ARTESANO, ...OTRAS_HERR, ...INSTRUMENTOS, ...PREDEFINIDOS.map(x => x.nombre)];
+  const igual = v => todos.find(h => norm(h) === v);
+  return syn ? syn[1] : igual(n) || igual(n.replace(/es$/, '')) || igual(n.replace(/s$/, '')) || sinCortes(t).trim().replace(/^./, c => c.toUpperCase()); };
+function extraDeLibro(nombre) {
+  const x = norm(nombre || '') && biblioteca().trasfondos.find(t => t.nombre && norm(t.nombre) === norm(nombre)); if (!x) return null;
+  const h = norm(sinCortes(x.herramientas || ''));
+  const herramienta = /juego/.test(h) ? { elige: 'juego' } : /instrumento/.test(h) ? { elige: 'instrumento' } : /artesan/.test(h) ? { elige: 'artesano' } : h ? nombreHerr(x.herramientas) : null;
+  const a = /[({]A[)}]\s*(.+?),?\s*o\s*[({](?:B|8)[)}]/i.exec(sinCortes(x.equipo || ''));
+  const objetos = [], po = { n: 0 };
+  if (a) for (const trozo of a[1].split(/\s*,\s*|\s+y\s+(?=\d+\s*po\b|[a-záéíóúñ])/i)) {
+    const t = trozo.trim(); if (!t) continue;
+    const oro = /^(?:(.+?)\s+y\s*)?([\dlI]+)\s*po$/.exec(t); if (oro && /\d/.test(oro[2].replace(/[lI]/g, '1'))) { po.n += +oro[2].replace(/[lI]/g, '1'); if (!oro[1]) continue; }
+    const txt = oro ? oro[1] : t; if (/^po$/i.test(txt)) continue;
+    if (/^juego\b.*mismo/i.test(txt) && herramienta?.elige) { objetos.push({ elige: herramienta.elige }); continue; }
+    const rac = /^raciones\s*\(para (\d+) d/i.exec(txt); if (rac) { objetos.push(['Raciones (1 día)', +rac[1]]); continue; }
+    const n1 = /^(\d+)\s+(.+)$/.exec(txt), n2 = /^(.+?)\s*\((\d+)\s+\w+\)$/.exec(txt);
+    const [cant, nom] = n1 ? [+n1[1], n1[2]] : n2 ? [+n2[2], n2[1]] : [1, txt];
+    const limpio = nombreHerr(nom), ok = norm(limpio) === norm(nombreHerr(x.herramientas || '')) && typeof herramienta === 'string' ? herramienta : limpio;
+    objetos.push(cant > 1 ? [ok, cant] : ok);
+  }
+  return { herramienta, opciones: [{ k: 'A', objetos, po: po.n }, { k: 'B', objetos: [], po: 50 }], libro: true };
+}
 export const extraClase = c => CLASE_EXTRA[clase2(c)] || null;
 const clase2 = c => clave(CLASE_EXTRA, c);
 
@@ -87,31 +137,53 @@ export const tirarOro = (clase, rnd = Math.random) => { const c = extraClase(cla
 // Requisitos de las dotes: nivel, características, rasgos, armaduras, especie y trasfondo
 const AB = { fuerza: 'fue', destreza: 'des', constitucion: 'con', inteligencia: 'int', sabiduria: 'sab', carisma: 'car' };
 const ESTILO = { 'Guerrero': 1, 'Paladín': 2, 'Explorador': 2 };
-const armadurasDe = ch => new Set(clasesDe(ch).flatMap((c, i) => (i === 0 ? CLASE_EXTRA[c.clase]?.armaduras : (CLASE_EXTRA[c.clase]?.armaduras || []).filter(a => a !== 'pesada')) || []));
+// El OCR de los manuales deja restos: «13 omás», «nivel4», «1nteligencia», «de/fuego», «Endave»
+export const limpiarRequisito = req => norm(req || '').replace(/^requ\W*i\W*\w*itos?\W*/, '').replace(/\b1(?=nteligen)/g, 'i').replace(/\/(?=\S)/g, ' ').replace(/(\d)\s*o\s*m[aáu]s/g, '$1 o mas')
+  .replace(/nivel(\d)/g, 'nivel $1').replace(/!os\b/g, 'los').replace(/\s+/g, ' ').trim();
+const ARM = { ligera: 'ligera', ligeras: 'ligera', media: 'media', medias: 'media', pesada: 'pesada', pesadas: 'pesada', escudo: 'escudo', escudos: 'escudo' };
+function parecida(a, b) {
+  a = a.replace(/[^a-z]/g, ''); b = b.replace(/[^a-z]/g, ''); if (a === b) return true; if (Math.abs(a.length - b.length) > 2 || Math.min(a.length, b.length) < 6) return false;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) { const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+  return prev[b.length] <= 2;
+}
+// Un requisito suelto («dote X», «competencia con armas marciales», «rasgo Magia del pacto»…): devuelve qué falta o ''
+function faltaUno(r, ch) {
+  if (/^dote /.test(r)) { const x = r.slice(5).trim(); return dotesDe(ch).some(d => parecida(norm(d.nombre), x) || parecida(norm(d.detalle ? `${d.nombre} ${d.detalle}` : d.nombre), x)) ? '' : `Pide la dote ${x}.`; }
+  if (/armas marciales/.test(r)) return marcialesDe(ch).some(f => f([], true) && f(['dos manos', 'pesada'], true)) ? '' : 'Pide competencia con armas marciales.';
+  if (/lanzamiento de conjuros|magia del pacto/.test(r)) { const P = perfil(ch), vale = /lanzamiento/.test(r) && P.c || /pacto/.test(r) && P.pact; return vale ? '' : `Pide el rasgo ${/lanzamiento/.test(r) && /pacto/.test(r) ? 'Lanzamiento de conjuros o Magia del pacto' : /pacto/.test(r) ? 'Magia del pacto' : 'Lanzamiento de conjuros'}.`; }
+  if (/estilo de combate/.test(r)) return clasesDe(ch).some(c => ESTILO[c.clase] && c.nivel >= ESTILO[c.clase]) ? '' : 'Pide el rasgo Estilo de combate (guerrero, o paladín y explorador desde nivel 2).';
+  const arm = /(?:competencia|entrenamiento) con (?:armaduras? |escudos?)?(ligeras?|medias?|pesadas?|escudos?)/.exec(r);
+  if (arm) { const k = ARM[arm[1]]; return armadurasDe(ch).has(k) ? '' : `Pide entrenamiento con ${k === 'escudo' ? 'escudos' : `armaduras ${k}s`}.`; }
+  const tr = /trasfondo\s+(?:de\s+)?([a-z ]+)/.exec(r);
+  if (tr) return norm(ch.trasfondo || '').includes(tr[1].trim()) ? '' : `Pide el trasfondo ${tr[1].trim()}.`;
+  const es = /especie\s+(?:de\s+)?([a-z ]+)/.exec(r);
+  if (es) return norm(ch.especie || '').includes(es[1].trim()) ? '' : `Pide ser de la especie ${es[1].trim()}.`;
+  return '';
+}
 export function faltaRequisito(req, ch) {
-  const r = norm(req || ''); if (!r) return '';
+  const r = limpiarRequisito(req); if (!r) return '';
   const L = nivelTotal(ch), n = /nivel\s*(\d+)/.exec(r);
   if (n && L < +n[1]) return `Pide nivel ${n[1]}; tu personaje es de nivel ${L}.`;
   const car = /((?:fuerza|destreza|constitucion|inteligencia|sabiduria|carisma)(?:\s*(?:,|o|y)\s*(?:fuerza|destreza|constitucion|inteligencia|sabiduria|carisma))*)\s*(\d+)\s*o\s*mas/.exec(r);
   if (car) { const ks = car[1].split(/\s*(?:,|\so\s|\sy\s)\s*/).map(x => AB[x.trim()]).filter(Boolean), min = +car[2];
-    if (ks.length && !ks.some(k => (ch.stats?.[k] || 0) >= min)) return `Pide ${car[1].replace(/\b\w/g, m => m.toUpperCase())} ${min} o más.`; }
-  if (/lanzamiento de conjuros|magia del pacto/.test(r)) { const P = perfil(ch); if (!P.c && !P.pact && !(ch.book || []).length) return 'Pide poder lanzar conjuros (Lanzamiento de conjuros o Magia del pacto).'; }
-  if (/estilo de combate/.test(r) && !clasesDe(ch).some(c => ESTILO[c.clase] && c.nivel >= ESTILO[c.clase])) return 'Pide el rasgo Estilo de combate (guerrero, o paladín y explorador desde nivel 2).';
-  const arm = /competencia con (?:armaduras? |escudos?)?(ligeras?|medias?|pesadas?|escudos?)/.exec(r);
-  if (arm) { const k = { ligera: 'ligera', ligeras: 'ligera', media: 'media', medias: 'media', pesada: 'pesada', pesadas: 'pesada', escudo: 'escudo', escudos: 'escudo' }[arm[1]];
-    if (!armadurasDe(ch).has(k)) return `Pide competencia con ${k === 'escudo' ? 'escudos' : `armadura ${k}`}.`; }
-  const tr = /trasfondo\s+(?:de\s+)?([a-z ]+?)(?:[,.;)]|$)/.exec(r);
-  if (tr && !norm(ch.trasfondo || '').includes(tr[1].trim())) return `Pide el trasfondo ${tr[1].trim()}.`;
-  const es = /especie\s+(?:de\s+)?([a-z ]+?)(?:[,.;)]|$)/.exec(r);
-  if (es && !norm(ch.especie || '').includes(es[1].trim())) return `Pide ser de la especie ${es[1].trim()}.`;
+    if (ks.length && !ks.some(k => (ch.stats?.[k] || 0) >= min)) return `Pide ${car[1].replace(/\b(?!o\b|y\b)\w/g, m => m.toUpperCase())} ${min} o más.`; }
+  // El resto, por partes: «A o B» se cumple con cualquiera de las dos
+  const resto = r.replace(/nivel\s*\d+\s*o\s*mas/g, '').replace(car ? car[0] : '\u0000', '');
+  for (const parte of resto.split(/\s*[,;]\s*/).map(x => x.trim()).filter(Boolean)) {
+    const alts = parte.split(/\s+o\s+(?=dote |rasgo |competencia |entrenamiento |especie |trasfondo )/).map(x => x.replace(/^rasgo\s+/, '').trim());
+    const fallos = alts.map(x => faltaUno(x, ch));
+    if (fallos.every(Boolean)) return fallos.length > 1 ? `Pide ${fallos.map(f => f.replace(/^Pide (?:la |el )?/, '').replace(/\.$/, '')).join(' o ')}.` : fallos[0];
+  }
   return '';
 }
 
 // Aumento de característica que da una dote («Aumenta tu Fuerza o Destreza en 1…»)
 const NOM = Object.fromEntries(ABILS.map(([k, n]) => [norm(n), k]));
 export function aumentoDeDote(texto) {
-  const t = norm(texto || ''), m = /aumenta (?:en 1 )?(?:tu |una )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);
+  const t = norm(texto || '').replace(/\ben\s*[t\\|l!i]\s*[.,]?\s*(?=h?asta)/, 'en 1, '), m = /aumenta (?:en 1 )?(?:tu |una |la )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);
   if (!m) return null;
+  if (/^caracteristica$/.test(m[1].trim()) && /elige una caracteristica/.test(t)) return ABILS.map(([k]) => k);
   if (/de tu eleccion|una caracteristica|cualquier/.test(m[1])) return ABILS.map(([k]) => k);
   const ks = Object.entries(NOM).filter(([n]) => m[1].includes(n)).map(([, k]) => k);
   return ks.length ? ks : null;
@@ -138,6 +210,8 @@ const ARMAS = { 'Bárbaro': 'sencillas y marciales', 'Guerrero': 'sencillas y ma
   'Pícaro': 'sencillas y marciales con Sutil o Ligera', 'Monje': 'sencillas y marciales con Ligera' };
 const NOM_ARM = { ligera: 'ligeras', media: 'medias', pesada: 'pesadas', escudo: 'escudos' };
 export function entrenamientoDe(ch) {
-  const c = clasesDe(ch)[0]?.clase, arm = [...armadurasDe(ch)];
-  return { armas: `Armas ${ARMAS[c] || 'sencillas'}`, armaduras: arm.length ? `Armaduras ${arm.filter(a => a !== 'escudo').map(a => NOM_ARM[a]).join(', ')}${arm.includes('escudo') ? `${arm.length > 1 ? ' y ' : ''}escudos` : ''}`.replace('Armaduras  y escudos', 'Escudos') : '' };
+  const c = clasesDe(ch)[0]?.clase, arm = [...armadurasDe(ch)], todas = marcialesDe(ch).some(f => f([], true) && f(['dos manos', 'pesada'], true));
+  const tipos = arm.filter(a => a !== 'escudo').map(a => NOM_ARM[a]), esc = arm.includes('escudo');
+  const armaduras = tipos.length ? `Armaduras ${tipos.join(', ')}${esc ? ' y escudos' : ''}` : esc ? 'Escudos' : '';
+  return { armas: `Armas ${todas ? 'sencillas y marciales' : ARMAS[c] || 'sencillas'}`, armaduras };
 }

@@ -29,7 +29,7 @@ const TS = [['falla', 'Ha fallado', 'efecto completo'], ['supera', 'Ha superado'
 const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s) }; };
 const dadosActuales = ({ ch, s, t }) => (t ? dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : []);
 const conSalvacion = (t, dados) => !!t?.salvacion && (dados.some(x => x.via === 'salvacion') || t.falla || t.extras.length);
-const bonoDe = (dd, t, P) => dd.bono + (dd.tipo === 'curación' && t.curacion?.mod ? (P.mod || 0) : 0);
+const bonoDe = (dd, t, P) => dd.bono + ((dd.tipo === 'curación' && t.curacion?.mod) || dd.mod ? (P.mod || 0) : 0);
 const exprDe = (n, caras, bono) => `${n}d${caras}${bono ? sgn(bono) : ''}`;
 const idxDe = (lista, k) => Math.max(0, lista.findIndex(m => m[0] === k));
 
@@ -58,7 +58,7 @@ function pintarCtl(tsAntes = R.ts) {
   }
   const fichas = [s.escuela ? `<span class="cj-chip esc">${esc(s.escuela)}</span>` : '', t?.salvacion ? `<span class="cj-chip">CD <b>${P.cd ?? '—'}</b></span>` : '', t?.ataque ? `<span class="cj-chip">Ataque <b>${P.atk == null ? '—' : sgn(P.atk)}</b></span>` : ''].filter(Boolean);
   if (fichas.length) h += `<div class="cj-fichas">${fichas.join('')}</div>`;
-  if (t?.escala?.tipo === 'espacio' && s.level > 0) {
+  if ((t?.escala?.tipo === 'espacio' || (t?.veces?.desde)) && s.level > 0) {
     const pills = []; for (let L = s.level; L <= 9; L++) {
       const tot = P.slots?.[L] || 0, libres = Math.max(0, tot - Math.min(ch.play.used?.[L] || 0, tot));
       pills.push(`<button type="button" role="radio" aria-checked="${L === R.nivel}" data-rlnivel="${L}" class="${tot ? '' : 'sin'}" title="${tot ? `${libres} de ${tot} libres` : 'No tienes espacios de este nivel'}"><b>${L}</b>${tot ? `<i class="${libres ? '' : 'agotado'}">${'●'.repeat(Math.min(libres, 4))}${libres > 4 ? '+' : ''}${libres ? '' : '○'}</i>` : ''}</button>`);
@@ -92,7 +92,8 @@ function pintarCtl(tsAntes = R.ts) {
     }
     const crit = dd.via === 'ataque' && R.critico, n = dd.n * (crit ? 2 : 1);
     if (crit) nota += ', crítico: dados dobles';
-    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? 'Curación' : 'Daño'} ${exprDe(n, dd.caras, bono)}${cura ? '' : ` ${esc(dd.tipo)}`}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
+    if (dd.veces > 1) nota = `${dd.veces} ${dd.via === 'ataque' ? 'ataques, cada uno con su tirada' : 'veces, una por proyectil'} · ${nota}`;
+    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? 'Curación' : 'Daño'} ${exprDe(n, dd.caras, bono)}${cura ? '' : ` ${esc(dd.tipo)}`}${dd.veces > 1 ? ` ×${dd.veces}` : ''}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
       mitad: dd.via === 'salvacion' && t.mitad && (R.ts === 'supera' || R.ts === 'varios') });
   });
   (t?.extras || []).forEach((xx, i) => {

@@ -28,28 +28,26 @@ const ESPECIE_CONJUROS = {
 const ELECCIONES = {
   'Bardo': ['Pericia: Interpretación y Persuasión'],
   'Brujo': ['Invocaciones: Descarga agónica, Pacto del grimorio, Máscara de los mil rostros, Mente sobrenatural, Vista del diablo'],
-  'Clérigo': ['Orden divina: Taumaturgo (un truco más)'],
-  'Druida': ['Orden primigenia: Naturalista (un truco más)'],
-  'Explorador': ['Estilo de combate: Tiro con arco', 'Pericia (Explorador hábil): Supervivencia'],
-  'Guerrero': ['Estilo de combate: Defensa'],
+  'Clérigo': [],
+  'Druida': [],
+  'Explorador': ['Pericia (Explorador hábil): Supervivencia'],
+  'Guerrero': [],
   'Hechicero': ['Metamagia: Conjuro acelerado y Conjuro gemelo'],
   'Monje': [],
-  'Paladín': ['Estilo de combate: Guerrero bendito (dos trucos de clérigo)'],
+  'Paladín': [],
   'Pícaro': ['Pericia: Sigilo, Juego de manos, Percepción y Herramientas de ladrón'],
   'Mago': ['Académico: pericia en Conocimiento arcano'],
   'Bárbaro': [],
 };
 const EXTRA_SUB = {
   'Maestro del combate': 'Maniobras: Ataque con finta, Ataque de precisión, Ataque para derribar, Contraataque y Desarmar',
-  'Campeón': 'Estilo de combate adicional: Tiro con arco',
   'Señor de las bestias': 'Compañero primigenio: bestia de la tierra',
   'Hechicería dracónica': 'Linaje: dragón rojo (fuego)',
   'Círculo de la tierra': 'Terreno: árido',
   'Vástago de los Tres': 'Lealtad aterradora: Bhaal (resistencia al veneno, Guardia de cuchillas)',
 };
+const ESTILO_PRUEBA = { 'Guerrero': 'Defensa', 'Explorador': 'Tiro con arco', 'Paladín': 'Guerrero bendito' };
 const TRUCOS_EXTRA = {
-  'Clérigo': [[null, 'Taumaturgo', 'Clérigo']],
-  'Druida': [[null, 'Naturalista', 'Druida']],
   'Paladín': [['Palabra de resplandor', 'Guerrero bendito'], ['Llama sagrada', 'Guerrero bendito']],
   'Brujo': [['Guía', 'Pacto del grimorio'], ['Mensaje', 'Pacto del grimorio'], ['Taumaturgia', 'Pacto del grimorio']],
 };
@@ -94,6 +92,9 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     nombre: NOMBRES[i % NOMBRES.length], clase, subclase: sc.nombre, nivel, especie, trasfondo, stats, prueba: true,
     lema: `Personaje de prueba generado automáticamente (${sc.libro}).`, campana: 'Pruebas de la rama development',
   });
+  if (clase === 'Clérigo') ch.ordenes = { 'Clérigo': 'Taumaturgo' };
+  if (clase === 'Druida') ch.ordenes = { 'Druida': 'Naturalista' };
+  ch.dotes = [...(ESTILO_PRUEBA[clase] && nivel >= (clase === 'Guerrero' ? 1 : 2) ? [ESTILO_PRUEBA[clase]] : []), ...(sc.nombre === 'Campeón' && nivel >= 7 ? ['Tiro con arco'] : [])];
   ch.habilidades = competenciasIniciales(ch);
   const pericias = periciasDisponibles(ch), hab = Object.keys(ch.habilidades).sort((x, y) => prio.indexOf(abDe(x)) - prio.indexOf(abDe(y)));
   hab.slice(0, pericias).forEach(k => { ch.habilidades[k] = 2; });
@@ -117,7 +118,6 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     deLista(0, cls).filter(x => !claves.has(x.k)).slice(0, 2).forEach(x => add(x, { always: true, fuente: 'Iniciado en la magia' }));
     const x1 = deLista(1, cls).find(x => !claves.has(x.k)); add(x1, { always: true, prep: true, fuente: 'Iniciado en la magia', gratis: '1/DL' });
   }
-  if (dote === 'Afortunado') ch.rasgos.push({ id: uid('r'), tipo: 'recurso', nombre: 'Puntos de suerte', nota: 'Dote Afortunado: ventaja en una prueba con d20 o desventaja a un ataque contra ti.', maxBase: 'comp', maxN: 1, maxAb: 'car', recarga: 'largo', dado: 'd20', nivMax: 5, escuela: '', espacioMin: 0, soloEspacio: true, efecto: 'aviso', efectoN: 5, texto: '' });
 
   if (P.maxCant && lista) {
     let n = 0; for (const x of deLista(0, lista)) { if (n >= P.maxCant) break; if (add(x, { fuente: P.listaNombre })) n++; }
@@ -173,7 +173,7 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
 }
 
 const KIT = {
-  'Bárbaro': [['Hacha a dos manos', 1], ['Hacha de mano', 4]], 'Bardo': [['Estoque', 1], ['Armadura de cuero', 1], ['Laúd', 1]],
+  'Bárbaro': [['Hacha a dos manos', 1], ['Hacha de mano', 4]], 'Bardo': [['Daga', 2], ['Armadura de cuero', 1], ['Laúd', 1]],
   'Brujo': [['Daga', 2], ['Armadura de cuero', 1], ['Foco arcano (orbe)', 1]], 'Clérigo': [['Maza', 1], ['Cota de escamas', 1], ['Escudo', 1], ['Símbolo sagrado (amuleto)', 1]],
   'Druida': [['Bastón', 1], ['Armadura de cuero', 1], ['Escudo', 1], ['Foco druídico (rama de muérdago)', 1], ['Kit de herborista', 1]],
   'Explorador': [['Cimitarra', 1], ['Arco largo', 1], ['Armadura de cuero tachonado', 1], ['Flechas', 20]], 'Guerrero': [['Espada larga', 1], ['Arco largo', 1], ['Cota de mallas', 1], ['Escudo', 1], ['Flechas', 20]],

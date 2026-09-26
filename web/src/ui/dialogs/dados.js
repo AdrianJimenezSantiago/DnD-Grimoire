@@ -29,8 +29,8 @@ export function openDados() {
 // alTirar: se llama una vez por tirada con el resultado. Si no es «repetible» (aplica cambios
 // en la ficha), cambiar ventaja o modificadores después no recalcula: vale para la siguiente.
 // siguiente: { texto, fn(critico) } para encadenar otra tirada, como el daño tras un ataque.
-export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null }) {
-  const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab }) : [];
+export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null, motivo = '' }) {
+  const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab, motivo: motivo || (tipo === 'muerte' ? 'muerte' : '') }) : [];
   V = { tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, res: null };
   montar(); abrir(); lanzar();
 }

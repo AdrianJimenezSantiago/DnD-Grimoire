@@ -50,7 +50,10 @@ export function pgMaximoCalculado(ch) {
     for (let n = 1; n <= c.nivel; n++) pg += Math.max(1, (i === 0 && n === 1 ? dg : dg / 2 + 1) + con);
   });
   if (tieneDote(ch, 'Duro')) pg += 2 * L;
+  if (tieneDote(ch, 'Don de la fortaleza')) pg += 40;
   if (/^enan/.test(norm(ch.especie || ''))) pg += L;
+  // Resistencia dracónica: +3 a nivel 3 de hechicero y +1 por cada nivel de hechicero después
+  const drac = cs.find(c => c.clase === 'Hechicero' && /drac[oó]n/i.test(c.subclase || '') && c.nivel >= 3); if (drac) pg += drac.nivel;
   return Math.max(1, pg);
 }
 export const pgMaximoBase = ch => vidaDe(ch).maxManual ?? pgMaximoCalculado(ch);
@@ -195,7 +198,7 @@ export function pasarRonda(ch) {
 }
 const UNIDAD = [[/^(asaltos?|rondas?|rounds?)$/, 1], [/^(min|minutos?|minutes?)$/, 10], [/^(h|horas?|hours?)$/, 600], [/^(d[ií]as?|days?)$/, 14400]];
 export function rondasDeDuracion(texto) {
-  const m = String(texto || '').toLowerCase().match(/(\d+)\s*([a-záéíóúñ]+)/); if (!m) return null;
+  const m = String(texto || '').toLowerCase().replace(/\b[li](?=\s*(?:min|h\b|hora|ronda|asalto|d[ií]a))/g, '1').match(/(\d+)\s*([a-záéíóúñ]+)/); if (!m) return null;
   const u = UNIDAD.find(([re]) => re.test(m[2]));
   return u ? parseInt(m[1], 10) * u[1] : null;
 }

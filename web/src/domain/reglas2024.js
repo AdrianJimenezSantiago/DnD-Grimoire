@@ -1,4 +1,5 @@
 import { clamp, norm } from '../core/util.js';
+import { ordenDe } from './ordenes.js';
 
 export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
 export const ABIL_NAME = Object.fromEntries(ABILS);
@@ -120,7 +121,7 @@ export function perfil(ch) {
     if (x) x.claves.push(...claves);
     else { const m = modOf(ch.stats[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
   }
-  const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length : 0);
+  const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length + (l.viaSub ? 0 : ordenDe(ch, k.clase)?.truco || 0) : 0);
   return {
     c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases, cds,
     lista: prim ? prim.l.lista : '',

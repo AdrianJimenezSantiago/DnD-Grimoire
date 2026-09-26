@@ -1,5 +1,6 @@
 import { uid, norm } from '../core/util.js';
-import { modOf, clasesDe, perfil } from './reglas2024.js';
+import { modOf, clasesDe, perfil, dotesDe, competencia, nivelTotal } from './reglas2024.js';
+import { competenteConArma, esMarcial as esMarcialArma } from './competencias.js';
 import { tieneEstilo } from './estilos.js';
 import { tieneMaestria } from './maestria.js';
 
@@ -128,26 +129,67 @@ export function claseArmadura(ch) {
   const arm = eq.objetos.find(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo'), esc = eq.objetos.find(o => o.equipado && o.armadura?.tipo === 'escudo');
   const bonoEsc = esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0;
   if (arm) {
-    const a = arm.armadura, d = a.dex === 'no' ? 0 : a.dex === 'max2' ? Math.min(2, des) : des;
+    const a = arm.armadura, maxDes = a.dex === 'max2' && a.tipo === 'media' && (st.des || 10) >= 16 && dotesDe(ch).some(x => norm(x.nombre) === 'maestro en armaduras medias') ? 3 : 2;
+    const d = a.dex === 'no' ? 0 : a.dex === 'max2' ? Math.min(maxDes, des) : des;
     const def = tieneEstilo(ch, 'defensa') ? 1 : 0;
     return { ca: (a.base || 10) + (a.bono || 0) + d + bonoEsc + def, detalle: [`${arm.nombre} ${a.base + (a.bono || 0)}`, a.dex !== 'no' ? `Des ${d >= 0 ? '+' : ''}${d}` : '', esc ? `escudo +${bonoEsc}` : '', def ? 'Defensa +1' : ''].filter(Boolean).join(', ') };
   }
   const opciones = [{ ca: 10 + des + bonoEsc, detalle: `10 + Des${esc ? ', escudo' : ''}` }];
   if (clases.includes('Bárbaro')) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Defensa sin armadura (10 + Des + Con)${esc ? ', escudo' : ''}` });
   if (clases.includes('Monje') && !esc) opciones.push({ ca: 10 + des + modOf(st.sab), detalle: 'Defensa sin armadura (10 + Des + Sab)' });
+  if (clasesDe(ch).some(c => c.clase === 'Hechicero' && /drac[oó]n/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.car) + bonoEsc, detalle: `Resistencia dracónica (10 + Des + Car)${esc ? ', escudo' : ''}` });
   return opciones.sort((a, b) => b.ca - a.ca)[0];
 }
+const MEDIA = d => { const m = /^(\d+)d(\d+)$/.exec(String(d || '').trim()); return m ? +m[1] * (+m[2] + 1) / 2 : parseFloat(d) || 0; };
+export const DADO_ARTES = L => (L >= 17 ? '1d12' : L >= 11 ? '1d10' : L >= 5 ? '1d8' : '1d6');
+export const DANO_FURIA = L => (L >= 16 ? 4 : L >= 9 ? 3 : 2);
+const efectoActivo = (ch, k) => (ch.vida?.efectos || []).some(e => e.k === k);
+const conArmadura = ch => equipoDe(ch).objetos.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo');
+const conEscudo = ch => equipoDe(ch).objetos.some(o => o.equipado && o.armadura?.tipo === 'escudo');
+// Artes marciales: armas sencillas cuerpo a cuerpo y marciales ligeras, sin armadura ni escudo
+function artesMarciales(ch, o, props, distancia) {
+  const m = clasesDe(ch).find(c => c.clase === 'Monje'); if (!m || conArmadura(ch) || conEscudo(ch)) return null;
+  if (!o.sinArmas && (distancia || (esMarcialArma(o) && !props.includes('ligera')))) return null;
+  return DADO_ARTES(m.nivel);
+}
+
+// El golpe sin armas: 1 + Fuerza, o mejor con Artes marciales, Matón de taberna o el estilo Combate sin armas
+export const GOLPE_SIN_ARMAS = 'sinarmas';
+export function golpeSinArmas(ch) {
+  const dotes = dotesDe(ch).map(d => norm(d.nombre)), dano = tieneEstilo(ch, 'sinarmas') ? '1d6' : dotes.includes('maton de taberna') ? '1d4' : '1';
+  return { id: GOLPE_SIN_ARMAS, nombre: 'Golpe sin armas', cat: 'arma', sinArmas: true, cantidad: 1, equipado: false, arma: { dano, tipo: 'contundente', props: [], maestria: '', distancia: '' } };
+}
+export const armasCombate = ch => [...equipoDe(ch).objetos.filter(x => x.arma), golpeSinArmas(ch)];
+export const armaCombate = (ch, id) => armasCombate(ch).find(x => x.id === id) || null;
+
 export function ataqueArma(ch, o) {
   const a = o.arma; if (!a) return null;
   const st = ch.stats || {}, fue = modOf(st.fue), des = modOf(st.des), props = (a.props || []).map(norm);
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
-  const mod = distancia ? des : sutil ? Math.max(fue, des) : fue, pb = perfil(ch).pb, bono = parseInt(a.bono, 10) || 0;
+  const artes = artesMarciales(ch, o, props, distancia), cancion = efectoActivo(ch, 'cancion') && clasesDe(ch).some(c => c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || ''));
+  let mod = distancia ? des : sutil || artes ? Math.max(fue, des) : fue;
+  const competente = !!o.sinArmas || competenteConArma(ch, o);
+  if (cancion && competente && modOf(st.int) > mod) mod = modOf(st.int);
+  const pb = competencia(nivelTotal(ch)), bono = parseInt(a.bono, 10) || 0;
   const s = n => (n >= 0 ? `+${n}` : String(n)), dosManos = props.includes('dos manos'), estilos = [];
-  const atk = distancia && tieneEstilo(ch, 'arqueria') ? (estilos.push('Arquería +2 al ataque'), 2) : 0;
-  const dmg = !distancia && !dosManos && tieneEstilo(ch, 'duelo') ? (estilos.push('Duelo +2 al daño (en una mano, sin otra arma)'), 2) : 0;
+  const atk = distancia && tieneEstilo(ch, 'arqueria') ? (estilos.push('Tiro con arco +2 al ataque'), 2) : 0;
+  const dmg = !distancia && !dosManos && !o.sinArmas && tieneEstilo(ch, 'duelo') ? (estilos.push('Duelo +2 al daño (en una mano, sin otra arma)'), 2) : 0;
   if (props.includes('arrojadiza') && tieneEstilo(ch, 'arrojadizas')) estilos.push('+2 al daño al lanzarla (Combate con armas arrojadizas)');
   if (!distancia && (dosManos || props.some(p => p.startsWith('versatil'))) && tieneEstilo(ch, 'grandes')) estilos.push('a dos manos, los 1 y 2 del daño cuentan como 3');
   if (props.includes('ligera') && tieneEstilo(ch, 'dosarmas')) estilos.push('el ataque adicional con arma ligera suma el modificador al daño');
-  const md = mod + bono + dmg;
-  return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr: `${a.dano || '1d4'}${md ? s(md) : ''}`, tipo: a.tipo || '', ataque: s(mod + pb + bono + atk), dano: `${a.dano || '1d4'}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim(), estilos };
+  if (o.sinArmas && tieneEstilo(ch, 'sinarmas')) estilos.push('1d8 si no empuñas armas ni escudo');
+  // Furia: suma su daño a los ataques que usan la Fuerza
+  const barb = clasesDe(ch).find(c => c.clase === 'Bárbaro'), furia = barb && efectoActivo(ch, 'furia') && mod === fue && !distancia ? DANO_FURIA(barb.nivel) : 0;
+  if (furia) estilos.push(`Furia +${furia} al daño`);
+  const notas = [];
+  if (artes) notas.push(`Artes marciales (${artes})`);
+  if (cancion && mod === modOf(st.int)) notas.push('Canción de la hoja: usa tu Inteligencia');
+  if (!competente) notas.push('Sin competencia: no sumas tu bonificador');
+  let dado = a.dano || '1d4';
+  if (artes && MEDIA(artes) > MEDIA(dado)) dado = artes;
+  const md = mod + bono + dmg + furia;
+  const plano = !/d/.test(dado), total = plano ? Math.max(0, (parseInt(dado, 10) || 0) + md) : 0;
+  const expr = plano ? String(total) : `${dado}${md ? s(md) : ''}`;
+  return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas,
+    ataque: s(mod + (competente ? pb : 0) + bono + atk), dano: `${plano ? total : `${dado}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''}`} ${a.tipo || ''}`.trim(), estilos };
 }

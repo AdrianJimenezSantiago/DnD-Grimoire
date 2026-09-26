@@ -3,11 +3,11 @@ import { clasesDe } from './reglas2024.js';
 
 // Dotes de estilo de combate (Manual del Jugador de 2024) y sus alternativas de paladín y explorador
 export const ESTILOS = [
-  { nombre: 'Arquería', ef: 'arqueria', re: /arquer|archery/, texto: 'Obtienes un bonificador de +2 a las tiradas de ataque que hagas con armas a distancia.' },
-  { nombre: 'Combate a ciegas', ef: 'ciegas', re: /ciegas|blind/, texto: 'Tienes vista ciega con un alcance de 3 m.' },
+  { nombre: 'Tiro con arco', ef: 'arqueria', re: /arquer|archery|tiro con arco/, texto: 'Obtienes un bonificador de +2 a las tiradas de ataque que hagas con armas a distancia.' },
+  { nombre: 'Lucha a ciegas', ef: 'ciegas', re: /ciegas|blind/, texto: 'Tienes vista ciega con un alcance de 3 m.' },
   { nombre: 'Defensa', ef: 'defensa', re: /^defensa$|^defense$/, texto: 'Mientras lleves armadura ligera, media o pesada, obtienes un bonificador de +1 a la CA.' },
   { nombre: 'Duelo', ef: 'duelo', re: /duel/, texto: 'Cuando empuñes un arma cuerpo a cuerpo en una mano y ninguna otra arma, obtienes un bonificador de +2 a las tiradas de daño con ella.' },
-  { nombre: 'Combate con armas grandes', ef: 'grandes', re: /grandes|dos manos|great weapon/, texto: 'Cuando tires daño con un arma cuerpo a cuerpo que empuñes con dos manos, puedes tratar cualquier 1 o 2 de un dado de daño como un 3. El arma debe tener la propiedad Dos manos o Versátil.' },
+  { nombre: 'Combate con armas a dos manos', ef: 'grandes', re: /grandes|dos manos|great weapon/, texto: 'Cuando tires daño con un arma cuerpo a cuerpo que empuñes con dos manos, puedes tratar cualquier 1 o 2 de un dado de daño como un 3. El arma debe tener la propiedad Dos manos o Versátil.' },
   { nombre: 'Intercepción', ef: 'intercepcion', re: /intercep/, texto: 'Reacción: cuando una criatura que puedas ver impacte a otra que esté a 1,5 m o menos de ti, reduces el daño en 1d10 + tu bonificador de competencia. Debes empuñar un escudo o un arma sencilla o marcial.' },
   { nombre: 'Protección', ef: 'proteccion', re: /^protec/, texto: 'Reacción: cuando una criatura que puedas ver ataque a otra que esté a 1,5 m o menos de ti, impones desventaja a esa tirada y a las demás contra ese objetivo hasta tu siguiente turno. Debes empuñar un escudo.' },
   { nombre: 'Combate con armas arrojadizas', ef: 'arrojadizas', re: /arrojadiz|thrown/, texto: 'Cuando impactes con un ataque a distancia usando un arma con la propiedad Arrojadiza, obtienes un bonificador de +2 a la tirada de daño.' },
@@ -36,8 +36,10 @@ export const tieneEstilo = (ch, ef) => estilosDe(ch).some(e => e.ef === ef);
 // Cuántos estilos da la clase (o su alternativa) y cuántos lleva el personaje
 export function estadoEstilo(ch, lib = []) {
   const fuentes = clasesDe(ch).filter(c => NIVEL_ESTILO[c.clase] && c.nivel >= NIVEL_ESTILO[c.clase]);
-  const elegidos = estilosDe(ch, lib).length + (ch.dotes || []).filter(esAlternativa).length;
-  return { fuentes: fuentes.map(c => c.clase), puede: fuentes.length > 0, faltan: fuentes.length && !elegidos ? 1 : 0, elegidos };
+  // Cada clase con el rasgo da un estilo, y el Campeón otro a nivel 7 (Estilo de combate adicional)
+  const campeon = clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 7);
+  const elegidos = estilosDe(ch, lib).length + (ch.dotes || []).filter(esAlternativa).length, total = fuentes.length + (campeon ? 1 : 0);
+  return { fuentes: [...fuentes.map(c => c.clase), ...(campeon ? ['Campeón'] : [])], puede: fuentes.length > 0, faltan: Math.max(0, total - elegidos), total, elegidos };
 }
 export const trucosAlternativa = ch => (ch.dotes || []).map(esAlternativa).filter(Boolean);
 

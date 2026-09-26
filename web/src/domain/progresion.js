@@ -39,13 +39,16 @@ export function levelDiff(a, b, chA, chB) {
 
 export function conjurosPendientes(db, ch, compendio) {
   const porNombre = new Map(); for (const x of compendio || []) if (!porNombre.has(norm(x.es))) porNombre.set(norm(x.es), x);
-  const tiene = new Set(ch.book.map(e => norm(db.catalog[e.sid]?.es)));
+  // Ya lo tiene si está como «siempre preparado»; si lo tenía preparado a mano, pasa a siempre preparado y deja libre su hueco
+  const tiene = new Set(ch.book.filter(e => e.always).map(e => norm(db.catalog[e.sid]?.es)));
   return clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
 }
 export function anadirPendientes(db, ch, pendientes) {
   for (const c of pendientes) {
     const sid = importSrd(db, c.x);
-    if (!ch.book.some(e => e.sid === sid)) ch.book.push({ sid, prep: true, always: true, fuente: c.fuente + (c.ritual ? ' (solo ritual)' : ''), gratis: c.gratis || '', used: false });
+    const fuente = c.fuente + (c.ritual ? ' (solo ritual)' : ''), ya = ch.book.find(e => e.sid === sid || norm(db.catalog[e.sid]?.es) === norm(c.x.es));
+    if (ya) Object.assign(ya, { prep: true, always: true, fuente, gratis: ya.gratis || c.gratis || '' });
+    else ch.book.push({ sid, prep: true, always: true, fuente, gratis: c.gratis || '', used: false });
   }
   return pendientes.map(c => c.x.es);
 }

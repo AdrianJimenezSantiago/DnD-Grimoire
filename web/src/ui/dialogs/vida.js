@@ -78,7 +78,7 @@ export function danar(S2, n, critico = false) {
 export function tirarConcentracion(S2, dano) {
   const c = S2.cur(), conj = c?.play.conc; if (!conj) return;
   const cd = cdConcentracion(dano);
-  tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución CD ${cd} (${dano} de daño) · ${conj}`, bono: bonoSalvacion(c, 'con'), tipo: 'salvacion', ab: 'con', cd,
+  tirarPrueba({ titulo: 'Concentración', sub: `Salvación de Constitución CD ${cd} (${dano} de daño) · ${conj}`, bono: bonoSalvacion(c, 'con'), tipo: 'salvacion', ab: 'con', cd, motivo: 'concentracion',
     alTirar: total => { if (total >= cd) return `<b class="ok">Mantienes la concentración</b> en ${esc(conj)}.`;
       if (S2.cur().play.conc === conj) S2.act(`Pierde la concentración en ${conj} (salvación ${total} contra CD ${cd})`, (db, x) => { soltarConc(x); });
       return `<b class="ko">Pierdes la concentración</b> en ${esc(conj)}.`; } });

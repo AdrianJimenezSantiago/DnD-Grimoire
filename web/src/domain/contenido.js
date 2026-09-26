@@ -26,7 +26,9 @@ export function parseDotes(pages) {
   return cab.map((c, n) => {
     let hasta = n + 1 < cab.length ? cab[n + 1].ini : L.length;
     for (let k = c.fin; k < hasta; k++) if (k - c.fin > 45 || (esMayus(L[k].s) && L[k].h >= (L[k].hTip || 16) * 1.5)) { hasta = k; break; }
-    return { clave: claveNombre(c.nombre), nombre: c.nombre, cat: c.cat, req: c.req, texto: bloques(L, c.fin, hasta, { propios: PROPIOS, subtitulo: () => null }).join('\n\n') };
+    const texto = bloques(L, c.fin, hasta, { propios: PROPIOS, subtitulo: () => null }).join('\n\n')
+      .replace(/\s*Estas dotes pertenecen a la categor[ií]a[^.]*\./g, '').replace(/\s*[¡!;:=_|—–-]*[;:=_|—–-]{2,}[^\p{L}\d]*$/u, '').trim();
+    return { clave: claveNombre(c.nombre), nombre: c.nombre, cat: c.cat, req: c.req, texto };
   }).filter(d => d.texto.length > 20);
 }
 
@@ -164,12 +166,14 @@ export function separarRasgos(L) {
   for (let i = 0; i < L.length; i++) {
     const l = L[i], m = NIVEL_OCR.exec(l.s), nv = m && numOcr(m[2]);
     if (!m || !(nv >= 1 && nv <= 20)) { out.push(l); continue; }
-    const antes = l.s.slice(0, m.index + m[1].length).replace(/^\W+$/, '').trim(), resto = l.s.slice(m.index + m[0].length).trim().split(/\s+/);
+    const antes = l.s.slice(0, m.index + m[1].length).replace(/^\W+$/, '').trim(), resto = l.s.slice(m.index + m[0].length).replace(/["“”«»]/g, '').trim().split(/\s+/);
     let n = 0;
     while (n < resto.length) {
       const w = resto[n].replace(/[.,:;]$/, ''), sig = resto[n + 1] || '';
       if (esMay(w) || (MENOR.test(w.toUpperCase()) && n > 0 && esMay(sig)) || (esCap(w) && esMay(sig.replace(/[.,:;]$/, '')))) n++; else break;
     }
+    // Encabezado solo en su línea con mayúsculas y minúsculas mezcladas por el OCR («NiveEL 1: Druípico», «EsTILO DE COMBATE»)
+    if (!n && resto.length <= 4 && !/[.,;:!?]$/.test(l.s.trim()) && resto.every((w, k) => /^[A-ZÁÉÍÓÚÑ]/.test(w) || (k > 0 && MENOR.test(w.toUpperCase())))) n = resto.length;
     if (!n) { out.push(l); continue; }
     let nombre = resto.slice(0, n).join(' ');
     const sig = L[i + 1];

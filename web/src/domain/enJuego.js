@@ -95,7 +95,7 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
     const n = norm(d.nombre); if (NO_JUEGO.test(n)) continue;
     const x = dotePorNombre(lib, d.nombre), nombre = d.detalle ? `${d.nombre} (${d.detalle})` : d.nombre;
     const etiqueta = d.origen === 'trasfondo' ? `Dote de origen · ${ch.trasfondo}` : `Dote elegida${x?.cat ? ` · ${x.cat.toLowerCase()}` : ''}`;
-    const recurso = recursos.find(r => r.tipo === 'recurso' && norm(r.nota || '').includes(`dote ${n}`)) || null;
+    const recurso = recursos.find(r => r.tipo === 'recurso' && (r.dote === n || norm(r.nota || '').includes(`dote ${n}`))) || null;
     const est = x ? null : estiloDe(d.nombre) || esAlternativa(d.nombre);
     nuevo(`dote:${norm(nombre)}`, { nombre, nivel: 0, origen: 'dote', etiqueta: est ? 'Estilo de combate' : etiqueta }, x ? { texto: x.texto, fuente: x.fuente } : est ? { texto: est.texto, fuente: 'Manual del Jugador' } : null, [], recurso);
   }

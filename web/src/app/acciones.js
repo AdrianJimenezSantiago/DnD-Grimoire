@@ -1,6 +1,6 @@
 import { esc, joinY } from '../core/util.js';
 import { perfil } from '../domain/reglas2024.js';
-import { reglas, recState, schoolMatch, recuperarEnDescanso } from '../domain/rasgos.js';
+import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/rasgos.js';
 import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/sheet.js';
 import { toast } from '../ui/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
@@ -14,7 +14,7 @@ import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfe
 import { combateDe } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
-import { efectosDe, efectoDeConjuro, fmtRondas } from '../domain/efectos.js';
+import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
@@ -41,10 +41,11 @@ function castEffects(S, ch, P, s, mode, L) {
   return { msg, extra };
 }
 
-export function cast(S, bi, mode, L) {
+export function cast(S, bi, mode, L, rec = null) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
   let msg = '', snuffIdx = -1;
   if (mode === 'free') msg = `<b>${esc(s.es)}</b>: uso gratis gastado.`;
+  else if (mode === 'recurso') msg = `<b>${esc(s.es)}</b> con ${esc(rec.nombre)}, sin gastar espacio (quedan ${rec.max - usosGastados(ch, rec) - 1}).`;
   else if (mode === 'ritual') msg = `<b>${esc(s.es)}</b> como ritual: sin espacio, 10 minutos más.`;
   else {
     const noLeft = freeOf(ch, P, s.level) === 0 && L !== s.level;
@@ -54,6 +55,7 @@ export function cast(S, bi, mode, L) {
       if (L > s.level) msg += ` <span style="opacity:.8">(${noLeft && slotsOf(P, s.level) ? 'no quedaban de nivel ' + s.level : 'potenciado'})</span>`; }
   }
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
+  if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
   const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro');
   let fuera = [];
@@ -62,6 +64,7 @@ export function cast(S, bi, mode, L) {
   const h = S.act(msg, (db, c) => {
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
+    if (mode === 'recurso') recState(c, rec.id).used = (recState(c, rec.id).used || 0) + 1;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
@@ -74,11 +77,12 @@ export function cast(S, bi, mode, L) {
   if (apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
   else if (apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
   if (mode === 'slot' && s.ritual && (isPrepared(e) || P.ritualLibro)) extra.push({ label: 'Era como ritual', fn: () => { S.undo(h); cast(S, bi, 'ritual'); } });
+  if (mode === 'recurso' && firstFreeFrom(ch, P, s.level)) extra.push({ label: 'Mejor con un espacio', fn: () => { S.undo(h); cast(S, bi, 'slot', firstFreeFrom(S.cur(), perfil(S.cur()), s.level)); } });
   castFx(row(bi), schoolColor(schoolKey(s.escuela)));
   if (snuffIdx >= 0) slotFx(L, snuffIdx, 'snuff');
   haptic();
   toast(msg + fx.msg, [...extra, undoBtn(S, h)]);
-  if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' ? L : null), 350);
+  if (mode !== 'ritual' && tieneTiradas(tiradasConjuro(s))) setTimeout(() => openRoll(bi, mode === 'slot' || mode === 'recurso' ? L || s.level : null), 350);
   return true;
 }
 
@@ -104,6 +108,8 @@ export function quickCast(S, bi, force) {
     return toast(`<b>${esc(s.es)}</b> no está preparado.`, [{ label: 'Lanzar igualmente', fn: () => quickCast(S, bi, true) }]);
   }
   if (e.gratis && !e.used) return cast(S, bi, 'free');
+  const rec = recursoParaConjuro(ch, s.es);
+  if (rec) return cast(S, bi, 'recurso', s.level, rec);
   const L = firstFreeFrom(ch, P, s.level);
   if (L) return cast(S, bi, 'slot', L);
   if (s.ritual) return toast(`No quedan espacios de nivel ${s.level} o superior.`, [{ label: 'Lanzar como ritual', hl: true, fn: () => cast(S, bi, 'ritual') }]);
@@ -216,10 +222,21 @@ export function shortRest(S, openRecovery, openVida) {
 }
 
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);
+// Furia y Canción de la hoja: al gastar el uso, el efecto queda puesto (la furia además rompe la concentración)
+function alGastar(c, id) {
+  const k = EFECTO_DE_RECURSO[id]; if (!k) return [];
+  const fuera = k === 'furia' && c.play?.conc ? soltarConc(c) : [];
+  ponerEfecto(c, k); return fuera;
+}
+function avisoGasto(S, id, h, fuera) {
+  const k = EFECTO_DE_RECURSO[id]; if (!k) return;
+  golpe('buff'); toast(`<b>${esc(EFECTO[k].nombre)}</b> activa: ${esc(EFECTO[k].texto)}${fuera.length ? ` Pierdes la concentración.` : ''}`, [undoBtn(S, h)]);
+}
 export function tickResource(S, id, i) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max), left = r.max - used, spend = i < left;
-  S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); });
-  haptic();
+  let fuera = [];
+  const h = S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); if (spend) fuera = alGastar(c, id); });
+  haptic(); if (spend) avisoGasto(S, id, h, fuera);
 }
 export async function stepResource(S, id, d) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);
@@ -232,8 +249,9 @@ export async function stepResource(S, id, d) {
   }
   const next = Math.max(0, Math.min(r.max, used + d));
   if (next === used) return;
-  S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; });
-  haptic();
+  let fuera = [];
+  const h = S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; if (d > 0) fuera = alGastar(c, id); });
+  haptic(); if (d > 0) avisoGasto(S, id, h, fuera);
 }
 export async function setResource(S, id) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);

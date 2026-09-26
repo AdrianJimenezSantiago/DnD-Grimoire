@@ -37,7 +37,8 @@ export function caracteristicasTrasfondo(trasfondo, lib = []) {
   const k = Object.keys(TRASFONDOS_2024).find(x => norm(x) === norm(trasfondo));
   if (k) return TRASFONDOS_2024[k][0];
   const x = lib.find(t => t.nombre && norm(t.nombre) === norm(trasfondo));
-  const found = x ? Object.entries(NOMBRES_AB).filter(([n]) => norm(x.caracteristicas || '').includes(n)).map(([, a]) => a) : [];
+  const t = norm(x?.caracteristicas || '').replace(/1/g, 'i').replace(/[^a-z]/g, '');
+  const found = x ? Object.entries(NOMBRES_AB).filter(([n]) => t.includes(n)).map(([, a]) => a) : [];
   return found.length === 3 ? KEYS.filter(a => found.includes(a)) : [];
 }
 export function limpiarBonos(bonos, permitidas) {
@@ -61,7 +62,14 @@ const EXTRA_MULTICLASE = { 'Bardo': [1, TODAS], 'Explorador': [1, HAB_CLASE['Exp
 export function fuentesExtra(ch) {
   const out = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];
   if (EXTRA_ESPECIE[especie]) { const [n, lista, nombre] = EXTRA_ESPECIE[especie]; out.push({ nombre, n, lista }); }
-  for (const d of dotesDe(ch)) if (norm(d.nombre) === 'habilidoso') out.push({ nombre: 'Habilidoso (dote)', n: 3, lista: TODAS });
+  const DOTE_HAB = { habilidoso: [3, TODAS], 'experto en habilidades': [1, TODAS], 'mente aguda': [1, ['arcanos', 'historia', 'investigacion', 'naturaleza', 'religion']],
+    observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'don de la habilidad': [18, TODAS] };
+  for (const d of dotesDe(ch)) { const x = DOTE_HAB[norm(d.nombre)]; if (x) out.push({ nombre: `${d.nombre} (dote)`, n: x[0], lista: x[1] }); }
+  for (const c of clasesDe(ch)) {
+    if (c.clase === 'Bardo' && /conocimiento/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS });
+    if (c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Hojacantante', n: 1, lista: ['acrobacias', 'atletismo', 'interpretacion', 'persuasion'] });
+    if (c.clase === 'Guerrero' && /abanderad/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Caballero emisario', n: 1, lista: ['interpretacion', 'intimidacion', 'perspicacia', 'persuasion'] });
+  }
   for (const c of clasesDe(ch).slice(1)) if (EXTRA_MULTICLASE[c.clase]) { const [n, lista] = EXTRA_MULTICLASE[c.clase]; out.push({ nombre: `${c.clase} (multiclase)`, n, lista }); }
   return out;
 }
@@ -101,7 +109,7 @@ const abDe = k => HABILIDADES.find(h => h[0] === k)?.[2] || 'des';
 
 // Dotes: la de origen del trasfondo, la de Humano (Versátil) y las que no se pueden repetir
 export const DOTES_ORIGEN = ['Alerta', 'Afortunado', 'Atacante salvaje', 'Duro', 'Fabricante', 'Habilidoso', 'Iniciado en la magia', 'Matón de taberna', 'Músico', 'Sanador'];
-const REPETIBLES = ['iniciado en la magia', 'habilidoso', 'adepto elemental', 'mejora de caracteristica'];
+const REPETIBLES = ['iniciado en la magia', 'habilidoso', 'adepto elemental', 'versado en un elemento', 'mejora de caracteristica'];
 const baseDote = t => norm(String(t || '').replace(/\s*\([^)]*\)\s*$/, ''));
 export function esRepetible(nombre, lib = []) {
   const n = baseDote(nombre);
