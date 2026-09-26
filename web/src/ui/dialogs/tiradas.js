@@ -9,6 +9,7 @@ import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
 import { burst, reducedMotion } from '../fx.js';
+import { fxImpacto, nivelImpacto } from '../impacto.js';
 import { haptic } from '../../platform/native.js';
 import { fmt, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../dadosVista.js';
 import { md } from './conjuro.js';
@@ -236,6 +237,7 @@ function asentar(el, x) {
   if (reducedMotion()) return;
   if (x.tipo === 'ataque' && (x.crit || x.pifia)) { fxNatural(el, x.crit ? 20 : 1, $('#rlBody')); return; }
   if (!x.nuevo) return;
+  if (x.tipo === 'dano') fxImpacto(el.querySelector('.dd-hero'), { clave: x.clave, cura: x.cura, nivel: nivelImpacto(x.total, x.dist), caja: $('#rlBody') });
   const [cx, cy] = centro(el.querySelector('.dd-sello')), max = x.dist && x.total >= maxDist(x.dist);
   for (const o of FX_DANO[x.clave] || [{ color: getComputedStyle(dlg()).getPropertyValue('--esc').trim() || '#E7B85F', n: 12, speed: 2, up: 1.2, life: 700, size: 1.7 }])
     burst(cx, cy, { ...o, color: /^#/.test(o.color) ? o.color : '#E7B85F', n: Math.round(o.n * (max ? 1.8 : 1)) });

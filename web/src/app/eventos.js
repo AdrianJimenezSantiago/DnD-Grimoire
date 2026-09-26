@@ -1,4 +1,4 @@
-import { esc, numLibre } from '../core/util.js';
+import { esc, norm, numLibre } from '../core/util.js';
 import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
 import { schoolKey } from '../ui/sheet.js';
@@ -39,7 +39,8 @@ import { transicion } from '../ui/combate.js';
 import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
 import { mostrarCaracteristica, abrirPruebas } from '../ui/vitales.js';
 import { leer, initLeer } from '../ui/leer.js';
-import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia } from '../domain/combate.js';
+import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia, registrarAtaque } from '../domain/combate.js';
+import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { equipoDe, ataqueArma } from '../domain/equipo.js';
 import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
@@ -291,9 +292,18 @@ function bindSheet() {
   on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } haptic('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = equipoDe(ch).objetos.find(x => x.id === id); return o ? { o, a: ataqueArma(ch, o) } : null; };
-  const danoArma = (x, critico = false) => tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) });
-  on(sheet, 'click', '[data-cbataque]', (e, b) => { const x = arma(b.dataset.cbataque); if (x) tirarPrueba({ titulo: x.o.nombre, sub: 'Tirada de ataque', bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
-    siguiente: x.a.expr ? { texto: 'Tirar daño', fn: critico => danoArma(x, critico) } : null }); });
+  const danoArma = (x, critico = false, aviso = '') => tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) });
+  const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
+  on(sheet, 'click', '[data-cbataque]', (e, b) => {
+    const x = arma(b.dataset.cbataque); if (!x) return;
+    let reg = null;
+    if (combateDe(S.cur()).activo) S.edit((db, c) => { reg = registrarAtaque(c, { max: ataquesPorAccion(c), ligera: x.a.ligera, mella: x.a.domina && norm(x.a.maestria) === 'mella' }); });
+    const eco = !reg ? '' : reg.tipo === 'accion' ? (reg.max > 1 ? `ataque ${reg.n} de ${reg.max} de tu acción` : 'gasta tu acción') : TXT_ATAQUE[reg.tipo];
+    if (reg?.tipo === 'agotado') toast(`${TXT_ATAQUE.agotado}. La tirada no se descuenta.`);
+    const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
+    tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
+      impacto: { maestria, clave: norm(x.a.tipo || '') }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
+  });
   on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) danoArma(x); });
   const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numLibre(i?.value); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
     if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };

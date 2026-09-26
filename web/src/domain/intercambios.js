@@ -3,7 +3,6 @@ import { clasesDe, dotesDe } from './reglas2024.js';
 const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const MAESTRIA = { 'Bárbaro': 'las armas cuyas maestrías usas', Guerrero: 'una de las armas cuyas maestrías usas', 'Paladín': 'las armas cuyas maestrías usas', Explorador: 'las armas cuyas maestrías usas', 'Pícaro': 'las armas cuyas maestrías usas' };
 const TRUCO_NIVEL = ['Bardo', 'Clérigo', 'Druida', 'Hechicero', 'Brujo'];
-const ESTILO = { Guerrero: 1, 'Paladín': 2, Explorador: 2 };
 
 export const esHumano = ch => /^humano/.test(n(ch?.especie));
 
@@ -29,7 +28,6 @@ export function opcionesIntercambio(ch, momento, { clase = null, trasfondos = []
       if (k === 'Brujo' && L >= 2) add('brujo', 'Cambiar una invocación', 'Puedes sustituir una de tus invocaciones sobrenaturales por otra cuyos requisitos cumplas.', 'Brujo');
       if (k === 'Brujo' && L >= 12) add('brujo', 'Cambiar un arcano místico', 'Puedes sustituir uno de tus conjuros de Arcano místico por otro de brujo del mismo nivel.', 'Brujo');
       if (k === 'Hechicero' && L >= 3) add('hechicero', 'Cambiar una metamagia', 'Puedes sustituir una de tus opciones de Metamagia por otra.', 'Hechicero');
-      if (ESTILO[k] && L >= ESTILO[k]) add('ca', 'Cambiar el estilo de combate', 'Puedes sustituir tu dote de estilo de combate por otra.', k);
       if ((k === 'Guerrero' || k === 'Pícaro') && /arcan|eldritch|trickster/.test(sub)) {
         add('libro', 'Cambiar un conjuro', 'Puedes sustituir uno de tus conjuros por otro de mago para el que tengas espacios.', subclase);
         add('o_varita', 'Cambiar un truco', 'Puedes sustituir uno de tus trucos por otro de mago.', subclase);

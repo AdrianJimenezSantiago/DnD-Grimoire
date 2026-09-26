@@ -1,0 +1,103 @@
+/* Impactos: tiradas de daño y curación por encima de la media */
+.dd-hero { position: relative; }
+.ip-fx { position: absolute; inset: -10px -20px; pointer-events: none; z-index: 4; display: grid; place-items: center; overflow: visible; color: var(--ip); }
+.ip-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: ip-barrido .38s cubic-bezier(.2, .9, .3, 1) both; }
+.ip-svg.grietas { animation-name: ip-abre; }
+.ip-trazo { fill: none; stroke: var(--ip); stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 8px var(--ip)) drop-shadow(0 0 3px #fff); animation: ip-apaga .6s ease-in 1.1s forwards; }
+.ip-trazo.fino { stroke-width: 2.4; }
+.ip-trazo.rayo { stroke-width: 3; stroke: #fff; filter: drop-shadow(0 0 8px var(--ip)) drop-shadow(0 0 16px var(--ip)); animation: ip-parpadeo .5s steps(2) .16s, ip-apaga .3s .7s forwards; }
+.grietas .ip-trazo { stroke: color-mix(in srgb, var(--ip) 60%, #fff); }
+.ip-chispa { fill: #fff; filter: drop-shadow(0 0 8px var(--ip)); transform-origin: 92px 50px; animation: ip-chispa .5s ease-out .3s both; }
+.ip-onda { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px; border-radius: 50%; border: 3px solid var(--ip); box-shadow: 0 0 18px var(--ip), inset 0 0 12px var(--ip);
+  animation: ip-onda .8s cubic-bezier(.1, .7, .3, 1) both; }
+.ip-onda.b { animation-delay: .12s; border-width: 2px; } .ip-onda.c { animation-delay: .24s; border-width: 1px; }
+.ip-onda.inversa { animation-name: ip-onda-in; border-color: #3a2350; box-shadow: 0 0 24px #000, inset 0 0 20px var(--ip); }
+.ip-rayos { position: absolute; left: 50%; top: 50%; width: 260px; height: 260px; margin: -130px; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--ip) 55%, transparent) 0 6deg, transparent 6deg 24deg);
+  -webkit-mask: radial-gradient(circle, #000 20%, transparent 68%); mask: radial-gradient(circle, #000 20%, transparent 68%); animation: ip-rayos 1.3s ease-out both; }
+.ip-cristal { position: absolute; left: 50%; top: 50%; width: 10px; height: 26px; margin: -13px -5px; background: linear-gradient(180deg, #fff, var(--ip)); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  filter: drop-shadow(0 0 6px var(--ip)); transform: rotate(var(--a)) translateY(0); animation: ip-cristal .7s cubic-bezier(.1, .8, .3, 1) both; }
+.ip-gota { position: absolute; top: 30%; width: 10px; height: 14px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: var(--ip); box-shadow: 0 0 10px var(--ip); animation: ip-gota 1s cubic-bezier(.5, 0, .9, .5) both; }
+.ip-sombra { position: absolute; inset: 10%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ip) 30%, #000) 0, transparent 65%); animation: ip-sombra 1.2s ease-out both; }
+.ip-halo { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px; border-radius: 50%; border: 2px solid var(--ip); box-shadow: 0 0 30px var(--ip), inset 0 0 30px color-mix(in srgb, var(--ip) 50%, transparent); animation: ip-halo 1.2s ease-out both; }
+.ip-mota { position: absolute; bottom: 20%; width: 7px; height: 7px; border-radius: 50%; background: #E9FFF3; box-shadow: 0 0 10px var(--ip), 0 0 3px #fff; animation: ip-mota 1.3s ease-out both; }
+.ip-lema { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); white-space: nowrap; font: 700 13px / 1 var(--display); letter-spacing: .12em; text-transform: uppercase;
+  color: #fff; text-shadow: 0 0 10px var(--ip), 0 0 22px var(--ip), 0 2px 0 rgba(0, 0, 0, .5); animation: ip-lema 1.4s cubic-bezier(.2, .9, .3, 1.3) both; }
+.ip-bueno .ip-lema { font-size: 11px; opacity: .9; }
+.ip-epico .ip-lema { font-size: 18px; }
+.ip-bueno .ip-onda.c, .ip-bueno .ip-rayos { display: none; }
+.ip-epico { inset: -16px -30px; }
+.ip-epico .ip-trazo { stroke-width: 7; }
+.ip-sacude { animation: ip-sacude .55s cubic-bezier(.36, .07, .19, .97) both; }
+.ip-brilla { animation: ip-brilla .8s ease-out both; }
+@keyframes ip-barrido { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes ip-abre { from { clip-path: circle(0 at 50% 50%); } to { clip-path: circle(75% at 50% 50%); } }
+@keyframes ip-apaga { to { opacity: 0; } }
+@keyframes ip-parpadeo { 50% { opacity: .2; } }
+@keyframes ip-chispa { from { transform: scale(0); opacity: 1; } 60% { transform: scale(2.2); } to { transform: scale(0); opacity: 0; } }
+@keyframes ip-onda { from { transform: scale(.2); opacity: 1; } to { transform: scale(3.2); opacity: 0; } }
+@keyframes ip-onda-in { from { transform: scale(3); opacity: 0; } 40% { opacity: 1; } to { transform: scale(.2); opacity: 0; } }
+@keyframes ip-rayos { from { transform: scale(.3) rotate(0); opacity: 0; } 30% { opacity: 1; } to { transform: scale(1.2) rotate(40deg); opacity: 0; } }
+@keyframes ip-cristal { from { transform: rotate(var(--a)) translateY(0) scale(.3); opacity: 1; } 70% { opacity: 1; } to { transform: rotate(var(--a)) translateY(calc(-1 * var(--d))) scale(1); opacity: 0; } }
+@keyframes ip-gota { from { transform: translateY(-20px) scale(.4); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(80px) scale(1, 1.3); opacity: 0; } }
+@keyframes ip-sombra { from { transform: scale(1.8); opacity: 0; } 40% { opacity: .9; } to { transform: scale(.4); opacity: 0; } }
+@keyframes ip-halo { from { transform: scale(.4); opacity: 0; } 30% { opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+@keyframes ip-mota { from { transform: translateY(0) scale(.5); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-110px) scale(1.2); opacity: 0; } }
+@keyframes ip-lema { from { transform: translate(-50%, 14px) scale(.6); opacity: 0; } 12% { transform: translate(-50%, -2px) scale(1.12); opacity: 1; } 20% { transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; } to { transform: translate(-50%, -8px); opacity: 0; } }
+@keyframes ip-sacude { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 1px, 0); } 30%, 50%, 70% { transform: translate3d(-6px, -1px, 0); } 40%, 60% { transform: translate3d(6px, 1px, 0); } }
+@keyframes ip-brilla { 30% { box-shadow: inset 0 0 60px color-mix(in srgb, #6EE0A0 30%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .ip-fx { display: none; } }
+
+/* Maestría con armas en el modo combate */
+.cb-arma.maestra { position: relative; border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
+  background: linear-gradient(100deg, color-mix(in srgb, var(--gold) 16%, var(--surface)), var(--surface) 62%);
+  box-shadow: inset 3px 0 0 var(--gold), 0 10px 28px -18px var(--glow); }
+.cb-arma.maestra::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--gold) 16%, transparent) 50%, transparent 65%) -200% 0 / 50% 100% no-repeat; animation: cb-destello 6s ease-in-out infinite; }
+.cb-arma.maestra .cb-a-ico { color: var(--gold); filter: drop-shadow(0 0 6px var(--glow)); }
+.cb-maes.domina { color: var(--on-gold, #1b1204); background: var(--gilt); box-shadow: 0 0 10px -3px var(--glow); }
+.cb-maes.sin { opacity: .45; background: transparent; border: 1px dashed var(--line); color: var(--ink-3); }
+@keyframes cb-destello { 0%, 70% { background-position: -200% 0; } 100% { background-position: 300% 0; } }
+.cb-ataques { display: inline-flex; align-items: center; gap: 8px; }
+.cb-at-pips { display: inline-flex; gap: 4px; }
+.cb-at-pips i { width: 10px; height: 10px; transform: rotate(45deg); border: 1.4px solid var(--gold); background: var(--gold); box-shadow: 0 0 6px var(--glow); transition: all .3s var(--ease); }
+.cb-at-pips i.usado { background: transparent; box-shadow: none; opacity: .5; }
+.cb-at-extra { font: 600 10px / 1 var(--sans); font-style: normal; color: var(--gold); }
+
+/* Impacta o falla, y el recordatorio de la maestría */
+.dd-impacto { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.dd-impacto > button { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: var(--r-pill); }
+.dd-impacto > button span { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.dd-impacto small { font: 500 10.5px / 1.2 var(--sans); opacity: .75; }
+.dd-impacto .dd-sig { margin: 0; }
+.dd-falla { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); color: var(--danger); }
+.dd-falla .gi, .dd-impacto .gi { width: 18px; height: 18px; }
+.da-maes { display: grid; gap: 4px; margin: 12px auto 0; max-width: 460px; padding: 10px 14px; border-radius: var(--r-m); text-align: left;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); background: linear-gradient(135deg, var(--gold-soft), transparent 80%);
+  box-shadow: 0 0 0 0 var(--glow); animation: maes-in .6s var(--spring) both, maes-pulso 1.6s ease-out .4s; font: 400 var(--fs-s) / 1.45 var(--sans); color: var(--ink-2); }
+.da-maes b { display: inline-flex; align-items: center; gap: 6px; font: 600 var(--fs-xs) / 1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.da-maes b .gi { width: 15px; height: 15px; }
+@keyframes maes-in { from { opacity: 0; transform: translateY(8px) scale(.96); } }
+@keyframes maes-pulso { 0% { box-shadow: 0 0 0 0 var(--glow); } 100% { box-shadow: 0 0 0 14px transparent; } }
+
+/* Elegir maestrías */
+.mz { margin: 12px 0; padding: 12px; border-radius: var(--r-m); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--ok); }
+.mz.falta { box-shadow: inset 3px 0 0 #D9822B; background: color-mix(in srgb, #D9822B 7%, var(--surface-2)); }
+.mz-cab { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 6px; font: 400 var(--fs-s) / 1.45 var(--sans); color: var(--ink-2); }
+.mz-cab > .icon { width: 16px; height: 16px; color: var(--ok); flex: none; margin-top: 2px; }
+.mz-g { margin: 10px 0 6px; font: 600 var(--fs-xs) / 1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.mz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; }
+.mz-arma { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 7px 10px; min-height: 48px; text-align: left; justify-content: center; border-radius: var(--r-s); background: var(--surface);
+  transition: border-color var(--t-med), background var(--t-med), box-shadow var(--t-med), transform var(--t-fast); }
+.mz-arma b { font: 600 var(--fs-s) / 1.1 var(--serif); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; }
+.mz-arma b i { display: inline-flex; color: var(--gold); } .mz-arma b .icon { width: 12px; height: 12px; }
+.mz-arma small { display: inline-flex; align-items: center; gap: 4px; font: 500 10.5px / 1.2 var(--sans); color: var(--ink-3); }
+.mz-arma small .gi { width: 11px; height: 11px; color: var(--gold); }
+.mz-arma.lleva { border-style: dashed; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.mz-arma.on { border-color: var(--gold); background: linear-gradient(135deg, var(--gold-soft), var(--surface) 75%); box-shadow: 0 0 0 1px var(--gold), 0 6px 18px -12px var(--glow); }
+.mz-arma.on small { color: var(--gold); }
+.mz-arma:active { transform: scale(.97); }
+.mz-arma:disabled { opacity: .45; }
+.mz-arma { position: relative; }
+.mz-lleva { position: absolute; top: 6px; right: 8px; font: 600 9.5px / 1 var(--sans); font-style: normal; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
