@@ -70,12 +70,14 @@ function acciones(ch, db) {
     const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm);
     const rec = s.level > 0 && recupera.find(r => schoolMatch(s, r.escuela));
     const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !firstFreeFrom(ch, P, s.level);
+    // Un espacio por turno: tras gastarlo en tu turno, los conjuros de nivel solo valen gratis o como reacción en otro turno
+    const turnoGastado = !sinEsp && s.level > 0 && !gratis && !!combateDe(ch).espacio && g !== 'reaccion';
     const flags = [s.conc ? '<i class="hz-f conc" title="Concentración">C</i>' : '', s.ritual ? '<i class="hz-f rit" title="Ritual">R</i>' : '', gratis ? '<i class="hz-f gratis" title="Uso gratis disponible">gratis</i>' : '',
       rec ? `<i class="hz-f rec" title="${esc(`${rec.nombre}: con un espacio de nivel ${rec.espacioMin || 1} o más recuperas un espacio gastado de nivel inferior (máximo ${rec.efectoN || 5}).`)}">${icon('reset')}espacio</i>` : ''].join('');
-    const html = `<button type="button" class="cb-hz ${sinEsp ? 'agotado' : ''} ${ch.play.conc === s.es ? 'activo' : ''}" style="--i:${n++}" data-sc="${ico.slice(4)}" data-cast="${bi}" data-leer="conj:${bi}" aria-label="Lanzar ${esc(s.es)}${sinEsp ? ' (sin espacios)' : ''}">
+    const html = `<button type="button" class="cb-hz ${sinEsp || turnoGastado ? 'agotado' : ''} ${ch.play.conc === s.es ? 'activo' : ''}" style="--i:${n++}" data-sc="${ico.slice(4)}" data-cast="${bi}" data-leer="conj:${bi}" aria-label="Lanzar ${esc(s.es)}${sinEsp ? ' (sin espacios)' : ''}">
       <span class="hz-ico">${ico ? gi(ico) : gi('libro')}<i class="cb-niv ${s.level ? '' : 'truco'}">${s.level || 'T'}</i></span>
       <span class="hz-t"><b>${esc(s.es)}</b><small><em class="cb-esc">${esc(s.escuela || '')}</em>${s.alcance ? ` · ${esc(s.alcance)}` : ''}</small><span class="hz-flags">${flags}</span></span>
-      <span class="hz-dato">${d.clave ? `<b>${esc(d.clave)}</b>` : ''}${d.dano ? `<small class="${d.cura ? 'cura' : ''}">${esc(d.dano)}${d.mitad ? ' · ½' : ''}</small>` : ''}${sinEsp ? '<small class="sin">sin espacios</small>' : ''}</span>
+      <span class="hz-dato">${d.clave ? `<b>${esc(d.clave)}</b>` : ''}${d.dano ? `<small class="${d.cura ? 'cura' : ''}">${esc(d.dano)}${d.mitad ? ' · ½' : ''}</small>` : ''}${sinEsp ? '<small class="sin">sin espacios</small>' : turnoGastado ? '<small class="sin">espacio del turno gastado</small>' : ''}</span>
       <span class="hz-go" aria-hidden="true">${gi(ico || 'libro')}</span></button>`;
     if (s.level) (grupos[g].niveles[s.level] ||= []).push(html); else grupos[g].trucos.push(html);
   }

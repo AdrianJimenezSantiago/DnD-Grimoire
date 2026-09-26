@@ -11,7 +11,7 @@ import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../dom
 import { tieneTiradas } from '../domain/tiradas.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
 import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion } from '../domain/vida.js';
-import { combateDe } from '../domain/combate.js';
+import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO } from '../domain/efectos.js';
@@ -41,8 +41,21 @@ function castEffects(S, ch, P, s, mode, L) {
   return { msg, extra };
 }
 
-export function cast(S, bi, mode, L, rec = null) {
+export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false } = {}) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
+  // Un espacio de conjuro por turno (Manual del Jugador 2024)
+  const lim = mode === 'slot' && !forzar ? limiteEspacio(ch, s.tiempo) : '';
+  if (lim === 'turno') {
+    const alt = [e.gratis && !e.used && { label: 'Usar su uso gratis', hl: true, fn: () => cast(S, bi, 'free') }, s.ritual && { label: 'Como ritual', fn: () => cast(S, bi, 'ritual') },
+      { label: 'Lanzar igualmente', fn: () => cast(S, bi, mode, L, rec, { forzar: true }) }].filter(Boolean);
+    toast(`<b>${esc(s.es)}</b>: ya gastaste un espacio de conjuro en este turno (${esc(combateDe(ch).espacio)}). Las reglas solo permiten uno por turno; aún puedes lanzar trucos o conjuros sin espacio.`, alt);
+    return false;
+  }
+  if (lim === 'reaccion' && ajeno == null) {
+    toast(`<b>${esc(s.es)}</b> gasta un espacio y ya gastaste uno en tu turno. Como reacción solo puedes hacerlo en el turno de otra criatura.`,
+      [{ label: 'Es en el turno de otro', hl: true, fn: () => cast(S, bi, mode, L, rec, { ajeno: true }) }, { label: 'Es en mi turno: lanzar igualmente', fn: () => cast(S, bi, mode, L, rec, { ajeno: false, forzar: true }) }]);
+    return false;
+  }
   let msg = '', snuffIdx = -1;
   if (mode === 'free') msg = `<b>${esc(s.es)}</b>: uso gratis gastado.`;
   else if (mode === 'recurso') msg = `<b>${esc(s.es)}</b> con ${esc(rec.nombre)}, sin gastar espacio (quedan ${rec.max - usosGastados(ch, rec) - 1}).`;
@@ -66,6 +79,7 @@ export function cast(S, bi, mode, L, rec = null) {
     if (mode === 'free') ee.used = true;
     if (mode === 'recurso') recState(c, rec.id).used = (recState(c, rec.id).used || 0) + 1;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
+    if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
   });
@@ -98,7 +112,7 @@ export function quickCast(S, bi, force) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
   if (s.level === 0) {
     const fx = castEffects(S, ch, P, s, 'truco', 0);
-    S.act(`${s.es} (truco)`, () => {});
+    S.act(`${s.es} (truco)`, (db, c) => { lanzarEnCombate(c, { tiempo: s.tiempo }); });
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
     if (tieneTiradas(tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return true; }
     toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${fx.msg}`); return true;
