@@ -1,6 +1,7 @@
 import { esc } from '../../core/util.js';
 import { sgn } from '../../domain/reglas2024.js';
-import { parsear, texto, esD20Simple, media, rango, resolver, distribucion, probMenor, probAlMenos, mediaDist, maxDist } from '../../domain/dados.js';
+import { parsear, texto, esD20Simple, media, rango, resolver, distribucion, maxDist } from '../../domain/dados.js';
+import { fmt, formaDe, forma, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../dadosVista.js';
 import { modsTirada, resolverModo, falloAutomatico, fmtMod } from '../../domain/efectos.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
@@ -42,27 +43,6 @@ const esD20 = () => D20.includes(V.tipo);
 const exprActual = () => (esD20() ? `1d20${V.bono ? sgn(V.bono) : ''}` : V.expr);
 const conModo = p => esD20() || (V.tipo === 'libre' && esD20Simple(p));
 const fijo = () => !!V.alTirar && !V.repetible;
-const fmt = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
-const pct = x => { const n = x * 100; return `${n > 0 && n < 1 ? '<1' : n > 99 && n < 100 ? '>99' : Math.round(n)} %`; };
-
-// ---- Dados poliédricos ----
-const FORMAS = {
-  d4: '<polygon class="c" points="20,3 37.5,34.5 2.5,34.5"/><path class="f" d="M20 3 20 25M2.5 34.5 20 25 37.5 34.5"/>',
-  d6: '<rect class="c" x="4.5" y="4.5" width="31" height="31" rx="7"/><rect class="f" x="9" y="9" width="22" height="22" rx="4"/>',
-  d8: '<polygon class="c" points="20,2 37.5,20 20,38 2.5,20"/><path class="f" d="M2.5 20h35"/>',
-  d10: '<polygon class="c" points="20,2 37.5,16.5 20,38 2.5,16.5"/><path class="f" d="M2.5 16.5 20 23 37.5 16.5M20 23v15"/>',
-  d12: '<polygon class="c" points="20,2 38,15 31,37.5 9,37.5 2,15"/><polygon class="f" points="20,9 30,16.5 26.5,29 13.5,29 10,16.5"/>',
-  d20: '<polygon class="c" points="20,2 36,11 36,29 20,38 4,29 4,11"/><polygon class="f" points="20,10 30.5,27 9.5,27"/>',
-  dx: '<circle class="c" cx="20" cy="20" r="17"/><circle class="f" cx="20" cy="20" r="12"/>',
-};
-const formaDe = c => (FORMAS['d' + c] ? 'd' + c : 'dx');
-const forma = c => `<svg viewBox="0 0 40 40" aria-hidden="true">${FORMAS[formaDe(c)]}</svg>`;
-function dado(c, v, { fuera = false, fresco = false, cls = '' } = {}) {
-  const k = [cls, v === c ? 'max' : v === 1 ? 'min' : '', fuera ? 'fuera' : '', fresco ? 'rueda' : ''].filter(Boolean).join(' ');
-  return `<span class="dd ${k}" data-f="${formaDe(c)}"${fresco ? ` data-v="${v}" data-c="${c}"` : ''} title="d${c}">${forma(c)}<b>${v}</b></span>`;
-}
-const op = s => `<i class="dd-op">${s < 0 ? '−' : '+'}</i>`;
-
 // ---- Montaje ----
 function montar() {
   const libre = V.tipo === 'libre', body = $('#daBody');
@@ -180,10 +160,6 @@ function registrar(nuevo) {
 }
 
 // ---- Resultado ----
-const MARCAS = Array.from({ length: 36 }, (_, i) => `<line x1="70" y1="3" x2="70" y2="${i % 3 ? 7 : 10}" transform="rotate(${i * 10} 70 70)"/>`).join('');
-const ROMBOS = Array.from({ length: 8 }, (_, i) => `<rect x="67.5" y="13.5" width="5" height="5" transform="rotate(${i * 45} 70 70) rotate(45 70 16)"/>`).join('');
-const ANILLO = `<svg class="dd-anillo" viewBox="0 0 140 140" aria-hidden="true"><circle class="a1" cx="70" cy="70" r="66" pathLength="100"/><g class="a-marcas">${MARCAS}</g><g class="a-rombos">${ROMBOS}</g><circle class="a2" cx="70" cy="70" r="54"/><circle class="a3" cx="70" cy="70" r="46" pathLength="100"/></svg>`;
-const GRIETA = '<svg class="dd-grieta" viewBox="0 0 140 140" aria-hidden="true"><path d="M46 14 60 46 51 64 75 80 67 104 82 128" pathLength="1"/><path d="M60 46 38 54M75 80 99 88M67 104 52 112" pathLength="1"/></svg>';
 const NOTA_NAT = {
   20: { ataque: 'Impacto crítico: los dados de daño se tiran dos veces.', muerte: 'Recuperas 1 punto de golpe y vuelves en ti.', otro: 'El mejor resultado posible del dado. En pruebas y salvaciones no es un éxito automático: cuenta el total.' },
   1: { ataque: 'Fallo automático, sea cual sea el total.', muerte: 'Cuenta como dos fallos.', otro: 'El peor resultado posible del dado. En pruebas y salvaciones no es un fallo automático: cuenta el total.' },
@@ -202,19 +178,18 @@ function pintarOut(anim = false) {
   const sig = V.siguiente && !x.falla && !(V.tipo === 'ataque' && x.pifia)
     ? `<button type="button" class="dd-sig dd-rev ${x.crit ? 'crit' : ''}" style="--r:3" data-dasig>${gi('cortante')}${esc(V.siguiente.texto)}${x.crit ? ' crítico' : ''}</button>` : '';
   el.className = `dd-out ${x.estado} ${n ? `n${n}` : ''} ${x.viejo ? 'viejo' : ''}`;
-  el.innerHTML = `<div class="dd-hero"><div class="dd-sello">${n === 20 ? '<i class="dd-rayos" aria-hidden="true"></i>' : ''}${ANILLO}<span class="dd-num" aria-hidden="true">${x.total}</span>${n === 1 ? GRIETA : ''}</div>
+  el.innerHTML = `<div class="dd-hero">${sello(x.total, { n })}
       <div class="dd-lbl">${esc(x.lbl)}${cdTxt}</div></div>
-    ${nat}<div class="dd-ec">${ecuacion(x)}</div>${probHtml(x)}
+    ${nat}<div class="dd-ec">${ecuacion(x)}</div>${x.falla ? '' : probHtml(x.dist, x.tope ? x.res.total : x.total, { cd: x.cd })}
     ${x.efecto ? `<div class="da-efecto dd-rev" style="--r:2">${x.efecto}</div>` : ''}${sig}`;
-  if (anim && !reducedMotion()) animar(el, x, tok); else asentar(el, x, anim);
+  if (!anim) { sellar(el, x.total, false); asentar(el, x, false); return; }
+  dlg().classList.add('rodando');
+  rodar(el, { total: x.total, antes: x.antes, lo: x.dist ? x.dist.min : 1, hi: x.dist ? maxDist(x.dist) : Math.max(20, x.total), nuevo: x.nuevo, vivo: () => tok === TOKEN, fin: () => asentar(el, x, true) });
 }
 
 function ecuacion(x) {
   const { r, extras, planos } = x.res, out = [];
-  if (r.d20) {
-    const [fa, fb] = r.frescos[0], usaA = r.d20.usa === r.d20.a;
-    out.push(`<span class="dd-par ${x.modo}" title="${x.modo === 'ventaja' ? 'Ventaja: cuenta el mayor' : 'Desventaja: cuenta el menor'}">${dado(20, r.d20.a, { fuera: !usaA, fresco: fa })}${dado(20, r.d20.b, { fuera: usaA, fresco: fb })}<small>${x.modo}</small></span>`);
-  } else r.grupos.forEach((g, k) => out.push(`${k || g.signo < 0 ? op(g.signo) : ''}<span class="dd-grupo">${g.vals.map((v, i) => dado(g.caras, v, { fuera: g.quita?.includes(i), fresco: r.frescos[k][i] })).join('')}</span>`));
+  out.push(dadosDe(r, x.modo));
   if (r.bono) out.push(`${op(r.bono)}<span class="dd-bono">${Math.abs(r.bono)}</span>`);
   for (const e of extras) out.push(`${op(e.neg ? -1 : 1)}<span class="dd-fx ${e.m.mal ? 'mal' : 'bien'}">${e.t.grupos.map((g, k) => g.vals.map((v, i) => dado(g.caras, v, { cls: 'mini', fresco: e.t.frescos[k][i] })).join('')).join('')}<small>${esc(e.m.fuente)}</small></span>`);
   for (const m of planos) out.push(`${op(m.valor)}<span class="dd-fx ${m.mal ? 'mal' : 'bien'}"><span class="dd-bono">${Math.abs(m.valor)}</span><small>${esc(m.fuente)}</small></span>`);
@@ -224,76 +199,17 @@ function ecuacion(x) {
   return out.join('');
 }
 
-function probHtml(x) {
-  const d = x.dist; if (!d || d.p.length < 2) return '';
-  const t = x.tope ? x.res.total : x.total, L = d.p.length, nb = Math.min(L, 44), w = L / nb, bins = [];
-  for (let b = 0; b < nb; b++) {
-    const i0 = Math.floor(b * w), i1 = Math.max(i0, Math.floor((b + 1) * w) - 1);
-    let s = 0; for (let i = i0; i <= i1; i++) s += d.p[i];
-    bins.push({ lo: d.min + i0, hi: d.min + i1, s });
-  }
-  const top = Math.max(...bins.map(b => b.s)), W = 6, cd = x.cd;
-  const bars = bins.map((b, i) => {
-    const h = 3 + 33 * (b.s / top), tu = t >= b.lo && t <= b.hi;
-    const k = tu ? 'tu' : cd != null ? (b.lo >= cd ? 'pasa' : 'no') : b.hi < t ? 'bajo' : 'alto';
-    return `<rect class="${k}" x="${i * W + 1}" y="${38 - h}" width="${W - 2}" height="${h}" rx="1.2" style="--i:${i}"/>`;
-  }).join('');
-  const cdX = cd != null && cd > d.min && cd <= maxDist(d) ? ((cd - d.min) / w) * W : null;
-  const lineaCd = cdX != null ? `<line class="cd" x1="${cdX}" y1="0" x2="${cdX}" y2="40"/>` : '';
-  const menor = probMenor(d, t), mx = maxDist(d);
-  const frase = t >= mx ? '<b>El mejor resultado posible</b>' : t <= d.min ? '<b>El peor resultado posible</b>' : `Mejor que el <b>${pct(menor)}</b> de las tiradas`;
-  const extra = [`media ${fmt(Math.round(mediaDist(d) * 10) / 10)}`, cd != null ? `${pct(probAlMenos(d, cd))} de superar la CD` : ''].filter(Boolean).join(' · ');
-  return `<figure class="dd-prob dd-rev" style="--r:1"><svg viewBox="0 0 ${nb * W} 40" preserveAspectRatio="none" role="img" aria-label="Probabilidad de cada resultado, de ${d.min} a ${mx}">${bars}${lineaCd}</svg>${cdX != null ? `<span class="dd-cdmarca" style="left:${(cdX / (nb * W)) * 100}%">CD ${cd}</span>` : ''}
-    <figcaption><span>${d.min}</span><span class="c"><span>${frase}</span><small>${extra}</small></span><span>${mx}</span></figcaption></figure>`;
-}
-
-// Los dados nuevos ruedan y muestran caras al azar hasta posarse; el total se sella al final.
-function animar(el, x, tok) {
-  const dados = [...el.querySelectorAll('.dd.rueda')], num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
-  const paso = dados.length ? Math.min(70, 480 / dados.length) : 0, dur = x.nuevo ? 460 : 320;
-  dados.forEach((d, i) => d.style.setProperty('--d', `${Math.round(i * paso)}ms`));
-  const fin = dados.length ? dur + (dados.length - 1) * paso : x.nuevo ? 420 : 260;
-  const [lo, hi] = x.dist ? [x.dist.min, maxDist(x.dist)] : [1, Math.max(20, x.total)];
-  const azar = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-  hero.classList.add('girando'); dlg().classList.add('rodando');
-  const t0 = performance.now(); let ult = 0;
-  const frame = now => {
-    if (tok !== TOKEN || !el.isConnected) return;
-    const e = now - t0, cambia = now - ult > 55; if (cambia) ult = now;
-    dados.forEach((d, i) => {
-      if (d.dataset.ok) return;
-      if (e >= i * paso + dur * 0.78) { d.querySelector('b').textContent = d.dataset.v; d.dataset.ok = '1'; d.classList.add('posado'); }
-      else if (cambia) d.querySelector('b').textContent = azar(1, +d.dataset.c);
-    });
-    if (e < fin) {
-      if (cambia) num.textContent = x.antes != null ? Math.round(x.antes + (x.total - x.antes) * (e / fin)) : azar(lo, hi);
-      requestAnimationFrame(frame);
-    } else asentar(el, x, true);
-  };
-  requestAnimationFrame(frame);
-}
 function asentar(el, x, anim) {
-  const num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
-  num.textContent = x.total; hero.classList.remove('girando'); dlg().classList.remove('rodando');
-  el.querySelectorAll('.dd.rueda b').forEach(b => { b.textContent = b.parentElement.dataset.v; });
-  el.classList.add('listo'); if (anim) hero.classList.add('sella');
+  dlg().classList.remove('rodando');
   $('#daVivo').textContent = `${x.total}${x.lbl ? ` ${x.lbl}` : ''}${x.cd != null && !x.falla ? `, CD ${x.cd} ${x.total >= x.cd ? 'superada' : 'fallada'}` : ''}${x.crit ? ', 20 natural' : x.pifia ? ', 1 natural' : ''}.`;
   if (!anim) return;
   haptic(x.crit || x.pifia ? 'heavy' : 'light');
   if (reducedMotion()) return;
-  const s = el.querySelector('.dd-sello').getBoundingClientRect(), cx = s.left + s.width / 2, cy = s.top + s.height / 2;
-  if (x.crit) {
-    burst(cx, cy, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 });
-    setTimeout(() => burst(cx, cy, { color: '#FFF3C8', n: 30, speed: 3, up: 2.5, life: 1200, size: 1.8, gravity: -0.03 }), 240);
-  } else if (x.pifia) {
-    burst(cx, cy, { color: '#FF5A45', n: 26, speed: 3.2, up: -0.4, life: 1100, size: 2.4, gravity: 0.14 });
-    burst(cx, cy, { color: '#6b6f7d', n: 18, speed: 2.4, up: 0.4, life: 1300, size: 3, gravity: 0.18 });
-    const d = $('#daBody'); d.classList.remove('dd-sacude'); void d.offsetWidth; d.classList.add('dd-sacude'); setTimeout(() => d.classList.remove('dd-sacude'), 700);
-  } else if (x.nuevo) {
-    const col = x.estado === 'exito' ? '#6ECB9D' : x.estado === 'fallo' ? '#F2826F' : getComputedStyle(el).getPropertyValue('--gold').trim() || '#E7B85F';
-    const max = x.dist && x.total >= maxDist(x.dist);
-    burst(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
-  }
+  if (x.crit || x.pifia) { fxNatural(el, x.crit ? 20 : 1, $('#daBody')); return; }
+  if (!x.nuevo) return;
+  const [cx, cy] = centro(el.querySelector('.dd-sello')), max = x.dist && x.total >= maxDist(x.dist);
+  const col = x.estado === 'exito' ? '#6ECB9D' : x.estado === 'fallo' ? '#F2826F' : getComputedStyle(el).getPropertyValue('--gold').trim();
+  burst(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
 }
 
 // ---- Crónica ----
