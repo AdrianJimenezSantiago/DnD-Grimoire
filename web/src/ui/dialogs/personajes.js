@@ -19,7 +19,7 @@ import { openRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases, lineaClase } from '../subclases.js';
 import { fileStore, shareJson } from '../../platform/native.js';
 import { pgMaximoCalculado } from '../../domain/vida.js';
-import { campoElegible, ponerValor, elegirDote, elegirEspecie, elegirTrasfondo, ESPECIE_BASE } from '../elecciones.js';
+import { campoElegible, ponerValor, elegirDote, elegirEspecie, elegirTrasfondo, elegirEstilo, ESPECIE_BASE } from '../elecciones.js';
 import { gi } from '../tema.js';
 import { SCHEMA } from '../../domain/modelo.js';
 import { HABILIDADES, AB_CORTA, HAB_CLASE, NOMBRE_HAB, habilidadesTrasfondo, bonoHabilidad, salvacionesCompetentes } from '../../domain/habilidades.js';
@@ -31,6 +31,7 @@ import { allSpellItems, itemToSid, itemMeta, listFilter, compendio } from '../..
 import { conjurosPendientes, anadirPendientes } from '../../domain/progresion.js';
 import { anadirComun, equipoDe } from '../../domain/equipo.js';
 import { previewSpell } from './conjuro.js';
+import { estadoEstilo, trucosAlternativa, estiloDe, esAlternativa } from '../../domain/estilos.js';
 
 let S, onCreated;
 let MC = [], DOTES = [], HAB = {}, SALV = [];
@@ -86,7 +87,7 @@ async function remove(id) {
 const PASOS = [['clase', 'Clase'], ['origen', 'Origen'], ['car', 'Características'], ['comp', 'Competencias'], ['dotes', 'Dotes'], ['conj', 'Conjuros'], ['fin', 'Detalles']];
 const ICO_PASO = { origen: 'trasfondo', car: 'd20', comp: 'eficaz', dotes: 'dote', conj: 'libro', fin: 'md_pluma' };
 let formId = null, conjAbierto = false, CREANDO = false, PASO = 0, VISTOS = new Set(), CAR = null, TEMA = '';
-let ELEC = {}, EQ = { clase: 'A', trasfondo: 'A', oro: null }, HERR = [], IDI = [], CONJ = { trucos: [], prep: [], libro: [] }, CQ = {};
+let ELEC = {}, EQ = { clase: 'A', trasfondo: 'A', oro: null }, HERR = [], IDI = [], CONJ = { trucos: [], prep: [], libro: [], estilo: [] }, CQ = {};
 const lib = () => biblioteca();
 
 function cargarCar(c) {
@@ -151,7 +152,7 @@ export function openCharForm(id) {
       <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
   MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
-  ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [] }; CQ = {};
+  ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
   sync(true); openSheet(charDlg());
@@ -184,6 +185,7 @@ function pendientes(d) {
   if (r.extra.faltan) P.comp.push(`${r.extra.faltan} de ${joinY(r.extra.fuentes.map(f => f.nombre))}.`);
   if (r.pericia.faltan) P.comp.push(`${r.pericia.faltan} ${r.pericia.faltan === 1 ? 'pericia' : 'pericias'}.`);
   if (versatilPendiente(d, lib().dotes)) P.dotes.push('Humano: una dote de origen (Versátil).');
+  const est = estadoEstilo(d, lib().dotes); if (est.faltan) P.dotes.push(`Estilo de combate de ${joinY(est.fuentes)}.`);
   for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
   if (CREANDO) {
     if (IDI.length < 2) P.origen.push(`Elige ${2 - IDI.length} ${IDI.length === 1 ? 'idioma' : 'idiomas'} más.`);
@@ -191,15 +193,16 @@ function pendientes(d) {
     const c = cupoConjuros(d);
     if (c.trucos > CONJ.trucos.length) P.conj.push(`${c.trucos - CONJ.trucos.length} ${c.trucos - CONJ.trucos.length === 1 ? 'truco' : 'trucos'}.`);
     if (c.libro > CONJ.libro.length) P.conj.push(`${c.libro - CONJ.libro.length} para el libro de conjuros.`);
+    if (c.estilo > CONJ.estilo.length) P.conj.push(`${c.estilo - CONJ.estilo.length} ${c.estilo - CONJ.estilo.length === 1 ? 'truco' : 'trucos'} de ${joinY(trucosAlternativa(d).map(a => a.nombre))}.`);
     if (c.prep > CONJ.prep.length) P.conj.push(`${c.prep - CONJ.prep.length} ${c.prep - CONJ.prep.length === 1 ? 'conjuro preparado' : 'conjuros preparados'}.`);
   }
   return P;
 }
 
 function cupoConjuros(d) {
-  const P = perfil(d); if (!P.c) return { P, trucos: 0, prep: 0, libro: 0 };
+  const P = perfil(d), estilo = 2 * trucosAlternativa(d).length; if (!P.c) return { P, trucos: 0, prep: 0, libro: 0, estilo };
   const mago = clasesDe(d).find(c => c.clase === 'Mago');
-  return { P, trucos: P.maxCant, libro: mago ? 6 + 2 * (mago.nivel - 1) : 0, prep: mago && P.lista === 'Mago' ? 0 : P.maxPrep };
+  return { P, estilo, trucos: P.maxCant, libro: mago ? 6 + 2 * (mago.nivel - 1) : 0, prep: mago && P.lista === 'Mago' ? 0 : P.maxPrep };
 }
 const pill = (attr, v, on, extra = '') => `<button type="button" class="cc-pill ${on ? 'on' : ''}" ${attr}="${esc(v)}" aria-pressed="${on}" ${extra}>${esc(v.split('|').pop())}</button>`;
 function eleccionHtml(e) {
@@ -259,6 +262,8 @@ function pintarConj(d) {
   if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && listFilter(it, lista), `Trucos (${c.trucos})`);
   if (c.libro) h += chooser('libro', c.libro, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, 'Mago'), `Libro de conjuros (${c.libro})`)
     + `<p class="hint">De ellos preparas ${P.maxPrep}: los primeros que elijas quedan preparados, y los cambias en la hoja tras un descanso largo.</p>`;
+  for (const a of trucosAlternativa(d)) h += chooser('estilo', c.estilo, it => it.l === 0 && listFilter(it, a.lista), `Trucos de ${a.nombre} (${c.estilo})`)
+    + `<p class="hint">Cuentan como conjuros de ${esc(d.clase.toLowerCase())} y no ocupan preparados.</p>`;
   if (c.prep) h += chooser('prep', c.prep, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, lista), `Conjuros preparados (${c.prep})`);
   const auto = conjurosPendientes(S.db, d, compendio()).map(x => x.x.es);
   if (auto.length) h += `<p class="hint">Siempre preparados por tu clase o subclase: ${esc(joinY(auto))}.</p>`;
@@ -363,11 +368,13 @@ function pintarComp(draft) {
 function pintarDotes(d) {
   const origen = dotesDe({ ...d, dotes: [] }, lib().trasfondos)[0];
   $('#f_dotes').innerHTML = (origen ? `<span class="dote-chip fija" title="Dote de origen de tu trasfondo">${esc(origen.detalle ? `${origen.nombre} (${origen.detalle})` : origen.nombre)}<small>${esc(d.trasfondo)}</small></span>` : '')
-    + DOTES.map((n, i) => `<button type="button" class="dote-chip" data-dotedel="${i}" aria-label="Quitar la dote ${esc(n)}">${esc(n)}<span aria-hidden="true">×</span></button>`).join('')
+    + DOTES.map((n, i) => `<button type="button" class="dote-chip ${estiloDe(n, lib().dotes) || esAlternativa(n) ? 'estilo' : ''}" data-dotedel="${i}" aria-label="Quitar la dote ${esc(n)}">${esc(n)}${estiloDe(n, lib().dotes) || esAlternativa(n) ? '<small>estilo</small>' : ''}<span aria-hidden="true">×</span></button>`).join('')
     || '<span class="hint">Sin dotes todavía.</span>';
   const av = [], m = mejorasHasta(d);
   if (!d.trasfondo) av.push(['', 'Tu dote de origen depende del trasfondo: elígelo en <button type="button" class="linkish" data-irpaso="1">Origen</button>.']);
   else if (origen) av.push(['ok', `<b>${esc(d.trasfondo)}</b> te da <b>${esc(origen.nombre)}</b>. No hace falta añadirla.`]);
+  const est = estadoEstilo(d, lib().dotes);
+  if (est.puede) av.push([est.faltan ? 'falta' : 'ok', `${est.faltan ? '<b class="cc-num">1</b> ' : ''}<b>${esc(joinY(est.fuentes))}</b> tiene el rasgo Estilo de combate: ${est.faltan ? 'elige una dote de estilo de combate.' : 'ya lo tienes elegido.'} <button type="button" class="linkish" data-elegirestilo>${est.faltan ? 'Elegir estilo' : 'Cambiar de estilo'}</button>`]);
   if (versatilPendiente(d, lib().dotes)) av.push(['falta', '<b class="cc-num">1</b> <b>Humano</b> (Versátil): elige una dote de origen más. No puede repetir la de tu trasfondo.']);
   if (m.asi) av.push(['', `A nivel ${m.nivel} tu clase te ha dado ${m.asi} ${m.asi === 1 ? 'mejora' : 'mejoras'} de característica${m.epico ? ` y ${m.epico === 1 ? 'un don épico' : `${m.epico} dones épicos`}` : ''}. En cada una eliges una dote general o subir características (+2 o +1 y +1): si subiste características, súmalas en <button type="button" class="linkish" data-irpaso="2">Características</button> con «A mano».`]);
   $('#h_dotes').innerHTML = av.map(([c, t]) => `<div class="cc-aviso ${c}">${t}</div>`).join('');
@@ -482,6 +489,7 @@ async function save() {
       const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
         if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, fuente: P.listaNombre || c.clase, ...rel }); });
       add(CONJ.trucos, {}); add(CONJ.libro.slice(0, P.maxPrep), { fuente: 'Libro', prep: true }); add(CONJ.libro.slice(P.maxPrep), { fuente: 'Libro' }); add(CONJ.prep, { prep: true });
+      add(CONJ.estilo, { fuente: trucosAlternativa(c)[0]?.nombre || 'Estilo de combate', always: true, prep: true });
       anadirPendientes(db, c, conjurosPendientes(db, c, compendio()));
       for (const [n, q] of items) anadirComun(c, datosObjeto(n, q));
       equipoDe(c).monedas.po += po;
@@ -499,7 +507,7 @@ function cambiarClase(nueva) {
   const r = repartoHabilidades(antes), lista = (HAB_CLASE[nueva] || [0, []])[1];
   if (CREANDO) for (const [k, f] of Object.entries(r.fuente)) if (f === 'clase' && HAB[k] === 1 && !lista.includes(k)) delete HAB[k];
   $('#f_clase').value = nueva; MC = MC.filter(m => m.clase !== nueva); pintarMulticlase();
-  CONJ = { trucos: [], prep: [], libro: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null;
+  CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null;
   const v = $('#f_subclase').value, vale = subclasesDe(nueva).includes(v); $('#f_subWrap').innerHTML = campoSubclase(nueva, vale ? v : '', 'id="f_subclase" aria-label="Subclase"');
   if (CAR.auto && CAR.metodo !== 'libre' && !(CAR.metodo === 'tiradas' && !CAR.tiradas.length)) CAR.base = repartoSugerido(nueva, ABILS.map(([k]) => CAR.base[k]));
   sync(false);
@@ -538,6 +546,8 @@ export function init(store, { onNewCharacterAddSpells }) {
     sync(false, { sinCar: e.target.matches('input[type="text"], input:not([type]), textarea') });
   });
   form.addEventListener('change', e => {
+    const t = e.target;
+    if (t.matches('textarea, input:not([type="checkbox"]):not([type="radio"])') && t.id !== 'f_trasfondo' && t.id !== 'f_especie' && !t.dataset.ccchk) return;
     if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
     if (e.target.dataset.ccchk) { const k = e.target.dataset.ccchk, v = e.target.value; CONJ[k] = e.target.checked ? [...new Set([...CONJ[k], v])] : CONJ[k].filter(x => x !== v);
       const y = $('#charForm').scrollTop; sync(false); $('#charForm').scrollTop = y; return; }
@@ -593,11 +603,15 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-mcdel]', (e, b) => { MC.splice(+b.dataset.mcdel, 1); pintarMulticlase(); sync(false); });
   on(form, 'click', '[data-mcstep]', (e, b) => { const [i, d] = b.dataset.mcstep.split('|').map(Number); MC[i].nivel = clamp((parseInt(MC[i].nivel, 10) || 1) + d, 1, 19); pintarMulticlase(); sync(false); });
   on(form, 'click', '#f_doteAdd', anadirDote);
+  on(form, 'click', '[data-elegirestilo]', async () => {
+    const d = readForm(), n = await elegirEstilo({ ...d, dotes: DOTES.filter(x => !estiloDe(x, lib().dotes) && !esAlternativa(x)) }, estadoEstilo(d, lib().dotes).fuentes[0]); if (!n) return;
+    DOTES = [...DOTES.filter(x => !estiloDe(x, lib().dotes) && !esAlternativa(x)), n]; CONJ.estilo = []; sync(false);
+  });
   on(form, 'click', '[data-elegir]', async (e, b) => {
     const inp = b.closest('.elg').querySelector('input'), v = await (b.dataset.elegir === 'especie' ? elegirEspecie(inp.value) : elegirTrasfondo(inp.value));
     if (v != null) ponerValor(inp, v);
   });
-  on(form, 'click', '[data-dotedel]', (e, b) => { DOTES.splice(+b.dataset.dotedel, 1); sync(false); });
+  on(form, 'click', '[data-dotedel]', (e, b) => { DOTES.splice(+b.dataset.dotedel, 1); if (!trucosAlternativa({ dotes: DOTES }).length) CONJ.estilo = []; sync(false); });
   on(form, 'click', '#f_conjOpen', () => { conjAbierto = true; sync(false); $('#f_aptitud').focus(); });
   on(form, 'click', '[data-step]', (e, b) => { const i = $('#f_nivel'); i.value = clamp((parseInt(i.value, 10) || 1) + (+b.dataset.step), 1, 20); sync(false); });
   $('#charSave').addEventListener('click', save);

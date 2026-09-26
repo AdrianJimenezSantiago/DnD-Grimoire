@@ -227,3 +227,22 @@
 .cc-conj .ch-head h3 { margin: 0; }
 .cc-conj input[type="search"] { margin-bottom: 6px; }
 .cc-lista { max-height: 340px; overflow: auto; border-radius: var(--r-s); border: 1px solid var(--line-soft); padding: 2px 6px; }
+
+/* Estilos de combate (subida de nivel) */
+.lv-estilo-q { margin-bottom: 12px; }
+.lv-estilos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px; }
+.lv-estilo { display: grid; grid-template-columns: 30px 1fr; align-items: start; gap: 4px 10px; padding: 10px 12px; text-align: left; justify-content: stretch; border-radius: var(--r-m); background: var(--surface);
+  transition: border-color var(--t-med), box-shadow var(--t-med), background var(--t-med), transform var(--t-fast); }
+.lv-estilo:hover:not(:disabled) { transform: translateY(-1px); border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
+.lv-estilo-ico { grid-row: span 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: var(--gold); background: var(--gold-soft); }
+.lv-estilo-ico .gi { width: 18px; height: 18px; }
+.lv-estilo b { font: 600 var(--fs-m) / 1.2 var(--serif); color: var(--ink); }
+.lv-estilo b small { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ink-3); }
+.lv-estilo .sp-text { font: 400 var(--fs-xs) / 1.45 var(--sans); color: var(--ink-2); }
+.lv-estilo .sp-text p { margin: 0; }
+.lv-estilo.alt { border-style: dashed; }
+.lv-estilo.on { border-color: var(--gold); background: linear-gradient(135deg, var(--gold-soft), var(--surface) 70%); box-shadow: 0 0 0 1px var(--gold), 0 8px 24px -14px var(--glow); }
+.lv-estilo.on .lv-estilo-ico { color: var(--on-gold, #fff); background: var(--gilt); }
+.lv-estilo:disabled { opacity: .5; }
+.cb-estilo { color: var(--ok); }
+.dote-chip.estilo { border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
