@@ -192,6 +192,8 @@
 .dd-fx.bien { border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); background: var(--gold-soft); }
 .dd-fx.mal { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 9%, transparent); }
 .dd-res { display: inline-grid; place-items: center; min-width: 36px; height: 30px; padding: 0 10px; border-radius: 9px; background: var(--gilt); color: var(--on-gold); font: 700 var(--fs-m) / 1 var(--display); box-shadow: 0 0 14px -4px var(--glow); }
+.dd-tachado { font: 600 var(--fs-m) / 1 var(--display); color: var(--ink-3); text-decoration-thickness: 2px; }
+.dd-tope { flex-basis: 100%; font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--dd-oro); }
 .dd-igual { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 
 /* Probabilidad */

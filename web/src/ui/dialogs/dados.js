@@ -144,8 +144,10 @@ function lanzar(nuevo = true) {
   const modo = conModo(p) ? V.modo || 'normal' : 'normal', antes = V.res;
   const previo = !nuevo && antes && texto(antes.p) === texto(p) ? antes.res : null;
   const res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });
-  const d20 = conModo(p), nat = res.r.natural, total = res.total;
-  const crit = d20 && nat === 20, pifia = d20 && nat === 1, falla = falloAutomatico(V.mods || []);
+  const d20 = conModo(p), nat = res.r.natural, falla = falloAutomatico(V.mods || []);
+  const crit = d20 && nat === 20, pifia = d20 && nat === 1;
+  // En una prueba de característica, un 20 natural no baja de 20 aunque los modificadores resten.
+  const tope = V.tipo === 'prueba' && crit && res.total < 20, total = tope ? 20 : res.total;
   let lbl = V.tipo === 'ataque' ? 'para impactar' : V.tipo === 'dano' ? V.sub || 'de daño' : V.tipo === 'iniciativa' ? 'de iniciativa' : V.tipo === 'libre' ? texto(p) : 'en la tirada';
   if (falla) lbl = 'fallo automático';
   if (V.tipo === 'muerte') lbl = nat === 20 ? '¡Vuelves con 1 PG!' : nat === 1 ? 'Dos fallos' : total >= 10 ? 'Éxito' : 'Fallo';
@@ -155,7 +157,7 @@ function lanzar(nuevo = true) {
   // En pruebas y salvaciones con CD manda el total; en ataques y salvaciones contra muerte, el dado natural.
   const porDado = V.tipo === 'ataque' || V.tipo === 'muerte' || cd == null;
   const estado = falla ? 'pifia' : porDado && crit ? 'crit' : porDado && pifia ? 'pifia' : cd != null ? (total >= cd ? 'exito' : 'fallo') : '';
-  V.res = { p, res, total, antes: antes && !nuevo ? antes.total : null, nat, crit, pifia, falla, lbl, efecto, cd, estado, modo, nuevo, firma: firmaMods(),
+  V.res = { p, res, total, tope, antes: antes && !nuevo ? antes.total : null, nat, crit, pifia, falla, lbl, efecto, cd, estado, modo, nuevo, firma: firmaMods(),
     dist: falla ? null : distDe(p, modo, res), id: nuevo || !antes ? ++SEQ : antes.id };
   registrar(nuevo || !antes);
   pintarOut(true); pintarHist(nuevo || !antes); actualizarBoton();
@@ -217,13 +219,14 @@ function ecuacion(x) {
   for (const e of extras) out.push(`${op(e.neg ? -1 : 1)}<span class="dd-fx ${e.m.mal ? 'mal' : 'bien'}">${e.t.grupos.map((g, k) => g.vals.map((v, i) => dado(g.caras, v, { cls: 'mini', fresco: e.t.frescos[k][i] })).join('')).join('')}<small>${esc(e.m.fuente)}</small></span>`);
   for (const m of planos) out.push(`${op(m.valor)}<span class="dd-fx ${m.mal ? 'mal' : 'bien'}"><span class="dd-bono">${Math.abs(m.valor)}</span><small>${esc(m.fuente)}</small></span>`);
   const piezas = r.grupos.reduce((s, g) => s + g.vals.length, 0) + (r.d20 ? 1 : 0) + (r.bono ? 1 : 0) + extras.length + planos.length;
-  if (piezas > 1) out.push(`<span class="dd-igual"><i class="dd-op">=</i><b class="dd-res">${x.total}</b></span>`);
+  if (x.tope) out.push(`<span class="dd-igual"><i class="dd-op">=</i><s class="dd-tachado">${x.res.total}</s><i class="dd-op">→</i><b class="dd-res">${x.total}</b></span><small class="dd-tope">Un 20 natural en una prueba no baja de 20.</small>`);
+  else if (piezas > 1) out.push(`<span class="dd-igual"><i class="dd-op">=</i><b class="dd-res">${x.total}</b></span>`);
   return out.join('');
 }
 
 function probHtml(x) {
   const d = x.dist; if (!d || d.p.length < 2) return '';
-  const L = d.p.length, nb = Math.min(L, 44), w = L / nb, bins = [];
+  const t = x.tope ? x.res.total : x.total, L = d.p.length, nb = Math.min(L, 44), w = L / nb, bins = [];
   for (let b = 0; b < nb; b++) {
     const i0 = Math.floor(b * w), i1 = Math.max(i0, Math.floor((b + 1) * w) - 1);
     let s = 0; for (let i = i0; i <= i1; i++) s += d.p[i];
@@ -231,14 +234,14 @@ function probHtml(x) {
   }
   const top = Math.max(...bins.map(b => b.s)), W = 6, cd = x.cd;
   const bars = bins.map((b, i) => {
-    const h = 3 + 33 * (b.s / top), tu = x.total >= b.lo && x.total <= b.hi;
-    const k = tu ? 'tu' : cd != null ? (b.lo >= cd ? 'pasa' : 'no') : b.hi < x.total ? 'bajo' : 'alto';
+    const h = 3 + 33 * (b.s / top), tu = t >= b.lo && t <= b.hi;
+    const k = tu ? 'tu' : cd != null ? (b.lo >= cd ? 'pasa' : 'no') : b.hi < t ? 'bajo' : 'alto';
     return `<rect class="${k}" x="${i * W + 1}" y="${38 - h}" width="${W - 2}" height="${h}" rx="1.2" style="--i:${i}"/>`;
   }).join('');
   const cdX = cd != null && cd > d.min && cd <= maxDist(d) ? ((cd - d.min) / w) * W : null;
   const lineaCd = cdX != null ? `<line class="cd" x1="${cdX}" y1="0" x2="${cdX}" y2="40"/>` : '';
-  const menor = probMenor(d, x.total), mx = maxDist(d);
-  const frase = x.total >= mx ? '<b>El mejor resultado posible</b>' : x.total <= d.min ? '<b>El peor resultado posible</b>' : `Mejor que el <b>${pct(menor)}</b> de las tiradas`;
+  const menor = probMenor(d, t), mx = maxDist(d);
+  const frase = t >= mx ? '<b>El mejor resultado posible</b>' : t <= d.min ? '<b>El peor resultado posible</b>' : `Mejor que el <b>${pct(menor)}</b> de las tiradas`;
   const extra = [`media ${fmt(Math.round(mediaDist(d) * 10) / 10)}`, cd != null ? `${pct(probAlMenos(d, cd))} de superar la CD` : ''].filter(Boolean).join(' · ');
   return `<figure class="dd-prob dd-rev" style="--r:1"><svg viewBox="0 0 ${nb * W} 40" preserveAspectRatio="none" role="img" aria-label="Probabilidad de cada resultado, de ${d.min} a ${mx}">${bars}${lineaCd}</svg>${cdX != null ? `<span class="dd-cdmarca" style="left:${(cdX / (nb * W)) * 100}%">CD ${cd}</span>` : ''}
     <figcaption><span>${d.min}</span><span class="c"><span>${frase}</span><small>${extra}</small></span><span>${mx}</span></figcaption></figure>`;
