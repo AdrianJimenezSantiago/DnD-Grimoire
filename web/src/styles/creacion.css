@@ -185,3 +185,8 @@
 .cc-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
 .cc-acciones button { display: inline-flex; align-items: center; gap: 6px; }
 .cc-acciones .icon { width: 16px; height: 16px; }
+
+/* Subclase: solo desde nivel 3 */
+.cc-subbloq { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: var(--r-s); border: 1px dashed var(--line); color: var(--ink-3);
+  font: italic 400 var(--fs-m) / 1.2 var(--serif); background: repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--line) 25%, transparent) 8px 9px); }
+.cc-subbloq[hidden], [data-mcsub][hidden], #f_subWrap[hidden] { display: none; }
