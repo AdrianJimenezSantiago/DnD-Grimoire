@@ -6,6 +6,7 @@ Creas a tu personaje (clase, subclase, especie, trasfondo, nivel y característi
 
 ## Qué ofrece
 
+- **Creación guiada paso a paso** (clase, origen, características, competencias, dotes y detalles): matriz estándar, compra de puntos o tiradas de 4d6, los aumentos del trasfondo, las habilidades que quedan por elegir y una ventana que toma el color de tu clase y subclase.
 - **Todas las clases y subclases de 2024, del nivel 1 al 20**, con multiclase y un asistente para subir de nivel que te dice qué ganas.
 - **Puntos de golpe y estado:** daño, curación y temporales, dados de golpe, salvaciones contra muerte, estados, agotamiento e inspiración heroica. Si estás concentrado, te da la CD para mantenerlo.
 - **Características, salvaciones y habilidades** calculadas con tu competencia y tus pericias, listas para tirarlas con un toque.

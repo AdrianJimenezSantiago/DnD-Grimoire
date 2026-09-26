@@ -28,7 +28,7 @@ export function blankChar(over = {}) {
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], rasgosOcultos: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
-    habilidades: null, salvacionesExtra: [], vida: null, combate: null,
+    habilidades: null, salvacionesExtra: [], vida: null, combate: null, creacion: null,
     ...clone(over),
   };
 }
@@ -67,9 +67,19 @@ export function normChar(c) {
   if (sinHabilidades) c.habilidades = Object.fromEntries(habilidadesTrasfondo(c).map(k => [k, 1]));
   c.habilidades = Object.fromEntries(HABILIDADES.map(([k]) => [k, Math.max(0, Math.min(2, parseInt(c.habilidades[k], 10) || 0))]).filter(([, n]) => n));
   c.salvacionesExtra = [...new Set((Array.isArray(c.salvacionesExtra) ? c.salvacionesExtra : []).filter(k => ['fue', 'des', 'con', 'int', 'sab', 'car'].includes(k)))];
+  c.creacion = normCreacion(c.creacion);
   c.vida = normVida(c.vida);
   c.combate = normCombate(c.combate);
   return c;
+}
+
+const METODOS_CAR = ['matriz', 'compra', 'tiradas', 'libre'];
+function normCreacion(x) {
+  if (!x || typeof x !== 'object' || !x.base) return null;
+  const n = (v, lo, hi, d) => clamp(parseInt(v, 10) || d, lo, hi);
+  return { metodo: METODOS_CAR.includes(x.metodo) ? x.metodo : 'libre', base: Object.fromEntries(Object.keys(STATS0).map(k => [k, n(x.base[k], 1, 30, 10)])),
+    bonos: Object.fromEntries(Object.entries(x.bonos || {}).filter(([k, v]) => k in STATS0 && (v === 1 || v === 2))),
+    tiradas: (Array.isArray(x.tiradas) ? x.tiradas : []).slice(0, 6).map(t => n(t, 3, 18, 10)) };
 }
 
 export function normDb(d) {
