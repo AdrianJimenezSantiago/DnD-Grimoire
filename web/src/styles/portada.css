@@ -1,0 +1,119 @@
+/* Portada: sin personaje abierto, la app no es gris. Una rueda con las doce clases marca el color,
+   que va girando por el círculo cromático y se detiene en lo que miras (una clase o un personaje). */
+@property --ln-h { syntax: '<number>'; inherits: false; initial-value: 40; }
+@property --ln-s { syntax: '<percentage>'; inherits: false; initial-value: 62%; }
+@property --ln-sg { syntax: '<percentage>'; inherits: false; initial-value: 62%; }
+@property --ln-k { syntax: '<number>'; inherits: false; initial-value: .52; }
+@property --ln-gl-d { syntax: '<percentage>'; inherits: false; initial-value: 66%; }
+@property --ln-gl2-d { syntax: '<percentage>'; inherits: false; initial-value: 78%; }
+@property --ln-gl-l { syntax: '<percentage>'; inherits: false; initial-value: 32%; }
+@property --ln-gl2-l { syntax: '<percentage>'; inherits: false; initial-value: 42%; }
+
+.landing {
+  --acc-h: var(--ln-h); --acc-s: var(--ln-s); --acc-sg: var(--ln-sg); --acc-k: var(--ln-k);
+  --gl-d: var(--ln-gl-d); --gl2-d: var(--ln-gl2-d); --gl-l: var(--ln-gl-l); --gl2-l: var(--ln-gl2-l);
+  --orla: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 55%, transparent) 18%, var(--gold) 50%, color-mix(in srgb, var(--gold) 55%, transparent) 82%, transparent);
+  --gilt: linear-gradient(180deg, var(--gold-2), var(--gold) 55%, color-mix(in srgb, var(--gold) 78%, #000));
+  --ln-t: 1.6s cubic-bezier(.4, 0, .2, 1);
+  transition: --ln-h var(--ln-t), --ln-s var(--ln-t), --ln-sg var(--ln-t), --ln-k var(--ln-t), --ln-gl-d var(--ln-t), --ln-gl2-d var(--ln-t), --ln-gl-l var(--ln-t), --ln-gl2-l var(--ln-t);
+  background: radial-gradient(90% 55% at 50% 0%, hsl(var(--acc-h) var(--acc-s) 50% / .12), transparent 70%);
+  scrollbar-gutter: stable;
+}
+.landing > * { position: relative; }
+
+/* Cabecera */
+.l-head { --rd: min(320px, 80vw); --e: 44px; text-align: center; margin: 4px 0 18px; display: flex; flex-direction: column; align-items: center; }
+.l-head.compacta { --rd: min(248px, 64vw); --e: 34px; margin-bottom: 10px; }
+.l-head h1 { margin: 10px 0 4px; font: 700 clamp(44px, 12.5vw, 78px) / 1 var(--display-deco); letter-spacing: .02em; }
+.l-head.compacta h1 { font-size: clamp(36px, 10vw, 58px); margin-top: 6px; }
+.l-head h1 span {
+  background: linear-gradient(100deg, transparent 42%, color-mix(in srgb, #fff 70%, var(--gold-2)) 50%, transparent 58%) 0 0 / 300% 100%,
+    linear-gradient(180deg, var(--gold-2) 10%, var(--gold) 58%, color-mix(in srgb, var(--gold) 62%, var(--ink)));
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 22px var(--glow)); animation: l-brillo 9s ease-in-out 1.4s infinite; }
+@keyframes l-brillo { 0%, 70% { background-position: 100% 0, 0 0; } 100% { background-position: -50% 0, 0 0; } }
+.l-lema { margin: 0; font: italic 400 var(--fs-l) / 1.3 var(--serif); color: var(--ink-2); }
+
+/* La rueda */
+.l-rueda { position: relative; width: var(--rd); height: var(--rd); flex: none; }
+.l-orbita { position: absolute; inset: 0; animation: girar 180s linear infinite; }
+.l-aro { position: absolute; inset: calc(var(--e) / 2 - 1px); border-radius: 50%; background: var(--aro); opacity: .55;
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px)); mask: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px)); }
+.l-rayo { position: absolute; left: 50%; top: 50%; width: 2px; height: calc(var(--rd) / 2 - var(--e) * .7); margin-left: -1px; transform-origin: 50% 0;
+  transform: rotate(calc(180deg + var(--act) * 360deg / var(--n))); transition: transform 1.2s var(--spring);
+  background: linear-gradient(180deg, transparent 18%, color-mix(in srgb, var(--gold) 70%, transparent)); border-radius: 2px; filter: drop-shadow(0 0 4px var(--gold)); }
+.l-pos { position: absolute; left: 50%; top: 50%; width: var(--e); height: var(--e); margin: calc(var(--e) / -2) 0 0 calc(var(--e) / -2);
+  transform: rotate(calc(var(--k) * 360deg / var(--n))) translateY(calc(var(--rd) / -2 + var(--e) / 2)) rotate(calc(var(--k) * -360deg / var(--n))); }
+.l-clase { width: 100%; height: 100%; min-height: 0; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--gold);
+  background: radial-gradient(circle, hsl(var(--acc-h) var(--acc-s) 45% / .30), color-mix(in srgb, var(--surface) 88%, transparent) 72%);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg) 70%, transparent);
+  opacity: .82; transition: opacity .5s, box-shadow .5s, border-color .5s, transform .18s var(--spring); }
+.l-clase > span { display: grid; place-items: center; width: 100%; height: 100%; animation: girar 180s linear infinite reverse; }
+.l-clase .gi { width: 58%; height: 58%; transition: scale .6s var(--spring), filter .6s; }
+.l-clase:hover:not(:disabled), .l-clase.on { opacity: 1; border-color: var(--gold); }
+.l-clase.on { box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg) 70%, transparent), 0 0 0 5px color-mix(in srgb, var(--gold) 35%, transparent), 0 0 26px 2px var(--glow); }
+.l-clase.on .gi { scale: 1.16; filter: drop-shadow(0 0 6px var(--glow)); }
+.l-clase:active:not(:disabled) { transform: scale(.9); }
+.l-mark { position: absolute; left: 50%; top: 50%; width: 58%; height: 58%; transform: translate(-50%, -50%); display: grid; place-items: center; border-radius: 50%; color: var(--gold);
+  background: radial-gradient(circle, var(--gold-soft), transparent 64%); }
+.l-runa { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--gold); opacity: .7; animation: girar 110s linear infinite reverse; }
+.l-nucleo { position: relative; display: grid; place-items: center; width: 44%; height: 44%; border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--acc-h) var(--acc-s) 50% / .28), transparent 70%); animation: l-latido 4.2s ease-in-out infinite; }
+.l-nucleo .gi { width: 70%; height: 70%; filter: drop-shadow(0 0 14px var(--glow)); }
+@keyframes l-latido { 0%, 100% { box-shadow: 0 0 0 0 transparent, 0 0 30px -6px var(--glow); } 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 6%, transparent), 0 0 46px 0 var(--glow); } }
+
+/* Sin personajes */
+.l-empty { text-align: center; max-width: 460px; margin: 4px 0 0; }
+.l-empty p { margin: 0 0 8px; font: 400 var(--fs-l) / 1.45 var(--sans); color: var(--ink); text-wrap: balance; }
+.l-empty .note { font-size: var(--fs-s); color: var(--ink-2); }
+.l-pilares { list-style: none; margin: 34px 0 0; padding: 0; width: min(720px, 100%); display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 10px; }
+.l-pilares li { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px;
+  background: linear-gradient(135deg, hsl(var(--acc-h) var(--acc-sg) 50% / .10), color-mix(in srgb, var(--surface) 72%, transparent) 60%);
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line-soft)); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.lp-ico { grid-row: span 2; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--gold);
+  background: radial-gradient(circle, var(--gold-soft), transparent 72%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent); }
+.lp-ico .gi { width: 22px; height: 22px; }
+.l-pilares b { font: 600 var(--fs-m) / 1.2 var(--display); letter-spacing: .04em; color: var(--gold); }
+.l-pilares small { font: 400 var(--fs-s) / 1.35 var(--sans); color: var(--ink-2); }
+
+/* Encabezados, acciones y pie */
+.l-h2 { font: 600 var(--fs-m) / 1 var(--display); letter-spacing: .06em; color: var(--gold); display: flex; align-items: center; gap: 14px; width: min(720px, 100%); justify-content: center; margin: 8px 0 12px; }
+.l-h2::before, .l-h2::after { content: ""; flex: 1; max-width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.l-h2::after { transform: scaleX(-1); }
+.l-h2 small { font: 400 var(--fs-s, .8em) / 1 var(--sans); color: var(--ink-2); letter-spacing: 0; }
+.l-actions { margin-top: 22px; }
+.l-actions button { background: color-mix(in srgb, var(--surface) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.l-actions button .icon, .l-actions button .gi { color: var(--gold); }
+.l-actions button.gold { background: linear-gradient(180deg, color-mix(in srgb, var(--bt) 28%, var(--raised)), color-mix(in srgb, var(--bt) 12%, var(--raised))); padding: 0 24px; }
+.l-actions button.gold::before { animation: barrido 6s ease-in-out 2.5s infinite; }
+.l-actions button.gold .icon { color: inherit; }
+
+/* Entrada */
+body.landing-in .l-rueda { animation: l-abrir 1.1s var(--ease-out) both; }
+body.landing-in .l-pos { animation: l-surgir .7s var(--spring) both; animation-delay: calc(.25s + var(--k) * 45ms); }
+body.landing-in .l-runa .r-anillo, body.landing-in .l-runa .r-geo { stroke-dasharray: 1; animation: trazar 1.8s var(--ease-out) both .15s; }
+body.landing-in .l-runa .r-runas { animation: aparecer 1s var(--ease) both 1s; }
+body.landing-in .l-nucleo .gi { animation: ignite .9s var(--spring) both .5s; }
+body.landing-in .l-head h1, body.landing-in .l-lema, body.landing-in .l-empty { animation: rise .6s var(--ease-out) both; }
+body.landing-in .l-head h1 { animation-delay: .35s; } body.landing-in .l-lema { animation-delay: .45s; } body.landing-in .l-empty { animation-delay: .55s; }
+body.landing-in .l-actions { animation-delay: .6s; }
+body.landing-in .l-pilares li { animation: rise .55s var(--ease-out) both; animation-delay: calc(.75s + var(--i) * 70ms); }
+@keyframes l-abrir { from { opacity: 0; transform: scale(.82) rotate(-25deg); } }
+@keyframes l-surgir { from { opacity: 0; translate: 0 0; scale: .2; } }
+
+@media (max-width: 560px) {
+  .l-pilares { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .l-pilares li { grid-template-columns: 1fr; row-gap: 4px; align-content: start; padding: 12px; }
+  .lp-ico { grid-row: auto; width: 34px; height: 34px; margin-bottom: 4px; }
+  .lp-ico .gi { width: 19px; height: 19px; }
+}
+@media (min-width: 900px) {
+  .l-head { --rd: 340px; --e: 48px; }
+  .l-head.compacta { --rd: 270px; --e: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing { transition: none; }
+  .l-orbita, .l-clase > span, .l-runa, .l-nucleo, .l-head h1 span { animation: none !important; }
+  .l-rayo { transition: none; }
+}
+@media print { .l-rueda { display: none; } }
