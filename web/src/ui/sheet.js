@@ -86,9 +86,9 @@ function statsHtml(db, ch, P) {
 
 function recursoHtml(ch, r) {
   const used = usosGastados(ch, r), left = r.max - used;
-  const ctl = r.max <= 10
+  const ctl = r.max <= 10 && !r.reserva
     ? `<span class="rticks">${Array.from({ length: r.max }, (_, i) => `<button type="button" class="rtick ${i >= left ? 'on' : ''}" data-rtick="${r.id}|${i}" aria-label="${esc(r.nombre)}: uso ${i + 1} ${i >= left ? 'gastado' : 'disponible'}"></button>`).join('')}</span>`
-    : `<span class="rstep"><button type="button" data-rstep="${r.id}|1" aria-label="Gastar 1 de ${esc(r.nombre)}">−</button><button type="button" class="rleft" data-rset="${r.id}" aria-label="Cambiar lo que queda">${left}<small> / ${r.max}</small></button><button type="button" data-rstep="${r.id}|-1" aria-label="Recuperar 1 de ${esc(r.nombre)}">+</button></span>`;
+    : `<span class="rstep"><button type="button" data-rstep="${r.id}|1" aria-label="Gastar 1 de ${esc(r.nombre)}">−</button><button type="button" class="rleft" data-rset="${r.id}" aria-label="Cambiar lo que queda">${left}<small> / ${r.max}${r.reserva ? ` ${esc(r.reserva)}` : ''}</small></button><button type="button" data-rstep="${r.id}|-1" aria-label="Recuperar 1 de ${esc(r.nombre)}">+</button></span>`;
   const formas = r.id === 'tpl:druida.forma' ? `<button type="button" class="ruse" data-cmd="formas">${gi('criatura')}Formas${(ch.formas || []).length + (ch.formasMano || []).length ? ` (${(ch.formas || []).length + (ch.formasMano || []).length})` : ''}</button>` : '';
   return `<div class="res rr ${left === 0 ? 'empty-res' : ''}" data-resid="${esc(r.id)}"><strong>${esc(r.nombre)}</strong>${ctl}${formas}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
 }

@@ -221,8 +221,16 @@ export function tickResource(S, id, i) {
   S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); });
   haptic();
 }
-export function stepResource(S, id, d) {
-  const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max), next = Math.max(0, Math.min(r.max, used + d));
+export async function stepResource(S, id, d) {
+  const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);
+  if (r.reserva && d > 0) {
+    if (used >= r.max) return;
+    const v = await pedir({ titulo: r.nombre, texto: `¿Cuántos ${r.reserva} gastas? Te quedan ${r.max - used}.`, valor: String(Math.min(5, r.max - used)), tipo: 'number', min: 1, max: r.max - used, ok: 'Gastar' }); if (v == null) return;
+    d = Math.max(1, Math.min(r.max - used, parseInt(v, 10) || 0));
+    const h = S.act(`${r.nombre}: gasta ${d} ${r.reserva} (quedan ${r.max - used - d})`, (db, c) => { recState(c, id).used = used + d; });
+    haptic(); toast(`${esc(r.nombre)}: gastas ${d} ${esc(r.reserva)}. Quedan ${r.max - used - d}.`, [undoBtn(S, h)]); return;
+  }
+  const next = Math.max(0, Math.min(r.max, used + d));
   if (next === used) return;
   S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; });
   haptic();
