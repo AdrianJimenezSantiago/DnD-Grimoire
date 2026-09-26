@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blankChar, normChar } from '../web/src/domain/modelo.js';
 import { modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra, lanzadorTira, soloSobreTi, efectoDeConjuro, EFECTOS } from '../web/src/domain/efectos.js';
-import { pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida } from '../web/src/domain/vida.js';
+import { pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida, esYo, sincronizarYo, cambiarConc } from '../web/src/domain/vida.js';
 
 const pj = vida => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, vida }));
 
@@ -67,4 +67,21 @@ test('perjuicios: se reconocen al lanzarlos y se aplican a las tiradas', () => {
   const ks = EFECTOS.map(e => e.k);
   assert.equal(new Set(ks).size, ks.length, 'claves repetidas');
   assert.ok(EFECTOS.some(e => !e.bueno) && EFECTOS.filter(e => !e.bueno).length >= 10);
+});
+
+test('objetivos: si tu nombre está entre ellos, el efecto se te aplica y se quita contigo', () => {
+  const ch = pj(); ch.nombre = 'Elowen la Sabia';
+  assert.ok(esYo(ch, 'Elowen') && esYo(ch, 'elowen la sabia') && esYo(ch, 'Yo'));
+  assert.ok(!esYo(ch, 'Gareth') && !esYo(ch, ''));
+  cambiarConc(ch, 'Bendición', 10);
+  ch.play.concObj.push('Gareth');
+  assert.equal(sincronizarYo(ch, 'conc'), '');
+  ch.play.concObj.push('Elowen');
+  assert.equal(sincronizarYo(ch, 'conc'), 'pone');
+  const e = ch.vida.efectos.find(x => x.k === 'bendicion');
+  assert.equal(e.conc, 'Bendición');
+  assert.ok(modsTirada(ch, { sobre: 'ataque' }).some(m => m.valor === '1d4'));
+  ch.play.concObj = ['Gareth'];
+  assert.equal(sincronizarYo(ch, 'conc'), 'quita');
+  assert.ok(!ch.vida.efectos.some(x => x.k === 'bendicion'));
 });

@@ -1,10 +1,13 @@
 import { esc, norm } from '../../core/util.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
-import { conObjetivos, objetivosNuevos } from '../../domain/concentracion.js';
+import { conObjetivos } from '../../domain/concentracion.js';
 import { dadosPara } from '../../domain/tiradas.js';
 import { parsear, resolver, distribucion, maxDist } from '../../domain/dados.js';
-import { modsTirada, resolverModo, fmtMod } from '../../domain/efectos.js';
+import { modsTirada, resolverModo, fmtMod, efectoDeConjuro } from '../../domain/efectos.js';
+import { esYo } from '../../domain/vida.js';
+import { botonYo } from '../avatar.js';
+import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
@@ -53,7 +56,7 @@ function pintarCtl(tsAntes = R.ts) {
   let h = '';
   const x = srdFor(s);
   if (ch.play.conc === s.es && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d])) {
-    h += `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
+    h += `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
       <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`;
   }
   const fichas = [s.escuela ? `<span class="cj-chip esc">${esc(s.escuela)}</span>` : '', t?.salvacion ? `<span class="cj-chip">CD <b>${P.cd ?? '—'}</b></span>` : '', t?.ataque ? `<span class="cj-chip">Ataque <b>${P.atk == null ? '—' : sgn(P.atk)}</b></span>` : ''].filter(Boolean);
@@ -273,11 +276,11 @@ export function init(store) {
     if (R.res?.tipo === 'dano' && R.res.ts !== undefined && dadosActuales(datos())[R.res.i]?.via === 'salvacion') reajustar();
   });
   on(body, 'click', '[data-rlnivel]', (e, b) => { const L = +b.dataset.rlnivel; if (L === R.nivel) return; R.nivel = L; haptic('light'); pintarCtl(); reajustar(); });
-  const anotar = inp => { const ch = S.cur(), nuevos = objetivosNuevos(inp.value, ch.play.concObj); inp.value = ''; if (!nuevos.length) return;
-    S.act(`${ch.play.conc}: sobre ${nuevos.join(', ')}`, (db, c) => { c.play.concObj.push(...nuevos); }); pintarCtl(); haptic('light'); $('#rlObj')?.focus(); };
+  const anotar = inp => { const t = inp.value; inp.value = ''; if (!anadirObjetivos(S, 'conc', t)) return; pintarCtl(); haptic('light'); $('#rlObj')?.focus(); };
   body.addEventListener('keydown', e => { if (e.target.id === 'rlObj' && e.key === 'Enter') { e.preventDefault(); anotar(e.target); } });
   body.addEventListener('focusout', e => { if (e.target.id === 'rlObj' && e.target.value.trim()) anotar(e.target); });
-  on(body, 'click', '[data-rlobjdel]', (e, b) => { S.act('Objetivo quitado', (db, c) => { c.play.concObj.splice(+b.dataset.rlobjdel, 1); }); pintarCtl(); });
+  on(body, 'click', '[data-rlobjdel]', (e, b) => { quitarObjetivo(S, 'conc', +b.dataset.rlobjdel); pintarCtl(); });
+  on(body, 'click', '[data-rlyo]', () => { alternarYo(S, 'conc'); pintarCtl(); });
   body.addEventListener('change', e => {
     if (e.target.id !== 'rlCrit') return;
     R.critico = e.target.checked; haptic('light'); pintarCtl();

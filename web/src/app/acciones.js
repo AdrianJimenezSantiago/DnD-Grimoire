@@ -9,7 +9,8 @@ import { pedir } from '../ui/modal.js';
 import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalogo.js';
 import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
-import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion } from '../domain/vida.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion, esYo, sincronizarYo, listaObjetivos, conjuroDeObjetivos } from '../domain/vida.js';
+import { openObjetivos } from '../ui/dialogs/objetivos.js';
 import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
@@ -87,10 +88,13 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
   if (solo) setTimeout(() => golpe('buff'), 200);
   const extra = [...fx.extra];
-  if (!solo) extra.unshift(...botonAplicarme(S, ef, s, mode === 'slot' ? L : s.level));
   const x = srdFor(s), apunta = s.conc && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d]);
-  if (apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
-  else if (apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
+  // Conjuros que ayudan: se pregunta sobre quién con un selector donde marcarte a ti
+  const pregunta = ef?.bueno && !solo && ef.k !== 'escudo';
+  if (pregunta) setTimeout(() => preguntarObjetivos(S, s, mode === 'slot' ? L : s.level), 420);
+  else if (!solo) extra.unshift(...botonAplicarme(S, ef, s, mode === 'slot' ? L : s.level));
+  if (!pregunta && apunta && ch.play.pedirObjetivos) setTimeout(() => enfocarObjetivos('conc'), 420);
+  else if (!pregunta && apunta) extra.unshift({ label: 'Anotar objetivos', hl: true, fn: () => enfocarObjetivos('conc') });
   if (mode === 'slot' && s.ritual && (isPrepared(e) || P.ritualLibro)) extra.push({ label: 'Era como ritual', fn: () => { S.undo(h); cast(S, bi, 'ritual'); } });
   if (mode === 'recurso' && firstFreeFrom(ch, P, s.level)) extra.push({ label: 'Mejor con un espacio', fn: () => { S.undo(h); cast(S, bi, 'slot', firstFreeFrom(S.cur(), perfil(S.cur()), s.level)); } });
   castFx(row(bi), schoolColor(schoolKey(s.escuela)));
@@ -102,6 +106,11 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
 }
 
 const notaObjetivo = (ef, s) => (ef?.tiraObjetivo ? ` <span class="tnote"><b>${esc(ef.nombre)}</b> en marcha${s.conc ? ' mientras te concentres' : ''}: el dado lo tira cada objetivo al hacer su tirada, no tú.${ef.bueno ? ' Si te incluyes, la app te lo suma sola a tus tiradas.' : ''}</span>` : '');
+function preguntarObjetivos(S, s, L) {
+  const ch = S.cur(); if (!ch) return;
+  const clave = s.conc ? (ch.play.conc === s.es ? 'conc' : null) : ch.play.efectos.find(e => e.nombre === s.es)?.id || null;
+  openObjetivos({ clave, conjuro: s.es, L });
+}
 const botonAplicarme = (S, ef, s, L) => (ef?.bueno ? [{ label: ef.k === 'escudo' ? 'Aplicarme +5 CA' : ef.tiraObjetivo ? 'Me incluyo' : 'Me lo aplico', hl: true, fn: () => aplicarmeConjuro(S, ef, s, L) }] : []);
 
 function aplicarmeConjuro(S, ef, s, L) {
@@ -122,7 +131,9 @@ export function quickCast(S, bi, force) {
     castFx(row(bi), schoolColor(schoolKey(s.escuela))); haptic();
     if (lanzadorTira(s.es, tiradasConjuro(s))) { openRoll(bi); if (fx.msg) toast(fx.msg.replace(/^\s+/, '')); return true; }
     const conc = s.conc ? `${antes && antes !== s.es ? ` Pierdes la concentración en ${esc(antes)}.` : ''}${fuera.length ? ` Terminan sobre ti: ${esc(joinY(fuera.map(x => x.nombre)))}.` : ''}` : '';
-    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${conc}${notaObjetivo(ef, s)}${fx.msg}`, [...botonAplicarme(S, ef, s, 0), undoBtn(S, h)]); return true;
+    toast(`<b>${esc(s.es)}</b> es un truco: a voluntad, no gasta espacio.${conc}${notaObjetivo(ef, s)}${fx.msg}`, [undoBtn(S, h)]);
+    if (ef?.bueno) setTimeout(() => preguntarObjetivos(S, s, 0), 420);
+    return true;
   }
   if (!force && !isPrepared(e)) {
     if (s.ritual && P.ritualLibro) return cast(S, bi, 'ritual');
@@ -155,18 +166,42 @@ export function enfocarObjetivos(clave) {
   const i = document.querySelector(`[data-objin="${clave}"]`); if (!i) return;
   i.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => i.focus({ preventScroll: true }), 250);
 }
-const listaDe = (play, clave) => (clave === 'conc' ? play.concObj : play.efectos.find(e => e.id === clave)?.objetivos);
-export function anadirObjetivos(S, clave, texto) {
+const listaDe = listaObjetivos;
+// Si entre los objetivos estás tú, el efecto se te aplica; si te quitas, deja de afectarte
+function avisoYo(S, cambio, nombre) {
+  const ef = efectoDeConjuro(nombre); if (!cambio || !ef) return;
+  if (cambio === 'pone') { golpe(ef.bueno ? 'buff' : 'debuff'); toast(`<b>${esc(ef.nombre)}</b> también sobre ti: ${esc(ef.texto)}`); }
+  else toast(`<b>${esc(ef.nombre)}</b> ya no te afecta.`);
+  haptic('light');
+}
+export function anadirObjetivos(S, clave, texto, { L } = {}) {
   const ch = S.cur(), nuevos = objetivosNuevos(texto, listaDe(ch.play, clave) || []); if (!nuevos.length) return false;
-  const nombre = clave === 'conc' ? ch.play.conc : ch.play.efectos.find(e => e.id === clave)?.nombre;
-  S.act(`${nombre}: sobre ${joinY(nuevos)}`, (db, c) => { listaDe(c.play, clave)?.push(...nuevos); });
+  const nombre = conjuroDeObjetivos(ch.play, clave); let cambio = '';
+  S.act(`${nombre}: sobre ${joinY(nuevos)}`, (db, c) => { listaDe(c.play, clave)?.push(...nuevos); cambio = sincronizarYo(c, clave, { L }); });
+  avisoYo(S, cambio, nombre);
   return true;
 }
 export function quitarObjetivo(S, clave, i) {
   const ch = S.cur(), l = listaDe(ch.play, clave); if (!l?.[i]) return;
-  const quien = l[i], nombre = clave === 'conc' ? ch.play.conc : ch.play.efectos.find(e => e.id === clave)?.nombre;
-  const h = S.act(`${nombre}: ya no está sobre ${quien}`, (db, c) => { listaDe(c.play, clave).splice(i, 1); });
-  toast(`<b>${esc(nombre)}</b> ya no está sobre ${esc(quien)}.`, [undoBtn(S, h)]);
+  const quien = l[i], nombre = conjuroDeObjetivos(ch.play, clave); let cambio = '';
+  const h = S.act(`${nombre}: ya no está sobre ${quien}`, (db, c) => { listaDe(c.play, clave).splice(i, 1); cambio = sincronizarYo(c, clave); });
+  if (cambio) avisoYo(S, cambio, nombre); else toast(`<b>${esc(nombre)}</b> ya no está sobre ${esc(quien)}.`, [undoBtn(S, h)]);
+}
+export function alternarYo(S, clave, { L } = {}) {
+  const ch = S.cur(), l = listaDe(ch.play, clave); if (!l) return;
+  const nombre = conjuroDeObjetivos(ch.play, clave), yo = l.some(o => esYo(ch, o)); let cambio = '';
+  S.act(yo ? `${nombre}: ya no está sobre ti` : `${nombre}: también sobre ti`, (db, c) => {
+    const ll = listaDe(c.play, clave);
+    if (yo) ll.splice(0, ll.length, ...ll.filter(o => !esYo(c, o))); else ll.push(c.nombre || 'Yo');
+    cambio = sincronizarYo(c, clave, { L });
+  });
+  avisoYo(S, cambio, nombre);
+}
+// Conjuros sin concentración (Auxilio, Armadura de mago…): sus objetivos van en una entrada de «Efectos activos»
+export function claveObjetivos(S, nombre) {
+  const ya = S.cur().play.efectos.find(e => e.nombre === nombre); if (ya) return ya.id;
+  let id = ''; S.act(`${nombre}: objetivos`, (db, c) => { id = nuevoEfecto(c.play, nombre).id; });
+  return id;
 }
 export function marcarEfecto(S, nombre) {
   let id = ''; S.act(`Efecto activo: ${nombre}`, (db, c) => { id = nuevoEfecto(c.play, nombre).id; });

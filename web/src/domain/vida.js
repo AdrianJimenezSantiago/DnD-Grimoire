@@ -1,5 +1,5 @@
 import { norm, uid } from '../core/util.js';
-import { normEfectos, EFECTO } from './efectos.js';
+import { normEfectos, EFECTO, efectoDeConjuro } from './efectos.js';
 import { modOf, clasesDe, dotesDe, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
 
@@ -214,4 +214,25 @@ export function cambiarConc(ch, nombre, rondas = null) {
   if (antes !== nombre) ch.play.concObj = [];
   ch.play.conc = nombre; ch.play.concRondas = rondas;
   return fuera;
+}
+
+// Objetivos de un conjuro: si entre ellos estás tú (tu nombre, o «yo»), el efecto se te aplica solo
+const PALABRAS_YO = new Set(['yo', 'mi', 'mi mismo', 'mi misma', 'yo mismo', 'yo misma', 'tu', 'tu mismo', 'tu misma']);
+export function esYo(ch, texto) {
+  const t = norm(texto).replace(/\(.*?\)/g, '').replace(/[.!¡¿?]/g, '').replace(/\s+/g, ' ').trim(); if (!t) return false;
+  if (PALABRAS_YO.has(t)) return true;
+  const nom = norm(ch?.nombre).replace(/\s+/g, ' ').trim(); if (!nom) return false;
+  return t === nom || t === nom.split(' ')[0];
+}
+export const listaObjetivos = (play, clave) => (clave === 'conc' ? play?.concObj : play?.efectos?.find(e => e.id === clave)?.objetivos);
+export const conjuroDeObjetivos = (play, clave) => (clave === 'conc' ? play?.conc : play?.efectos?.find(e => e.id === clave)?.nombre) || '';
+// Devuelve 'pone', 'quita' o '' según haya cambiado el efecto sobre ti
+// L: nivel del espacio, para los efectos que suben los PG máximos (Auxilio)
+export function sincronizarYo(ch, clave, { L } = {}) {
+  const pl = ch.play, lista = listaObjetivos(pl, clave), nombre = conjuroDeObjetivos(pl, clave), ef = efectoDeConjuro(nombre);
+  if (!lista || !ef) return '';
+  const yo = lista.some(o => esYo(ch, o)), conc = clave === 'conc' ? nombre : '', ya = vidaDe(ch).efectos.find(e => e.k === ef.k);
+  if (yo && !ya) { ponerEfecto(ch, ef.k, { conc, rondas: conc && pl.concRondas != null ? pl.concRondas : undefined, n: ef.maxPg ? ef.maxPg * Math.max(1, (L || 2) - 1) : 0 }); return 'pone'; }
+  if (!yo && ya && ya.conc === conc) { quitarEfectos(ch, [ya]); return 'quita'; }
+  return '';
 }
