@@ -26,6 +26,11 @@ import { HABILIDADES, AB_CORTA, HAB_CLASE, NOMBRE_HAB, habilidadesTrasfondo, bon
 import { CLASES_INFO, TEMAS } from '../../domain/clases2024.js';
 import { METODOS, COSTE, PUNTOS, costeCompra, tirarSeis, prioridad, repartoSugerido, caracteristicasTrasfondo, limpiarBonos, estadoBonos, bonosSugeridos, conBonos,
   repartoHabilidades, completarHabilidades, doteRepetida, mejorasHasta, versatilPendiente } from '../../domain/creacion.js';
+import { LISTAS_HERRAMIENTA, IDIOMAS, IDIOMAS_RAROS, extraTrasfondo, extraClase, eleccionesHerramienta, herramientasDe, equipoInicial, tirarOro, datosObjeto, entrenamientoDe } from '../../domain/origen.js';
+import { allSpellItems, itemToSid, itemMeta, listFilter, compendio } from '../../domain/catalogo.js';
+import { conjurosPendientes, anadirPendientes } from '../../domain/progresion.js';
+import { anadirComun, equipoDe } from '../../domain/equipo.js';
+import { previewSpell } from './conjuro.js';
 
 let S, onCreated;
 let MC = [], DOTES = [], HAB = {}, SALV = [];
@@ -78,9 +83,10 @@ async function remove(id) {
 
 
 // Creación y edición: un asistente por pasos en el orden del Manual del Jugador (clase, origen, características…)
-const PASOS = [['clase', 'Clase'], ['origen', 'Origen'], ['car', 'Características'], ['comp', 'Competencias'], ['dotes', 'Dotes'], ['fin', 'Detalles']];
-const ICO_PASO = { origen: 'trasfondo', car: 'd20', comp: 'eficaz', dotes: 'dote', fin: 'md_pluma' };
+const PASOS = [['clase', 'Clase'], ['origen', 'Origen'], ['car', 'Características'], ['comp', 'Competencias'], ['dotes', 'Dotes'], ['conj', 'Conjuros'], ['fin', 'Detalles']];
+const ICO_PASO = { origen: 'trasfondo', car: 'd20', comp: 'eficaz', dotes: 'dote', conj: 'libro', fin: 'md_pluma' };
 let formId = null, conjAbierto = false, CREANDO = false, PASO = 0, VISTOS = new Set(), CAR = null, TEMA = '';
+let ELEC = {}, EQ = { clase: 'A', trasfondo: 'A', oro: null }, HERR = [], IDI = [], CONJ = { trucos: [], prep: [], libro: [] }, CQ = {};
 const lib = () => biblioteca();
 
 function cargarCar(c) {
@@ -109,18 +115,19 @@ export function openCharForm(id) {
       <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
       <div id="f_mc" class="mc-list"></div>
       <button type="button" class="ghost mc-add" id="f_mcAdd">${icon('plus')}Añadir otra clase (multiclase)</button>
-      <p class="hint" id="h_mc" aria-live="polite"></p></section>`)
+      <p class="hint" id="h_mc" aria-live="polite"></p></section>
+    <section class="fsec"><h3>Lo que te da la clase</h3><div id="f_claseExtra"></div></section>`)
   + paso('origen', 'Tu origen: quién eras antes de aventurar. El trasfondo te da tres características para mejorar, una dote de origen y dos habilidades.', `
     ${id ? `<div class="f-ret">${avatarHtml(c, 'lg')}<div><b>Retrato</b><p class="note">${c.retrato ? 'Puedes reencuadrarlo o cambiarlo cuando quieras.' : 'Añade una imagen de tu personaje: aparece en la portada, la hoja y la barra superior.'}</p><button type="button" data-retrato>${c.retrato ? 'Editar retrato' : 'Añadir retrato'}</button></div></div>` : ''}
     <label class="f cc-nombre" id="w_nombre">Nombre<input id="f_nombre" value="${esc(c.nombre)}" autocomplete="off" required placeholder="¿Cómo se llama?"></label>
     <div class="frow cc-origen">
       <div class="f"><span>Especie</span>${campoElegible('id="f_especie" aria-label="Especie"', c.especie, 'especie', 'criatura', 'Elige o escribe')}<div class="cc-info" id="i_especie"></div></div>
-      <div class="f"><span>Trasfondo</span>${campoElegible('id="f_trasfondo" aria-label="Trasfondo"', c.trasfondo, 'trasfondo', 'trasfondo', 'Elige o escribe')}<div class="cc-info" id="i_trasfondo"></div></div></div>`)
+      <div class="f"><span>Trasfondo</span>${campoElegible('id="f_trasfondo" aria-label="Trasfondo"', c.trasfondo, 'trasfondo', 'trasfondo', 'Elige o escribe')}<div class="cc-info" id="i_trasfondo"></div></div></div>
+    <div id="f_origenExtra"></div>`)
   + paso('car', 'Elige cómo generas tus puntuaciones y después suma los aumentos de tu trasfondo.', '<div id="f_car"></div>')
   + paso('comp', 'Las de tu trasfondo ya están marcadas. Elige las de tu clase entre las resaltadas.', `
     <div id="h_comp" class="cc-avisos" aria-live="polite"></div>
-    <div class="comp-salv" id="f_salv" role="group" aria-label="Tiradas de salvación"></div>
-    <div class="comp-grid" id="f_comp" role="group" aria-label="Habilidades"></div>
+    <div class="cc-grupos" id="f_comp" role="group" aria-label="Salvaciones y habilidades por característica"></div>
     <p class="hint">Toca una habilidad para pasar de nada a competencia (●) y a pericia (◆◆).</p>
     <div class="cc-acciones"><button type="button" class="ghost" id="f_compAuto">${icon('sparkles')}Elegir por mí las que faltan</button><button type="button" class="ghost" id="f_compReset">Volver a empezar</button></div>`)
   + paso('dotes', 'La dote de origen sale de tu trasfondo. Añade aquí las que ganes por especie o al subir de nivel.', `
@@ -128,6 +135,7 @@ export function openCharForm(id) {
     <div class="dote-chips" id="f_dotes"></div>
     <button type="button" class="elg-add" id="f_doteAdd">${gi('dote')}<span><b>Añadir una dote</b><small>Elige de la lista, con su texto, o escribe cualquiera</small></span>${icon('plus')}</button>
     <p class="hint">Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p>`)
+  + paso('conj', 'Los conjuros que conoces al empezar: tus trucos y los que preparas cada día.', '<div id="f_conj"></div>')
   + paso('fin', 'Últimos toques. Todo esto puedes cambiarlo más adelante.', `
     <section class="fsec"><h3>Puntos de golpe</h3><div class="frow"><label class="f">PG máximos<input id="f_pgmax" type="number" inputmode="numeric" min="1" value="${c.vida?.maxManual ?? ''}" placeholder=""><span class="hint" id="h_pgmax"></span></label></div></section>
     <button type="button" class="ghost conj-toggle" id="f_conjOpen" hidden>${icon('plus')}Opciones de conjuros (dotes, especie o multiclase)</button>
@@ -143,7 +151,8 @@ export function openCharForm(id) {
       <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
   MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
-  $('#f_trasfondo').dataset.antes = c.trasfondo || '';
+  ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [] }; CQ = {};
+  $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
   sync(true); openSheet(charDlg());
 }
@@ -159,7 +168,7 @@ function irA(i, primera = false) {
 }
 
 function pendientes(d) {
-  const P = { clase: [], origen: [], car: [], comp: [], dotes: [], fin: [] };
+  const P = { clase: [], origen: [], car: [], comp: [], dotes: [], conj: [], fin: [] };
   const exceso = d.nivel + MC.reduce((n, m) => n + (parseInt(m.nivel, 10) || 1), 0) > 20;
   if (exceso) P.clase.push('El nivel total pasa de 20.');
   for (const r of requisitosMulticlase(d)) P.clase.push(`${r.clase} pide ${r.falta}.`);
@@ -175,7 +184,85 @@ function pendientes(d) {
   if (r.extra.faltan) P.comp.push(`${r.extra.faltan} de ${joinY(r.extra.fuentes.map(f => f.nombre))}.`);
   if (r.pericia.faltan) P.comp.push(`${r.pericia.faltan} ${r.pericia.faltan === 1 ? 'pericia' : 'pericias'}.`);
   if (versatilPendiente(d, lib().dotes)) P.dotes.push('Humano: una dote de origen (Versátil).');
+  for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
+  if (CREANDO) {
+    if (IDI.length < 2) P.origen.push(`Elige ${2 - IDI.length} ${IDI.length === 1 ? 'idioma' : 'idiomas'} más.`);
+    if (EQ.clase === 'oro' && !EQ.oro) P.clase.push('Tira tu oro inicial.');
+    const c = cupoConjuros(d);
+    if (c.trucos > CONJ.trucos.length) P.conj.push(`${c.trucos - CONJ.trucos.length} ${c.trucos - CONJ.trucos.length === 1 ? 'truco' : 'trucos'}.`);
+    if (c.libro > CONJ.libro.length) P.conj.push(`${c.libro - CONJ.libro.length} para el libro de conjuros.`);
+    if (c.prep > CONJ.prep.length) P.conj.push(`${c.prep - CONJ.prep.length} ${c.prep - CONJ.prep.length === 1 ? 'conjuro preparado' : 'conjuros preparados'}.`);
+  }
   return P;
+}
+
+function cupoConjuros(d) {
+  const P = perfil(d); if (!P.c) return { P, trucos: 0, prep: 0, libro: 0 };
+  const mago = clasesDe(d).find(c => c.clase === 'Mago');
+  return { P, trucos: P.maxCant, libro: mago ? 6 + 2 * (mago.nivel - 1) : 0, prep: mago && P.lista === 'Mago' ? 0 : P.maxPrep };
+}
+const pill = (attr, v, on, extra = '') => `<button type="button" class="cc-pill ${on ? 'on' : ''}" ${attr}="${esc(v)}" aria-pressed="${on}" ${extra}>${esc(v.split('|').pop())}</button>`;
+function eleccionHtml(e) {
+  const [txt, lista] = LISTAS_HERRAMIENTA[e.lista], sel = ELEC[e.id] || [], lleno = sel.length >= e.n;
+  return `<div class="cc-elige ${lleno ? 'ok' : 'falta'}"><p>${lleno ? icon('sparkles') : `<b class="cc-num">${e.n - sel.length}</b>`}<b>${esc(e.de)}</b>: ${e.soloEquipo ? 'tu equipo incluye' : 'competencia con'} ${e.n === 1 ? esc(txt) : `${e.n} (${esc(txt)})`}. ${lleno ? '' : 'Elige:'}</p>
+    <div class="cc-pills">${lista.map(v => pill('data-herr', `${e.id}|${v}`, sel.includes(v), !sel.includes(v) && lleno && e.n > 1 ? 'disabled' : '')).join('')}</div></div>`;
+}
+function opcionesHtml(ops, actual, attr, extra = '') {
+  const txt = o => { const it = o.objetos.map(x => typeof x === 'string' ? x : Array.isArray(x) ? `${x[1]} × ${x[0]}` : `${LISTAS_HERRAMIENTA[x.elige][0]} (el que elijas)`); return it.length ? `${joinY(it)} y ${o.po} po` : `${o.po} po para comprar tu equipo`; };
+  return `<div class="cc-opciones" role="radiogroup">${ops.map(o => `<button type="button" role="radio" class="cc-opcion ${actual === o.k ? 'on' : ''}" aria-checked="${actual === o.k}" ${attr}="${o.k}"><b>Opción ${o.k}</b><span>${esc(txt(o))}</span></button>`).join('')}${extra}</div>`;
+}
+function pintarClaseExtra(d) {
+  const c = extraClase(d.clase), e = entrenamientoDe(d), elecs = eleccionesHerramienta(d).filter(x => x.id !== 't');
+  let h = `<dl class="cc-dl cc-entreno"><div><dt>Entrenamiento</dt><dd>${esc([e.armas, e.armaduras].filter(Boolean).join('. '))}.</dd></div>
+    ${c?.herramientas.some(x => typeof x === 'string') ? `<div><dt>Herramientas</dt><dd>${esc(c.herramientas.filter(x => typeof x === 'string').join(', '))}</dd></div>` : ''}</dl>`;
+  h += elecs.map(eleccionHtml).join('');
+  if (CREANDO && c) {
+    const t = c.tirada, oro = `<button type="button" role="radio" class="cc-opcion ${EQ.clase === 'oro' ? 'on' : ''}" aria-checked="${EQ.clase === 'oro'}" data-eqclase="oro"><b>Tirar el oro</b><span>${t[0]}d${t[1]}${t[2] > 1 ? ` × ${t[2]}` : ''} po (variante de 2014)${EQ.oro ? `: <strong>${EQ.oro.total} po</strong> (${EQ.oro.dados.join(' + ')})` : ''}</span></button>`;
+    h += `<h4 class="cc-sub">Equipo inicial de ${esc(d.clase)}</h4>${opcionesHtml(c.opciones, EQ.clase, 'data-eqclase', oro)}
+      ${EQ.clase === 'oro' ? `<button type="button" class="${EQ.oro ? 'ghost' : 'primary'} cc-tirar" data-tiraroro>${gi('dados')}${EQ.oro ? 'Volver a tirar' : 'Tirar oro inicial'}</button>` : ''}`;
+  } else if (!CREANDO) h += '<p class="hint">El equipo inicial se reparte al crear el personaje. Ahora lo llevas en el Inventario.</p>';
+  $('#f_claseExtra').innerHTML = h;
+}
+function pintarOrigenExtra(d) {
+  const t = extraTrasfondo(d.trasfondo), e = eleccionesHerramienta(d).find(x => x.id === 't');
+  let h = '';
+  if (d.trasfondo) {
+    h += `<section class="fsec"><h3>Herramientas e idiomas</h3>`;
+    if (e) h += eleccionHtml(e);
+    const auto = herramientasDe(d, ELEC), extra = HERR.filter(x => !auto.includes(x));
+    h += `<p class="hint">Herramientas: ${auto.length || extra.length ? esc(joinY([...auto, ...extra])) : 'ninguna'}.${extra.length ? ' <button type="button" class="linkish" data-herrlimpia>Quitar las que no vienen de tu clase ni trasfondo</button>' : ''}</p>`;
+    const lleno = IDI.length >= 2;
+    h += `<div class="cc-elige ${lleno || !CREANDO ? 'ok' : 'falta'}"><p>${lleno || !CREANDO ? icon('sparkles') : `<b class="cc-num">${2 - IDI.length}</b>`}<b>Idiomas</b>: común y dos más de la lista estándar.</p>
+      <div class="cc-pills"><span class="cc-pill on fija">Común</span>${IDIOMAS.filter(x => x !== 'Común').map(v => pill('data-idioma', v, IDI.includes(v))).join('')}</div>
+      <details class="cc-raros" ${IDI.some(x => IDIOMAS_RAROS.includes(x)) ? 'open' : ''}><summary>Idiomas raros (si tu DJ lo permite)</summary><div class="cc-pills">${IDIOMAS_RAROS.map(v => pill('data-idioma', v, IDI.includes(v))).join('')}</div></details></div></section>`;
+    if (CREANDO && t) h += `<section class="fsec"><h3>Equipo de ${esc(d.trasfondo)}</h3>${opcionesHtml(t.opciones, EQ.trasfondo, 'data-eqtras')}</section>`;
+  }
+  $('#f_origenExtra').innerHTML = h;
+}
+function chooser(key, n, filtro, titulo) {
+  const all = allSpellItems(S.db), sel = CONJ[key], otros = new Set(Object.entries(CONJ).filter(([k]) => k !== key).flatMap(([, v]) => v)), q = norm(CQ[key] || ''), lleno = sel.length >= n;
+  const items = all.filter(it => !otros.has(it.id) && filtro(it) && (!q || norm(it.es).includes(q) || norm(it.en || '').includes(q)))
+    .sort((a, b) => (sel.includes(b.id) - sel.includes(a.id)) || a.l - b.l || a.es.localeCompare(b.es, 'es'));
+  return `<section class="fsec cc-conj"><div class="ch-head"><h3>${titulo}</h3><b class="ch-count ${lleno ? 'ok' : ''}">${sel.length} de ${n}</b></div>
+    <input type="search" data-ccq="${key}" placeholder="Buscar" value="${esc(CQ[key] || '')}" aria-label="Buscar conjuro">
+    <div class="cc-lista">${items.length ? items.map(it => { const on = sel.includes(it.id);
+      return `<div class="pitem ${on ? 'on' : ''}"><label class="pmain"><input type="checkbox" data-ccchk="${key}" value="${esc(it.id)}" ${on ? 'checked' : ''} ${!on && lleno ? 'disabled' : ''}>
+        <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${itemMeta(it)}</span></span></label>
+        <button type="button" class="pview" data-ccver="${esc(it.id)}">Ver</button></div>`; }).join('') : '<p class="pempty">No hay conjuros que encajen.</p>'}</div></section>`;
+}
+function pintarConj(d) {
+  const c = cupoConjuros(d), P = c.P;
+  if (!CREANDO) { $('#f_conj').innerHTML = `<div class="cc-aviso">Tus conjuros se gestionan en el libro de la hoja, con «Editar conjuros». ${P.c ? `Preparas ${P.maxPrep} y sabes ${P.maxCant} trucos.` : ''}</div>`; return; }
+  if (!P.c) { $('#f_conj').innerHTML = `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si una dote o tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>`; return; }
+  const lista = P.lista;
+  let h = `<div class="cc-aviso ok">Lanzas conjuros de ${esc(lista.toLowerCase())} con ${esc(ABIL_NAME[P.apKey])}: CD ${P.cd}, ataque ${sgn(P.atk)}. Espacios hasta nivel ${P.maxSlot}.</div>`;
+  if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && listFilter(it, lista), `Trucos (${c.trucos})`);
+  if (c.libro) h += chooser('libro', c.libro, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, 'Mago'), `Libro de conjuros (${c.libro})`)
+    + `<p class="hint">De ellos preparas ${P.maxPrep}: los primeros que elijas quedan preparados, y los cambias en la hoja tras un descanso largo.</p>`;
+  if (c.prep) h += chooser('prep', c.prep, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, lista), `Conjuros preparados (${c.prep})`);
+  const auto = conjurosPendientes(S.db, d, compendio()).map(x => x.x.es);
+  if (auto.length) h += `<p class="hint">Siempre preparados por tu clase o subclase: ${esc(joinY(auto))}.</p>`;
+  $('#f_conj').innerHTML = h;
 }
 
 function pintarPasos(d) {
@@ -211,7 +298,8 @@ function pintarOrigen(d) {
   $('#i_trasfondo').innerHTML = d.trasfondo ? `<dl class="cc-dl">
     <div><dt>Características</dt><dd>${perm.length ? esc(perm.map(k => ABIL_NAME[k]).join(', ')) : 'Tres a tu elección'}</dd></div>
     <div><dt>Dote de origen</dt><dd>${dote ? esc(dote.detalle ? `${dote.nombre} (${dote.detalle})` : dote.nombre) : 'Anótala en Dotes'}</dd></div>
-    <div><dt>Habilidades</dt><dd>${tras.length ? esc(joinY(tras.map(k => NOMBRE_HAB[k]))) : 'Márcalas en Competencias'}</dd></div></dl>` : '';
+    <div><dt>Habilidades</dt><dd>${tras.length ? esc(joinY(tras.map(k => NOMBRE_HAB[k]))) : 'Márcalas en Competencias'}</dd></div>
+    ${(x => x ? `<div><dt>Herramienta</dt><dd>${esc(typeof x.herramienta === 'string' ? x.herramienta : `${LISTAS_HERRAMIENTA[x.herramienta.elige][0]} (elígelo abajo)`)}</dd></div>` : '')(extraTrasfondo(d.trasfondo))}</dl>` : '';
 }
 
 function pintarCar(d) {
@@ -248,15 +336,18 @@ function pintarCar(d) {
 
 function pintarComp(draft) {
   const base = new Set(CLASES_INFO[draft.clase]?.salv || []), comp = salvacionesCompetentes(draft), r = repartoHabilidades(draft);
-  $('#f_salv').innerHTML = '<span class="comp-lbl">Salvaciones</span>' + ['fue', 'des', 'con', 'int', 'sab', 'car'].map(k => base.has(k)
-    ? `<span class="comp-s fija" title="De tu clase">${AB_CORTA[k]}</span>`
-    : `<button type="button" class="comp-s ${comp.has(k) ? 'on' : ''}" data-salv="${k}" aria-pressed="${comp.has(k)}" title="Competencia extra (dote o rasgo)">${AB_CORTA[k]}</button>`).join('');
   const claseLista = new Set(r.clase.faltan ? r.clase.lista : []), extraLista = new Set(r.extra.faltan && !r.clase.faltan ? r.extra.fuentes.flatMap(f => f.lista) : []);
   const ETQ = { trasfondo: 'trasfondo', clase: draft.clase, extra: r.extra.fuentes.length ? 'especie o dote' : 'extra' };
-  $('#f_comp').innerHTML = HABILIDADES.map(([k, n, ab]) => {
+  const boton = ([k, n]) => {
     const nv = HAB[k] || 0, f = r.fuente[k], elegible = !nv && (claseLista.has(k) || extraLista.has(k)), enLista = r.clase.lista.includes(k);
     const etq = nv === 2 ? `pericia · ${ETQ[f] || ''}` : f ? ETQ[f] : enLista ? `de ${draft.clase}` : '';
-    return `<button type="button" class="comp-h n${nv} ${f ? 'src-' + f : ''} ${elegible ? 'elegible' : ''}" data-hab="${k}" aria-label="${esc(n)}: ${['sin competencia', 'competencia', 'pericia'][nv]}${f === 'trasfondo' ? ', de tu trasfondo' : ''}"><i class="cr-m n${nv}" aria-hidden="true"></i><span>${esc(n)}<small>${AB_CORTA[ab]}${etq ? ' · ' + esc(etq) : ''}</small></span><b>${sgn(bonoHabilidad(draft, k))}</b></button>`;
+    return `<button type="button" class="comp-h n${nv} ${f ? 'src-' + f : ''} ${elegible ? 'elegible' : ''}" data-hab="${k}" aria-label="${esc(n)}: ${['sin competencia', 'competencia', 'pericia'][nv]}${f === 'trasfondo' ? ', de tu trasfondo' : ''}"><i class="cr-m n${nv}" aria-hidden="true"></i><span>${esc(n)}${etq ? `<small>${esc(etq)}</small>` : ''}</span><b>${sgn(bonoHabilidad(draft, k))}</b></button>`;
+  };
+  $('#f_comp').innerHTML = ABILS.map(([ab, nombre]) => {
+    const on = comp.has(ab), salv = base.has(ab) ? `<span class="comp-s fija" title="De tu clase">Salvación</span>`
+      : `<button type="button" class="comp-s ${on ? 'on' : ''}" data-salv="${ab}" aria-pressed="${on}" title="Competencia extra (dote o rasgo)">Salvación</button>`;
+    const habs = HABILIDADES.filter(h => h[2] === ab);
+    return `<section class="cc-grupo ${base.has(ab) ? 'salv' : ''}"><header><b>${nombre}</b><em>${draft.stats[ab]} · ${sgn(modOf(draft.stats[ab]))}</em>${salv}</header>${habs.map(boton).join('') || '<p class="cc-sinhab">Sin habilidades: solo su salvación.</p>'}</section>`;
   }).join('');
   const av = [];
   if (r.trasfondo.length) av.push(['ok', `<b>${esc(draft.trasfondo)}</b> te da ${esc(joinY(r.trasfondo.map(k => NOMBRE_HAB[k])))}.${r.faltanTrasfondo.length ? ' Márcalas: vienen con tu trasfondo.' : ''}`]);
@@ -301,6 +392,8 @@ function readForm() {
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
     multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
+  base.herramientas = [...new Set([...herramientasDe(base, ELEC), ...HERR])];
+  base.idiomas = ['Común', ...IDI];
   const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
   const bonos = limpiarBonos(CAR.bonos, permitidas(base)), sinTirar = CAR.metodo === 'tiradas' && !CAR.tiradas.length;
   base.stats = conBonos(sinTirar ? {} : CAR.base, bonos);
@@ -329,7 +422,7 @@ function slotText(P) {
   const parts = Object.keys(P.slots).map(Number).sort((a, b) => a - b).map(L => `${P.slots[L]} de nivel ${L}`);
   return parts.length ? `Espacios: ${joinY(parts)}.` : 'Sin espacios de conjuro.';
 }
-const FOCO = ['data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
+const FOCO = ['data-herr', 'data-idioma', 'data-eqclase', 'data-eqtras', 'data-ccchk', 'data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
 function sync(first, { sinCar = false } = {}) {
   const a = document.activeElement, attr = a && charDlg().contains(a) ? FOCO.find(k => a.hasAttribute(k)) : null, val = attr && a.getAttribute(attr);
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
@@ -363,7 +456,7 @@ function sync(first, { sinCar = false } = {}) {
   }
   if (formId) { const oc = S.db.chars.find(x => x.id === formId), diff = levelDiff(perfil(oc), P, oc, draft); if (diff) notes.push(diff); }
   $('#f_sum').innerHTML = L.map(t => `<p>${esc(t)}</p>`).join('') + notes.map(t => `<p class="note">${esc(t)}</p>`).join('');
-  pintarClases(draft); pintarOrigen(draft); pintarComp(draft); pintarDotes(draft); pintarPasos(draft); pintarHero(draft, first);
+  pintarClases(draft); pintarOrigen(draft); pintarClaseExtra(draft); pintarOrigenExtra(draft); pintarComp(draft); pintarDotes(draft); pintarConj(draft); pintarPasos(draft); pintarHero(draft, first);
   if (!sinCar) pintarCar(draft);
   else ABILS.forEach(([k]) => { const t = $('#t_' + k), m = $('#m_' + k); if (t) t.textContent = draft.stats[k]; if (m) m.textContent = sgn(modOf(draft.stats[k])); });
   $('#f_pgmax').placeholder = String(pgMaximoCalculado({ ...draft, vida: { ...draft.vida, maxManual: null } }));
@@ -381,10 +474,19 @@ async function save() {
     closeSheet(charDlg()); if (charsDlg().open) renderList();
     toast(`${esc(draft.nombre)} actualizado.${diff ? ' ' + esc(diff) : ''}`, [undoBtn(S, h)]);
   } else {
-    const P = Object.values(pendientes(draft)).flat();
-    if (P.length && !(await confirmar({ titulo: 'Quedan cosas por elegir', texto: `${P.join(' ')} Puedes crearlo igualmente y completarlo luego desde «Editar».`, ok: 'Crear igualmente', cancelar: 'Seguir eligiendo' }))) return;
-    const c = normChar(draft);
-    const h = S.edit(db => { db.chars.push(c); db.activeId = c.id; });
+    const faltan = Object.values(pendientes(draft)).flat();
+    if (faltan.length && !(await confirmar({ titulo: 'Quedan cosas por elegir', texto: `${faltan.join(' ')} Puedes crearlo igualmente y completarlo luego desde «Editar».`, ok: 'Crear igualmente', cancelar: 'Seguir eligiendo' }))) return;
+    const c = normChar(draft), all = allSpellItems(S.db), P = perfil(c);
+    const { items, po } = equipoInicial(c, { claseOpcion: EQ.clase, trasfondoOpcion: EQ.trasfondo, elecciones: ELEC, oroTirado: EQ.oro?.total });
+    const h = S.edit(db => {
+      const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
+        if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, fuente: P.listaNombre || c.clase, ...rel }); });
+      add(CONJ.trucos, {}); add(CONJ.libro.slice(0, P.maxPrep), { fuente: 'Libro', prep: true }); add(CONJ.libro.slice(P.maxPrep), { fuente: 'Libro' }); add(CONJ.prep, { prep: true });
+      anadirPendientes(db, c, conjurosPendientes(db, c, compendio()));
+      for (const [n, q] of items) anadirComun(c, datosObjeto(n, q));
+      equipoDe(c).monedas.po += po;
+      db.chars.push(c); db.activeId = c.id;
+    });
     document.dispatchEvent(new CustomEvent('grimorio:creado'));
     closeSheet(charDlg()); if (charsDlg().open) closeSheet(charsDlg());
     window.scrollTo({ top: 0 });
@@ -397,6 +499,7 @@ function cambiarClase(nueva) {
   const r = repartoHabilidades(antes), lista = (HAB_CLASE[nueva] || [0, []])[1];
   if (CREANDO) for (const [k, f] of Object.entries(r.fuente)) if (f === 'clase' && HAB[k] === 1 && !lista.includes(k)) delete HAB[k];
   $('#f_clase').value = nueva; MC = MC.filter(m => m.clase !== nueva); pintarMulticlase();
+  CONJ = { trucos: [], prep: [], libro: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null;
   const v = $('#f_subclase').value, vale = subclasesDe(nueva).includes(v); $('#f_subWrap').innerHTML = campoSubclase(nueva, vale ? v : '', 'id="f_subclase" aria-label="Subclase"');
   if (CAR.auto && CAR.metodo !== 'libre' && !(CAR.metodo === 'tiradas' && !CAR.tiradas.length)) CAR.base = repartoSugerido(nueva, ABILS.map(([k]) => CAR.base[k]));
   sync(false);
@@ -429,15 +532,22 @@ export function init(store, { onNewCharacterAddSpells }) {
   form.addEventListener('input', e => {
     leerMc(e.target);
     if (e.target.id === 'f_nombre') { $('#w_nombre').classList.remove('bad'); $('#charErr').textContent = ''; }
+    if (e.target.dataset.ccchk) return;
+    if (e.target.dataset.ccq) { const k = e.target.dataset.ccq, pos = e.target.selectionStart; CQ[k] = e.target.value; pintarConj(readForm()); const n = form.querySelector(`[data-ccq="${k}"]`); n?.focus(); n?.setSelectionRange(pos, pos); return; }
     if (e.target.dataset.libre) { CAR.base[e.target.dataset.libre] = clamp(parseInt(e.target.value, 10) || 10, 1, 30); return sync(false, { sinCar: true }); }
     sync(false, { sinCar: e.target.matches('input[type="text"], input:not([type]), textarea') });
   });
   form.addEventListener('change', e => {
     if (e.target.dataset.mc?.endsWith('|clase')) leerMc(e.target);
+    if (e.target.dataset.ccchk) { const k = e.target.dataset.ccchk, v = e.target.value; CONJ[k] = e.target.checked ? [...new Set([...CONJ[k], v])] : CONJ[k].filter(x => x !== v);
+      const y = $('#charForm').scrollTop; sync(false); $('#charForm').scrollTop = y; return; }
+    if (e.target.dataset.ccq) return;
+    if ((e.target.id === 'f_trasfondo' || e.target.id === 'f_especie') && e.target.dataset.sync === e.target.value) return;
+    if (e.target.id === 'f_trasfondo' || e.target.id === 'f_especie') e.target.dataset.sync = e.target.value;
     if (e.target.id === 'f_trasfondo') {
       for (const k of habilidadesTrasfondo({ trasfondo: e.target.dataset.antes || '' })) if (HAB[k] === 1) delete HAB[k];
       for (const k of habilidadesTrasfondo({ trasfondo: e.target.value })) HAB[k] ||= 1;
-      if (norm(e.target.dataset.antes || '') !== norm(e.target.value)) { CAR.bonos = {}; CAR.heredado = false; }
+      if (norm(e.target.dataset.antes || '') !== norm(e.target.value)) { CAR.bonos = {}; CAR.heredado = false; delete ELEC.t; EQ.trasfondo = 'A'; }
       e.target.dataset.antes = e.target.value;
     }
     if (e.target.id === 'f_manual' && e.target.checked) {
@@ -447,6 +557,14 @@ export function init(store, { onNewCharacterAddSpells }) {
     sync(false);
   });
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
+  on(form, 'click', '[data-herr]', (e, b) => { const [id, v] = b.dataset.herr.split('|'), el = eleccionesHerramienta(readForm()).find(x => x.id === id); if (!el) return;
+    const cur = ELEC[id] || []; ELEC[id] = cur.includes(v) ? cur.filter(x => x !== v) : el.n === 1 ? [v] : cur.length < el.n ? [...cur, v] : cur; sync(false); });
+  on(form, 'click', '[data-herrlimpia]', () => { HERR = []; sync(false); });
+  on(form, 'click', '[data-idioma]', (e, b) => { const v = b.dataset.idioma; IDI = IDI.includes(v) ? IDI.filter(x => x !== v) : [...IDI, v]; sync(false); });
+  on(form, 'click', '[data-eqclase]', (e, b) => { EQ.clase = b.dataset.eqclase; sync(false); });
+  on(form, 'click', '[data-eqtras]', (e, b) => { EQ.trasfondo = b.dataset.eqtras; sync(false); });
+  on(form, 'click', '[data-tiraroro]', (e, b) => { EQ.oro = tirarOro(readForm().clase); sync(false); burstFrom(form.querySelector('[data-tiraroro]'), { color: '#F4C567', n: 20, speed: 2.4, up: 1.6, life: 800, size: 1.8 }); });
+  on(form, 'click', '[data-ccver]', (e, b) => { const it = allSpellItems(S.db).find(x => x.id === b.dataset.ccver); if (it) previewSpell(it); });
   on(form, 'click', '[data-clase]', (e, b) => cambiarClase(b.dataset.clase));
   on(form, 'click', '[data-metodo]', (e, b) => cambiarMetodo(b.dataset.metodo));
   on(form, 'click', '[data-cctirar]', tirar);

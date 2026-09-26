@@ -2,6 +2,7 @@ import { esc } from '../core/util.js';
 import { sgn } from '../domain/reglas2024.js';
 import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas, resumenTirada } from '../domain/efectos.js';
 import { vidaDe, pgMaximo, pgActuales, dadosDeGolpe, estadoVital, NOMBRE_ESTADO } from '../domain/vida.js';
+import { entrenamientoDe } from '../domain/origen.js';
 import { iniciativa, fmtMetros, tablaCaracteristicas, percepcionPasiva, penalizacionAgotamiento } from '../domain/habilidades.js';
 import { combateDe } from '../domain/combate.js';
 import { gi } from './tema.js';
@@ -98,7 +99,9 @@ export function caracteristicasHtml(ch) {
       <button type="button" class="ruse cr-ed" data-cmd="editchar" aria-label="Editar características y competencias" title="Editar">${icon('quill')}</button></div>
     <div class="cr-grid">${t.map(tarjeta).join('')}</div>
     ${abierta ? (c => `<div class="cr-panel" data-car="${c.k}"><h3>${esc(c.nombre)} <small>${c.valor} · ${sgn(c.mod)}</small></h3>${filasCar(ch, c)}</div>`)(t.find(x => x.k === abierta)) : ''}
-    <p class="cr-leyenda"><span>${marcaComp(1)}competencia</span><span>${marcaComp(2)}pericia</span><span><i class="cr-v ventaja">▲</i><i class="cr-v desventaja">▼</i>ventaja o desventaja por estados y efectos</span><span>Toca una característica para su prueba, o una tirada de la lista.</span></p>`;
+    <p class="cr-leyenda"><span>${marcaComp(1)}competencia</span><span>${marcaComp(2)}pericia</span><span><i class="cr-v ventaja">▲</i><i class="cr-v desventaja">▼</i>ventaja o desventaja por estados y efectos</span><span>Toca una característica para su prueba, o una tirada de la lista.</span></p>
+    ${(e => `<dl class="cr-otras">${[['Entrenamiento', [e.armas, e.armaduras].filter(Boolean).join('. ')], ['Herramientas', (ch.herramientas || []).join(', ')], ['Idiomas', (ch.idiomas || []).join(', ')]]
+      .filter(([, v]) => v).map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`)(entrenamientoDe(ch))}`;
 }
 let pruebasAbiertas = false;
 export const abrirPruebas = v => { pruebasAbiertas = v; };
