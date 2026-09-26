@@ -1,5 +1,5 @@
 import { clamp, norm } from '../core/util.js';
-import { modOf, nivelDe, competencia, clasesDe, vistaClase } from './reglas2024.js';
+import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from './reglas2024.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
@@ -149,7 +149,7 @@ export function plantillas(ch) {
       if (has(/misericordia/i) && L >= 17) uno('misericordia.suprema', 'Mano de misericordia suprema');
       break;
     case 'Paladín':
-      R('paladin.manos', { tipo: 'recurso', nombre: 'Imponer las manos', max: 5 * L, nota: 'Reserva de puntos de golpe para curar.' });
+      R('paladin.manos', { tipo: 'recurso', nombre: 'Imponer las manos', max: 5 * L, reserva: 'PG', nota: 'Reserva de puntos de golpe para curar: gasta los que quieras con una acción adicional; 5 de ellos curan un veneno.' });
       if (L >= 2) uno('paladin.castigo', 'Castigo de paladín', 'Castigo divino sin gastar espacio.');
       if (L >= 3) R('paladin.canalizar', { tipo: 'recurso', nombre: 'Canalizar divinidad', max: L >= 11 ? 3 : 2, recarga: 'corto1' });
       if (L >= 5) uno('paladin.corcel', 'Corcel fiel', 'Hallar corcel sin gastar espacio.');
@@ -187,10 +187,30 @@ export function maxFrom(ch, r) {
   }
 }
 
+// Usos que dan la especie y las dotes de origen (Manual del Jugador de 2024)
+export function plantillasOrigen(ch) {
+  const L = nivelTotal(ch), pb = competencia(L), T = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];
+  const R = (id, nombre, max, recarga = 'largo', nota = '') => T.push({ id: 'tpl:' + id, tpl: true, tipo: 'recurso', nombre, max, recarga, nota });
+  const ESP = {
+    draconido: () => R('especie.aliento', 'Arma de aliento', pb, 'largo', 'Sustituye un ataque: cono de 4,5 m o línea de 9 m, salvación de Destreza.'),
+    aasimar: () => { R('especie.manos', 'Manos curativas', 1, 'largo', `Curas ${pb}d4 a una criatura que toques.`); if (L >= 3) R('especie.revelacion', 'Revelación celestial', 1, 'largo', 'Te transformas durante 1 minuto.'); },
+    enano: () => R('especie.piedra', 'Sentido de la piedra', pb, 'largo', 'Sentido de temblores 18 m durante 10 minutos.'),
+    goliat: () => { R('especie.gigante', 'Ascendencia de gigante', pb, 'largo'); if (L >= 5) R('especie.grande', 'Forma grande', 1, 'largo', 'Te vuelves Grande durante 10 minutos.'); },
+    orco: () => { R('especie.adrenalina', 'Descarga de adrenalina', pb, 'corto', 'Correr como acción adicional y ganas PG temporales.'); R('especie.aguante', 'Aguante incansable', 1, 'largo', 'Al caer a 0 PG, te quedas a 1.'); },
+  };
+  ESP[especie]?.();
+  for (const d of dotesDe(ch)) {
+    const n = norm(d.nombre);
+    if (n === 'afortunado') R('dote.afortunado', 'Puntos de suerte', pb, 'largo', 'Gasta 1 para tener ventaja en una prueba con d20, o para imponer desventaja a un ataque contra ti.');
+    if (n === 'iniciado en la magia') R(`dote.iniciado.${norm(d.detalle || '')}`, `Iniciado en la magia${d.detalle ? ` (${d.detalle})` : ''}`, 1, 'largo', 'Lanzas su conjuro de nivel 1 sin gastar espacio.');
+  }
+  return T;
+}
+
 export function reglas(ch, todas = false) {
   const sust = new Set(ch.rasgosOff || []), ocultos = new Set(ch.rasgosOcultos || []);
   const list = [
-    ...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))).map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
+    ...[...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))), ...plantillasOrigen(ch)].map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
     ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.sustituida);

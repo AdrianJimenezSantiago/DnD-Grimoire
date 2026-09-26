@@ -60,7 +60,7 @@
 .cc-badge { position: absolute; top: 0; left: 26px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 9px;
   font: 700 10.5px / 1 var(--sans); color: #fff; background: #D9822B; box-shadow: 0 0 0 2px var(--raised); animation: latido 2.4s ease-in-out infinite; }
 @keyframes latido { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.22); } 24% { transform: scale(1); } }
-@media (max-width: 620px) {
+@media (max-width: 860px) {
   .cc-pasos button { flex: 0 0 auto; padding-right: 5px; }
   .cc-pasos button:not([aria-selected="true"]) .cc-l { display: none; }
   .cc-pasos button[aria-selected="true"] { padding-right: 12px; }
@@ -190,3 +190,40 @@
 .cc-subbloq { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: var(--r-s); border: 1px dashed var(--line); color: var(--ink-3);
   font: italic 400 var(--fs-m) / 1.2 var(--serif); background: repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--line) 25%, transparent) 8px 9px); }
 .cc-subbloq[hidden], [data-mcsub][hidden], #f_subWrap[hidden] { display: none; }
+
+/* Competencias agrupadas por característica */
+.cc-grupos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 10px; margin-bottom: 8px; align-items: start; }
+.cc-grupo { display: grid; gap: 5px; padding: 10px; border-radius: var(--r-m); border: 1px solid var(--line-soft); background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.cc-grupo.salv { border-color: color-mix(in srgb, var(--gold) 35%, var(--line-soft)); }
+.cc-grupo header { display: flex; align-items: center; gap: 8px; padding: 0 2px 4px; }
+.cc-grupo header b { font: 600 var(--fs-m) / 1 var(--display); letter-spacing: .03em; }
+.cc-grupo header em { font: 400 var(--fs-xs) / 1 var(--sans); font-style: normal; color: var(--ink-3); }
+.cc-grupo header .comp-s { margin-left: auto; min-height: 28px; min-width: 0; padding: 0 9px; font: 600 10.5px / 1 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.cc-grupo .comp-h { min-height: 40px; }
+.cc-sinhab { margin: 0; padding: 6px 4px; font: italic 400 var(--fs-s) / 1.3 var(--serif); color: var(--ink-3); }
+
+/* Herramientas, idiomas y equipo */
+.cc-sub { margin: 16px 0 8px; font: 600 var(--fs-m) / 1.2 var(--display); letter-spacing: .02em; }
+.cc-entreno { margin-bottom: 10px; }
+.cc-elige { margin: 10px 0; padding: 10px 12px; border-radius: var(--r-m); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--ok); }
+.cc-elige.falta { box-shadow: inset 3px 0 0 #D9822B; background: color-mix(in srgb, #D9822B 8%, var(--surface-2)); }
+.cc-elige > p { margin: 0 0 8px; font: 400 var(--fs-s) / 1.4 var(--sans); color: var(--ink-2); }
+.cc-elige > p .icon { width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; color: var(--ok); }
+.cc-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.cc-pills .cc-pill { font: 500 var(--fs-xs) / 1 var(--sans); letter-spacing: 0; text-transform: none; min-width: 0; }
+.cc-pill.fija { display: inline-grid; place-items: center; cursor: default; }
+.cc-raros { margin-top: 8px; } .cc-raros summary { cursor: pointer; font: 400 var(--fs-xs) / 1.6 var(--sans); color: var(--ink-3); } .cc-raros .cc-pills { margin-top: 6px; }
+.cc-opciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+.cc-opcion { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; text-align: left; justify-content: flex-start; border-radius: var(--r-m); background: var(--surface); min-height: 64px;
+  transition: border-color var(--t-med), box-shadow var(--t-med), background var(--t-med); }
+.cc-opcion b { font: 600 var(--fs-s) / 1.1 var(--display); letter-spacing: .04em; color: var(--gold); }
+.cc-opcion span { font: 400 var(--fs-xs) / 1.4 var(--sans); color: var(--ink-2); }
+.cc-opcion strong { color: var(--ink); }
+.cc-opcion.on { border-color: var(--gold); background: linear-gradient(135deg, var(--gold-soft), var(--surface) 70%); box-shadow: 0 0 0 1px var(--gold), 0 8px 24px -14px var(--glow); }
+.cc-opciones + .cc-tirar { margin-top: 10px; }
+
+/* Conjuros iniciales */
+.cc-conj .ch-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.cc-conj .ch-head h3 { margin: 0; }
+.cc-conj input[type="search"] { margin-bottom: 6px; }
+.cc-lista { max-height: 340px; overflow: auto; border-radius: var(--r-s); border: 1px solid var(--line-soft); padding: 2px 6px; }

@@ -23,7 +23,7 @@ export const PREDEFINIDOS = [
   A('Cimitarra', '1d6', 'cortante', 1.5, '25 po', ['Sutil', 'Ligera'], 'Mella'), A('Hacha de batalla', '1d8', 'cortante', 2, '10 po', ['Versátil (1d10)'], 'Derribar'),
   A('Hacha a dos manos', '1d12', 'cortante', 3.5, '30 po', ['Pesada', 'Dos manos'], 'Hendir'), A('Martillo de guerra', '1d8', 'contundente', 2.5, '15 po', ['Versátil (1d10)'], 'Empujar'),
   A('Mazo', '2d6', 'contundente', 5, '10 po', ['Pesada', 'Dos manos'], 'Derribar'), A('Alabarda', '1d10', 'cortante', 3, '20 po', ['Pesada', 'Alcance', 'Dos manos'], 'Hendir'),
-  A('Lucero del alba', '1d8', 'perforante', 2, '15 po', [], 'Debilitar'), A('Tridente', '1d8', 'perforante', 2, '5 po', ['Arrojadiza', 'Versátil (1d10)'], 'Derribar', '6/18 m'),
+  A('Mayal', '1d8', 'contundente', 1, '10 po', [], 'Debilitar'), A('Lucero del alba', '1d8', 'perforante', 2, '15 po', [], 'Debilitar'), A('Tridente', '1d8', 'perforante', 2, '5 po', ['Arrojadiza', 'Versátil (1d10)'], 'Derribar', '6/18 m'),
   A('Látigo', '1d4', 'cortante', 1.5, '2 po', ['Sutil', 'Alcance'], 'Ralentizar'), A('Arco largo', '1d8', 'perforante', 1, '50 po', ['Munición', 'Pesada', 'Dos manos'], 'Ralentizar', '45/180 m'),
   A('Ballesta de mano', '1d6', 'perforante', 1.5, '75 po', ['Munición', 'Ligera', 'Carga'], 'Irritar', '9/36 m'), A('Ballesta pesada', '1d10', 'perforante', 9, '50 po', ['Munición', 'Pesada', 'Carga', 'Dos manos'], 'Empujar', '30/120 m'),
   R('Armadura acolchada', 11, 'todo', 'ligera', 4, '5 po'), R('Armadura de cuero', 11, 'todo', 'ligera', 5, '10 po'), R('Armadura de cuero tachonado', 12, 'todo', 'ligera', 6.5, '45 po'),
@@ -39,6 +39,10 @@ export const PREDEFINIDOS = [
   E('Herramientas de ladrón', 'herramienta', 0.5, '25 po'), E('Kit de herborista', 'herramienta', 1.5, '5 po'), E('Útiles de herrero', 'herramienta', 4, '20 po'),
   E('Suministros de caligrafía', 'herramienta', 2.5, '10 po'), E('Laúd', 'herramienta', 1, '35 po'), E('Kit de disfraz', 'herramienta', 1.5, '25 po'),
   E('Foco arcano (orbe)', 'equipo', 1.5, '20 po'), E('Símbolo sagrado (amuleto)', 'equipo', 0.5, '5 po'), E('Foco druídico (rama de muérdago)', 'equipo', 0, '1 po'), E('Libro de conjuros', 'equipo', 1.5, '50 po'),
+  E('Carcaj', 'equipo', 0.5, '1 po'), E('Ropa de viaje', 'equipo', 2, '2 po'), E('Ropa fina', 'equipo', 3, '15 po'), E('Túnica', 'equipo', 2, '1 po'), E('Bolsa', 'equipo', 0.5, '5 pp'),
+  E('Lámpara', 'equipo', 0.5, '5 pp'), E('Tienda de campaña', 'equipo', 10, '2 po'), E('Grilletes', 'equipo', 3, '2 po'), E('Pala', 'equipo', 2.5, '2 po'), E('Olla de hierro', 'equipo', 5, '2 po'),
+  E('Pergamino (hoja)', 'equipo', 0, '2 pp'), E('Espejo', 'equipo', 0.25, '5 po'), E('Perfume', 'equipo', 0, '5 po'), E('Disfraz', 'equipo', 2, '5 po'),
+  E('Foco arcano (cristal)', 'equipo', 0.5, '10 po'), E('Foco arcano (bastón)', 'equipo', 2, '5 po'), E('Foco druídico (bastón)', 'equipo', 2, '5 po'),
   E('Gema', 'tesoro', 0, '50 po'), E('Objeto de arte', 'tesoro', 0.5, '25 po'),
 ];
 

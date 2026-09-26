@@ -13,6 +13,7 @@ import { undoBtn } from '../../app/acciones.js';
 import { previewSpell } from './conjuro.js';
 import { tarjetasSubclase, campoClase } from '../subclases.js';
 import { gi } from '../tema.js';
+import { aumentoDeDote, faltaRequisito } from '../../domain/origen.js';
 
 let S, LV = null;
 const dlg = () => $('#lvlDlg');
@@ -22,6 +23,8 @@ const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase =
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
 
 const cambiosHtml = xs => xs.length ? `<section class="av-sec av-cambios lv-cambios"><h3>${gi('libro')}Al subir también puedes cambiar</h3><ul class="av-lista">${xs.map(i => `<li class="av-it">${gi(i.ico, 'av-it-ico')}<span class="av-it-t"><b>${esc(i.titulo)}${i.fuente ? `<small>${esc(i.fuente)}</small>` : ''}</b><span>${esc(i.texto)}</span></span></li>`).join('')}</ul></section>` : '';
+const doteLib = n => biblioteca().dotes.find(x => norm(x.nombre) === norm(String(n || '').replace(/\s*\([^)]*\)\s*$/, '')));
+const aumentosDote = n => { const x = doteLib(n); return x ? aumentoDeDote(x.texto) : null; };
 function draft() {
   const d = clone(char()), o = objetivo();
   if (o.principal) { d.nivel = LV.to; d.subclase = LV.subclase; }
@@ -29,6 +32,7 @@ function draft() {
   const a = LV.asi, up = (k, n) => { if (k) d.stats[k] = Math.min(20, d.stats[k] + n); };
   if (a.modo === 'dos') up(a.a, 2);
   if (a.modo === 'uno') { up(a.a, 1); if (a.b !== a.a) up(a.b, 1); }
+  if (a.modo === 'dote') up(a.c, 1);
   return d;
 }
 function plan() {
@@ -60,7 +64,7 @@ export function openLevelUp() {
 }
 function elegirClase(clase) {
   LV.clase = clase; const o = objetivo();
-  Object.assign(LV, { to: o.nivel + 1, subclase: o.subclase || '', asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [] });
+  Object.assign(LV, { to: o.nivel + 1, subclase: o.subclase || '', asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [] });
 }
 function chooser(key, n, filterFn, hint) {
   const chosen = LV[key], others = new Set(['libro', 'savant', 'prep', 'trucos'].filter(k => k !== key).flatMap(k => LV[k]));
@@ -117,7 +121,10 @@ function render() {
         <label class="chk-line"><input type="radio" name="lvasi" value="dos" ${a.modo === 'dos' ? 'checked' : ''}> +2 a una característica</label>${a.modo === 'dos' ? `<div class="frow">${sel('lvA', a.a)}</div>` : ''}
         <label class="chk-line"><input type="radio" name="lvasi" value="uno" ${a.modo === 'uno' ? 'checked' : ''}> +1 a dos características</label>${a.modo === 'uno' ? `<div class="frow">${sel('lvA', a.a)}${sel('lvB', a.b, a.a)}</div>` : ''}
         <label class="chk-line"><input type="radio" name="lvasi" value="dote" ${a.modo === 'dote' ? 'checked' : ''}> ${to === 19 ? 'Don épico u otra dote' : 'Otra dote'}</label>
-        ${a.modo === 'dote' ? `<div class="f wide"><span>Dote</span>${campoElegible('id="lvDote" aria-label="Nombre de la dote"', a.dote, 'dote', 'dote', 'Por ejemplo, Iniciado en la magia')}<span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></div>` : ''}
+        ${a.modo === 'dote' ? `<div class="f wide"><span>Dote</span>${campoElegible('id="lvDote" aria-label="Nombre de la dote"', a.dote, 'dote', 'dote', 'Por ejemplo, Iniciado en la magia')}${(() => {
+          if (!a.dote) return ''; const ops = aumentosDote(a.dote), x = doteLib(a.dote), falta = x ? faltaRequisito(x.req, draft()) : '';
+          const lista = (ops || ABILS.map(([k]) => k)).map(k => `<option value="${k}" ${a.c === k ? 'selected' : ''} ${ch.stats[k] >= 20 ? 'disabled' : ''}>${ABIL_NAME[k]} (${ch.stats[k]} → ${Math.min(20, ch.stats[k] + 1)})</option>`).join('');
+          return `${falta ? `<p class="note warn-txt">${esc(falta)}</p>` : ''}<label class="f lv-aum">${ops ? `${esc(x.nombre)} sube en 1 una característica. ¿Cuál?` : 'Si la dote sube una característica, elige cuál (+1)'}<select id="lvC"><option value="">${ops ? 'Elige' : 'Ninguna'}</option>${lista}</select></label>`; })()}<span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></div>` : ''}
       </div>${B.apKey && B.mod !== A.mod ? `<div class="fsum" style="margin-top:14px">Tu ${ABIL_NAME[B.apKey]} pasa a ${sgn(B.mod)}: CD ${B.cd} y ataque ${sgn(B.atk)}.</div>` : ''}`;
   }
   const escL = LV.sch.toLowerCase();
@@ -132,7 +139,7 @@ function render() {
     if (LV.subclase !== (o.subclase || '')) L.push(`Subclase: ${LV.subclase || 'ninguna'}.`);
     if (LV.steps.includes('mejora')) {
       const a = LV.asi;
-      if (a.modo === 'dote') L.push(a.dote ? `Dote: ${a.dote}.` : 'Dote sin nombre: puedes anotarla después en la ficha.');
+      if (a.modo === 'dote') L.push(a.dote ? `Dote: ${a.dote}${a.c ? ` (${ABIL_NAME[a.c]} ${ch.stats[a.c]} → ${d.stats[a.c]})` : ''}.` : 'Dote sin nombre: puedes anotarla después en la ficha.');
       else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} ${ch.stats[k]} → ${d.stats[k]}`); L.push(bits.length ? `Mejora de característica: ${bits.join(', ')}.` : 'Mejora de característica sin elegir.'); }
     }
     if (LV.libro.length) L.push(`Al libro: ${names('libro').join(', ')}.`);
@@ -155,7 +162,7 @@ function apply() {
   if (!o.principal) notes.push(o.nueva ? `multiclase: ${o.clase} 1` : `${o.clase} ${to}`);
   if (LV.subclase !== (o.subclase || '')) notes.push(`subclase ${LV.subclase}`);
   if (LV.steps.includes('mejora')) {
-    if (LV.asi.modo === 'dote') { if (LV.asi.dote) notes.push(`dote ${LV.asi.dote}`); }
+    if (LV.asi.modo === 'dote') { if (LV.asi.dote) notes.push(`dote ${LV.asi.dote}${LV.asi.c ? ` (+1 ${ABIL_NAME[LV.asi.c]})` : ''}`); }
     else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} +${d.stats[k] - ch.stats[k]}`); if (bits.length) notes.push(`mejora de característica (${bits.join(', ')})`); }
   }
   const B = perfil(d), all = allSpellItems(S.db), picks = { libro: LV.libro, savant: LV.savant, prep: LV.prep, trucos: LV.trucos }, sch = LV.sch;
@@ -190,9 +197,11 @@ export function init(store) {
   });
   body.addEventListener('change', ev => {
     const t = ev.target;
-    if (t.name === 'lvasi') { LV.asi = { ...LV.asi, modo: t.value, a: '', b: '' }; return render(); }
+    if (t.name === 'lvasi') { LV.asi = { ...LV.asi, modo: t.value, a: '', b: '', c: '' }; return render(); }
     if (t.id === 'lvA') { LV.asi.a = t.value; if (LV.asi.b === t.value) LV.asi.b = ''; return render(); }
     if (t.id === 'lvB') { LV.asi.b = t.value; return render(); }
+    if (t.id === 'lvC') { LV.asi.c = t.value; return render(); }
+    if (t.id === 'lvDote') { LV.asi.dote = t.value.trim(); const ops = aumentosDote(LV.asi.dote); LV.asi.c = ops?.length === 1 ? ops[0] : ''; return render(); }
     if (t.dataset.chk) { const k = t.dataset.chk; LV[k] = t.checked ? [...new Set([...LV[k], t.value])] : LV[k].filter(x => x !== t.value);
       const y = body.scrollTop; render(); body.scrollTop = y; haptic(); }
   });
@@ -206,6 +215,7 @@ export function init(store) {
   $('#lvNext').addEventListener('click', () => {
     const step = LV.steps[LV.i];
     if (step === 'mejora' && LV.asi.modo !== 'dote' && !LV.asi.a) { toast('Elige qué característica mejora, o marca «Otra dote».'); return; }
+    if (step === 'mejora' && LV.asi.modo === 'dote' && LV.asi.dote && aumentosDote(LV.asi.dote) && !LV.asi.c) { toast('Esa dote sube una característica: elige cuál.'); return; }
     if (step === 'clase' && !LV.clase) { toast('Elige la clase en la que subes.'); return; }
     if (LV.i === LV.steps.length - 1) return apply();
     LV.i++; render(); body.scrollTop = 0;
