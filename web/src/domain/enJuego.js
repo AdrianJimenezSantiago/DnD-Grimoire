@@ -3,6 +3,7 @@ import { norm } from '../core/util.js';
 import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
 import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
 import { maniobrasDe, cdManiobras, dadoSupremacia } from './maniobras.js';
+import { VARIANTES, varianteDe } from './variantes.js';
 
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
 const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen : 'clase');
@@ -89,6 +90,11 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
       const etiqueta = `Nivel ${r.nivel} · ${r.origen === 'subclase' ? c.subclase : c.clase}`;
       nuevo(clave, { nombre: r.nombre, nivel: r.nivel, origen, clase: c.clase, etiqueta }, t, numeros, recurso);
     }
+  }
+  // Golpes benditos / Furia elemental: la variante elegida, o que falta elegirla
+  for (const r of out) {
+    const def = VARIANTES[r.clase];
+    if (def && norm(def.rasgo) === norm(r.nombre)) r.eleccion = { clase: r.clase, rasgo: def.rasgo, opciones: def.opciones, actual: varianteDe(ch, r.clase)?.nombre || '' };
   }
   // Maniobras del Maestro del combate: cada una en su grupo, con el recurso de los dados de supremacía
   const maniobras = maniobrasDe(ch);

@@ -223,7 +223,7 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
 // Golpes benditos (clérigo) y Furia elemental (druida): lo que da la variante elegida
 function furiaOGolpes(ch, nombre, mejorado) {
   const v = varianteDe(ch, ch.clase), dado = mejorado ? '2d8' : '1d8';
-  if (!v) return { nombre, valor: dado, nota: 'Elige la variante en la ficha (Dotes) o al subir de nivel' };
+  if (!v) return { nombre, valor: 'Sin elegir', nota: 'Elige la variante tocando el rasgo en «En juego»' };
   if (v.ef === 'golpe') return { nombre, valor: `${dado} ${v.tipos.replace(/^de /, '')}`, nota: `${v.nombre}: una vez por turno al impactar con un arma` };
   return { nombre, valor: `+${modOf(ch.stats?.sab)} a trucos`, nota: `${v.nombre}: Sabiduría al daño de tus trucos` };
 }

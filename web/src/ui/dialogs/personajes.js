@@ -37,13 +37,13 @@ import { dotesConConjuros, filtroEleccion } from '../../domain/conjurosDote.js';
 import { cupoMaestrias } from '../../domain/maestria.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 import { fuentesExtra } from '../../domain/creacion.js';
-import { preguntarHabilidades, aplicarFuente, faltanDe } from '../habilidadesElegir.js';
+import { preguntarHabilidades, preguntarOpcion, aplicarFuente, faltanDe } from '../habilidadesElegir.js';
 import { VARIANTES, variantesPendientes } from '../../domain/variantes.js';
 import { cupoManiobras, alternarManiobra } from '../../domain/maniobras.js';
 import { maniobrasHtml } from '../maniobras.js';
 
 let S, onCreated;
-let MC = [], DOTES = [], HAB = {}, SALV = [], ORD = {}, VAR = {}, MAN = [], FVISTAS = new Set();
+let MC = [], DOTES = [], HAB = {}, SALV = [], ORD = {}, VAR = {}, MAN = [], FVISTAS = new Set(), VVISTAS = new Set();
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 
 export function openCharacter(id) {
@@ -165,7 +165,7 @@ export function openCharForm(id, { clase = '' } = {}) {
   MAES = [...(c.maestrias || [])]; ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
-  sync(true); FVISTAS = new Set(fuentesConClave(readForm()).map(f => f.clave));
+  sync(true); FVISTAS = new Set(fuentesConClave(readForm()).map(f => f.clave)); VVISTAS = new Set(CREANDO ? [] : variantesPendientes(readForm()));
   if (!id && CLASES[clase]) cambiarClase(clase);
   openSheet(charDlg());
 }
@@ -514,6 +514,11 @@ function sync(first, { sinCar = false } = {}) {
 // Competencias que da algo recién elegido (dote Habilidoso del trasfondo, subclase, multiclase…): se preguntan al momento
 const fuentesConClave = d => { const m = new Map(); return fuentesExtra(d).map(f => { const k = (m.get(f.nombre) || 0) + 1; m.set(f.nombre, k); return { ...f, clave: `${f.nombre}#${k}` }; }); };
 function revisarFuentes(d) {
+  // Al llegar a nivel 7 (clérigo o druida) se pregunta la variante de su rasgo
+  const vars = variantesPendientes(d).filter(k => !VVISTAS.has(k));
+  if (vars.length) { vars.forEach(k => VVISTAS.add(k)); setTimeout(async () => {
+    for (const k of vars) { const def = VARIANTES[k], v = await preguntarOpcion({ titulo: `${def.rasgo} (${k.toLowerCase()} ${def.nivel})`, texto: 'Elige cómo funciona este rasgo. Podrás cambiarlo desde Dotes.', opciones: def.opciones }); if (v) VAR = { ...VAR, [k]: v }; }
+    sync(false); }, 0); }
   const nuevas = fuentesConClave(d).filter(f => !FVISTAS.has(f.clave)); if (!nuevas.length) return;
   nuevas.forEach(f => FVISTAS.add(f.clave));
   setTimeout(async () => {

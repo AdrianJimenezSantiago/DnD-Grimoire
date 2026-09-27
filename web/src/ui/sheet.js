@@ -157,7 +157,8 @@ function enJuegoHtml(ch, P) {
       <button type="button" class="ej-main" data-ejver="${esc(r.clave)}" aria-label="Leer ${esc(r.nombre)}"><b>${esc(r.nombre)}</b>
         <small>${gi(iconoFuente(r), 'ej-ico')}${esc(r.etiqueta)}</small>
         ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
-      <div class="ej-side">${r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
+      <div class="ej-side">${r.eleccion && !r.eleccion.actual ? `<button type="button" class="ej-num ej-pend" data-ejver="${esc(r.clave)}" title="Elige cómo funciona ${esc(r.nombre)}">Elegir variante</button>`
+          : r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
         ${rec ? `<button type="button" class="ej-usos ${left ? '' : 'agotado'}" data-irrec="${esc(rec.id)}" aria-label="${esc(rec.nombre)}: quedan ${left} de ${rec.max}. Ir a su contador" title="Los usos se marcan en su tarjeta de recursos">${left}/${rec.max}<small>usos</small></button>` : ''}
         <button type="button" class="ej-star" data-ejfijar="${esc(r.clave)}" aria-pressed="${fijo}" aria-label="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}: ${esc(r.nombre)}" title="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}">★</button></div></article>`;
   };
