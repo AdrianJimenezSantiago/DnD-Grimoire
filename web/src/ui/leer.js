@@ -3,7 +3,8 @@ import { glosario } from '../domain/catalogo.js';
 import { equipoDe, ataqueArma, armaCombate } from '../domain/equipo.js';
 import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas, REGLAS_ESTADO } from '../domain/efectos.js';
 import { NOMBRE_ESTADO, RESUMEN_ESTADO } from '../domain/vida.js';
-import { fmtMetros } from '../domain/habilidades.js';
+import { fmtMetros, NOMBRE_HAB } from '../domain/habilidades.js';
+import { ACCION_COMUN, accionesAdicionales } from '../domain/combate.js';
 import { ECONOMIA_INFO, textoPropiedad, textoMaestria } from '../domain/referencia.js';
 import { ficha, abrirTermino, abrirRasgoJuego } from './dialogs/biblioteca.js';
 import { openSpell } from './dialogs/conjuro.js';
@@ -58,6 +59,16 @@ function conc() {
   if (bi >= 0) openSpell(bi);
 }
 
+// Acciones de combate: la regla del manual importado si la hay; si no, el resumen de la app
+function accionComun(k) {
+  const a = ACCION_COMUN[k]; if (!a) return;
+  const g = glosario().find(e => norm(e.nombre) === norm(a.nombre) || norm(e.nombre) === norm(`${a.nombre} (acción)`));
+  if (g) return abrirTermino(g.clave);
+  const ad = accionesAdicionales(S.cur()).find(x => x.k === k);
+  ficha({ titulo: a.nombre, ico: a.ico, sub: pills([a.via === 'reaccion' ? 'Reacción' : 'Acción', ad ? `adicional con ${ad.rasgo}` : ''].filter(Boolean)),
+    cuerpo: `<p class="lr-intro">${esc(a.texto)}</p>${a.tirar ? `<p class="note">Suele pedir: ${esc(a.tirar.map(h => NOMBRE_HAB[h]).join(', '))}.</p>` : ''}<p class="note">Tócala en la vista de combate para gastar ${a.via === 'reaccion' ? 'tu reacción' : 'tu acción'}; vuelve a tocarla para desmarcarla.</p>` });
+}
+
 export function leer(clave) {
   if (!S?.cur()) return false;
   const [tipo, ...r] = clave.split(':'), v = r.join(':');
@@ -67,6 +78,7 @@ export function leer(clave) {
   else if (tipo === 'estado') estado(v);
   else if (tipo === 'efecto') efecto(v);
   else if (tipo === 'eco') economia(v);
+  else if (tipo === 'accom') accionComun(v);
   else if (tipo === 'ca') ca();
   else if (tipo === 'vel') vel();
   else if (tipo === 'conc') conc();

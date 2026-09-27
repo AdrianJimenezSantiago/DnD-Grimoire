@@ -7,7 +7,7 @@ import { biblioteca, tiradasConjuro } from '../domain/catalogo.js';
 import { dadosPara } from '../domain/tiradas.js';
 import { slotsOf, freeOf, firstFreeFrom } from './sheet.js';
 import { armasCombate, ataqueArma } from '../domain/equipo.js';
-import { combateDe, ECONOMIA, economiaDeTiempo } from '../domain/combate.js';
+import { combateDe, ECONOMIA, economiaDeTiempo, ACCIONES_COMUNES, ACCION_COMUN, accionesAdicionales } from '../domain/combate.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../domain/habilidades.js';
 import { pgActuales, pgMaximo, estadoVital, vidaDe } from '../domain/vida.js';
 import { gi } from './tema.js';
@@ -46,9 +46,16 @@ function acciones(ch, db) {
   const P = perfil(ch), mAt = modsTirada(ch, { sobre: 'ataque' }).filter(m => !/^Agotamiento/.test(m.fuente)), modo = resolverModo(mAt);
   const marca = modo === 'normal' ? mAt.filter(m => m.efecto === 'dado' || m.efecto === 'plano').map(m => `<i class="cb-at-m ${m.mal ? 'mal' : 'bien'}" title="${esc(m.fuente)}">${esc(fmtMod(m))}</i>`).join('')
     : `<i class="cb-at-m ${modo === 'ventaja' ? 'bien' : 'mal'}" title="${esc(mAt.filter(m => m.efecto === modo).map(m => m.fuente).join(', '))}">${modo === 'ventaja' ? '▲' : '▼'}</i>` + mAt.filter(m => m.efecto === 'dado').map(m => `<i class="cb-at-m ${m.mal ? 'mal' : 'bien'}">${esc(fmtMod(m))}</i>`).join('');
-  const nuevo = () => ({ armas: [], trucos: [], niveles: {}, rasgos: [] });
+  const nuevo = () => ({ armas: [], comunes: [], trucos: [], niveles: {}, rasgos: [] });
   const grupos = { accion: nuevo(), adicional: nuevo(), reaccion: nuevo() };
   let n = 0;
+  // Correr, Destrabarse, Esquivar…: se tocan para gastar la acción (o la adicional con Acción astuta, o la reacción)
+  const cb = combateDe(ch), incap = incapacitado(ch).length > 0;
+  const comun = (a, via, rasgo = '') => { const hecha = cb.hechas.some(h => h.k === a.k && h.via === via);
+    return `<button type="button" class="cb-ac ${hecha ? 'hecha' : ''}" style="--i:${n++}" data-accom="${a.k}|${via}" data-leer="accom:${a.k}" aria-pressed="${hecha}" ${incap ? 'disabled' : ''} aria-label="${esc(a.nombre)}${rasgo ? ` (${esc(rasgo)})` : ''}${hecha ? ': hecha este turno' : ''}">
+      <span class="cb-ac-ico">${gi(a.ico)}</span><span class="cb-ac-t"><b>${esc(a.nombre)}</b><small>${esc(rasgo || a.corto)}</small></span>${hecha ? '<i class="cb-ac-ok" aria-hidden="true"></i>' : ''}</button>`; };
+  for (const a of ACCIONES_COMUNES) grupos[a.via || 'accion'].comunes.push(comun(a, a.via || 'accion'));
+  for (const x of accionesAdicionales(ch)) grupos.adicional.comunes.push(comun(ACCION_COMUN[x.k], 'adicional', x.rasgo));
   for (const o of armasCombate(ch).sort((a, b) => b.equipado - a.equipado)) {
     const a = ataqueArma(ch, o), props = (o.arma.props || []).map(x => x.replace(/\s*\(.*$/, ''));
     grupos.accion.armas.push(`<div class="cb-arma ${o.equipado ? 'eq' : ''} ${a.domina ? 'maestra' : ''}" style="--i:${n++}" data-leer="arma:${o.id}">
@@ -97,6 +104,7 @@ function grupoHtml(ch, P, c, k, t, g, extra = '') {
   const subs = [];
   if (g.armas.length) { const n = ataquesPorAccion(ch), a = c.ataques, usados = a ? a.usados : c.turno.accion ? n : 0;
     subs.push(['Armas', 'armas', g.armas, `<span class="cb-sub-n cb-ataques" title="Ataques de tu acción de Ataque">${n > 1 ? `${n} ataques por acción` : 'acción de Ataque'}<span class="cb-at-pips">${Array.from({ length: a ? a.max : n }, (_, i) => `<i class="${i < usados ? 'usado' : ''}"></i>`).join('')}</span>${a?.mella ? '<em class="cb-at-extra">+ Mella</em>' : a?.extra ? '<em class="cb-at-extra">+ ligera</em>' : ''}</span>`]); }
+  if (g.comunes.length) subs.push([k === 'accion' ? 'Acciones de combate' : k === 'adicional' ? 'Como acción adicional' : 'Siempre disponible', 'comunes', g.comunes, k === 'accion' ? '<span class="cb-sub-n">toca la que hagas</span>' : '']);
   if (g.trucos.length) subs.push(['Trucos', '', g.trucos, '<span class="cb-sub-n">a voluntad</span>']);
   for (const L of Object.keys(g.niveles).map(Number).sort((a, b) => a - b)) subs.push([`Nivel ${L}`, `n${L}`, g.niveles[L], pipsEspacio(ch, P, L)]);
   if (g.rasgos.length) subs.push(['Rasgos', 'rasgos', g.rasgos, '']);

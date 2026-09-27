@@ -40,12 +40,13 @@ import { transicion } from '../ui/combate.js';
 import { estaMuerto, ordenPermitida, resucitar } from '../ui/luto.js';
 import { mostrarCaracteristica, abrirPruebas } from '../ui/vitales.js';
 import { leer, initLeer } from '../ui/leer.js';
-import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia, registrarAtaque } from '../domain/combate.js';
+import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia, registrarAtaque, ACCION_COMUN, hacerAccionComun, deshacerAccionComun } from '../domain/combate.js';
 import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
-import { equipoDe, ataqueArma, armaCombate } from '../domain/equipo.js';
+import { equipoDe, ataqueArma, armaCombate, armasCombate } from '../domain/equipo.js';
 import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
-import { pasarRonda, vidaDe } from '../domain/vida.js';
+import { pasarRonda, vidaDe, ponerEfecto } from '../domain/vida.js';
+import { golpe } from '../ui/golpes.js';
 import { avisar } from '../ui/dialogs/aviso.js';
 
 const PREF = 'theo-grimorio-v1';
@@ -297,16 +298,42 @@ function bindSheet() {
   const arma = id => { const ch = S.cur(), o = armaCombate(ch, id); return o ? { o, a: ataqueArma(ch, o) } : null; };
   const danoArma = (x, critico = false, aviso = '') => tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) });
   const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
+  const tirarAtaque = (x, eco = '') => {
+    const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
+    tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
+      impacto: { maestria, clave: norm(x.a.tipo || '') }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
+  };
   on(sheet, 'click', '[data-cbataque]', (e, b) => {
     const x = arma(b.dataset.cbataque); if (!x) return;
     let reg = null;
     if (combateDe(S.cur()).activo) S.edit((db, c) => { reg = registrarAtaque(c, { max: ataquesPorAccion(c), ligera: x.a.ligera, mella: x.a.domina && norm(x.a.maestria) === 'mella' }); });
     const eco = !reg ? '' : reg.tipo === 'accion' ? (reg.max > 1 ? `ataque ${reg.n} de ${reg.max} de tu acción` : 'gasta tu acción') : TXT_ATAQUE[reg.tipo];
     if (reg?.tipo === 'agotado') toast(`${TXT_ATAQUE.agotado}. La tirada no se descuenta.`);
-    const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
-    tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
-      impacto: { maestria, clave: norm(x.a.tipo || '') }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
+    tirarAtaque(x, eco);
   });
+  // Correr, Destrabarse, Esquivar, Esconderse…: gastan la acción (o la adicional o la reacción) y dejan su efecto hasta tu siguiente turno
+  const VIA_TXT = { accion: 'tu acción', adicional: 'tu acción adicional', reaccion: 'tu reacción' };
+  const accionComun = (k, via, forzar = false) => {
+    const ch = S.cur(), a = ACCION_COMUN[k], c = combateDe(ch); if (!ch || !a) return;
+    if (c.hechas.some(h => h.k === k && h.via === via)) {
+      const h = S.act(`Deshace ${a.nombre}`, (db, x) => { deshacerAccionComun(x, k, via); if (a.efecto) vidaDe(x).efectos = vidaDe(x).efectos.filter(e => e.k !== a.efecto); });
+      haptic('light'); toast(`<b>${esc(a.nombre)}</b> desmarcada: ${esc(VIA_TXT[via])} vuelve a estar libre.`, [A.undoBtn(S, h)]); return;
+    }
+    if (c.turno[via] && !forzar) {
+      toast(`Ya has gastado ${esc(VIA_TXT[via])} este turno.`, [{ label: 'Hacerlo igualmente', hl: true, fn: () => accionComun(k, via, true) }]); return;
+    }
+    const h = S.act(`${a.nombre}${via !== 'accion' ? ` (${via === 'adicional' ? 'acción adicional' : 'reacción'})` : ''}`, (db, x) => { hacerAccionComun(x, k, via); if (a.efecto) ponerEfecto(x, a.efecto); });
+    haptic('light');
+    if (a.efecto) golpe('buff');
+    const extra = [];
+    if (k === 'oportunidad') {
+      const ch2 = S.cur(), o = armasCombate(ch2).filter(Boolean).sort((p, q) => q.equipado - p.equipado).find(w => !(w.arma.props || []).some(p => norm(p).startsWith('municion')));
+      if (o) setTimeout(() => tirarAtaque(arma(o.id), 'ataque de oportunidad · gasta tu reacción'), 200);
+    } else if (a.tirar?.length === 1) setTimeout(() => tirarDesde(`hab:${a.tirar[0]}`), 250);
+    else if (a.tirar) extra.push(...a.tirar.slice(0, 3).map((hk, i) => ({ label: NOMBRE_HAB[hk], hl: i === 0, fn: () => tirarDesde(`hab:${hk}`) })));
+    toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, A.undoBtn(S, h)]);
+  };
+  on(sheet, 'click', '[data-accom]', (e, b) => { const [k, via] = b.dataset.accom.split('|'); accionComun(k, via); });
   on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) danoArma(x); });
   const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numLibre(i?.value); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
     if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
