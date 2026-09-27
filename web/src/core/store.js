@@ -3,6 +3,10 @@ import { clone, uid } from './util.js';
 const MAX_HIST = 60, MAX_LOG = 120;
 // Serializar y guardar toda la base de datos se hace cuando el navegador está libre, no en mitad de una animación.
 // Al pausar la app o cerrar la página se sigue guardando al instante con flush().
+// Las acciones de juego (act) solo modifican al personaje activo y, como mucho, añaden conjuros al catálogo. Para poder
+// deshacerlas basta con copiar ese personaje y el índice del catálogo; el resto de personajes se comparte con el estado
+// actual en lugar de clonar toda la base de datos en cada toque. Las ediciones (edit) siguen copiándolo todo.
+const instantanea = (db, ch) => (ch ? { ...db, chars: db.chars.map(c => (c === ch ? clone(c) : c)), catalog: { ...db.catalog } } : clone(db));
 const enReposo = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 1000 }) : fn());
 
 export function createStore({ storage, key, db }) {
@@ -20,7 +24,7 @@ export function createStore({ storage, key, db }) {
     flush() { clearTimeout(timer); if (!dirty) return; dirty = false; return storage.set(key, JSON.stringify(S.db)); },
 
     act(text, fn) {
-      const before = clone(S.db), ch = S.cur(), id = uid('h');
+      const ch = S.cur(), before = instantanea(S.db, ch), id = uid('h');
       fn(S.db, ch);
       const target = ch && S.db.chars.find(c => c.id === ch.id);
       if (text && target) {

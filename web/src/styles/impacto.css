@@ -50,18 +50,19 @@
 @media (prefers-reduced-motion: reduce) { .ip-fx { display: none; } }
 
 /* Maestría con armas en el modo combate */
-.cb-arma.maestra { position: relative; border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
+.cb-arma.maestra { position: relative; overflow: clip; border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
   background: linear-gradient(100deg, color-mix(in srgb, var(--gold) 16%, var(--surface)), var(--surface) 62%);
   box-shadow: inset 3px 0 0 var(--gold), 0 10px 28px -18px var(--glow); }
 .cb-arma.maestra::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--gold) 16%, transparent) 50%, transparent 65%) -200% 0 / 50% 100% no-repeat; animation: cb-destello 6s ease-in-out infinite; }
+  right: auto; width: 50%; transform: translateX(-200%);
+  background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--gold) 16%, transparent) 50%, transparent 65%); animation: cb-destello 6s ease-in-out infinite; }
 .cb-arma.maestra .cb-a-ico { color: var(--gold); filter: drop-shadow(0 0 6px var(--glow)); }
 .cb-maes.domina { color: var(--on-gold, #1b1204); background: var(--gilt); box-shadow: 0 0 10px -3px var(--glow); }
 .cb-maes.sin { opacity: .45; background: transparent; border: 1px dashed var(--line); color: var(--ink-3); }
-@keyframes cb-destello { 0%, 70% { background-position: -200% 0; } 100% { background-position: 300% 0; } }
+@keyframes cb-destello { 0%, 70% { transform: translateX(-200%); } 100% { transform: translateX(300%); } }
 .cb-ataques { display: inline-flex; align-items: center; gap: 8px; }
 .cb-at-pips { display: inline-flex; gap: 4px; }
-.cb-at-pips i { width: 10px; height: 10px; transform: rotate(45deg); border: 1.4px solid var(--gold); background: var(--gold); box-shadow: 0 0 6px var(--glow); transition: all .3s var(--ease); }
+.cb-at-pips i { width: 10px; height: 10px; transform: rotate(45deg); border: 1.4px solid var(--gold); background: var(--gold); box-shadow: 0 0 6px var(--glow); transition: background-color .3s var(--ease), box-shadow .3s var(--ease), opacity .3s var(--ease); }
 .cb-at-pips i.usado { background: transparent; box-shadow: none; opacity: .5; }
 .cb-at-extra { font: 600 10px / 1 var(--sans); font-style: normal; color: var(--gold); }
 

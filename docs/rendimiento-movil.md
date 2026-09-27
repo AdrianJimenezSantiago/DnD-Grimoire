@@ -13,20 +13,22 @@ El Chromium de pruebas pinta sin GPU, así que el coste de los lienzos sale infl
 
 ## Resultados
 
+Antes → primera ronda → segunda ronda (lo que hay ahora):
+
 | Escenario | fps | tirones | peor fotograma (ms) | tareas largas (ms) |
 |---|---|---|---|---|
-| portada reposo | 8 → **38** | 7 → 14 | 450 → 117 | 2430 → 578 |
-| portada scroll | 21 → **48** | 4 → 3 | 500 → 67 | 1396 → 121 |
-| hoja reposo | 28 → **48** | 29 → 4 | 67 → 50 | 106 → 50 |
-| hoja scroll ↓ | 28 → **49** | 26 → 2 | 67 → 50 | 465 → 53 |
-| hoja scroll ↑ | 23 → **41** | 42 → 6 | 83 → 50 | 975 → 214 |
-| gastar espacio | 13 → **25** | 12 → 8 | 167 → 100 | 760 → 244 |
-| abrir dados | 35 → **54** | 1 → 1 | 133 → 117 | 97 → 77 |
-| entrar combate | 13 → **16** | 26 → 23 | 367 → 400 | 2132 → 1505 |
-| combate reposo | 16 → **35** | 44 → 8 | 100 → 67 | 2641 → 261 |
-| combate scroll | 16 → **38** | 32 → 2 | 117 → 50 | 1963 → 0 |
+| portada reposo | 8 → 38 → **52** | 7 → 14 → 6 | 450 → 117 → 83 | 2430 → 578 → 393 |
+| portada scroll | 21 → 48 → **58** | 4 → 3 → 2 | 500 → 67 → 50 | 1396 → 121 → 55 |
+| hoja reposo | 28 → 48 → **60** | 29 → 4 → 0 | 67 → 50 → 17 | 106 → 50 → 0 |
+| hoja scroll ↓ | 28 → 49 → **55** | 26 → 2 → 6 | 67 → 50 → 167 | 465 → 53 → 0 |
+| hoja scroll ↑ | 23 → 41 → **60** | 42 → 6 → 0 | 83 → 50 → 17 | 975 → 214 → 0 |
+| gastar espacio | 13 → 25 → **54** | 12 → 8 → 4 | 167 → 100 → 83 | 760 → 244 → 0 |
+| abrir dados | 35 → 54 → **59** | 1 → 1 → 0 | 133 → 117 → 33 | 97 → 77 → 90 |
+| entrar combate | 13 → 16 → **37** | 26 → 23 → 6 | 367 → 400 → 350 | 2132 → 1505 → 922 |
+| combate reposo | 16 → 35 → **60** | 44 → 8 → 0 | 100 → 67 → 17 | 2641 → 261 → 0 |
+| combate scroll | 16 → 38 → **60** | 32 → 2 → 0 | 117 → 50 → 17 | 1963 → 0 → 0 |
 
-En la portada, el número de tirones sube porque ahora se pintan cuatro veces más fotogramas: hay más ocasiones de que alguno llegue tarde, pero son muchos menos en proporción. La entrada al combate sigue siendo pesada porque monta toda la vista de combate de una vez, pero ese trabajo ocurre mientras el velo de «¡A las armas!» tapa la pantalla.
+El salto de la segunda ronda viene sobre todo de sacar el fondo animado a un Worker (punto 12). El Chromium de pruebas pinta el lienzo sin GPU, así que en un teléfono la diferencia será menor, pero el hilo principal queda igual de libre. La entrada al combate sigue siendo lo más pesado porque monta toda la vista de golpe, pero ocurre mientras el velo de «¡A las armas!» tapa la pantalla.
 
 ## Qué se encontró y qué se ha cambiado
 
@@ -85,6 +87,36 @@ Serializar y guardar la base de datos (medio mega con los personajes de prueba) 
 
 Se han renombrado a `cc-latido` y `cc-llama` y cada animación vuelve a ser la que se diseñó.
 
+## Segunda ronda
+
+### 12. El fondo animado se dibuja en un Worker (`ui/fondoMotor.js`, `ui/fondoWorker.js`)
+Las escenas y el bucle de dibujo están en `fondoMotor.js`, sin tocar el DOM. `fondo.js` pasa el lienzo al Worker con `transferControlToOffscreen()` y solo le cuenta lo que pasa en la página: tamaño, escena, tema, si hay una ventana a pantalla completa (se comprueba al abrirse o cerrarse una, ya no en cada fotograma), si la pestaña está oculta y si se está desplazando. El hilo principal ya no dibuja partículas ni sube el lienzo en cada fotograma.
+Si el navegador no admite `OffscreenCanvas` o el Worker falla, el mismo motor corre en la página como antes. En la versión de Windows (un solo HTML abierto desde disco) siempre se usa este modo.
+
+### 13. Carga bajo demanda de los asistentes (`app/asistentes.js`)
+El de crear o editar personaje (51 kB) y el de subir de nivel (24 kB) van en trozos aparte. Ya no se analizan al arrancar: se cargan en un momento libre después del arranque o, como tarde, al abrirlos.
+
+### 14. Iconos con `JSON.parse`
+`gameIcons.js` (190 kB, casi una cuarta parte del JS) se genera como `JSON.parse("…")` en lugar de un objeto literal: V8 lo analiza bastante más rápido. Lo hace `tools/iconos.mjs`.
+
+### 15. Deshacer sin clonar toda la base de datos (`core/store.js`)
+Las acciones de juego solo modifican al personaje activo y, al subir de nivel, añaden conjuros al catálogo. La instantánea para deshacer copia ese personaje y el índice del catálogo, y comparte el resto. Las ediciones siguen guardando una copia completa. Hay un test nuevo para esto.
+
+### 16. Más animaciones infinitas pasadas a capas de opacidad o transform
+- PG en crítico o a 0, 20 natural en los dados y en las tiradas: el latido de brillo es ahora un halo detrás del número que cambia de opacidad.
+- Iniciativa pendiente, efectos que acaban, botón de revivir, núcleo de la portada, inspiración heroica y avisos de la creación: el resplandor está en una capa `::after`/`::before` que solo cambia de opacidad.
+- Barridos de brillo (chip dorada, botón dorado de la portada, maestría en combate, competencias elegibles): una banda que se desplaza con `transform` dentro de su caja.
+- Anillo de los dados: cada aro que gira es un `<svg>` propio, como el astrolabio.
+
+### 17. `transition: all` sustituido por las propiedades que cambian en las seis reglas que lo usaban.
+
+### 18. `:hover` solo con ratón
+Un pequeño plugin de PostCSS en `web/vite.config.js` envuelve en el build cada regla con `:hover` en `@media (hover: hover)`. En el móvil el resaltado ya no se queda pegado tras tocar, y tocar no recalcula estilos de hover. Si una regla mezcla selectores con y sin `:hover`, se parte en dos para no perder los demás.
+
+### Lo que queda, a propósito
+- El destello periódico de la chip dorada (`destello`), el brillo del título de la portada (`l-brillo`) y la línea de fuego de la barra en combate (`llama`) siguen animando `box-shadow` o `background-position`. Los dos primeros solo cambian durante un 12–30 % de su ciclo; el resto del tiempo el valor no varía y no se repinta nada. La línea mide 1 px de alto. Moverlos a capas obligaría a rehacer cómo se recortan (el botón necesita `overflow: hidden` para su brillo interior).
+- La entrada al combate monta toda la vista en un solo paso, tapada por la animación del velo.
+
 ## Lo que ya estaba bien
 - `content-visibility: auto` en los niveles de conjuros: lo que está fuera de pantalla no se calcula.
 - `patch()` compara el HTML antes de tocar el DOM, así que las secciones sin cambios no se repintan.
@@ -92,15 +124,6 @@ Se han renombrado a `cc-latido` y `cc-llama` y cada animación vuelve a ser la q
 - `touch-action: manipulation` en los botones y `overscroll-behavior: contain` en las ventanas.
 - `prefers-reduced-motion` respetado en CSS y JS. El lienzo de fondo se detiene si la app pasa a segundo plano.
 - Fuentes y datos locales; el lector de PDF y la importación de libros se cargan solo cuando hacen falta.
-
-## Pendiente (no se ha tocado; ordenado por impacto)
-1. **Tamaño del JS principal (934 kB, 345 kB comprimido).** En un Android medio el primer arranque tarda en compilarlo. Las ventanas que se abren poco (creación de personaje, subir de nivel, biblioteca, diario, manuales) y `gameIcons.js` (192 kB) podrían cargarse con `import()` al abrirlas.
-2. **Historial de deshacer:** cada acción clona la base de datos entera (`structuredClone`). Con muchos personajes pesa; bastaría con clonar el personaje activo.
-3. **Otras animaciones infinitas que repintan** (`box-shadow`, `text-shadow` o `background-position`): PG en crítico (`latido-pg`), iniciativa pendiente (`ini-late`), efectos que acaban (`es-acaba`), la chispa de la chip dorada (`destello`/`barrido`), el núcleo de la portada (`l-latido`) y la maestría en combate (`cb-destello`). Son elementos pequeños; se pueden pasar a una capa con opacidad como la de concentración.
-4. **Anillo de los dados:** tres grupos `<g>` giran dentro del SVG. Se puede separar en capas como el astrolabio.
-5. **`transition: all`** en seis reglas (`.cc-n`, `.ch-count`, `.oy-sello`, `.cb-at-pips i`…): mejor listar solo las propiedades que cambian.
-6. **Fondo en un Worker con `OffscreenCanvas`:** sacaría por completo el lienzo del hilo principal.
-7. **UX táctil:** los estilos `:hover` se quedan pegados tras un toque. Se pueden envolver en `@media (hover: hover)`.
 
 ## Cómo comprobarlo en un teléfono
 1. Conecta el móvil por USB con la depuración activada, abre `chrome://inspect` en el ordenador e inspecciona la WebView del Grimorio.

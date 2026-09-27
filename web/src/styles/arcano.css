@@ -83,8 +83,9 @@ button.gold::before, button.primary::before, .chip.gold::before { content: ""; p
   background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--bt-ink, #fff) 22%, transparent) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat; transition: background-position .8s var(--ease); }
 button.gold:hover::before, button.primary:hover::before, .chip.gold:hover::before { background-position: 150% 0; }
 .chip.gold { animation: destello 7s ease-in-out 3s infinite; }
-.chip.gold::before { animation: barrido 7s ease-in-out 3s infinite; }
-@keyframes barrido { 0%, 80% { background-position: -150% 0; } 92%, 100% { background-position: 150% 0; } }
+/* El destello de las píldoras doradas es una banda que se desplaza con transform dentro del botón (overflow: hidden). */
+.chip.gold::before { animation: barrido 7s ease-in-out 3s infinite; right: auto; width: 250%; background-position: 0 0; background-size: 100% 100%; transform: translateX(90%); transition: none; }
+@keyframes barrido { 0%, 80% { transform: translateX(90%); } 92%, 100% { transform: translateX(-90%); } }
 @keyframes destello { 0%, 80%, 100% { box-shadow: 0 6px 20px -10px var(--glow); } 88% { box-shadow: 0 0 0 4px var(--glow), 0 6px 26px -6px var(--glow); } }
 button.warn:hover { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 8%, transparent); }
 .onda { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: 2; }
@@ -384,8 +385,8 @@ html.vt-portal::view-transition-new(root) { animation: portal .8s cubic-bezier(.
 .rl-total > .gi, .rl-total .dmg.big { animation: dado .7s var(--spring) both; }
 @keyframes dado { from { transform: rotate(-220deg) scale(.3); opacity: 0; } }
 .rl-num { font-family: var(--display); font-weight: 700; }
-.rl-total.crit .rl-num { animation: latido 1.4s ease-in-out infinite; }
-@keyframes latido { 50% { text-shadow: 0 0 44px var(--glow), 0 0 12px var(--glow); } }
+.rl-total.crit .rl-num { position: relative; isolation: isolate; }
+.rl-total.crit .rl-num::before { content: ""; position: absolute; inset: -16px -20px; z-index: -1; pointer-events: none; border-radius: 50%; background: radial-gradient(closest-side, var(--glow), transparent); opacity: 0; animation: respira 1.4s ease-in-out infinite; }
 .rl-btn:hover:not(:disabled), .rl-open:hover { box-shadow: 0 0 0 3px var(--gold-soft), 0 0 22px -8px var(--glow); }
 .rl-btn > .gi { transition: transform .4s var(--spring); }
 .rl-btn:hover > .gi { transform: rotate(-18deg) scale(1.1); }

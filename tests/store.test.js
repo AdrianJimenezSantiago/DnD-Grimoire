@@ -43,3 +43,16 @@ test('note anota una tirada sin crear punto de deshacer', () => {
   S.note('Descarga de fuego: 7 de daño de fuego');
   assert.equal(S.cur().play.log.length, 1); assert.equal(S.history().length, 0);
 });
+
+test('act solo copia al personaje activo para deshacer y no toca a los demás', () => {
+  const db = seedDb(), otro = { ...structuredClone(db.chars[0]), id: 'otro', nombre: 'Otro' };
+  db.chars.push(otro);
+  const S = createStore({ storage: mem(), key: 'k', db });
+  const h = S.act('Escudo', (d, ch) => { ch.play.used[1] = 1; d.catalog.nuevo = { es: 'Nuevo', level: 1 }; });
+  assert.equal(h.before.chars.find(c => c.id === 'otro'), otro, 'el resto de personajes se comparte');
+  assert.notEqual(h.before.chars[0], S.cur(), 'el activo se copia');
+  S.undo(h);
+  assert.deepEqual(S.cur().play.used, {});
+  assert.equal(S.db.catalog.nuevo, undefined);
+  assert.equal(S.db.chars.find(c => c.id === 'otro'), otro);
+});

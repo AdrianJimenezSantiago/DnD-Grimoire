@@ -126,15 +126,19 @@
 .dd-hero { display: flex; flex-direction: column; align-items: center; }
 .dd-sello { position: relative; display: grid; place-items: center; width: 136px; height: 136px; color: var(--gold); }
 .crit .dd-sello { color: var(--dd-oro); } .pifia .dd-sello, .fallo .dd-sello { color: var(--dd-ko); } .exito .dd-sello { color: var(--dd-ok); }
-.dd-anillo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dd-anillo { position: absolute; inset: 0; display: block; }
+.dd-anillo > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .dd-anillo circle { fill: none; stroke: currentColor; }
 .dd-anillo .a1 { stroke-width: 1.2; opacity: .5; stroke-dasharray: 100; stroke-dashoffset: 100; animation: dd-traza 1s var(--ease-out) forwards; }
-.dd-anillo .a-marcas { stroke: currentColor; stroke-width: 1.2; opacity: .38; transform-origin: 70px 70px; animation: girar 80s linear infinite; }
-.dd-anillo .a-rombos { fill: currentColor; opacity: .55; transform-origin: 70px 70px; animation: girar 40s linear infinite reverse; }
-.dd-anillo .a2 { stroke-width: 1; stroke-dasharray: 1.5 5.5; opacity: .55; transform-origin: 70px 70px; animation: girar 30s linear infinite; }
+.dd-anillo .a-marcas { stroke: currentColor; stroke-width: 1.2; opacity: .38; }
+.dd-anillo .gira-marcas { animation: girar 80s linear infinite; }
+.dd-anillo .a-rombos { fill: currentColor; opacity: .55; }
+.dd-anillo .gira-rombos { animation: girar 40s linear infinite reverse; }
+.dd-anillo .a2 { stroke-width: 1; stroke-dasharray: 1.5 5.5; opacity: .55; }
+.dd-anillo .gira-a2 { animation: girar 30s linear infinite; }
 .dd-anillo .a3 { stroke-width: 2.2; opacity: .9; stroke-dasharray: 100; stroke-dashoffset: 100; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 70px 70px; }
 .listo .dd-anillo .a3 { animation: dd-traza .6s var(--ease-out) forwards; }
-.girando .dd-anillo .a2, .girando .dd-anillo .a-rombos { animation-duration: 1.4s; }
+.girando .dd-anillo .gira-a2, .girando .dd-anillo .gira-rombos { animation-duration: 1.4s; }
 .girando .dd-anillo { animation: dd-zumba .12s linear infinite; }
 @keyframes dd-traza { to { stroke-dashoffset: 0; } }
 @keyframes dd-zumba { 50% { transform: rotate(1.2deg) scale(1.01); } }
@@ -142,7 +146,7 @@
 .girando .dd-num { color: var(--ink-3); filter: blur(.5px); }
 .sella .dd-num { animation: dd-sella .6s var(--spring) both; }
 .crit .dd-num { color: var(--dd-oro); text-shadow: 0 0 26px color-mix(in srgb, var(--dd-oro) 70%, transparent); }
-.listo.crit .dd-num { animation: dd-sella .6s var(--spring) both, latido 1.6s ease-in-out .6s infinite; }
+.listo.crit .dd-num::before { content: ""; position: absolute; inset: -18px -24px; z-index: -1; pointer-events: none; border-radius: 50%; background: radial-gradient(closest-side, var(--glow), transparent); opacity: 0; animation: respira 1.6s ease-in-out .6s infinite; }
 .pifia .dd-num, .fallo .dd-num { color: var(--dd-ko); } .exito .dd-num { color: var(--dd-ok); }
 .sella .dd-sello::after { content: ""; position: absolute; inset: 20px; border-radius: 50%; border: 2px solid currentColor; opacity: 0; pointer-events: none; animation: dd-onda .8s var(--ease-out); }
 @keyframes dd-sella { 0% { transform: scale(1.55); filter: blur(4px); opacity: .2; } 100% { transform: none; filter: none; opacity: 1; } }

@@ -32,5 +32,6 @@ const USO = {
 const out = {};
 for (const [k, n] of Object.entries(USO)) { if (!ic.icons[n]) throw new Error('No existe ' + n); out[k] = ic.icons[n].body; }
 fs.writeFileSync(new URL('../web/src/ui/gameIcons.js', import.meta.url),
-  `export const GI = ${JSON.stringify(out)};\n`);
+  // Como cadena para JSON.parse: V8 la analiza bastante más rápido que un objeto literal de este tamaño.
+  `export const GI = JSON.parse(${JSON.stringify(JSON.stringify(out))});\n`);
 console.log(Object.keys(out).length, 'iconos,', Math.round(fs.statSync(new URL('../web/src/ui/gameIcons.js', import.meta.url)).size / 1024), 'kB');
