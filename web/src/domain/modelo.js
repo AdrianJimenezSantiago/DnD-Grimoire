@@ -7,6 +7,7 @@ import { habilidadesTrasfondo, HABILIDADES } from './habilidades.js';
 import { normVida } from './vida.js';
 import { normCombate } from './combate.js';
 import { normOrdenes } from './ordenes.js';
+import { normVariantes } from './variantes.js';
 
 export const SCHEMA = 2;
 export const CAT_FIELDS = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
@@ -29,7 +30,7 @@ export function blankChar(over = {}) {
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], rasgosOcultos: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
-    habilidades: null, salvacionesExtra: [], vida: null, combate: null, creacion: null, herramientas: [], idiomas: [], maestrias: [], ordenes: {},
+    habilidades: null, salvacionesExtra: [], vida: null, combate: null, creacion: null, herramientas: [], idiomas: [], maestrias: [], maniobras: [], ordenes: {}, variantes: {},
     ...clone(over),
   };
 }
@@ -69,9 +70,10 @@ export function normChar(c) {
   c.habilidades = Object.fromEntries(HABILIDADES.map(([k]) => [k, Math.max(0, Math.min(2, parseInt(c.habilidades[k], 10) || 0))]).filter(([, n]) => n));
   c.salvacionesExtra = [...new Set((Array.isArray(c.salvacionesExtra) ? c.salvacionesExtra : []).filter(k => ['fue', 'des', 'con', 'int', 'sab', 'car'].includes(k)))];
   c.creacion = normCreacion(c.creacion);
-  for (const k of ['herramientas', 'idiomas', 'maestrias']) c[k] = [...new Set((Array.isArray(c[k]) ? c[k] : []).map(x => String(x || '').trim()).filter(Boolean))];
+  for (const k of ['herramientas', 'idiomas', 'maestrias', 'maniobras']) c[k] = [...new Set((Array.isArray(c[k]) ? c[k] : []).map(x => String(x || '').trim()).filter(Boolean))];
   c.vida = normVida(c.vida);
   c.ordenes = normOrdenes(c.ordenes);
+  c.variantes = normVariantes(c.variantes);
   c.combate = normCombate(c.combate);
   return c;
 }

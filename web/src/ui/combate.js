@@ -5,6 +5,7 @@ import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../domain/ras
 import { rasgosEnJuego } from '../domain/enJuego.js';
 import { biblioteca, tiradasConjuro } from '../domain/catalogo.js';
 import { dadosPara } from '../domain/tiradas.js';
+import { trucoPotente } from '../domain/variantes.js';
 import { slotsOf, freeOf, firstFreeFrom } from './sheet.js';
 import { armasCombate, ataqueArma } from '../domain/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo, ACCIONES_COMUNES, ACCION_COMUN, accionesAdicionales } from '../domain/combate.js';
@@ -29,11 +30,12 @@ function ticks(ch, r) {
 
 const AB3 = { fuerza: 'Fue', destreza: 'Des', 'constitución': 'Con', inteligencia: 'Int', 'sabiduría': 'Sab', carisma: 'Car', fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' };
 const dadoTxt = d => `${d.n}d${d.caras}${d.bono ? (d.bono > 0 ? `+${d.bono}` : d.bono) : ''}`;
-function datosConjuro(ch, P, s, Pm) {
+function datosConjuro(ch, P, s, Pm, fuente = '') {
   const r = tiradasConjuro(s); if (!r || !lanzadorTira(s.es, r)) return { clave: Pm.cd != null && /salvaci|saving/i.test(s.desc || '') ? `CD ${Pm.cd}` : '', dano: '' };
   const clave = r.ataque ? `${sgn(Pm.atk ?? P.atk)} ataque` : r.salvacion ? `CD ${Pm.cd ?? P.cd} ${AB3[norm(r.salvacion)] || AB3[String(r.salvacion).toLowerCase()] || ''}`.trim() : '';
   const ds = dadosPara(r, { nivelPj: nivelTotal(ch), nivelConjuro: s.level, nivelEspacio: s.level || null });
-  const dano = ds.length ? `${ds[0].veces > 1 ? `${ds[0].veces}× ` : ''}${dadoTxt({ ...ds[0], bono: ds[0].bono + (ds[0].mod ? Pm.mod || 0 : 0) })}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
+  const pot = s.level === 0 && ds[0] && !ds[0].mod && ds[0].tipo !== 'curación' ? trucoPotente(ch, fuente)?.bono || 0 : 0;
+  const dano = ds.length ? `${ds[0].veces > 1 ? `${ds[0].veces}× ` : ''}${dadoTxt({ ...ds[0], bono: ds[0].bono + (ds[0].mod ? Pm.mod || 0 : 0) + pot })}${ds[0].tipo ? ` ${ds[0].tipo}` : ''}${ds.length > 1 ? ' +' : ''}` : '';
   return { clave, dano, cura: !!r.curacion && !r.danos.length, mitad: r.mitad };
 }
 function pipsEspacio(ch, P, L) {
@@ -74,7 +76,7 @@ function acciones(ch, db) {
   conj.sort((a, b) => a.s.level - b.s.level || a.s.es.localeCompare(b.s.es, 'es'));
   const recupera = reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.efecto === 'recuperar');
   for (const { e, bi, s, g } of conj) {
-    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm);
+    const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm, e.fuente);
     const rec = s.level > 0 && recupera.find(r => schoolMatch(s, r.escuela));
     const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !firstFreeFrom(ch, P, s.level);
     // Un espacio por turno: tras gastarlo en tu turno, los conjuros de nivel solo valen gratis o como reacción en otro turno

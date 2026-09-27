@@ -56,20 +56,27 @@ export function bonosSugeridos(clase, permitidas, modo = '21') {
 }
 export const conBonos = (base, bonos) => Object.fromEntries(KEYS.map(k => [k, Math.min(20, Math.max(1, (parseInt(base[k], 10) || 10) + (bonos?.[k] || 0)))]));
 
-// Competencias en habilidades: de dónde sale cada una y cuántas quedan por elegir
+// Competencias en habilidades: de dónde sale cada una y cuántas quedan por elegir.
+// pericia: las elegidas quedan con pericia; fijas: no se eligen, son todas las de la lista; herramientas: puede cambiarlas por herramientas.
+const DOTE_HAB = { habilidoso: [3, TODAS, { herramientas: true }], 'experto en habilidades': [1, TODAS], 'mente aguda': [1, ['arcanos', 'historia', 'investigacion', 'naturaleza', 'religion']],
+  observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'don de la habilidad': [18, TODAS, { fijas: true }] };
+// Subclases que dan competencias en habilidades a nivel 3
+export const HAB_SUBCLASE = {
+  'Bardo': [{ re: /conocimiento/i, nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS }],
+  'Clérigo': [{ re: /conocimiento/i, nombre: 'Bendiciones del conocimiento', n: 2, lista: ['arcanos', 'historia', 'naturaleza', 'religion'], pericia: true }],
+  'Explorador': [{ re: /errante/i, nombre: 'Glamur sobrenatural', n: 1, lista: ['engano', 'interpretacion', 'persuasion'] }],
+  'Guerrero': [{ re: /abanderad/i, nombre: 'Caballero emisario', n: 1, lista: ['interpretacion', 'intimidacion', 'perspicacia', 'persuasion'] },
+    { re: /maestro del combate|batalla/i, nombre: 'Estudioso de la guerra', n: 1, lista: HAB_CLASE['Guerrero'][1] }],
+  'Mago': [{ re: /hojacantante|cantante/i, nombre: 'Hojacantante', n: 1, lista: ['acrobacias', 'atletismo', 'interpretacion', 'persuasion'] }],
+  'Monje': [{ re: /misericordia/i, nombre: 'Instrumentos de misericordia', n: 2, lista: ['perspicacia', 'medicina'], fijas: true }],
+};
 const EXTRA_ESPECIE = { humano: [1, TODAS, 'Humano (Habilidoso)'], elfo: [1, ['perspicacia', 'percepcion', 'supervivencia'], 'Elfo (Sentidos agudos)'] };
 const EXTRA_MULTICLASE = { 'Bardo': [1, TODAS], 'Explorador': [1, HAB_CLASE['Explorador'][1]], 'Pícaro': [1, HAB_CLASE['Pícaro'][1]] };
 export function fuentesExtra(ch) {
   const out = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];
   if (EXTRA_ESPECIE[especie]) { const [n, lista, nombre] = EXTRA_ESPECIE[especie]; out.push({ nombre, n, lista }); }
-  const DOTE_HAB = { habilidoso: [3, TODAS], 'experto en habilidades': [1, TODAS], 'mente aguda': [1, ['arcanos', 'historia', 'investigacion', 'naturaleza', 'religion']],
-    observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'don de la habilidad': [18, TODAS] };
-  for (const d of dotesDe(ch)) { const x = DOTE_HAB[norm(d.nombre)]; if (x) out.push({ nombre: `${d.nombre} (dote)`, n: x[0], lista: x[1] }); }
-  for (const c of clasesDe(ch)) {
-    if (c.clase === 'Bardo' && /conocimiento/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS });
-    if (c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Hojacantante', n: 1, lista: ['acrobacias', 'atletismo', 'interpretacion', 'persuasion'] });
-    if (c.clase === 'Guerrero' && /abanderad/i.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: 'Caballero emisario', n: 1, lista: ['interpretacion', 'intimidacion', 'perspicacia', 'persuasion'] });
-  }
+  for (const d of dotesDe(ch)) { const x = DOTE_HAB[norm(d.nombre)]; if (x) out.push({ nombre: `${d.nombre} (dote)`, n: x[0], lista: x[1], ...(x[2] || {}) }); }
+  for (const c of clasesDe(ch)) for (const r of HAB_SUBCLASE[c.clase] || []) if (r.re.test(c.subclase || '') && c.nivel >= 3) out.push({ nombre: r.nombre, n: r.n, lista: r.lista, ...(r.pericia ? { pericia: true } : {}), ...(r.fijas ? { fijas: true } : {}) });
   for (const c of clasesDe(ch).slice(1)) if (EXTRA_MULTICLASE[c.clase]) { const [n, lista] = EXTRA_MULTICLASE[c.clase]; out.push({ nombre: `${c.clase} (multiclase)`, n, lista }); }
   return out;
 }
