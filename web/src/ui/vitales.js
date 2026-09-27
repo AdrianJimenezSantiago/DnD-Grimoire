@@ -89,10 +89,10 @@ const filasCar = (ch, c) => [
 ].join('');
 export function caracteristicasHtml(ch) {
   const t = tablaCaracteristicas(ch), ag = penalizacionAgotamiento(ch);
-  const tarjeta = c => { const r = resumenTirada(ch, 'prueba', { ab: c.k }, c.mod);
+  const tarjeta = c => { const r = resumenTirada(ch, 'prueba', { ab: c.k }, c.prueba);
     return `<article class="cr-car ${abierta === c.k ? 'abierta' : ''} ${c.salvacion.competente ? 'salv' : ''}" data-car="${c.k}">
       <button type="button" class="cr-cab" data-crab="${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}: d20 ${sgn(r.total)}" title="Prueba de ${esc(c.nombre)}: d20 ${sgn(r.total)}${r.fuentes.length ? ` (${esc(r.fuentes.join(', '))})` : ''}">
-        <span class="cr-nom">${c.corto}<small>${esc(c.nombre)}</small></span><b class="cr-mod">${sgn(c.mod)}</b><span class="cr-val">${c.valor}</span><span class="cr-d20" aria-hidden="true">${gi('d20')}</span>${r.modo !== 'normal' || r.dados.length ? `<em class="cr-mk cr-mk-cab">${marcasTirada(r)}</em>` : ''}</button>
+        <span class="cr-nom">${c.corto}<small>${esc(c.nombre)}</small></span><b class="cr-mod">${sgn(c.mod)}</b><span class="cr-val ${c.objetos.length ? 'obj' : ''}" ${c.objetos.length ? `title="${esc(`${c.objetos.join(', ')} (sin objetos: ${c.base})`)}"` : ''}>${c.valor}</span><span class="cr-d20" aria-hidden="true">${gi('d20')}</span>${r.modo !== 'normal' || r.dados.length ? `<em class="cr-mk cr-mk-cab">${marcasTirada(r)}</em>` : ''}</button>
       <div class="cr-det" id="cr-det-${c.k}">${filasCar(ch, c)}</div></article>`; };
   return `<div class="cr-head"><span class="cr-emb">${gi('d20')}</span><h2>Características</h2>
       <small>Percepción pasiva <b>${percepcionPasiva(ch)}</b>${ag ? ` · agotamiento −${ag}` : ''}</small>
@@ -108,6 +108,6 @@ export const abrirPruebas = v => { pruebasAbiertas = v; };
 export function pruebasCombateHtml(ch) {
   const t = tablaCaracteristicas(ch);
   return `<details class="cb-pruebas" ${pruebasAbiertas ? 'open' : ''}><summary>${gi('d20')}Pruebas y salvaciones<small>con tus estados y efectos</small>${icon('chevron')}</summary>
-    <div class="cb-pr-grid">${t.map(c => `<section class="cb-pr-car"><button type="button" class="cb-pr-cab" data-tirar="car:${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}">${(r => `<span class="cb-pr-n">${c.corto}<small>${c.valor}</small></span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b>`)(resumenTirada(ch, 'prueba', { ab: c.k }, c.mod))}${gi('d20', 'cb-pr-d20')}</button>${filasCar(ch, c)}</section>`).join('')}</div></details>`;
+    <div class="cb-pr-grid">${t.map(c => `<section class="cb-pr-car"><button type="button" class="cb-pr-cab" data-tirar="car:${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}">${(r => `<span class="cb-pr-n">${c.corto}<small>${c.valor}</small></span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b>`)(resumenTirada(ch, 'prueba', { ab: c.k }, c.prueba))}${gi('d20', 'cb-pr-d20')}</button>${filasCar(ch, c)}</section>`).join('')}</div></details>`;
 }
 export const enCombate = ch => !!combateDe(ch).activo;

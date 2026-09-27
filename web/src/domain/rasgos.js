@@ -1,4 +1,5 @@
 import { clamp, norm } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from './reglas2024.js';
 import { cdManiobras } from './maniobras.js';
 
@@ -31,7 +32,7 @@ const byLvl = (L, pairs) => pairs.reduce((v, [from, val]) => (L >= from ? val : 
 
 export function plantillas(ch) {
   const L = nivelDe(ch), sub = ch.subclase || '', T = [];
-  const mod = k => Math.max(1, modOf(ch.stats[k]));
+  const mod = k => Math.max(1, modOf(statsEfectivos(ch)[k]));
   const has = re => re.test(sub);
   const R = (id, o) => T.push({ id: 'tpl:' + id, tpl: true, nota: '', recarga: 'largo', ...o });
   const uno = (id, nombre, nota = '', recarga = 'largo') => R(id, { tipo: 'recurso', nombre, max: 1, recarga, nota });
@@ -144,7 +145,7 @@ export function plantillas(ch) {
         if (L >= 6) R('adivino.avezado', { tipo: 'al_lanzar', nombre: 'Adivino avezado', escuela: 'Adivinación', espacioMin: 2, soloEspacio: true, efecto: 'recuperar', efectoN: 5 });
       }
       if (has(/hojacantante|cantante/i) && L >= 3) R('hojacantante.cancion', { tipo: 'recurso', nombre: 'Canción de la hoja', max: mod('int'), nota: `+${mod('int')} a la CA, +3 m de velocidad y ataques con Inteligencia durante 1 minuto. Recuperas un uso al usar Recuperación arcana.` });
-      if (has(/abjur/i) && L >= 3) R('abjurador.salvaguarda', { tipo: 'recurso', nombre: 'Salvaguarda arcana', max: 2 * L + modOf(ch.stats.int), nota: 'Puntos de golpe de la salvaguarda. Recupera el doble del nivel del espacio al lanzar abjuración.' });
+      if (has(/abjur/i) && L >= 3) R('abjurador.salvaguarda', { tipo: 'recurso', nombre: 'Salvaguarda arcana', max: 2 * L + modOf(statsEfectivos(ch).int), nota: 'Puntos de golpe de la salvaguarda. Recupera el doble del nivel del espacio al lanzar abjuración.' });
       if (has(/evoca/i)) {
         if (L >= 10) R('evocador.potenciada', { tipo: 'al_lanzar', nombre: 'Evocación potenciada', escuela: 'Evocación', espacioMin: 0, soloEspacio: false, efecto: 'aviso', texto: 'Suma tu modificador de Inteligencia a una tirada de daño del conjuro.' });
         if (L >= 14) uno('evocador.sobrecanalizar', 'Sobrecanalizar', 'Repetirlo antes de un descanso largo causa daño necrótico creciente.');
@@ -198,7 +199,7 @@ export function maxFrom(ch, r) {
     case 'nivel': return L;
     case 'nivelx': return L * (n || 1);
     case 'mitad': return Math.ceil(L / 2);
-    case 'mod': return Math.max(1, modOf(ch.stats[r.maxAb || 'car']));
+    case 'mod': return Math.max(1, modOf(statsEfectivos(ch)[r.maxAb || 'car']));
     case 'comp': return competencia(L);
     default: return Math.max(0, n || 0);
   }

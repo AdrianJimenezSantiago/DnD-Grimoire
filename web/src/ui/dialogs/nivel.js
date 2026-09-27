@@ -16,7 +16,7 @@ import { tarjetasSubclase, campoClase, initSubclases } from '../subclases.js';
 import { gi } from '../tema.js';
 import { aumentoDeDote, faltaRequisito } from '../../domain/origen.js';
 import { NIVEL_ESTILO, ALTERNATIVAS, opcionesEstilo, estilosDe, esAlternativa } from '../../domain/estilos.js';
-import { md } from './conjuro.js';
+import { md, mdPlano } from './conjuro.js';
 import { cupoEn, cupoMaestrias } from '../../domain/maestria.js';
 import { ORDENES, ordenDe } from '../../domain/ordenes.js';
 import { conjurosDeDote, filtroEleccion } from '../../domain/conjurosDote.js';
@@ -217,7 +217,7 @@ function render() {
       ${cambia ? `<div class="opts lv-estilo-q">${LV.estiloSuyos.map(n => `<button type="button" data-lvquitar="${esc(n)}" aria-pressed="${e.quitar === n}">Cambiar ${esc(n)}</button>`).join('')}<button type="button" data-lvquitar="" aria-pressed="${!e.quitar}">Mantener mi estilo</button></div>` : ''}
       ${!cambia || e.quitar ? `<div class="lv-estilos">${ops.map(x => { const on = e.nuevo === x.nombre, bloq = x.ya && x.nombre !== e.quitar;
         return `<button type="button" class="lv-estilo ${on ? 'on' : ''} ${x.alternativa ? 'alt' : ''}" data-lvestilo="${esc(x.nombre)}" aria-pressed="${on}" ${bloq ? 'disabled' : ''}>
-          <span class="lv-estilo-ico">${gi(x.alternativa ? 'libro' : 'ca')}</span><b>${esc(x.nombre)}${bloq ? ' <small>la tienes</small>' : ''}</b><span class="sp-text">${md(x.texto)}</span></button>`; }).join('')}</div>` : ''}`;
+          <span class="lv-estilo-ico">${gi(x.alternativa ? 'libro' : 'ca')}</span><b>${esc(x.nombre)}${bloq ? ' <small>la tienes</small>' : ''}</b><span class="sp-text">${mdPlano(x.texto)}</span></button>`; }).join('')}</div>` : ''}`;
   }
   if (step === 'variante') {
     const def = VARIANTES[o.clase];

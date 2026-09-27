@@ -42,6 +42,7 @@ import { leer, initLeer } from '../ui/leer.js';
 import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEconomia, registrarAtaque, ACCION_COMUN, hacerAccionComun, deshacerAccionComun } from '../domain/combate.js';
 import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
+import { statsEfectivos, bonoPruebasObjetos } from '../domain/objetosEfecto.js';
 import { equipoDe, ataqueArma, armaCombate, armasCombate } from '../domain/equipo.js';
 import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
 import { pasarRonda, vidaDe, ponerEfecto } from '../domain/vida.js';
@@ -243,7 +244,7 @@ function tirarDesde(clave) {
   if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa', repetible: true,
     alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; combateDe(x).iniManual = false; }); return 'Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.'; } });
   const [tipo, k] = clave.split(':');
-  if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${ABIL_NAME[k]}`, sub: 'Prueba de característica', bono: modOf(ch.stats?.[k]), tipo: 'prueba', ab: k });
+  if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${ABIL_NAME[k]}`, sub: 'Prueba de característica', bono: modOf(statsEfectivos(ch)[k]) + bonoPruebasObjetos(ch), tipo: 'prueba', ab: k });
   if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
   if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
 }

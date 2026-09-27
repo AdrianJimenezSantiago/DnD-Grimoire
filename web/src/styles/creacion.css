@@ -258,3 +258,5 @@ dialog.modal.hab-modal { width: min(560px, 94vw); text-align: left; max-height: 
 .ej-eleccion.falta { box-shadow: inset 3px 0 0 #D9822B; background: color-mix(in srgb, #D9822B 8%, var(--surface-2)); }
 .ej-eleccion .note { margin: 0 0 8px; }
 .ej-num.ej-pend { cursor: pointer; color: #fff; background: #D9822B; border-color: transparent; }
+.obj-ef { color: var(--ink-3); } .obj-ef.on { color: var(--ok); font-weight: 600; }
+.cr-val.obj { color: var(--ok); text-decoration: underline dotted; }

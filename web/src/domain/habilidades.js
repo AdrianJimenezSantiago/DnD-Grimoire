@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos } from './objetosEfecto.js';
 import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
 import { biblioteca } from './catalogo.js';
@@ -92,23 +93,23 @@ const INCAP = ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrif
 export function auraProteccion(ch) {
   if (!clasesDe(ch).some(c => c.clase === 'Paladín' && c.nivel >= 6)) return 0;
   if ((ch.vida?.estados || []).some(k => INCAP.includes(k))) return 0;
-  return Math.max(1, modOf(ch.stats?.car));
+  return Math.max(1, modOf(statsEfectivos(ch).car));
 }
 export function bonoSalvacion(ch, ab) {
   const pb = competencia(nivelTotal(ch));
-  return modOf(ch.stats?.[ab]) + (salvacionesCompetentes(ch).has(ab) ? pb : 0) + auraProteccion(ch);
+  return modOf(statsEfectivos(ch)[ab]) + (salvacionesCompetentes(ch).has(ab) ? pb : 0) + auraProteccion(ch) + bonoSalvObjetos(ch);
 }
 export function nivelHabilidad(ch, k) { return Math.max(0, Math.min(2, parseInt(ch.habilidades?.[k], 10) || 0)); }
 export function bonoHabilidad(ch, k) {
   const pb = competencia(nivelTotal(ch)), n = nivelHabilidad(ch, k);
   const extra = n === 2 ? pb * 2 : n === 1 ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0;
-  return modOf(ch.stats?.[abDe(k)]) + extra + bonoOrden(ch, k);
+  return modOf(statsEfectivos(ch)[abDe(k)]) + extra + bonoOrden(ch, k) + bonoPruebasObjetos(ch);
 }
 // Taumaturgo y Naturalista suman la Sabiduría (mínimo +1) a sus dos habilidades de Inteligencia
-export const bonoOrden = (ch, k) => clasesDe(ch).some(c => ordenDe(ch, c.clase)?.habilidades?.includes(k)) ? Math.max(1, modOf(ch.stats?.sab)) : 0;
+export const bonoOrden = (ch, k) => clasesDe(ch).some(c => ordenDe(ch, c.clase)?.habilidades?.includes(k)) ? Math.max(1, modOf(statsEfectivos(ch).sab)) : 0;
 export function iniciativa(ch) {
   const pb = competencia(nivelTotal(ch));
-  return modOf(ch.stats?.des) + (tieneDote(ch, 'Alerta') ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0);
+  return modOf(statsEfectivos(ch).des) + bonoPruebasObjetos(ch) + (tieneDote(ch, 'Alerta') ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0);
 }
 export const percepcionPasiva = ch => 10 + bonoHabilidad(ch, 'percepcion');
 export const investigacionPasiva = ch => 10 + bonoHabilidad(ch, 'investigacion');
@@ -134,9 +135,9 @@ export function velocidad(ch) {
 export const fmtMetros = m => `${String(Math.round(m * 10) / 10).replace('.', ',')} m`;
 
 export function tablaCaracteristicas(ch) {
-  const salv = salvacionesCompetentes(ch);
+  const salv = salvacionesCompetentes(ch), st = statsEfectivos(ch), por = statsPorObjeto(ch);
   return ABILS.map(([k, nombre]) => ({
-    k, nombre, corto: AB_CORTA[k], valor: parseInt(ch.stats?.[k], 10) || 10, mod: modOf(ch.stats?.[k]),
+    k, nombre, corto: AB_CORTA[k], valor: parseInt(st[k], 10) || 10, mod: modOf(st[k]), prueba: modOf(st[k]) + bonoPruebasObjetos(ch), objetos: por[k] || [], base: parseInt(ch.stats?.[k], 10) || 10,
     salvacion: { bono: bonoSalvacion(ch, k), competente: salv.has(k) },
     habilidades: HABILIDADES.filter(h => h[2] === k).map(([hk, hn]) => ({ k: hk, nombre: hn, nivel: nivelHabilidad(ch, hk), bono: bonoHabilidad(ch, hk) })),
   }));

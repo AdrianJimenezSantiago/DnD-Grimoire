@@ -52,6 +52,8 @@ function tablaHtml(lineas) {
     <thead><tr>${pad(cab).map((c, k) => td(c, k, true)).join('')}</tr></thead>
     <tbody>${cuerpo.map(f => `<tr${numerada && esRot(f[0]) ? ` data-rot="${esc(f[0].replace(/\.$/, ''))}"` : ''}>${pad(f).map((c, k) => td(c, k)).join('')}</tr>`).join('')}</tbody></table></div></figure>`;
 }
+// El mismo texto sin botones del glosario, para meterlo dentro de otro botón (una tarjeta que se elige)
+export const mdPlano = t => md(t).replace(/<button type="button" class="term"[^>]*>(.*?)<\/button>/g, '<b class="term-plano">$1</b>');
 export function md(t) {
   const bloques = String(t || '').trim().split(/\n{2,}/).filter(b => b.trim());
   let h = '', lista = [];

@@ -1,4 +1,5 @@
 import { clamp, norm } from '../core/util.js';
+import { statsEfectivos, bonoMagiaObjetos } from './objetosEfecto.js';
 import { ordenDe } from './ordenes.js';
 
 export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
@@ -100,7 +101,7 @@ export function perfil(ch) {
   const prim = lanzan[0] || null, c = prim ? prim.l.cast : null;
   const apKey = ch.aptitud || (c ? c.ap : '');
   const pb = competencia(lvl);
-  const mod = apKey ? modOf(ch.stats[apKey]) : null;
+  const st = statsEfectivos(ch), mo = bonoMagiaObjetos(ch), mod = apKey ? modOf(st[apKey]) : null;
   const slots = {}; let pact = null;
   if (ch.espaciosManuales) {
     for (let L = 1; L <= 9; L++) { const n = parseInt((ch.espacios || {})[L], 10) || 0; if (n > 0) slots[L] = n; }
@@ -119,7 +120,7 @@ export function perfil(ch) {
     const ap = ch.aptitud || l.cast.ap, claves = [norm(k.clase), norm(l.nombre), ...(l.lista === 'Mago' || k.clase === 'Mago' ? ['libro', 'experto'] : []), ...(k.clase === 'Brujo' ? ['pacto'] : [])];
     const x = cds.find(y => y.ap === ap);
     if (x) x.claves.push(...claves);
-    else { const m = modOf(ch.stats[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
+    else { const m = modOf(st[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + mo.cd + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + mo.atk + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
   }
   const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length + (l.viaSub ? 0 : ordenDe(ch, k.clase)?.truco || 0) : 0);
   return {
@@ -127,8 +128,8 @@ export function perfil(ch) {
     lista: prim ? prim.l.lista : '',
     listaNombre: prim ? prim.l.nombre : '',
     listas: lanzan.map(x => x.l.lista),
-    cd: mod == null ? null : 8 + pb + mod + (parseInt(ch.extraCD, 10) || 0),
-    atk: mod == null ? null : pb + mod + (parseInt(ch.extraAtaque, 10) || 0),
+    cd: mod == null ? null : 8 + pb + mod + mo.cd + (parseInt(ch.extraCD, 10) || 0),
+    atk: mod == null ? null : pb + mod + mo.atk + (parseInt(ch.extraAtaque, 10) || 0),
     slots, pact, maxSlot: Math.max(0, ...Object.keys(slots).map(Number)),
     maxPrep: lanzan.reduce((n, { c: k, l }) => n + PREP[l.cast.prep][k.nivel - 1], 0),
     maxCant: lanzan.reduce((n, x) => n + trucos(x), 0),
