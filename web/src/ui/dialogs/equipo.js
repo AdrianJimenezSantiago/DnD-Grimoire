@@ -3,6 +3,7 @@ import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, alternarEquipado, cambiarCantidad,
   quitarObjeto, anadirComun, normObjeto, pesoTotal, capacidadCarga, valorMonedas, claseArmadura, ataqueArma } from '../../domain/equipo.js';
 import { reglas, usosGastados } from '../../domain/rasgos.js';
+import { efectoDe, objetoActivo, bonoDeNombre } from '../../domain/objetosEfecto.js';
 import { biblioteca } from '../../domain/catalogo.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
@@ -33,6 +34,21 @@ function resumen(ch) {
   ${V.monedas ? `<section class="inv-coins" aria-label="Monedas">${MONEDAS.map(([k, n]) => `<label class="f"><span>${n} (${k})</span><input type="number" inputmode="numeric" min="0" data-moneda="${k}" value="${eq.monedas[k] || 0}"></label>`).join('')}</section>` : ''}`;
 }
 
+// Qué hace el objeto en la hoja, y si está funcionando
+const AB_N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
+function efectoTexto(o) {
+  const e = efectoDe(o.nombre); if (!e) return '';
+  const b = [];
+  if (e.ca) b.push(`${e.ca > 0 ? '+' : ''}${e.ca} CA${e.sinArmadura ? ' sin armadura ni escudo' : ''}`);
+  if (e.caBase) b.push(`CA ${e.caBase} + Des sin armadura`);
+  if (e.salv) b.push(`+${e.salv} a salvaciones`);
+  if (e.pruebas) b.push(`+${e.pruebas} a pruebas`);
+  if (e.cd && e.cd === e.atk) b.push(`+${e.cd} a CD y ataque de conjuro`); else { if (e.cd) b.push(`+${e.cd} a CD de conjuro`); if (e.atk) b.push(`+${e.atk} a ataque de conjuro`); }
+  for (const [k, v] of Object.entries(e.fija || {})) b.push(`${AB_N[k]} ${v}`);
+  for (const [k, v] of Object.entries(e.suma || {})) b.push(`+${v} ${AB_N[k]} (máx. 20)`);
+  if (!b.length) return '';
+  return objetoActivo(o) ? `<span class="obj-ef on">${esc(b.join(', '))}</span>` : `<span class="obj-ef">${esc(b.join(', '))} (${o.sintonia && !o.sintonizado ? 'al sintonizarlo' : 'al equiparlo'})</span>`;
+}
 function fila(ch, o, R) {
   const r = o.rasgo && R.find(x => x.id === o.rasgo), libres = r ? r.max - usosGastados(ch, r) : 0, conTexto = o.clave && biblioteca().objetos.some(x => x.clave === o.clave);
   const at = o.arma ? ataqueArma(ch, o) : null;
@@ -41,6 +57,7 @@ function fila(ch, o, R) {
     o.arma ? [...(o.arma.props || []), o.arma.maestria ? `maestría: ${o.arma.maestria}` : '', o.arma.distancia].filter(Boolean).join(', ') : '',
     o.armadura ? (o.armadura.tipo === 'escudo' ? `+${o.armadura.base || 2} a la CA` : `CA ${o.armadura.base + (o.armadura.bono || 0)}${o.armadura.dex === 'todo' ? ' + Des' : o.armadura.dex === 'max2' ? ' + Des (máx. 2)' : ''} · ${o.armadura.tipo}`) : '',
     o.rareza ? `<span class="rar-txt">${esc(o.rareza)}</span>` : '',
+    efectoTexto(o),
     r ? `${libres} de ${r.max} cargas` : '',
     o.peso ? kg(o.peso * (o.cantidad || 1)) : '',
     o.valor, o.notas,
@@ -72,14 +89,14 @@ function formulario() {
       <label class="f">Valor<input id="ivValor" value="${esc(o.valor || '')}" placeholder="15 po" autocomplete="off"></label></div>
     ${cat === 'arma' ? `<div class="frow"><label class="f">Daño<input id="ivDano" value="${esc(arma.dano || '')}" placeholder="1d8" autocomplete="off"></label>
       <label class="f">Tipo de daño<input id="ivTipo" value="${esc(arma.tipo || '')}" placeholder="cortante" autocomplete="off"></label>
-      <label class="f">Bonificador mágico<input id="ivBonoA" type="number" inputmode="numeric" value="${arma.bono || 0}"></label>
+      <label class="f">Bonificador mágico<input id="ivBonoA" type="number" inputmode="numeric" value="${arma.bono ?? bonoDeNombre(o.nombre)}"></label>
       <label class="f wide">Propiedades<input id="ivProps" value="${esc((arma.props || []).join(', '))}" placeholder="Sutil, Ligera, Arrojadiza" autocomplete="off"></label>
       <label class="f">Maestría<input id="ivMaes" value="${esc(arma.maestria || '')}" placeholder="Irritar" autocomplete="off"></label>
       <label class="f">Alcance<input id="ivDist" value="${esc(arma.distancia || '')}" placeholder="24/96 m" autocomplete="off"></label></div>` : ''}
     ${cat === 'armadura' ? `<div class="frow"><label class="f">Tipo<select id="ivArmT">${[['ligera', 'Ligera'], ['media', 'Media'], ['pesada', 'Pesada'], ['escudo', 'Escudo']].map(([k, t]) => `<option value="${k}" ${arm.tipo === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <label class="f">${arm.tipo === 'escudo' ? 'Bonificador a la CA' : 'CA base'}<input id="ivBase" type="number" inputmode="numeric" value="${arm.base ?? (arm.tipo === 'escudo' ? 2 : 11)}"></label>
       <label class="f">Destreza<select id="ivDex">${[['todo', 'Suma toda'], ['max2', 'Máximo +2'], ['no', 'No suma']].map(([k, t]) => `<option value="${k}" ${arm.dex === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
-      <label class="f">Bonificador mágico<input id="ivBonoR" type="number" inputmode="numeric" value="${arm.bono || 0}"></label></div>` : ''}
+      <label class="f">Bonificador mágico<input id="ivBonoR" type="number" inputmode="numeric" value="${arm.bono ?? bonoDeNombre(o.nombre)}"></label></div>` : ''}
     <label class="f wide">Notas<input id="ivNotas" value="${esc(o.notas || '')}" placeholder="Dónde lo guarda, efectos, usos…" autocomplete="off"></label>
     <div class="inv-form-acts"><button type="button" data-inv="cancelar">Cancelar</button><span class="spacer"></span><button type="button" class="gold" data-inv="guardar">${f.id ? 'Guardar' : 'Añadir al inventario'}</button></div></section>`;
 }

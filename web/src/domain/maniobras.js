@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { clasesDe, competencia, modOf, nivelTotal } from './reglas2024.js';
 
 // Maniobras del Maestro del combate (guerrero, Manual del Jugador de 2024). «Dado» es un dado de supremacía.
@@ -33,7 +34,7 @@ export const cupoManiobrasEn = L => (L >= 15 ? 9 : L >= 10 ? 7 : L >= 7 ? 5 : L 
 export function cupoManiobras(ch) { const c = maestroDe(ch); return c ? cupoManiobrasEn(c.nivel) : 0; }
 export const dadoSupremacia = L => (L >= 18 ? 'd12' : L >= 10 ? 'd10' : 'd8');
 // CD de las maniobras: 8 + Fuerza o Destreza (la mayor) + competencia
-export const cdManiobras = ch => 8 + competencia(nivelTotal(ch)) + Math.max(modOf(ch.stats?.fue), modOf(ch.stats?.des));
+export const cdManiobras = ch => 8 + competencia(nivelTotal(ch)) + Math.max(modOf(statsEfectivos(ch).fue), modOf(statsEfectivos(ch).des));
 export const maniobraDe = nombre => MANIOBRAS.find(m => norm(m.nombre) === norm(nombre)) || null;
 // Las que tiene el personaje, con su texto; las que no están en la lista (de otro manual) salen sin texto
 export function maniobrasDe(ch) {

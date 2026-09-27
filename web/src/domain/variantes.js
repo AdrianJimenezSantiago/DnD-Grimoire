@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { clasesDe, modOf } from './reglas2024.js';
 
 // Rasgos de clase con dos variantes que se eligen al aprenderlos (Manual del Jugador de 2024):
@@ -50,7 +51,7 @@ export function trucoPotente(ch, fuente = '') {
     const def = VARIANTES[c.clase], v = varianteDe(ch, c.clase);
     if (!def || c.nivel < def.nivel || v?.ef !== 'potente') continue;
     const clase = norm(c.clase);
-    if (f.includes(clase) || !(OTRAS.test(f) || /clerigo|druida/.test(f))) return { bono: modOf(ch.stats?.sab), fuente: `${v.nombre} (${def.rasgo})` };
+    if (f.includes(clase) || !(OTRAS.test(f) || /clerigo|druida/.test(f))) return { bono: modOf(statsEfectivos(ch).sab), fuente: `${v.nombre} (${def.rasgo})` };
   }
   return null;
 }

@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal } from './reglas2024.js';
 import { textoMaestria } from './referencia.js';
 
@@ -50,6 +51,6 @@ export function ataquesPorAccion(ch) {
   return n;
 }
 export const modAtaque = (ch, arma) => {
-  const props = (arma.arma?.props || []).map(norm), st = ch.stats || {};
+  const props = (arma.arma?.props || []).map(norm), st = statsEfectivos(ch);
   return props.some(p => p.startsWith('municion')) ? modOf(st.des) : props.includes('sutil') ? Math.max(modOf(st.fue), modOf(st.des)) : modOf(st.fue);
 };

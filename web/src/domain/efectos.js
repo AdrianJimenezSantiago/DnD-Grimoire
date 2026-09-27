@@ -1,4 +1,5 @@
 import { norm, uid } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { claseArmadura } from './equipo.js';
 import { velocidad, abDe } from './habilidades.js';
 import { clasesDe, modOf } from './reglas2024.js';
@@ -101,7 +102,7 @@ export function pasivosDe(ch) {
   if (dotes.includes('lanzador en combate')) out.push({ nombre: 'Lanzador en combate', reglas: [R('salvacion', 'ventaja', { ab: 'con', motivo: 'concentracion' })] });
   if (dotes.includes('resistente')) out.push({ nombre: 'Resistente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte' })] });
   if (clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 18)) out.push({ nombre: 'Superviviente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte', cond: 'y de 18 a 20 cuenta como un 20' })] });
-  if ((ch.vida?.efectos || []).some(e => e.k === 'cancion')) out.push({ nombre: 'Canción de la hoja', reglas: [R('salvacion', 'plano', { ab: 'con', motivo: 'concentracion', valor: Math.max(1, modOf(ch.stats?.int)) })] });
+  if ((ch.vida?.efectos || []).some(e => e.k === 'cancion')) out.push({ nombre: 'Canción de la hoja', reglas: [R('salvacion', 'plano', { ab: 'con', motivo: 'concentracion', valor: Math.max(1, modOf(statsEfectivos(ch).int)) })] });
   if (especie === 'gnomo') out.push({ nombre: 'Astucia gnoma', reglas: ['int', 'sab', 'car'].map(ab => R('salvacion', 'ventaja', { ab })) });
   if (especie === 'enano') out.push({ nombre: 'Resistencia enana', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] });
   if (especie === 'mediano') out.push({ nombre: 'Valiente', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de asustado' })] });
@@ -180,10 +181,10 @@ export function caEfectiva(ch) {
   // Armadura de mago: 13 + Des sin armadura (se queda con la mejor opción)
   const cb = Math.max(0, ...efs.map(e => e.caBase || 0)), objs = ch.equipo?.objetos || [];
   if (cb && !objs.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo')) {
-    const esc = objs.find(o => o.equipado && o.armadura?.tipo === 'escudo'), alt = cb + modOf(ch.stats?.des) + (esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0);
+    const esc = objs.find(o => o.equipado && o.armadura?.tipo === 'escudo'), alt = cb + modOf(statsEfectivos(ch).des) + (esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0);
     if (alt > base.ca) { base.ca = alt; base.detalle = `Armadura de mago (${cb} + Des)${esc ? ', escudo' : ''}`; }
   }
-  const caDe = e => (e.ca || 0) + (e.caAb ? Math.max(1, modOf(ch.stats?.[e.caAb])) : 0);
+  const caDe = e => (e.ca || 0) + (e.caAb ? Math.max(1, modOf(statsEfectivos(ch)[e.caAb])) : 0);
   let ca = base.ca + efs.reduce((s, e) => s + caDe(e), 0);
   const min = Math.max(0, ...efs.map(e => e.caMin || 0));
   const extra = efs.filter(e => caDe(e) || e.caMin).map(e => e.caMin ? `${e.nombre} (mín. ${e.caMin})` : `${e.nombre} ${caDe(e) > 0 ? '+' : ''}${caDe(e)}`);

@@ -4,6 +4,7 @@ import { competenteConArma, esMarcial as esMarcialArma } from './competencias.js
 import { tieneEstilo } from './estilos.js';
 import { tieneMaestria } from './maestria.js';
 import { golpeExtra } from './variantes.js';
+import { statsEfectivos, objetosActivos, efectoDe, bonoDeNombre } from './objetosEfecto.js';
 
 export const MAX_SINTONIA = 3;
 export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras y escudos', 'o_armadura'], ['equipo', 'Equipo', 'cofre'],
@@ -60,10 +61,25 @@ export const sintonizados = ch => equipoDe(ch).objetos.filter(o => o.sintonizado
 export const tieneObjeto = (ch, clave) => equipoDe(ch).objetos.some(o => o.clave === clave);
 const num = (v, def = 0) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : def; };
 
+// Arma o armadura mágica con nombre de una normal («Espada larga +1», «Escudo +2», «Cota de mallas +1»): toma sus datos y el bonificador
+const BASES = [...PREDEFINIDOS].filter(p => p.arma || p.armadura).sort((a, b) => b.nombre.length - a.nombre.length);
+export function baseMagica(nombre) {
+  const n = norm(nombre || ''), p = BASES.find(x => n.includes(norm(x.nombre))); if (!p) return null;
+  const bono = bonoDeNombre(nombre), c = JSON.parse(JSON.stringify(p));
+  if (c.arma) c.arma.bono = bono; if (c.armadura) c.armadura.bono = bono;
+  return c;
+}
 export function normObjeto(o) {
   const cat = CATEGORIAS.some(([k]) => k === o.cat) ? o.cat : o.clave ? (CAT_TIPO[o.tipo] || 'magico') : 'otro';
-  return { ...o, id: o.id || uid('ob'), nombre: String(o.nombre || 'Objeto').trim(), cat, cantidad: Math.max(0, Math.round(num(o.cantidad, 1))), peso: Math.max(0, num(o.peso)),
-    valor: String(o.valor || ''), notas: String(o.notas || ''), equipado: !!o.equipado, magico: !!(o.magico || o.clave || o.rareza), sintonia: !!o.sintonia, sintonizado: !!o.sintonizado };
+  const out = { ...o, id: o.id || uid('ob'), nombre: String(o.nombre || 'Objeto').trim(), cat, cantidad: Math.max(0, Math.round(num(o.cantidad, 1))), peso: Math.max(0, num(o.peso)),
+    valor: String(o.valor || ''), notas: String(o.notas || ''), equipado: !!o.equipado, magico: !!(o.magico || o.clave || o.rareza), sintonia: !!o.sintonia || !!efectoDe(o.nombre)?.sintonia, sintonizado: !!o.sintonizado };
+  // Las armas y armaduras mágicas del libro llegaban sin daño ni CA: se completan con la normal de su nombre
+  if (out.magico && (cat === 'arma' || cat === 'armadura') && !out.arma && !out.armadura) {
+    const b = baseMagica(out.nombre);
+    if (b?.arma && cat === 'arma') { out.arma = b.arma; if (!out.peso) out.peso = b.peso; }
+    if (b?.armadura && cat === 'armadura') { out.armadura = b.armadura; if (!out.peso) out.peso = b.peso; }
+  }
+  return out;
 }
 export function normEquipo(ch) {
   const eq = equipoDe(ch);
@@ -122,11 +138,25 @@ export function pesoTotal(ch) {
   const eq = equipoDe(ch), monedas = Object.values(eq.monedas).reduce((s, n) => s + (n || 0), 0);
   return Math.round((eq.objetos.reduce((s, o) => s + (o.peso || 0) * (o.cantidad || 0), 0) + monedas / 50 * 0.5) * 10) / 10;
 }
-export const capacidadCarga = ch => (ch.stats?.fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? 2 : 1);
+export const capacidadCarga = ch => (statsEfectivos(ch).fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? 2 : 1);
 export const valorMonedas = ch => Math.round(MONEDAS.reduce((s, [k, , v]) => s + (equipoDe(ch).monedas[k] || 0) * v, 0) * 100) / 100;
 
+// CA con los objetos mágicos puestos: Capa y Anillo de protección, Brazales de defensa, Ropajes del archimago…
 export function claseArmadura(ch) {
-  const eq = equipoDe(ch), st = ch.stats || {}, des = modOf(st.des), clases = clasesDe(ch).map(c => c.clase);
+  const base = claseArmaduraBase(ch), eq = equipoDe(ch), act = objetosActivos(ch);
+  const armadura = eq.objetos.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo'), escudo = eq.objetos.some(o => o.equipado && o.armadura?.tipo === 'escudo');
+  let { ca, detalle } = base;
+  const cb = act.find(({ e }) => e.caBase);
+  if (cb && !armadura) {
+    const esc = eq.objetos.find(o => o.equipado && o.armadura?.tipo === 'escudo'), alt = cb.e.caBase + modOf(statsEfectivos(ch).des) + (esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0);
+    if (alt > ca) { ca = alt; detalle = `${cb.o.nombre} (${cb.e.caBase} + Des)${esc ? ', escudo' : ''}`; }
+  }
+  const extra = [];
+  for (const { o, e } of act) { if (!e.ca || (e.sinArmadura && (armadura || escudo))) continue; ca += e.ca; extra.push(`${o.nombre} +${e.ca}`); }
+  return { ca, detalle: [detalle, ...extra].filter(Boolean).join(', ') };
+}
+function claseArmaduraBase(ch) {
+  const eq = equipoDe(ch), st = statsEfectivos(ch), des = modOf(st.des), clases = clasesDe(ch).map(c => c.clase);
   const arm = eq.objetos.find(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo'), esc = eq.objetos.find(o => o.equipado && o.armadura?.tipo === 'escudo');
   const bonoEsc = esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0;
   if (arm) {
@@ -165,7 +195,7 @@ export const armaCombate = (ch, id) => armasCombate(ch).find(x => x.id === id) |
 
 export function ataqueArma(ch, o) {
   const a = o.arma; if (!a) return null;
-  const st = ch.stats || {}, fue = modOf(st.fue), des = modOf(st.des), props = (a.props || []).map(norm);
+  const st = statsEfectivos(ch), fue = modOf(st.fue), des = modOf(st.des), props = (a.props || []).map(norm);
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
   const artes = artesMarciales(ch, o, props, distancia), cancion = efectoActivo(ch, 'cancion') && clasesDe(ch).some(c => c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || ''));
   let mod = distancia ? des : sutil || artes ? Math.max(fue, des) : fue;

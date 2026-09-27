@@ -3,6 +3,7 @@ import { sgn, modOf } from '../../domain/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
 import { bonoSalvacion } from '../../domain/habilidades.js';
+import { statsEfectivos } from '../../domain/objetosEfecto.js';
 import { glosario } from '../../domain/catalogo.js';
 import { rngCripto } from '../../domain/dados.js';
 import { combateDe } from '../../domain/combate.js';
@@ -32,7 +33,7 @@ export function openVida(foco, { descanso = false } = {}) { enDescanso = descans
 function render() {
   const c = ch(); if (!c) return;
   const v = vidaDe(c), max = pgMaximo(c), act = pgActuales(c), est = estadoVital(c);
-  $('#vdHead').innerHTML = `${avatarHtml(c, 'md')}<div><h2 id="vdTitle">Puntos de golpe</h2><div class="dsub">${esc(c.nombre)} · Constitución ${sgn(modOf(c.stats?.con))}</div></div>`;
+  $('#vdHead').innerHTML = `${avatarHtml(c, 'md')}<div><h2 id="vdTitle">Puntos de golpe</h2><div class="dsub">${esc(c.nombre)} · Constitución ${sgn(modOf(statsEfectivos(c).con))}</div></div>`;
   let h = `<section class="vd-marcador ${tonoVida(c)}">
     <div class="vd-cifra"><span class="vd-act">${act}</span><span class="vd-max">/ ${max}</span>${v.temp ? `<span class="vd-temp" title="Puntos de golpe temporales">+${v.temp} temp.</span>` : ''}</div>
     <div class="vd-barra" role="meter" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${act}" aria-label="Puntos de golpe"><i style="width:${pctVida(c)}%"></i>${v.temp ? `<b style="width:${Math.min(100, Math.round(v.temp / max * 100))}%"></b>` : ''}</div>
@@ -46,8 +47,8 @@ function render() {
   }
   h += `<section class="vd-dados ${enDescanso ? 'descanso' : ''}"><h3>${gi('dado_golpe')}Dados de golpe${enDescanso ? '<small class="vd-dg-tag">Descanso corto</small>' : ''}</h3><div class="vd-dg">${dadosDeGolpe(c).map(d => `<div class="vd-dg-it">
       <b>${d.quedan}<small>/${d.total}</small></b><span>${d.dado}</span>${enDescanso ? `<button type="button" data-vddg="${d.dado}" ${d.quedan && act < max && est !== 'muerto' ? '' : 'disabled'}>Gastar y tirar</button>` : ''}</div>`).join('')}</div>
-    ${enDescanso ? `<p class="hint">Cada dado cura su tirada ${sgn(modOf(c.stats?.con))} (Con), mínimo 1. Gasta los que quieras mientras dure el descanso; con un descanso largo se recuperan todos.</p>`
-      : `<p class="hint vd-dg-nota">Solo se gastan durante un descanso corto: cada dado cura su tirada ${sgn(modOf(c.stats?.con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p>${combateDe(c).activo || est === 'muerto' ? '' : '<button type="button" class="ghost vd-dg-corto" data-cmd="short">Hacer un descanso corto</button>'}`}</section>`;
+    ${enDescanso ? `<p class="hint">Cada dado cura su tirada ${sgn(modOf(statsEfectivos(c).con))} (Con), mínimo 1. Gasta los que quieras mientras dure el descanso; con un descanso largo se recuperan todos.</p>`
+      : `<p class="hint vd-dg-nota">Solo se gastan durante un descanso corto: cada dado cura su tirada ${sgn(modOf(statsEfectivos(c).con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p>${combateDe(c).activo || est === 'muerto' ? '' : '<button type="button" class="ghost vd-dg-corto" data-cmd="short">Hacer un descanso corto</button>'}`}</section>`;
   h += `<section class="vd-max-sec"><h3>${gi('pg')}PG máximos aumentados</h3>
     ${v.maxExtra.length ? `<ul class="vd-mx">${v.maxExtra.map(m => `<li><b>+${m.n}</b><span>${esc(m.nombre)}</span><button type="button" data-vdmxq="${esc(m.id)}">Termina</button></li>`).join('')}</ul>` : ''}
     <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
@@ -176,7 +177,7 @@ export function init(store) {
     const dado = b.dataset.vddg, caras = parseInt(dado.slice(1), 10), t = rngCripto(caras); let g;
     const h = S.act(`Gasta un dado de golpe (${dado}): ${t}`, (db, x) => { g = gastarDadoGolpe(x, dado, t); });
     if (!g) return; render(); golpeFx('cura', g.ganado, { desde: pgActuales(S.cur()) - g.ganado, hasta: pgActuales(S.cur()) }); haptic('light');
-    toast(`Dado de golpe ${dado}: <b>${t}</b> ${sgn(modOf(S.cur().stats?.con))} = recupera <b>${g.ganado}</b> PG.`, [undoBtn(S, h)]);
+    toast(`Dado de golpe ${dado}: <b>${t}</b> ${sgn(modOf(statsEfectivos(S.cur()).con))} = recupera <b>${g.ganado}</b> PG.`, [undoBtn(S, h)]);
   });
   on(document, 'click', '[data-pip]', (e, b) => {
     const [tipo, i] = b.dataset.pip.split('|'), k = tipo === 'exito' ? 'exitos' : 'fallos';

@@ -1,4 +1,5 @@
 import { norm, uid } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { normEfectos, EFECTO, efectoDeConjuro } from './efectos.js';
 import { modOf, clasesDe, dotesDe, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
@@ -43,7 +44,7 @@ export const vidaDe = ch => (ch.vida && ch.vida.muerte && ch.vida.dadosUsados &&
 
 const tieneDote = (ch, nombre) => dotesDe(ch).some(d => norm(d.nombre) === norm(nombre));
 export function pgMaximoCalculado(ch) {
-  const cs = clasesDe(ch), con = modOf(ch.stats?.con), L = nivelTotal(ch);
+  const cs = clasesDe(ch), con = modOf(statsEfectivos(ch).con), L = nivelTotal(ch);
   let pg = 0;
   cs.forEach((c, i) => {
     const dg = CLASES_INFO[c.clase]?.dg || 8;
@@ -151,7 +152,7 @@ export function gastarDadoGolpe(ch, dado, tirada) {
   const v = vidaDe(ch), d = dadosDeGolpe(ch).find(x => x.dado === dado);
   if (!d || !d.quedan) return null;
   v.dadosUsados[dado] = (v.dadosUsados[dado] || 0) + 1;
-  const total = Math.max(1, tirada + modOf(ch.stats?.con));
+  const total = Math.max(1, tirada + modOf(statsEfectivos(ch).con));
   const ganado = curar(ch, total);
   return { total, ganado };
 }

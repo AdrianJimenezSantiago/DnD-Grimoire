@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { statsEfectivos } from './objetosEfecto.js';
 import { competencia, modOf, nivelDe } from './reglas2024.js';
 import { varianteDe } from './variantes.js';
 import { cdManiobras, dadoSupremacia } from './maniobras.js';
@@ -225,12 +226,12 @@ function furiaOGolpes(ch, nombre, mejorado) {
   const v = varianteDe(ch, ch.clase), dado = mejorado ? '2d8' : '1d8';
   if (!v) return { nombre, valor: 'Sin elegir', nota: 'Elige la variante tocando el rasgo en «En juego»' };
   if (v.ef === 'golpe') return { nombre, valor: `${dado} ${v.tipos.replace(/^de /, '')}`, nota: `${v.nombre}: una vez por turno al impactar con un arma` };
-  return { nombre, valor: `+${modOf(ch.stats?.sab)} a trucos`, nota: `${v.nombre}: Sabiduría al daño de tus trucos` };
+  return { nombre, valor: `+${modOf(statsEfectivos(ch).sab)} a trucos`, nota: `${v.nombre}: Sabiduría al daño de tus trucos` };
 }
 const byLvl = (L, pairs) => pairs.reduce((v, [from, val]) => (L >= from ? val : v), pairs[0][1]);
 export function escalas(ch) {
   const L = nivelDe(ch), info = CLASES_INFO[ch.clase]; if (!info) return [];
-  const con = modOf(ch.stats?.con), out = [];
+  const con = modOf(statsEfectivos(ch).con), out = [];
   const pg = info.dg + con + (L - 1) * (info.dg / 2 + 1 + con);
   out.push({ nombre: 'Puntos de golpe (media)', valor: String(Math.max(L, pg)), nota: `d${info.dg} por nivel${con ? `, ${con > 0 ? '+' : ''}${con} de Constitución` : ''}` });
   out.push({ nombre: 'Dado de golpe', valor: `${L}d${info.dg}` });
@@ -252,7 +253,7 @@ export function escalas(ch) {
     case 'Hechicero': if (L >= 2) out.push({ nombre: 'Opciones de metamagia', valor: String(byLvl(L, [[2, 2], [10, 4], [17, 6]])) }); break;
     case 'Monje': out.push({ nombre: 'Artes marciales', valor: byLvl(L, [[1, 'd6'], [5, 'd8'], [11, 'd10'], [17, 'd12']]) });
       if (L >= 2) out.push({ nombre: 'Movimiento sin armadura', valor: '+' + byLvl(L, [[2, '3'], [6, '4,5'], [10, '6'], [14, '7,5'], [18, '9']]) + ' m' }); break;
-    case 'Paladín': maestria(2); if (L >= 6) out.push({ nombre: 'Aura de protección', valor: `+${Math.max(1, modOf(ch.stats?.car))} a salvaciones, ${L >= 18 ? 9 : 3} m` }); break;
+    case 'Paladín': maestria(2); if (L >= 6) out.push({ nombre: 'Aura de protección', valor: `+${Math.max(1, modOf(statsEfectivos(ch).car))} a salvaciones, ${L >= 18 ? 9 : 3} m` }); break;
     case 'Pícaro': out.push({ nombre: 'Ataque furtivo', valor: `${Math.ceil(L / 2)}d6` }); maestria(2); break;
   }
   return out;
