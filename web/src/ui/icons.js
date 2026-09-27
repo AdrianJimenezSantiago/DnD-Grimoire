@@ -22,9 +22,9 @@ const P = {
 };
 export const icon = (name, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[name] || ''}</svg>`;
 
-export const ASTROLABE = `<svg class="astrolabe" viewBox="0 0 340 340" aria-hidden="true"><g fill="none" stroke="currentColor">
+export const ASTROLABE = `<span class="astrolabe" aria-hidden="true"><svg viewBox="0 0 340 340"><g fill="none" stroke="currentColor">
   <circle cx="170" cy="170" r="164" stroke-width="1"/><circle cx="170" cy="170" r="150" stroke-width=".6" stroke-dasharray="2 6"/>
-  <g class="spin"><circle cx="170" cy="170" r="118" stroke-width="1"/><ellipse cx="170" cy="170" rx="118" ry="46" stroke-width=".8"/>
+  <circle cx="170" cy="170" r="70" stroke-width="1"/><circle cx="170" cy="170" r="10" stroke-width="1"/></g></svg>
+  <svg class="spin" viewBox="0 0 340 340"><g fill="none" stroke="currentColor"><circle cx="170" cy="170" r="118" stroke-width="1"/><ellipse cx="170" cy="170" rx="118" ry="46" stroke-width=".8"/>
   <ellipse cx="170" cy="170" rx="46" ry="118" stroke-width=".8"/><path d="M170 30v280M30 170h280" stroke-width=".5"/>
-  <circle cx="288" cy="170" r="5" fill="currentColor"/><circle cx="170" cy="52" r="3" fill="currentColor"/></g>
-  <circle cx="170" cy="170" r="70" stroke-width="1"/><circle cx="170" cy="170" r="10" stroke-width="1"/></g></svg>`;
+  <circle cx="288" cy="170" r="5" fill="currentColor"/><circle cx="170" cy="52" r="3" fill="currentColor"/></g></svg></span>`;

@@ -39,16 +39,31 @@ export function sello(x, y, { color = 'var(--gold)', size = 160, dur = 900, lado
 export function selloEn(el, opts) { if (!el) return; const r = el.getBoundingClientRect(); sello(r.left + r.width / 2, r.top + r.height / 2, opts); }
 
 const SIN_ONDA = '.slotbtn,.prep,.tick,.rtick,.term,.nt-b,.hero-av,.switch,.sb-l b,[data-no-onda]';
+function pintarOnda(b, x, y) {
+  if (!b.isConnected) return;
+  const r = b.getBoundingClientRect(), d = Math.hypot(r.width, r.height) * 2;
+  const caja = document.createElement('span'); caja.className = 'onda'; caja.setAttribute('aria-hidden', 'true');
+  const i = document.createElement('i');
+  i.style.cssText = `left:${x - r.left}px;top:${y - r.top}px;width:${d}px;height:${d}px`;
+  caja.appendChild(i); b.appendChild(caja);
+  setTimeout(() => caja.remove(), 650);
+}
+// Con el dedo, la onda espera un instante: si el gesto resulta ser un desplazamiento no se crea nada y el scroll
+// arranca sin tocar el DOM ni medir. Si es un toque, aparece igual (al soltar o a los 70 ms, lo que llegue antes).
 function onda(e) {
   if (reducedMotion() || e.button > 0) return;
   const b = e.target.closest('button, .castzone, .ses, [role="button"]');
   if (!b || b.disabled || b.matches(SIN_ONDA)) return;
-  const r = b.getBoundingClientRect(), d = Math.hypot(r.width, r.height) * 2;
-  const caja = document.createElement('span'); caja.className = 'onda'; caja.setAttribute('aria-hidden', 'true');
-  const i = document.createElement('i');
-  i.style.cssText = `left:${e.clientX - r.left}px;top:${e.clientY - r.top}px;width:${d}px;height:${d}px`;
-  caja.appendChild(i); b.appendChild(caja);
-  setTimeout(() => caja.remove(), 650);
+  const x = e.clientX, y = e.clientY, id = e.pointerId;
+  if (e.pointerType !== 'touch') { pintarOnda(b, x, y); return; }
+  const fin = pinta => { clearTimeout(t); removeEventListener('pointermove', mueve, true); removeEventListener('pointerup', suelta, true); removeEventListener('pointercancel', cancela, true); if (pinta) pintarOnda(b, x, y); };
+  const mueve = ev => { if (ev.pointerId === id && Math.hypot(ev.clientX - x, ev.clientY - y) > 10) fin(false); };
+  const suelta = ev => { if (ev.pointerId === id) fin(true); };
+  const cancela = ev => { if (ev.pointerId === id) fin(false); };
+  const t = setTimeout(() => fin(true), 70);
+  addEventListener('pointermove', mueve, { capture: true, passive: true });
+  addEventListener('pointerup', suelta, { capture: true, passive: true });
+  addEventListener('pointercancel', cancela, { capture: true, passive: true });
 }
 
 function inclinar(e) {

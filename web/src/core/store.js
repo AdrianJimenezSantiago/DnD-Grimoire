@@ -1,6 +1,9 @@
 import { clone, uid } from './util.js';
 
 const MAX_HIST = 60, MAX_LOG = 120;
+// Serializar y guardar toda la base de datos se hace cuando el navegador está libre, no en mitad de una animación.
+// Al pausar la app o cerrar la página se sigue guardando al instante con flush().
+const enReposo = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 1000 }) : fn());
 
 export function createStore({ storage, key, db }) {
   const listeners = new Set();
@@ -13,7 +16,7 @@ export function createStore({ storage, key, db }) {
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     emit(reason) { listeners.forEach(fn => fn(S, reason)); },
 
-    save() { dirty = true; clearTimeout(timer); timer = setTimeout(S.flush, 200); },
+    save() { dirty = true; clearTimeout(timer); timer = setTimeout(() => enReposo(S.flush), 200); },
     flush() { clearTimeout(timer); if (!dirty) return; dirty = false; return storage.set(key, JSON.stringify(S.db)); },
 
     act(text, fn) {

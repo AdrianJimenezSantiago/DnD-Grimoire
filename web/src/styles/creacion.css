@@ -58,8 +58,8 @@
 .cc-pasos button[aria-selected="true"] .cc-n { color: var(--on-gold, #fff); background: var(--gilt); border-color: transparent; box-shadow: 0 0 14px -2px var(--glow); }
 .cc-pasos button.hecho .cc-n { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 55%, transparent); }
 .cc-badge { position: absolute; top: 0; left: 26px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 9px;
-  font: 700 10.5px / 1 var(--sans); color: #fff; background: #D9822B; box-shadow: 0 0 0 2px var(--raised); animation: latido 2.4s ease-in-out infinite; }
-@keyframes latido { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.22); } 24% { transform: scale(1); } }
+  font: 700 10.5px / 1 var(--sans); color: #fff; background: #D9822B; box-shadow: 0 0 0 2px var(--raised); animation: cc-latido 2.4s ease-in-out infinite; }
+@keyframes cc-latido { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.22); } 24% { transform: scale(1); } }
 @media (max-width: 860px) {
   .cc-pasos button { flex: 0 0 auto; padding-right: 5px; }
   .cc-pasos button:not([aria-selected="true"]) .cc-l { display: none; }
@@ -151,7 +151,7 @@
 .cc-puntos i::after { content: ""; position: absolute; inset: 0; width: calc(var(--p) * 100%); background: var(--gilt); border-radius: inherit; transition: width .35s var(--ease-out); }
 .cc-puntos.ok b { color: var(--ok); } .cc-puntos.mal b { color: var(--danger); } .cc-puntos.mal i::after { background: var(--danger); }
 .cc-bonos { margin-top: 14px; padding: 12px 14px; border-radius: var(--r-m); border: 1px dashed color-mix(in srgb, var(--gold) 50%, var(--line)); background: var(--surface-2); transition: border-color var(--t-med); }
-.cc-bonos.falta { animation: llama 2.6s ease-in-out infinite; }
+.cc-bonos.falta { animation: cc-llama 2.6s ease-in-out infinite; }
 .cc-bonos.ok { border-style: solid; border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); }
 .cc-bonos h4 { margin: 0 0 10px; font: 600 var(--fs-m) / 1.2 var(--display); letter-spacing: .02em; }
 .cc-bonos .seg { margin-bottom: 8px; }
@@ -160,7 +160,7 @@
 .cc-pill { min-height: 34px; min-width: 52px; padding: 0 10px; border-radius: var(--r-pill); font: 700 var(--fs-xs) / 1 var(--display); letter-spacing: .08em; }
 .cc-pill.on { color: var(--on-gold, #fff); background: var(--gilt); border-color: transparent; box-shadow: 0 0 14px -4px var(--glow); }
 .cc-bonos .hint .icon { width: 14px; height: 14px; vertical-align: -2px; color: var(--gold); }
-@keyframes llama { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px color-mix(in srgb, #D9822B 22%, transparent), 0 0 22px -6px #D9822B; } }
+@keyframes cc-llama { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px color-mix(in srgb, #D9822B 22%, transparent), 0 0 22px -6px #D9822B; } }
 @media (max-width: 560px) { .cc-abil { grid-template-columns: repeat(3, 1fr); } .cc-metodos button { padding: 0 6px; font-size: var(--fs-xs); } }
 
 /* Avisos de lo que queda por elegir */
@@ -170,7 +170,7 @@
 .cc-aviso b { color: var(--ink); }
 .cc-aviso.ok { box-shadow: inset 3px 0 0 var(--ok); }
 .cc-aviso.warn { box-shadow: inset 3px 0 0 var(--danger); }
-.cc-aviso.falta { box-shadow: inset 3px 0 0 #D9822B; background: color-mix(in srgb, #D9822B 10%, var(--surface-2)); animation: rise .3s var(--ease-out) both, llama 2.6s ease-in-out infinite .3s; }
+.cc-aviso.falta { box-shadow: inset 3px 0 0 #D9822B; background: color-mix(in srgb, #D9822B 10%, var(--surface-2)); animation: rise .3s var(--ease-out) both, cc-llama 2.6s ease-in-out infinite .3s; }
 .cc-num { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-right: 6px; padding: 0 6px; border-radius: 11px; background: #D9822B; color: #fff !important; font: 700 var(--fs-xs) / 1 var(--sans); vertical-align: 1px; }
 .cc-aviso ul { margin: 6px 0 0; padding-left: 18px; }
 .cc-aviso li + li { margin-top: 3px; }

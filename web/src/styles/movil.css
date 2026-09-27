@@ -1,0 +1,31 @@
+/* Pantallas táctiles: mismo aspecto y mismas animaciones, con menos trabajo de GPU al desplazarse.
+   - Las barras fijas o pegajosas pierden el desenfoque de fondo (backdrop-filter): en el móvil se recalcula en cada
+     fotograma que la página o el fondo animado se mueven por debajo. Se compensa con un fondo casi opaco.
+   - Las entradas de ventanas, vistas y pasos conservan el movimiento pero sin filter: blur, que en superficies
+     grandes es de lo más caro de animar. */
+@media (hover: none) and (pointer: coarse) {
+  .appbar { background: color-mix(in srgb, var(--bg) 94%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .dock { background: color-mix(in srgb, var(--bg) 93%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .lvl-head::before { background: color-mix(in srgb, var(--bg) 95%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .obj-g, .el-g h3 { background: color-mix(in srgb, var(--raised) 97%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .toast, .l-pilares li, .l-actions button { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  dialog::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, .14); }
+
+  /* El cambio de tono de la portada avanza a saltos muy cortos (12 en 1,6 s): entre salto y salto el valor no cambia y
+     el navegador no recalcula los estilos de la rueda y los bloques en cada fotograma. */
+  .landing > :not(.l-grid) { transition-timing-function: steps(12, jump-none); }
+
+  /* La inclinación 3D de las tarjetas de la portada solo existe con ratón: sin ella no hace falta una capa por tarjeta. */
+  .lcard { transform: none; will-change: auto; }
+  .lcard:active { transform: scale(.98); }
+
+  @keyframes pagina-in { from { opacity: 0; transform: perspective(1000px) translateY(22px) rotateX(9deg) scale(.96); } }
+  @keyframes pagina-out { to { opacity: 0; transform: perspective(1000px) translateY(10px) rotateX(-4deg) scale(.98); } }
+  @keyframes menu-in { from { opacity: 0; transform: scale(.9) translateY(-8px); } }
+  @keyframes portal-fuera { to { transform: scale(1.06); filter: brightness(.6); } }
+  @keyframes paso-der { from { opacity: 0; transform: translateX(22px); } }
+  @keyframes paso-izq { from { opacity: 0; transform: translateX(-22px); } }
+  @keyframes cb-entra { from { opacity: 0; transform: translateY(18px) scale(.985); } }
+  @keyframes lapida-in { from { opacity: 0; transform: translateY(26px); } }
+  @keyframes lapida-out { to { opacity: 0; transform: translateY(-14px) scale(.98); filter: brightness(1.6); } }
+}

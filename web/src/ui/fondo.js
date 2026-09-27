@@ -324,13 +324,24 @@ function nuevaHoja(inicio) { return { x: rnd(0, W), y: inicio ? rnd(0, H) : -20,
 function nuevaNota(inicio) { return { x: rnd(W * .05, W * .95), y: inicio ? rnd(H * .3, H) : H + 20, v: rnd(16, 34), g: '♪♫♩♬'[(Math.random() * 4) | 0], size: rnd(16, 30) | 0, t: inicio ? rnd(0, 6) : 0, max: rnd(14, 22), f: rnd(0, 6) }; }
 function nuevaPompa(inicio) { return { x: rnd(0, W), y: inicio ? rnd(0, H) : H + 40, v: rnd(8, 20), r: rnd(10, 34), t: 0, f: rnd(0, 6), dh: rnd(0, 120) }; }
 
+// En pantallas táctiles el lienzo va a menos resolución: son brillos difusos y así cada fotograma pesa un tercio menos.
+const tactil = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 function tamano() {
-  dpr = Math.min(1.5, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+  const antes = W;
+  dpr = Math.min(tactil ? 1.25 : 1.5, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
-  ESCENAS[E.nombre]?.s(); pintar(0);
+  // Si solo cambia el alto (la barra del navegador del móvil que aparece y desaparece al desplazarse) se conservan las partículas.
+  if (W !== antes || !E.ps.length) ESCENAS[E.nombre]?.s();
+  pintar(0);
 }
+// Colección viva de <dialog>: recorrer la treintena que hay es mucho más barato que un querySelector sobre toda la hoja
+// 30 veces por segundo. Se usa el ancho guardado (W) porque leer innerWidth puede forzar un layout.
+let dialogos = null;
 function tapado() {
-  return innerWidth < 700 && !!document.querySelector('dialog.tall[open]');
+  if (W >= 700) return false;
+  dialogos ||= document.getElementsByTagName('dialog');
+  for (const d of dialogos) if (d.open && d.classList.contains('tall')) return true;
+  return false;
 }
 function pintar(dt) {
   if (!ctx) return;
@@ -339,11 +350,16 @@ function pintar(dt) {
   ESCENAS[E.nombre]?.p(dt);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
 }
+// Mientras se desplaza la página (o una ventana) el fondo se queda quieto y deja la GPU libre para el scroll;
+// sigue en cuanto el dedo para. El tiempo en pausa no se acumula, para que las partículas no den un salto al volver.
+let quietoHasta = 0;
+const desplazando = () => { quietoHasta = performance.now() + 180; };
 function bucle(t) {
   raf = requestAnimationFrame(bucle);
   const dt = Math.min(.1, (t - (last || t)) / 1000); last = t; acc += dt;
-  if (acc < 1 / 30 || document.hidden || tapado()) return;
-  pintar(acc); acc = 0;
+  if (acc < 1 / 30) return;
+  if (document.hidden || t < quietoHasta || tapado()) { acc = 0; return; }
+  pintar(Math.min(acc, .1)); acc = 0;
 }
 function arrancar() {
   cancelAnimationFrame(raf); raf = 0; last = 0;
@@ -366,6 +382,7 @@ export function initFondo() {
   cv = document.createElement('canvas'); cv.className = 'fondo-vivo'; cv.setAttribute('aria-hidden', 'true');
   document.body.prepend(cv); ctx = cv.getContext('2d');
   addEventListener('resize', () => { clearTimeout(tamano.t); tamano.t = setTimeout(tamano, 120); });
+  document.addEventListener('scroll', desplazando, { capture: true, passive: true });
   tamano();
   const re = () => { const n = E.nombre; E.nombre = ''; setEscena({ h: E.h, s: E.s, icono: Object.keys(ESCENA).find(k => ESCENA[k] === n) }); };
   new MutationObserver(re).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

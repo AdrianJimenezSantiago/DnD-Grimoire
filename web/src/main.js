@@ -22,6 +22,7 @@ import './styles/portada.css';
 import './styles/dados.css';
 import './styles/creacion.css';
 import './styles/impacto.css';
+import './styles/movil.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/modelo.js';
