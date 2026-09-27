@@ -66,9 +66,9 @@
   background: radial-gradient(circle, var(--gold-soft), transparent 64%); }
 .l-runa { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--gold); opacity: .7; animation: girar 110s linear infinite reverse; }
 .l-nucleo { position: relative; display: grid; place-items: center; width: 44%; height: 44%; border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--acc-h) var(--acc-s) 50% / .28), transparent 70%); animation: l-latido 4.2s ease-in-out infinite; }
+  background: radial-gradient(circle, hsl(var(--acc-h) var(--acc-s) 50% / .28), transparent 70%); box-shadow: 0 0 30px -6px var(--glow); }
+.l-nucleo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 6%, transparent), 0 0 46px 0 var(--glow); opacity: 0; animation: respira 4.2s ease-in-out infinite; }
 .l-nucleo .gi { width: 70%; height: 70%; filter: drop-shadow(0 0 14px var(--glow)); }
-@keyframes l-latido { 0%, 100% { box-shadow: 0 0 0 0 transparent, 0 0 30px -6px var(--glow); } 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 6%, transparent), 0 0 46px 0 var(--glow); } }
 
 /* Sin personajes */
 .l-empty { text-align: center; max-width: 460px; margin: 4px 0 0; }
@@ -93,7 +93,7 @@
 .l-actions button { background: color-mix(in srgb, var(--surface) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .l-actions button .icon, .l-actions button .gi { color: var(--gold); }
 .l-actions button.gold { background: linear-gradient(180deg, color-mix(in srgb, var(--bt) 28%, var(--raised)), color-mix(in srgb, var(--bt) 12%, var(--raised))); padding: 0 24px; }
-.l-actions button.gold::before { animation: barrido 6s ease-in-out 2.5s infinite; }
+.l-actions button.gold::before { animation: barrido 6s ease-in-out 2.5s infinite; right: auto; width: 250%; background-position: 0 0; background-size: 100% 100%; transform: translateX(90%); transition: none; }
 .l-actions button.gold .icon { color: inherit; }
 
 /* Entrada */
@@ -121,7 +121,7 @@ body.landing-in .l-pilares li { animation: rise .55s var(--ease-out) both; anima
 }
 @media (prefers-reduced-motion: reduce) {
   .landing { transition: none; }
-  .l-orbita, .l-clase > span, .l-runa, .l-nucleo, .l-head h1 span { animation: none !important; }
+  .l-orbita, .l-clase > span, .l-runa, .l-nucleo, .l-nucleo::after, .l-head h1 span { animation: none !important; }
   .l-rayo { transition: none; }
 }
 @media print { .l-rueda { display: none; } }

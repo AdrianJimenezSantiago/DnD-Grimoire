@@ -33,7 +33,8 @@ export function dadosDe(r, modo = 'normal', cls = '') {
 
 const MARCAS = Array.from({ length: 36 }, (_, i) => `<line x1="70" y1="3" x2="70" y2="${i % 3 ? 7 : 10}" transform="rotate(${i * 10} 70 70)"/>`).join('');
 const ROMBOS = Array.from({ length: 8 }, (_, i) => `<rect x="67.5" y="13.5" width="5" height="5" transform="rotate(${i * 45} 70 70) rotate(45 70 16)"/>`).join('');
-export const ANILLO = `<svg class="dd-anillo" viewBox="0 0 140 140" aria-hidden="true"><circle class="a1" cx="70" cy="70" r="66" pathLength="100"/><g class="a-marcas">${MARCAS}</g><g class="a-rombos">${ROMBOS}</g><circle class="a2" cx="70" cy="70" r="54"/><circle class="a3" cx="70" cy="70" r="46" pathLength="100"/></svg>`;
+// Cada anillo que gira es un <svg> propio: así la GPU lo rota sin repintar el sello en cada fotograma.
+export const ANILLO = `<span class="dd-anillo" aria-hidden="true"><svg viewBox="0 0 140 140"><circle class="a1" cx="70" cy="70" r="66" pathLength="100"/><circle class="a3" cx="70" cy="70" r="46" pathLength="100"/></svg><svg class="gira-marcas" viewBox="0 0 140 140"><g class="a-marcas">${MARCAS}</g></svg><svg class="gira-rombos" viewBox="0 0 140 140"><g class="a-rombos">${ROMBOS}</g></svg><svg class="gira-a2" viewBox="0 0 140 140"><circle class="a2" cx="70" cy="70" r="54"/></svg></span>`;
 export const GRIETA = '<svg class="dd-grieta" viewBox="0 0 140 140" aria-hidden="true"><path d="M46 14 60 46 51 64 75 80 67 104 82 128" pathLength="1"/><path d="M60 46 38 54M75 80 99 88M67 104 52 112" pathLength="1"/></svg>';
 // Sello con el total: rayos para el 20 natural, grieta para el 1, y un icono opcional encima.
 export const sello = (total, { n = null, ico = '' } = {}) => `<div class="dd-sello">${n === 20 ? '<i class="dd-rayos" aria-hidden="true"></i>' : ''}${ANILLO}${ico ? `<span class="dd-ico" aria-hidden="true">${ico}</span>` : ''}<span class="dd-num" aria-hidden="true">${total}</span>${n === 1 ? GRIETA : ''}</div>`;

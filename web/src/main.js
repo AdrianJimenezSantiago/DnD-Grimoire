@@ -36,10 +36,9 @@ import { libros } from './domain/catalogo.js';
 import { storage, setBars, onAppEvents } from './platform/native.js';
 import { renderBar, renderSheet } from './ui/sheet.js';
 import * as eventos from './app/eventos.js';
-import * as personajes from './ui/dialogs/personajes.js';
+import * as asistentes from './app/asistentes.js';
 import * as buscador from './ui/dialogs/buscador.js';
 import * as conjuro from './ui/dialogs/conjuro.js';
-import * as nivel from './ui/dialogs/nivel.js';
 import * as rasgos from './ui/dialogs/rasgos.js';
 import * as historial from './ui/dialogs/historial.js';
 import * as copia from './ui/dialogs/copia.js';
@@ -82,9 +81,9 @@ async function boot() {
   S.subscribe(() => { renderBar(S); renderSheet(S); });
 
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
-  personajes.init(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
+  asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); nivel.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
+  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
   const app = await eventos.init(S);
 
   const TOUR_INICIO = [
@@ -136,7 +135,7 @@ async function boot() {
   };
   landing.init(S, {
     pruebasAuto: PRUEBAS,
-    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? personajes.openCharForm(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.openCharForm(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
@@ -163,6 +162,7 @@ async function boot() {
     if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();
     if (ok && linkCatalog(S.db)) S.save();
     S.emit('srd');
+    idle(asistentes.precargar);
   });
 }
 boot();

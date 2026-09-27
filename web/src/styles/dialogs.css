@@ -108,7 +108,7 @@ dialog.tall { width: min(760px, 96vw); }
 .steps i.done::after, .steps i.now::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--gold), var(--gold-2)); transform-origin: left; animation: grow .4s var(--ease-out) both; }
 .chooser + .chooser { border-top: 1px solid var(--line-soft); padding-top: 14px; }
 .ch-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; font: 400 var(--fs-m) / 1.45 var(--sans); margin-bottom: 10px; }
-.ch-count { white-space: nowrap; font: 700 var(--fs-s) / 1 var(--sans); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 6px 12px; transition: all var(--t-med) var(--spring); }
+.ch-count { white-space: nowrap; font: 700 var(--fs-s) / 1 var(--sans); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 6px 12px; transition: background var(--t-med), border-color var(--t-med), color var(--t-med), transform var(--t-med) var(--spring); }
 .ch-count.ok { background: linear-gradient(180deg, var(--gold-2), var(--gold)); border-color: transparent; color: var(--on-gold); transform: scale(1.06); }
 .radios { display: flex; flex-direction: column; gap: 10px; }
 .radios .frow { margin: 0 0 6px 32px; }

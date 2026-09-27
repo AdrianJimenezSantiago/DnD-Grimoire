@@ -11,7 +11,7 @@ import { ascend } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { previewSpell } from './conjuro.js';
-import { tarjetasSubclase, campoClase } from '../subclases.js';
+import { tarjetasSubclase, campoClase, initSubclases } from '../subclases.js';
 import { gi } from '../tema.js';
 import { aumentoDeDote, faltaRequisito } from '../../domain/origen.js';
 import { NIVEL_ESTILO, ALTERNATIVAS, opcionesEstilo, estilosDe, esAlternativa } from '../../domain/estilos.js';
@@ -257,7 +257,7 @@ function apply() {
 }
 
 export function init(store) {
-  S = store;
+  S = store; initSubclases();
   const body = $('#lvBody');
   on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(draft(), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
   body.addEventListener('input', ev => {

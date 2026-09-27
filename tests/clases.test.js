@@ -9,7 +9,7 @@ import { blankChar } from '../web/src/domain/modelo.js';
 import { combinaciones, sembrarPruebas, statsPrueba, NIVEL_PRUEBA } from '../web/src/domain/pruebas.js';
 
 const { conjuros } = JSON.parse(fs.readFileSync(new URL('../web/public/data/compendio.json', import.meta.url)));
-const GI = fs.readFileSync(new URL('../web/src/ui/gameIcons.js', import.meta.url), 'utf8');
+const GI = JSON.stringify((await import('../web/src/ui/gameIcons.js')).GI);
 const ESCENAS = fs.readFileSync(new URL('../web/src/ui/fondo.js', import.meta.url), 'utf8');
 const ch = (clase, subclase = '', nivel = 8, stats = {}) => blankChar({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
 
