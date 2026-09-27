@@ -1,8 +1,8 @@
-import { esc, norm, numLibre } from '../core/util.js';
-import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf } from '../domain/reglas2024.js';
+import { esc, joinY, norm, numLibre } from '../core/util.js';
+import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf, clasesDe } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
 import { schoolKey, prepCount } from '../ui/sheet.js';
-import { hasShortRest } from '../domain/rasgos.js';
+import { hasShortRest, reglas, usosGastados, recState } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems } from '../domain/catalogo.js';
 import { $, on } from '../ui/dom.js';
@@ -43,6 +43,9 @@ import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEco
 import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { statsEfectivos, bonoPruebasObjetos } from '../domain/objetosEfecto.js';
+import { opcionesAlImpactar, gastarAlImpactar } from '../domain/alImpactar.js';
+import { maniobrasDe, dadoSupremacia } from '../domain/maniobras.js';
+import { preguntarAlImpactar } from '../ui/alImpactar.js';
 import { equipoDe, ataqueArma, armaCombate, armasCombate } from '../domain/equipo.js';
 import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../domain/efectos.js';
 import { pasarRonda, vidaDe, ponerEfecto } from '../domain/vida.js';
@@ -296,12 +299,33 @@ function bindSheet() {
   on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } haptic('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); haptic('light'); });
   const arma = id => { const ch = S.cur(), o = armaCombate(ch, id); return o ? { o, a: ataqueArma(ch, o) } : null; };
-  const danoArma = (x, critico = false, aviso = '') => tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })) });
+  // Al impactar pregunta por maniobras, Castigo divino, Ataque furtivo… y gasta lo elegido (con deshacer)
+  const danoArma = async (x, critico = false, aviso = '') => {
+    const ops = opcionesAlImpactar(S.cur(), x.o); let mas = [];
+    if (ops.length) {
+      const sel = await preguntarAlImpactar(ops, { arma: x.o.nombre }); if (sel == null) return;
+      if (sel.length) {
+        const txt = sel.map(o => o.grupo === 'maniobra' ? o.nombre : o.grupo === 'castigo' ? `Castigo divino (${o.nombre.toLowerCase()})` : o.titulo);
+        const h = S.act(`${x.o.nombre}: ${txt.join(', ')}`, (db, c) => gastarAlImpactar(c, sel));
+        toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [A.undoBtn(S, h)]);
+        mas = sel.map(o => ({ fuente: o.grupo === 'maniobra' ? o.nombre : o.titulo, valor: o.dado }));
+      }
+    }
+    tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: [...efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })), ...mas] });
+  };
   const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
+  // Ataque de precisión: si conoces la maniobra y te quedan dados de supremacía, se ofrece al fallar
+  const precisionDe = ch => {
+    if (!maniobrasDe(ch).some(m => m.nombre === 'Ataque de precisión')) return null;
+    const r = reglas(ch).find(x => x.id === 'tpl:maestro.supremacia'); if (!r) return null;
+    const quedan = r.max - usosGastados(ch, r); if (quedan < 1) return null;
+    return { dado: dadoSupremacia(clasesDe(ch).find(c => c.clase === 'Guerrero').nivel), quedan,
+      fn: () => { const h = S.act('Ataque de precisión: gasta un dado de supremacía', (db, c) => { recState(c, r.id).used = (recState(c, r.id).used || 0) + 1; }); toast('Ataque de precisión: dado de supremacía gastado.', [A.undoBtn(S, h)]); } };
+  };
   const tirarAtaque = (x, eco = '') => {
     const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
     tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
-      impacto: { maestria, clave: norm(x.a.tipo || '') }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
+      impacto: { maestria, clave: norm(x.a.tipo || ''), precision: precisionDe(S.cur()) }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
   };
   on(sheet, 'click', '[data-cbataque]', (e, b) => {
     const x = arma(b.dataset.cbataque); if (!x) return;
