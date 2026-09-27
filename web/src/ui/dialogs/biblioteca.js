@@ -213,6 +213,10 @@ export function abrirResumen(clase, subclase = '') {
     pie: subclase ? `<button type="button" data-rzclase="${esc(clase)}">${gi(ico === 'subclase' ? 'libro' : TEMAS.clase[clase]?.[2] || 'libro')}Ver ${esc(clase)} completo</button>` : '', clase: 'rz' });
   const d = $('#fichaDlg'); d.style.setProperty('--sh', h); d.style.setProperty('--ss', sat + '%');
 }
+// Rasgos con dos variantes (Golpes benditos, Furia elemental): se eligen o cambian desde su ficha
+const eleccionHtml = r => !r.eleccion ? '' : `<section class="ej-eleccion ${r.eleccion.actual ? '' : 'falta'}"><p class="note">${r.eleccion.actual ? `Usas <b>${esc(r.eleccion.actual)}</b>. Puedes cambiarla si te equivocaste al elegir.` : `<b>Elige una variante de ${esc(r.eleccion.rasgo)}.</b> La app aplica la que elijas a tus ataques o trucos.`}</p>
+  <div class="lv-estilos">${r.eleccion.opciones.map(o => { const on = r.eleccion.actual === o.nombre;
+    return `<button type="button" class="lv-estilo ${on ? 'on' : ''}" data-ejvar="${esc(r.eleccion.clase)}|${esc(o.nombre)}" aria-pressed="${on}"><span class="lv-estilo-ico">${gi(o.ef === 'golpe' ? 'ca' : 'libro')}</span><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`; }).join('')}</div></section>`;
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
   const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
@@ -220,7 +224,7 @@ export function abrirRasgoJuego(clave) {
   const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
   ficha({ titulo: r.nombre, ico: r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : r.origen === 'subclase' ? 'subclase' : norm(r.clase || '').replace(/[^a-z]/g, ''),
     sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
-    cuerpo: `${grupos}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
+    cuerpo: `${grupos}${eleccionHtml(r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;
@@ -250,6 +254,11 @@ export function init(store) {
   });
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   on($('#fichaDlg'), 'click', '[data-rzclase]', (e, b) => abrirResumen(b.dataset.rzclase));
+  on($('#fichaDlg'), 'click', '[data-ejvar]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [clase, v] = b.dataset.ejvar.split('|');
+    const h = S.act(`${clase}: variante ${v}`, (db, ch) => { ch.variantes = { ...(ch.variantes || {}), [clase]: v }; });
+    abrirRasgoJuego(k); toast(`Ahora usas <b>${esc(v)}</b>.`, [undoBtn(S, h)]);
+  });
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;
     S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.grupo = { ...(ch.enJuego.grupo || {}) }; ch.enJuego.grupo[k] = g; });

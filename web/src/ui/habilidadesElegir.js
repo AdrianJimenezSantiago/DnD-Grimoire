@@ -67,3 +67,20 @@ export function preguntarHabilidades(fuentes, hab, { titulo = 'Elige tus habilid
     openSheet(d);
   });
 }
+
+// Ventana para elegir una opción con su texto (la variante de Golpes benditos, por ejemplo). Devuelve el nombre o null.
+export function preguntarOpcion({ titulo, texto = '', opciones }) {
+  if (!dlg) { dlg = document.createElement('dialog'); dlg.className = 'modal hab-modal'; dlg.setAttribute('aria-labelledby', 'habTitle'); document.body.appendChild(dlg); }
+  const d = dlg;
+  return new Promise(resolve => {
+    let hecho = false;
+    const fin = v => { if (hecho) return; hecho = true; closeSheet(d); resolve(v); };
+    d.innerHTML = `<h2 id="habTitle">${esc(titulo)}</h2>${texto ? `<p class="md-text">${esc(texto)}</p>` : ''}
+      <div class="lv-estilos">${opciones.map((o, i) => `<button type="button" class="lv-estilo" data-hop="${i}"><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`).join('')}</div>
+      <div class="md-btns" style="margin-top:14px"><button type="button" data-hfin="0">Más tarde</button></div>`;
+    d.onclick = e => { const o = e.target.closest('[data-hop]'); if (o) return fin(opciones[+o.dataset.hop].nombre); if (e.target.closest('[data-hfin]')) fin(null); };
+    d.oncancel = e => { e.preventDefault(); fin(null); };
+    d.addEventListener('close', () => fin(null), { once: true });
+    openSheet(d);
+  });
+}
