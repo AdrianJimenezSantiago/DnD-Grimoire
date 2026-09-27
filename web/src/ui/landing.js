@@ -29,12 +29,18 @@ const PASO = 4200;
 
 let giro = 1, activo = 1, hueAcum = RUEDA[1].h, fijo = null, timer = 0;
 
-function tintar({ h, s }) {
+// El tono de destino (--lnd-*) se pone solo en los bloques de la portada que no tienen paleta propia, nunca en el
+// contenedor: así cambiar de tono no recalcula los estilos de todas las tarjetas de personaje (ver portada.css).
+let tinte = {};
+function aplicarTinte() {
   const el = $('#landing'); if (!el) return;
+  for (const b of el.children) if (!b.classList.contains('l-grid')) for (const [k, x] of Object.entries(tinte)) b.style.setProperty(k, x);
+}
+function tintar({ h, s }) {
   hueAcum += ((((h - hueAcum) % 360) + 540) % 360) - 180;
   const sa = Math.max(s, 42), p = paleta({ h, s: sa });
-  const v = { '--ln-h': hueAcum.toFixed(1), '--ln-s': sa + '%', '--ln-sg': p['--acc-sg'], '--ln-k': p['--acc-k'], '--ln-gl-d': p['--gl-d'], '--ln-gl2-d': p['--gl2-d'], '--ln-gl-l': p['--gl-l'], '--ln-gl2-l': p['--gl2-l'] };
-  for (const [k, x] of Object.entries(v)) el.style.setProperty(k, x);
+  tinte = { '--lnd-h': hueAcum.toFixed(1), '--lnd-s': sa + '%', '--lnd-sg': p['--acc-sg'], '--lnd-k': p['--acc-k'], '--lnd-gl-d': p['--gl-d'], '--lnd-gl2-d': p['--gl2-d'], '--lnd-gl-l': p['--gl-l'], '--lnd-gl2-l': p['--gl2-l'] };
+  aplicarTinte();
   nexo({ h, s: sa });
 }
 function marcar(i) {
@@ -79,23 +85,23 @@ function render() {
       <span class="lc-marca" aria-hidden="true">${gi(t.icono)}</span>
       ${caido ? `<span class="lc-caido">${gi('muerte')}Caído</span>` : c.id === ult ? '<span class="lc-cont">Continuar</span>' : ''}</button>`;
   };
-  const pilares = `<ul class="l-pilares" aria-label="Qué hay dentro">${PILARES.map(([ico, t, d], k) => {
+  const pilares = `<ul class="l-pilares paleta-local" aria-label="Qué hay dentro">${PILARES.map(([ico, t, d], k) => {
     const c = RUEDA[(k * 2 + 1) % RUEDA.length];
     return `<li class="paleta-local" style="${estiloPaleta({ h: c.h, s: Math.max(c.s, 50) })};--i:${k}"><span class="lp-ico">${gi(ico)}</span><b>${t}</b><small>${d}</small></li>`;
   }).join('')}</ul>`;
-  patch($('#landing'), `<header class="l-head ${hayLista ? 'compacta' : ''}">
+  const nuevo = patch($('#landing'), `<div class="l-cielo" aria-hidden="true"></div><header class="l-head paleta-local ${hayLista ? 'compacta' : ''}">
       ${rueda()}
       <h1><span>Grimorio</span></h1>
       <p class="l-lema">Tu compañero de mesa para D&amp;D 2024</p>
     </header>
-    ${propios.length ? `<h2 class="l-h2">Elige personaje</h2><div class="l-grid">${propios.map(card).join('')}</div>` : ''}
-    ${pruebas.length && verPruebas ? `<h2 class="l-h2">Clases de prueba <small>(${pruebas.length}, nivel ${pruebas[0].nivel})</small></h2>
-      <p class="l-pruebas-nota">Un personaje por subclase, montado solo con las reglas. Sirven para revisar colores, emblemas, recursos y progresión.
+    ${propios.length ? `<h2 class="l-h2 paleta-local">Elige personaje</h2><div class="l-grid">${propios.map(card).join('')}</div>` : ''}
+    ${pruebas.length && verPruebas ? `<h2 class="l-h2 paleta-local">Clases de prueba <small>(${pruebas.length}, nivel ${pruebas[0].nivel})</small></h2>
+      <p class="l-pruebas-nota paleta-local">Un personaje por subclase, montado solo con las reglas. Sirven para revisar colores, emblemas, recursos y progresión.
         <button type="button" class="ghost" data-lcmd="pruebas">${gi('dados')}Regenerar</button><button type="button" class="ghost" data-lcmd="quitarPruebas">${icon('reset')}Quitar</button></p>
       <div class="l-grid">${pruebas.map((c, i) => card(c, propios.length + i)).join('')}</div>` : ''}
-    ${hayLista ? '' : `<div class="l-empty"><p>Hoja de personaje, libro de conjuros, combate, dados y diario de campaña. Todo en tu dispositivo, también sin conexión.</p>
+    ${hayLista ? '' : `<div class="l-empty paleta-local"><p>Hoja de personaje, libro de conjuros, combate, dados y diario de campaña. Todo en tu dispositivo, también sin conexión.</p>
       <p class="note">Toca una clase de la rueda para empezar con ella, o carga una copia si ya tienes personajes en otro sitio.</p></div>`}
-    <div class="l-actions">
+    <div class="l-actions paleta-local">
       <button type="button" class="${chars.length ? '' : 'gold'}" data-lcmd="nuevo">${icon('plus')}Nuevo personaje</button>
       <button type="button" data-lcmd="copia">${icon('save')}Cargar copia</button>
       <button type="button" data-lcmd="biblioteca">${gi('biblioteca')}Biblioteca</button>
@@ -103,8 +109,9 @@ function render() {
       ${chars.length ? `<button type="button" data-lcmd="gestionar">${icon('users')}Gestionar personajes</button>` : ''}
     </div>
     ${hayLista ? '' : pilares}
-    <footer class="l-foot"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button>
+    <footer class="l-foot paleta-local"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button>
       <button type="button" class="ghost" data-lcmd="revisarPruebas" aria-pressed="${!!(pruebas.length && verPruebas)}">${gi('dados')}${pruebas.length && verPruebas ? 'Ocultar clases de prueba' : 'Revisar clases de prueba'}</button></footer>`);
+  if (nuevo) aplicarTinte();
   requestAnimationFrame(centrar); setTimeout(centrar, 700);
 }
 export function showLanding() {

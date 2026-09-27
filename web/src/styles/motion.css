@@ -28,7 +28,10 @@
 .spell.fx-cast { background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 14%, transparent), transparent 70%); transition: background 1.2s var(--ease); }
 .prep.fx-pop { animation: diamond-pop .35s var(--spring); }
 .pdie.used::after { animation: strike .35s var(--ease-out) both; }
-.conc { animation: breathe 3.6s ease-in-out infinite; }
+/* Mismo resplandor que «breathe», pero animando la opacidad de una capa: no repinta cada fotograma. */
+.conc { position: relative; }
+.conc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 18px var(--glow); opacity: 0; animation: respira 3.6s ease-in-out infinite; }
+@keyframes respira { 50% { opacity: 1; } }
 @keyframes vista-in { from { opacity: 0; transform: translateY(6px); } }
 .dbody.fx-vista > * { animation: vista-in .26s var(--ease-out) both; }
 @keyframes senala { 0%, 100% { box-shadow: var(--shadow-1); } 25%, 60% { box-shadow: 0 0 0 3px var(--gold), 0 0 26px -4px var(--glow); } }
@@ -44,13 +47,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .astrolabe g.spin, .orb, .conc { animation: none !important; }
+  .astrolabe .spin, .orb, .conc, .conc::after { animation: none !important; }
 }
 @page { size: A4 landscape; margin: 10mm; }
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-2: #fff; --raised: #fff; --ink: #151a2d; --ink-2: #444b63; --ink-3: #6d748b; --line: #c4cad6; --line-soft: #dde1e8; --gold: #8e5f0c; --gold-soft: #f3e2b5; --glow: transparent; --shadow-1: none; }
   body { background: #fff; }
-  body::after, .appbar, .dock, .toast, dialog, .chips, .legend .howto, .astrolabe, .addrow, .fxcanvas, .menu { display: none !important; }
+  html::before, body::after, .appbar, .dock, .toast, dialog, .chips, .legend .howto, .astrolabe, .addrow, .fxcanvas, .menu { display: none !important; }
   .wrap { padding: 0; max-width: none; }
   .hero { padding-top: 0; } .hero h1 { font-size: 44px; }
   .list-head, .spell { grid-template-columns: 34px minmax(170px, 2.3fr) 1.1fr 1fr .8fr 1fr .6fr 1.5fr 1.3fr !important; grid-template-areas: none !important; column-gap: 10px; }

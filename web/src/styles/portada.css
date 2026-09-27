@@ -10,16 +10,24 @@
 @property --ln-gl2-l { syntax: '<percentage>'; inherits: false; initial-value: 42%; }
 
 .landing {
+  --ln-t: 1.6s cubic-bezier(.4, 0, .2, 1);
+  background: none; scrollbar-gutter: stable;
+}
+/* El cambio de color de la rueda anima variables que se heredan, y eso recalcula los estilos de todo lo que cuelga del
+   elemento en cada fotograma. Por eso la transición no está en .landing (arrastraría todas las tarjetas de personaje, que
+   ya tienen su propia paleta) sino en el cielo y en cada bloque de la portada salvo la rejilla de tarjetas. */
+.landing > :not(.l-grid) {
+  --ln-h: var(--lnd-h, 40); --ln-s: var(--lnd-s, 62%); --ln-sg: var(--lnd-sg, 62%); --ln-k: var(--lnd-k, .52);
+  --ln-gl-d: var(--lnd-gl-d, 66%); --ln-gl2-d: var(--lnd-gl2-d, 78%); --ln-gl-l: var(--lnd-gl-l, 32%); --ln-gl2-l: var(--lnd-gl2-l, 42%);
   --acc-h: var(--ln-h); --acc-s: var(--ln-s); --acc-sg: var(--ln-sg); --acc-k: var(--ln-k);
   --gl-d: var(--ln-gl-d); --gl2-d: var(--ln-gl2-d); --gl-l: var(--ln-gl-l); --gl2-l: var(--ln-gl2-l);
   --orla: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 55%, transparent) 18%, var(--gold) 50%, color-mix(in srgb, var(--gold) 55%, transparent) 82%, transparent);
   --gilt: linear-gradient(180deg, var(--gold-2), var(--gold) 55%, color-mix(in srgb, var(--gold) 78%, #000));
-  --ln-t: 1.6s cubic-bezier(.4, 0, .2, 1);
   transition: --ln-h var(--ln-t), --ln-s var(--ln-t), --ln-sg var(--ln-t), --ln-k var(--ln-t), --ln-gl-d var(--ln-t), --ln-gl2-d var(--ln-t), --ln-gl-l var(--ln-t), --ln-gl2-l var(--ln-t);
-  background: radial-gradient(90% 55% at 50% 0%, hsl(var(--acc-h) var(--acc-s) 50% / .12), transparent 70%);
-  scrollbar-gutter: stable;
 }
 .landing > * { position: relative; }
+.landing > .l-cielo { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(90% 55% at 50% 0%, hsl(var(--acc-h) var(--acc-s) 50% / .12), transparent 70%); }
 
 /* Cabecera */
 .l-head { --rd: min(320px, 80vw); --e: 44px; text-align: center; margin: 4px 0 18px; display: flex; flex-direction: column; align-items: center; }

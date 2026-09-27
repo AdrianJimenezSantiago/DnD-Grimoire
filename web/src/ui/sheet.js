@@ -260,8 +260,21 @@ export function renderBar(S) {
   if (h) h = `<span class="sb-slots">${h}</span>`;
   if (ch.play.conc) h += `<span class="conc">Concentrado en <strong>${esc(ch.play.conc)}</strong>${ch.play.concObj.length ? `<span class="conc-obj">sobre ${esc(ch.play.concObj.join(', '))}</span>` : `<button type="button" class="conc-add" data-cmd="objetivos">¿Sobre quién?</button>`}<button type="button" data-cmd="endconc" aria-label="Terminar concentración">Terminar</button></span>`;
   patch($('#sbar'), h);
-  const fila = $('#sbar .sb-slots'); if (fila) fila.classList.toggle('desborda', fila.scrollWidth > fila.clientWidth + 2);
-  document.documentElement.style.setProperty('--appbar-h', `${Math.round($('#appbar').getBoundingClientRect().height - (parseFloat(getComputedStyle($('#appbar')).paddingTop) || 0))}px`);
+  medirBarra();
+}
+// Las medidas de la barra se leen en el siguiente fotograma, cuando ya se ha pintado toda la hoja, y no a mitad del
+// render (eso forzaba un cálculo de estilos y de layout extra en cada acción). Solo se escribe --appbar-h si cambia,
+// porque tocar una variable de :root recalcula los estilos de todo el documento.
+let medida = 0, appbarH = '', vigilada = false;
+function medirBarra() {
+  if (!vigilada && typeof ResizeObserver === 'function') { vigilada = true; new ResizeObserver(medirBarra).observe($('#appbar')); }
+  if (medida) return;
+  medida = requestAnimationFrame(() => {
+    medida = 0;
+    const fila = $('#sbar .sb-slots'); if (fila) fila.classList.toggle('desborda', fila.scrollWidth > fila.clientWidth + 2);
+    const bar = $('#appbar'), alto = `${Math.round(bar.getBoundingClientRect().height - (parseFloat(getComputedStyle(bar).paddingTop) || 0))}px`;
+    if (alto !== appbarH) { appbarH = alto; document.documentElement.style.setProperty('--appbar-h', alto); }
+  });
 }
 
 export function renderSheet(S) {

@@ -1,33 +1,52 @@
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 export const reducedMotion = () => mq.matches;
 
-let cv = null, ctx = null, parts = [], raf = 0, dpr = 1;
+let cv = null, ctx = null, parts = [], raf = 0, dpr = 1, vw = 0, vh = 0;
 function ensure() {
   if (cv) return;
   cv = document.createElement('canvas'); cv.className = 'fxcanvas'; cv.setAttribute('aria-hidden', 'true');
   document.body.appendChild(cv); ctx = cv.getContext('2d');
-  const size = () => { dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
+  const size = () => { dpr = Math.min(1.5, window.devicePixelRatio || 1); vw = innerWidth; vh = innerHeight; cv.width = vw * dpr; cv.height = vh * dpr; };
   size(); addEventListener('resize', size);
 }
+// Cada chispa es un degradado radial; en vez de crearlo en cada fotograma para cada partícula se pinta una vez
+// por color en un lienzo pequeño y se estampa con drawImage. La transparencia de la vida va en globalAlpha.
+const sprites = new Map();
+function sprite(h, s, l) {
+  const k = `${h}|${s}|${l}`;
+  let c = sprites.get(k); if (c) return c;
+  c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, `hsla(${h},${s}%,${l + 20}%,1)`); gr.addColorStop(.35, `hsla(${h},${s}%,${l}%,.55)`); gr.addColorStop(1, `hsla(${h},${s}%,${l}%,0)`);
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  if (sprites.size > 80) sprites.clear();
+  sprites.set(k, c); return c;
+}
+const MAX_PARTS = 500;
+let prev = 0;
 export function alFrente(el) {
   if (!el?.showPopover) return;
   if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
   try { if (el.matches(':popover-open')) el.hidePopover(); el.showPopover(); } catch { /* sin top layer */ }
 }
+// Se borra con el tamaño guardado: leer innerWidth dentro del fotograma puede forzar un layout.
+// La física está pensada a 60 fps: con pantallas de 90/120 Hz o un móvil que va justo, se escala por el tiempo real
+// del fotograma para que las chispas duren y vuelen lo mismo en cualquier dispositivo.
 function loop(t) {
+  const f = prev ? Math.min(3, (t - prev) / 16.67) : 1; prev = t;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.clearRect(0, 0, vw, vh);
   ctx.globalCompositeOperation = 'lighter';
-  parts = parts.filter(p => (p.life -= 16) > 0);
+  parts = parts.filter(p => (p.life -= 16 * f) > 0);
   for (const p of parts) {
-    p.vx *= p.drag; p.vy = p.vy * p.drag + p.g; p.x += p.vx; p.y += p.vy;
-    const k = p.life / p.max, r = p.r * (0.4 + 0.6 * k);
-    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3);
-    g.addColorStop(0, `hsla(${p.h},${p.s}%,${p.l + 20}%,${k})`); g.addColorStop(.35, `hsla(${p.h},${p.s}%,${p.l}%,${k * .55})`); g.addColorStop(1, `hsla(${p.h},${p.s}%,${p.l}%,0)`);
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r * 3, 0, 6.283); ctx.fill();
+    const d = Math.pow(p.drag, f);
+    p.vx *= d; p.vy = p.vy * d + p.g * f; p.x += p.vx * f; p.y += p.vy * f;
+    const k = p.life / p.max, r = p.r * (0.4 + 0.6 * k) * 3;
+    ctx.globalAlpha = k; ctx.drawImage(p.spr, p.x - r, p.y - r, r * 2, r * 2);
   }
+  ctx.globalAlpha = 1;
   raf = parts.length ? requestAnimationFrame(loop) : 0;
-  if (!raf) ctx.clearRect(0, 0, innerWidth, innerHeight);
+  if (!raf) { ctx.clearRect(0, 0, vw, vh); prev = 0; }
 }
 function hslOf(color) {
   const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(String(color).trim());
@@ -41,11 +60,11 @@ function hslOf(color) {
 export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, spread = 1, life = 900, size = 2.2, gravity = -0.02 } = {}) {
   if (reducedMotion()) return;
   ensure(); if (document.querySelector('dialog[open]') || cv.matches?.(':popover-open')) alFrente(cv);
-  const [h, s, l] = hslOf(color);
-  for (let i = 0; i < n; i++) {
+  const [h, s, l] = hslOf(color), S = Math.round(s), L = Math.round(l);
+  for (let i = 0; i < n && parts.length < MAX_PARTS; i++) {
     const a = Math.random() * Math.PI * 2, v = (0.4 + Math.random()) * speed;
     parts.push({ x, y, vx: Math.cos(a) * v * spread, vy: Math.sin(a) * v * 0.6 - up * Math.random() * 2, drag: 0.94, g: gravity,
-      r: size * (0.6 + Math.random()), life: life * (0.6 + Math.random() * 0.4), max: life, h: h + (Math.random() * 16 - 8), s, l });
+      r: size * (0.6 + Math.random()), life: life * (0.6 + Math.random() * 0.4), max: life, spr: sprite(Math.round((h + Math.random() * 16 - 8) / 4) * 4, S, L) });
   }
   if (!raf) raf = requestAnimationFrame(loop);
 }
