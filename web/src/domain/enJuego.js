@@ -2,6 +2,7 @@ import { estiloDe, esAlternativa } from './estilos.js';
 import { norm } from '../core/util.js';
 import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
 import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
+import { maniobrasDe, cdManiobras, dadoSupremacia } from './maniobras.js';
 
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
 const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen : 'clase');
@@ -45,7 +46,7 @@ export function resumen(texto) {
 }
 
 const NUMEROS = { furia: ['Daño por furia'], 'ataque furtivo': ['Ataque furtivo'], 'artes marciales': ['Artes marciales'], 'golpe brutal': ['Golpe brutal'],
-  'maestria con armas': ['Maestría con armas'], 'inspiracion bardica': ['Dado de inspiración'], 'forma salvaje': ['Forma salvaje'], 'golpes benditos': ['Golpes benditos'],
+  'maestria con armas': ['Maestría con armas'], 'inspiracion bardica': ['Dado de inspiración'], 'forma salvaje': ['Forma salvaje'], 'golpes benditos': ['Golpes benditos'], 'furia elemental': ['Furia elemental'], 'supremacia en combate': ['Dado de supremacía'],
   'aura de proteccion': ['Aura de protección'], 'ataque adicional': ['Ataques por acción'], 'dos ataques adicionales': ['Ataques por acción'], 'tres ataques adicionales': ['Ataques por acción'],
   'movimiento sin armadura': ['Movimiento sin armadura'], 'invocaciones sobrenaturales': ['Invocaciones'], 'arcanum mistico': ['Arcanum místico'], metamagia: ['Opciones de metamagia'] };
 
@@ -87,6 +88,18 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
       const origen = c.principal ? r.origen : 'multiclase';
       const etiqueta = `Nivel ${r.nivel} · ${r.origen === 'subclase' ? c.subclase : c.clase}`;
       nuevo(clave, { nombre: r.nombre, nivel: r.nivel, origen, clase: c.clase, etiqueta }, t, numeros, recurso);
+    }
+  }
+  // Maniobras del Maestro del combate: cada una en su grupo, con el recurso de los dados de supremacía
+  const maniobras = maniobrasDe(ch);
+  if (maniobras.length) {
+    const g = clases.find(c => c.clase === 'Guerrero'), cd = cdManiobras(ch), dado = dadoSupremacia(g.nivel);
+    const recurso = recursos.find(x => x.tipo === 'recurso' && norm(x.nombre) === 'dados de supremacia') || null;
+    for (const m of maniobras) {
+      const clave = `maniobra:${norm(m.nombre)}`, texto = m.texto ? `${m.texto}\n\nDado de supremacía: ${dado}. CD de salvación: ${cd}.` : '';
+      out.push({ clave, nombre: m.nombre, nivel: 3, origen: g.principal ? 'subclase' : 'multiclase', clase: 'Guerrero', etiqueta: `Maniobra · ${g.subclase}`, fuente: 'clase',
+        auto: m.grupo, grupo: manual[clave] || m.grupo, resumen: m.texto ? resumen(m.texto) : '', texto, libro: m.texto ? 'Manual del Jugador' : '',
+        numeros: [{ nombre: 'Dado de supremacía', valor: dado }, { nombre: 'CD', valor: String(cd) }], recurso });
     }
   }
   const esp = especieDe(ch, lib), total = nivelTotal(ch);

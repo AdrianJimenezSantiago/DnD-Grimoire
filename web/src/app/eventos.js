@@ -1,7 +1,7 @@
 import { esc, norm, numLibre } from '../core/util.js';
 import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf } from '../domain/reglas2024.js';
 import { campo } from '../domain/validar.js';
-import { schoolKey } from '../ui/sheet.js';
+import { schoolKey, prepCount } from '../ui/sheet.js';
 import { hasShortRest } from '../domain/rasgos.js';
 import { REL_FIELDS, emptyDb } from '../domain/modelo.js';
 import { invalidateItems } from '../domain/catalogo.js';
@@ -348,7 +348,12 @@ function bindSheet() {
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;
     if (d.slotbtn) { const [L, i] = d.slotbtn.split(':').map(Number); return A.toggleSlot(S, L, i); }
-    if (d.prep) { const bi = +d.prep; S.edit((db, ch) => { ch.book[bi].prep = !ch.book[bi].prep; }); pop(document.querySelector(`[data-prep="${bi}"]`), 'fx-pop'); haptic(); return; }
+    if (d.prep) { const bi = +d.prep, ch0 = S.cur(), P0 = perfil(ch0);
+      // No se puede preparar más de lo que permite la clase (los «siempre preparados» no cuentan)
+      if (!ch0.book[bi].prep && P0.c && prepCount(S.db, ch0) >= P0.maxPrep) {
+        haptic('medium');
+        return toast(`Ya tienes <b>${P0.maxPrep} de ${P0.maxPrep}</b> conjuros preparados. Quita otro antes de preparar <b>${esc(S.db.catalog[ch0.book[bi].sid]?.es || 'este')}</b>.`); }
+      S.edit((db, ch) => { ch.book[bi].prep = !ch.book[bi].prep; }); pop(document.querySelector(`[data-prep="${bi}"]`), 'fx-pop'); haptic(); return; }
     if (d.used) { const bi = +d.used, x = S.cur().book[bi], s = S.db.catalog[x.sid];
       S.act(`${s.es}: uso gratis ${x.used ? 'recuperado' : 'gastado'} a mano`, (db, ch) => { ch.book[bi].used = !ch.book[bi].used; }); return; }
     if (d.flag) { if (!S.editing) return; const sid = S.cur().book[+d.bi].sid; S.edit(db => { db.catalog[sid][d.flag] = !db.catalog[sid][d.flag]; }); return; }

@@ -1,5 +1,6 @@
 import { campoElegible, ponerValor, elegirDote } from '../elecciones.js';
 import { clone, esc, joinY, norm } from '../../core/util.js';
+import { NOMBRE_HAB as HAB_NOMBRE } from '../../domain/habilidades.js';
 import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas2024.js';
 import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/progresion.js';
 import { allSpellItems, compendio, itemMeta, itemToSid, listFilter, biblioteca } from '../../domain/catalogo.js';
@@ -20,10 +21,16 @@ import { cupoEn, cupoMaestrias } from '../../domain/maestria.js';
 import { ORDENES, ordenDe } from '../../domain/ordenes.js';
 import { conjurosDeDote, filtroEleccion } from '../../domain/conjurosDote.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
+import { fuentesExtra, repartoHabilidades } from '../../domain/creacion.js';
+import { periciasDisponibles } from '../../domain/habilidades.js';
+import { fuenteHtml, periciaHtml, alternarHab, aplicarFuente, faltanDe } from '../habilidadesElegir.js';
+import { VARIANTES, varianteDe } from '../../domain/variantes.js';
+import { cupoManiobras, alternarManiobra } from '../../domain/maniobras.js';
+import { maniobrasHtml } from '../maniobras.js';
 
 let S, LV = null;
 const dlg = () => $('#lvlDlg');
-const TITLE = { orden: 'Orden de tu clase', doteConj: 'Conjuros de la dote', maestria: 'Maestría con armas', estilo: 'Estilo de combate', estiloTrucos: 'Trucos de tu estilo', clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', confirmar: 'Confirmar' };
+const TITLE = { orden: 'Orden de tu clase', doteConj: 'Conjuros de la dote', maestria: 'Maestría con armas', estilo: 'Estilo de combate', estiloTrucos: 'Trucos de tu estilo', clase: 'En qué clase subes', resumen: 'Qué ganas', subclase: 'Subclase', mejora: 'Mejora o dote', experto: 'Conjuro gratis de tu escuela', libro: 'Conjuros para el libro', preparados: 'Nuevos conjuros preparados', trucos: 'Trucos nuevos', habilidades: 'Habilidades', variante: 'Elige la variante', maniobras: 'Maniobras', confirmar: 'Confirmar' };
 const char = () => S.db.chars.find(c => c.id === LV.id);
 const objetivo = () => { const ch = char(), c = clasesDe(ch).find(x => x.clase === LV.clase); return c || { clase: LV.clase, subclase: '', nivel: 0, principal: false, nueva: true }; };
 const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return cls.cast ? clase : cls.subCast && cls.subCast.re.test(subclase || '') ? 'Mago' : ''; };
@@ -37,7 +44,7 @@ const topeDote = n => { const x = doteLib(n); return x && (x.cat === 'Don épico
 const conDetalle = (n, k) => /^resiliente$/i.test(norm(n)) && k ? `${n} (${ABIL_NAME[k]})` : n;
 // Nivel 20: Campeón primordial (bárbaro) y Cuerpo y mente (monje) suben dos características en 4, hasta 25
 const CUMBRE = { 'Bárbaro': ['fue', 'con'], 'Monje': ['des', 'sab'] };
-function draft() {
+function draft(conDote = true) {
   const d = clone(char()), o = objetivo();
   if (o.principal) { d.nivel = LV.to; d.subclase = LV.subclase; }
   else { d.multiclase = d.multiclase || []; const m = d.multiclase.find(x => x.clase === o.clase); if (m) Object.assign(m, { nivel: LV.to, subclase: LV.subclase }); else d.multiclase.push({ clase: o.clase, subclase: LV.subclase, nivel: LV.to }); }
@@ -51,7 +58,28 @@ function draft() {
   if (LV.orden) d.ordenes = { ...(d.ordenes || {}), [o.clase]: LV.orden };
   const e = LV.estilo || {};
   if (e.nuevo) d.dotes = [...(d.dotes || []).filter(x => x !== e.quitar), e.nuevo];
+  // La dote elegida ya cuenta para lo que dé (Habilidoso pide habilidades, por ejemplo)
+  if (conDote && (LV.steps?.includes('mejora') || esMejora(o.clase, LV.to) || LV.to === 19) && a.modo === 'dote' && a.dote) {
+    const n = conDetalle(a.dote, a.c); if (!(d.dotes || []).includes(n)) d.dotes = [...(d.dotes || []), n]; }
+  if (LV.variante) d.variantes = { ...(d.variantes || {}), [o.clase]: LV.variante };
+  if (LV.man) d.maniobras = [...LV.man];
   return d;
+}
+// Habilidades tras lo elegido en el paso de habilidades (sin las pericias)
+function habTras() {
+  let hab = { ...(char().habilidades || {}) };
+  for (const f of LV.fuentes || []) hab = aplicarFuente(hab, f, LV.habSel[f.clave] || []);
+  return hab;
+}
+function faltaHabilidades() {
+  let hab = { ...(char().habilidades || {}) };
+  for (const f of LV.fuentes) {
+    const sel = LV.habSel[f.clave] || [], n = f.herramientas || f.opcional ? 0 : faltanDe(f, hab, sel);
+    if (n) return `${f.nombre}: elige ${n} ${n === 1 ? 'habilidad' : 'habilidades'} más.`;
+    hab = aplicarFuente(hab, f, sel);
+  }
+  const posibles = Object.keys(hab).filter(k => hab[k] === 1).length, n = Math.min(LV.nPer - LV.perPend, posibles + LV.perSel.length) - LV.perSel.length;
+  return n > 0 ? `Elige ${n} ${n === 1 ? 'pericia' : 'pericias'} más.` : '';
 }
 function plan() {
   const ch = char(), d = draft(), A = perfil(ch), B = perfil(d), to = LV.to, o = objetivo(), cls = CLASES[o.clase] || {};
@@ -65,6 +93,24 @@ function plan() {
   // El Campeón gana otro estilo de combate a nivel 7 (Estilo de combate adicional)
   LV.estiloGana = (!!nEst && to === nEst) || (o.clase === 'Guerrero' && /campe[oó]n/i.test(LV.subclase || '') && to === 7); LV.estiloSuyos = suyos;
   if (LV.estiloGana || (nEst && to > nEst && suyos.length)) steps.push('estilo');
+  // Golpes benditos (clérigo 7) y Furia elemental (druida 7): se elige variante al ganarlos, o después si quedó sin elegir
+  const vdef = VARIANTES[o.clase]; if (vdef && to >= vdef.nivel && !varianteDe(ch, o.clase)) steps.push('variante');
+  // Maniobras del Maestro del combate: 3 a nivel 3 y 2 más a niveles 7, 10 y 15
+  if (!LV.man) LV.man = [...(ch.maniobras || [])];
+  LV.cupoMan = cupoManiobras(d);
+  if (LV.cupoMan && (LV.cupoMan > cupoManiobras(ch) || LV.man.length < LV.cupoMan)) steps.push('maniobras');
+  // Habilidades nuevas: dote (Habilidoso…), subclase (Bendiciones del conocimiento…) o multiclase, y las pericias que ganas
+  const cuenta = xs => xs.reduce((m, f) => m.set(f.nombre, (m.get(f.nombre) || 0) + 1), new Map()), antes = cuenta(fuentesExtra(ch)), vistas = new Map();
+  LV.fuentes = fuentesExtra(d).map(f => { const k = (vistas.get(f.nombre) || 0) + 1; vistas.set(f.nombre, k); return { ...f, clave: `${f.nombre}#${k}`, nueva: k > (antes.get(f.nombre) || 0) }; }).filter(f => f.nueva);
+  LV.nPer = Math.max(0, periciasDisponibles(d) - periciasDisponibles(ch) - LV.fuentes.filter(f => f.pericia).reduce((n, f) => n + f.n, 0));
+  // Lo que quedó sin elegir en niveles anteriores (por ejemplo, una subclase elegida antes de que la app lo pidiera): opcional
+  const r0 = repartoHabilidades(ch), listaPend = [...new Set(r0.extra.fuentes.filter(f => !f.fijas).flatMap(f => f.lista))];
+  if (r0.extra.faltan && listaPend.length) LV.fuentes.unshift({ nombre: 'Competencias que te faltan', n: r0.extra.faltan, lista: listaPend, clave: 'pendientes#1', opcional: true,
+    nota: `Te las dan ${joinY(r0.extra.fuentes.filter(f => !f.fijas).map(f => f.nombre))} y aún no las has marcado.` });
+  LV.perPend = r0.pericia.faltan; LV.nPer += LV.perPend;
+  for (const k of Object.keys(LV.habSel)) if (!LV.fuentes.some(f => f.clave === k)) delete LV.habSel[k];
+  { const hab = habTras(); LV.perSel = LV.perSel.filter(k => hab[k] === 1).slice(0, LV.nPer); }
+  if (LV.fuentes.length || LV.nPer) steps.push('habilidades');
   const alt = esAlternativa(LV.estilo?.nuevo || '');
   const vista = vistaClase(d, { clase: o.clase, subclase: LV.subclase, nivel: to }), sch = savantSchool(vista);
   Object.assign(LV, { A, B, d, sch,
@@ -90,13 +136,13 @@ function plan() {
 }
 export function openLevelUp() {
   const ch = S.cur(); if (!ch || nivelTotal(ch) >= 20) return;
-  LV = { orden: '', id: ch.id, i: 0, elegirClase: (ch.multiclase || []).length > 0, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' }, q: {} };
+  LV = { orden: '', id: ch.id, i: 0, elegirClase: (ch.multiclase || []).length > 0, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' }, q: {}, habSel: {}, perSel: [], variante: '', man: null };
   elegirClase(ch.clase);
   render(); openSheet(dlg());
 }
 function elegirClase(clase) {
   LV.clase = clase; const o = objetivo();
-  Object.assign(LV, { orden: '', to: o.nivel + 1, subclase: o.subclase || '', maes: null, asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' } });
+  Object.assign(LV, { orden: '', to: o.nivel + 1, subclase: o.subclase || '', maes: null, asi: { modo: o.nivel + 1 === 19 ? 'dote' : 'dos', a: '', b: '', c: '', dote: '' }, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' }, habSel: {}, perSel: [], variante: '', man: null });
 }
 function chooser(key, n, filterFn, hint) {
   const chosen = LV[key] ||= [], others = new Set(['libro', 'savant', 'prep', 'trucos', 'estTrucos', ...Object.keys(LV).filter(k => k.startsWith('dc:'))].filter(k => k !== key).flatMap(k => LV[k] || []));
@@ -173,6 +219,23 @@ function render() {
         return `<button type="button" class="lv-estilo ${on ? 'on' : ''} ${x.alternativa ? 'alt' : ''}" data-lvestilo="${esc(x.nombre)}" aria-pressed="${on}" ${bloq ? 'disabled' : ''}>
           <span class="lv-estilo-ico">${gi(x.alternativa ? 'libro' : 'ca')}</span><b>${esc(x.nombre)}${bloq ? ' <small>la tienes</small>' : ''}</b><span class="sp-text">${md(x.texto)}</span></button>`; }).join('')}</div>` : ''}`;
   }
+  if (step === 'variante') {
+    const def = VARIANTES[o.clase];
+    h = `<p class="note">${to === def.nivel ? `A nivel ${def.nivel}, ${esc(o.clase.toLowerCase())} gana ${esc(def.rasgo)}` : `Aún no has elegido cómo funciona tu ${esc(def.rasgo)}`}: elige una de sus dos variantes. La mejora de nivel ${def.mejora} sigue a la que elijas.</p>
+      <div class="lv-estilos">${def.opciones.map(x => `<button type="button" class="lv-estilo ${LV.variante === x.nombre ? 'on' : ''}" data-lvvar="${esc(x.nombre)}" aria-pressed="${LV.variante === x.nombre}">
+        <span class="lv-estilo-ico">${gi(x.ef === 'golpe' ? 'ca' : 'libro')}</span><b>${esc(x.nombre)}</b><span class="sp-text">${esc(x.texto)}</span></button>`).join('')}</div>`;
+  }
+  if (step === 'maniobras') {
+    const nuevas = LV.cupoMan - (char().maniobras || []).length;
+    h = `<p class="note">${nuevas > 0 ? `Supremacía en combate: aprendes ${nuevas} ${nuevas === 1 ? 'maniobra' : 'maniobras'}${(char().maniobras || []).length ? ' más' : ''}.` : 'Elige tus maniobras.'} Cada vez que subes de nivel en guerrero también puedes cambiar una de las que conoces por otra.</p>`
+      + maniobrasHtml(LV.man, { attr: 'data-lvman', cupo: LV.cupoMan });
+  }
+  if (step === 'habilidades') {
+    let hab = { ...(ch.habilidades || {}) };
+    h = `<p class="note">Lo que ganas a este nivel te da competencias: elígelas aquí y quedan marcadas en tu ficha.</p>`
+      + LV.fuentes.map(f => { const x = fuenteHtml(f, { hab, sel: LV.habSel[f.clave] || [], attr: `data-lvhf="${esc(f.clave)}" data-lvhab` }); hab = aplicarFuente(hab, f, LV.habSel[f.clave] || []); return x; }).join('')
+      + (LV.nPer ? periciaHtml(LV.nPer, { hab, sel: LV.perSel, attr: 'data-lvper' }) : '');
+  }
   if (step === 'maestria') h = `<p class="note">${esc(o.clase)} ${to === 1 ? 'te da' : 'amplía'} la Maestría con armas: ahora dominas ${LV.cupoMaes} ${LV.cupoMaes === 1 ? 'arma' : 'armas'}. Elige ${LV.cupoMaes - LV.maes.length > 0 ? `${LV.cupoMaes - LV.maes.length} más` : 'las que quieras cambiar'}.</p>`
     + maestriasHtml(d, LV.maes, { attr: 'data-lvmaes', cupo: LV.cupoMaes, destacar: (ch.equipo?.objetos || []).filter(x => x.arma).map(x => x.nombre) });
   if (step === 'doteConj') {
@@ -199,6 +262,9 @@ function render() {
     if (LV.steps.includes('maestria')) L.push(`Maestría con armas: ${LV.maes.length ? LV.maes.join(', ') : 'sin elegir'}.`);
     if (LV.orden) L.push(`${ORDENES[o.clase].rasgo}: ${LV.orden}.`);
     if (to === 20 && CUMBRE[o.clase]) L.push(`${o.clase === 'Bárbaro' ? 'Campeón primordial' : 'Cuerpo y mente'}: ${CUMBRE[o.clase].map(k => `${ABIL_NAME[k]} ${ch.stats[k]} → ${d.stats[k]}`).join(', ')}.`);
+    if (LV.variante && LV.steps.includes('variante')) L.push(`${VARIANTES[o.clase].rasgo}: ${LV.variante}.`);
+    if (LV.steps.includes('maniobras')) L.push(`Maniobras: ${LV.man.length ? LV.man.join(', ') : 'sin elegir'}.`);
+    if (LV.steps.includes('habilidades')) { const nuevas = nuevasHabilidades(); if (nuevas) L.push(nuevas); }
     if (LV.estilo.nuevo) L.push(`Estilo de combate: ${LV.estilo.quitar ? `${LV.estilo.quitar} → ` : ''}${LV.estilo.nuevo}.`);
     if (LV.estTrucos.length) L.push(`Trucos de ${LV.estilo.nuevo}: ${names('estTrucos').join(', ')}.`);
     if (LV.libro.length) L.push(`Al libro: ${names('libro').join(', ')}.`);
@@ -216,6 +282,19 @@ function render() {
   $('#lvBody').innerHTML = h;
   $('#lvBack').hidden = LV.i === 0;
   $('#lvNext').textContent = LV.i === LV.steps.length - 1 ? `Subir a nivel ${total + 1}` : 'Siguiente';
+}
+function habilidadesFinales() {
+  const hab = habTras();
+  for (const k of LV.perSel) if (hab[k] === 1) hab[k] = 2;
+  return hab;
+}
+function nuevasHabilidades() {
+  const antes = char().habilidades || {}, hab = habilidadesFinales();
+  const comp = Object.keys(hab).filter(k => hab[k] >= 1 && !(antes[k] >= 1)), per = Object.keys(hab).filter(k => hab[k] === 2 && antes[k] !== 2);
+  const n = k => HAB_NOMBRE[k] || k, bits = [];
+  if (comp.length) bits.push(`competencia en ${joinY(comp.map(n))}`);
+  if (per.length) bits.push(`pericia en ${joinY(per.map(n))}`);
+  return bits.length ? `Habilidades: ${bits.join('; ')}.` : '';
 }
 function apply() {
   const ch = char(), d = draft(), to = LV.to, o = objetivo(), notes = [], total = nivelTotal(ch) + 1;
@@ -246,6 +325,9 @@ function apply() {
     const dote = LV.asi.dote && conDetalle(LV.asi.dote, LV.asi.c);
     if (LV.steps.includes('mejora') && LV.asi.modo === 'dote' && dote && !(c.dotes || []).includes(dote)) c.dotes = [...(c.dotes || []), dote];
     if (LV.orden) c.ordenes = d.ordenes;
+    if (LV.variante && LV.steps.includes('variante')) { c.variantes = { ...(c.variantes || {}), [o.clase]: LV.variante }; notes.push(`${VARIANTES[o.clase].rasgo}: ${LV.variante}`); }
+    if (LV.steps.includes('maniobras')) { c.maniobras = [...LV.man]; if (LV.man.length) notes.push(`maniobras ${LV.man.join(', ')}`); }
+    if (LV.steps.includes('habilidades')) { const txt = nuevasHabilidades(); c.habilidades = habilidadesFinales(); if (txt) notes.push(txt.replace(/\.$/, '').replace(/^./, x => x.toLowerCase())); }
     if (to === 20 && CUMBRE[o.clase]) notes.push(o.clase === 'Bárbaro' ? 'Campeón primordial (+4 Fuerza y Constitución)' : 'Cuerpo y mente (+4 Destreza y Sabiduría)');
     const auto = anadirPendientes(db, c, conjurosPendientes(db, c, compendio()));
     if (auto.length) notes.push(`siempre preparados ${auto.join(', ')}`);
@@ -259,7 +341,7 @@ function apply() {
 export function init(store) {
   S = store; initSubclases();
   const body = $('#lvBody');
-  on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(draft(), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
+  on(body, 'click', '[data-elegir="dote"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirDote(draft(false), { titulo: LV.to === 19 ? 'Don épico u otra dote' : 'Elegir dote', grupoInicial: LV.to === 19 ? 'Dones épicos' : 'Dotes generales', excluirOrigen: false }); if (v != null) ponerValor(inp, v); });
   body.addEventListener('input', ev => {
     const t = ev.target;
     if (t.dataset.chq) { LV.q[t.dataset.chq] = t.value; const pos = t.selectionStart; render(); const n = body.querySelector(`[data-chq="${t.dataset.chq}"]`); n?.focus(); n?.setSelectionRange(pos, pos); return; }
@@ -281,6 +363,11 @@ export function init(store) {
   on(body, 'click', '[data-lvestilo]', (ev, b) => { LV.estilo.nuevo = LV.estilo.nuevo === b.dataset.lvestilo ? '' : b.dataset.lvestilo; LV.estTrucos = []; const y = body.scrollTop; render(); body.scrollTop = y; haptic(); });
   on(body, 'click', '[data-lvquitar]', (ev, b) => { LV.estilo = { nuevo: '', quitar: b.dataset.lvquitar }; LV.estTrucos = []; render(); });
   on(body, 'click', '[data-lvclase]', (ev, b) => { elegirClase(b.dataset.lvclase); render(); });
+  const repinta = () => { const y = body.scrollTop; render(); body.scrollTop = y; haptic(); };
+  on(body, 'click', '[data-lvhab]', (ev, b) => { const f = LV.fuentes.find(x => x.clave === b.dataset.lvhf); if (!f) return; LV.habSel[f.clave] = alternarHab(LV.habSel[f.clave] || [], b.dataset.lvhab, f.n); repinta(); });
+  on(body, 'click', '[data-lvper]', (ev, b) => { LV.perSel = alternarHab(LV.perSel, b.dataset.lvper, LV.nPer); repinta(); });
+  on(body, 'click', '[data-lvvar]', (ev, b) => { LV.variante = b.dataset.lvvar; repinta(); });
+  on(body, 'click', '[data-lvman]', (ev, b) => { LV.man = alternarManiobra(LV.man, b.dataset.lvman, LV.cupoMan); repinta(); });
   on(body, 'click', '[data-lvorden]', (ev, b) => { LV.orden = b.dataset.lvorden; render(); haptic(); });
   on(body, 'click', '[data-lvmulti]', () => { LV.elegirClase = true; LV.i = 0; render(); body.scrollTop = 0; });
   body.addEventListener('change', ev => { if (ev.target.id === 'lvNueva' && ev.target.value) { elegirClase(ev.target.value); render(); } });
@@ -294,6 +381,9 @@ export function init(store) {
     if (step === 'mejora' && LV.asi.modo === 'dote' && LV.asi.dote && aumentosDote(LV.asi.dote) && !LV.asi.c) { toast('Esa dote sube una característica: elige cuál.'); return; }
     if (step === 'clase' && !LV.clase) { toast('Elige la clase en la que subes.'); return; }
     if (step === 'subclase' && !LV.subclase) { toast('Elige tu subclase (o escribe la de otro manual).'); return; }
+    if (step === 'variante' && !LV.variante) { toast(`Elige una variante de ${VARIANTES[LV.o.clase].rasgo}.`); return; }
+    if (step === 'maniobras' && LV.man.length < LV.cupoMan) { const n = LV.cupoMan - LV.man.length; toast(`Elige ${n} ${n === 1 ? 'maniobra' : 'maniobras'} más.`); return; }
+    if (step === 'habilidades') { const falta = faltaHabilidades(); if (falta) { toast(falta); return; } }
     if (step === 'orden' && !LV.orden) { toast(`Elige tu ${ORDENES[LV.o.clase].rasgo.toLowerCase()}.`); return; }
     if (step === 'maestria' && LV.maes.length < LV.cupoMaes) { toast(`Elige ${LV.cupoMaes - LV.maes.length} ${LV.cupoMaes - LV.maes.length === 1 ? 'arma' : 'armas'} más para tu maestría.`); return; }
     if (step === 'estilo' && LV.estiloGana && !LV.estilo.nuevo) { toast('Elige tu estilo de combate.'); return; }

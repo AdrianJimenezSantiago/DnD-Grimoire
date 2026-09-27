@@ -1,5 +1,7 @@
 import { norm } from '../core/util.js';
 import { competencia, modOf, nivelDe } from './reglas2024.js';
+import { varianteDe } from './variantes.js';
+import { cdManiobras, dadoSupremacia } from './maniobras.js';
 
 const ASI = 'Mejora de característica', EPICO = 'Don épico', SUB = 'Rasgo de subclase';
 
@@ -218,6 +220,13 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   return out;
 }
 
+// Golpes benditos (clérigo) y Furia elemental (druida): lo que da la variante elegida
+function furiaOGolpes(ch, nombre, mejorado) {
+  const v = varianteDe(ch, ch.clase), dado = mejorado ? '2d8' : '1d8';
+  if (!v) return { nombre, valor: dado, nota: 'Elige la variante en la ficha (Dotes) o al subir de nivel' };
+  if (v.ef === 'golpe') return { nombre, valor: `${dado} ${v.tipos.replace(/^de /, '')}`, nota: `${v.nombre}: una vez por turno al impactar con un arma` };
+  return { nombre, valor: `+${modOf(ch.stats?.sab)} a trucos`, nota: `${v.nombre}: Sabiduría al daño de tus trucos` };
+}
 const byLvl = (L, pairs) => pairs.reduce((v, [from, val]) => (L >= from ? val : v), pairs[0][1]);
 export function escalas(ch) {
   const L = nivelDe(ch), info = CLASES_INFO[ch.clase]; if (!info) return [];
@@ -234,10 +243,12 @@ export function escalas(ch) {
     case 'Bardo': out.push({ nombre: 'Dado de inspiración', valor: byLvl(L, [[1, 'd6'], [5, 'd8'], [10, 'd10'], [15, 'd12']]) }); break;
     case 'Brujo': out.push({ nombre: 'Invocaciones', valor: String(byLvl(L, [[1, 1], [2, 3], [5, 5], [7, 6], [9, 7], [12, 8], [15, 9], [18, 10]])) });
       if (L >= 11) out.push({ nombre: 'Arcanum místico', valor: [6, 7, 8, 9].filter(n => L >= 2 * n - 1).map(n => `nivel ${n}`).join(', ') }); break;
-    case 'Clérigo': if (L >= 7) out.push({ nombre: 'Golpes benditos', valor: L >= 14 ? '2d8' : '1d8' }); break;
-    case 'Druida': if (L >= 2) out.push({ nombre: 'Forma salvaje', valor: `VD ${L >= 8 ? 1 : L >= 4 ? '1/2' : '1/4'}${L >= 8 ? ', vuela' : L >= 4 ? ', nada' : ''}`, nota: `Formas conocidas: ${byLvl(L, [[2, 4], [4, 6], [8, 8]])}` }); break;
+    case 'Clérigo': if (L >= 7) out.push(furiaOGolpes(ch, 'Golpes benditos', L >= 14)); break;
+    case 'Druida': if (L >= 2) out.push({ nombre: 'Forma salvaje', valor: `VD ${L >= 8 ? 1 : L >= 4 ? '1/2' : '1/4'}${L >= 8 ? ', vuela' : L >= 4 ? ', nada' : ''}`, nota: `Formas conocidas: ${byLvl(L, [[2, 4], [4, 6], [8, 8]])}` });
+      if (L >= 7) out.push(furiaOGolpes(ch, 'Furia elemental', L >= 15)); break;
     case 'Explorador': maestria(2); break;
-    case 'Guerrero': maestria(byLvl(L, [[1, 3], [4, 4], [10, 5], [16, 6]])); out.push({ nombre: 'Ataques por acción', valor: String(byLvl(L, [[1, 1], [5, 2], [11, 3], [20, 4]])) }); break;
+    case 'Guerrero': maestria(byLvl(L, [[1, 3], [4, 4], [10, 5], [16, 6]])); out.push({ nombre: 'Ataques por acción', valor: String(byLvl(L, [[1, 1], [5, 2], [11, 3], [20, 4]])) });
+      if (L >= 3 && /maestro del combate|batalla/i.test(ch.subclase || '')) out.push({ nombre: 'Dado de supremacía', valor: dadoSupremacia(L), nota: `CD de las maniobras ${cdManiobras(ch)}` }); break;
     case 'Hechicero': if (L >= 2) out.push({ nombre: 'Opciones de metamagia', valor: String(byLvl(L, [[2, 2], [10, 4], [17, 6]])) }); break;
     case 'Monje': out.push({ nombre: 'Artes marciales', valor: byLvl(L, [[1, 'd6'], [5, 'd8'], [11, 'd10'], [17, 'd12']]) });
       if (L >= 2) out.push({ nombre: 'Movimiento sin armadura', valor: '+' + byLvl(L, [[2, '3'], [6, '4,5'], [10, '6'], [14, '7,5'], [18, '9']]) + ' m' }); break;

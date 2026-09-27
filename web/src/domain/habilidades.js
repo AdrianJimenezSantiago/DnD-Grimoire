@@ -53,8 +53,10 @@ export function habilidadesTrasfondo(ch) {
   return x ? habilidadesDeTexto(x.habilidades || '').slice(0, 2) : [];
 }
 const PERICIA_DOTE = { 'experto en habilidades': 1, 'don de la habilidad': 1 };
+// Bendiciones del conocimiento (clérigo del conocimiento 3): pericia en las dos habilidades que elige
+const periciaSubclase = c => (c.clase === 'Clérigo' && /conocimiento/i.test(c.subclase || '') && c.nivel >= 3 ? 2 : 0);
 export function periciasDisponibles(ch) {
-  return clasesDe(ch).reduce((n, c) => n + (PERICIAS_CLASE[c.clase] || []).filter(([L]) => c.nivel >= L).reduce((s, [, k]) => s + k, 0), 0)
+  return clasesDe(ch).reduce((n, c) => n + periciaSubclase(c) + (PERICIAS_CLASE[c.clase] || []).filter(([L]) => c.nivel >= L).reduce((s, [, k]) => s + k, 0), 0)
     + dotesDe(ch).reduce((n, d) => n + (PERICIA_DOTE[norm(d.nombre)] || 0), 0);
 }
 

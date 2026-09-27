@@ -3,6 +3,7 @@ import { modOf, clasesDe, perfil, dotesDe, competencia, nivelTotal } from './reg
 import { competenteConArma, esMarcial as esMarcialArma } from './competencias.js';
 import { tieneEstilo } from './estilos.js';
 import { tieneMaestria } from './maestria.js';
+import { golpeExtra } from './variantes.js';
 
 export const MAX_SINTONIA = 3;
 export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras y escudos', 'o_armadura'], ['equipo', 'Equipo', 'cofre'],
@@ -181,6 +182,7 @@ export function ataqueArma(ch, o) {
   // Furia: suma su daño a los ataques que usan la Fuerza
   const barb = clasesDe(ch).find(c => c.clase === 'Bárbaro'), furia = barb && efectoActivo(ch, 'furia') && mod === fue && !distancia ? DANO_FURIA(barb.nivel) : 0;
   if (furia) estilos.push(`Furia +${furia} al daño`);
+  for (const g of golpeExtra(ch)) estilos.push(`${g.nombre}: una vez por turno, +${g.dado} ${g.tipos} al impactar`);
   const notas = [];
   if (artes) notas.push(`Artes marciales (${artes})`);
   if (cancion && mod === modOf(st.int)) notas.push('Canción de la hoja: usa tu Inteligencia');

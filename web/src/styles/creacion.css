@@ -248,3 +248,9 @@
 .lv-estilo:disabled { opacity: .5; }
 .cb-estilo { color: var(--ok); }
 .dote-chip.estilo { border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
+/* Elegir habilidades (dotes, subclases, multiclase) y maniobras */
+dialog.modal.hab-modal { width: min(560px, 94vw); text-align: left; max-height: 88vh; overflow-y: auto; }
+.hab-modal h2 { text-align: center; margin: 0 0 12px; }
+.cc-pill small { font-size: .85em; opacity: .7; margin-left: 4px; }
+.cc-pill:disabled { opacity: .45; }
+.man-grid .lv-estilo b small { margin-left: 6px; }

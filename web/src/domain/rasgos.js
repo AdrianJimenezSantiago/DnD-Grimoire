@@ -1,5 +1,6 @@
 import { clamp, norm } from '../core/util.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from './reglas2024.js';
+import { cdManiobras } from './maniobras.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
@@ -111,7 +112,7 @@ export function plantillas(ch) {
       if (L >= 2) R('guerrero.oleada', { tipo: 'recurso', nombre: 'Acción súbita', max: L >= 17 ? 2 : 1, recarga: 'corto', nota: 'Solo una vez por turno.' });
       if (L >= 9) R('guerrero.indomito', { tipo: 'recurso', nombre: 'Indómito', max: byLvl(L, [[9, 1], [13, 2], [17, 3]]) });
       if (has(/maestro del combate|batalla/i) && L >= 7) uno('maestro.conoce', 'Conoce a tu enemigo', 'Acción adicional: sabes las inmunidades, resistencias y vulnerabilidades de una criatura a 9 m. También puedes recuperarlo gastando un dado de supremacía.');
-      if (has(/maestro del combate|batalla/i) && L >= 3) R('maestro.supremacia', { tipo: 'recurso', nombre: 'Dados de supremacía', max: byLvl(L, [[3, 4], [7, 5], [15, 6]]), recarga: 'corto', nota: `Dado: ${L >= 18 ? 'd12' : L >= 10 ? 'd10' : 'd8'}.` });
+      if (has(/maestro del combate|batalla/i) && L >= 3) R('maestro.supremacia', { tipo: 'recurso', nombre: 'Dados de supremacía', max: byLvl(L, [[3, 4], [7, 5], [15, 6]]), recarga: 'corto', nota: `Dado: ${L >= 18 ? 'd12' : L >= 10 ? 'd10' : 'd8'}. CD de las maniobras: ${cdManiobras(ch)}.${(ch.maniobras || []).length ? ` Maniobras: ${ch.maniobras.join(', ')}.` : ''}` });
       if (has(/psi[óo]nic/i)) {
         if (L >= 3) R('psionico.dados', { tipo: 'recurso', nombre: 'Dados de energía psiónica', ...dadosPsionicos(L), recarga: 'corto1' });
         if (L >= 7) uno('psionico.salto', 'Adepto telequinético (salto psiónico)', 'Velocidad volando doble hasta el final del turno. También puedes restablecerlo gastando un dado de energía psiónica.', 'corto');

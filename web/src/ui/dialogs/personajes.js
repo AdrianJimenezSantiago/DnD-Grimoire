@@ -36,9 +36,14 @@ import { ORDENES, ordenesPendientes } from '../../domain/ordenes.js';
 import { dotesConConjuros, filtroEleccion } from '../../domain/conjurosDote.js';
 import { cupoMaestrias } from '../../domain/maestria.js';
 import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
+import { fuentesExtra } from '../../domain/creacion.js';
+import { preguntarHabilidades, aplicarFuente, faltanDe } from '../habilidadesElegir.js';
+import { VARIANTES, variantesPendientes } from '../../domain/variantes.js';
+import { cupoManiobras, alternarManiobra } from '../../domain/maniobras.js';
+import { maniobrasHtml } from '../maniobras.js';
 
 let S, onCreated;
-let MC = [], DOTES = [], HAB = {}, SALV = [], ORD = {};
+let MC = [], DOTES = [], HAB = {}, SALV = [], ORD = {}, VAR = {}, MAN = [], FVISTAS = new Set();
 const charsDlg = () => $('#charsDlg'), charDlg = () => $('#charDlg');
 
 export function openCharacter(id) {
@@ -156,10 +161,11 @@ export function openCharForm(id, { clase = '' } = {}) {
       <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
   MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; ORD = { ...(c.ordenes || {}) }; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
+  VAR = { ...(c.variantes || {}) }; MAN = [...(c.maniobras || [])];
   MAES = [...(c.maestrias || [])]; ELEC = {}; EQ = { clase: 'A', trasfondo: 'A', oro: null }; HERR = [...(c.herramientas || [])]; IDI = (c.idiomas || []).filter(x => norm(x) !== 'comun'); CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; CQ = {};
   $('#f_trasfondo').dataset.antes = c.trasfondo || ''; $('#f_trasfondo').dataset.sync = c.trasfondo || ''; $('#f_especie').dataset.sync = c.especie || '';
   pintarMulticlase(); irA(0, true);
-  sync(true);
+  sync(true); FVISTAS = new Set(fuentesConClave(readForm()).map(f => f.clave));
   if (!id && CLASES[clase]) cambiarClase(clase);
   openSheet(charDlg());
 }
@@ -194,6 +200,8 @@ function pendientes(d) {
   const est = estadoEstilo(d, lib().dotes); if (est.faltan) P.dotes.push(`Estilo de combate de ${joinY(est.fuentes)}.`);
   for (const k of ordenesPendientes(d, clasesDe(d).map(c => c.clase))) P.clase.push(`${k}: elige tu ${ORDENES[k].rasgo.toLowerCase()} (en Dotes).`);
   { const cupo = cupoMaestrias(d); if (MAES.length < cupo) P.clase.push(`Maestría con armas: elige ${cupo - MAES.length} ${cupo - MAES.length === 1 ? 'arma' : 'armas'}.`); }
+  { const cupo = cupoManiobras(d); if (MAN.length < cupo) P.clase.push(`Maniobras: elige ${cupo - MAN.length} ${cupo - MAN.length === 1 ? 'maniobra' : 'maniobras'} más.`); }
+  for (const k of variantesPendientes(d)) P.dotes.push(`${k}: elige la variante de ${VARIANTES[k].rasgo}.`);
   for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
   if (CREANDO) {
     if (IDI.length < 2) P.origen.push(`Elige ${2 - IDI.length} ${IDI.length === 1 ? 'idioma' : 'idiomas'} más.`);
@@ -231,6 +239,8 @@ function pintarClaseExtra(d) {
   const cupo = cupoMaestrias(d);
   if (cupo) { const lleva = CREANDO ? equipoInicial(d, { claseOpcion: EQ.clase, trasfondoOpcion: EQ.trasfondo, elecciones: ELEC }).items.map(([n]) => n) : (d.equipo?.objetos || []).filter(o => o.arma).map(o => o.nombre);
     h += maestriasHtml(d, MAES, { cupo, destacar: lleva }); }
+  const cupoMan = cupoManiobras(d);
+  if (cupoMan) h += `<h4 class="cc-sub">Maestro del combate</h4>${maniobrasHtml(MAN, { attr: 'data-man', cupo: cupoMan })}`;
   if (CREANDO && c) {
     const t = c.tirada, oro = `<button type="button" role="radio" class="cc-opcion ${EQ.clase === 'oro' ? 'on' : ''}" aria-checked="${EQ.clase === 'oro'}" data-eqclase="oro"><b>Tirar el oro</b><span>${t[0]}d${t[1]}${t[2] > 1 ? ` × ${t[2]}` : ''} po (variante de 2014)${EQ.oro ? `: <strong>${EQ.oro.total} po</strong> (${EQ.oro.dados.join(' + ')})` : ''}</span></button>`;
     h += `<h4 class="cc-sub">Equipo inicial de ${esc(d.clase)}</h4>${opcionesHtml(c.opciones, EQ.clase, 'data-eqclase', oro)}
@@ -380,7 +390,7 @@ function pintarComp(draft) {
   if (r.trasfondo.length) av.push(['ok', `<b>${esc(draft.trasfondo)}</b> te da ${esc(joinY(r.trasfondo.map(k => NOMBRE_HAB[k])))}.${r.faltanTrasfondo.length ? ' Márcalas: vienen con tu trasfondo.' : ''}`]);
   else if (!draft.trasfondo) av.push(['', `Sin trasfondo todavía: elígelo en <button type="button" class="linkish" data-irpaso="1">Origen</button> y sus dos habilidades se marcan solas.`]);
   if (r.clase.n) av.push([r.clase.faltan ? 'falta' : 'ok', r.clase.faltan ? `<b class="cc-num">${r.clase.faltan}</b> Te ${r.clase.faltan === 1 ? 'queda' : 'quedan'} ${r.clase.faltan} ${r.clase.faltan === 1 ? 'habilidad' : 'habilidades'} de <b>${esc(draft.clase)}</b> por elegir entre las resaltadas.` : `<b>${esc(draft.clase)}</b>: ${r.clase.n} de ${r.clase.n} elegidas.`]);
-  if (r.extra.n) av.push([r.extra.faltan ? 'falta' : 'ok', `${r.extra.faltan ? `<b class="cc-num">${r.extra.faltan}</b>` : ''}${r.extra.fuentes.map(f => `<b>${esc(f.nombre)}</b>: ${f.n} ${f.n === 1 ? 'habilidad' : 'habilidades'}${f.lista.length < HABILIDADES.length ? ` (${esc(f.lista.map(k => NOMBRE_HAB[k]).join(', '))})` : ' a tu elección'}.`).join(' ')}${r.extra.faltan ? ` Te ${r.extra.faltan === 1 ? 'queda' : 'quedan'} ${r.extra.faltan}.` : ''}`]);
+  if (r.extra.n) av.push([r.extra.faltan ? 'falta' : 'ok', `${r.extra.faltan ? `<b class="cc-num">${r.extra.faltan}</b>` : ''}${r.extra.fuentes.map((f, i) => `<b>${esc(f.nombre)}</b>: ${f.fijas ? `${f.lista.length === HABILIDADES.length ? 'todas' : esc(f.lista.map(k => NOMBRE_HAB[k]).join(' y '))}` : `${f.n} ${f.n === 1 ? 'habilidad' : 'habilidades'}${f.lista.length < HABILIDADES.length ? ` (${esc(f.lista.map(k => NOMBRE_HAB[k]).join(', '))})` : ' a tu elección'}`}${f.pericia ? ', con pericia' : ''}.${r.extra.faltan && !f.fijas && faltanDe(f, HAB) ? ` <button type="button" class="linkish" data-elegirhab="${i}">Elegir</button>` : ''}`).join(' ')}${r.extra.faltan ? ` Te ${r.extra.faltan === 1 ? 'queda' : 'quedan'} ${r.extra.faltan}.` : ''}`]);
   if (r.pericia.n) av.push([r.pericia.faltan ? 'falta' : r.pericia.sobran ? 'warn' : 'ok', r.pericia.faltan ? `<b class="cc-num">${r.pericia.faltan}</b> Pericia: toca otra vez ${r.pericia.faltan === 1 ? 'una habilidad' : `${r.pericia.faltan} habilidades`} en las que ya seas competente.` : `Pericias de tu clase: ${r.pericia.llevas} de ${r.pericia.n}.`]);
   else if (r.pericia.sobran) av.push(['warn', `Llevas ${r.pericia.sobran} ${r.pericia.sobran === 1 ? 'pericia' : 'pericias'} que no da tu clase a este nivel. Déjalas si vienen de una dote o rasgo.`]);
   if (r.extra.sobran) av.push(['warn', `Llevas ${r.extra.sobran} ${r.extra.sobran === 1 ? 'competencia' : 'competencias'} de más para tu clase y trasfondo. Déjalas si vienen de una dote o rasgo.`]);
@@ -400,6 +410,10 @@ function pintarDotes(d) {
   for (const c of clasesDe(d).filter(c => ORDENES[c.clase])) {
     const def = ORDENES[c.clase], sel = d.ordenes?.[c.clase];
     av.push([sel ? 'ok' : 'falta', `${sel ? '' : '<b class="cc-num">1</b> '}<b>${esc(c.clase)}</b> · ${esc(def.rasgo)}: ${def.opciones.map(o => `<button type="button" class="cc-pill ${sel === o.nombre ? 'on' : ''}" data-orden="${esc(c.clase)}|${esc(o.nombre)}" aria-pressed="${sel === o.nombre}" title="${esc(o.texto)}">${esc(o.nombre)}</button>`).join(' ')}${sel ? ` <small>${esc(def.opciones.find(o => o.nombre === sel).texto)}</small>` : ''}`]);
+  }
+  for (const c of clasesDe(d).filter(c => VARIANTES[c.clase] && c.nivel >= VARIANTES[c.clase].nivel)) {
+    const def = VARIANTES[c.clase], sel = d.variantes?.[c.clase];
+    av.push([sel ? 'ok' : 'falta', `${sel ? '' : '<b class="cc-num">1</b> '}<b>${esc(c.clase)}</b> · ${esc(def.rasgo)}: ${def.opciones.map(o => `<button type="button" class="cc-pill ${sel === o.nombre ? 'on' : ''}" data-variante="${esc(c.clase)}|${esc(o.nombre)}" aria-pressed="${sel === o.nombre}" title="${esc(o.texto)}">${esc(o.nombre)}</button>`).join(' ')}${sel ? ` <small>${esc(def.opciones.find(o => o.nombre === sel).texto)}</small>` : ''}`]);
   }
   if (versatilPendiente(d, lib().dotes)) av.push(['falta', '<b class="cc-num">1</b> <b>Humano</b> (Versátil): elige una dote de origen más. No puede repetir la de tu trasfondo.']);
   if (m.asi) av.push(['', `A nivel ${m.nivel} tu clase te ha dado ${m.asi} ${m.asi === 1 ? 'mejora' : 'mejoras'} de característica${m.epico ? ` y ${m.epico === 1 ? 'un don épico' : `${m.epico} dones épicos`}` : ''}. En cada una eliges una dote general o subir características (+2 o +1 y +1): si subiste características, súmalas en <button type="button" class="linkish" data-irpaso="2">Características</button> con «A mano».`]);
@@ -424,7 +438,7 @@ function readForm() {
   Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: (parseInt(v('#f_nivel'), 10) || 1) >= 3 ? v('#f_subclase') : '',
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
     espaciosManuales: $('#f_manual').checked, lema: $('#f_lema').value.trim(), campana: v('#f_campana'), notas: $('#f_notas').value.trim(),
-    multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], ordenes: { ...ORD }, habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
+    multiclase: MC.map(m => ({ ...m, subclase: (parseInt(m.nivel, 10) || 1) >= 3 ? m.subclase : '' })), dotes: [...DOTES], ordenes: { ...ORD }, variantes: { ...VAR }, maniobras: [...MAN], habilidades: { ...HAB }, salvacionesExtra: [...SALV] });
   base.herramientas = [...new Set([...herramientasDe(base, ELEC), ...HERR])];
   base.idiomas = ['Común', ...IDI]; base.maestrias = [...MAES];
   const pgm = parseInt($('#f_pgmax')?.value, 10); base.vida = { ...(base.vida || {}), maxManual: pgm > 0 ? pgm : null };
@@ -455,7 +469,7 @@ function slotText(P) {
   const parts = Object.keys(P.slots).map(Number).sort((a, b) => a - b).map(L => `${P.slots[L]} de nivel ${L}`);
   return parts.length ? `Espacios: ${joinY(parts)}.` : 'Sin espacios de conjuro.';
 }
-const FOCO = ['data-maes', 'data-herr', 'data-idioma', 'data-eqclase', 'data-eqtras', 'data-ccchk', 'data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
+const FOCO = ['data-maes', 'data-man', 'data-variante', 'data-herr', 'data-idioma', 'data-eqclase', 'data-eqtras', 'data-ccchk', 'data-hab', 'data-swap', 'data-pm', 'data-metodo', 'data-bono', 'data-ccmodo', 'data-salv', 'data-clase', 'data-irpaso'];
 function sync(first, { sinCar = false } = {}) {
   const a = document.activeElement, attr = a && charDlg().contains(a) ? FOCO.find(k => a.hasAttribute(k)) : null, val = attr && a.getAttribute(attr);
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
@@ -495,6 +509,20 @@ function sync(first, { sinCar = false } = {}) {
   $('#f_pgmax').placeholder = String(pgMaximoCalculado({ ...draft, vida: { ...draft.vida, maxManual: null } }));
   $('#h_pgmax').textContent = `Vacío: la media de cada nivel con tu Constitución (${pgMaximoCalculado(draft)}). Escribe otro si tiras los PG al subir de nivel.`;
   if (attr && !charDlg().contains(a)) charDlg().querySelector(`[${attr}="${CSS.escape(val)}"]`)?.focus({ preventScroll: true });
+  if (!first) revisarFuentes(draft);
+}
+// Competencias que da algo recién elegido (dote Habilidoso del trasfondo, subclase, multiclase…): se preguntan al momento
+const fuentesConClave = d => { const m = new Map(); return fuentesExtra(d).map(f => { const k = (m.get(f.nombre) || 0) + 1; m.set(f.nombre, k); return { ...f, clave: `${f.nombre}#${k}` }; }); };
+function revisarFuentes(d) {
+  const nuevas = fuentesConClave(d).filter(f => !FVISTAS.has(f.clave)); if (!nuevas.length) return;
+  nuevas.forEach(f => FVISTAS.add(f.clave));
+  setTimeout(async () => {
+    const fijas = nuevas.filter(f => f.fijas), elegir = nuevas.filter(f => !f.fijas && faltanDe(f, HAB) > 0);
+    for (const f of fijas) HAB = aplicarFuente(HAB, f, []);
+    if (fijas.length) toast(`${esc(joinY(fijas.map(f => f.nombre)))}: competencias marcadas.`);
+    if (elegir.length) { const hab = await preguntarHabilidades(elegir, HAB, { titulo: elegir.length === 1 ? `${elegir[0].nombre.replace(/ \(dote\)$/, '')}: elige habilidades` : 'Elige tus habilidades' }); if (hab) HAB = hab; }
+    if (fijas.length || elegir.length) sync(false);
+  }, 0);
 }
 async function save() {
   const draft = readForm();
@@ -599,6 +627,12 @@ export function init(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-retrato]', () => openRetrato(formId));
   on(form, 'click', '[data-herr]', (e, b) => { const [id, v] = b.dataset.herr.split('|'), el = eleccionesHerramienta(readForm()).find(x => x.id === id); if (!el) return;
     const cur = ELEC[id] || []; ELEC[id] = cur.includes(v) ? cur.filter(x => x !== v) : el.n === 1 ? [v] : cur.length < el.n ? [...cur, v] : cur; sync(false); });
+  on(form, 'click', '[data-man]', (e, b) => { MAN = alternarManiobra(MAN, b.dataset.man, cupoManiobras(readForm())); sync(false); });
+  on(form, 'click', '[data-variante]', (e, b) => { const [k, v] = b.dataset.variante.split('|'); VAR = { ...VAR, [k]: VAR[k] === v ? undefined : v }; if (!VAR[k]) delete VAR[k]; sync(false); });
+  on(form, 'click', '[data-elegirhab]', async (e, b) => {
+    const f = repartoHabilidades(readForm()).extra.fuentes[+b.dataset.elegirhab]; if (!f) return;
+    const hab = await preguntarHabilidades([f], HAB, { titulo: `${f.nombre.replace(/ \(dote\)$/, '')}: elige habilidades` }); if (hab) { HAB = hab; sync(false); }
+  });
   on(form, 'click', '[data-maes]', (e, b) => { MAES = alternarMaes(MAES, b.dataset.maes, cupoMaestrias(readForm())); sync(false); });
   on(form, 'click', '[data-herrlimpia]', () => { HERR = []; sync(false); });
   on(form, 'click', '[data-idioma]', (e, b) => { const v = b.dataset.idioma; IDI = IDI.includes(v) ? IDI.filter(x => x !== v) : [...IDI, v]; sync(false); });
