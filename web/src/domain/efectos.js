@@ -62,6 +62,9 @@ export const EFECTOS = [
   { k: 'armamagica', dur: 600, conjuro: /^arma m[aá]gica$/i, nombre: 'Arma mágica', bueno: true, ico: 'cortante', texto: '+1 a las tiradas de ataque y de daño con el arma encantada (más con espacios superiores).', reglas: [R('ataque', 'plano', { valor: 1, cond: 'con el arma encantada' })] },
   { k: 'protveneno', dur: 600, conjuro: /^protecci[oó]n contra (el )?veneno$/i, nombre: 'Protección contra veneno', bueno: true, ico: 'veneno', texto: 'Resistencia al daño de veneno y ventaja en las salvaciones para no quedar envenenado.', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] },
   { k: 'vision', dur: 4800, conjuro: /^visi[oó]n en la oscuridad$/i, nombre: 'Visión en la oscuridad', bueno: true, ico: 'ojo', texto: 'Visión en la oscuridad hasta 45 m.', reglas: [] },
+  { k: 'correr', dur: 1, accion: true, nombre: 'Correr', bueno: true, ico: 'velocidad', texto: 'Movimiento extra igual a tu velocidad este turno.', velX: 2, reglas: [] },
+  { k: 'destrabarse', dur: 1, accion: true, nombre: 'Destrabarse', bueno: true, ico: 'iniciativa', texto: 'Tu movimiento no provoca ataques de oportunidad este turno.', reglas: [] },
+  { k: 'esquivar', dur: 1, accion: true, nombre: 'Esquivando', bueno: true, ico: 'ca', texto: 'Quien te ataque tiene desventaja y tus salvaciones de Destreza, ventaja, hasta tu siguiente turno.', reglas: [R('salvacion', 'ventaja', { ab: 'des' })] },
   { k: 'perdicion', dur: 10, conjuro: /^perdici[oó]n$/i, nombre: 'Perdición', bueno: false, tiraObjetivo: true, ico: 'muerte', texto: '−1d4 a tus tiradas de ataque y de salvación.', reglas: [R('ataque', 'dado', { valor: '-1d4' }), R('salvacion', 'dado', { valor: '-1d4' })] },
   { k: 'ralentizar', dur: 10, conjuro: /^ralentizar$/i, nombre: 'Ralentizar', bueno: false, ico: 'md_tiempo', texto: '−2 a la CA y a las salvaciones de Destreza, velocidad a la mitad y sin reacciones.', ca: -2, velX: 0.5, reglas: [R('salvacion', 'plano', { valor: -2, ab: 'des' })] },
   { k: 'maleficio', dur: 600, conjuro: /^maleficio$/i, nombre: 'Maleficio', bueno: false, ico: 'esc_nig', texto: 'Desventaja en las pruebas de la característica que elija quien lo lanzó.', reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' })] },
@@ -158,7 +161,9 @@ export function modsTirada(ch, { sobre, ab = '', hab = '', motivo = '' }) {
   };
   const out = [];
   for (const k of estadosActivos(ch)) for (const r of REGLAS_ESTADO[k].reglas) if (aplica(r)) out.push({ fuente: k.charAt(0).toUpperCase() + k.slice(1), mal: r.efecto !== 'ventaja', ...r });
-  for (const e of efectosDe(ch)) for (const r of e.reglas) if (aplica(r)) out.push({ fuente: e.nombre, mal: !e.bueno, ...r });
+  // Esquivar se pierde si quedas incapacitado o tu velocidad es 0
+  const sinEsquivar = () => incapacitado(ch).length > 0 || velocidadEfectiva(ch).m === 0;
+  for (const e of efectosDe(ch)) { if (e.k === 'esquivar' && sinEsquivar()) continue; for (const r of e.reglas) if (aplica(r)) out.push({ fuente: e.nombre, mal: !e.bueno, ...r }); }
   for (const p of pasivosDe(ch)) for (const r of p.reglas) if (aplica(r)) out.push({ fuente: p.nombre, mal: !p.bueno, pasivo: true, ...r });
   const ago = Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
   if (ago && sobre !== 'dano') out.push({ fuente: `Agotamiento ${ago}`, efecto: 'plano', valor: -2 * ago, mal: true });

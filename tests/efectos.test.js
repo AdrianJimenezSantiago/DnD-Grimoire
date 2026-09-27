@@ -85,3 +85,25 @@ test('objetivos: si tu nombre está entre ellos, el efecto se te aplica y se qui
   assert.equal(sincronizarYo(ch, 'conc'), 'quita');
   assert.ok(!ch.vida.efectos.some(x => x.k === 'bendicion'));
 });
+
+test('acciones de combate: gastan la parte del turno, dejan su efecto y se deshacen', async () => {
+  const { combateDe, empezarCombate, hacerAccionComun, deshacerAccionComun, siguienteTurno, accionesAdicionales } = await import('../web/src/domain/combate.js');
+  const { ponerEfecto, pasarRonda } = await import('../web/src/domain/vida.js');
+  const ch = pj(); empezarCombate(ch);
+  assert.ok(hacerAccionComun(ch, 'esquivar'));
+  ponerEfecto(ch, 'esquivar');
+  assert.equal(combateDe(ch).turno.accion, true);
+  assert.equal(resolverModo(modsTirada(ch, { sobre: 'salvacion', ab: 'des' })), 'ventaja');
+  const tumbado = pj({ estados: ['apresado'], efectos: [{ k: 'esquivar' }] });
+  assert.ok(!modsTirada(tumbado, { sobre: 'salvacion', ab: 'des' }).some(m => m.fuente === 'Esquivando'), 'con velocidad 0 no esquivas');
+  assert.ok(deshacerAccionComun(ch, 'esquivar', 'accion'));
+  assert.equal(combateDe(ch).turno.accion, false);
+  hacerAccionComun(ch, 'correr'); ponerEfecto(ch, 'correr');
+  assert.equal(velocidadEfectiva(ch).m, 18);
+  siguienteTurno(ch); pasarRonda(ch);
+  assert.deepEqual(combateDe(ch).hechas, []);
+  assert.equal(velocidadEfectiva(ch).m, 9);
+  assert.equal(hacerAccionComun(ch, 'oportunidad'), true);
+  assert.equal(combateDe(ch).turno.reaccion, true);
+  assert.deepEqual(accionesAdicionales(pj()).map(x => x.k), []);
+});
