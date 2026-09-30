@@ -15,6 +15,7 @@ import { previewSpell } from './conjuro.js';
 import { tarjetasSubclase, campoClase, initSubclases } from '../subclases.js';
 import { gi } from '../tema.js';
 import { aumentoDeDote, faltaRequisito } from '../../domain/origen.js';
+import { AUMENTO_DOTE } from '../../domain/dotesDatos.js';
 import { NIVEL_ESTILO, ALTERNATIVAS, opcionesEstilo, estilosDe, esAlternativa } from '../../domain/estilos.js';
 import { md, mdPlano } from './conjuro.js';
 import { cupoEn, cupoMaestrias } from '../../domain/maestria.js';
@@ -37,9 +38,9 @@ const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return c
 
 const cambiosHtml = xs => xs.length ? `<section class="av-sec av-cambios lv-cambios"><h3>${gi('libro')}Al subir también puedes cambiar</h3><ul class="av-lista">${xs.map(i => `<li class="av-it">${gi(i.ico, 'av-it-ico')}<span class="av-it-t"><b>${esc(i.titulo)}${i.fuente ? `<small>${esc(i.fuente)}</small>` : ''}</b><span>${esc(i.texto)}</span></span></li>`).join('')}</ul></section>` : '';
 const doteLib = n => biblioteca().dotes.find(x => norm(x.nombre) === norm(String(n || '').replace(/\s*\([^)]*\)\s*$/, '')));
-const aumentosDote = n => { const x = doteLib(n); return x ? aumentoDeDote(x.texto) : null; };
+const aumentosDote = n => { const x = doteLib(n); return (x && aumentoDeDote(x.texto)) || AUMENTO_DOTE[norm(String(n || '').replace(/\s*\([^)]*\)\s*$/, ''))] || null; };
 // Tope de la característica que sube una dote: 30 en los dones épicos, 20 en el resto
-const topeDote = n => { const x = doteLib(n); return x && (x.cat === 'Don épico' || /m[aá]ximo de 30/i.test(x.texto)) ? 30 : 20; };
+const topeDote = n => { const x = doteLib(n); return (x ? x.cat === 'Don épico' || /m[aá]ximo de 30/i.test(x.texto) : /^don /i.test(String(n || '').trim())) ? 30 : 20; };
 // Dotes cuya característica elegida cambia algo más (Resiliente da la salvación): se guardan con ella entre paréntesis
 const conDetalle = (n, k) => /^resiliente$/i.test(norm(n)) && k ? `${n} (${ABIL_NAME[k]})` : n;
 // Nivel 20: Campeón primordial (bárbaro) y Cuerpo y mente (monje) suben dos características en 4, hasta 25

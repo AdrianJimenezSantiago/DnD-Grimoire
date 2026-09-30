@@ -1,6 +1,6 @@
 import { norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
-import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe } from './reglas2024.js';
+import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe, dotesDe } from './reglas2024.js';
 import { reglas, recState, usosGastados } from './rasgos.js';
 import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital } from './vida.js';
 import { DADO_ARTES } from './equipo.js';
@@ -157,8 +157,16 @@ export function temporalesDeConjuro(nombre, L, ch = null, tirar = tirarDado) {
 }
 // Resiliencia celestial (celestial 10): al terminar un descanso corto o largo ganas nivel de brujo + Carisma PG temporales
 export function temporalesAlDescansar(ch) {
-  const c = subDe(ch, 'Brujo', /celestial/); return c && c.nivel >= 10 ? c.nivel + modOf(statsEfectivos(ch).car) : 0;
+  const c = subDe(ch, 'Brujo', /celestial/), st = statsEfectivos(ch);
+  const celestial = c && c.nivel >= 10 ? c.nivel + modOf(st.car) : 0;
+  // Líder inspirador (dote): nivel de personaje + Sabiduría o Carisma (el mayor) al terminar un descanso corto o largo
+  const lider = dotesDe(ch).some(d => norm(d.nombre) === 'lider inspirador') ? nivelTotal(ch) + Math.max(modOf(st.sab), modOf(st.car)) : 0;
+  return Math.max(celestial, lider);
 }
+// Don del recuerdo de conjuros: al gastar un espacio de nivel 1 a 4 tiras 1d4; si sale su nivel, no se gasta
+export const recuerdoDeConjuros = (ch, L, tirar = tirarDado) => (L >= 1 && L <= 4 && dotesDe(ch).some(d => norm(d.nombre) === 'don del recuerdo de conjuros') ? tirar(4) === L : false);
+// Maestro en armaduras pesadas: con armadura pesada, el daño contundente, cortante y perforante de un ataque se reduce en tu competencia
+export const reduccionArmaduraPesada = ch => (dotesDe(ch).some(d => norm(d.nombre) === 'maestro en armaduras pesadas') && (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura?.tipo === 'pesada') ? competencia(nivelTotal(ch)) : 0);
 
 // Superviviente (campeón 18), Desafiar a la muerte: un 18-20 en la salvación contra muerte cuenta como un 20
 export const rangoMuerte = ch => { const g = subDe(ch, 'Guerrero', /campeon/); return g && g.nivel >= 18 ? 18 : 20; };

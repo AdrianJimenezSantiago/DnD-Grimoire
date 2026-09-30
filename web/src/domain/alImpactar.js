@@ -1,5 +1,5 @@
 import { norm } from '../core/util.js';
-import { clasesDe, perfil } from './reglas2024.js';
+import { clasesDe, perfil, dotesDe } from './reglas2024.js';
 import { reglas, usosGastados } from './rasgos.js';
 import { maniobrasDe, dadoSupremacia, cdManiobras } from './maniobras.js';
 import { golpeExtra } from './variantes.js';
@@ -94,6 +94,9 @@ export function opcionesAlImpactar(ch, o) {
     nota: `${gig.texto} Te quedan ${usosGig} usos.` });
   if ((ch.vida?.efectos || []).some(e => e.k === 'revelacion') && una('revelacion')) { const pb = competencia(nivelTotal(ch));
     out.push({ k: 'revelacion', grupo: '', titulo: 'Revelación celestial', nombre: `+${pb} radiante o necrótico`, dado: String(pb), unaVez: true, nota: 'Una vez en cada uno de tus turnos mientras dure la transformación.' }); }
+  // Atacante a la carga: tras moverte 3 m en línea recta, +1d8 una vez en cada uno de tus turnos
+  if (cuerpo && dotesDe(ch).some(d => norm(d.nombre) === 'atacante a la carga') && una('carga'))
+    out.push({ k: 'carga', grupo: '', titulo: 'Atacante a la carga', nombre: '+1d8', dado: '1d8', unaVez: true, nota: 'Si te moviste al menos 3 m en línea recta hacia el objetivo justo antes (o empújalo 3 m en su lugar).' });
   // Conjuros en marcha que suman daño a cada impacto: Marca del cazador y Maleficio
   const conc = norm(ch.play?.conc || '');
   if (conc === 'marca del cazador') { const d = clasesDe(ch).some(x => x.clase === 'Explorador' && x.nivel >= 20) ? '1d10' : '1d6';

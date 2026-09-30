@@ -220,6 +220,9 @@ export function ataqueArma(ch, o) {
   // Furia: suma su daño a los ataques que usan la Fuerza
   const barb = clasesDe(ch).find(c => c.clase === 'Bárbaro'), furia = barb && efectoActivo(ch, 'furia') && mod === fue && !distancia ? DANO_FURIA(barb.nivel) : 0;
   if (furia) estilos.push(`Furia +${furia} al daño`);
+  // Maestro en armas pesadas: +competencia al daño con armas pesadas en la acción de Ataque
+  const pesadas = props.includes('pesada') && dotesDe(ch).some(d => norm(d.nombre) === 'maestro en armas pesadas') ? pb : 0;
+  if (pesadas) estilos.push(`Maestro en armas pesadas +${pesadas} al daño`);
   for (const g of golpeExtra(ch)) estilos.push(`${g.nombre}: una vez por turno, +${g.dado} ${g.tipos} al impactar`);
   const notas = [];
   if (artes) notas.push(`Artes marciales (${artes})`);
@@ -227,7 +230,7 @@ export function ataqueArma(ch, o) {
   if (!competente) notas.push('Sin competencia: no sumas tu bonificador');
   let dado = a.dano || '1d4';
   if (artes && MEDIA(artes) > MEDIA(dado)) dado = artes;
-  const md = mod + bono + dmg + furia;
+  const md = mod + bono + dmg + furia + pesadas;
   const plano = !/d/.test(dado), total = plano ? Math.max(0, (parseInt(dado, 10) || 0) + md) : 0;
   const expr = plano ? String(total) : `${dado}${md ? s(md) : ''}`;
   return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas,

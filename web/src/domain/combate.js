@@ -1,5 +1,5 @@
 import { norm } from '../core/util.js';
-import { clasesDe } from './reglas2024.js';
+import { clasesDe, dotesDe } from './reglas2024.js';
 
 export const ECONOMIA = [['accion', 'Acción'], ['adicional', 'Acción adicional'], ['reaccion', 'Reacción'], ['movimiento', 'Movimiento']];
 export const COMBATE0 = () => ({ activo: false, ronda: 1, iniciativa: null, iniManual: false, turno: { accion: false, adicional: false, reaccion: false, movimiento: false }, ataques: null, espacio: '', hechas: [], unaVez: [] });
@@ -86,6 +86,11 @@ export function accionesAdicionales(ch) {
   const out = [], c = Object.fromEntries(clasesDe(ch).map(x => [x.clase, x.nivel]));
   if ((c['Pícaro'] || 0) >= 2) for (const k of ['correr', 'destrabarse', 'esconderse']) out.push({ k, rasgo: 'Acción astuta' });
   if ((c['Monje'] || 0) >= 2) { out.push({ k: 'correr', rasgo: 'Paso del viento' }); out.push({ k: 'destrabarse', rasgo: 'Defensa paciente' }); }
+  // Dotes: Estudio rápido (Mente aguda), Búsqueda rápida (Observador), Artista escapista (Don de la velocidad)
+  const dotes = dotesDe(ch).map(d => norm(d.nombre));
+  if (dotes.includes('mente aguda')) out.push({ k: 'estudiar', rasgo: 'Mente aguda' });
+  if (dotes.includes('observador')) out.push({ k: 'buscar', rasgo: 'Observador' });
+  if (dotes.includes('don de la velocidad')) out.push({ k: 'destrabarse', rasgo: 'Don de la velocidad' });
   return out.filter((x, i) => out.findIndex(y => y.k === x.k) === i);
 }
 // Marca la acción común hecha y gasta la parte del turno que toca
