@@ -16,7 +16,7 @@ import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -69,6 +69,7 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
       if (L > s.level) msg += ` <span style="opacity:.8">(${noLeft && slotsOf(P, s.level) ? 'no quedaban de nivel ' + s.level : 'potenciado'})</span>`; }
   }
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
+  if (mode === 'slot' && /^abjur/i.test(s.escuela || '') && reglas(ch).some(r => r.id === 'tpl:abjurador.salvaguarda')) msg += ` <span class="tnote"><b>Salvaguarda arcana</b>: recupera ${2 * L} PG.</span>`;
   if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
   // Conjuros que solo pueden afectarte a ti (alcance Lanzador): se activan solos al lanzarlos
@@ -82,6 +83,8 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
     if (mode === 'free') ee.used = true;
     if (mode === 'recurso') recState(c, rec.id).used = (recState(c, rec.id).used || 0) + 1;
     if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
+    // Salvaguarda arcana (abjurador): lanzar abjuración con espacio le devuelve el doble del nivel del espacio
+    if (mode === 'slot' && /^abjur/i.test(s.escuela || '')) { const w = reglas(c).find(r => r.id === 'tpl:abjurador.salvaguarda'); if (w) { const st = recState(c, w.id); st.used = Math.max(0, Math.min(st.used || 0, w.max) - 2 * L); } }
     if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
@@ -222,6 +225,7 @@ export function longRest(S) {
     vida = descansoLargoVida(c);
     if (esHumano(c) && !vidaDe(c).inspiracion) { vidaDe(c).inspiracion = true; inspira = true; }
     c.play.used = {}; terminarConc(c.play); c.play.efectos = []; c.book.forEach(e => { e.used = false; });
+    const tmp = temporalesAlDescansar(c); if (tmp) ponerTemporales(c, tmp);
     const rec = {};
     reglas(c).forEach(r => { const st = c.play.rec?.[r.id];
       if (r.tipo === 'recurso' && st?.used) { const x = recuperarEnDescanso(r, Math.min(st.used, r.max), 'largo'); if (x.usados) rec[r.id] = { used: x.usados, dice: [] }; if (x.tirada) tiradas.push(`${r.nombre}: recupera ${x.tirada}`); } });
@@ -260,6 +264,7 @@ export function shortRest(S, openRecovery, openVida) {
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
       const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });
+    const tmp = temporalesAlDescansar(c); if (tmp && ponerTemporales(c, tmp)) bits.push(`Resiliencia celestial: ${tmp} PG temporales`);
     // Infatigable (explorador 10): el agotamiento baja un nivel al terminar un descanso corto
     const v = vidaDe(c);
     if (v.agotamiento > 0 && clasesDe(c).some(k => k.clase === 'Explorador' && k.nivel >= 10)) { v.agotamiento -= 1; bits.push('Infatigable: un nivel de agotamiento menos'); }
@@ -292,6 +297,7 @@ function alGastar(c, id) {
     ponerEfecto(c, k);
     if (k === 'furia') { const t = temporalesAlEnfurecer(c); if (t && ponerTemporales(c, t)) out.extra.push(`Vitalidad del árbol: ganas ${t} PG temporales.`); }
   }
+  out.extra.push(...alGastarRecurso(c, id));
   if (id === 'tpl:guerrero.oleada' && combateDe(c).activo) { const cb = combateDe(c); cb.turno.accion = false; cb.ataques = null; out.extra.push('Tienes una acción más este turno (no puede ser la de Magia).'); }
   const cu = curacionDeRecurso(c, id);
   if (cu?.solo) { const r = aplicarCuracion(c, cu); out.cura = { ...cu, ...r }; out.extra.push(`${cu.tipo === 'temp' ? 'Ganas' : 'Recuperas'} ${r.aplicado} ${cu.tipo === 'temp' ? 'PG temporales' : 'PG'} (${cu.expr}: ${r.total}).`); }

@@ -1,6 +1,6 @@
 import { norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
-import { clasesDe, modOf, competencia, nivelTotal } from './reglas2024.js';
+import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe } from './reglas2024.js';
 import { reglas, recState, usosGastados } from './rasgos.js';
 import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital } from './vida.js';
 import { DADO_ARTES } from './equipo.js';
@@ -52,6 +52,9 @@ export function alTirarIniciativa(ch, tirar = tirarDado) {
     recState(ch, insp.id).used = Math.max(0, insp.max - 2);
     out.push({ nombre: 'Inspiración superior', texto: 'Recuperas usos de Inspiración bárdica hasta tener 2.' });
   }
+  // Archidruida (druida 20), Forma salvaje perenne: si no te quedan usos de Forma salvaje, recuperas uno
+  const forma = regla(ch, 'tpl:druida.forma');
+  if (forma && nivelClase(ch, 'Druida') >= 20 && usosGastados(ch, forma) >= forma.max) { recState(ch, forma.id).used = forma.max - 1; out.push({ nombre: 'Archidruida', texto: 'Recuperas un uso de Forma salvaje.' }); }
   // Don del destino: se recupera al tirar iniciativa
   const destino = regla(ch, 'tpl:dote.destino');
   if (destino && usosGastados(ch, destino) > 0) { recState(ch, destino.id).used = 0; out.push({ nombre: 'Don del destino', texto: 'Vuelves a tenerlo disponible.' }); }
@@ -109,3 +112,33 @@ export function temporalesAlEnfurecer(ch) {
 }
 // Poderío indómito (bárbaro 18): en pruebas y salvaciones de Fuerza, si el total es menor que tu Fuerza, usas tu Fuerza
 export const totalMinimoFuerza = (ch, ab) => (ab === 'fue' && nivelClase(ch, 'Bárbaro') >= 18 ? parseInt(statsEfectivos(ch).fue, 10) || 0 : 0);
+
+// Efectos de gastar un uso que cambian otros contadores de la ficha. Devuelve lo que ha pasado.
+export function alGastarRecurso(ch, id) {
+  const out = [];
+  const P = perfilDe(ch);
+  // Astucia mágica (brujo 2): recuperas espacios de pacto hasta la mitad del máximo (todos con Maestro sobrenatural, 20)
+  if (id === 'tpl:brujo.astucia' && P.pact) {
+    const L = P.pact.level, usados = Math.min(ch.play.used?.[L] || 0, P.pact.n), n = Math.min(usados, nivelClase(ch, 'Brujo') >= 20 ? P.pact.n : Math.ceil(P.pact.n / 2));
+    if (n) { ch.play.used[L] = (ch.play.used[L] || 0) - n; out.push(`Recuperas ${n} ${n === 1 ? 'espacio' : 'espacios'} de pacto.`); }
+    else out.push('No tenías espacios de pacto gastados.');
+    const celestial = subDe(ch, 'Brujo', /celestial/);
+    if (celestial && celestial.nivel >= 10) { const t = celestial.nivel + modOf(statsEfectivos(ch).car); if (ponerTemporales(ch, t)) out.push(`Resiliencia celestial: ${t} PG temporales.`); }
+  }
+  // Recuperación mágica (hechicero 5): recuperas puntos de hechicería hasta la mitad de tu nivel
+  if (id === 'tpl:hechicero.recuperacion') {
+    const r = regla(ch, 'tpl:hechicero.puntos');
+    if (r) { const n = Math.min(usosGastados(ch, r), Math.floor(nivelClase(ch, 'Hechicero') / 2)); recState(ch, r.id).used = usosGastados(ch, r) - n; out.push(`Recuperas ${n} puntos de hechicería.`); }
+  }
+  // Forma salvaje (druida 2): PG temporales iguales a tu nivel de druida (el triple con Formas del círculo, luna 3)
+  if (id === 'tpl:druida.forma') {
+    const L = nivelClase(ch, 'Druida'), luna = subDe(ch, 'Druida', /luna/), t = luna && luna.nivel >= 3 ? 3 * L : L;
+    if (ponerTemporales(ch, t)) out.push(`Ganas ${t} PG temporales al transformarte.`);
+    out.push(`Dura ${Math.floor(L / 2)} ${Math.floor(L / 2) === 1 ? 'hora' : 'horas'}.${luna && luna.nivel >= 3 ? ` Tu CA es al menos ${13 + modOf(statsEfectivos(ch).sab)}.` : ''}`);
+  }
+  return out;
+}
+// Resiliencia celestial (celestial 10): al terminar un descanso corto o largo ganas nivel de brujo + Carisma PG temporales
+export function temporalesAlDescansar(ch) {
+  const c = subDe(ch, 'Brujo', /celestial/); return c && c.nivel >= 10 ? c.nivel + modOf(statsEfectivos(ch).car) : 0;
+}

@@ -17,6 +17,7 @@ import { TEMAS } from '../../domain/clases2024.js';
 import { reglasVisibles, reglas, usosGastados, recState } from '../../domain/rasgos.js';
 import { EFECTO, EFECTO_DE_RASGO } from '../../domain/efectos.js';
 import { ponerEfecto } from '../../domain/vida.js';
+import { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } from '../../domain/canjes.js';
 import { anadirPendientes, conjurosPendientes, quitarSobrantes } from '../../domain/progresion.js';
 
 let S;
@@ -234,6 +235,17 @@ const activarHtml = (ch, r) => {
   return `<section class="ej-eleccion"><p class="note">${activo ? `<b>${esc(EFECTO[a.k].nombre)}</b> está activo.` : esc(EFECTO[a.k].texto)}</p>
     <button type="button" class="gold" data-ejefecto="${esc(norm(r.nombre))}" ${activo || (rec && quedan < (a.n || 1)) ? 'disabled' : ''}>${gi('inspiracion')}Activar${esc(coste)}</button></section>`;
 };
+// Recuperar un uso gastando otra cosa (un espacio, un uso de Furia, puntos de hechicería…) y la Fuente de magia
+const canjesHtml = (ch, r) => {
+  let h = '';
+  const cs = r.recurso ? canjesDe(ch, r.recurso.id) : [];
+  if (cs.length) h += `<section class="ej-eleccion"><p class="note">Recupera un uso de <b>${esc(r.recurso.nombre)}</b>:</p><div class="ej-canjes">${cs.map(c => `<button type="button" data-ejcanje="${esc(c.k)}">${esc(c.texto)}</button>`).join(' ')}</div></section>`;
+  const fm = norm(r.nombre) === 'fuente de magia' ? fuenteDeMagia(ch) : null;
+  if (fm && (fm.aPuntos.length || fm.crear.length)) h += `<section class="ej-eleccion"><p class="note">Te quedan <b>${fm.libres}</b> puntos de hechicería.</p><div class="ej-canjes">
+    ${fm.aPuntos.map(x => `<button type="button" data-ejfm="p:${x.L}">Espacio de nivel ${x.L} → ${x.gana} ${x.gana === 1 ? 'punto' : 'puntos'}</button>`).join(' ')}
+    ${fm.crear.map(x => `<button type="button" data-ejfm="e:${x.L}">${x.coste} puntos → espacio de nivel ${x.L}</button>`).join(' ')}</div></section>`;
+  return h;
+};
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
   const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
@@ -241,7 +253,7 @@ export function abrirRasgoJuego(clave) {
   const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
   ficha({ titulo: r.nombre, ico: r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : r.origen === 'subclase' ? 'subclase' : norm(r.clase || '').replace(/[^a-z]/g, ''),
     sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
-    cuerpo: `${grupos}${eleccionHtml(r)}${activarHtml(ch, r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
+    cuerpo: `${grupos}${eleccionHtml(r)}${activarHtml(ch, r)}${canjesHtml(ch, r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;
@@ -291,6 +303,17 @@ export function init(store) {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, a = EFECTO_DE_RASGO[b.dataset.ejefecto]; if (!a) return;
     const h = S.act(`Activa ${EFECTO[a.k].nombre}`, (db, ch) => { if (a.gasta) { const st = recState(ch, a.gasta); st.used = (st.used || 0) + (a.n || 1); } ponerEfecto(ch, a.k); });
     abrirRasgoJuego(k); toast(`<b>${esc(EFECTO[a.k].nombre)}</b> activo: ${esc(EFECTO[a.k].texto)}`, [undoBtn(S, h)]);
+  });
+  on($('#fichaDlg'), 'click', '[data-ejcanje]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, ch = S.cur();
+    const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === k), c = r?.recurso && canjesDe(ch, r.recurso.id).find(x => x.k === b.dataset.ejcanje); if (!c) return;
+    const h = S.act(`${r.recurso.nombre}: recupera 1 (${c.texto.toLowerCase()})`, (db, x) => aplicarCanje(x, r.recurso.id, c));
+    abrirRasgoJuego(k); toast(`<b>${esc(r.recurso.nombre)}</b>: recuperas un uso.`, [undoBtn(S, h)]);
+  });
+  on($('#fichaDlg'), 'click', '[data-ejfm]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [t, L] = b.dataset.ejfm.split(':'); let n = 0;
+    const h = S.act(t === 'p' ? `Fuente de magia: espacio de nivel ${L} a puntos` : `Fuente de magia: crea un espacio de nivel ${L}`, (db, x) => { n = t === 'p' ? espacioAPuntos(x, +L) : puntosAEspacio(x, +L); });
+    abrirRasgoJuego(k); toast(t === 'p' ? `Ganas <b>${n}</b> puntos de hechicería.` : `Gastas <b>${n}</b> puntos: tienes un espacio de nivel ${L} más.`, [undoBtn(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;

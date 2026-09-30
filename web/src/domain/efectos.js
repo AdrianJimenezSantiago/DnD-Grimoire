@@ -68,6 +68,7 @@ export const EFECTOS = [
   { k: 'voto', dur: 10, rasgo: true, nombre: 'Voto de enemistad', bueno: true, ico: 'combate', texto: 'Ventaja en tus tiradas de ataque contra la criatura del voto durante 1 minuto.', reglas: [R('ataque', 'ventaja', { cond: 'contra la criatura del voto' })] },
   { k: 'armasagrada', dur: 100, rasgo: true, nombre: 'Arma sagrada', bueno: true, ico: 'radiante', texto: 'Sumas tu Carisma a las tiradas de ataque con el arma, que da luz y puede hacer daño radiante, durante 10 minutos.', reglas: [R('ataque', 'plano', { valorAb: 'car', cond: 'con el arma bendecida' })] },
   { k: 'atleta', dur: 600, rasgo: true, nombre: 'Atleta sin parangón', bueno: true, ico: 'velocidad', texto: 'Ventaja en Atletismo y Acrobacias, y tus saltos llegan 3 m más lejos, durante 1 hora.', reglas: [R('prueba', 'ventaja', { hab: 'atletismo' }), R('prueba', 'ventaja', { hab: 'acrobacias' })] },
+  { k: 'innata', dur: 10, nombre: 'Hechicería innata', bueno: true, ico: 'esc_evo', texto: 'Durante 1 minuto, la CD de tus conjuros de hechicero sube 1 y tienes ventaja en tus tiradas de ataque de conjuro.', reglas: [R('ataque', 'ventaja', { cond: 'solo ataques de conjuro' })] },
   { k: 'defensasup', dur: 10, rasgo: true, nombre: 'Defensa superior', bueno: true, ico: 'ca', texto: 'Resistencia a todo el daño salvo el de fuerza durante 1 minuto.', reglas: [] },
   { k: 'correr', dur: 1, accion: true, nombre: 'Correr', bueno: true, ico: 'velocidad', texto: 'Movimiento extra igual a tu velocidad este turno.', velX: 2, reglas: [] },
   { k: 'destrabarse', dur: 1, accion: true, nombre: 'Destrabarse', bueno: true, ico: 'iniciativa', texto: 'Tu movimiento no provoca ataques de oportunidad este turno.', reglas: [] },
@@ -90,7 +91,7 @@ export const EFECTOS = [
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
 // Rasgos con usos que, al gastarse, ponen un efecto sobre ti
-export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion' };
+export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion', 'tpl:hechicero.innata': 'innata' };
 // Rasgos que se activan desde «En juego» y dejan un efecto sobre ti; gasta: el uso que consumen
 export const EFECTO_DE_RASGO = {
   'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
@@ -117,6 +118,7 @@ export function pasivosDe(ch) {
   if (dotes.includes('resistente')) out.push({ nombre: 'Resistente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte' })] });
   if (clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 18)) out.push({ nombre: 'Superviviente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte', cond: 'y de 18 a 20 cuenta como un 20' })] });
   if ((ch.vida?.efectos || []).some(e => e.k === 'cancion')) out.push({ nombre: 'Canción de la hoja', reglas: [R('salvacion', 'plano', { ab: 'con', motivo: 'concentracion', valor: Math.max(1, modOf(statsEfectivos(ch).int)) })] });
+  if (clasesDe(ch).some(c => c.clase === 'Mago' && c.nivel >= 14 && /abjur/i.test(c.subclase || ''))) out.push({ nombre: 'Resistencia a conjuros', reglas: [R('salvacion', 'ventaja', { cond: 'contra conjuros' })] });
   if (especie === 'gnomo') out.push({ nombre: 'Astucia gnoma', reglas: ['int', 'sab', 'car'].map(ab => R('salvacion', 'ventaja', { ab })) });
   if (especie === 'enano') out.push({ nombre: 'Resistencia enana', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] });
   if (especie === 'mediano') out.push({ nombre: 'Valiente', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de asustado' })] });
@@ -170,6 +172,8 @@ export function inmunidadesEstado(ch) {
     if (c.clase === 'Paladín' && c.nivel >= 10 && !incap) out.set('asustado', 'Aura de coraje');
     if (c.clase === 'Paladín' && c.nivel >= 7 && /entrega|devoci/i.test(c.subclase || '') && !incap) out.set('encantado', 'Aura de entrega');
     if (c.clase === 'Bárbaro' && c.nivel >= 6 && /berserk/i.test(c.subclase || '') && efs.includes('furia')) { out.set('asustado', 'Furia irracional'); out.set('encantado', 'Furia irracional'); }
+    if (c.clase === 'Brujo' && c.nivel >= 10 && /fe[eé]ric/i.test(c.subclase || '')) out.set('encantado', 'Defensas seductoras');
+    if (c.clase === 'Druida' && c.nivel >= 10 && /tierra/i.test(c.subclase || '')) out.set('envenenado', 'Protección de la naturaleza');
   }
   if (efs.includes('heroismo')) out.set('asustado', 'Heroísmo');
   return out;
