@@ -10,7 +10,8 @@ const RE_AT = /impact|acierta|ataque|\bhit\b|attack/i;
 const RE_TURNO = /comienc|empiec|termin\w* su turno|start|begin|expuest/i;
 const RE_FALLA = /\b(?:si|cuando|en caso de que)\s+(?:la\s+|lo\s+)?(?:falla|fracasa)|con un fallo|si no la supera|on a failed save|if (?:it|the target|a creature) fails/i;
 const RE_SUPERA = /\b(?:si|cuando)\s+(?:la\s+|lo\s+)?supera|si tiene éxito|con éxito|on a successful save|if (?:it|the target|a creature) succeeds/i;
-const RE_MITAD = /mitad (?:de ese |del |de |de dicho )?daño|la mitad|half as much damage|half damage|half the damage/i;
+// «la mitad» sola no basta (Ralentizar: «su velocidad se reduce a la mitad»): tiene que hablar del daño
+const RE_MITAD = /mitad (?:de ese |del |de |de dicho )?daño|la mitad(?: de esa cantidad)?(?= si la supera| en caso de superarla)|half as much damage|half damage|half the damage/i;
 
 function frases(t) {
   const out = []; const re = /[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g; let m;
@@ -30,10 +31,11 @@ const NUM_PAL = { un: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, 
 export function analizarTiradas(desc = '', sup = '') {
   const t = arreglarOcr(desc), s = arreglarOcr(sup), F = frases(t);
   const r = { ataque: null, salvacion: null, danos: [], curacion: null, escala: null, mitad: false, falla: '', supera: '', extras: [] };
-  const at = /ataque de conjuro (a distancia|cuerpo a cuerpo)|(ranged|melee) spell attack/i.exec(t);
+  const at = /ataque de conjuro (?:(?:a|:i|;i|á) ?distancia|cuerpo a cuerpo)|(ranged|melee) spell attack/i.exec(t);
   if (at) r.ataque = /distancia|ranged/i.test(at[0]) ? 'a distancia' : 'cuerpo a cuerpo';
-  const sv = /tirada de salvación de (Fuerza|Destreza|Constitución|Inteligencia|Sabiduría|Carisma)|(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw/i.exec(t);
-  if (sv) r.salvacion = SAL[(sv[1] || sv[2]).toLowerCase()];
+  // Tolera restos del OCR («Constitucicín», «Sabidurla»): basta con el principio de la palabra
+  const sv = /tirada de salvación de (Fuerza|Destreza|Constituc\S*|Inteligenc\S*|Sabidur\S*|Carisma)|(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw/i.exec(t);
+  if (sv) r.salvacion = sv[1] ? { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' }[sv[1].slice(0, 3).toLowerCase()] : SAL[sv[2].toLowerCase()];
   r.mitad = !!r.salvacion && RE_MITAD.test(t);
   r.falla = F.filter(f => RE_FALLA.test(f.s)).map(f => f.s).join(' ');
   r.supera = F.filter(f => RE_SUPERA.test(f.s)).map(f => f.s).join(' ');
@@ -41,6 +43,8 @@ export function analizarTiradas(desc = '', sup = '') {
 
   const usados = [], vistos = new Set();
   const add = (m, n, c, b, tipo) => {
+    // «5d8 de daño de ácido, frío, fuego, relámpago o trueno»: el tipo es a elegir
+    if (m[0] && new RegExp(`^,\\s*(?:${TIPOS_ES.join('|')})`, 'i').test(t.slice(m.index + m[0].length, m.index + m[0].length + 20))) tipo = 'a elegir';
     const k = `${n}d${c}+${b}|${tipo}`; if (vistos.has(k) || r.danos.length >= 6) return; vistos.add(k);
     const fi = fraseEn(F, m.index), fr = F[fi] || { s: '', i: 0 }, prev = F[fi - 1]?.s || '';
     const enTurno = RE_TURNO.test(fr.s);
@@ -57,13 +61,13 @@ export function analizarTiradas(desc = '', sup = '') {
   for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (?:extra )?damage of (?:a|the) (?:(?:type|kind) (?:of your choice|you choose|chosen)|chosen type|spirit's type)/gi)) add(m, m[1], m[2], m[3], 'a elegir');
   for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? de daño del tipo (?:del esp[ií]ritu|elegido)/gi)) add(m, m[1], m[2], m[3], 'a elegir');
   // «2d8 de daño adicional. Este daño es de ácido, frío…» / «an extra 2d8 damage… This damage is Acid, Cold…»
-  for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (?:extra |additional )?(?:damage|de daño(?: adicional)?)\b[^.]{0,80}\.\s*(?:This damage is|Este daño es)/gi)) add(m, m[1], m[2], m[3], 'a elegir');
+  for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (?:extra |additional )?(?:damage|de daño(?: adicional)?)\b[^.]{0,80}\.\s*(?:This damage is|Este daño es|Ese daño (?:es|será))/gi)) add(m, m[1], m[2], m[3], 'a elegir');
   // «Force damage equal to 1d8 plus your spellcasting ability modifier»
   for (const m of t.matchAll(new RegExp(`\\b(${Object.keys(EN2ES).join('|')}) damage equal to (\\d+)d(\\d+)(?:\\s*\\+\\s*(\\d+))?`, 'gi'))) add({ index: m.index + m[0].search(/\d+d\d+/) }, m[2], m[3], m[4], EN2ES[m[1].toLowerCase()]);
   // «5d10 Radiant or Necrotic damage»
   for (const m of t.matchAll(new RegExp(`(\\d+)d(\\d+)(?:\\s*\\+\\s*(\\d+))? (${Object.keys(EN2ES).join('|')}) or (?:${Object.keys(EN2ES).join('|')}) damage`, 'gi'))) add(m, m[1], m[2], m[3], EN2ES[m[4].toLowerCase()]);
   // «El daño base es de 12d6»: el tipo es el primero que nombre el texto
-  { const b = /(?:base damage is|daño base es(?: de)?) (\d+)d(\d+)/i.exec(t), tp = new RegExp(`\\b(${Object.keys(EN2ES).join('|')}) damage|daño (?:de |por )?(${TIPOS_ES.join('|')})`, 'i').exec(t);
+  { const b = /(?:base damage is|daño base (?:del conjuro )?es(?: de)?) (\d+)d(\d+)/i.exec(t), tp = new RegExp(`\\b(${Object.keys(EN2ES).join('|')}) damage|daño (?:de |por )?(${TIPOS_ES.join('|')})`, 'i').exec(t);
     if (b && tp) add(b, b[1], b[2], 0, tp[1] ? EN2ES[tp[1].toLowerCase()] : tp[2].toLowerCase()); }
   for (const m of t.matchAll(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (Acid|Bludgeoning|Slashing|Cold|Fire|Force|Necrotic|Piercing|Psychic|Radiant|Lightning|Thunder|Poison) damage/gi)) add(m, m[1], m[2], m[3], EN2ES[m[4].toLowerCase()]);
   if (r.salvacion && !r.ataque && r.danos.length && !r.danos.some(d => d.via === 'salvacion') && !RE_TURNO.test(r.danos[0].frase))
@@ -95,7 +99,7 @@ export function analizarTiradas(desc = '', sup = '') {
   const tr = /aumenta en (\d+)d(\d+) cuando alcanzas los niveles|al llegar a los niveles|increases by (\d+)d(\d+) when you reach levels/i.exec(s);
   const up = /aumentan? en (\d+)d(\d+) por cada nivel(?: de espacio)? por encima de(?:l)? (\d)|increases? by (\d+)d(\d+) for (?:each|every) (?:spell )?slot level above (\d)/i.exec(s);
   const unDado = /aumenta en un dado cuando alcanzas los niveles|increases by one die when you reach/i.test(s);
-  const plano = /(\d+) (?:additional Temporary Hit Points|puntos de golpe temporales adicionales) (?:for each spell slot level above|por cada nivel de espacio por encima de(?:l)?) (\d)/i.exec(s);
+  const plano = /(\d+) (?:additional Temporary Hit Points|puntos de golpe temporales adicionales) (?:for each spell slot level above|por cada nivel(?: de espacio)? por encima de(?:l)?) (\d)/i.exec(s);
   if (unDado && r.danos.length) r.escala = { tipo: 'truco', unDado: true, n: 1, caras: 0 };
   else if (tr) r.escala = { tipo: 'truco', ...dado(tr[1] || tr[3] || 1, tr[2] || tr[4] || r.danos[0]?.caras || 6) };
   else if (up) r.escala = { tipo: 'espacio', ...dado(up[1] || up[4], up[2] || up[5]), desde: +(up[3] || up[6]) };
@@ -107,7 +111,7 @@ export function analizarTiradas(desc = '', sup = '') {
   const porNivel = new RegExp(`(?:crea )?dos ${PROY} a nivel 5, tres ${PROY} a nivel 11 y cuatro ${PROY} a nivel 17|two beams at level 5, three beams at level 11, and four beams at level 17`, 'i').test(s);
   if (porNivel) r.veces = { base: 1, truco: true };
   else if (extra) r.veces = { base: base ? NUM_PAL[base[1].toLowerCase()] : 1, desde: +(extra[2] || extra[4] || extra[6]) };
-  else if (base && r.danos.length && /cada (?:uno|dardo|rayo)|each (?:dart|ray)/i.test(t)) r.veces = { base: NUM_PAL[base[1].toLowerCase()] };
+  else if (base && r.danos.length && /cada (?:uno de (?:ellos|los (?:dardos|rayos))|dardo|rayo)\b|each (?:dart|ray)/i.test(t)) r.veces = { base: NUM_PAL[base[1].toLowerCase()] };
   return r;
 }
 // Cuántas veces se tiran los dados (rayos o dardos): por nivel de personaje en los trucos, por nivel de espacio en el resto

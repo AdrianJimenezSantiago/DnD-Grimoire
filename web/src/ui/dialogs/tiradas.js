@@ -43,7 +43,7 @@ const conSalvacion = (t, dados) => !!t?.salvacion && (dados.some(x => x.via === 
 const bonoDe = (dd, t, P, ex = null) => dd.bono + ((dd.tipo === 'curación' && t.curacion?.mod) || dd.mod ? (P.mod || 0) : 0) + (ex?.bono || 0);
 // Lo que suman tus rasgos a cada línea de dados (Lanzamiento potente, Discípulo de la vida, Alma radiante…)
 const extrasDe = (D, dados) => bonosDeConjuro(D.ch, D.s, D.ch.book[R.bi].fuente, dados, D.s.level ? R.nivel : null);
-const exprDe = (n, caras, bono) => `${n}d${caras}${bono ? sgn(bono) : ''}`;
+const exprDe = (n, caras, bono) => (n ? `${n}d${caras}${bono ? sgn(bono) : ''}` : String(bono || 0));
 const idxDe = (lista, k) => Math.max(0, lista.findIndex(m => m[0] === k));
 
 export function openRoll(bi, nivelEspacio) {
