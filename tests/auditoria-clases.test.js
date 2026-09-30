@@ -207,3 +207,71 @@ test('Aura de celeridad (gloria 7): +3 m de velocidad', () => {
   assert.equal(velocidad(ch({ clase: 'Paladín', subclase: 'Juramento de gloria', nivel: 7 })), 12);
   assert.equal(velocidad(ch({ clase: 'Paladín', subclase: 'Juramento de gloria', nivel: 6 })), 9);
 });
+
+test('lanzadores: Astucia mágica, Recuperación mágica y Forma salvaje al gastarse', async () => {
+  const { alGastarRecurso } = await import('../web/src/domain/automatismos.js');
+  const b = ch({ clase: 'Brujo', nivel: 11 }); b.play.used = { 5: 3 };
+  assert.match(alGastarRecurso(b, 'tpl:brujo.astucia')[0], /Recuperas 2 espacios/); assert.equal(b.play.used[5], 1);
+  const b20 = ch({ clase: 'Brujo', nivel: 20 }); b20.play.used = { 5: 4 }; alGastarRecurso(b20, 'tpl:brujo.astucia'); assert.equal(b20.play.used[5], 0);
+  const h = ch({ clase: 'Hechicero', nivel: 9 }); recState(h, 'tpl:hechicero.puntos').used = 9;
+  alGastarRecurso(h, 'tpl:hechicero.recuperacion'); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 5);
+  const d = ch({ clase: 'Druida', subclase: 'Círculo de la luna', nivel: 4 }); alGastarRecurso(d, 'tpl:druida.forma');
+  assert.equal(vidaDe(d).temp, 12);
+  const d2 = ch({ clase: 'Druida', nivel: 4 }); alGastarRecurso(d2, 'tpl:druida.forma'); assert.equal(vidaDe(d2).temp, 4);
+});
+test('lanzadores: Archidruida recupera Forma salvaje al tirar iniciativa si no quedan', () => {
+  const d = ch({ clase: 'Druida', nivel: 20 }); recState(d, 'tpl:druida.forma').used = 4;
+  assert.equal(alTirarIniciativa(d).find(x => x.nombre === 'Archidruida').nombre, 'Archidruida');
+  assert.equal(recState(d, 'tpl:druida.forma').used, 3);
+});
+test('lanzadores: Hechicería innata sube 1 la CD de hechicero', () => {
+  const h = ch({ clase: 'Hechicero', nivel: 3 }); const cd = perfil(h).cd;
+  ponerEfecto(h, 'innata'); assert.equal(perfil(h).cd, cd + 1);
+});
+test('bonos a conjuros: Discípulo de la vida, Alma radiante, Afinidad elemental, Evocación potenciada', async () => {
+  const { bonosDeConjuro } = await import('../web/src/domain/bonosConjuro.js');
+  const cura = [{ tipo: 'curación', n: 2, caras: 8, bono: 0 }];
+  assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 3 }), { level: 1 }, 'Clérigo', cura, 2)[0].bono, 4);
+  assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 3 }), { level: 0 }, 'Clérigo', cura)[0].bono, 0);
+  const fuego = [{ tipo: 'fuego', n: 8, caras: 6, bono: 0 }, { tipo: 'fuego', n: 1, caras: 6, bono: 0 }];
+  const al = bonosDeConjuro(ch({ clase: 'Brujo', subclase: 'Patrón celestial', nivel: 6 }), { level: 3 }, 'Brujo', fuego);
+  assert.deepEqual(al.map(x => x.bono), [2, 0], 'solo a una tirada');
+  const dr = ch({ clase: 'Hechicero', subclase: 'Hechicería dracónica', nivel: 6, opciones: { 'draconica.afinidad': 'Fuego' } });
+  assert.equal(bonosDeConjuro(dr, { level: 3 }, 'Hechicero', fuego)[0].bono, 2);
+  assert.equal(bonosDeConjuro(ch({ clase: 'Mago', subclase: 'Evocador', nivel: 10 }), { level: 3, escuela: 'Evocación' }, 'Mago', fuego)[0].bono, 1);
+});
+test('conjuros siempre preparados que faltaban: Contactar patrón, Maleficio primigenio, Rompeconjuros, Palabras de creación', () => {
+  const n = c => conjurosAutomaticos(ch(c)).map(x => x.nombre);
+  assert.ok(n({ clase: 'Brujo', nivel: 9 }).includes('Contactar con otro plano'));
+  assert.ok(n({ clase: 'Brujo', subclase: 'Patrón primigenio', nivel: 10 }).includes('Maleficio'));
+  assert.ok(n({ clase: 'Mago', subclase: 'Abjurador', nivel: 10 }).includes('Contrahechizo'));
+  assert.ok(n({ clase: 'Bardo', nivel: 20 }).includes('Palabra de poder: matar'));
+});
+test('CA: Juego de pies deslumbrante del colegio de la danza', async () => {
+  const { claseArmadura } = await import('../web/src/domain/equipo.js');
+  assert.equal(claseArmadura(ch({ clase: 'Bardo', subclase: 'Colegio de la danza', nivel: 3 })).ca, 10 + 3 + 2);
+});
+
+test('canjes: recuperar usos gastando espacios, Furia o puntos de hechicería', async () => {
+  const { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } = await import('../web/src/domain/canjes.js');
+  const b = ch({ clase: 'Bárbaro', subclase: 'Senda del berserker', nivel: 14 });
+  assert.deepEqual(canjesDe(b, 'tpl:berserker.presencia'), [], 'sin gastar no hay nada que recuperar');
+  recState(b, 'tpl:berserker.presencia').used = 1;
+  const c = canjesDe(b, 'tpl:berserker.presencia')[0]; assert.equal(c.rec2, 'tpl:barbaro.furia');
+  aplicarCanje(b, 'tpl:berserker.presencia', c);
+  assert.equal(recState(b, 'tpl:berserker.presencia').used, 0); assert.equal(recState(b, 'tpl:barbaro.furia').used, 1);
+  const bardo = ch({ clase: 'Bardo', nivel: 5 }); recState(bardo, 'tpl:bardo.inspiracion').used = 1;
+  assert.deepEqual(canjesDe(bardo, 'tpl:bardo.inspiracion').map(x => x.espacio), [1, 2, 3]);
+  const bardo4 = ch({ clase: 'Bardo', nivel: 4 }); recState(bardo4, 'tpl:bardo.inspiracion').used = 1;
+  assert.deepEqual(canjesDe(bardo4, 'tpl:bardo.inspiracion'), [], 'Fuente de inspiración es de nivel 5');
+  const d = ch({ clase: 'Druida', nivel: 5 }); recState(d, 'tpl:druida.forma').used = 1;
+  assert.deepEqual(canjesDe(d, 'tpl:druida.forma'), [], 'Resurgimiento salvaje solo sin usos');
+  recState(d, 'tpl:druida.forma').used = 2; assert.ok(canjesDe(d, 'tpl:druida.forma').length);
+  const h = ch({ clase: 'Hechicero', nivel: 5 }); recState(h, 'tpl:hechicero.puntos').used = 4;
+  assert.deepEqual(fuenteDeMagia(h).crear, [], 'solo recupera espacios gastados');
+  assert.equal(espacioAPuntos(h, 3), 3); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 1); assert.equal(h.play.used[3], 1);
+  assert.deepEqual(fuenteDeMagia(h).crear, [], 'crear uno de nivel 3 cuesta 5 y quedan 4');
+  recState(h, 'tpl:hechicero.puntos').used = 0;
+  assert.deepEqual(fuenteDeMagia(h).crear.map(x => [x.L, x.coste]), [[3, 5]]);
+  assert.equal(puntosAEspacio(h, 3), 5); assert.equal(h.play.used[3], 0); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 5);
+});

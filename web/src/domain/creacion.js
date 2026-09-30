@@ -62,6 +62,8 @@ const DOTE_HAB = { habilidoso: [3, TODAS, { herramientas: true }], 'experto en h
   observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'don de la habilidad': [18, TODAS, { fijas: true }] };
 // Subclases que dan competencias en habilidades a nivel 3
 export const HAB_SUBCLASE = {
+  // Conocimiento primigenio (bárbaro 3, rasgo de clase): una habilidad más de la lista del bárbaro
+  'Bárbaro': [{ re: /(?:)/, nombre: 'Conocimiento primigenio', n: 1, lista: HAB_CLASE['Bárbaro'][1] }],
   'Bardo': [{ re: /conocimiento/i, nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS }],
   'Clérigo': [{ re: /conocimiento/i, nombre: 'Bendiciones del conocimiento', n: 2, lista: ['arcanos', 'historia', 'naturaleza', 'religion'], pericia: true }],
   'Explorador': [{ re: /errante/i, nombre: 'Glamur sobrenatural', n: 1, lista: ['engano', 'interpretacion', 'persuasion'] }],

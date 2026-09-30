@@ -11,7 +11,7 @@ const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen
 
 export const GRUPOS = [['accion', 'Acción'], ['adicional', 'Acción adicional'], ['reaccion', 'Reacción'], ['pasivo', 'Siempre activo'], ['fuera', 'Fuera de combate']];
 
-const NO_JUEGO = /^(mejora de caracteristica|don epico|subclase de |rasgo de subclase|lanzamiento de conjuros|conjuros (del|de|de la) |hechiceria innata)/;
+const NO_JUEGO = /^(mejora de caracteristica|don epico|subclase de |rasgo de subclase|lanzamiento de conjuros|conjuros (del|de|de la) )/;
 
 const GRUPO_SIN_TEXTO = {
   furia: 'adicional', 'inspiracion bardica': 'adicional', 'forma salvaje': 'adicional', 'enemigo predilecto': 'adicional', 'tomar aliento': 'adicional',

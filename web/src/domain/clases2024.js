@@ -86,7 +86,7 @@ export const SUBCLASES = {
     { nombre: 'Patrón infernal', re: /infernal/, libro: PHB, rasgos: { 3: ['Bendición del Oscuro', 'Conjuros del infernal'], 6: ['La suerte del Oscuro'], 10: ['Resistencia infernal'], 14: ['Arrastrar por el infierno'] },
       conjuros: { 3: ['Manos ardientes', 'Orden imperiosa', 'Rayo abrasador', 'Sugestión'], 5: ['Bola de fuego', 'Nube apestosa'], 7: ['Escudo de fuego', 'Muro de fuego'], 9: ['Geas', 'Plaga de insectos'] } },
     { nombre: 'Patrón primigenio', re: /primigenio/, libro: PHB, rasgos: { 3: ['Conjuros del primigenio', 'Conjuros psíquicos', 'Mente iluminada'], 6: ['Combatiente clarividente'], 10: ['Escudo mental', 'Maleficio sobrenatural'], 14: ['Crear siervo'] },
-      conjuros: { 3: ['Detectar pensamientos', 'Fuerza fantasmal', 'Risa horrible de Tasha', 'Susurros discordantes'], 5: ['Clarividencia', 'Hambre de Hadar'], 7: ['Confusión', 'Invocar aberración'], 9: ['Alterar los recuerdos', 'Telequinesis'] } },
+      conjuros: { 3: ['Detectar pensamientos', 'Fuerza fantasmal', 'Risa horrible de Tasha', 'Susurros discordantes'], 5: ['Clarividencia', 'Hambre de Hadar'], 7: ['Confusión', 'Invocar aberración'], 9: ['Alterar los recuerdos', 'Telequinesis'], 10: ['Maleficio'] } },
   ],
   'Clérigo': [
     { nombre: 'Dominio de la guerra', re: /guerra/, libro: PHB, rasgos: { 3: ['Conjuros del dominio de la guerra', 'Golpe guiado', 'Sacerdote guerrero'], 6: ['Bendición del dios de la guerra'], 17: ['Avatar de la batalla'] },
@@ -147,7 +147,8 @@ export const SUBCLASES = {
       conjuros: { 3: ['Curar heridas', 'Rayo abrasador', 'Restablecimiento menor', 'Saeta guía'], 5: ['Aura de vitalidad', 'Disipar magia'], 6: ['Contrahechizo'], 7: ['Escudo de fuego', 'Muro de fuego'], 9: ['Golpe flamígero', 'Restablecimiento mayor'] } },
   ],
   'Mago': [
-    { nombre: 'Abjurador', re: /abjur/, libro: PHB, escuela: 'Abjuración', rasgos: { 3: ['Experto en abjuración', 'Salvaguarda arcana'], 6: ['Salvaguarda proyectada'], 10: ['Rompeconjuros'], 14: ['Resistencia a conjuros'] } },
+    { nombre: 'Abjurador', re: /abjur/, libro: PHB, escuela: 'Abjuración', rasgos: { 3: ['Experto en abjuración', 'Salvaguarda arcana'], 6: ['Salvaguarda proyectada'], 10: ['Rompeconjuros'], 14: ['Resistencia a conjuros'] },
+      conjuros: { 10: ['Contrahechizo', 'Disipar magia'] } },
     { nombre: 'Adivino', re: /adivin|divin/, libro: PHB, escuela: 'Adivinación', rasgos: { 3: ['Experto en adivinación', 'Presagio'], 6: ['Adivino avezado'], 10: ['El tercer ojo'], 14: ['Presagio mayor'] } },
     { nombre: 'Evocador', re: /evoca/, libro: PHB, escuela: 'Evocación', rasgos: { 3: ['Experto en evocación', 'Truco potente'], 6: ['Esculpir conjuros'], 10: ['Evocación potenciada'], 14: ['Sobrecanalizar'] } },
     { nombre: 'Ilusionista', re: /ilusion/, libro: PHB, escuela: 'Ilusionismo', rasgos: { 3: ['Experto en ilusionismo', 'Ilusiones mejoradas'], 6: ['Criaturas fantasmales'], 10: ['Yo ilusorio'], 14: ['Realidad ilusoria'] },
@@ -186,6 +187,8 @@ export const SUBCLASES = {
 };
 
 const CONJUROS_CLASE = {
+  'Bardo': { 20: [['Palabra de poder: sanar', 'Palabras de creación', ''], ['Palabra de poder: matar', 'Palabras de creación', '']] },
+  'Brujo': { 9: [['Contactar con otro plano', 'Contactar patrón', '']] },
   'Druida': { 1: [['Hablar con los animales', 'Druídico', '']] },
   'Explorador': { 1: [['Marca del cazador', 'Enemigo predilecto', '']] },
   'Paladín': { 2: [['Castigo divino', 'Castigo de paladín', '']], 5: [['Hallar corcel', 'Corcel fiel', '']] },

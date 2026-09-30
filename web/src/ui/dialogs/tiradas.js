@@ -1,4 +1,5 @@
 import { esc, norm } from '../../core/util.js';
+import { bonosDeConjuro } from '../../domain/bonosConjuro.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
 import { conObjetivos } from '../../domain/concentracion.js';
@@ -6,7 +7,6 @@ import { dadosPara } from '../../domain/tiradas.js';
 import { parsear, resolver, distribucion, maxDist } from '../../domain/dados.js';
 import { modsTirada, resolverModo, fmtMod, efectoDeConjuro } from '../../domain/efectos.js';
 import { esYo } from '../../domain/vida.js';
-import { trucoPotente } from '../../domain/variantes.js';
 import { botonYo } from '../avatar.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
 import { $, on } from '../dom.js';
@@ -30,11 +30,13 @@ const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc'
 const MODOS = [['desventaja', 'Desventaja', 'el menor de 2d20'], ['normal', 'Normal', '1d20'], ['ventaja', 'Ventaja', 'el mayor de 2d20']];
 const TS = [['falla', 'Ha fallado', 'efecto completo'], ['supera', 'Ha superado', 'se libra o mitad'], ['varios', 'Varios', 'unos sí y otros no']];
 
-const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s), pot: s.level === 0 ? trucoPotente(ch, e.fuente) : null }; };
+const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s) }; };
 const dadosActuales = ({ ch, s, t }) => (t ? dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : []);
 const conSalvacion = (t, dados) => !!t?.salvacion && (dados.some(x => x.via === 'salvacion') || t.falla || t.extras.length);
 // Lanzamiento potente (clérigo o druida 7) suma la Sabiduría al daño de sus trucos
-const bonoDe = (dd, t, P, pot = null) => dd.bono + ((dd.tipo === 'curación' && t.curacion?.mod) || dd.mod ? (P.mod || 0) : 0) + (pot && dd.tipo !== 'curación' && !dd.mod ? pot.bono : 0);
+const bonoDe = (dd, t, P, ex = null) => dd.bono + ((dd.tipo === 'curación' && t.curacion?.mod) || dd.mod ? (P.mod || 0) : 0) + (ex?.bono || 0);
+// Lo que suman tus rasgos a cada línea de dados (Lanzamiento potente, Discípulo de la vida, Alma radiante…)
+const extrasDe = (D, dados) => bonosDeConjuro(D.ch, D.s, D.ch.book[R.bi].fuente, dados, D.s.level ? R.nivel : null);
 const exprDe = (n, caras, bono) => `${n}d${caras}${bono ? sgn(bono) : ''}`;
 const idxDe = (lista, k) => Math.max(0, lista.findIndex(m => m[0] === k));
 
@@ -51,7 +53,7 @@ export function openRoll(bi, nivelEspacio) {
 
 // ---- Controles ----
 function pintarCtl(tsAntes = R.ts) {
-  const D = datos(), { ch, s, P, t, pot } = D, dados = dadosActuales(D), conTS = conSalvacion(t, dados);
+  const D = datos(), { ch, s, P, t } = D, dados = dadosActuales(D), conTS = conSalvacion(t, dados);
   const k = norm(s.escuela || '').slice(0, 3);
   $('#rlTitle').innerHTML = `${gi(ESC_ICO[k] || 'd20', 'rl-d20 cj-esc-ico')} ${esc(s.es)}`;
   $('#rlSub').textContent = s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
@@ -86,10 +88,11 @@ function pintarCtl(tsAntes = R.ts) {
     }
     h += '</section>';
   }
+  const ex = extrasDe(D, dados);
   const btns = dados.map((dd, i) => {
-    const cura = dd.tipo === 'curación', bono = bonoDe(dd, t, P, pot);
+    const cura = dd.tipo === 'curación', bono = bonoDe(dd, t, P, ex[i]);
     let nota = cura ? 'curación' : dd.via === 'auto' ? 'automático: sin ataque ni salvación' : dd.via === 'ataque' ? 'si el ataque impacta' : 'depende de la salvación', off = false;
-    if (pot && !cura && !dd.mod && pot.bono) nota += `, ${pot.fuente} ${sgn(pot.bono)}`;
+    if (ex[i].notas.length) nota += `, ${ex[i].notas.join(', ')}`;
     if (dd.via === 'salvacion' && conTS) {
       if (!R.ts) { nota = 'elige antes el resultado de la salvación'; off = true; }
       else if (R.ts === 'supera' && !t.mitad) { nota = 'sin daño al superar la salvación'; off = true; }
@@ -142,7 +145,7 @@ function distDe(p, { modo = 'normal', critico = false, res = null } = {}) {
 }
 // nuevo = false recalcula la última tirada conservando sus dados (cambio de ventaja, crítico, espacio o salvación).
 function tirar(tipo, i, nuevo = true) {
-  const D = datos(), { s, P, t, pot } = D, antes = R.res;
+  const D = datos(), { s, P, t } = D, antes = R.res;
   const previo = !nuevo && antes?.tipo === tipo && antes.i === i ? antes.res : null;
   let x;
   if (tipo === 'ataque') {
@@ -154,8 +157,8 @@ function tirar(tipo, i, nuevo = true) {
     const xx = t.extras[i], p = parsear(exprDe(xx.n, xx.caras, xx.bono)), res = resolver({ p, previo });
     x = { tipo, i, p, res, total: res.total, lbl: exprDe(xx.n, xx.caras, xx.bono), ctx: xx.frase, dist: distDe(p), texto: `${s.es}: ${exprDe(xx.n, xx.caras, xx.bono)} = ${res.total}` };
   } else {
-    const dd = dadosActuales(D)[i]; if (!dd) return;
-    const cura = dd.tipo === 'curación', crit = dd.via === 'ataque' && R.critico, bono = bonoDe(dd, t, P, pot);
+    const lista = dadosActuales(D), dd = lista[i]; if (!dd) return;
+    const cura = dd.tipo === 'curación', crit = dd.via === 'ataque' && R.critico, bono = bonoDe(dd, t, P, extrasDe(D, lista)[i]);
     const p = parsear(exprDe(dd.n, dd.caras, bono)), res = resolver({ p, critico: crit, previo });
     const ts = dd.via === 'salvacion' ? R.ts : null, bruto = res.total, mitad = Math.floor(bruto / 2);
     const total = ts === 'supera' ? mitad : bruto, n = dd.n * (crit ? 2 : 1);

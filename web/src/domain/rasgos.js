@@ -146,7 +146,7 @@ export function plantillas(ch) {
         if (L >= 6) R('adivino.avezado', { tipo: 'al_lanzar', nombre: 'Adivino avezado', escuela: 'Adivinación', espacioMin: 2, soloEspacio: true, efecto: 'recuperar', efectoN: 5 });
       }
       if (has(/hojacantante|cantante/i) && L >= 3) R('hojacantante.cancion', { tipo: 'recurso', nombre: 'Canción de la hoja', max: mod('int'), nota: `+${mod('int')} a la CA, +3 m de velocidad y ataques con Inteligencia durante 1 minuto. Recuperas un uso al usar Recuperación arcana.` });
-      if (has(/abjur/i) && L >= 3) R('abjurador.salvaguarda', { tipo: 'recurso', nombre: 'Salvaguarda arcana', max: 2 * L + modOf(statsEfectivos(ch).int), nota: 'Puntos de golpe de la salvaguarda. Recupera el doble del nivel del espacio al lanzar abjuración.' });
+      if (has(/abjur/i) && L >= 3) R('abjurador.salvaguarda', { tipo: 'recurso', nombre: 'Salvaguarda arcana', max: 2 * L + modOf(statsEfectivos(ch).int), reserva: 'PG', nota: 'Puntos de golpe de la salvaguarda: gasta los que absorba. Al lanzar un conjuro de abjuración con espacio recupera el doble del nivel del espacio (la app lo hace sola).' });
       if (has(/evoca/i)) {
         if (L >= 10) R('evocador.potenciada', { tipo: 'al_lanzar', nombre: 'Evocación potenciada', escuela: 'Evocación', espacioMin: 0, soloEspacio: false, efecto: 'aviso', texto: 'Suma tu modificador de Inteligencia a una tirada de daño del conjuro.' });
         if (L >= 14) uno('evocador.sobrecanalizar', 'Sobrecanalizar', 'Repetirlo antes de un descanso largo causa daño necrótico creciente.');
@@ -287,7 +287,7 @@ export const RECURSO_DE_CONJURO = {
   'marca del cazador': ['tpl:explorador.enemigo'], 'castigo divino': ['tpl:paladin.castigo'], 'hallar corcel': ['tpl:paladin.corcel'],
   'paso brumoso': ['tpl:feerico.pasos', 'tpl:errante.brumoso'], 'saeta guia': ['tpl:estrellas.mapa'], 'invocar feerico': ['tpl:errante.refuerzos', 'tpl:ilusionista.criaturas'],
   'invocar bestia': ['tpl:ilusionista.criaturas'], 'contactar con otro plano': ['tpl:brujo.contactar'], 'telequinesis': ['tpl:psionico.maestro'], 'invocar dragon': ['tpl:draconica.companero'],
-  'sentidos de la bestia': ['tpl:dote.enclave'], 'baile irresistible de otto': ['tpl:dote.jolgorio'],
+  'sentidos de la bestia': ['tpl:dote.enclave'], 'encontrar familiar': ['tpl:druida.forma'], 'baile irresistible de otto': ['tpl:dote.jolgorio'],
 };
 // Los conjuros que da una dote llevan su nombre como fuente: su uso gratis sale del contador de la dote
 const RECURSO_DE_FUENTE = [[/^iniciado en la magia(?: \((.+)\))?/, m => `tpl:dote.iniciado.${norm(m[1] || '')}`], [/^influencia feerica/, () => 'tpl:dote.feerica'],

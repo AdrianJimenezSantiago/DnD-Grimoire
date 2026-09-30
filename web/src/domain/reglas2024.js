@@ -116,12 +116,14 @@ export function perfil(ch) {
     row.forEach((n, i) => { if (n) slots[i + 1] = n; });
     if (pact) slots[pact.level] = (slots[pact.level] || 0) + pact.n;
   }
+  // Hechicería innata activa: +1 a la CD de los conjuros de hechicero
+  const innata = (ch.vida?.efectos || []).some(e => e.k === 'innata') ? 1 : 0;
   const cds = [];
   for (const { c: k, l } of lanzan) {
     const ap = ch.aptitud || l.cast.ap, claves = [norm(k.clase), norm(l.nombre), ...(l.lista === 'Mago' || k.clase === 'Mago' ? ['libro', 'experto'] : []), ...(k.clase === 'Brujo' ? ['pacto'] : [])];
     const x = cds.find(y => y.ap === ap);
     if (x) x.claves.push(...claves);
-    else { const m = modOf(st[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + mo.cd + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + mo.atk + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
+    else { const m = modOf(st[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + mo.cd + (parseInt(ch.extraCD, 10) || 0) + (k.clase === 'Hechicero' ? innata : 0), atk: pb + m + mo.atk + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
   }
   // Subclases sin lanzamiento que dan conjuros con su propia característica (monje, bárbaro del corazón salvaje, guerrero psiónico)
   for (const k of clases) {
@@ -134,7 +136,7 @@ export function perfil(ch) {
     lista: prim ? prim.l.lista : '',
     listaNombre: prim ? prim.l.nombre : '',
     listas: lanzan.map(x => x.l.lista),
-    cd: mod == null ? null : 8 + pb + mod + mo.cd + (parseInt(ch.extraCD, 10) || 0),
+    cd: mod == null ? null : 8 + pb + mod + mo.cd + (parseInt(ch.extraCD, 10) || 0) + (prim?.c.clase === 'Hechicero' ? innata : 0),
     atk: mod == null ? null : pb + mod + mo.atk + (parseInt(ch.extraAtaque, 10) || 0),
     slots, pact, maxSlot: Math.max(0, ...Object.keys(slots).map(Number)),
     maxPrep: lanzan.reduce((n, { c: k, l }) => n + PREP[l.cast.prep][k.nivel - 1], 0),
