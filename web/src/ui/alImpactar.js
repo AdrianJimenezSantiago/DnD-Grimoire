@@ -16,7 +16,7 @@ export function preguntarAlImpactar(ops, { arma = '' } = {}) {
       d.innerHTML = `<h2 id="aiTitle">${gi('ca')}¿Algo más al impactar?</h2><p class="md-text">${esc(arma)}: lo que elijas se suma al daño y se gasta de tus recursos.</p>
         ${grupos.map(g => { const xs = ops.filter(o => o.titulo === g);
           return `<section class="ai-g"><h3>${esc(g)}${xs[0].grupo ? ' <small>elige uno</small>' : ''}</h3><div class="ai-ops">${xs.map(o => { const on = sel.has(o.k);
-            return `<button type="button" class="ai-op ${on ? 'on' : ''}" data-aio="${esc(o.k)}" aria-pressed="${on}"><b>${esc(o.nombre)}</b><span class="ai-dado">+${esc(o.dado)}</span>${o.nota ? `<small>${esc(o.nota)}</small>` : ''}</button>`; }).join('')}</div></section>`; }).join('')}
+            return `<button type="button" class="ai-op ${on ? 'on' : ''}" data-aio="${esc(o.k)}" aria-pressed="${on}"><b>${esc(o.nombre)}</b>${o.dado ? `<span class="ai-dado">+${esc(o.dado)}</span>` : ''}${o.nota ? `<small>${esc(o.nota)}</small>` : ''}</button>`; }).join('')}</div></section>`; }).join('')}
         <div class="md-btns"><button type="button" data-aifin="nada">Solo el daño</button><button type="button" class="primary" data-aifin="si">${sel.size ? 'Gastar y tirar' : 'Tirar daño'}</button></div>`;
     };
     pintar();

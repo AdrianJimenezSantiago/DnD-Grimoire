@@ -83,7 +83,7 @@ export function dotesDe(ch, trasfondosLib = []) {
 export const LISTAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
 
 export function magiaPara(P, fuente = '') {
-  if (!P.cds || P.cds.length < 2) return P;
+  if (!P.cds?.length || (P.cds.length < 2 && P.cd != null)) return P;
   const f = norm(fuente), x = P.cds.find(c => c.claves.some(k => k && f.includes(k))) || P.cds[0];
   return { ...P, apKey: x.ap, mod: x.mod, cd: x.cd, atk: x.atk };
 }
@@ -93,6 +93,7 @@ function lanzamientoDe(c) {
   if (cls.subCast && cls.subCast.re.test(c.subclase || '') && c.nivel >= cls.subCast.desde) return { cast: cls.subCast, viaSub: true, nombre: cls.subCast.nombre, lista: 'Mago' };
   return null;
 }
+const SUB_APTITUD = [{ clase: 'Monje', re: /sombra|elementos/, ap: 'sab' }, { clase: 'Bárbaro', re: /corazon/, ap: 'sab' }, { clase: 'Guerrero', re: /psionic/, ap: 'int' }, { clase: 'Guerrero', re: /abanderad/, ap: 'car' }];
 const FACTOR = { full: L => L, half: L => Math.ceil(L / 2), third: L => Math.floor(L / 3) };
 
 export function perfil(ch) {
@@ -121,6 +122,11 @@ export function perfil(ch) {
     const x = cds.find(y => y.ap === ap);
     if (x) x.claves.push(...claves);
     else { const m = modOf(st[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + mo.cd + (parseInt(ch.extraCD, 10) || 0), atk: pb + m + mo.atk + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
+  }
+  // Subclases sin lanzamiento que dan conjuros con su propia característica (monje, bárbaro del corazón salvaje, guerrero psiónico)
+  for (const k of clases) {
+    const x = SUB_APTITUD.find(a => a.clase === k.clase && a.re.test(norm(k.subclase || ''))); if (!x || cds.some(y => y.claves.includes(norm(k.subclase)))) continue;
+    const m = modOf(st[x.ap]); cds.push({ ap: x.ap, mod: m, cd: 8 + pb + m + mo.cd, atk: pb + m + mo.atk, claves: [norm(k.subclase)] });
   }
   const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length + (l.viaSub ? 0 : ordenDe(ch, k.clase)?.truco || 0) : 0);
   return {

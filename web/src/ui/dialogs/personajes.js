@@ -39,6 +39,7 @@ import { maestriasHtml, alternar as alternarMaes } from '../maestrias.js';
 import { fuentesExtra } from '../../domain/creacion.js';
 import { preguntarHabilidades, preguntarOpcion, aplicarFuente, faltanDe } from '../habilidadesElegir.js';
 import { VARIANTES, variantesPendientes } from '../../domain/variantes.js';
+import { opcionesPendientes } from '../../domain/opcionesRasgo.js';
 import { cupoManiobras, alternarManiobra } from '../../domain/maniobras.js';
 import { maniobrasHtml } from '../maniobras.js';
 
@@ -202,6 +203,7 @@ function pendientes(d) {
   { const cupo = cupoMaestrias(d); if (MAES.length < cupo) P.clase.push(`Maestría con armas: elige ${cupo - MAES.length} ${cupo - MAES.length === 1 ? 'arma' : 'armas'}.`); }
   { const cupo = cupoManiobras(d); if (MAN.length < cupo) P.clase.push(`Maniobras: elige ${cupo - MAN.length} ${cupo - MAN.length === 1 ? 'maniobra' : 'maniobras'} más.`); }
   for (const k of variantesPendientes(d)) P.dotes.push(`${k}: elige la variante de ${VARIANTES[k].rasgo}.`);
+  for (const o of opcionesPendientes(d)) P.dotes.push(`${o.clase}: elige una opción de ${o.rasgo} (tócalo en «En juego»).`);
   for (const e of eleccionesHerramienta(d)) { const n = (ELEC[e.id] || []).length; if (n < e.n) P[e.id === 't' ? 'origen' : 'clase'].push(`${e.de}: elige ${e.n === 1 ? LISTAS_HERRAMIENTA[e.lista][0] : `${e.n} (${LISTAS_HERRAMIENTA[e.lista][0]})`}.`); }
   if (CREANDO) {
     if (IDI.length < 2) P.origen.push(`Elige ${2 - IDI.length} ${IDI.length === 1 ? 'idioma' : 'idiomas'} más.`);

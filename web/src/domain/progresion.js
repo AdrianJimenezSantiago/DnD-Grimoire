@@ -43,6 +43,18 @@ export function conjurosPendientes(db, ch, compendio) {
   const tiene = new Set(ch.book.filter(e => e.always).map(e => norm(db.catalog[e.sid]?.es)));
   return clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))).filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
 }
+// Conjuros «siempre preparados» de un rasgo que ya no toca (otro terreno del Círculo de la tierra, otra subclase…): dejan de estarlo
+export function sobrantesAutomaticos(db, ch) {
+  const auto = clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c)));
+  const nombres = new Set(auto.map(c => norm(c.nombre))), fuentes = new Set(auto.map(c => norm(c.fuente)));
+  if (!fuentes.has(norm('Conjuros del círculo de la tierra'))) fuentes.add(norm('Conjuros del círculo de la tierra'));
+  return ch.book.filter(e => e.always && fuentes.has(norm(String(e.fuente || '').replace(/\s*\(solo ritual\)$/, ''))) && !nombres.has(norm(db.catalog[e.sid]?.es)));
+}
+export function quitarSobrantes(db, ch) {
+  const fuera = sobrantesAutomaticos(db, ch);
+  for (const e of fuera) Object.assign(e, { always: false, prep: false, fuente: '' });
+  return fuera.map(e => db.catalog[e.sid]?.es).filter(Boolean);
+}
 export function anadirPendientes(db, ch, pendientes) {
   for (const c of pendientes) {
     const sid = importSrd(db, c.x);

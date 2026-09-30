@@ -4,6 +4,11 @@ import { reglas, usosGastados } from './rasgos.js';
 import { maniobrasDe, dadoSupremacia, cdManiobras } from './maniobras.js';
 import { golpeExtra } from './variantes.js';
 import { combateDe } from './combate.js';
+import { statsEfectivos } from './objetosEfecto.js';
+import { modOf, competencia, nivelTotal } from './reglas2024.js';
+import { golpesDeOpciones } from './opcionesRasgo.js';
+import { DADO_ARTES, DANO_FURIA } from './equipo.js';
+import { esMarcial } from './competencias.js';
 
 // Lo que se puede añadir al daño de un ataque con arma que impacta, según las reglas de 2024:
 // maniobras del Maestro del combate (gastan un dado de supremacía), Castigo divino del paladín (gasta un espacio o el uso
@@ -41,6 +46,45 @@ export function opcionesAlImpactar(ch, o) {
   // Clérigo y druida 7: una vez por turno
   for (const g of golpeExtra(ch)) if (!hechas.includes(`golpe:${g.nombre}`))
     out.push({ k: `golpe:${g.nombre}`, grupo: '', titulo: g.nombre, nombre: `+${g.dado} ${g.tipos}`, dado: g.dado, unaVez: true, nota: 'Una vez en cada uno de tus turnos.' });
+  const sub = (clase, re, L = 3) => clasesDe(ch).find(x => x.clase === clase && re.test(norm(x.subclase || '')) && x.nivel >= L);
+  const enFuria = (ch.vida?.efectos || []).some(e => e.k === 'furia'), mod = k => modOf(statsEfectivos(ch)[k]), una = k => !hechas.includes(k);
+  // Bárbaro berserker: Frenesí (furia y Ataque temerario), al primer objetivo que impactes en tu turno con un ataque de Fuerza
+  const bers = sub('Bárbaro', /berserk/);
+  if (bers && enFuria && una('frenesi')) { const n = DANO_FURIA(bers.nivel);
+    out.push({ k: 'frenesi', grupo: '', titulo: 'Frenesí', nombre: `+${n}d6`, dado: `${n}d6`, unaVez: true, nota: 'Solo si usaste Ataque temerario este turno y el ataque usa la Fuerza. Una vez por turno.' }); }
+  // Bárbaro fanático: Furia divina, a la primera criatura que impactes con un arma en cada uno de tus turnos mientras estés en furia
+  const fan = sub('Bárbaro', /fanatic/);
+  if (fan && enFuria && una('furiadivina')) { const d = `1d6+${Math.floor(fan.nivel / 2)}`;
+    out.push({ k: 'furiadivina', grupo: '', titulo: 'Furia divina', nombre: `+${d} necrótico o radiante`, dado: d, unaVez: true, nota: 'Una vez en cada uno de tus turnos, mientras estés en furia.' }); }
+  // Opciones elegidas que suman daño (Asesino de colosos)
+  for (const g of golpesDeOpciones(ch)) if (una(`op:${g.nombre}`))
+    out.push({ k: `op:${g.nombre}`, grupo: '', titulo: g.nombre, nombre: `+${g.dado}`, dado: g.dado, unaVez: true, nota: `Una vez por turno, ${g.cond}.` });
+  // Monje: Golpe aturdidor (5) y Mano de aflicción (misericordia 3), con 1 punto de concentración, una vez por turno cada uno
+  const monje = clasesDe(ch).find(x => x.clase === 'Monje'), foco = libres(ch, 'tpl:monje.concentracion');
+  const armaMonje = o?.sinArmas || (cuerpo && (!esMarcial(o) || props.includes('ligera')));
+  if (monje && foco > 0 && armaMonje) {
+    const cd = 8 + mod('sab') + competencia(nivelTotal(ch));
+    if (monje.nivel >= 5 && una('aturdidor')) out.push({ k: 'aturdidor', grupo: '', titulo: 'Golpe aturdidor', nombre: 'Aturdir', dado: '', unaVez: true, gasta: { rec: 'tpl:monje.concentracion' },
+      nota: `Salvación de Constitución CD ${cd}: si falla, aturdido hasta el inicio de tu siguiente turno; si la supera, su velocidad se reduce a la mitad y el siguiente ataque contra él tiene ventaja. 1 punto de concentración (te quedan ${foco}).` });
+    if (o?.sinArmas && sub('Monje', /misericordia/) && una('afliccion')) { const d = `${DADO_ARTES(monje.nivel)}+${Math.max(0, mod('sab'))}`;
+      out.push({ k: 'afliccion', grupo: '', titulo: 'Mano de aflicción', nombre: `+${d} necrótico`, dado: d, unaVez: true, gasta: { rec: 'tpl:monje.concentracion' }, nota: `Una vez por turno con un golpe sin armas. 1 punto de concentración (te quedan ${foco}).` }); }
+  }
+  // Guerrero psiónico: Golpe psiónico, un dado de energía psiónica + Inteligencia de fuerza, una vez en cada uno de tus turnos
+  const psi = sub('Guerrero', /psionic/), dpsi = libres(ch, 'tpl:psionico.dados');
+  if (psi && dpsi > 0 && una('psionico')) { const d = `1${psi.nivel >= 17 ? 'd12' : psi.nivel >= 11 ? 'd10' : psi.nivel >= 5 ? 'd8' : 'd6'}+${Math.max(0, mod('int'))}`;
+    out.push({ k: 'psionico', grupo: '', titulo: 'Golpe psiónico', nombre: `+${d} de fuerza`, dado: d, unaVez: true, gasta: { rec: 'tpl:psionico.dados' }, nota: `Objetivo a 9 m o menos. Gasta un dado de energía psiónica (te quedan ${dpsi}).` }); }
+  // Explorador: Golpe pavoroso (acechador en la penumbra) y Golpes pavorosos (errante feérico), una vez por turno
+  const pav = libres(ch, 'tpl:acechador.emboscador');
+  if (sub('Explorador', /acechador|penumbra/) && pav > 0 && una('pavoroso'))
+    out.push({ k: 'pavoroso', grupo: '', titulo: 'Golpe pavoroso', nombre: '+2d6 psíquico', dado: '2d6', unaVez: true, gasta: { rec: 'tpl:acechador.emboscador' }, nota: `Una vez por turno (te quedan ${pav} usos).` });
+  const errante = sub('Explorador', /errante/);
+  if (errante && una('pavorosos')) { const d = errante.nivel >= 11 ? '1d6' : '1d4';
+    out.push({ k: 'pavorosos', grupo: '', titulo: 'Golpes pavorosos', nombre: `+${d} psíquico`, dado: d, unaVez: true, nota: 'Una vez por turno a cada criatura.' }); }
+  // Conjuros en marcha que suman daño a cada impacto: Marca del cazador y Maleficio
+  const conc = norm(ch.play?.conc || '');
+  if (conc === 'marca del cazador') { const d = clasesDe(ch).some(x => x.clase === 'Explorador' && x.nivel >= 20) ? '1d10' : '1d6';
+    out.push({ k: 'marca', grupo: '', titulo: 'Marca del cazador', nombre: `+${d} de fuerza`, dado: d, nota: 'Si el objetivo es la criatura marcada.' }); }
+  if (conc === 'maleficio') out.push({ k: 'maleficio', grupo: '', titulo: 'Maleficio', nombre: '+1d6 necrótico', dado: '1d6', nota: 'Si el objetivo es la criatura maldita.' });
   // Pícaro: Ataque furtivo con arma sutil o a distancia, una vez por turno
   const pic = clasesDe(ch).find(x => x.clase === 'Pícaro');
   if (pic && (props.includes('sutil') || distancia) && !hechas.includes('furtivo'))
@@ -58,4 +102,12 @@ export function gastarAlImpactar(ch, elegidas) {
     if (c.activo && x.adicional) c.turno.adicional = true;
     if (c.activo && x.unaVez) c.unaVez = [...(c.unaVez || []), x.k];
   }
+}
+
+// Daño que se suma siempre al impactar, sin elegir: Golpes radiantes (paladín 11) con armas cuerpo a cuerpo y golpes sin armas
+export function danoSiempre(ch, o) {
+  const props = (o?.arma?.props || []).map(norm), cuerpo = !props.some(p => p.startsWith('municion'));
+  const out = [];
+  if (cuerpo && clasesDe(ch).some(x => x.clase === 'Paladín' && x.nivel >= 11)) out.push({ fuente: 'Golpes radiantes (radiante)', valor: '1d8' });
+  return out;
 }

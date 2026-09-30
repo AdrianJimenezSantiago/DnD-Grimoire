@@ -9,13 +9,14 @@ import { pedir } from '../ui/modal.js';
 import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalogo.js';
 import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
-import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, soltarConc, cambiarConc, rondasDeDuracion, esYo, sincronizarYo, listaObjetivos, conjuroDeObjetivos } from '../domain/vida.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, ponerTemporales, curar, soltarConc, cambiarConc, rondasDeDuracion, esYo, sincronizarYo, listaObjetivos, conjuroDeObjetivos } from '../domain/vida.js';
 import { openObjetivos } from '../ui/dialogs/objetivos.js';
 import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate.js';
 import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -278,21 +279,40 @@ export function shortRest(S, openRecovery, openVida) {
 }
 
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);
-// Furia y Canción de la hoja: al gastar el uso, el efecto queda puesto (la furia además rompe la concentración)
+// Furia y Canción de la hoja: al gastar el uso, el efecto queda puesto (la furia además rompe la concentración).
+// Acción súbita te devuelve la acción en combate; Tomar aliento y otros usos que curan se tiran y se aplican solos.
 function alGastar(c, id) {
-  const k = EFECTO_DE_RECURSO[id]; if (!k) return [];
-  const fuera = k === 'furia' && c.play?.conc ? soltarConc(c) : [];
-  ponerEfecto(c, k); return fuera;
+  const out = { fuera: [], extra: [], cura: null };
+  const k = EFECTO_DE_RECURSO[id];
+  if (k) {
+    if (k === 'furia' && c.play?.conc) out.fuera = soltarConc(c);
+    ponerEfecto(c, k);
+    if (k === 'furia') { const t = temporalesAlEnfurecer(c); if (t && ponerTemporales(c, t)) out.extra.push(`Vitalidad del árbol: ganas ${t} PG temporales.`); }
+  }
+  if (id === 'tpl:guerrero.oleada' && combateDe(c).activo) { const cb = combateDe(c); cb.turno.accion = false; cb.ataques = null; out.extra.push('Tienes una acción más este turno (no puede ser la de Magia).'); }
+  const cu = curacionDeRecurso(c, id);
+  if (cu?.solo) { const r = aplicarCuracion(c, cu); out.cura = { ...cu, ...r }; out.extra.push(`${cu.tipo === 'temp' ? 'Ganas' : 'Recuperas'} ${r.aplicado} ${cu.tipo === 'temp' ? 'PG temporales' : 'PG'} (${cu.expr}: ${r.total}).`); }
+  else if (cu) out.cura = cu;
+  return out;
 }
-function avisoGasto(S, id, h, fuera) {
-  const k = EFECTO_DE_RECURSO[id]; if (!k) return;
-  golpe('buff'); toast(`<b>${esc(EFECTO[k].nombre)}</b> activa: ${esc(EFECTO[k].texto)}${fuera.length ? ` Pierdes la concentración.` : ''}`, [undoBtn(S, h)]);
+function avisoGasto(S, id, h, g) {
+  const k = EFECTO_DE_RECURSO[id], ch = S.cur(), r = ruleOf(ch, id);
+  const pesada = k === 'furia' && (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura?.tipo === 'pesada');
+  const extra = g.cura && !g.cura.solo ? [{ label: `Curarme ${g.cura.expr}`, hl: true, fn: () => {
+    let x = null; const h2 = S.act(`${r?.nombre || 'Curación'}: sobre ti`, (db, c) => { x = aplicarCuracion(c, g.cura); });
+    golpe('cura', x.aplicado); toast(`Recuperas ${x.aplicado} PG (${esc(g.cura.expr)}: ${x.total}).`, [undoBtn(S, h2)]); } }] : [];
+  if (g.cura?.solo && g.cura.aplicado) golpe(g.cura.tipo === 'temp' ? 'temp' : 'cura', g.cura.aplicado);
+  if (!k && !g.extra.length && !extra.length) return;
+  if (k) golpe('buff');
+  const texto = [k ? `<b>${esc(EFECTO[k].nombre)}</b> activa: ${esc(EFECTO[k].texto)}` : `<b>${esc(r?.nombre || '')}</b>.`, ...g.extra.map(esc),
+    g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : ''].filter(Boolean).join(' ');
+  toast(texto, [...extra, undoBtn(S, h)]);
 }
 export function tickResource(S, id, i) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max), left = r.max - used, spend = i < left;
-  let fuera = [];
-  const h = S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); if (spend) fuera = alGastar(c, id); });
-  haptic(); if (spend) avisoGasto(S, id, h, fuera);
+  let g = null;
+  const h = S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); if (spend) g = alGastar(c, id); });
+  haptic(); if (spend) avisoGasto(S, id, h, g);
 }
 export async function stepResource(S, id, d) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);
@@ -301,13 +321,14 @@ export async function stepResource(S, id, d) {
     const v = await pedir({ titulo: r.nombre, texto: `¿Cuántos ${r.reserva} gastas? Te quedan ${r.max - used}.`, valor: String(Math.min(5, r.max - used)), tipo: 'number', min: 1, max: r.max - used, ok: 'Gastar' }); if (v == null) return;
     d = Math.max(1, Math.min(r.max - used, parseInt(v, 10) || 0));
     const h = S.act(`${r.nombre}: gasta ${d} ${r.reserva} (quedan ${r.max - used - d})`, (db, c) => { recState(c, id).used = used + d; });
-    haptic(); toast(`${esc(r.nombre)}: gastas ${d} ${esc(r.reserva)}. Quedan ${r.max - used - d}.`, [undoBtn(S, h)]); return;
+    const curarme = r.reserva === 'PG' ? [{ label: `Curarme ${d}`, hl: true, fn: () => { let n = 0; const h2 = S.act(`${r.nombre}: ${d} PG sobre ti`, (db, c) => { n = curar(c, d); }); golpe('cura', n); toast(`Recuperas ${n} PG.`, [undoBtn(S, h2)]); } }] : [];
+    haptic(); toast(`${esc(r.nombre)}: gastas ${d} ${esc(r.reserva)}. Quedan ${r.max - used - d}.`, [...curarme, undoBtn(S, h)]); return;
   }
   const next = Math.max(0, Math.min(r.max, used + d));
   if (next === used) return;
-  let fuera = [];
-  const h = S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; if (d > 0) fuera = alGastar(c, id); });
-  haptic(); if (d > 0) avisoGasto(S, id, h, fuera);
+  let g = null;
+  const h = S.act(`${r.nombre}: ${d > 0 ? 'gasta 1' : 'recupera 1'} (quedan ${r.max - next})`, (db, c) => { recState(c, id).used = next; if (d > 0) g = alGastar(c, id); });
+  haptic(); if (d > 0) avisoGasto(S, id, h, g);
 }
 export async function setResource(S, id) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);

@@ -1,4 +1,5 @@
 import { clasesDe, dotesDe } from './reglas2024.js';
+import { opcionesCambiables, opcionDe } from './opcionesRasgo.js';
 
 const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const MAESTRIA = { 'Bárbaro': 'las armas cuyas maestrías usas', Guerrero: 'una de las armas cuyas maestrías usas', 'Paladín': 'las armas cuyas maestrías usas', Explorador: 'las armas cuyas maestrías usas', 'Pícaro': 'las armas cuyas maestrías usas' };
@@ -34,6 +35,12 @@ export function opcionesIntercambio(ch, momento, { clase = null, trasfondos = []
       }
       if (k === 'Guerrero' && /maestro|battle/.test(sub)) add('o_arma', 'Cambiar una maniobra', 'Puedes sustituir una de las maniobras que conoces por otra.', subclase);
     }
+  }
+  // Opciones de subclase que se cambian al descansar (Presa del cazador, Aspecto de lo salvaje, terreno del Círculo de la tierra…)
+  if (momento === 'largo' || momento === 'corto') for (const d of opcionesCambiables(ch, momento)) {
+    if (clase && d.clase !== clase) continue;
+    const act = opcionDe(ch, d.id)?.nombre;
+    add('dote', `Cambiar ${d.rasgo}`, `${act ? `Ahora: ${act}. ` : 'Aún no la has elegido. '}Opciones: ${d.opciones.map(o => o.nombre).join(', ')}. Se cambia tocando el rasgo en «En juego».`, d.clase);
   }
   if (!clase || momento !== 'nivel') {
     for (const d of dotesDe(ch, trasfondos)) {
