@@ -64,7 +64,7 @@ function render() {
         ${tags.length ? `<span class="efx-tags">${tags.map(t => `<i>${esc(t)}</i>`).join('')}</span>` : ''}</span>
       <span class="efx-est">${on ? `<em>${x.rondas != null ? `quedan ${esc(fmtRondas(x.rondas))}` : 'activo'}</em>` : e.dur ? `<em class="apag">${esc(fmtRondas(e.dur))}</em>` : ''}${e.tiraObjetivo && bueno ? '<em class="tira">tiras tú el dado</em>' : ''}<i class="efx-marca" aria-hidden="true"></i></span></button>`;
   };
-  const lista = EFECTOS.filter(e => !!e.bueno === bueno && !e.accion), porK = Object.fromEntries(lista.map(e => [e.k, e]));
+  const lista = EFECTOS.filter(e => !!e.bueno === bueno && !e.accion && !e.rasgo), porK = Object.fromEntries(lista.map(e => [e.k, e]));
   const grupos = [...GRUPOS[TAB].map(([t, ico, ks]) => [t, ico, ks.map(k => porK[k]).filter(Boolean)]), ['Otros', 'estados', []]];
   grupos.forEach(g => g[2].forEach(e => usados.add(e.k)));
   grupos[grupos.length - 1][2] = lista.filter(e => !usados.has(e.k));

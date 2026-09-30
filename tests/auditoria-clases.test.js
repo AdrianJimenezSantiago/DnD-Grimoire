@@ -172,3 +172,38 @@ test('conjuros de subclases sin lanzamiento usan su característica (monje de la
   assert.equal(P.cd, 8 + 2 + 2);
   assert.ok(conjurosAutomaticos(ch({ clase: 'Guerrero', subclase: 'Guerrero psiónico', nivel: 18 })).some(c => c.nombre === 'Telequinesis'));
 });
+
+test('inmunidades a estados: Aura de coraje, Aura de entrega y Furia irracional', async () => {
+  const { inmunidadesEstado } = await import('../web/src/domain/efectos.js');
+  const p = ch({ clase: 'Paladín', subclase: 'Juramento de entrega', nivel: 10 });
+  vidaDe(p).estados = ['asustado'];
+  assert.deepEqual([...inmunidadesEstado(p).keys()].sort(), ['asustado', 'encantado']);
+  assert.ok(!modsTirada(p, { sobre: 'ataque' }).some(m => m.fuente === 'Asustado'));
+  const b = ch({ clase: 'Bárbaro', subclase: 'Senda del berserker', nivel: 6 });
+  assert.equal(inmunidadesEstado(b).size, 0); ponerEfecto(b, 'furia');
+  assert.equal(inmunidadesEstado(b).get('encantado'), 'Furia irracional');
+});
+test('efectos de rasgo: Arma sagrada suma el Carisma al ataque; Puntería certera deja la velocidad a 0', async () => {
+  const { velocidadEfectiva, EFECTO_DE_RASGO } = await import('../web/src/domain/efectos.js');
+  const p = ch({ clase: 'Paladín', subclase: 'Juramento de entrega', nivel: 3 }); ponerEfecto(p, 'armasagrada');
+  assert.equal(modsTirada(p, { sobre: 'ataque' }).find(m => m.fuente === 'Arma sagrada').valor, 2);
+  const r = ch({ clase: 'Pícaro', nivel: 3 }); ponerEfecto(r, 'punteria');
+  assert.equal(velocidadEfectiva(r).m, 0);
+  assert.equal(EFECTO_DE_RASGO['voto de enemistad'].gasta, 'tpl:paladin.canalizar');
+});
+test('explorador: Cazador implacable protege la Marca del cazador; acechador suma Sabiduría a la iniciativa', async () => {
+  const { iniciativa, salvacionesCompetentes, bonoHabilidad } = await import('../web/src/domain/habilidades.js');
+  const e = ch({ clase: 'Explorador', nivel: 13 }); e.play.conc = 'Marca del cazador';
+  assert.equal(aplicarDano(e, 12).concentracion, null);
+  const e2 = ch({ clase: 'Explorador', nivel: 12 }); e2.play.conc = 'Marca del cazador';
+  assert.equal(aplicarDano(e2, 12).concentracion.cd, 10);
+  const a = ch({ clase: 'Explorador', subclase: 'Acechador en la penumbra', nivel: 7 });
+  assert.equal(iniciativa(a), 3 + 2);
+  assert.ok(salvacionesCompetentes(a).has('sab'));
+  const f = ch({ clase: 'Explorador', subclase: 'Errante feérico', nivel: 3 });
+  assert.equal(bonoHabilidad(f, 'persuasion'), 2 + 2);
+});
+test('Aura de celeridad (gloria 7): +3 m de velocidad', () => {
+  assert.equal(velocidad(ch({ clase: 'Paladín', subclase: 'Juramento de gloria', nivel: 7 })), 12);
+  assert.equal(velocidad(ch({ clase: 'Paladín', subclase: 'Juramento de gloria', nivel: 6 })), 9);
+});

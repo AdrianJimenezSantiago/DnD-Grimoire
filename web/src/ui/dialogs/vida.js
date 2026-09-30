@@ -19,7 +19,7 @@ import { undoBtn } from '../../app/acciones.js';
 import { tirarPrueba } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
 import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../vitales.js';
-import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas } from '../../domain/efectos.js';
+import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas, inmunidadesEstado } from '../../domain/efectos.js';
 import { pedir } from '../modal.js';
 import { golpe } from '../golpes.js';
 
@@ -122,8 +122,9 @@ function renderEstados() {
   const insp = ve(['Inspiración heroica', 'repetir d20']) ? `<button type="button" class="es-insp ${v.inspiracion ? 'on' : ''}" data-es="inspiracion" aria-pressed="${v.inspiracion}">${gi('inspiracion')}<span><b>${marca('Inspiración heroica', q)}</b><small>${v.inspiracion ? 'La tienes: gástala para repetir un d20.' : 'Sin inspiración.'}</small></span></button>` : '';
   const agoH = ve(['Agotamiento', txtAgo, 'cansancio']) ? `<div class="es-ago"><span class="es-ago-t">${gi('agotamiento')}<span><b>${marca('Agotamiento', q)}</b><small>${txtAgo}</small></span></span>
         <div class="stepper"><button type="button" data-esago="-1" aria-label="Quitar un nivel" ${ago ? '' : 'disabled'}>−</button><output>${ago}</output><button type="button" data-esago="1" aria-label="Añadir un nivel" ${ago >= 6 ? 'disabled' : ''}>+</button></div></div>` : '';
+  const inm = inmunidadesEstado(c);
   const estados = ESTADOS.filter(([k, n]) => ve([n, RESUMEN_ESTADO[k]])).map(([k, n]) => { const on = v.estados.includes(k), cl = regla(k);
-    return `<div class="es-it ${on ? 'on' : ''}"><button type="button" class="es-tog" data-estado="${k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${marca(n, q)}</b><small>${marca(RESUMEN_ESTADO[k], q)}</small></span></button>${cl ? `<button type="button" class="linkish es-regla" data-esregla="${esc(cl)}">Regla</button>` : ''}</div>`; });
+    return `<div class="es-it ${on ? 'on' : ''}"><button type="button" class="es-tog" data-estado="${k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${marca(n, q)}</b><small>${inm.has(k) ? `<b>Inmune (${esc(inm.get(k))})</b>: no te afecta. ` : ''}${marca(RESUMEN_ESTADO[k], q)}</small></span></button>${cl ? `<button type="button" class="linkish es-regla" data-esregla="${esc(cl)}">Regla</button>` : ''}</div>`; });
   const efectos = [[true, 'Beneficiosos'], [false, 'Perjudiciales']].map(([bueno, t]) => { const xs = EFECTOS.filter(e => e.bueno === bueno && ve([e.nombre, e.texto]));
     return xs.length ? `<h4 class="es-sub">${t}</h4><section class="es-lista ef">${xs.map(e => { const x = v.efectos.find(y => y.k === e.k), on = !!x;
       return `<div class="es-it ${on ? 'on' : ''} ${bueno ? 'bueno' : 'malo'}"><button type="button" class="es-tog" data-efk="${e.k}" aria-pressed="${on}"><i class="es-marca" aria-hidden="true"></i><span><b>${gi(e.ico, 'es-ico')}${marca(e.nombre, q)}${on && x.rondas != null ? `<em class="es-dur">quedan ${esc(fmtRondas(x.rondas))}</em>` : !on && e.dur ? `<em class="es-dur apag">${esc(fmtRondas(e.dur))}</em>` : ''}${x?.conc ? '<em class="es-dur conc">concentración</em>' : ''}</b><small>${marca(e.texto, q)}</small></span></button></div>`; }).join('')}</section>` : ''; }).join('');
