@@ -215,7 +215,7 @@ function ecuacion(x) {
   if (r.bono) out.push(`${op(r.bono)}<span class="dd-bono">${Math.abs(r.bono)}</span>`);
   for (const e of extras) out.push(`${op(e.neg ? -1 : 1)}<span class="dd-fx ${e.m.mal ? 'mal' : 'bien'}">${e.t.grupos.map((g, k) => g.vals.map((v, i) => dado(g.caras, v, { cls: 'mini', fresco: e.t.frescos[k][i] })).join('')).join('')}<small>${esc(e.m.fuente)}</small></span>`);
   for (const m of planos) out.push(`${op(m.valor)}<span class="dd-fx ${m.mal ? 'mal' : 'bien'}"><span class="dd-bono">${Math.abs(m.valor)}</span><small>${esc(m.fuente)}</small></span>`);
-  if (x.precision) out.push(`${op(1)}<span class="dd-fx bien"><span class="dd-bono">${x.precision}</span><small>Ataque de precisión</small></span>`);
+  if (x.precision) out.push(`${op(1)}<span class="dd-fx bien"><span class="dd-bono">${x.precision}</span><small>${esc(V.impacto?.precision?.nombre || 'Ataque de precisión')}</small></span>`);
   const piezas = r.grupos.reduce((s, g) => s + g.vals.length, 0) + (r.d20 ? 1 : 0) + (r.bono ? 1 : 0) + extras.length + planos.length;
   if (x.tope) out.push(`<span class="dd-igual"><i class="dd-op">=</i><s class="dd-tachado">${x.res.total}</s><i class="dd-op">→</i><b class="dd-res">${x.total}</b></span><small class="dd-tope">Un 20 natural en una prueba no baja de 20.</small>`);
   else if (piezas > 1) out.push(`<span class="dd-igual"><i class="dd-op">=</i><b class="dd-res">${x.total}</b></span>`);
@@ -327,9 +327,9 @@ export function init(store) {
   const avisoMaes = (m, txt) => m && txt ? `<b>${gi('dote')}Maestría: ${esc(m.nombre)}</b><span>${esc(txt)}</span>` : '';
   on(body, 'click', '[data-daprec]', () => {
     const pr = V.impacto?.precision; if (!pr || V.res.precision) return;
-    const caras = parseInt(pr.dado.slice(1), 10) || 8, r = rngCripto(caras); pr.fn();
+    const caras = parseInt(String(pr.dado || '').slice(1), 10) || 8, r = pr.fijo ?? rngCripto(caras); pr.fn();
     V.res.precision = r; V.res.total += r; V.res.decidido = false;
-    V.res.aviso = `<b>${gi('dados')}Ataque de precisión: +${r}</b><span>1${esc(pr.dado)} de supremacía. La tirada queda en ${V.res.total}: ¿impacta ahora?</span>`;
+    V.res.aviso = `<b>${gi('dados')}${esc(pr.nombre || 'Ataque de precisión')}: +${r}</b><span>${pr.fijo ? '' : `1${esc(pr.dado)} de supremacía. `}La tirada queda en ${V.res.total}: ¿impacta ahora?</span>`;
     haptic('medium'); pintarOut();
   });
   on(body, 'click', '[data-daimpacta]', () => {
@@ -341,7 +341,7 @@ export function init(store) {
   on(body, 'click', '[data-dafalla]', () => {
     const m = V.impacto?.maestria, pr = V.impacto?.precision; V.impacto?.alFallar?.();
     // Ataque de precisión (Maestro del combate): al fallar, un dado de supremacía se suma a la tirada
-    const oferta = pr && !V.res.precision ? `<button type="button" class="dd-sig" data-daprec>${gi('dados')}<span>Ataque de precisión<small>gasta un dado de supremacía y suma 1${esc(pr.dado)} a la tirada (${pr.quedan} ${pr.quedan === 1 ? 'queda' : 'quedan'})</small></span></button>` : '';
+    const oferta = pr && !V.res.precision ? `<button type="button" class="dd-sig" data-daprec>${gi('dados')}<span>${esc(pr.nombre || 'Ataque de precisión')}<small>${esc(pr.texto || `gasta un dado de supremacía y suma 1${pr.dado} a la tirada`)} (${pr.quedan} ${pr.quedan === 1 ? 'queda' : 'quedan'})</small></span></button>` : '';
     V.res.decidido = true; V.res.aviso = (avisoMaes(m, m?.alFallar) || 'Fallo. El ataque no impacta.') + oferta; pintarOut();
     if (m?.alFallar) { const hero = $('#daOut .dd-hero'); fxImpacto(hero, { clave: V.impacto.clave, nivel: 'bueno' }); }
   });

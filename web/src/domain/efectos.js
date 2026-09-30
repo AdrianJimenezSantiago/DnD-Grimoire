@@ -122,6 +122,8 @@ export function pasivosDe(ch) {
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Bárbaro' && c.nivel >= 2 && !incap) out.push({ nombre: 'Sentir el peligro', reglas: [R('salvacion', 'ventaja', { ab: 'des' })] });
     if (c.clase === 'Bárbaro' && c.nivel >= 7) out.push({ nombre: 'Instinto salvaje', reglas: [R('iniciativa', 'ventaja')] });
+    // Cazador preciso (explorador 17): ventaja contra la criatura marcada con Marca del cazador
+    if (c.clase === 'Explorador' && c.nivel >= 17 && norm(ch.play?.conc || '') === 'marca del cazador') out.push({ nombre: 'Cazador preciso', reglas: [R('ataque', 'ventaja', { cond: 'contra la criatura marcada' })] });
     if (c.clase === 'Guerrero' && c.nivel >= 3 && /campe[oó]n/i.test(c.subclase || '')) out.push({ nombre: 'Atleta sobresaliente', reglas: [R('iniciativa', 'ventaja'), R('prueba', 'ventaja', { hab: 'atletismo' })] });
     if (c.clase === 'Pícaro' && c.nivel >= 3 && /asesin/i.test(c.subclase || '')) out.push({ nombre: 'Asesinar', reglas: [R('iniciativa', 'ventaja')] });
   }
@@ -300,7 +302,6 @@ export function resistenciasDe(ch) {
     if (c.clase === 'Guerrero' && /psionic/i.test(s) && L >= 10) add('psíquico', 'Mente robusta');
     if (c.clase === 'Clérigo' && /guerra/i.test(s) && L >= 17) add(BPS, 'Avatar de la batalla');
     if (c.clase === 'Druida' && /tierra/i.test(s) && L >= 10) { const o = opcionDe(ch, 'tierra.terreno'); add(TERRENO_RES[o?.nombre || 'Árido'], 'Protección de la naturaleza'); }
-    if (c.clase === 'Druida' && /estrella/i.test(s) && L >= 14 && efs.includes('formaestelar')) add(BPS, 'Colmado de luz estelar');
     if (c.clase === 'Paladín' && /antiguos/i.test(s) && L >= 7) add(['necrótico', 'psíquico', 'radiante'], 'Aura de salvaguarda');
     if (c.clase === 'Pícaro' && /vastago|tres/i.test(s) && L >= 3) { const o = opcionDe(ch, 'vastago.lealtad'); if (o) add(LEALTAD_RES[o.nombre], 'Lealtad aterradora'); }
     if (c.clase === 'Explorador' && /invernal/i.test(s) && L >= 3) add('frío', 'Explorador gélido');

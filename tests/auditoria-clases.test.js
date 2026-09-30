@@ -419,3 +419,15 @@ test('conjuros en español (Manual importado): mitad solo con daño, PG temporal
   assert.equal(dadosPara(cur, { nivelEspacio: 7, nivelConjuro: 6 })[0].bono, 80);
   assert.equal(dadosPara(ajustarTiradas(analizarTiradas('sufrirán 10d8 de daño de relámpago', ''), 'Chain Lightning'), { nivelEspacio: 6, nivelConjuro: 6 })[0].veces, 4);
 });
+
+test('reacciones al recibir daño y Golpe guiado, Cazador preciso', async () => {
+  const { reaccionesDano } = await import('../web/src/domain/automatismos.js');
+  const p = ch({ clase: 'Pícaro', nivel: 5 });
+  assert.equal(reaccionesDano(p).find(r => r.k === 'esquiva').aplica(p, 11), 5);
+  const m = ch({ clase: 'Monje', nivel: 3 });
+  assert.equal(reaccionesDano(m, () => 4).find(r => r.k === 'desviar').aplica(m, 12), 12 - (4 + 3 + 3));
+  const a = ch({ clase: 'Mago', subclase: 'Abjurador', nivel: 3 }); const w = reaccionesDano(a).find(r => r.k === 'salvaguarda');
+  assert.equal(w.aplica(a, 20), 20 - (6 + 1)); assert.equal(recState(a, 'tpl:abjurador.salvaguarda').used, 7);
+  const e = ch({ clase: 'Explorador', nivel: 17 }); e.play.conc = 'Marca del cazador';
+  assert.ok(modsTirada(e, { sobre: 'ataque' }).some(x => x.fuente === 'Cazador preciso'));
+});
