@@ -16,7 +16,7 @@ import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -314,6 +314,7 @@ function avisoGasto(S, id, h, g) {
   const extra = g.cura && !g.cura.solo ? [{ label: `Curarme ${g.cura.expr}`, hl: true, fn: () => {
     let x = null; const h2 = S.act(`${r?.nombre || 'Curación'}: sobre ti`, (db, c) => { x = aplicarCuracion(c, g.cura); });
     golpe('cura', x.aplicado); toast(`Recuperas ${x.aplicado} PG (${esc(g.cura.expr)}: ${x.total}).`, [undoBtn(S, h2)]); } }] : [];
+  if (id === 'tpl:especie.aliento') { const a = alientoDe(ch); extra.push({ label: `Tirar ${a.dado}`, hl: true, fn: () => import('../ui/dialogs/dados.js').then(m => m.tirarDano({ titulo: 'Ataque de aliento', sub: `de daño ${a.tipo}`.trim(), expr: a.dado, clave: a.tipo })) }); }
   if (g.cura?.solo && g.cura.aplicado) golpe(g.cura.tipo === 'temp' ? 'temp' : 'cura', g.cura.aplicado);
   if (!k && !g.extra.length && !extra.length) return;
   if (k) golpe('buff');

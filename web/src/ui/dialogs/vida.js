@@ -20,7 +20,7 @@ import { undoBtn } from '../../app/acciones.js';
 import { tirarPrueba } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
 import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../vitales.js';
-import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas, inmunidadesEstado } from '../../domain/efectos.js';
+import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas, inmunidadesEstado, resistenciasDe } from '../../domain/efectos.js';
 import { pedir } from '../modal.js';
 import { golpe } from '../golpes.js';
 
@@ -60,8 +60,10 @@ function render() {
 export function danar(S2, n, critico = false) {
   const c = S2.cur(), desde = pgActuales(c); let r;
   const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) soltarConc(x); });
-  const c2 = S2.cur(), acts = [undoBtn(S2, h)];
-  let msg = `<b>${n}</b> de daño${r.absorbido ? ` (${r.absorbido} a los temporales)` : ''}. Quedan <b>${pgActuales(c2)}</b> PG.`;
+  const c2 = S2.cur(), acts = [undoBtn(S2, h)], res = resistenciasDe(c2);
+  // Resistencias: si el daño es de uno de esos tipos, rehace el golpe con la mitad
+  if (res.length && n > 1) acts.push({ label: 'Tengo resistencia: la mitad', fn: () => { S2.undo(h); danar(S2, Math.floor(n / 2), critico); } });
+  let msg = `<b>${n}</b> de daño${r.absorbido ? ` (${r.absorbido} a los temporales)` : ''}. Quedan <b>${pgActuales(c2)}</b> PG.${res.length ? ` <span class="tnote">Resistes: ${esc(res.map(x => `${x.tipo} (${x.fuente})`).join(', '))}.</span>` : ''}`;
   if (r.muerte) msg = `<b>${n}</b> de daño: <b>${esc(c.nombre)} muere</b>${r.fallo ? ' (tercer fallo)' : ' (daño masivo)'}.`;
   else if (r.cayo) msg = `<b>${n}</b> de daño: cae a 0 PG, inconsciente.${r.concentracion?.perdida ? ` Pierde la concentración en ${esc(r.concentracion.conjuro)}.` : ''}`;
   else if (r.fallo) msg = `Daño a 0 PG: un fallo en las salvaciones contra muerte.`;

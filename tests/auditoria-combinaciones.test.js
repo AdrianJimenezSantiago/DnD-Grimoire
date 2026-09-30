@@ -70,3 +70,17 @@ test('los recursos de todas las subclases a nivel 20 tienen máximo positivo y r
     }
   }
 });
+
+test('todas las especies y sus linajes, de nivel 1 a 20: el motor responde y sus conjuros existen', async () => {
+  const { LINAJES, conjurosEspecie, RASGOS_ESPECIE } = await import('../web/src/domain/especies.js');
+  const especies = { aasimar: 'Aasimar', draconido: 'Dracónido', elfo: 'Elfo', enano: 'Enano', gnomo: 'Gnomo', goliat: 'Goliat', humano: 'Humano', mediano: 'Mediano', orco: 'Orco', tiefling: 'Tiefling' };
+  assert.deepEqual(Object.keys(RASGOS_ESPECIE).sort(), Object.keys(especies).sort());
+  for (const [k, especie] of Object.entries(especies)) {
+    const d = LINAJES.find(x => x.especie === k && x.cambia === 'fija'), ops = d ? d.opciones.map(o => o.nombre) : [''];
+    for (const op of ops) for (const nivel of [1, 3, 5, 11, 17, 20]) {
+      const ch = normChar(blankChar({ clase: 'Guerrero', nivel, stats, especie, opciones: op ? { [d.id]: op } : {} }));
+      ejercitar(ch);
+      for (const c of conjurosEspecie(ch, nivel)) assert.ok(nombres.has(c.nombre.toLowerCase()), `${especie} ${op}: ${c.nombre}`);
+    }
+  }
+});

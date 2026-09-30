@@ -5,6 +5,7 @@ import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from '
 import { maniobrasDe, cdManiobras, dadoSupremacia } from './maniobras.js';
 import { VARIANTES, varianteDe } from './variantes.js';
 import { opcionDeRasgo, opcionDe, CAMBIA_TXT } from './opcionesRasgo.js';
+import { RASGOS_ESPECIE, especieBase } from './especies.js';
 
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
 const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen : 'clase');
@@ -115,7 +116,15 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
     }
   }
   const esp = especieDe(ch, lib), total = nivelTotal(ch);
-  if (esp) for (const r of esp.rasgos) if ((r.nivel || 1) <= total) nuevo(`especie:${norm(r.nombre)}`, { nombre: r.nombre, nivel: r.nivel || 1, origen: 'especie', etiqueta: esp.nombre + (r.nivel > 1 ? ` · nivel ${r.nivel}` : '') }, { texto: r.texto, fuente: esp.fuente });
+  // Atributos de especie: los del libro importado o, sin él, sus nombres (para usos y elecciones)
+  const rasgosEsp = esp ? esp.rasgos : (RASGOS_ESPECIE[especieBase(ch)] || []).map(([nivel, nombre]) => ({ nivel, nombre, texto: '' }));
+  const nombreEsp = esp?.nombre || String(ch.especie || '').replace(/\s*\(.*$/, '');
+  for (const r of rasgosEsp) if ((r.nivel || 1) <= total) {
+    const n = norm(r.nombre), recurso = recursos.find(x => x.tipo === 'recurso' && /^tpl:especie\./.test(x.id) && (norm(x.nombre) === n || norm(x.nombre).startsWith(n + ' ('))) || null;
+    nuevo(`especie:${n}`, { nombre: r.nombre, nivel: r.nivel || 1, origen: 'especie', etiqueta: nombreEsp + (r.nivel > 1 ? ` · nivel ${r.nivel}` : '') }, r.texto ? { texto: r.texto, fuente: esp.fuente } : null, [], recurso);
+    const op = opcionDeRasgo(ch, r.nombre), x = out[out.length - 1];
+    if (op) { x.eleccion = { id: op.id, rasgo: op.rasgo, opciones: op.opciones, actual: opcionDe(ch, op.id)?.nombre || '', cambia: op.cambia, cuando: CAMBIA_TXT[op.cambia] }; if (x.eleccion.actual) x.numeros = [{ nombre: op.rasgo, valor: x.eleccion.actual }]; }
+  }
   for (const d of dotesDe(ch, lib.trasfondos || [])) {
     const n = norm(d.nombre); if (NO_JUEGO.test(n)) continue;
     const x = dotePorNombre(lib, d.nombre), nombre = d.detalle ? `${d.nombre} (${d.detalle})` : d.nombre;

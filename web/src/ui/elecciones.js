@@ -45,17 +45,18 @@ export function elegirDote(ch, { titulo = 'Elegir dote', grupoInicial = '', excl
     sub: lib.length ? 'Toca una para leerla antes de elegirla. También puedes escribir otra.' : 'Sin libros importados solo salen las dotes de origen. Importa el Manual del Jugador para verlas todas, o escribe cualquier otra.' });
 }
 
+// Atributos de cada especie con los nombres del Manual del Jugador de 2024
 export const ESPECIE_BASE = {
-  Aasimar: 'Resistencia celestial · Manos curativas · Portador de luz · Revelación celestial (nivel 3)',
-  'Dracónido': 'Linaje dracónico · Arma de aliento · Resistencia al daño · Vuelo dracónico (nivel 5)',
-  Elfo: 'Visión en la oscuridad · Linaje élfico · Ascendencia feérica · Sentidos agudos · Trance',
-  Enano: 'Visión en la oscuridad (36 m) · Resistencia enana · Dureza enana · Sentido de la piedra',
-  Gnomo: 'Visión en la oscuridad · Astucia gnómica · Linaje gnomo',
-  Goliat: 'Velocidad 10,5 m · Ascendencia de gigante · Forma grande (nivel 5) · Constitución poderosa',
-  Humano: 'Ingenioso · Habilidoso · Versátil (una dote de origen)',
-  Mediano: 'Valiente · Agilidad mediana · Suerte · Sigiloso por naturaleza',
-  Orco: 'Descarga de adrenalina · Visión en la oscuridad (36 m) · Aguante incansable',
-  Tiefling: 'Visión en la oscuridad · Legado infernal · Presencia sobrenatural',
+  Aasimar: 'Manos curativas · Portador de luz · Resistencia celestial · Visión en la oscuridad · Revelación celestial (nivel 3)',
+  'Dracónido': 'Linaje dracónico · Ataque de aliento · Resistencia al daño · Visión en la oscuridad · Vuelo dracónico (nivel 5)',
+  Elfo: 'Linaje élfico · Linaje feérico · Sentidos agudos · Trance · Visión en la oscuridad',
+  Enano: 'Afinidad con la piedra · Aguante enano · Resistencia enana · Visión en la oscuridad (36 m)',
+  Gnomo: 'Astucia gnoma · Linaje gnomo · Visión en la oscuridad',
+  Goliat: 'Velocidad 10,5 m · Constitución poderosa · Forma grande (nivel 5) · Linaje gigante',
+  Humano: 'Diestro · Ingenioso · Versátil (una dote de origen)',
+  Mediano: 'Agilidad de mediano · Fortuna · Sigiloso por naturaleza · Valiente',
+  Orco: 'Aguante incansable · Descarga de adrenalina · Visión en la oscuridad (36 m)',
+  Tiefling: 'Legado infernal · Presencia sobrenatural · Visión en la oscuridad',
 };
 export function elegirEspecie(actual = '') {
   const lib = biblioteca().especies, items = ESPECIES.map(n => {

@@ -9,6 +9,7 @@ import { modOf, competencia, nivelTotal } from './reglas2024.js';
 import { golpesDeOpciones } from './opcionesRasgo.js';
 import { DADO_ARTES, DANO_FURIA } from './equipo.js';
 import { esMarcial } from './competencias.js';
+import { linajeDe } from './especies.js';
 
 // Lo que se puede añadir al daño de un ataque con arma que impacta, según las reglas de 2024:
 // maniobras del Maestro del combate (gastan un dado de supremacía), Castigo divino del paladín (gasta un espacio o el uso
@@ -87,6 +88,12 @@ export function opcionesAlImpactar(ch, o) {
   const cdiv = libres(ch, 'tpl:paladin.canalizar');
   if (sub('Paladín', /genios/) && cuerpo && cdiv > 0) out.push({ k: 'ifrit', grupo: '', titulo: 'Castigo elemental', nombre: 'Furia del ifrit: +2d4 de fuego', dado: '2d4', gasta: { rec: 'tpl:paladin.canalizar' },
     nota: `Solo junto a Castigo divino; otra criatura a 9 m también sufre 2d4 de fuego. Gasta Canalizar divinidad (te quedan ${cdiv}).` });
+  // Especie: Linaje gigante del goliat (usos = competencia) y Revelación celestial del aasimar (una vez por turno)
+  const gig = linajeDe(ch, 'especie.goliat'), usosGig = libres(ch, 'tpl:especie.gigante');
+  if (gig?.golpe && usosGig > 0) out.push({ k: 'gigante', grupo: '', titulo: gig.nombre, nombre: gig.golpe.dado ? `+${gig.golpe.dado} de ${gig.golpe.tipo}` : 'Derribar', dado: gig.golpe.dado, gasta: { rec: 'tpl:especie.gigante' },
+    nota: `${gig.texto} Te quedan ${usosGig} usos.` });
+  if ((ch.vida?.efectos || []).some(e => e.k === 'revelacion') && una('revelacion')) { const pb = competencia(nivelTotal(ch));
+    out.push({ k: 'revelacion', grupo: '', titulo: 'Revelación celestial', nombre: `+${pb} radiante o necrótico`, dado: String(pb), unaVez: true, nota: 'Una vez en cada uno de tus turnos mientras dure la transformación.' }); }
   // Conjuros en marcha que suman daño a cada impacto: Marca del cazador y Maleficio
   const conc = norm(ch.play?.conc || '');
   if (conc === 'marca del cazador') { const d = clasesDe(ch).some(x => x.clase === 'Explorador' && x.nivel >= 20) ? '1d10' : '1d6';

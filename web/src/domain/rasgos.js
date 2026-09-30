@@ -2,6 +2,7 @@ import { clamp, norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from './reglas2024.js';
 import { cdManiobras } from './maniobras.js';
+import { linajeActual } from './especies.js';
 
 export const TIPO_TXT = { recurso: 'Recurso con usos', dados: 'Dados que se anotan', recuperar: 'Recuperar espacios', al_lanzar: 'Efecto al lanzar un conjuro' };
 export const RECARGA_TXT = { largo: 'se recuperan con un descanso largo', corto: 'se recuperan con un descanso corto o largo', corto1: 'recupera 1 con un descanso corto y todos con uno largo', nunca: 'no se recuperan (consumible)' };
@@ -211,10 +212,11 @@ export function plantillasOrigen(ch) {
   const L = nivelTotal(ch), pb = competencia(L), T = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];
   const R = (id, nombre, max, recarga = 'largo', nota = '') => T.push({ id: 'tpl:' + id, tpl: true, tipo: 'recurso', nombre, max, recarga, nota });
   const ESP = {
-    draconido: () => { R('especie.aliento', 'Arma de aliento', pb, 'largo', 'Sustituye un ataque: cono de 4,5 m o línea de 9 m, salvación de Destreza.'); if (L >= 5) R('especie.vuelo', 'Vuelo dracónico', 1, 'largo', 'Acción adicional: velocidad volando igual a tu velocidad durante 10 minutos.'); },
+    draconido: () => { R('especie.aliento', 'Ataque de aliento', pb, 'largo', `Sustituye un ataque: cono de 4,5 m o línea de 9 m, salvación de Destreza CD ${8 + modOf(statsEfectivos(ch).con) + pb}, ${[1, 5, 11, 17].filter(x => L >= x).length}d10${linajeActual(ch)?.dano ? ` de ${linajeActual(ch).dano}` : ''} (mitad si la supera).`); if (L >= 5) R('especie.vuelo', 'Vuelo dracónico', 1, 'largo', 'Acción adicional: velocidad volando igual a tu velocidad durante 10 minutos.'); },
     aasimar: () => { R('especie.manos', 'Manos curativas', 1, 'largo', `Curas ${pb}d4 a una criatura que toques.`); if (L >= 3) R('especie.revelacion', 'Revelación celestial', 1, 'largo', 'Te transformas durante 1 minuto.'); },
-    enano: () => R('especie.piedra', 'Sentido de la piedra', pb, 'largo', 'Sentido de temblores 18 m durante 10 minutos.'),
-    goliat: () => { R('especie.gigante', 'Ascendencia de gigante', pb, 'largo'); if (L >= 5) R('especie.grande', 'Forma grande', 1, 'largo', 'Te vuelves Grande durante 10 minutos.'); },
+    enano: () => R('especie.piedra', 'Afinidad con la piedra', pb, 'largo', 'Acción adicional: sentido de la vibración 18 m durante 10 minutos, sobre piedra.'),
+    gnomo: () => { if (linajeActual(ch)?.gratisPb) R('especie.animales', 'Linaje gnomo (hablar con los animales)', pb, 'largo', 'Hablar con los animales sin gastar espacio.'); },
+    goliat: () => { R('especie.gigante', 'Linaje gigante', pb, 'largo', linajeActual(ch)?.texto || 'Elige tu linaje gigante en «En juego».'); if (L >= 5) R('especie.grande', 'Forma grande', 1, 'largo', 'Te vuelves Grande durante 10 minutos.'); },
     orco: () => { R('especie.adrenalina', 'Descarga de adrenalina', pb, 'corto', 'Correr como acción adicional y ganas PG temporales.'); R('especie.aguante', 'Aguante incansable', 1, 'largo', 'Al caer a 0 PG, te quedas a 1.'); },
   };
   ESP[especie]?.();
@@ -293,7 +295,9 @@ export const RECURSO_DE_CONJURO = {
 const RECURSO_DE_FUENTE = [[/^iniciado en la magia(?: \((.+)\))?/, m => `tpl:dote.iniciado.${norm(m[1] || '')}`], [/^influencia feerica/, () => 'tpl:dote.feerica'],
   [/^influencia sombria/, () => 'tpl:dote.sombria'], [/^telepatico/, () => 'tpl:dote.telepatico'],
   // Artes sombrías (monje de la sombra): Oscuridad cuesta 1 punto de concentración en lugar de un espacio
-  [/^guerrero de la sombra/, () => 'tpl:monje.concentracion']];
+  [/^guerrero de la sombra/, () => 'tpl:monje.concentracion'],
+  // Gnomo de los bosques: Hablar con los animales gratis tantas veces como tu competencia
+  [/^linaje gnomo/, () => 'tpl:especie.animales']];
 export function recursoParaConjuro(ch, nombre, fuente = '') {
   const f = norm(fuente), porFuente = RECURSO_DE_FUENTE.map(([re, id]) => { const m = re.exec(f); return m ? id(m) : null; }).filter(Boolean);
   const ids = [...porFuente, ...(RECURSO_DE_CONJURO[norm(nombre)] || [])]; if (!ids.length) return null;
