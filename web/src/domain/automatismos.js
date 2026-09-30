@@ -183,3 +183,18 @@ export function alientoDe(ch) {
   const L = nivelTotal(ch), pb = competencia(L), tipo = linajeDe(ch, 'especie.draconido')?.dano || '';
   return { cd: 8 + modOf(statsEfectivos(ch).con) + pb, dado: `${[1, 5, 11, 17].filter(x => L >= x).length}d10`, tipo };
 }
+
+// Reacciones que reducen el daño recibido de un ataque: se ofrecen al anotar el daño.
+// aplica(ch, n) gasta lo que toque y devuelve el daño que queda.
+export function reaccionesDano(ch, tirar = tirarDado) {
+  const out = [], st = statsEfectivos(ch), pic = nivelClase(ch, 'Pícaro'), monje = nivelClase(ch, 'Monje');
+  if (pic >= 5) out.push({ k: 'esquiva', label: 'Esquiva asombrosa: la mitad', aplica: (c, n) => Math.floor(n / 2) });
+  if (monje >= 3) { const bono = modOf(st.des) + monje;
+    out.push({ k: 'desviar', label: `Desviar ataques: −1d10 + ${bono}`, aplica: (c, n) => Math.max(0, n - (tirar(10) + bono)) }); }
+  const ward = regla(ch, 'tpl:abjurador.salvaguarda'), queda = ward ? ward.max - usosGastados(ch, ward) : 0;
+  if (queda > 0) out.push({ k: 'salvaguarda', label: `Salvaguarda arcana: absorbe hasta ${queda}`, aplica: (c, n) => { const a = Math.min(n, queda); gastar(c, ward.id, a); return n - a; } });
+  const sup = regla(ch, 'tpl:maestro.supremacia'), dados = sup ? sup.max - usosGastados(ch, sup) : 0;
+  if (dados > 0 && (ch.maniobras || []).some(m => norm(m) === 'parada')) { const g = nivelClase(ch, 'Guerrero'), caras = g >= 18 ? 12 : g >= 10 ? 10 : 8, bono = Math.max(modOf(st.fue), modOf(st.des));
+    out.push({ k: 'parada', label: `Parada: −1d${caras} + ${bono}`, aplica: (c, n) => { gastar(c, sup.id); return Math.max(0, n - (tirar(caras) + bono)); } }); }
+  return out;
+}

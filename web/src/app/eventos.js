@@ -324,7 +324,11 @@ function bindSheet() {
   const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
   // Ataque de precisión: si conoces la maniobra y te quedan dados de supremacía, se ofrece al fallar
   const precisionDe = ch => {
-    if (!maniobrasDe(ch).some(m => m.nombre === 'Ataque de precisión')) return null;
+    // Golpe guiado (dominio de la guerra 3): al fallar, +10 a la tirada gastando Canalizar divinidad
+    const guerra = clasesDe(ch).some(c => c.clase === 'Clérigo' && c.nivel >= 3 && /guerra/i.test(c.subclase || '')), cd = reglas(ch).find(x => x.id === 'tpl:clerigo.canalizar');
+    const guiado = guerra && cd && cd.max - usosGastados(ch, cd) > 0 ? { nombre: 'Golpe guiado', fijo: 10, quedan: cd.max - usosGastados(ch, cd), texto: 'gasta Canalizar divinidad y suma +10 a la tirada',
+      fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { recState(c, cd.id).used = (recState(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [A.undoBtn(S, h)]); } } : null;
+    if (!maniobrasDe(ch).some(m => m.nombre === 'Ataque de precisión')) return guiado;
     const r = reglas(ch).find(x => x.id === 'tpl:maestro.supremacia'); if (!r) return null;
     const quedan = r.max - usosGastados(ch, r); if (quedan < 1) return null;
     return { dado: dadoSupremacia(clasesDe(ch).find(c => c.clase === 'Guerrero').nivel), quedan,

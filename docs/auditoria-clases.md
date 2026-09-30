@@ -6,7 +6,7 @@ Generado por `tools/auditoria-clases.mjs`. Cada rasgo, nivel a nivel, con lo que
 
 Las pruebas `tests/auditoria-*.test.js` recorren todas las clases y subclases de nivel 1 a 20 y todas las multiclases de dos clases.
 
-Recuento: 336 automáticos, 12 en parte y 193 de consulta.
+Recuento: 345 automáticos, 11 en parte y 185 de consulta.
 
 ## Bárbaro
 
@@ -218,7 +218,7 @@ Conjuros siempre preparados: nivel 3: Manos ardientes, Orden imperiosa, Rayo abr
 | 3 | Conjuros psíquicos | Automático | Conjuros siempre preparados por nivel. |
 | 3 | Mente iluminada | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 6 | Combatiente clarividente | Automático | Contador (descanso corto) con canje por espacio de pacto. |
-| 10 | Escudo mental | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 10 | Escudo mental | Automático | Resistencia psíquica. |
 | 10 | Maleficio sobrenatural | Automático | Maleficio siempre preparado; +1d6 al impactar. |
 | 14 | Crear siervo | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 
@@ -250,10 +250,10 @@ Conjuros siempre preparados: nivel 3: Detectar pensamientos, Fuerza fantasmal, R
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
 | 3 | Conjuros del dominio de la guerra | Automático | Conjuros siempre preparados por nivel. |
-| 3 | Golpe guiado | Se consulta | Canalizar divinidad. |
+| 3 | Golpe guiado | Automático | Al fallar un ataque, +10 gastando Canalizar divinidad. |
 | 3 | Sacerdote guerrero | Automático | Contador (Sab, descanso corto). |
 | 6 | Bendición del dios de la guerra | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 17 | Avatar de la batalla | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 17 | Avatar de la batalla | Automático | Resistencia contundente, cortante y perforante. |
 
 Conjuros siempre preparados: nivel 3: Arma espiritual, Arma mágica, Escudo de fe, Saeta guía; nivel 5: Espíritus guardianes, Manto del cruzado; nivel 7: Escudo de fuego, Libertad de movimiento; nivel 9: Golpe de viento acerado, Inmovilizar monstruo.
 
@@ -402,7 +402,7 @@ Conjuros siempre preparados: nivel 3: Hacer añicos, Nube de oscurecimiento, Ola
 | 14 | Velo de la naturaleza | Automático | Contador (Sab). |
 | 15 | Rasgo de subclase | Automático | Se elige en la subida de nivel. |
 | 16 | Mejora de característica | Automático | Asistente de subida de nivel: +2/+1 o dote. |
-| 17 | Cazador preciso | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 17 | Cazador preciso | Automático | Ventaja contra la criatura marcada mientras mantienes Marca del cazador. |
 | 18 | Sentidos salvajes | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 19 | Don épico | Automático | Asistente de subida de nivel. |
 | 20 | Azote de enemigos | Automático | Marca del cazador hace 1d10. |
@@ -458,7 +458,7 @@ Conjuros siempre preparados: nivel 3: Hechizar persona; nivel 5: Paso brumoso; n
 |---|---|---|---|
 | 3 | Conjuros de caminante invernal | Automático | Conjuros siempre preparados por nivel. |
 | 3 | Escarcha del cazador | Automático | Al lanzar Marca del cazador ganas 1d10 + nivel PG temporales. |
-| 3 | Explorador gélido | Automático | Golpes polares +1d4 de frío al impactar (1d6 a nivel 11). |
+| 3 | Explorador gélido | Automático | Golpes polares al impactar y resistencia al frío. |
 | 7 | Alma fortalecedora | Automático | Contador. |
 | 11 | Represalia escalofriante | Automático | Contador. |
 | 15 | Espectro congelado | Automático | Contador con canje por espacio de nivel 4+. |
@@ -525,7 +525,7 @@ Conjuros siempre preparados: nivel 3: Cuchillo de hielo; nivel 5: Inmovilizar pe
 |---|---|---|---|
 | 3 | Poder psiónico | Automático | Dados de energía (1 en descanso corto); Golpe psiónico al impactar. |
 | 7 | Adepto telequinético | Automático | Contador con canje por dado. |
-| 10 | Mente robusta | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 10 | Mente robusta | Automático | Resistencia psíquica. |
 | 15 | Bastión de fuerza | Automático | Contador con canje por dado. |
 | 18 | Maestro telequinético | Automático | Telequinesis siempre preparada y gratis 1/día, con Inteligencia. |
 
@@ -584,7 +584,7 @@ Conjuros siempre preparados: nivel 3: Entender idiomas.
 |---|---|---|---|
 | 3 | Conjuros psiónicos | Automático | Conjuros siempre preparados por nivel. |
 | 3 | Habla telepática | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 6 | Defensas psíquicas | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 6 | Defensas psíquicas | Automático | Resistencia psíquica y ventaja contra asustado o hechizado. |
 | 6 | Hechicería psiónica | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 14 | Revelación en carne | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 18 | Implosión deformadora | Automático | Contador con canje por 5 puntos. |
@@ -663,7 +663,7 @@ Conjuros siempre preparados: nivel 3: Curar heridas, Rayo abrasador, Restablecim
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
 | 3 | Experto en abjuración | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 3 | Salvaguarda arcana | Automático | Reserva de PG; se recarga sola al lanzar abjuración con espacio. |
+| 3 | Salvaguarda arcana | Automático | Reserva de PG; se recarga sola al lanzar abjuración con espacio o gastando un espacio; absorbe daño con un botón al recibirlo. |
 | 6 | Salvaguarda proyectada | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 10 | Rompeconjuros | Automático | Contrahechizo y Disipar magia siempre preparados. |
 | 14 | Resistencia a conjuros | Automático | Ventaja en salvaciones contra conjuros. |
@@ -721,7 +721,7 @@ Conjuros siempre preparados: nivel 3: Ilusión menor; nivel 6: Invocar bestia, I
 | 2 | Concentración de monje | Automático | Puntos (descanso corto) y su CD. |
 | 2 | Metabolismo asombroso | Automático | Al tirar iniciativa recuperas los puntos y te curas nivel + dado (1/día). |
 | 2 | Movimiento sin armadura | Automático | Velocidad extra sin armadura ni escudo. |
-| 3 | Desviar ataques | En parte | Número de reducción. |
+| 3 | Desviar ataques | Automático | Botón al recibir daño: resta 1d10 + Des + nivel. |
 | 3 | Subclase de monje | Automático | Se elige en la subida de nivel. |
 | 4 | Caída lenta | En parte | Número de reducción. |
 | 4 | Mejora de característica | Automático | Asistente de subida de nivel: +2/+1 o dote. |
@@ -847,7 +847,7 @@ Conjuros siempre preparados: nivel 3: Heroísmo, Saeta guía; nivel 5: Arma mág
 |---|---|---|---|
 | 3 | Conjuros del juramento de los antiguos | Automático | Conjuros siempre preparados por nivel. |
 | 3 | Ira de la naturaleza | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 7 | Aura de salvaguarda | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 7 | Aura de salvaguarda | Automático | Resistencia a necrótico, psíquico y radiante en la lista de resistencias. |
 | 15 | Centinela imperecedero | Automático | Contador. |
 | 20 | Campeón ancestral | Automático | Contador con canje por espacio de nivel 5. |
 
@@ -890,7 +890,7 @@ Conjuros siempre preparados: nivel 3: Castigo atronador, Elementalismo, Orbe cro
 | 3 | Puntería certera | Automático | Se activa en «En juego»: ventaja y velocidad 0. |
 | 3 | Subclase de pícaro | Automático | Se elige en la subida de nivel. |
 | 4 | Mejora de característica | Automático | Asistente de subida de nivel: +2/+1 o dote. |
-| 5 | Esquiva asombrosa | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 5 | Esquiva asombrosa | Automático | Botón al recibir daño: la mitad. |
 | 5 | Golpe astuto | En parte | Muestra la CD. |
 | 6 | Pericia | Automático | Cupo de pericias por clase y nivel. |
 | 7 | Evasión | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
