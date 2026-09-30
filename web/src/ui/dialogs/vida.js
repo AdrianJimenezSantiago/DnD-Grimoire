@@ -1,5 +1,5 @@
 import { esc, norm, numLibre } from '../../core/util.js';
-import { rangoMuerte } from '../../domain/automatismos.js';
+import { rangoMuerte, reduccionArmaduraPesada } from '../../domain/automatismos.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
@@ -62,6 +62,8 @@ export function danar(S2, n, critico = false) {
   const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) soltarConc(x); });
   const c2 = S2.cur(), acts = [undoBtn(S2, h)], res = resistenciasDe(c2);
   // Resistencias: si el daño es de uno de esos tipos, rehace el golpe con la mitad
+  const red = reduccionArmaduraPesada(c2);
+  if (red && n > 0) acts.push({ label: `Maestro en armaduras pesadas: −${red}`, fn: () => { S2.undo(h); danar(S2, Math.max(0, n - red), critico); } });
   if (res.length && n > 1) acts.push({ label: 'Tengo resistencia: la mitad', fn: () => { S2.undo(h); danar(S2, Math.floor(n / 2), critico); } });
   let msg = `<b>${n}</b> de daño${r.absorbido ? ` (${r.absorbido} a los temporales)` : ''}. Quedan <b>${pgActuales(c2)}</b> PG.${res.length ? ` <span class="tnote">Resistes: ${esc(res.map(x => `${x.tipo} (${x.fuente})`).join(', '))}.</span>` : ''}`;
   if (r.muerte) msg = `<b>${n}</b> de daño: <b>${esc(c.nombre)} muere</b>${r.fallo ? ' (tercer fallo)' : ' (daño masivo)'}.`;

@@ -181,7 +181,7 @@ export function faltaRequisito(req, ch) {
 // Aumento de característica que da una dote («Aumenta tu Fuerza o Destreza en 1…»)
 const NOM = Object.fromEntries(ABILS.map(([k, n]) => [norm(n), k]));
 export function aumentoDeDote(texto) {
-  const t = norm(texto || '').replace(/\ben\s*[t\\|l!i]\s*[.,]?\s*(?=h?asta)/, 'en 1, '), m = /aumenta (?:en 1 )?(?:tu |una |la )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);
+  const t = norm(texto || '').replace(/\b1nteligencia/g, 'inteligencia').replace(/\ben\s*[t\\|l!i]\s*[.,]?\s*(?=h?asta)/, 'en 1, '), m = /aumenta (?:en 1 )?(?:tu |una |la )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);
   if (!m) return null;
   if (/^caracteristica$/.test(m[1].trim()) && /elige una caracteristica/.test(t)) return ABILS.map(([k]) => k);
   if (/de tu eleccion|una caracteristica|cualquier/.test(m[1])) return ABILS.map(([k]) => k);

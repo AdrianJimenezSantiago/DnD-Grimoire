@@ -2,9 +2,10 @@ import { norm, uid } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
 import { claseArmadura } from './equipo.js';
 import { velocidad, abDe } from './habilidades.js';
-import { clasesDe, modOf } from './reglas2024.js';
+import { clasesDe, modOf, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { armadurasDe } from './competencias.js';
 import { resistenciasEspecie } from './especies.js';
+import { pgMaximo, pgActuales } from './vida.js';
 import { opcionDe } from './opcionesRasgo.js';
 
 const R = (sobre, efecto, extra = {}) => ({ sobre, efecto, ...extra });
@@ -78,6 +79,7 @@ export const EFECTOS = [
   { k: 'voto', dur: 10, rasgo: true, nombre: 'Voto de enemistad', bueno: true, ico: 'combate', texto: 'Ventaja en tus tiradas de ataque contra la criatura del voto durante 1 minuto.', reglas: [R('ataque', 'ventaja', { cond: 'contra la criatura del voto' })] },
   { k: 'armasagrada', dur: 100, rasgo: true, nombre: 'Arma sagrada', bueno: true, ico: 'radiante', texto: 'Sumas tu Carisma a las tiradas de ataque con el arma, que da luz y puede hacer daño radiante, durante 10 minutos.', reglas: [R('ataque', 'plano', { valorAb: 'car', cond: 'con el arma bendecida' })] },
   { k: 'atleta', dur: 600, rasgo: true, nombre: 'Atleta sin parangón', bueno: true, ico: 'velocidad', texto: 'Ventaja en Atletismo y Acrobacias, y tus saltos llegan 3 m más lejos, durante 1 hora.', reglas: [R('prueba', 'ventaja', { hab: 'atletismo' }), R('prueba', 'ventaja', { hab: 'acrobacias' })] },
+  { k: 'parada', dur: 1, rasgo: true, nombre: 'Parada', bueno: true, ico: 'ca', texto: 'Sumas tu bonificador por competencia a la CA contra ataques cuerpo a cuerpo hasta el principio de tu siguiente turno.', caPb: true, reglas: [] },
   { k: 'innata', dur: 10, nombre: 'Hechicería innata', bueno: true, ico: 'esc_evo', texto: 'Durante 1 minuto, la CD de tus conjuros de hechicero sube 1 y tienes ventaja en tus tiradas de ataque de conjuro.', reglas: [R('ataque', 'ventaja', { cond: 'solo ataques de conjuro' })] },
   { k: 'revelacion', dur: 10, rasgo: true, nombre: 'Revelación celestial', bueno: true, ico: 'radiante', texto: 'Transformación de 1 minuto: una vez por turno, daño radiante o necrótico adicional igual a tu competencia.', reglas: [] },
   { k: 'formagrande', dur: 100, rasgo: true, nombre: 'Forma grande', bueno: true, ico: 'fuerza', texto: 'Eres Grande durante 10 minutos: ventaja en pruebas de Fuerza y +3 m de velocidad.', vel: 3, reglas: [R('prueba', 'ventaja', { ab: 'fue' })] },
@@ -110,7 +112,7 @@ export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantan
 export const EFECTO_DE_RASGO = {
   'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
   'voto de enemistad': { k: 'voto', gasta: 'tpl:paladin.canalizar' }, 'arma sagrada': { k: 'armasagrada', gasta: 'tpl:paladin.canalizar' },
-  'atleta sin parangon': { k: 'atleta', gasta: 'tpl:paladin.canalizar' }, 'defensa superior': { k: 'defensasup', gasta: 'tpl:monje.concentracion', n: 3 },
+  'atleta sin parangon': { k: 'atleta', gasta: 'tpl:paladin.canalizar' }, 'duelista defensivo': { k: 'parada' }, 'defensa superior': { k: 'defensasup', gasta: 'tpl:monje.concentracion', n: 3 },
 };
 
 // Ventajas pasivas de clase y especie que se aplican solas a las tiradas
@@ -129,6 +131,7 @@ export function pasivosDe(ch) {
     reglas: [R('ataque', 'desventaja'), ...['fue', 'des'].flatMap(ab => [R('prueba', 'desventaja', { ab }), R('salvacion', 'desventaja', { ab })])] });
   const dotes = (ch.dotes || []).map(d => norm(d).replace(/\s*\(.*$/, ''));
   if (dotes.includes('lanzador en combate')) out.push({ nombre: 'Lanzador en combate', reglas: [R('salvacion', 'ventaja', { ab: 'con', motivo: 'concentracion' })] });
+  if (dotesDe(ch).some(d => norm(d.nombre) === 'comandante del dragon purpura') && maltrecho(ch)) out.push({ nombre: 'Último esfuerzo', reglas: [R('ataque', 'ventaja')] });
   if (dotes.includes('resistente')) out.push({ nombre: 'Resistente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte' })] });
   if (clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 18)) out.push({ nombre: 'Superviviente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte', cond: 'y de 18 a 20 cuenta como un 20' })] });
   if ((ch.vida?.efectos || []).some(e => e.k === 'cancion')) out.push({ nombre: 'Canción de la hoja', reglas: [R('salvacion', 'plano', { ab: 'con', motivo: 'concentracion', valor: Math.max(1, modOf(statsEfectivos(ch).int)) })] });
@@ -192,6 +195,7 @@ export function inmunidadesEstado(ch) {
     if (c.clase === 'Druida' && c.nivel >= 10 && /tierra/i.test(c.subclase || '')) out.set('envenenado', 'Protección de la naturaleza');
   }
   if (efs.includes('heroismo')) out.set('asustado', 'Heroísmo');
+  for (const d of dotesDe(ch)) { const n = norm(d.nombre); if (n === 'don del terror') out.set('asustado', d.nombre); if (n === 'don del dominio de los venenos') out.set('envenenado', d.nombre); }
   return out;
 }
 const estadosActivos = ch => { const inm = inmunidadesEstado(ch); return (ch.vida?.estados || []).filter(k => REGLAS_ESTADO[k] && !inm.has(k)); };
@@ -232,7 +236,7 @@ export function caEfectiva(ch) {
     const esc = objs.find(o => o.equipado && o.armadura?.tipo === 'escudo'), alt = cb + modOf(statsEfectivos(ch).des) + (esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0);
     if (alt > base.ca) { base.ca = alt; base.detalle = `Armadura de mago (${cb} + Des)${esc ? ', escudo' : ''}`; }
   }
-  const caDe = e => (e.ca || 0) + (e.caAb ? Math.max(1, modOf(statsEfectivos(ch)[e.caAb])) : 0);
+  const caDe = e => (e.ca || 0) + (e.caAb ? Math.max(1, modOf(statsEfectivos(ch)[e.caAb])) : 0) + (e.caPb ? competencia(nivelTotal(ch)) : 0);
   let ca = base.ca + efs.reduce((s, e) => s + caDe(e), 0);
   const min = Math.max(0, ...efs.map(e => e.caMin || 0));
   const extra = efs.filter(e => caDe(e) || e.caMin).map(e => e.caMin ? `${e.nombre} (mín. ${e.caMin})` : `${e.nombre} ${caDe(e) > 0 ? '+' : ''}${caDe(e)}`);
@@ -301,6 +305,15 @@ export function resistenciasDe(ch) {
     if (c.clase === 'Pícaro' && /vastago|tres/i.test(s) && L >= 3) { const o = opcionDe(ch, 'vastago.lealtad'); if (o) add(LEALTAD_RES[o.nombre], 'Lealtad aterradora'); }
     if (c.clase === 'Explorador' && /invernal/i.test(s) && L >= 3) add('frío', 'Explorador gélido');
   }
+  // Dotes: dones épicos y Dracoseñalado (tipos elegidos entre paréntesis: «Dracoseñalado (fuego)»)
+  const TIPOS = ['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'];
+  for (const d of dotesDe(ch)) { const n = norm(d.nombre), det = norm(d.detalle || '');
+    if (n === 'don de la absorcion de almas') add(['frío', 'necrótico'], d.nombre);
+    if (n === 'don de la furia de la tormenta') add(['relámpago', 'trueno'], d.nombre);
+    if (n === 'don del dominio de los venenos') add('veneno', `${d.nombre} (inmunidad)`);
+    if ((n === 'dracosenalado' || n === 'don de la resistencia a energias') && det) add(TIPOS.filter(t => det.includes(norm(t))), d.nombre);
+    if (n === 'don de la resistencia desesperada' && maltrecho(ch)) add(TIPOS.filter(t => t !== 'fuerza'), `${d.nombre} (maltrecho)`);
+  }
   if (efs.includes('pielpetrea')) add(BPS, 'Piel pétrea');
   if (efs.includes('defensasup')) add(['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'], 'Defensa superior');
   if (efs.includes('vinculo')) add(['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'], 'Vínculo protector');
@@ -308,3 +321,6 @@ export function resistenciasDe(ch) {
   if (efs.includes('fuentelunar')) add('radiante', 'Fuente de luz lunar');
   return [...out].map(([tipo, fuente]) => ({ tipo, fuente }));
 }
+
+// Maltrecho: con la mitad de tus PG máximos o menos (y aún en pie)
+function maltrecho(ch) { const max = pgMaximo(ch), pg = pgActuales(ch); return pg > 0 && pg <= Math.floor(max / 2); }

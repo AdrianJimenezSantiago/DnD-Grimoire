@@ -122,7 +122,8 @@ export function curar(ch, cantidad) {
   return despues - antes;
 }
 export function ponerTemporales(ch, cantidad) {
-  const v = vidaDe(ch), n = Math.max(0, Math.floor(cantidad) || 0);
+  // Don de la salud plena: +5 cada vez que ganas PG temporales
+  const v = vidaDe(ch), n0 = Math.max(0, Math.floor(cantidad) || 0), n = n0 && tieneDote(ch, 'Don de la salud plena') ? n0 + 5 : n0;
   const antes = v.temp; v.temp = Math.max(v.temp, n); return v.temp - antes;
 }
 export function fijarPg(ch, valor) {
@@ -154,9 +155,11 @@ export function gastarDadoGolpe(ch, dado, tirada) {
   const v = vidaDe(ch), d = dadosDeGolpe(ch).find(x => x.dado === dado);
   if (!d || !d.quedan) return null;
   v.dadosUsados[dado] = (v.dadosUsados[dado] || 0) + 1;
-  const total = Math.max(1, tirada + modOf(statsEfectivos(ch).con));
+  // Don de la salud plena: el dado de golpe da su máximo
+  const plena = tieneDote(ch, 'Don de la salud plena'), valor = plena ? d.caras : tirada;
+  const total = Math.max(1, valor + modOf(statsEfectivos(ch).con));
   const ganado = curar(ch, total);
-  return { total, ganado };
+  return { total, ganado, plena };
 }
 
 export function revivir(ch) {

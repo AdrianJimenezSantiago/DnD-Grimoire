@@ -11,6 +11,12 @@ const DEF = {
   'influencia sombria': () => ({ fijos: ['Invisibilidad'], elegir: [{ k: 'nivel1', n: 1, nivel: 1, escuelas: ['Ilusionismo', 'Nigromancia'] }], nota: 'conjuro de nivel 1 de ilusionismo o nigromancia' }),
   telepatico: () => ({ fijos: ['Detectar pensamientos'], elegir: [] }),
   telequinetico: () => ({ fijos: ['Mano de mago'], elegir: [] }),
+  // Héroes de Faerûn
+  'chispa del fuego magico': () => ({ fijos: ['Llama sagrada'], elegir: [] }),
+  'conjurador de frio': () => ({ fijos: ['Rayo de escarcha'], elegir: [] }),
+  'principiante del enclave esmeralda': () => ({ fijos: ['Hablar con los animales'], elegir: [] }),
+  'magia del enclave': () => ({ fijos: ['Sentidos de la bestia'], elegir: [] }),
+  'don del jolgorio': () => ({ fijos: ['Baile irresistible de Otto'], elegir: [] }),
 };
 // Nombre con el que la dote aparece como fuente en el libro: «Iniciado en la magia (mago)», «Influencia feérica»
 export const fuenteDote = d => (d.detalle ? `${d.nombre} (${d.detalle})` : d.nombre);

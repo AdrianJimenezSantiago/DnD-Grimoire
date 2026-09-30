@@ -372,3 +372,33 @@ test('especies: linajes, conjuros de especie, usos y resistencias del Manual', a
   const en = rasgosEnJuego(ch({ clase: 'Mago', nivel: 1, especie: 'Elfo' })).find(r => r.nombre === 'Linaje élfico');
   assert.equal(en.eleccion.id, 'especie.elfo');
 });
+
+test('dotes del Manual y de Faerûn: aumentos, acciones adicionales, combate, descansos y defensas', async () => {
+  const { AUMENTO_DOTE } = await import('../web/src/domain/dotesDatos.js');
+  const { accionesAdicionales } = await import('../web/src/domain/combate.js');
+  const { cupoMaestrias } = await import('../web/src/domain/maestria.js');
+  const { ataqueArma } = await import('../web/src/domain/equipo.js');
+  const { temporalesAlDescansar, recuerdoDeConjuros, reduccionArmaduraPesada } = await import('../web/src/domain/automatismos.js');
+  const { resistenciasDe, inmunidadesEstado, caEfectiva } = await import('../web/src/domain/efectos.js');
+  const { gastarDadoGolpe } = await import('../web/src/domain/vida.js');
+  const { dotesConConjuros } = await import('../web/src/domain/conjurosDote.js');
+  assert.deepEqual(AUMENTO_DOTE['maestro en armas pesadas'], ['fue']);
+  assert.deepEqual(AUMENTO_DOTE['don de las formas fluidas'], ['int', 'sab', 'car']);
+  assert.ok(accionesAdicionales(ch({ clase: 'Mago', nivel: 4, dotes: ['Observador'] })).some(a => a.k === 'buscar'));
+  assert.equal(cupoMaestrias(ch({ clase: 'Guerrero', nivel: 4, dotes: ['Maestro de armas'] })), 5);
+  assert.match(ataqueArma(ch({ clase: 'Guerrero', nivel: 5, dotes: ['Maestro en armas pesadas'] }), arma('Mazo')).dano, /^2d6 \+ 6/);
+  assert.ok(opcionesAlImpactar(ch({ clase: 'Guerrero', nivel: 4, dotes: ['Atacante a la carga'] }), arma('Espada larga')).some(o => o.k === 'carga'));
+  const duel = ch({ clase: 'Pícaro', nivel: 4, dotes: ['Duelista defensivo'] }); const ca = caEfectiva(duel).ca; ponerEfecto(duel, 'parada');
+  assert.equal(caEfectiva(duel).ca, ca + 2);
+  assert.equal(temporalesAlDescansar(ch({ clase: 'Bardo', nivel: 8, dotes: ['Líder inspirador'] })), 8 + 2);
+  assert.equal(recuerdoDeConjuros(ch({ clase: 'Mago', nivel: 19, dotes: ['Don del recuerdo de conjuros'] }), 3, () => 3), true);
+  const pes = ch({ clase: 'Guerrero', nivel: 4, dotes: ['Maestro en armaduras pesadas'] });
+  pes.equipo.objetos.push({ ...JSON.parse(JSON.stringify(PREDEFINIDOS.find(p => p.nombre === 'Cota de mallas'))), equipado: true });
+  assert.equal(reduccionArmaduraPesada(pes), 2);
+  const don = ch({ clase: 'Guerrero', nivel: 20, dotes: ['Don del dominio de los venenos', 'Don de la furia de la tormenta', 'Dracoseñalado (fuego)'] });
+  assert.deepEqual(resistenciasDe(don).map(r => r.tipo).sort(), ['fuego', 'relámpago', 'trueno', 'veneno']);
+  assert.ok(inmunidadesEstado(don).has('envenenado'));
+  const plena = ch({ clase: 'Guerrero', nivel: 20, dotes: ['Don de la salud plena'] }); aplicarDano(plena, 30);
+  assert.equal(gastarDadoGolpe(plena, 'd10', 1).total, 10 + 2);
+  assert.deepEqual(dotesConConjuros(ch({ clase: 'Guerrero', nivel: 4, dotes: ['Conjurador de frío'] }))[0].fijos, ['Rayo de escarcha']);
+});

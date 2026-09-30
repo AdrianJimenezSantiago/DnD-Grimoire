@@ -16,7 +16,7 @@ import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe, recuerdoDeConjuros } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -82,7 +82,8 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
     if (mode === 'recurso') recState(c, rec.id).used = (recState(c, rec.id).used || 0) + 1;
-    if (mode === 'slot') { c.play.used[L] = usedOf(c, P, L) + 1; extraConj.push(...alLanzarConEspacio(c, e.fuente)); }
+    if (mode === 'slot') { c.play.used[L] = usedOf(c, P, L) + 1; extraConj.push(...alLanzarConEspacio(c, e.fuente));
+      if (recuerdoDeConjuros(c, L)) { c.play.used[L] -= 1; extraConj.push(`Don del recuerdo de conjuros: sale un ${L} en el d4 y el espacio no se gasta.`); } }
     // Salvaguarda arcana (abjurador): lanzar abjuración con espacio le devuelve el doble del nivel del espacio
     if (mode === 'slot' && /^abjur/i.test(s.escuela || '')) { const w = reglas(c).find(r => r.id === 'tpl:abjurador.salvaguarda'); if (w) { const st = recState(c, w.id); st.used = Math.max(0, Math.min(st.used || 0, w.max) - 2 * L); } }
     if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
@@ -267,7 +268,7 @@ export function shortRest(S, openRecovery, openVida) {
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
       const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });
-    const tmp = temporalesAlDescansar(c); if (tmp && ponerTemporales(c, tmp)) bits.push(`Resiliencia celestial: ${tmp} PG temporales`);
+    const tmp = temporalesAlDescansar(c); if (tmp && ponerTemporales(c, tmp)) bits.push(`${tmp} PG temporales (Resiliencia celestial o Líder inspirador)`);
     // Infatigable (explorador 10): el agotamiento baja un nivel al terminar un descanso corto
     const v = vidaDe(c);
     if (v.agotamiento > 0 && clasesDe(c).some(k => k.clase === 'Explorador' && k.nivel >= 10)) { v.agotamiento -= 1; bits.push('Infatigable: un nivel de agotamiento menos'); }

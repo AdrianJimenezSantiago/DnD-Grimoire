@@ -59,7 +59,7 @@ export const conBonos = (base, bonos) => Object.fromEntries(KEYS.map(k => [k, Ma
 // Competencias en habilidades: de dónde sale cada una y cuántas quedan por elegir.
 // pericia: las elegidas quedan con pericia; fijas: no se eligen, son todas las de la lista; herramientas: puede cambiarlas por herramientas.
 const DOTE_HAB = { habilidoso: [3, TODAS, { herramientas: true }], 'experto en habilidades': [1, TODAS], 'mente aguda': [1, ['arcanos', 'historia', 'investigacion', 'naturaleza', 'religion']],
-  observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'don de la habilidad': [18, TODAS, { fijas: true }] };
+  observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'aprendiz del dragon purpura': [1, ['interpretacion', 'perspicacia', 'persuasion']], 'don de la habilidad': [18, TODAS, { fijas: true }] };
 // Subclases que dan competencias en habilidades a nivel 3
 export const HAB_SUBCLASE = {
   // Conocimiento primigenio (bárbaro 3, rasgo de clase): una habilidad más de la lista del bárbaro
