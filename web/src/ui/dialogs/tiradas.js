@@ -1,5 +1,5 @@
 import { esc, norm } from '../../core/util.js';
-import { bonosDeConjuro } from '../../domain/bonosConjuro.js';
+import { bonosDeConjuro, trucoPotenteEvocador } from '../../domain/bonosConjuro.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas2024.js';
 import { manualFor, srdFor, tiradasConjuro } from '../../domain/catalogo.js';
 import { conObjetivos } from '../../domain/concentracion.js';
@@ -32,7 +32,11 @@ const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc'
 const MODOS = [['desventaja', 'Desventaja', 'el menor de 2d20'], ['normal', 'Normal', '1d20'], ['ventaja', 'Ventaja', 'el mayor de 2d20']];
 const TS = [['falla', 'Ha fallado', 'efecto completo'], ['supera', 'Ha superado', 'se libra o mitad'], ['varios', 'Varios', 'unos sí y otros no']];
 
-const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; return { ch, s, P: magiaPara(perfil(ch), e.fuente), t: tiradasConjuro(s) }; };
+const datos = () => { const ch = S.cur(), e = ch.book[R.bi], s = S.db.catalog[e.sid]; let t = tiradasConjuro(s);
+  if (t && s.level === 0 && t.salvacion && !t.mitad && t.danos.length && trucoPotenteEvocador(ch)) t = { ...t, mitad: true, supera: t.supera || 'Truco potente: sufre la mitad del daño.' };
+  return { ch, s, P: magiaPara(perfil(ch), e.fuente), t }; };
+// Sanación suprema: la curación da el máximo de cada dado
+const exprLinea = (n, caras, bono, ex) => (ex?.maximo ? String(n * caras + bono) : exprDe(n, caras, bono));
 const dadosActuales = ({ ch, s, t }) => (t ? dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : []);
 const conSalvacion = (t, dados) => !!t?.salvacion && (dados.some(x => x.via === 'salvacion') || t.falla || t.extras.length);
 // Lanzamiento potente (clérigo o druida 7) suma la Sabiduría al daño de sus trucos
@@ -104,7 +108,7 @@ function pintarCtl(tsAntes = R.ts) {
     const crit = dd.via === 'ataque' && R.critico, n = dd.n * (crit ? 2 : 1);
     if (crit) nota += ', crítico: dados dobles';
     if (dd.veces > 1) nota = `${dd.veces} ${dd.via === 'ataque' ? 'ataques, cada uno con su tirada' : 'veces, una por proyectil'} · ${nota}`;
-    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? (dd.temp ? 'PG temporales' : 'Curación') : 'Daño'} ${exprDe(n, dd.caras, bono)}${cura ? '' : ` ${esc(dd.tipo)}`}${dd.veces > 1 ? ` ×${dd.veces}` : ''}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
+    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? (dd.temp ? 'PG temporales' : 'Curación') : 'Daño'} ${exprLinea(n, dd.caras, bono, ex[i])}${cura ? '' : ` ${esc(dd.tipo)}`}${dd.veces > 1 ? ` ×${dd.veces}` : ''}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
       mitad: dd.via === 'salvacion' && t.mitad && (R.ts === 'supera' || R.ts === 'varios') });
   });
   (t?.extras || []).forEach((xx, i) => {
@@ -160,11 +164,11 @@ function tirar(tipo, i, nuevo = true) {
     x = { tipo, i, p, res, total: res.total, lbl: exprDe(xx.n, xx.caras, xx.bono), ctx: xx.frase, dist: distDe(p), texto: `${s.es}: ${exprDe(xx.n, xx.caras, xx.bono)} = ${res.total}` };
   } else {
     const lista = dadosActuales(D), dd = lista[i]; if (!dd) return;
-    const cura = dd.tipo === 'curación', crit = dd.via === 'ataque' && R.critico, bono = bonoDe(dd, t, P, extrasDe(D, lista)[i]);
-    const p = parsear(exprDe(dd.n, dd.caras, bono)), res = resolver({ p, critico: crit, previo });
+    const exi = extrasDe(D, lista)[i], cura = dd.tipo === 'curación', crit = dd.via === 'ataque' && R.critico, bono = bonoDe(dd, t, P, exi);
+    const p = parsear(exprLinea(dd.n, dd.caras, bono, exi)), res = resolver({ p, critico: crit, previo });
     const ts = dd.via === 'salvacion' ? R.ts : null, bruto = res.total, mitad = Math.floor(bruto / 2);
     const total = ts === 'supera' ? mitad : bruto, n = dd.n * (crit ? 2 : 1);
-    x = { tipo, i, p, res, total, bruto, mitad: t.mitad ? mitad : 0, ts, crit, cura, temp: !!dd.temp, dano: dd.tipo, clave: claveDano(dd.tipo), cond: dd.cond,
+    x = { tipo, i, p, res, total, bruto, mitad: t.mitad ? mitad : 0, ts, crit, cura, temp: !!dd.temp, sanador: exi?.sanador || 0, dano: dd.tipo, clave: claveDano(dd.tipo), cond: dd.cond,
       lbl: `${cura ? (dd.temp ? 'puntos de golpe temporales' : 'puntos de golpe') : `de ${danoDe(dd.tipo)}`}${ts === 'supera' ? ' (mitad por superar la salvación)' : ''}`, dist: distDe(p, { critico: crit }),
       texto: `${s.es}: ${ts === 'varios' ? `${bruto} (${t.mitad ? mitad : 0} si supera)` : total} ${cura ? 'de curación' : 'de ' + danoDe(dd.tipo)} (${exprDe(n, dd.caras, bono)}${s.level && R.nivel > s.level ? ', espacio ' + R.nivel : ''}${crit ? ', crítico' : ''}${ts === 'supera' ? ', mitad' : ''})` };
   }
@@ -219,7 +223,7 @@ function pintarOut(anim = false) {
       ${x.ts === 'varios' ? `<div class="cj-split dd-rev" style="--r:0"><span class="falla"><small>Quien falle</small><b>${x.bruto}</b></span><span class="supera"><small>Quien supere</small><b>${x.mitad}</b></span></div>` : ''}
       <div class="dd-ec">${partes.join('')}</div>${x.cond ? `<p class="cj-cond">Solo si ${esc(x.cond)}.</p>` : ''}${probHtml(x.dist, x.bruto ?? x.total)}
       ${x.ctx ? `<div class="rl-ctx dd-rev" style="--r:2">${md(x.ctx)}</div>` : ''}
-      ${x.cura && x.total > 0 ? `<button type="button" class="dd-sig dd-rev" style="--r:3" data-rlcurarme>${gi('curacion')}${x.temp ? `Ganar ${x.total} PG temporales` : `Curarme ${x.total} PG`}</button>` : ''}`;
+      ${x.cura && x.total > 0 ? `<button type="button" class="dd-sig dd-rev" style="--r:3" data-rlcurarme>${gi('curacion')}${x.temp ? `Ganar ${x.total} PG temporales` : `Curarme ${x.total} PG`}</button>${x.sanador ? `<button type="button" class="dd-sig dd-rev" style="--r:3" data-rlsanador>${gi('curacion')}Curé a otro: Sanador bendito, recupero ${x.sanador}</button>` : ''}` : ''}`;
   }
   el.className = `dd-out ${clase}`;
   el.innerHTML = h;
@@ -290,6 +294,11 @@ export function init(store) {
   body.addEventListener('focusout', e => { if (e.target.id === 'rlObj' && e.target.value.trim()) anotar(e.target); });
   on(body, 'click', '[data-rlobjdel]', (e, b) => { quitarObjetivo(S, 'conc', +b.dataset.rlobjdel); pintarCtl(); });
   on(body, 'click', '[data-rlyo]', () => { alternarYo(S, 'conc'); pintarCtl(); });
+  on(body, 'click', '[data-rlsanador]', (e, b) => {
+    const x = R.res; if (!x?.sanador) return; let n = 0;
+    const h = S.act(`Sanador bendito: ${x.sanador} PG`, (db, c) => { n = curar(c, x.sanador); });
+    b.disabled = true; golpe('cura', n); toast(`Sanador bendito: recuperas ${n} PG.`, [undoBtn(S, h)]);
+  });
   // Curación de un conjuro sobre ti
   on(body, 'click', '[data-rlcurarme]', (e, b) => {
     const x = R.res; if (!x?.cura) return; let n = 0;

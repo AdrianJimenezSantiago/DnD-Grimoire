@@ -306,3 +306,12 @@ test('Armadura de Agathys y Heroísmo dan PG temporales', async () => {
   const b = ch({ clase: 'Bardo', nivel: 3 }); b.play.conc = 'Heroísmo'; ponerEfecto(b, 'heroismo', { conc: 'Heroísmo' });
   alEmpezarTurno(b); assert.equal(vidaDe(b).temp, 2);
 });
+
+test('vida 6/17: Sanador bendito y Sanación suprema; evocador: Truco potente', async () => {
+  const { bonosDeConjuro, trucoPotenteEvocador } = await import('../web/src/domain/bonosConjuro.js');
+  const cura = [{ tipo: 'curación', n: 2, caras: 8, bono: 0 }];
+  const [x] = bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 17 }), { level: 1 }, 'Clérigo', cura, 1);
+  assert.equal(x.maximo, true); assert.equal(x.sanador, 3); assert.equal(x.bono, 3);
+  assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 5 }), { level: 1 }, 'Clérigo', cura, 1)[0].sanador, undefined);
+  assert.ok(trucoPotenteEvocador(ch({ clase: 'Mago', subclase: 'Evocador', nivel: 3 })));
+});
