@@ -12,10 +12,10 @@ test('habilidades: característica, competencia y pericia', () => {
   assert.equal(bonoHabilidad(ch, 'atletismo'), -1);
   assert.equal(percepcionPasiva(ch), 14);
 });
-test('habilidades: Aprendiz de mucho del bardo suma la mitad de la competencia', () => {
+test('habilidades: Aprendiz de mucho del bardo suma la mitad de la competencia a las pruebas de habilidad, no a la iniciativa (2024)', () => {
   const ch = pj({ clase: 'Bardo', habilidades: {} });
   assert.equal(bonoHabilidad(ch, 'historia'), 4 + 1);
-  assert.equal(iniciativa(ch), 2 + 1);
+  assert.equal(iniciativa(ch), 2);
 });
 test('salvaciones de la clase principal y extra', () => {
   const ch = pj({ clase: 'Mago', multiclase: [{ clase: 'Guerrero', nivel: 1 }], salvacionesExtra: ['con'] });

@@ -4,6 +4,7 @@ import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
 import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
 import { maniobrasDe, cdManiobras, dadoSupremacia } from './maniobras.js';
 import { VARIANTES, varianteDe } from './variantes.js';
+import { opcionDeRasgo, opcionDe, CAMBIA_TXT } from './opcionesRasgo.js';
 
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
 const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen : 'clase');
@@ -49,7 +50,8 @@ export function resumen(texto) {
 const NUMEROS = { furia: ['Daño por furia'], 'ataque furtivo': ['Ataque furtivo'], 'artes marciales': ['Artes marciales'], 'golpe brutal': ['Golpe brutal'],
   'maestria con armas': ['Maestría con armas'], 'inspiracion bardica': ['Dado de inspiración'], 'forma salvaje': ['Forma salvaje'], 'golpes benditos': ['Golpes benditos'], 'furia elemental': ['Furia elemental'], 'supremacia en combate': ['Dado de supremacía'],
   'aura de proteccion': ['Aura de protección'], 'ataque adicional': ['Ataques por acción'], 'dos ataques adicionales': ['Ataques por acción'], 'tres ataques adicionales': ['Ataques por acción'],
-  'movimiento sin armadura': ['Movimiento sin armadura'], 'invocaciones sobrenaturales': ['Invocaciones'], 'arcanum mistico': ['Arcanum místico'], metamagia: ['Opciones de metamagia'] };
+  'movimiento sin armadura': ['Movimiento sin armadura'], 'concentracion de monje': ['CD de concentración'], 'golpe aturdidor': ['CD de concentración'], 'desviar ataques': ['Desviar ataques'], 'caida lenta': ['Caída lenta'],
+  'golpe astuto': ['CD de golpe astuto'], 'furia implacable': ['Furia implacable'], 'tomar aliento': ['Tomar aliento'], indomito: ['Indómito'], 'invocaciones sobrenaturales': ['Invocaciones'], 'arcanum mistico': ['Arcanum místico'], metamagia: ['Opciones de metamagia'] };
 
 function textoDe(r, ch, lib) {
   const n = norm(r.nombre);
@@ -79,7 +81,7 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
   for (const c of clases) {
     const v = vistaClase(ch, c), esc = escalas(v);
     for (const r0 of progresion(v)) {
-      const r = { ...r0, nombre: r0.nombre.replace(/\s*\(.*\)$/, '') }, n = norm(r.nombre); if (NO_JUEGO.test(n)) continue;
+      const r = { ...r0, nombre: r0.nombre.replace(/\s*\(.*\)$/, '') }, n = norm(r.nombre); if (NO_JUEGO.test(n) && !opcionDeRasgo(v, r.nombre)) continue;
       const clave = c.principal ? `${r.origen}:${n}` : `multiclase:${norm(c.clase)}:${n}`, t = textoDe(r, v, lib), ya = out.find(x => x.clave === clave);
       if (ya) { if (t?.texto && !ya.texto.includes(t.texto)) ya.texto += `\n\n#### Nivel ${r.nivel}\n\n${t.texto}`; continue; }
       const igual = out.find(x => x.fuente === 'clase' && x.clase !== c.clase && norm(x.nombre) === n);
@@ -95,6 +97,10 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
   for (const r of out) {
     const def = VARIANTES[r.clase];
     if (def && norm(def.rasgo) === norm(r.nombre)) r.eleccion = { clase: r.clase, rasgo: def.rasgo, opciones: def.opciones, actual: varianteDe(ch, r.clase)?.nombre || '' };
+    // Opciones de subclase (Aspecto de lo salvaje, terreno del Círculo de la tierra, Presa del cazador…)
+    const op = r.origen !== 'especie' && r.origen !== 'dote' ? opcionDeRasgo(ch, r.nombre) : null;
+    if (op) r.eleccion = { id: op.id, rasgo: op.rasgo, opciones: op.opciones, actual: opcionDe(ch, op.id)?.nombre || '', cambia: op.cambia, cuando: CAMBIA_TXT[op.cambia] };
+    if (op && r.eleccion.actual) r.numeros = [{ nombre: op.rasgo, valor: r.eleccion.actual }, ...r.numeros];
   }
   // Maniobras del Maestro del combate: cada una en su grupo, con el recurso de los dados de supremacía
   const maniobras = maniobrasDe(ch);

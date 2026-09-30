@@ -2,6 +2,7 @@ import { norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
 import { competencia, modOf, nivelDe } from './reglas2024.js';
 import { varianteDe } from './variantes.js';
+import { opcionDe } from './opcionesRasgo.js';
 import { cdManiobras, dadoSupremacia } from './maniobras.js';
 
 const ASI = 'Mejora de característica', EPICO = 'Don épico', SUB = 'Rasgo de subclase';
@@ -128,7 +129,8 @@ export const SUBCLASES = {
   'Guerrero': [
     { nombre: 'Caballero arcano', re: /arcan/, libro: PHB, prio: ['fue', 'int', 'con', 'des', 'sab', 'car'], rasgos: { 3: ['Lanzamiento de conjuros', 'Vínculo de guerra'], 7: ['Magia de guerra'], 10: ['Golpe sobrenatural'], 15: ['Carga arcana'], 18: ['Magia de guerra mejorada'] } },
     { nombre: 'Campeón', re: /campeon/, libro: PHB, rasgos: { 3: ['Atleta sobresaliente', 'Crítico mejorado'], 7: ['Estilo de combate adicional'], 10: ['Guerrero heroico'], 15: ['Crítico superior'], 18: ['Superviviente'] } },
-    { nombre: 'Guerrero psiónico', re: /psionic/, libro: PHB, prio: ['fue', 'con', 'int', 'des', 'sab', 'car'], rasgos: { 3: ['Poder psiónico'], 7: ['Adepto telequinético'], 10: ['Mente robusta'], 15: ['Bastión de fuerza'], 18: ['Maestro telequinético'] } },
+    { nombre: 'Guerrero psiónico', re: /psionic/, libro: PHB, prio: ['fue', 'con', 'int', 'des', 'sab', 'car'], rasgos: { 3: ['Poder psiónico'], 7: ['Adepto telequinético'], 10: ['Mente robusta'], 15: ['Bastión de fuerza'], 18: ['Maestro telequinético'] },
+      conjuros: { 18: ['Telequinesis'] } },
     { nombre: 'Maestro del combate', re: /maestro del combate|batalla/, libro: PHB, rasgos: { 3: ['Estudioso de la guerra', 'Supremacía en combate'], 7: ['Conoce a tu enemigo'], 10: ['Supremacía en combate mejorada'], 15: ['Incansable'], 18: ['Supremacía en combate definitiva'] } },
     { nombre: 'Abanderado', re: /abanderad/, libro: HF, prio: ['fue', 'con', 'car', 'des', 'sab', 'int'], rasgos: { 3: ['Caballero emisario', 'Recuperación grupal'], 7: ['Tácticas de equipo'], 10: ['Arenga súbita'], 15: ['Resistencia compartida'], 18: ['Comandante inspirador'] },
       conjuros: { 3: ['Entender idiomas'] }, ritual: true },
@@ -216,7 +218,9 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   for (const [L, lista] of Object.entries(CONJUROS_CLASE[ch.clase] || {})) if (hasta >= +L) lista.forEach(([nombre, fuente, gratis]) => out.push({ nombre, nivel: +L, fuente, gratis, ritual: false }));
   if (sc?.conjuros) {
     const fuente = (sc.rasgos[3] || []).find(r => /^Conjuros/.test(r)) || sc.nombre;
-    for (const [L, lista] of Object.entries(sc.conjuros)) if (hasta >= +L) lista.forEach(nombre => out.push({ nombre, nivel: +L, fuente, gratis: '', ritual: !!sc.ritual }));
+    // Círculo de la tierra: los del terreno elegido (Árido si aún no se ha elegido)
+    const lista0 = sc.terrenos ? sc.terrenos[opcionDe(ch, 'tierra.terreno')?.nombre] || sc.conjuros : sc.conjuros;
+    for (const [L, lista] of Object.entries(lista0)) if (hasta >= +L) lista.forEach(nombre => out.push({ nombre, nivel: +L, fuente, gratis: '', ritual: !!sc.ritual }));
   }
   return out;
 }
@@ -240,7 +244,8 @@ export function escalas(ch) {
   const maestria = n => out.push({ nombre: 'Maestría con armas', valor: `${n} tipos de arma` });
   switch (ch.clase) {
     case 'Bárbaro': out.push({ nombre: 'Daño por furia', valor: '+' + byLvl(L, [[1, 2], [9, 3], [16, 4]]) }); maestria(byLvl(L, [[1, 2], [4, 3], [10, 4]]));
-      if (L >= 9) out.push({ nombre: 'Golpe brutal', valor: L >= 17 ? '2d10' : '1d10' }); break;
+      if (L >= 9) out.push({ nombre: 'Golpe brutal', valor: L >= 17 ? '2d10' : '1d10' });
+      if (L >= 11) out.push({ nombre: 'Furia implacable', valor: 'CD 10', nota: 'Salvación de Constitución al caer a 0 PG en furia: la CD sube 5 cada vez y vuelve a 10 al descansar.' }); break;
     case 'Bardo': out.push({ nombre: 'Dado de inspiración', valor: byLvl(L, [[1, 'd6'], [5, 'd8'], [10, 'd10'], [15, 'd12']]) }); break;
     case 'Brujo': out.push({ nombre: 'Invocaciones', valor: String(byLvl(L, [[1, 1], [2, 3], [5, 5], [7, 6], [9, 7], [12, 8], [15, 9], [18, 10]])) });
       if (L >= 11) out.push({ nombre: 'Arcanum místico', valor: [6, 7, 8, 9].filter(n => L >= 2 * n - 1).map(n => `nivel ${n}`).join(', ') }); break;
@@ -249,12 +254,17 @@ export function escalas(ch) {
       if (L >= 7) out.push(furiaOGolpes(ch, 'Furia elemental', L >= 15)); break;
     case 'Explorador': maestria(2); break;
     case 'Guerrero': maestria(byLvl(L, [[1, 3], [4, 4], [10, 5], [16, 6]])); out.push({ nombre: 'Ataques por acción', valor: String(byLvl(L, [[1, 1], [5, 2], [11, 3], [20, 4]])) });
+      out.push({ nombre: 'Tomar aliento', valor: `1d10 + ${L}` }); if (L >= 9) out.push({ nombre: 'Indómito', valor: `+${L} a la salvación repetida` });
       if (L >= 3 && /maestro del combate|batalla/i.test(ch.subclase || '')) out.push({ nombre: 'Dado de supremacía', valor: dadoSupremacia(L), nota: `CD de las maniobras ${cdManiobras(ch)}` }); break;
     case 'Hechicero': if (L >= 2) out.push({ nombre: 'Opciones de metamagia', valor: String(byLvl(L, [[2, 2], [10, 4], [17, 6]])) }); break;
     case 'Monje': out.push({ nombre: 'Artes marciales', valor: byLvl(L, [[1, 'd6'], [5, 'd8'], [11, 'd10'], [17, 'd12']]) });
-      if (L >= 2) out.push({ nombre: 'Movimiento sin armadura', valor: '+' + byLvl(L, [[2, '3'], [6, '4,5'], [10, '6'], [14, '7,5'], [18, '9']]) + ' m' }); break;
+      if (L >= 2) out.push({ nombre: 'Movimiento sin armadura', valor: '+' + byLvl(L, [[2, '3'], [6, '4,5'], [10, '6'], [14, '7,5'], [18, '9']]) + ' m' });
+      if (L >= 2) out.push({ nombre: 'CD de concentración', valor: String(8 + modOf(statsEfectivos(ch).sab) + competencia(L)), nota: 'Golpe aturdidor y otros rasgos de monje' });
+      if (L >= 3) out.push({ nombre: 'Desviar ataques', valor: `1d10 + ${modOf(statsEfectivos(ch).des) + L}` });
+      if (L >= 4) out.push({ nombre: 'Caída lenta', valor: `−${5 * L} de daño` }); break;
     case 'Paladín': maestria(2); if (L >= 6) out.push({ nombre: 'Aura de protección', valor: `+${Math.max(1, modOf(statsEfectivos(ch).car))} a salvaciones, ${L >= 18 ? 9 : 3} m` }); break;
-    case 'Pícaro': out.push({ nombre: 'Ataque furtivo', valor: `${Math.ceil(L / 2)}d6` }); maestria(2); break;
+    case 'Pícaro': out.push({ nombre: 'Ataque furtivo', valor: `${Math.ceil(L / 2)}d6` }); maestria(2);
+      if (L >= 5) out.push({ nombre: 'CD de golpe astuto', valor: String(8 + modOf(statsEfectivos(ch).des) + competencia(L)) }); break;
   }
   return out;
 }

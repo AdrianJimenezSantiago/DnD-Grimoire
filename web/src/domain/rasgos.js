@@ -39,6 +39,7 @@ export function plantillas(ch) {
   switch (ch.clase) {
     case 'Bárbaro':
       R('barbaro.furia', { tipo: 'recurso', nombre: 'Furia', max: byLvl(L, [[1, 2], [3, 3], [6, 4], [12, 5], [17, 6]]), recarga: 'corto1' });
+      if (L >= 15) uno('barbaro.persistente', 'Furia persistente', 'Al tirar iniciativa, si has gastado usos de Furia, los recuperas todos (la app lo hace sola).');
       if (has(/berserk/i) && L >= 14) uno('berserker.presencia', 'Presencia intimidante', 'También puedes restablecerla gastando un uso de Furia.');
       if (has(/fan[áa]tic/i)) {
         if (L >= 3) R('fanatico.dioses', { tipo: 'recurso', nombre: 'Guerrero de los dioses', max: byLvl(L, [[3, 4], [6, 5], [12, 6], [17, 7]]), nota: 'Reserva de d12 para curarte con una acción adicional.' });
@@ -290,7 +291,9 @@ export const RECURSO_DE_CONJURO = {
 };
 // Los conjuros que da una dote llevan su nombre como fuente: su uso gratis sale del contador de la dote
 const RECURSO_DE_FUENTE = [[/^iniciado en la magia(?: \((.+)\))?/, m => `tpl:dote.iniciado.${norm(m[1] || '')}`], [/^influencia feerica/, () => 'tpl:dote.feerica'],
-  [/^influencia sombria/, () => 'tpl:dote.sombria'], [/^telepatico/, () => 'tpl:dote.telepatico']];
+  [/^influencia sombria/, () => 'tpl:dote.sombria'], [/^telepatico/, () => 'tpl:dote.telepatico'],
+  // Artes sombrías (monje de la sombra): Oscuridad cuesta 1 punto de concentración en lugar de un espacio
+  [/^guerrero de la sombra/, () => 'tpl:monje.concentracion']];
 export function recursoParaConjuro(ch, nombre, fuente = '') {
   const f = norm(fuente), porFuente = RECURSO_DE_FUENTE.map(([re, id]) => { const m = re.exec(f); return m ? id(m) : null; }).filter(Boolean);
   const ids = [...porFuente, ...(RECURSO_DE_CONJURO[norm(nombre)] || [])]; if (!ids.length) return null;

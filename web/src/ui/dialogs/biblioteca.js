@@ -1,5 +1,5 @@
 import { esc, norm } from '../../core/util.js';
-import { biblioteca, glosario, termino, libros } from '../../domain/catalogo.js';
+import { biblioteca, glosario, termino, libros, compendio } from '../../domain/catalogo.js';
 import { RAREZAS, TIPOS_OBJ, ordenRareza } from '../../domain/objetos.js';
 import { CLASES } from '../../domain/reglas2024.js';
 import { anadirObjeto, tieneObjeto } from '../../domain/equipo.js';
@@ -15,6 +15,7 @@ import { undoBtn } from '../../app/acciones.js';
 import { rasgosEnJuego, GRUPOS, resumenClase, resumenSubclase } from '../../domain/enJuego.js';
 import { TEMAS } from '../../domain/clases2024.js';
 import { reglasVisibles } from '../../domain/rasgos.js';
+import { anadirPendientes, conjurosPendientes, quitarSobrantes } from '../../domain/progresion.js';
 
 let S;
 const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'tipo', ctipo: '', cvd: '' };
@@ -214,9 +215,15 @@ export function abrirResumen(clase, subclase = '') {
   const d = $('#fichaDlg'); d.style.setProperty('--sh', h); d.style.setProperty('--ss', sat + '%');
 }
 // Rasgos con dos variantes (Golpes benditos, Furia elemental): se eligen o cambian desde su ficha
-const eleccionHtml = r => !r.eleccion ? '' : `<section class="ej-eleccion ${r.eleccion.actual ? '' : 'falta'}"><p class="note">${r.eleccion.actual ? `Usas <b>${esc(r.eleccion.actual)}</b>. Puedes cambiarla si te equivocaste al elegir.` : `<b>Elige una variante de ${esc(r.eleccion.rasgo)}.</b> La app aplica la que elijas a tus ataques o trucos.`}</p>
-  <div class="lv-estilos">${r.eleccion.opciones.map(o => { const on = r.eleccion.actual === o.nombre;
-    return `<button type="button" class="lv-estilo ${on ? 'on' : ''}" data-ejvar="${esc(r.eleccion.clase)}|${esc(o.nombre)}" aria-pressed="${on}"><span class="lv-estilo-ico">${gi(o.ef === 'golpe' ? 'ca' : 'libro')}</span><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`; }).join('')}</div></section>`;
+const eleccionHtml = r => {
+  const e = r.eleccion; if (!e) return '';
+  const nota = e.id
+    ? (e.actual ? `Ahora: <b>${esc(e.actual)}</b>. ${esc(e.cuando)}` : `<b>${e.cambia === 'uso' ? `Cada vez que uses ${esc(e.rasgo)} eliges una opción.` : `Elige una opción de ${esc(e.rasgo)}.`}</b> ${e.cambia === 'uso' ? 'Marca la de esta vez para tenerla a la vista.' : esc(e.cuando)}`)
+    : (e.actual ? `Usas <b>${esc(e.actual)}</b>. Puedes cambiarla si te equivocaste al elegir.` : `<b>Elige una variante de ${esc(e.rasgo)}.</b> La app aplica la que elijas a tus ataques o trucos.`);
+  return `<section class="ej-eleccion ${e.actual || e.cambia === 'uso' ? '' : 'falta'}"><p class="note">${nota}</p>
+  <div class="lv-estilos">${e.opciones.map(o => { const on = e.actual === o.nombre, dato = e.id ? `data-ejopc="${esc(e.id)}|${esc(o.nombre)}"` : `data-ejvar="${esc(e.clase)}|${esc(o.nombre)}"`;
+    return `<button type="button" class="lv-estilo ${on ? 'on' : ''}" ${dato} aria-pressed="${on}"><span class="lv-estilo-ico">${gi(o.ef === 'golpe' || o.golpe ? 'ca' : 'libro')}</span><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`; }).join('')}</div></section>`;
+};
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
   const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
@@ -258,6 +265,17 @@ export function init(store) {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [clase, v] = b.dataset.ejvar.split('|');
     const h = S.act(`${clase}: variante ${v}`, (db, ch) => { ch.variantes = { ...(ch.variantes || {}), [clase]: v }; });
     abrirRasgoJuego(k); toast(`Ahora usas <b>${esc(v)}</b>.`, [undoBtn(S, h)]);
+  });
+  on($('#fichaDlg'), 'click', '[data-ejopc]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [id, v] = b.dataset.ejopc.split('|');
+    let fuera = [], dentro = [];
+    const h = S.act(`${v}`, (db, ch) => {
+      ch.opciones = { ...(ch.opciones || {}), [id]: v };
+      // El terreno del Círculo de la tierra cambia los conjuros siempre preparados
+      if (id === 'tierra.terreno') { fuera = quitarSobrantes(db, ch); dentro = anadirPendientes(db, ch, conjurosPendientes(db, ch, compendio())); }
+    });
+    abrirRasgoJuego(k);
+    toast(`Ahora: <b>${esc(v)}</b>.${dentro.length ? ` Siempre preparados: ${esc(dentro.join(', '))}.` : ''}${fuera.length ? ` Dejan de estarlo: ${esc(fuera.join(', '))}.` : ''}`, [undoBtn(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;

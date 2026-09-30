@@ -93,6 +93,8 @@ export function pasivosDe(ch) {
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Bárbaro' && c.nivel >= 2 && !incap) out.push({ nombre: 'Sentir el peligro', reglas: [R('salvacion', 'ventaja', { ab: 'des' })] });
     if (c.clase === 'Bárbaro' && c.nivel >= 7) out.push({ nombre: 'Instinto salvaje', reglas: [R('iniciativa', 'ventaja')] });
+    if (c.clase === 'Guerrero' && c.nivel >= 3 && /campe[oó]n/i.test(c.subclase || '')) out.push({ nombre: 'Atleta sobresaliente', reglas: [R('iniciativa', 'ventaja'), R('prueba', 'ventaja', { hab: 'atletismo' })] });
+    if (c.clase === 'Pícaro' && c.nivel >= 3 && /asesin/i.test(c.subclase || '')) out.push({ nombre: 'Asesinar', reglas: [R('iniciativa', 'ventaja')] });
   }
   // Armadura sin entrenamiento: desventaja en lo que use Fuerza o Destreza y no puedes lanzar conjuros
   const puestas = (ch.equipo?.objetos || []).filter(o => o.equipado && o.armadura).map(o => o.armadura.tipo), sabe = armadurasDe(ch), sin = puestas.filter(t => !sabe.has(t));

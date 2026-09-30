@@ -1,4 +1,6 @@
 import { esc } from '../../core/util.js';
+import { minimoD20Habilidad, totalMinimoFuerza } from '../../domain/automatismos.js';
+import { abDe } from '../../domain/habilidades.js';
 import { sgn } from '../../domain/reglas2024.js';
 import { parsear, texto, esD20Simple, media, rango, resolver, distribucion, maxDist, rngCripto } from '../../domain/dados.js';
 import { fmt, formaDe, forma, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../dadosVista.js';
@@ -29,9 +31,11 @@ export function openDados() {
 // alTirar: se llama una vez por tirada con el resultado. Si no es «repetible» (aplica cambios
 // en la ficha), cambiar ventaja o modificadores después no recalcula: vale para la siguiente.
 // siguiente: { texto, fn(critico) } para encadenar otra tirada, como el daño tras un ataque.
-export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null, motivo = '' }) {
+export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null, motivo = '', critMin = 20, minD20 = 0, minFuente = '' }) {
   const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab, motivo: motivo || (tipo === 'muerte' ? 'muerte' : '') }) : [];
-  V = { tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, res: null };
+  if (!minD20 && hab && tipo === 'prueba' && S.cur() && minimoD20Habilidad(S.cur(), hab)) { minD20 = minimoD20Habilidad(S.cur(), hab); minFuente = 'Talentos fiables'; }
+  const minTotal = (tipo === 'prueba' || tipo === 'salvacion') && S.cur() ? totalMinimoFuerza(S.cur(), ab || (hab ? abDe(hab) : '')) : 0;
+  V = { minTotal, tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, critMin, minD20, minFuente, res: null };
   montar(); abrir(); lanzar();
 }
 const CLAVES = ['cortante', 'contundente', 'perforante', 'fuego', 'frio', 'relampago', 'trueno', 'acido', 'veneno', 'necrotico', 'radiante', 'psiquico', 'fuerza', 'curacion'];
@@ -128,10 +132,15 @@ function lanzar(nuevo = true) {
   const previo = !nuevo && antes && texto(antes.p) === texto(p) ? antes.res : null;
   const res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });
   const d20 = conModo(p), nat = res.r.natural, falla = falloAutomatico(V.mods || []);
-  const crit = d20 && nat === 20, pifia = d20 && nat === 1;
+  // Crítico mejorado del campeón: el ataque es crítico con 19 o 18
+  const crit = d20 && (nat === 20 || (V.tipo === 'ataque' && nat >= (V.critMin || 20))), pifia = d20 && nat === 1;
+  // Talentos fiables: un 9 o menos en el d20 cuenta como 10
+  const fiable = d20 && V.minD20 && nat < V.minD20 ? V.minD20 - nat : 0;
   // En una prueba de característica, un 20 natural no baja de 20 aunque los modificadores resten.
-  const tope = V.tipo === 'prueba' && crit && res.total < 20, total = tope ? 20 : res.total;
+  const tope = V.tipo === 'prueba' && crit && res.total < 20, total0 = tope ? 20 : res.total + fiable, poderio = V.minTotal && total0 < V.minTotal, total = poderio ? V.minTotal : total0;
   let lbl = V.tipo === 'ataque' ? 'para impactar' : V.tipo === 'dano' ? V.sub || 'de daño' : V.tipo === 'iniciativa' ? 'de iniciativa' : V.tipo === 'libre' ? texto(p) : 'en la tirada';
+  if (poderio) lbl = `${lbl} (Poderío indómito: usas tu Fuerza, ${V.minTotal})`;
+  if (fiable) lbl = `${lbl} (${V.minFuente || 'mínimo'}: el ${nat} cuenta como ${V.minD20})`;
   if (falla) lbl = 'fallo automático';
   if (V.tipo === 'muerte') lbl = nat === 20 ? '¡Vuelves con 1 PG!' : nat === 1 ? 'Dos fallos' : total >= 10 ? 'Éxito' : 'Fallo';
   let efecto = !nuevo && antes ? antes.efecto : '';

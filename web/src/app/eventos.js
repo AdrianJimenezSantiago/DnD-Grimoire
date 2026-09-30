@@ -43,7 +43,7 @@ import { combateDe, empezarCombate, terminarCombate, siguienteTurno, alternarEco
 import { ataquesPorAccion, efectoMaestria } from '../domain/maestria.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, NOMBRE_HAB, abDe } from '../domain/habilidades.js';
 import { statsEfectivos, bonoPruebasObjetos } from '../domain/objetosEfecto.js';
-import { opcionesAlImpactar, gastarAlImpactar } from '../domain/alImpactar.js';
+import { opcionesAlImpactar, gastarAlImpactar, danoSiempre } from '../domain/alImpactar.js';
 import { maniobrasDe, dadoSupremacia } from '../domain/maniobras.js';
 import { preguntarAlImpactar } from '../ui/alImpactar.js';
 import { equipoDe, ataqueArma, armaCombate, armasCombate } from '../domain/equipo.js';
@@ -51,6 +51,7 @@ import { efectosDe, caEfectiva, velocidadEfectiva, EFECTO, fmtRondas } from '../
 import { pasarRonda, vidaDe, ponerEfecto } from '../domain/vida.js';
 import { golpe } from '../ui/golpes.js';
 import { avisar } from '../ui/dialogs/aviso.js';
+import { alTirarIniciativa, alEmpezarTurno, rangoCritico } from '../domain/automatismos.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -214,22 +215,26 @@ async function iniciativaManual() {
   if (r == null || r === '') return;
   const n = parseInt(r, 10); if (!Number.isFinite(n)) return;
   const antes = c.iniciativa;
-  const h = S.act(`Iniciativa a mano: ${n}${antes != null ? ` (antes ${antes})` : ''}`, (db, x) => { combateDe(x).iniciativa = n; combateDe(x).iniManual = true; });
+  let auto = [];
+  const h = S.act(`Iniciativa a mano: ${n}${antes != null ? ` (antes ${antes})` : ''}`, (db, x) => { combateDe(x).iniciativa = n; combateDe(x).iniManual = true; if (antes == null) auto = alTirarIniciativa(x); });
   pop(document.querySelector('.cb-ini-v'), 'fx-pop'); haptic('light');
-  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.`, [A.undoBtn(S, h)]);
+  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.${textoAuto(auto)}`, [A.undoBtn(S, h)]);
 }
 function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
   if (combateDe(ch).iniciativa == null) { toast('Antes de pasar de ronda, tira tu iniciativa (o escríbela con el lápiz).'); tirarDesde('iniciativa'); return; }
   let fuera = [];
   const ronda = combateDe(ch).ronda + 1;
-  const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); });
+  let auto = [];
+  const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); auto = alEmpezarTurno(x); });
+  if (auto.length) { S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')); if (!fuera.length) toast(textoAuto(auto).trim(), [A.undoBtn(S, h)]); }
   if (fuera.length) {
     S.note(`Terminan: ${fuera.map(e => (e.finConc ? `concentración en ${e.nombre}` : e.nombre)).join(', ')}`);
     setTimeout(() => avisoFinEfectos(fuera, ronda, h), 380);
   }
   pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
 }
+const textoAuto = auto => auto.map(a => ` <b>${esc(a.nombre)}</b>: ${esc(a.texto)}`).join('');
 function avisoFinEfectos(fuera, ronda, h) {
   const buenos = fuera.filter(e => e.bueno), malos = fuera.filter(e => !e.bueno);
   const ca = caEfectiva(S.cur()), vel = velocidadEfectiva(S.cur());
@@ -245,7 +250,10 @@ function avisoFinEfectos(fuera, ronda, h) {
 function tirarDesde(clave) {
   const ch = S.cur(); if (!ch) return;
   if (clave === 'iniciativa') return tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa', repetible: true,
-    alTirar: total => { if (!combateDe(S.cur()).activo) return ''; S.act(`Iniciativa: ${total}`, (db, x) => { combateDe(x).iniciativa = total; combateDe(x).iniManual = false; }); return 'Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.'; } });
+    alTirar: total => { if (!combateDe(S.cur()).activo) return ''; let auto = [];
+      S.act(`Iniciativa: ${total}`, (db, x) => { const primera = combateDe(x).iniciativa == null; combateDe(x).iniciativa = total; combateDe(x).iniManual = false; if (primera) auto = alTirarIniciativa(x); });
+      if (auto.length) S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' '));
+      return `Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.${auto.length ? ` ${auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')}` : ''}`; } });
   const [tipo, k] = clave.split(':');
   if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${ABIL_NAME[k]}`, sub: 'Prueba de característica', bono: modOf(statsEfectivos(ch)[k]) + bonoPruebasObjetos(ch), tipo: 'prueba', ab: k });
   if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
@@ -308,10 +316,10 @@ function bindSheet() {
         const txt = sel.map(o => o.grupo === 'maniobra' ? o.nombre : o.grupo === 'castigo' ? `Castigo divino (${o.nombre.toLowerCase()})` : o.titulo);
         const h = S.act(`${x.o.nombre}: ${txt.join(', ')}`, (db, c) => gastarAlImpactar(c, sel));
         toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [A.undoBtn(S, h)]);
-        mas = sel.map(o => ({ fuente: o.grupo === 'maniobra' ? o.nombre : o.titulo, valor: o.dado }));
+        mas = sel.filter(o => o.dado).map(o => ({ fuente: o.grupo === 'maniobra' ? o.nombre : o.titulo, valor: o.dado }));
       }
     }
-    tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: [...efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })), ...mas] });
+    tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: [...efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })), ...danoSiempre(S.cur(), x.o), ...mas] });
   };
   const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
   // Ataque de precisión: si conoces la maniobra y te quedan dados de supremacía, se ofrece al fallar
@@ -324,7 +332,7 @@ function bindSheet() {
   };
   const tirarAtaque = (x, eco = '') => {
     const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
-    tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque',
+    tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque', critMin: rangoCritico(S.cur()),
       impacto: { maestria, clave: norm(x.a.tipo || ''), precision: precisionDe(S.cur()) }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
   };
   on(sheet, 'click', '[data-cbataque]', (e, b) => {
