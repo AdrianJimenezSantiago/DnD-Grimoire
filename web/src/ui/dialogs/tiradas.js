@@ -6,9 +6,11 @@ import { conObjetivos } from '../../domain/concentracion.js';
 import { dadosPara } from '../../domain/tiradas.js';
 import { parsear, resolver, distribucion, maxDist } from '../../domain/dados.js';
 import { modsTirada, resolverModo, fmtMod, efectoDeConjuro } from '../../domain/efectos.js';
-import { esYo } from '../../domain/vida.js';
+import { esYo, curar, ponerTemporales, vidaDe } from '../../domain/vida.js';
+import { toast } from '../toast.js';
+import { golpe } from '../golpes.js';
 import { botonYo } from '../avatar.js';
-import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
+import { anadirObjetivos, quitarObjetivo, alternarYo, undoBtn } from '../../app/acciones.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { openSheet } from '../dialog.js';
@@ -102,7 +104,7 @@ function pintarCtl(tsAntes = R.ts) {
     const crit = dd.via === 'ataque' && R.critico, n = dd.n * (crit ? 2 : 1);
     if (crit) nota += ', crítico: dados dobles';
     if (dd.veces > 1) nota = `${dd.veces} ${dd.via === 'ataque' ? 'ataques, cada uno con su tirada' : 'veces, una por proyectil'} · ${nota}`;
-    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? 'Curación' : 'Daño'} ${exprDe(n, dd.caras, bono)}${cura ? '' : ` ${esc(dd.tipo)}`}${dd.veces > 1 ? ` ×${dd.veces}` : ''}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
+    return botonDados({ roll: 'dano', i, ico: gi(claveDano(dd.tipo)), clave: claveDano(dd.tipo), titulo: `${cura ? (dd.temp ? 'PG temporales' : 'Curación') : 'Daño'} ${exprDe(n, dd.caras, bono)}${cura ? '' : ` ${esc(dd.tipo)}`}${dd.veces > 1 ? ` ×${dd.veces}` : ''}`, cond: dd.cond, nota, n, caras: dd.caras, bono, off, crit,
       mitad: dd.via === 'salvacion' && t.mitad && (R.ts === 'supera' || R.ts === 'varios') });
   });
   (t?.extras || []).forEach((xx, i) => {
@@ -162,8 +164,8 @@ function tirar(tipo, i, nuevo = true) {
     const p = parsear(exprDe(dd.n, dd.caras, bono)), res = resolver({ p, critico: crit, previo });
     const ts = dd.via === 'salvacion' ? R.ts : null, bruto = res.total, mitad = Math.floor(bruto / 2);
     const total = ts === 'supera' ? mitad : bruto, n = dd.n * (crit ? 2 : 1);
-    x = { tipo, i, p, res, total, bruto, mitad: t.mitad ? mitad : 0, ts, crit, cura, dano: dd.tipo, clave: claveDano(dd.tipo), cond: dd.cond,
-      lbl: `${cura ? 'puntos de golpe' : `de ${danoDe(dd.tipo)}`}${ts === 'supera' ? ' (mitad por superar la salvación)' : ''}`, dist: distDe(p, { critico: crit }),
+    x = { tipo, i, p, res, total, bruto, mitad: t.mitad ? mitad : 0, ts, crit, cura, temp: !!dd.temp, dano: dd.tipo, clave: claveDano(dd.tipo), cond: dd.cond,
+      lbl: `${cura ? (dd.temp ? 'puntos de golpe temporales' : 'puntos de golpe') : `de ${danoDe(dd.tipo)}`}${ts === 'supera' ? ' (mitad por superar la salvación)' : ''}`, dist: distDe(p, { critico: crit }),
       texto: `${s.es}: ${ts === 'varios' ? `${bruto} (${t.mitad ? mitad : 0} si supera)` : total} ${cura ? 'de curación' : 'de ' + danoDe(dd.tipo)} (${exprDe(n, dd.caras, bono)}${s.level && R.nivel > s.level ? ', espacio ' + R.nivel : ''}${crit ? ', crítico' : ''}${ts === 'supera' ? ', mitad' : ''})` };
   }
   x.nuevo = nuevo || !previo; x.antes = x.nuevo ? null : antes.total;
@@ -216,7 +218,8 @@ function pintarOut(anim = false) {
     h = `<div class="dd-hero">${sello(x.total, { ico: dano ? gi(x.clave) : gi('dados') })}<div class="dd-lbl">${esc(x.lbl)}</div></div>
       ${x.ts === 'varios' ? `<div class="cj-split dd-rev" style="--r:0"><span class="falla"><small>Quien falle</small><b>${x.bruto}</b></span><span class="supera"><small>Quien supere</small><b>${x.mitad}</b></span></div>` : ''}
       <div class="dd-ec">${partes.join('')}</div>${x.cond ? `<p class="cj-cond">Solo si ${esc(x.cond)}.</p>` : ''}${probHtml(x.dist, x.bruto ?? x.total)}
-      ${x.ctx ? `<div class="rl-ctx dd-rev" style="--r:2">${md(x.ctx)}</div>` : ''}`;
+      ${x.ctx ? `<div class="rl-ctx dd-rev" style="--r:2">${md(x.ctx)}</div>` : ''}
+      ${x.cura && x.total > 0 ? `<button type="button" class="dd-sig dd-rev" style="--r:3" data-rlcurarme>${gi('curacion')}${x.temp ? `Ganar ${x.total} PG temporales` : `Curarme ${x.total} PG`}</button>` : ''}`;
   }
   el.className = `dd-out ${clase}`;
   el.innerHTML = h;
@@ -287,6 +290,13 @@ export function init(store) {
   body.addEventListener('focusout', e => { if (e.target.id === 'rlObj' && e.target.value.trim()) anotar(e.target); });
   on(body, 'click', '[data-rlobjdel]', (e, b) => { quitarObjetivo(S, 'conc', +b.dataset.rlobjdel); pintarCtl(); });
   on(body, 'click', '[data-rlyo]', () => { alternarYo(S, 'conc'); pintarCtl(); });
+  // Curación de un conjuro sobre ti
+  on(body, 'click', '[data-rlcurarme]', (e, b) => {
+    const x = R.res; if (!x?.cura) return; let n = 0;
+    const h = S.act(`${S.db.catalog[R.sid]?.es || 'Conjuro'}: ${x.temp ? `${x.total} PG temporales` : `${x.total} PG`} sobre ti`, (db, c) => { n = x.temp ? ponerTemporales(c, x.total) : curar(c, x.total); });
+    b.disabled = true; golpe(x.temp ? 'temp' : 'cura', n);
+    toast(x.temp ? `Tienes ${vidaDe(S.cur()).temp} PG temporales.` : `Recuperas ${n} PG.`, [undoBtn(S, h)]);
+  });
   body.addEventListener('change', e => {
     if (e.target.id !== 'rlCrit') return;
     R.critico = e.target.checked; haptic('light'); pintarCtl();
