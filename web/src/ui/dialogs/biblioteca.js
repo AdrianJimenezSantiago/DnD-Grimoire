@@ -14,7 +14,9 @@ import { bestiarioDe, nuevaCriatura } from '../../domain/bestiario.js';
 import { undoBtn } from '../../app/acciones.js';
 import { rasgosEnJuego, GRUPOS, resumenClase, resumenSubclase } from '../../domain/enJuego.js';
 import { TEMAS } from '../../domain/clases2024.js';
-import { reglasVisibles } from '../../domain/rasgos.js';
+import { reglasVisibles, reglas, usosGastados, recState } from '../../domain/rasgos.js';
+import { EFECTO, EFECTO_DE_RASGO } from '../../domain/efectos.js';
+import { ponerEfecto } from '../../domain/vida.js';
 import { anadirPendientes, conjurosPendientes, quitarSobrantes } from '../../domain/progresion.js';
 
 let S;
@@ -224,6 +226,14 @@ const eleccionHtml = r => {
   <div class="lv-estilos">${e.opciones.map(o => { const on = e.actual === o.nombre, dato = e.id ? `data-ejopc="${esc(e.id)}|${esc(o.nombre)}"` : `data-ejvar="${esc(e.clase)}|${esc(o.nombre)}"`;
     return `<button type="button" class="lv-estilo ${on ? 'on' : ''}" ${dato} aria-pressed="${on}"><span class="lv-estilo-ico">${gi(o.ef === 'golpe' || o.golpe ? 'ca' : 'libro')}</span><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`; }).join('')}</div></section>`;
 };
+// Rasgos que se activan y dejan un efecto sobre ti (Ataque temerario, Voto de enemistad, Arma sagrada…)
+const activarHtml = (ch, r) => {
+  const a = EFECTO_DE_RASGO[norm(r.nombre)]; if (!a) return '';
+  const rec = a.gasta ? reglas(ch).find(x => x.id === a.gasta) : null, quedan = rec ? rec.max - usosGastados(ch, rec) : null, activo = (ch.vida?.efectos || []).some(e => e.k === a.k);
+  const coste = rec ? ` · gasta ${a.n || 1} de ${rec.nombre} (te quedan ${quedan})` : '';
+  return `<section class="ej-eleccion"><p class="note">${activo ? `<b>${esc(EFECTO[a.k].nombre)}</b> está activo.` : esc(EFECTO[a.k].texto)}</p>
+    <button type="button" class="gold" data-ejefecto="${esc(norm(r.nombre))}" ${activo || (rec && quedan < (a.n || 1)) ? 'disabled' : ''}>${gi('inspiracion')}Activar${esc(coste)}</button></section>`;
+};
 export function abrirRasgoJuego(clave) {
   const ch = S.cur(); if (!ch) return;
   const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === clave); if (!r) return;
@@ -231,7 +241,7 @@ export function abrirRasgoJuego(clave) {
   const grupos = `<div class="ej-mover"><span>Mostrar en</span><div class="seg sm" role="radiogroup" aria-label="Grupo">${GRUPOS.map(([k, t]) => `<button type="button" role="radio" aria-checked="${r.grupo === k}" data-ejgrupo="${k}">${esc(t)}${k === r.auto && r.grupo !== r.auto ? ' ·' : ''}</button>`).join('')}</div></div>`;
   ficha({ titulo: r.nombre, ico: r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : r.origen === 'subclase' ? 'subclase' : norm(r.clase || '').replace(/[^a-z]/g, ''),
     sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
-    cuerpo: `${grupos}${eleccionHtml(r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
+    cuerpo: `${grupos}${eleccionHtml(r)}${activarHtml(ch, r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
 export function abrirTermino(clave) {
   const e = termino(clave); if (!e) return;
@@ -276,6 +286,11 @@ export function init(store) {
     });
     abrirRasgoJuego(k);
     toast(`Ahora: <b>${esc(v)}</b>.${dentro.length ? ` Siempre preparados: ${esc(dentro.join(', '))}.` : ''}${fuera.length ? ` Dejan de estarlo: ${esc(fuera.join(', '))}.` : ''}`, [undoBtn(S, h)]);
+  });
+  on($('#fichaDlg'), 'click', '[data-ejefecto]', (e, b) => {
+    if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, a = EFECTO_DE_RASGO[b.dataset.ejefecto]; if (!a) return;
+    const h = S.act(`Activa ${EFECTO[a.k].nombre}`, (db, ch) => { if (a.gasta) { const st = recState(ch, a.gasta); st.used = (st.used || 0) + (a.n || 1); } ponerEfecto(ch, a.k); });
+    abrirRasgoJuego(k); toast(`<b>${esc(EFECTO[a.k].nombre)}</b> activo: ${esc(EFECTO[a.k].texto)}`, [undoBtn(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;

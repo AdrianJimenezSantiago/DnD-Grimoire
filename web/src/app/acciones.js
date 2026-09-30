@@ -1,5 +1,5 @@
 import { esc, joinY } from '../core/util.js';
-import { perfil } from '../domain/reglas2024.js';
+import { perfil, clasesDe } from '../domain/reglas2024.js';
 import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/rasgos.js';
 import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/sheet.js';
 import { toast } from '../ui/toast.js';
@@ -260,6 +260,9 @@ export function shortRest(S, openRecovery, openVida) {
     else if (c.clase === 'Brujo' && c.espaciosManuales) Object.keys(P.slots).forEach(L => { c.play.used[L] = 0; });
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = recState(c, r.id);
       const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });
+    // Infatigable (explorador 10): el agotamiento baja un nivel al terminar un descanso corto
+    const v = vidaDe(c);
+    if (v.agotamiento > 0 && clasesDe(c).some(k => k.clase === 'Explorador' && k.nivel >= 10)) { v.agotamiento -= 1; bits.push('Infatigable: un nivel de agotamiento menos'); }
   });
   haptic();
   if (P.pact) document.querySelectorAll(`[data-slotbtn^="${P.pact.level}:"]`).forEach(b => pop(b, 'fx-ignite'));

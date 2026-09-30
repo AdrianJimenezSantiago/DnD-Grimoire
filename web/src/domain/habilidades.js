@@ -84,6 +84,8 @@ export function salvacionesCompetentes(ch) {
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Pícaro' && c.nivel >= 15) { out.add('sab'); out.add('car'); }
     if (c.clase === 'Monje' && c.nivel >= 14) KS.forEach(k => out.add(k));
+    // Mente de hierro (acechador en la penumbra 7): Sabiduría, o Inteligencia si ya la tenías
+    if (c.clase === 'Explorador' && c.nivel >= 7 && /acechador|penumbra/i.test(c.subclase || '')) out.add(out.has('sab') ? 'int' : 'sab');
   }
   for (const d of dotesDe(ch)) if (norm(d.nombre) === 'resiliente' && AB_DE_NOMBRE[norm(d.detalle)]) out.add(AB_DE_NOMBRE[norm(d.detalle)]);
   return out;
@@ -103,14 +105,18 @@ export function nivelHabilidad(ch, k) { return Math.max(0, Math.min(2, parseInt(
 export function bonoHabilidad(ch, k) {
   const pb = competencia(nivelTotal(ch)), n = nivelHabilidad(ch, k);
   const extra = n === 2 ? pb * 2 : n === 1 ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0;
-  return modOf(statsEfectivos(ch)[abDe(k)]) + extra + bonoOrden(ch, k) + bonoPruebasObjetos(ch);
+  return modOf(statsEfectivos(ch)[abDe(k)]) + extra + bonoOrden(ch, k) + bonoGlamur(ch, k) + bonoPruebasObjetos(ch);
 }
 // Taumaturgo y Naturalista suman la Sabiduría (mínimo +1) a sus dos habilidades de Inteligencia
 export const bonoOrden = (ch, k) => clasesDe(ch).some(c => ordenDe(ch, c.clase)?.habilidades?.includes(k)) ? Math.max(1, modOf(statsEfectivos(ch).sab)) : 0;
+// Glamur sobrenatural (errante feérico 3): suma la Sabiduría (mínimo +1) a las pruebas de Carisma
+export const bonoGlamur = (ch, k) => abDe(k) === 'car' && clasesDe(ch).some(c => c.clase === 'Explorador' && c.nivel >= 3 && /errante/i.test(c.subclase || '')) ? Math.max(1, modOf(statsEfectivos(ch).sab)) : 0;
 export function iniciativa(ch) {
   const pb = competencia(nivelTotal(ch));
   // Aprendiz de mucho (2024) solo vale para pruebas de habilidad: la iniciativa no usa ninguna
-  return modOf(statsEfectivos(ch).des) + bonoPruebasObjetos(ch) + (tieneDote(ch, 'Alerta') ? pb : 0);
+  // Emboscador pavoroso (acechador en la penumbra 3): suma la Sabiduría a la iniciativa
+  const acechador = clasesDe(ch).some(c => c.clase === 'Explorador' && c.nivel >= 3 && /acechador|penumbra/i.test(c.subclase || ''));
+  return modOf(statsEfectivos(ch).des) + bonoPruebasObjetos(ch) + (tieneDote(ch, 'Alerta') ? pb : 0) + (acechador ? modOf(statsEfectivos(ch).sab) : 0);
 }
 export const percepcionPasiva = ch => 10 + bonoHabilidad(ch, 'percepcion');
 export const investigacionPasiva = ch => 10 + bonoHabilidad(ch, 'investigacion');
@@ -129,6 +135,8 @@ export function velocidad(ch) {
     if (c.clase === 'Bárbaro' && c.nivel >= 5 && !conArmaduraPesada) m += 3;
     if (c.clase === 'Monje' && c.nivel >= 2 && !armado) m += [[18, 9], [14, 7.5], [10, 6], [6, 4.5], [2, 3]].find(([L]) => c.nivel >= L)[1];
     if (c.clase === 'Explorador' && c.nivel >= 6 && !conArmaduraPesada) m += 3;
+    // Aura de celeridad (juramento de gloria 7)
+    if (c.clase === 'Paladín' && c.nivel >= 7 && /gloria/i.test(c.subclase || '')) m += 3;
   }
   m -= 1.5 * Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
   return Math.max(0, m);

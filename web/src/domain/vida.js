@@ -107,7 +107,9 @@ export function aplicarDano(ch, cantidad, { critico = false } = {}) {
     if (queda <= 0) { r.cayo = true; if (-queda >= max) { r.muerte = true; v.muerte = { exitos: 0, fallos: 3 }; marcarCaida(ch, 'masivo'); } else v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
     v.pg = Math.max(0, queda);
   }
-  if (ch.play?.conc && n > 0) r.concentracion = { cd: cdConcentracion(n), conjuro: ch.play.conc };
+  // Cazador implacable (explorador 13): el daño no rompe la concentración en Marca del cazador
+  const implacable = norm(ch.play?.conc || '') === 'marca del cazador' && clasesDe(ch).some(c => c.clase === 'Explorador' && c.nivel >= 13);
+  if (ch.play?.conc && n > 0 && !implacable) r.concentracion = { cd: cdConcentracion(n), conjuro: ch.play.conc };
   if (r.cayo || r.muerte) r.concentracion = r.concentracion ? { ...r.concentracion, perdida: true } : null;
   return r;
 }

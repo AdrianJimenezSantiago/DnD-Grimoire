@@ -63,6 +63,12 @@ export const EFECTOS = [
   { k: 'armamagica', dur: 600, conjuro: /^arma m[aá]gica$/i, nombre: 'Arma mágica', bueno: true, ico: 'cortante', texto: '+1 a las tiradas de ataque y de daño con el arma encantada (más con espacios superiores).', reglas: [R('ataque', 'plano', { valor: 1, cond: 'con el arma encantada' })] },
   { k: 'protveneno', dur: 600, conjuro: /^protecci[oó]n contra (el )?veneno$/i, nombre: 'Protección contra veneno', bueno: true, ico: 'veneno', texto: 'Resistencia al daño de veneno y ventaja en las salvaciones para no quedar envenenado.', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] },
   { k: 'vision', dur: 4800, conjuro: /^visi[oó]n en la oscuridad$/i, nombre: 'Visión en la oscuridad', bueno: true, ico: 'ojo', texto: 'Visión en la oscuridad hasta 45 m.', reglas: [] },
+  { k: 'temerario', dur: 1, rasgo: true, nombre: 'Ataque temerario', bueno: true, ico: 'fuerza', texto: 'Ventaja en tus ataques con Fuerza este turno; los ataques contra ti tienen ventaja hasta tu siguiente turno.', reglas: [R('ataque', 'ventaja', { cond: 'si el ataque usa la Fuerza' })] },
+  { k: 'punteria', dur: 1, rasgo: true, nombre: 'Puntería certera', bueno: true, ico: 'ojo', texto: 'Ventaja en tu siguiente tirada de ataque este turno; tu velocidad es 0 hasta el final del turno.', reglas: [R('ataque', 'ventaja', { cond: 'solo en la siguiente' })], velX: 0 },
+  { k: 'voto', dur: 10, rasgo: true, nombre: 'Voto de enemistad', bueno: true, ico: 'combate', texto: 'Ventaja en tus tiradas de ataque contra la criatura del voto durante 1 minuto.', reglas: [R('ataque', 'ventaja', { cond: 'contra la criatura del voto' })] },
+  { k: 'armasagrada', dur: 100, rasgo: true, nombre: 'Arma sagrada', bueno: true, ico: 'radiante', texto: 'Sumas tu Carisma a las tiradas de ataque con el arma, que da luz y puede hacer daño radiante, durante 10 minutos.', reglas: [R('ataque', 'plano', { valorAb: 'car', cond: 'con el arma bendecida' })] },
+  { k: 'atleta', dur: 600, rasgo: true, nombre: 'Atleta sin parangón', bueno: true, ico: 'velocidad', texto: 'Ventaja en Atletismo y Acrobacias, y tus saltos llegan 3 m más lejos, durante 1 hora.', reglas: [R('prueba', 'ventaja', { hab: 'atletismo' }), R('prueba', 'ventaja', { hab: 'acrobacias' })] },
+  { k: 'defensasup', dur: 10, rasgo: true, nombre: 'Defensa superior', bueno: true, ico: 'ca', texto: 'Resistencia a todo el daño salvo el de fuerza durante 1 minuto.', reglas: [] },
   { k: 'correr', dur: 1, accion: true, nombre: 'Correr', bueno: true, ico: 'velocidad', texto: 'Movimiento extra igual a tu velocidad este turno.', velX: 2, reglas: [] },
   { k: 'destrabarse', dur: 1, accion: true, nombre: 'Destrabarse', bueno: true, ico: 'iniciativa', texto: 'Tu movimiento no provoca ataques de oportunidad este turno.', reglas: [] },
   { k: 'esquivar', dur: 1, accion: true, nombre: 'Esquivando', bueno: true, ico: 'ca', texto: 'Quien te ataque tiene desventaja y tus salvaciones de Destreza, ventaja, hasta tu siguiente turno.', reglas: [R('salvacion', 'ventaja', { ab: 'des' })] },
@@ -85,6 +91,12 @@ export const EFECTOS = [
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
 // Rasgos con usos que, al gastarse, ponen un efecto sobre ti
 export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion' };
+// Rasgos que se activan desde «En juego» y dejan un efecto sobre ti; gasta: el uso que consumen
+export const EFECTO_DE_RASGO = {
+  'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
+  'voto de enemistad': { k: 'voto', gasta: 'tpl:paladin.canalizar' }, 'arma sagrada': { k: 'armasagrada', gasta: 'tpl:paladin.canalizar' },
+  'atleta sin parangon': { k: 'atleta', gasta: 'tpl:paladin.canalizar' }, 'defensa superior': { k: 'defensasup', gasta: 'tpl:monje.concentracion', n: 3 },
+};
 
 // Ventajas pasivas de clase y especie que se aplican solas a las tiradas
 const INCAP_P = ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'];
@@ -149,7 +161,20 @@ export function efectosDe(ch) {
     texto: [e.propio?.ca && `CA ${e.propio.ca > 0 ? '+' : ''}${e.propio.ca}`, e.propio?.ataque && `ataques ${e.propio.ataque}`, e.propio?.salvacion && `salvaciones ${e.propio.salvacion}`, e.propio?.prueba && `pruebas ${e.propio.prueba}`, e.propio?.vel && `velocidad ${e.propio.vel > 0 ? '+' : ''}${e.propio.vel} m`].filter(Boolean).join(', ') || 'Efecto propio.',
     ca: e.propio?.ca || 0, vel: e.propio?.vel || 0, reglas: reglasPropias(e.propio || {}) }; });
 }
-const estadosActivos = ch => (ch.vida?.estados || []).filter(k => REGLAS_ESTADO[k]);
+// Estados a los que eres inmune ahora mismo: Aura de coraje (paladín 10), Aura de entrega (entrega 7), Furia irracional (berserker 6, en furia),
+// Heroísmo (asustado)
+export function inmunidadesEstado(ch) {
+  const out = new Map(), efs = (ch.vida?.efectos || []).map(e => e.k), ests = ch.vida?.estados || [];
+  const incap = ests.some(k => ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'].includes(k));
+  for (const c of clasesDe(ch)) {
+    if (c.clase === 'Paladín' && c.nivel >= 10 && !incap) out.set('asustado', 'Aura de coraje');
+    if (c.clase === 'Paladín' && c.nivel >= 7 && /entrega|devoci/i.test(c.subclase || '') && !incap) out.set('encantado', 'Aura de entrega');
+    if (c.clase === 'Bárbaro' && c.nivel >= 6 && /berserk/i.test(c.subclase || '') && efs.includes('furia')) { out.set('asustado', 'Furia irracional'); out.set('encantado', 'Furia irracional'); }
+  }
+  if (efs.includes('heroismo')) out.set('asustado', 'Heroísmo');
+  return out;
+}
+const estadosActivos = ch => { const inm = inmunidadesEstado(ch); return (ch.vida?.estados || []).filter(k => REGLAS_ESTADO[k] && !inm.has(k)); };
 export const incapacitado = ch => estadosActivos(ch).filter(k => REGLAS_ESTADO[k].incap);
 
 // motivo: 'muerte' (salvación contra muerte) o 'concentracion' (mantener un conjuro); algunas reglas solo valen para eso
@@ -166,7 +191,8 @@ export function modsTirada(ch, { sobre, ab = '', hab = '', motivo = '' }) {
   for (const k of estadosActivos(ch)) for (const r of REGLAS_ESTADO[k].reglas) if (aplica(r)) out.push({ fuente: k.charAt(0).toUpperCase() + k.slice(1), mal: r.efecto !== 'ventaja', ...r });
   // Esquivar se pierde si quedas incapacitado o tu velocidad es 0
   const sinEsquivar = () => incapacitado(ch).length > 0 || velocidadEfectiva(ch).m === 0;
-  for (const e of efectosDe(ch)) { if (e.k === 'esquivar' && sinEsquivar()) continue; for (const r of e.reglas) if (aplica(r)) out.push({ fuente: e.nombre, mal: !e.bueno, ...r }); }
+  const conAb = r => (r.valorAb ? { ...r, valor: Math.max(1, modOf(statsEfectivos(ch)[r.valorAb])) } : r);
+  for (const e of efectosDe(ch)) { if (e.k === 'esquivar' && sinEsquivar()) continue; for (const r of e.reglas) if (aplica(r)) out.push({ fuente: e.nombre, mal: !e.bueno, ...conAb(r) }); }
   for (const p of pasivosDe(ch)) for (const r of p.reglas) if (aplica(r)) out.push({ fuente: p.nombre, mal: !p.bueno, pasivo: true, ...r });
   const ago = Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
   if (ago && sobre !== 'dano') out.push({ fuente: `Agotamiento ${ago}`, efecto: 'plano', valor: -2 * ago, mal: true });
@@ -197,9 +223,9 @@ export function velocidadEfectiva(ch) {
   const base = velocidad(ch), efs = efectosDe(ch), cero = estadosActivos(ch).filter(k => REGLAS_ESTADO[k].vel0);
   if (cero.length) return { m: 0, base, motivo: cero.map(k => k.charAt(0).toUpperCase() + k.slice(1)).join(', '), cambia: base !== 0 };
   let m = base + efs.reduce((s, e) => s + (e.vel || 0), 0);
-  for (const e of efs) if (e.velX) m *= e.velX;
+  for (const e of efs) if (e.velX != null) m *= e.velX;
   const arrastra = estadosActivos(ch).includes('derribado');
-  return { m: Math.max(0, Math.round(m * 10) / 10), base, arrastra, motivo: efs.filter(e => e.vel || e.velX).map(e => e.nombre).join(', '), cambia: Math.abs(m - base) > 0.01 };
+  return { m: Math.max(0, Math.round(m * 10) / 10), base, arrastra, motivo: efs.filter(e => e.vel || e.velX != null).map(e => e.nombre).join(', '), cambia: Math.abs(m - base) > 0.01 };
 }
 export const danoArmaExtra = ch => efectosDe(ch).map(e => e.danoArma).filter(Boolean);
 
