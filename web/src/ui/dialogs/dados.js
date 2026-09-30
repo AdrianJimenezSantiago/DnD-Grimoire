@@ -1,6 +1,7 @@
 import { esc } from '../../core/util.js';
 import { minimoD20Habilidad, totalMinimoFuerza } from '../../domain/automatismos.js';
 import { abDe } from '../../domain/habilidades.js';
+import { especieBase } from '../../domain/especies.js';
 import { sgn } from '../../domain/reglas2024.js';
 import { parsear, texto, esD20Simple, media, rango, resolver, distribucion, maxDist, rngCripto } from '../../domain/dados.js';
 import { fmt, formaDe, forma, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../dadosVista.js';
@@ -130,7 +131,11 @@ function lanzar(nuevo = true) {
   if (!p) { V.res = null; pintarOut(); actualizarBoton(); $('#daExpr')?.focus(); return; }
   const modo = conModo(p) ? V.modo || 'normal' : 'normal', antes = V.res;
   const previo = !nuevo && antes && texto(antes.p) === texto(p) ? antes.res : null;
-  const res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });
+  let res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });
+  // Fortuna (mediano): un 1 en una prueba con d20 se repite y vale el nuevo resultado
+  let fortuna = !previo && conModo(p) && V.tipo !== 'dano' && V.tipo !== 'libre' && res.r.natural === 1 && S.cur() && especieBase(S.cur()) === 'mediano';
+  if (fortuna) res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [] });
+  else if (!!previo && antes?.fortuna) fortuna = true;
   const d20 = conModo(p), nat = res.r.natural, falla = falloAutomatico(V.mods || []);
   // Crítico mejorado del campeón: el ataque es crítico con 19 o 18
   const crit = d20 && (nat === 20 || ((V.tipo === 'ataque' || V.tipo === 'muerte') && nat >= (V.critMin || 20))), pifia = d20 && nat === 1;
@@ -140,6 +145,7 @@ function lanzar(nuevo = true) {
   const tope = V.tipo === 'prueba' && crit && res.total < 20, total0 = tope ? 20 : res.total + fiable, poderio = V.minTotal && total0 < V.minTotal, total = poderio ? V.minTotal : total0;
   let lbl = V.tipo === 'ataque' ? 'para impactar' : V.tipo === 'dano' ? V.sub || 'de daño' : V.tipo === 'iniciativa' ? 'de iniciativa' : V.tipo === 'libre' ? texto(p) : 'en la tirada';
   if (poderio) lbl = `${lbl} (Poderío indómito: usas tu Fuerza, ${V.minTotal})`;
+  if (fortuna) lbl = `${lbl} (Fortuna: repetiste un 1)`;
   if (fiable) lbl = `${lbl} (${V.minFuente || 'mínimo'}: el ${nat} cuenta como ${V.minD20})`;
   if (falla) lbl = 'fallo automático';
   if (V.tipo === 'muerte') lbl = crit ? '¡Vuelves con 1 PG!' : nat === 1 ? 'Dos fallos' : total >= 10 ? 'Éxito' : 'Fallo';
@@ -149,7 +155,7 @@ function lanzar(nuevo = true) {
   // En pruebas y salvaciones con CD manda el total; en ataques y salvaciones contra muerte, el dado natural.
   const porDado = V.tipo === 'ataque' || V.tipo === 'muerte' || cd == null;
   const estado = falla ? 'pifia' : porDado && crit ? 'crit' : porDado && pifia ? 'pifia' : cd != null ? (total >= cd ? 'exito' : 'fallo') : '';
-  V.res = { p, res, total, tope, antes: antes && !nuevo ? antes.total : null, nat, crit, pifia, falla, lbl, efecto, cd, estado, modo, nuevo, firma: firmaMods(),
+  V.res = { fortuna, p, res, total, tope, antes: antes && !nuevo ? antes.total : null, nat, crit, pifia, falla, lbl, efecto, cd, estado, modo, nuevo, firma: firmaMods(),
     dist: falla ? null : distDe(p, modo, res), id: nuevo || !antes ? ++SEQ : antes.id };
   registrar(nuevo || !antes);
   pintarOut(true); pintarHist(nuevo || !antes); actualizarBoton();

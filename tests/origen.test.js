@@ -33,7 +33,7 @@ test('herramientas y equipo inicial de clase y trasfondo', () => {
 });
 test('recursos de especie y dotes, e Imponer las manos como reserva', () => {
   const r = reglas(pj({ especie: 'Dracónido', trasfondo: 'Comerciante' }));
-  assert.equal(r.find(x => x.nombre === 'Arma de aliento').max, 2);
+  assert.equal(r.find(x => x.nombre === 'Ataque de aliento').max, 2);
   assert.equal(r.find(x => x.nombre === 'Puntos de suerte').max, 2);
   const manos = r.find(x => x.nombre === 'Imponer las manos');
   assert.equal(manos.max, 5); assert.equal(manos.reserva, 'PG');

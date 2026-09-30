@@ -4,6 +4,8 @@ import { claseArmadura } from './equipo.js';
 import { velocidad, abDe } from './habilidades.js';
 import { clasesDe, modOf } from './reglas2024.js';
 import { armadurasDe } from './competencias.js';
+import { resistenciasEspecie } from './especies.js';
+import { opcionDe } from './opcionesRasgo.js';
 
 const R = (sobre, efecto, extra = {}) => ({ sobre, efecto, ...extra });
 export const REGLAS_ESTADO = {
@@ -77,6 +79,9 @@ export const EFECTOS = [
   { k: 'armasagrada', dur: 100, rasgo: true, nombre: 'Arma sagrada', bueno: true, ico: 'radiante', texto: 'Sumas tu Carisma a las tiradas de ataque con el arma, que da luz y puede hacer daño radiante, durante 10 minutos.', reglas: [R('ataque', 'plano', { valorAb: 'car', cond: 'con el arma bendecida' })] },
   { k: 'atleta', dur: 600, rasgo: true, nombre: 'Atleta sin parangón', bueno: true, ico: 'velocidad', texto: 'Ventaja en Atletismo y Acrobacias, y tus saltos llegan 3 m más lejos, durante 1 hora.', reglas: [R('prueba', 'ventaja', { hab: 'atletismo' }), R('prueba', 'ventaja', { hab: 'acrobacias' })] },
   { k: 'innata', dur: 10, nombre: 'Hechicería innata', bueno: true, ico: 'esc_evo', texto: 'Durante 1 minuto, la CD de tus conjuros de hechicero sube 1 y tienes ventaja en tus tiradas de ataque de conjuro.', reglas: [R('ataque', 'ventaja', { cond: 'solo ataques de conjuro' })] },
+  { k: 'revelacion', dur: 10, rasgo: true, nombre: 'Revelación celestial', bueno: true, ico: 'radiante', texto: 'Transformación de 1 minuto: una vez por turno, daño radiante o necrótico adicional igual a tu competencia.', reglas: [] },
+  { k: 'formagrande', dur: 100, rasgo: true, nombre: 'Forma grande', bueno: true, ico: 'fuerza', texto: 'Eres Grande durante 10 minutos: ventaja en pruebas de Fuerza y +3 m de velocidad.', vel: 3, reglas: [R('prueba', 'ventaja', { ab: 'fue' })] },
+  { k: 'vuelodraconico', dur: 100, rasgo: true, nombre: 'Vuelo dracónico', bueno: true, ico: 'velocidad', texto: 'Alas espectrales durante 10 minutos: velocidad volando igual a tu velocidad.', reglas: [] },
   { k: 'defensasup', dur: 10, rasgo: true, nombre: 'Defensa superior', bueno: true, ico: 'ca', texto: 'Resistencia a todo el daño salvo el de fuerza durante 1 minuto.', reglas: [] },
   { k: 'correr', dur: 1, accion: true, nombre: 'Correr', bueno: true, ico: 'velocidad', texto: 'Movimiento extra igual a tu velocidad este turno.', velX: 2, reglas: [] },
   { k: 'destrabarse', dur: 1, accion: true, nombre: 'Destrabarse', bueno: true, ico: 'iniciativa', texto: 'Tu movimiento no provoca ataques de oportunidad este turno.', reglas: [] },
@@ -99,7 +104,8 @@ export const EFECTOS = [
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
 // Rasgos con usos que, al gastarse, ponen un efecto sobre ti
-export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion', 'tpl:hechicero.innata': 'innata' };
+export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion', 'tpl:hechicero.innata': 'innata',
+  'tpl:especie.revelacion': 'revelacion', 'tpl:especie.grande': 'formagrande', 'tpl:especie.vuelo': 'vuelodraconico' };
 // Rasgos que se activan desde «En juego» y dejan un efecto sobre ti; gasta: el uso que consumen
 export const EFECTO_DE_RASGO = {
   'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
@@ -126,6 +132,7 @@ export function pasivosDe(ch) {
   if (dotes.includes('resistente')) out.push({ nombre: 'Resistente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte' })] });
   if (clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 18)) out.push({ nombre: 'Superviviente', reglas: [R('salvacion', 'ventaja', { motivo: 'muerte', cond: 'y de 18 a 20 cuenta como un 20' })] });
   if ((ch.vida?.efectos || []).some(e => e.k === 'cancion')) out.push({ nombre: 'Canción de la hoja', reglas: [R('salvacion', 'plano', { ab: 'con', motivo: 'concentracion', valor: Math.max(1, modOf(statsEfectivos(ch).int)) })] });
+  if (clasesDe(ch).some(c => c.clase === 'Hechicero' && c.nivel >= 6 && /aberrant/i.test(c.subclase || ''))) out.push({ nombre: 'Defensas psíquicas', reglas: [R('salvacion', 'ventaja', { cond: 'contra asustado o hechizado' })] });
   if (clasesDe(ch).some(c => c.clase === 'Mago' && c.nivel >= 14 && /abjur/i.test(c.subclase || ''))) out.push({ nombre: 'Resistencia a conjuros', reglas: [R('salvacion', 'ventaja', { cond: 'contra conjuros' })] });
   if (especie === 'gnomo') out.push({ nombre: 'Astucia gnoma', reglas: ['int', 'sab', 'car'].map(ab => R('salvacion', 'ventaja', { ab })) });
   if (especie === 'enano') out.push({ nombre: 'Resistencia enana', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] });
@@ -265,4 +272,39 @@ export function resumenTirada(ch, sobre, { ab = '', hab = '' } = {}, bono = 0) {
   const plano = mods.filter(m => m.efecto === 'plano').reduce((s, m) => s + (Number(m.valor) || 0), 0);
   return { total: bono + plano, modo: resolverModo(mods), dados: mods.filter(m => m.efecto === 'dado').map(m => (String(m.valor).startsWith('-') ? `−${String(m.valor).slice(1)}` : `+${m.valor}`)), falla: !!falloAutomatico(mods), cond: todos.some(m => m.cond),
     fuentes: [...new Set(todos.map(m => m.fuente))] };
+}
+
+// Resistencias al daño que tienes ahora mismo, con su origen (especie, clase, subclase, opciones elegidas y efectos)
+const BPS = ['contundente', 'cortante', 'perforante'];
+const TERRENO_RES = { 'Árido': 'fuego', Polar: 'frío', Templado: 'relámpago', Tropical: 'veneno' };
+const LEALTAD_RES = { Bhaal: 'veneno', Myrkul: 'necrótico', 'Perdición': 'psíquico' };
+export function resistenciasDe(ch) {
+  const out = new Map(), add = (tipos, fuente) => [].concat(tipos).forEach(t => { if (!out.has(t)) out.set(t, fuente); });
+  for (const [t, f] of resistenciasEspecie(ch)) add(t, f);
+  const efs = (ch.vida?.efectos || []).map(e => e.k), furia = efs.includes('furia');
+  for (const c of clasesDe(ch)) {
+    const s = c.subclase || '', L = c.nivel;
+    if (c.clase === 'Bárbaro' && furia) {
+      add(BPS, 'Furia');
+      if (/coraz/i.test(s) && opcionDe(ch, 'corazon.furia')?.nombre === 'Oso') add(['ácido', 'frío', 'fuego', 'relámpago', 'trueno', 'veneno'], 'Furia de lo salvaje (oso)');
+    }
+    if (c.clase === 'Brujo' && /celestial/i.test(s) && L >= 6) add('radiante', 'Alma radiante');
+    if (c.clase === 'Brujo' && /primigenio/i.test(s) && L >= 10) add('psíquico', 'Escudo mental');
+    if (c.clase === 'Brujo' && /infernal/i.test(s) && L >= 10) { const o = opcionDe(ch, 'infernal.resistencia'); if (o) add(norm(o.nombre) === 'acido' ? 'ácido' : o.nombre.toLowerCase(), 'Resistencia infernal'); }
+    if (c.clase === 'Hechicero' && /dracon/i.test(s) && L >= 6) { const o = opcionDe(ch, 'draconica.afinidad'); if (o) add(o.tipo, 'Afinidad elemental'); }
+    if (c.clase === 'Hechicero' && /aberrant/i.test(s) && L >= 6) add('psíquico', 'Defensas psíquicas');
+    if (c.clase === 'Guerrero' && /psionic/i.test(s) && L >= 10) add('psíquico', 'Mente robusta');
+    if (c.clase === 'Clérigo' && /guerra/i.test(s) && L >= 17) add(BPS, 'Avatar de la batalla');
+    if (c.clase === 'Druida' && /tierra/i.test(s) && L >= 10) { const o = opcionDe(ch, 'tierra.terreno'); add(TERRENO_RES[o?.nombre || 'Árido'], 'Protección de la naturaleza'); }
+    if (c.clase === 'Druida' && /estrella/i.test(s) && L >= 14 && efs.includes('formaestelar')) add(BPS, 'Colmado de luz estelar');
+    if (c.clase === 'Paladín' && /antiguos/i.test(s) && L >= 7) add(['necrótico', 'psíquico', 'radiante'], 'Aura de salvaguarda');
+    if (c.clase === 'Pícaro' && /vastago|tres/i.test(s) && L >= 3) { const o = opcionDe(ch, 'vastago.lealtad'); if (o) add(LEALTAD_RES[o.nombre], 'Lealtad aterradora'); }
+    if (c.clase === 'Explorador' && /invernal/i.test(s) && L >= 3) add('frío', 'Explorador gélido');
+  }
+  if (efs.includes('pielpetrea')) add(BPS, 'Piel pétrea');
+  if (efs.includes('defensasup')) add(['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'], 'Defensa superior');
+  if (efs.includes('vinculo')) add(['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'], 'Vínculo protector');
+  if (efs.includes('protveneno')) add('veneno', 'Protección contra veneno');
+  if (efs.includes('fuentelunar')) add('radiante', 'Fuente de luz lunar');
+  return [...out].map(([tipo, fuente]) => ({ tipo, fuente }));
 }

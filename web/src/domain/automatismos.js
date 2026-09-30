@@ -5,6 +5,7 @@ import { reglas, recState, usosGastados } from './rasgos.js';
 import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital } from './vida.js';
 import { DADO_ARTES } from './equipo.js';
 import { nivelHabilidad } from './habilidades.js';
+import { linajeDe } from './especies.js';
 
 // Reglas de clase que la app aplica sola en momentos concretos (Manual del Jugador de 2024):
 // al tirar iniciativa, al empezar tu turno y al gastar un uso que cura o da puntos de golpe temporales.
@@ -135,6 +136,8 @@ export function alGastarRecurso(ch, id) {
     const r = regla(ch, 'tpl:hechicero.puntos');
     if (r) { const n = Math.min(usosGastados(ch, r), Math.floor(nivelClase(ch, 'Hechicero') / 2)); recState(ch, r.id).used = usosGastados(ch, r) - n; out.push(`Recuperas ${n} puntos de hechicería.`); }
   }
+  // Ataque de aliento (dracónido): CD 8 + Con + competencia, 1d10 a 4d10 del tipo de su linaje
+  if (id === 'tpl:especie.aliento') { const a = alientoDe(ch); out.push(`Salvación de Destreza CD ${a.cd}: ${a.dado}${a.tipo ? ` de ${a.tipo}` : ''}, mitad si la supera.`); }
   // Forma salvaje (druida 2): PG temporales iguales a tu nivel de druida (el triple con Formas del círculo, luna 3)
   if (id === 'tpl:druida.forma') {
     const L = nivelClase(ch, 'Druida'), luna = subDe(ch, 'Druida', /luna/), t = luna && luna.nivel >= 3 ? 3 * L : L;
@@ -166,4 +169,9 @@ export function alLanzarConEspacio(ch, fuente = '') {
     recState(ch, r.id).used = 0; out.push('Mareas del caos se restablece: tira en la tabla de sobrecarga de magia salvaje.');
   }
   return out;
+}
+
+export function alientoDe(ch) {
+  const L = nivelTotal(ch), pb = competencia(L), tipo = linajeDe(ch, 'especie.draconido')?.dano || '';
+  return { cd: 8 + modOf(statsEfectivos(ch).con) + pb, dado: `${[1, 5, 11, 17].filter(x => L >= x).length}d10`, tipo };
 }

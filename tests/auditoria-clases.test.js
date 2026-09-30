@@ -347,3 +347,28 @@ test('libro: Canción de la victoria ya no suma Inteligencia al daño; Daño bá
   assert.equal(alLanzarConEspacio(s, 'Hechicero').length, 1); assert.equal(recState(s, 'tpl:salvaje.mareas').used, 0);
   assert.equal(rangoMuerte(ch({ clase: 'Guerrero', subclase: 'Campeón', nivel: 18 })), 18);
 });
+
+test('especies: linajes, conjuros de especie, usos y resistencias del Manual', async () => {
+  const { conjurosEspecie, linajeActual } = await import('../web/src/domain/especies.js');
+  const { resistenciasDe } = await import('../web/src/domain/efectos.js');
+  const { alientoDe } = await import('../web/src/domain/automatismos.js');
+  const drow = ch({ clase: 'Mago', nivel: 5, especie: 'Elfo (drow)' });
+  assert.equal(linajeActual(drow).nombre, 'Drow');
+  assert.deepEqual(conjurosEspecie(drow, 5).map(c => `${c.nombre}:${c.gratis}`), ['Luces danzantes:', 'Fuego feérico:1/DL', 'Oscuridad:1/DL']);
+  const bosque = ch({ clase: 'Druida', nivel: 1, especie: 'Elfo', opciones: { 'especie.elfo': 'Elfo de los bosques' } });
+  assert.equal(velocidad(bosque), 10.5);
+  const t = ch({ clase: 'Brujo', nivel: 3, especie: 'Tiefling', opciones: { 'especie.tiefling': 'Ctónico' } });
+  assert.deepEqual(conjurosEspecie(t, 3).map(c => c.nombre), ['Taumaturgia', 'Toque helado', 'Falsa vida']);
+  assert.ok(resistenciasDe(t).some(r => r.tipo === 'necrótico'));
+  const g = ch({ clase: 'Druida', nivel: 3, especie: 'Gnomo (de los bosques)' });
+  assert.ok(reglas(g).some(r => r.id === 'tpl:especie.animales'));
+  const d = ch({ clase: 'Guerrero', nivel: 11, especie: 'Dracónido (rojo)' });
+  assert.deepEqual(alientoDe(d), { cd: 8 + 2 + 4, dado: '3d10', tipo: 'fuego' });
+  assert.ok(reglas(d).some(r => r.nombre === 'Ataque de aliento'));
+  const gol = ch({ clase: 'Guerrero', nivel: 5, especie: 'Goliat', opciones: { 'especie.goliat': 'Abrasión del fuego' } });
+  assert.equal(opcionesAlImpactar(gol, arma('Espada larga')).find(o => o.k === 'gigante').dado, '1d10');
+  const b = ch({ clase: 'Bárbaro', nivel: 3 }); ponerEfecto(b, 'furia');
+  assert.deepEqual(resistenciasDe(b).map(r => r.tipo), ['contundente', 'cortante', 'perforante']);
+  const en = rasgosEnJuego(ch({ clase: 'Mago', nivel: 1, especie: 'Elfo' })).find(r => r.nombre === 'Linaje élfico');
+  assert.equal(en.eleccion.id, 'especie.elfo');
+});

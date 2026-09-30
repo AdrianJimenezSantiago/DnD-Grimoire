@@ -294,7 +294,7 @@ export function init(store) {
     const h = S.act(`${v}`, (db, ch) => {
       ch.opciones = { ...(ch.opciones || {}), [id]: v };
       // El terreno del Círculo de la tierra cambia los conjuros siempre preparados
-      if (id === 'tierra.terreno' || id === 'vastago.lealtad') { fuera = quitarSobrantes(db, ch); dentro = anadirPendientes(db, ch, conjurosPendientes(db, ch, compendio())); }
+      if (id === 'tierra.terreno' || id === 'vastago.lealtad' || /^especie\./.test(id)) { fuera = quitarSobrantes(db, ch); dentro = anadirPendientes(db, ch, conjurosPendientes(db, ch, compendio())); }
     });
     abrirRasgoJuego(k);
     toast(`Ahora: <b>${esc(v)}</b>.${dentro.length ? ` Siempre preparados: ${esc(dentro.join(', '))}.` : ''}${fuera.length ? ` Dejan de estarlo: ${esc(fuera.join(', '))}.` : ''}`, [undoBtn(S, h)]);

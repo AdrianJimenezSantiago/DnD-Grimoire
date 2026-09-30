@@ -1,5 +1,6 @@
 import { norm } from '../core/util.js';
-import { clasesDe } from './reglas2024.js';
+import { clasesDe, nivelTotal } from './reglas2024.js';
+import { LINAJES, linajeDe, especieBase } from './especies.js';
 
 // Rasgos de subclase que obligan a escoger una opción entre varias (Manual del Jugador de 2024 y Héroes de Faerûn).
 // cambia: cuándo se puede cambiar la elección
@@ -47,7 +48,7 @@ export const OPCIONES_RASGO = [
   { id: 'draconica.afinidad', clase: 'Hechicero', sub: /dracon/, nivel: 6, rasgo: 'Afinidad elemental', cambia: 'fija', opciones: ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Veneno'].map(t =>
     O(t, `Resistencia al daño de ${t.toLowerCase()} y sumas tu Carisma a una tirada de daño de ${t.toLowerCase()} de cada conjuro.`, { tipo: t.toLowerCase() })) },
 ];
-export const OPCION_RASGO = Object.fromEntries(OPCIONES_RASGO.map(d => [d.id, d]));
+export const OPCION_RASGO = Object.fromEntries([...OPCIONES_RASGO, ...LINAJES].map(d => [d.id, d]));
 export const CAMBIA_TXT = { largo: 'Puedes cambiarla al terminar un descanso largo.', corto: 'Puedes cambiarla al terminar un descanso corto o largo.', uso: 'Se elige cada vez que usas el rasgo.', fija: 'Se elige al aprender el rasgo.' };
 
 export function normOpciones(x) {
@@ -59,8 +60,10 @@ export function normOpciones(x) {
   return out;
 }
 // Definiciones que el personaje ya tiene por clase, subclase y nivel
-export const opcionesDe = ch => OPCIONES_RASGO.filter(d => clasesDe(ch).some(c => c.clase === d.clase && d.sub.test(norm(c.subclase || '')) && c.nivel >= d.nivel));
-export const opcionDe = (ch, id) => { const d = OPCION_RASGO[id]; return d?.opciones.find(o => o.nombre === ch.opciones?.[id]) || null; };
+export const opcionesDe = ch => [...OPCIONES_RASGO.filter(d => clasesDe(ch).some(c => c.clase === d.clase && d.sub.test(norm(c.subclase || '')) && c.nivel >= d.nivel)),
+  // Linajes y legados de la especie
+  ...LINAJES.filter(d => especieBase(ch) === d.especie && nivelTotal(ch) >= (d.nivel || 1))];
+export const opcionDe = (ch, id) => { const d = OPCION_RASGO[id]; if (d?.especie) return linajeDe(ch, id); return d?.opciones.find(o => o.nombre === ch.opciones?.[id]) || null; };
 export const opcionDeRasgo = (ch, rasgo) => opcionesDe(ch).find(d => norm(d.rasgo) === norm(rasgo)) || null;
 // Las que faltan por elegir (las de «uso» se eligen al usarlas y no cuentan)
 export const opcionesPendientes = ch => opcionesDe(ch).filter(d => d.cambia !== 'uso' && !opcionDe(ch, d.id));

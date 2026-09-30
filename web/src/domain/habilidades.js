@@ -1,4 +1,5 @@
 import { norm } from '../core/util.js';
+import { linajeActual } from './especies.js';
 import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos } from './objetosEfecto.js';
 import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
@@ -128,7 +129,7 @@ const VEL_ESPECIE = { goliat: 10.5 };
 const DOTES_VEL = { veloz: 3, 'don de la velocidad': 9 };
 export function velocidad(ch) {
   const especie = norm(ch.especie || '').split(/[\s(]/)[0];
-  let m = VEL_ESPECIE[especie] || (especie === 'elfo' && /silvan|bosque/.test(norm(ch.especie)) ? 10.5 : 9);
+  let m = VEL_ESPECIE[especie] || linajeActual(ch)?.vel || 9;
   for (const d of dotesDe(ch)) m += DOTES_VEL[norm(d.nombre)] || 0;
   // Movimiento sin armadura: ni armadura ni escudo
   const armado = (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura);
