@@ -5,7 +5,7 @@ escalado) para tirarlo con un toque, el efecto que te aplica sola cuando te lo l
 permite lanzarlo sin gastar espacio. «Respaldo» indica que el SRD no trae su texto y la app usa sus datos mecánicos de 2024
 hasta que importes el manual. Con el manual importado, la app lee el texto en español.
 
-Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilitarios (sin tiradas del lanzador).
+Conjuros con tirada, dados o efecto automático: 246 de 391. El resto son utilitarios (sin tiradas del lanzador).
 
 ## Trucos
 
@@ -135,7 +135,7 @@ Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilit
 | Cerradura arcana | Abjuración | — | — | — | — | — |
 | Clavo mental | Adivinación | C | salvación de Sabiduría (mitad) | 3d8 psíquico | +1d8 por espacio sobre 2 | — |
 | Contorno borroso | Ilusionismo | C | — | — | — | Contorno borroso |
-| Cordón de flechas | Transmutación | — | — | — | — | — |
+| Cordón de flechas ·respaldo | Transmutación | — | salvación de Destreza | 2d4 perforante | — | — |
 | Corona de la locura ·respaldo | Encantamiento | C | salvación de Sabiduría | — | — | — |
 | Crecimiento espinoso | Transmutación | C | — | 2d4 perforante | — | — |
 | Detectar pensamientos | Adivinación | C | salvación de Sabiduría | — | — | — |
@@ -257,7 +257,7 @@ Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilit
 | Controlar agua | Transmutación | C | salvación de Fuerza (mitad) | 2d8 contundente | — | — |
 | Destierro | Abjuración | C | salvación de Carisma | — | — | — |
 | Dominar bestia | Encantamiento | C | salvación de Sabiduría | — | — | — |
-| Enredadera ·respaldo | Conjuración | C | ataque cuerpo a cuerpo | 4d8 contundente | +1d8 por espacio sobre 4 | — |
+| Enredadera ·respaldo | Conjuración | C | ataque cuerpo a cuerpo | 4d8 contundente | — | — |
 | Escudo de fuego | Evocación | — | — | 2d8 fuego, 2d8 frío | — | Escudo de fuego |
 | Esfera elástica de Otiluke | Abjuración | C | salvación de Destreza | — | — | — |
 | Esfera vitriólica | Evocación | — | salvación de Destreza | 10d4 ácido, 5d4 ácido | +2d4 por espacio sobre 4 | — |
@@ -333,11 +333,11 @@ Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilit
 | Pasamuros | Transmutación | — | — | — | — | — |
 | Paso arbóreo | Conjuración | C | — | — | — | — |
 | Plaga de insectos | Conjuración | C | salvación de Constitución (mitad) | 4d10 perforante | +1d10 por espacio sobre 5 | — |
-| Presencia regia de Yolande ·respaldo | Encantamiento | C | salvación de Sabiduría (mitad) | 4d6 psíquico | +1d6 por espacio sobre 5 | — |
+| Presencia regia de Yolande ·respaldo | Encantamiento | C | salvación de Sabiduría (mitad) | 4d6 psíquico | — | — |
 | Reencarnar | Nigromancia | — | — | — | — | — |
 | Restablecimiento mayor | Abjuración | — | — | — | — | — |
 | Telequinesis | Transmutación | C | salvación de Fuerza | — | — | gratis con psionico.maestro |
-| Tormenta resplandeciente de Jallarzi ·respaldo | Evocación | C | salvación de Constitución | 2d10 radiante, 2d10 trueno | +1d10 por espacio sobre 5 | — |
+| Tormenta resplandeciente de Jallarzi ·respaldo | Evocación | C | salvación de Constitución (mitad) | 2d10 radiante, 2d10 trueno | +1d10 por espacio sobre 5 | — |
 
 ## Nivel 6
 
@@ -351,7 +351,7 @@ Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilit
 | Conjurar feérico | Conjuración | C | ataque cuerpo a cuerpo | 3d12+mod psíquico | +1d12 por espacio sobre 6 | — |
 | Contingencia | Abjuración | — | — | — | — | — |
 | Crear muerto viviente | Nigromancia | — | — | — | — | — |
-| Curar | Abjuración | — | — | — | — | — |
+| Curar | Abjuración | — | — | +70 curación | +10 por espacio sobre 6 | — |
 | Dañar | Nigromancia | — | salvación de Constitución (mitad) | 14d6 necrótico | — | — |
 | De la carne a la piedra | Transmutación | C | salvación de Constitución | — | — | — |
 | Desintegrar | Transmutación | — | salvación de Destreza | 10d6+40 fuerza | +3d6 por espacio sobre 6 | — |
@@ -371,7 +371,7 @@ Conjuros con tirada, dados o efecto automático: 244 de 391. El resto son utilit
 | Prohibición | Abjuración | R | — | 5d10 radiante | — | — |
 | Puerta arcana | Conjuración | C | — | — | — | — |
 | Rayo solar | Evocación | C | salvación de Constitución (mitad) | 6d8 radiante | — | — |
-| Relámpago en cadena | Evocación | — | salvación de Destreza (mitad) | 10d8 relámpago | — | — |
+| Relámpago en cadena | Evocación | — | salvación de Destreza (mitad) | 10d8 relámpago | +1 proyectil por espacio sobre 6 | — |
 | Sugestión en masa | Encantamiento | — | salvación de Sabiduría | — | — | — |
 | Urna mágica | Nigromancia | — | salvación de Carisma | — | — | — |
 | Viajar con el viento | Transmutación | — | — | — | — | — |

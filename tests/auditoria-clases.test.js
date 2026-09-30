@@ -402,3 +402,20 @@ test('dotes del Manual y de Faerûn: aumentos, acciones adicionales, combate, de
   assert.equal(gastarDadoGolpe(plena, 'd10', 1).total, 10 + 2);
   assert.deepEqual(dotesConConjuros(ch({ clase: 'Guerrero', nivel: 4, dotes: ['Conjurador de frío'] }))[0].fijos, ['Rayo de escarcha']);
 });
+
+test('conjuros en español (Manual importado): mitad solo con daño, PG temporales, daño base, tipos a elegir y OCR', async () => {
+  const { analizarTiradas, dadosPara } = await import('../web/src/domain/tiradas.js');
+  const { ajustarTiradas } = await import('../web/src/domain/tiradasBase.js');
+  assert.equal(analizarTiradas('Debe superar una tirada de salvación de Sabiduría. Un objetivo afectado ve cómo su velocidad se reduce a la mitad.', '').mitad, false);
+  const fv = analizarTiradas('Obtienes 2d4 + 4 puntos de golpe temporales.', 'Obtienes 5 puntos de golpe temporales adicionales por cada nivel por encima de 1 que tenga el espacio.');
+  assert.ok(fv.curacion.temp); assert.equal(dadosPara(fv, { nivelEspacio: 3, nivelConjuro: 1 })[0].bono, 14);
+  assert.equal(analizarTiradas('hacen una tirada de salvación de Destreza. El daño base del conjuro es 12d6 y sufrirán daño de fuego', '').danos[0].tipo, 'fuego');
+  assert.equal(analizarTiradas('Sufrirán 5d8 de daño de ácido, frío, fuego, relámpago o trueno (el tipo que elijas) si la fallan o la mitad del daño si la superan.', '').danos[0].tipo, 'a elegir');
+  assert.equal(analizarTiradas('cualquier ataque que hagas causará 2d8 de daño adicional cuando aciertes. Ese daño será de ácido, frío, fuego o relámpago.', '').danos[0].tipo, 'a elegir');
+  assert.equal(analizarTiradas('deberá hacer una tirada de salvación de Constitucicín. Si la falla, sufrirá 3d10 de daño necrótico', '').salvacion, 'Constitución');
+  assert.equal(analizarTiradas('Haz un ataque de conjuro :i distancia. Si acierta, sufre 3d6 de daño de fuego', '').ataque, 'a distancia');
+  assert.equal(analizarTiradas('Haz un ataque de conjuro cuerpo a cuerpo. Si acierta, sufre 1d8 de daño de fuego', '').ataque, 'cuerpo a cuerpo');
+  const cur = ajustarTiradas(analizarTiradas('restaurando 70 puntos de golpe.', ''), 'Heal');
+  assert.equal(dadosPara(cur, { nivelEspacio: 7, nivelConjuro: 6 })[0].bono, 80);
+  assert.equal(dadosPara(ajustarTiradas(analizarTiradas('sufrirán 10d8 de daño de relámpago', ''), 'Chain Lightning'), { nivelEspacio: 6, nivelConjuro: 6 })[0].veces, 4);
+});

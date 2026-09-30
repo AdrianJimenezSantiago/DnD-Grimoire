@@ -20,6 +20,7 @@ export const TIRADAS_BASE = {
   'witch bolt': T({ ataque: 'a distancia', danos: [D(2, 12, 'relámpago', 'ataque'), D(1, 12, 'relámpago', 'auto', { cond: 'en tus turnos siguientes, como acción adicional' })], escala: esp(1, 12, 1) }),
   'hail of thorns': T({ salvacion: 'Destreza', mitad: true, danos: [D(1, 10, 'perforante', 'salvacion')], escala: esp(1, 10, 1) }),
   'crown of madness': T({ salvacion: 'Sabiduría' }),
+  'cordon of arrows': T({ salvacion: 'Destreza', danos: [D(2, 4, 'perforante', 'salvacion')] }),
   'cloud of daggers': T({ danos: [D(4, 4, 'cortante', 'auto')], escala: esp(2, 4, 2) }),
   'aura of vitality': T({ curacion: { n: 2, caras: 6, bono: 0, mod: false }, extras: [] }),
   'blinding smite': T({ salvacion: 'Constitución', danos: [D(3, 8, 'radiante', 'auto')], escala: esp(1, 8, 3), falla: 'Si falla, queda cegado.' }),
@@ -27,13 +28,19 @@ export const TIRADAS_BASE = {
   'lightning arrow': T({ ataque: 'a distancia', salvacion: 'Destreza', mitad: true, danos: [D(4, 8, 'relámpago', 'ataque'), D(2, 8, 'relámpago', 'salvacion', { cond: 'a cada criatura a 3 m del objetivo' })], escala: esp(1, 8, 3) }),
   'hunger of hadar': T({ salvacion: 'Destreza', danos: [D(2, 6, 'frío', 'auto', { cond: 'al empezar su turno en la esfera' }), D(2, 6, 'ácido', 'salvacion', { cond: 'al terminar su turno en la esfera' })], escala: esp(1, 6, 3) }),
   'staggering smite': T({ salvacion: 'Sabiduría', danos: [D(4, 6, 'psíquico', 'auto')], escala: esp(1, 6, 4), falla: 'Si falla, queda aturdido hasta el final de tu siguiente turno.' }),
-  'grasping vine': T({ ataque: 'cuerpo a cuerpo', danos: [D(4, 8, 'contundente', 'ataque')], escala: esp(1, 8, 4) }),
+  'grasping vine': T({ ataque: 'cuerpo a cuerpo', danos: [D(4, 8, 'contundente', 'ataque')] }),
   'banishing smite': T({ danos: [D(5, 10, 'fuerza', 'auto')] }),
   'conjure volley': T({ salvacion: 'Destreza', mitad: true, danos: [D(8, 8, 'a elegir', 'salvacion')] }),
   'synaptic static': T({ salvacion: 'Inteligencia', mitad: true, danos: [D(8, 6, 'psíquico', 'salvacion')], falla: 'Si falla, resta 1d6 a sus tiradas de ataque y pruebas de característica.' }),
   'steel wind strike': T({ ataque: 'cuerpo a cuerpo', danos: [D(6, 10, 'fuerza', 'ataque')] }),
   'destructive wave': T({ salvacion: 'Constitución', mitad: true, danos: [D(5, 6, 'trueno', 'salvacion'), D(5, 6, 'radiante', 'salvacion', { cond: 'o necrótico, a tu elección' })] }),
-  "yolande's regal presence": T({ salvacion: 'Sabiduría', mitad: true, danos: [D(4, 6, 'psíquico', 'salvacion')], escala: esp(1, 6, 5) }),
-  "jallarzi's storm of radiance": T({ salvacion: 'Constitución', danos: [D(2, 10, 'radiante', 'salvacion'), D(2, 10, 'trueno', 'salvacion')], escala: esp(1, 10, 5) }),
+  "yolande's regal presence": T({ salvacion: 'Sabiduría', mitad: true, danos: [D(4, 6, 'psíquico', 'salvacion')] }),
+  "jallarzi's storm of radiance": T({ salvacion: 'Constitución', mitad: true, danos: [D(2, 10, 'radiante', 'salvacion'), D(2, 10, 'trueno', 'salvacion')], escala: esp(1, 10, 5) }),
 };
+// Ajustes que el texto no deja leer: cuántos relámpagos lanza Relámpago en cadena, la curación fija de Curar
+const AJUSTES = {
+  'chain lightning': r => ({ ...r, veces: { base: 4, desde: 6 } }),
+  heal: r => ({ ...r, curacion: r.curacion || { n: 0, caras: 0, bono: 70, mod: false }, escala: { tipo: 'espacio', n: 0, caras: 0, bono: 0, porNivel: 10, desde: 6 } }),
+};
+export const ajustarTiradas = (r, en) => { const f = AJUSTES[String(en || '').toLowerCase().trim()]; return f && r ? f(r) : r; };
 export const tiradasBase = en => TIRADAS_BASE[String(en || '').toLowerCase().trim()] || null;
