@@ -31,13 +31,19 @@ export const OPCIONES_RASGO = [
     O('Cáliz', 'Cuando lances un conjuro con espacio que cure, tú u otra criatura a 9 m recupera 1d8 + tu Sabiduría puntos de golpe.'),
     O('Dragón', 'En las pruebas de Inteligencia o Sabiduría y en las salvaciones de Constitución para mantener la concentración, un 9 o menos en el d20 cuenta como 10.') ] },
   { id: 'cazador.presa', clase: 'Explorador', sub: /cazador/, nivel: 3, rasgo: 'El cazador y la presa', cambia: 'corto', opciones: [
-    O('Asesino de colosos', 'Una vez por turno, al impactar con un arma a una criatura a la que le falten puntos de golpe, le haces 1d8 de daño adicional.', { golpe: { dado: '1d8', tipos: 'del tipo del arma', cond: 'si al objetivo le faltan puntos de golpe' } }),
-    O('Rompehordas', 'Una vez en cada uno de tus turnos, al atacar con un arma, puedes hacer otro ataque con esa arma contra otra criatura a 1,5 m del objetivo original y a tu alcance.') ] },
+    O('Azote de colosos', 'Una vez por turno, al impactar con un arma a una criatura a la que le falten puntos de golpe, le haces 1d8 de daño adicional.', { golpe: { dado: '1d8', tipos: 'del tipo del arma', cond: 'si al objetivo le faltan puntos de golpe' } }),
+    O('Destructor de hordas', 'Una vez en cada uno de tus turnos, al atacar con un arma, puedes hacer otro ataque con esa arma contra otra criatura a 1,5 m del objetivo original y a tu alcance.') ] },
   { id: 'cazador.tacticas', clase: 'Explorador', sub: /cazador/, nivel: 7, rasgo: 'Tácticas defensivas', cambia: 'corto', opciones: [
     O('Escapar de la horda', 'Los ataques de oportunidad contra ti tienen desventaja.'),
     O('Defensa contra ataques múltiples', 'Cuando una criatura te impacte, las demás tiradas de ataque que haga contra ti este turno tienen desventaja.') ] },
   { id: 'infernal.resistencia', clase: 'Brujo', sub: /infernal/, nivel: 10, rasgo: 'Resistencia infernal', cambia: 'corto',
     opciones: TIPOS_DANO.map(t => O(t, `Tienes resistencia al daño de tipo ${t.toLowerCase()} (no puede ser de fuerza).`)) },
+  { id: 'vastago.lealtad', clase: 'Pícaro', sub: /vastago|tres/, nivel: 3, rasgo: 'Lealtad aterradora', cambia: 'largo', opciones: [
+    O('Bhaal', 'Resistencia al daño de veneno y el truco Guardia de cuchillas (Inteligencia).', { truco: 'Guardia de cuchillas' }),
+    O('Myrkul', 'Resistencia al daño necrótico y el truco Toque helado (Inteligencia).', { truco: 'Toque helado' }),
+    O('Perdición', 'Resistencia al daño psíquico y el truco Ilusión menor (Inteligencia).', { truco: 'Ilusión menor' }) ] },
+  { id: 'genios.aura', clase: 'Paladín', sub: /genios/, nivel: 7, rasgo: 'Aura de escudo elemental', cambia: 'uso', opciones: ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Trueno'].map(t =>
+    O(t, `Tus aliados y tú tenéis resistencia al daño de ${t.toLowerCase()} dentro de tu Aura de protección. Puedes cambiarlo al principio de cada uno de tus turnos.`)) },
   { id: 'draconica.afinidad', clase: 'Hechicero', sub: /dracon/, nivel: 6, rasgo: 'Afinidad elemental', cambia: 'fija', opciones: ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Veneno'].map(t =>
     O(t, `Resistencia al daño de ${t.toLowerCase()} y sumas tu Carisma a una tirada de daño de ${t.toLowerCase()} de cada conjuro.`, { tipo: t.toLowerCase() })) },
 ];

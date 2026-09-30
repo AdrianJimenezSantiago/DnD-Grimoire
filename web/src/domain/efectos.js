@@ -181,6 +181,7 @@ export function inmunidadesEstado(ch) {
     if (c.clase === 'Paladín' && c.nivel >= 7 && /entrega|devoci/i.test(c.subclase || '') && !incap) out.set('encantado', 'Aura de entrega');
     if (c.clase === 'Bárbaro' && c.nivel >= 6 && /berserk/i.test(c.subclase || '') && efs.includes('furia')) { out.set('asustado', 'Furia irracional'); out.set('encantado', 'Furia irracional'); }
     if (c.clase === 'Brujo' && c.nivel >= 10 && /fe[eé]ric/i.test(c.subclase || '')) out.set('encantado', 'Defensas seductoras');
+    if (c.clase === 'Guerrero' && c.nivel >= 18 && /abanderad/i.test(c.subclase || '')) { out.set('asustado', 'Comandante inspirador'); out.set('encantado', 'Comandante inspirador'); }
     if (c.clase === 'Druida' && c.nivel >= 10 && /tierra/i.test(c.subclase || '')) out.set('envenenado', 'Protección de la naturaleza');
   }
   if (efs.includes('heroismo')) out.set('asustado', 'Heroísmo');

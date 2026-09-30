@@ -47,7 +47,7 @@ export function conjurosPendientes(db, ch, compendio) {
 export function sobrantesAutomaticos(db, ch) {
   const auto = clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c)));
   const nombres = new Set(auto.map(c => norm(c.nombre))), fuentes = new Set(auto.map(c => norm(c.fuente)));
-  if (!fuentes.has(norm('Conjuros del círculo de la tierra'))) fuentes.add(norm('Conjuros del círculo de la tierra'));
+  for (const f of ['Conjuros del círculo de la tierra', 'Vástago de los Tres']) fuentes.add(norm(f));
   return ch.book.filter(e => e.always && fuentes.has(norm(String(e.fuente || '').replace(/\s*\(solo ritual\)$/, ''))) && !nombres.has(norm(db.catalog[e.sid]?.es)));
 }
 export function quitarSobrantes(db, ch) {

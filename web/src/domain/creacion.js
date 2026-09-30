@@ -64,7 +64,9 @@ const DOTE_HAB = { habilidoso: [3, TODAS, { herramientas: true }], 'experto en h
 export const HAB_SUBCLASE = {
   // Conocimiento primigenio (bárbaro 3, rasgo de clase): una habilidad más de la lista del bárbaro
   'Bárbaro': [{ re: /(?:)/, nombre: 'Conocimiento primigenio', n: 1, lista: HAB_CLASE['Bárbaro'][1] }],
-  'Bardo': [{ re: /conocimiento/i, nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS }],
+  'Bardo': [{ re: /conocimiento/i, nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS },
+    { re: /luna/i, nombre: 'Conocimientos primigenios', n: 1, lista: ['medicina', 'naturaleza', 'percepcion', 'perspicacia', 'supervivencia', 'tratoanimales'] }],
+  'Paladín': [{ re: /genios/i, nombre: 'Esplendor del genio', n: 1, lista: ['acrobacias', 'interpretacion', 'intimidacion', 'persuasion'] }],
   'Clérigo': [{ re: /conocimiento/i, nombre: 'Bendiciones del conocimiento', n: 2, lista: ['arcanos', 'historia', 'naturaleza', 'religion'], pericia: true }],
   'Explorador': [{ re: /errante/i, nombre: 'Glamur sobrenatural', n: 1, lista: ['engano', 'interpretacion', 'persuasion'] }],
   'Guerrero': [{ re: /abanderad/i, nombre: 'Caballero emisario', n: 1, lista: ['interpretacion', 'intimidacion', 'perspicacia', 'persuasion'] },

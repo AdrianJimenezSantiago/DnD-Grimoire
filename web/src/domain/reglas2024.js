@@ -93,7 +93,7 @@ function lanzamientoDe(c) {
   if (cls.subCast && cls.subCast.re.test(c.subclase || '') && c.nivel >= cls.subCast.desde) return { cast: cls.subCast, viaSub: true, nombre: cls.subCast.nombre, lista: 'Mago' };
   return null;
 }
-const SUB_APTITUD = [{ clase: 'Monje', re: /sombra|elementos/, ap: 'sab' }, { clase: 'Bárbaro', re: /corazon/, ap: 'sab' }, { clase: 'Guerrero', re: /psionic/, ap: 'int' }, { clase: 'Guerrero', re: /abanderad/, ap: 'car' }];
+const SUB_APTITUD = [{ clase: 'Monje', re: /sombra|elementos/, ap: 'sab' }, { clase: 'Bárbaro', re: /corazon/, ap: 'sab' }, { clase: 'Guerrero', re: /psionic/, ap: 'int' }, { clase: 'Guerrero', re: /abanderad/, ap: 'car' }, { clase: 'Pícaro', re: /vastago|tres/, ap: 'int' }];
 const FACTOR = { full: L => L, half: L => Math.ceil(L / 2), third: L => Math.floor(L / 3) };
 
 export function perfil(ch) {

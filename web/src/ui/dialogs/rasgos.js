@@ -145,7 +145,9 @@ function applyRecovery() {
   Object.entries(REC.pick).forEach(([L, n]) => { if (n) { bits.push(`${n} de nivel ${L}`); const f = freeOf(ch, P, +L); for (let k = 0; k < n; k++) fxs.push([+L, f + k]); } });
   const txt = bits.length ? `${r.nombre}: recupera ${bits.join(' y ')}` : `${r.nombre}: usada`;
   const pick = { ...REC.pick }, id = REC.id;
-  const h = S.act(txt, (db, c) => { Object.entries(pick).forEach(([L, n]) => { if (n) c.play.used[L] = usedOf(c, P, +L) - n; }); recState(c, id).used = 1; });
+  const h = S.act(txt, (db, c) => { Object.entries(pick).forEach(([L, n]) => { if (n) c.play.used[L] = usedOf(c, P, +L) - n; }); recState(c, id).used = 1;
+    // Canción de la hoja: recuperas un uso al emplear Recuperación arcana
+    if (id === 'tpl:mago.recuperacion') { const st = c.play.rec?.['tpl:hojacantante.cancion']; if (st?.used) st.used -= 1; } });
   closeSheet($('#recDlg'));
   setTimeout(() => fxs.forEach(([L, i], k) => setTimeout(() => slotFx(L, i, 'ignite'), k * 90)), 150);
   haptic(); toast(esc(txt) + '.', [undoBtn(S, h)]);

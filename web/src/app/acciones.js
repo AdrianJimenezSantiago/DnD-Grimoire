@@ -16,7 +16,7 @@ import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -70,12 +70,11 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   }
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
   if (mode === 'slot' && /^abjur/i.test(s.escuela || '') && reglas(ch).some(r => r.id === 'tpl:abjurador.salvaguarda')) msg += ` <span class="tnote"><b>Salvaguarda arcana</b>: recupera ${2 * L} PG.</span>`;
-  { const tmp = mode !== 'ritual' ? temporalesDeConjuro(s.es, mode === 'slot' ? L : s.level) : 0; if (tmp) msg += ` <span class="tnote">Ganas <b>${tmp} PG temporales</b>.</span>`; }
-  if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
+    if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
   // Conjuros que solo pueden afectarte a ti (alcance Lanzador): se activan solos al lanzarlos
   const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro' || (ef.bueno && soloSobreTi(s.alcance || srdFor(s)?.a)));
-  let fuera = [];
+  let fuera = [], tmpConj = 0; const extraConj = [];
   const concRondas = s.conc ? rondasDeDuracion(s.duracion || srdFor(s)?.du) : null;
   if (solo) msg += ` <span class="tnote"><b>${esc(ef.nombre)}</b> te afecta: ${esc(ef.texto.replace(/\.$/, ''))}${ef.dur ? ` (${esc(fmtRondas(ef.dur))})` : ''}.</span>`;
   else msg += notaObjetivo(ef, s);
@@ -83,15 +82,17 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
     const ee = c.book[bi];
     if (mode === 'free') ee.used = true;
     if (mode === 'recurso') recState(c, rec.id).used = (recState(c, rec.id).used || 0) + 1;
-    if (mode === 'slot') c.play.used[L] = usedOf(c, P, L) + 1;
+    if (mode === 'slot') { c.play.used[L] = usedOf(c, P, L) + 1; extraConj.push(...alLanzarConEspacio(c, e.fuente)); }
     // Salvaguarda arcana (abjurador): lanzar abjuración con espacio le devuelve el doble del nivel del espacio
     if (mode === 'slot' && /^abjur/i.test(s.escuela || '')) { const w = reglas(c).find(r => r.id === 'tpl:abjurador.salvaguarda'); if (w) { const st = recState(c, w.id); st.used = Math.max(0, Math.min(st.used || 0, w.max) - 2 * L); } }
     if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
-    const tmp = mode !== 'ritual' ? temporalesDeConjuro(s.es, mode === 'slot' ? L : s.level) : 0; if (tmp) ponerTemporales(c, tmp);
+    tmpConj = mode !== 'ritual' ? temporalesDeConjuro(s.es, mode === 'slot' ? L : s.level, c) : 0; if (tmpConj) ponerTemporales(c, tmpConj);
   });
   if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
+  if (extraConj.length) msg += ` <span class="tnote">${esc(extraConj.join(' '))}</span>`;
+  if (tmpConj) msg += ` <span class="tnote">Ganas <b>${tmpConj} PG temporales</b>.</span>`;
   if (solo) setTimeout(() => golpe('buff'), 200);
   const extra = [...fx.extra];
   const x = srdFor(s), apunta = s.conc && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d]);
@@ -309,6 +310,7 @@ function alGastar(c, id) {
 function avisoGasto(S, id, h, g) {
   const k = EFECTO_DE_RECURSO[id], ch = S.cur(), r = ruleOf(ch, id);
   const pesada = k === 'furia' && (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura?.tipo === 'pesada');
+  const armado = k === 'cancion' && (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura);
   const extra = g.cura && !g.cura.solo ? [{ label: `Curarme ${g.cura.expr}`, hl: true, fn: () => {
     let x = null; const h2 = S.act(`${r?.nombre || 'Curación'}: sobre ti`, (db, c) => { x = aplicarCuracion(c, g.cura); });
     golpe('cura', x.aplicado); toast(`Recuperas ${x.aplicado} PG (${esc(g.cura.expr)}: ${x.total}).`, [undoBtn(S, h2)]); } }] : [];
@@ -316,7 +318,7 @@ function avisoGasto(S, id, h, g) {
   if (!k && !g.extra.length && !extra.length) return;
   if (k) golpe('buff');
   const texto = [k ? `<b>${esc(EFECTO[k].nombre)}</b> activa: ${esc(EFECTO[k].texto)}` : `<b>${esc(r?.nombre || '')}</b>.`, ...g.extra.map(esc),
-    g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : ''].filter(Boolean).join(' ');
+    g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : '', armado ? '<span class="tnote"><b>Llevas armadura o escudo</b>: la Canción de la hoja no funciona con ellos.</span>' : ''].filter(Boolean).join(' ');
   toast(texto, [...extra, undoBtn(S, h)]);
 }
 export function tickResource(S, id, i) {

@@ -24,6 +24,8 @@ export const CANJES = [
   C('tpl:hechicero.innata', { rec2: 'tpl:hechicero.puntos', n: 2, desde: ['Hechicero', 7], agotado: true }),
   C('tpl:ilusionista.yo', { espacio: 2 }),
   C('tpl:paladin.cumbre', { espacio: 5 }),
+  // Salvaguarda arcana: un espacio como acción adicional le devuelve el doble de su nivel en PG
+  C('tpl:abjurador.salvaguarda', { espacio: 1, porNivel: 2 }),
 ];
 const regla = (ch, id) => reglas(ch).find(r => r.id === id) || null;
 const nivelClase = (ch, clase) => perfil(ch).clases.find(c => c.clase === clase)?.nivel || 0;
@@ -47,10 +49,10 @@ export function canjesDe(ch, id) {
     const r2 = regla(ch, c.rec2); if (!r2 || r2.max - usosGastados(ch, r2) < c.n) return [];
     return [{ k: `rec:${c.rec2}`, texto: `Gastar ${c.n} de ${r2.nombre}`, rec2: c.rec2, n: c.n }];
   }
-  return espaciosLibres(ch, c.espacio || 1, c.pacto).map(e => ({ k: `esp:${e.L}`, texto: `Gastar un espacio ${e.pacto ? 'de pacto ' : ''}de nivel ${e.L}`, espacio: e.L }));
+  return espaciosLibres(ch, c.espacio || 1, c.pacto).map(e => ({ k: `esp:${e.L}`, texto: `Gastar un espacio ${e.pacto ? 'de pacto ' : ''}de nivel ${e.L}${c.porNivel ? ` (+${c.porNivel * e.L})` : ''}`, espacio: e.L, n: c.porNivel ? c.porNivel * e.L : 1 }));
 }
 export function aplicarCanje(ch, id, canje) {
-  const st = recState(ch, id); st.used = Math.max(0, (st.used || 0) - 1);
+  const st = recState(ch, id); st.used = Math.max(0, (st.used || 0) - (canje.espacio ? canje.n || 1 : 1));
   if (canje.rec2) { const s2 = recState(ch, canje.rec2); s2.used = (s2.used || 0) + canje.n; }
   if (canje.espacio) { ch.play.used ||= {}; ch.play.used[canje.espacio] = (ch.play.used[canje.espacio] || 0) + 1; }
 }
