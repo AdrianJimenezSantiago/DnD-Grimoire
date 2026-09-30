@@ -11,6 +11,8 @@ import { opcionDe } from './opcionesRasgo.js';
 //   Alma radiante (celestial 6): Carisma a una tirada de daño radiante o de fuego
 //   Afinidad elemental (dracónica 6): Carisma a una tirada de daño del tipo elegido
 //   Evocación potenciada (evocador 10): Inteligencia a una tirada de daño de un conjuro de evocación
+// Truco potente (evocador 3): quien supera la salvación contra tu truco de daño sufre la mitad
+export const trucoPotenteEvocador = ch => clasesDe(ch).some(c => c.clase === 'Mago' && /evoca/.test(norm(c.subclase || '')) && c.nivel >= 3);
 export function bonosDeConjuro(ch, s, fuente, dados, nivelEspacio = null) {
   const out = dados.map(() => ({ bono: 0, notas: [] })), mod = k => modOf(statsEfectivos(ch)[k]);
   const sub = (clase, re, L) => clasesDe(ch).some(c => c.clase === clase && re.test(norm(c.subclase || '')) && c.nivel >= L);
@@ -22,7 +24,11 @@ export function bonosDeConjuro(ch, s, fuente, dados, nivelEspacio = null) {
   }
   if (s.level > 0 && sub('Clérigo', /vida/, 3)) {
     const n = 2 + (nivelEspacio || s.level);
-    dados.forEach((d, i) => { if (!dano(i)) { out[i].bono += n; out[i].notas.push(`Discípulo de la vida +${n}`); } });
+    dados.forEach((d, i) => { if (dano(i) || d.temp) return; out[i].bono += n; out[i].notas.push(`Discípulo de la vida +${n}`);
+      // Sanación suprema (vida 17): los dados de curación dan su máximo
+      if (sub('Clérigo', /vida/, 17)) { out[i].maximo = true; out[i].notas.push('Sanación suprema: dados al máximo'); }
+      // Sanador bendito (vida 6): si curas a otro, tú recuperas 2 + nivel del espacio
+      if (sub('Clérigo', /vida/, 6)) out[i].sanador = n; });
   }
   const tipo = t => norm(t || '');
   if (sub('Brujo', /celestial/, 6)) una(d => ['radiante', 'fuego'].includes(tipo(d.tipo)), Math.max(1, mod('car')), 'Alma radiante');
