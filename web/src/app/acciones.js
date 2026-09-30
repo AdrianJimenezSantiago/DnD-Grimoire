@@ -16,7 +16,7 @@ import { golpe } from '../ui/golpes.js';
 import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
 import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro } from '../domain/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -70,6 +70,7 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
   }
   if (s.conc && ch.play.conc && ch.play.conc !== s.es) msg += ` Pierdes la concentración en ${esc(ch.play.conc)}.`;
   if (mode === 'slot' && /^abjur/i.test(s.escuela || '') && reglas(ch).some(r => r.id === 'tpl:abjurador.salvaguarda')) msg += ` <span class="tnote"><b>Salvaguarda arcana</b>: recupera ${2 * L} PG.</span>`;
+  { const tmp = mode !== 'ritual' ? temporalesDeConjuro(s.es, mode === 'slot' ? L : s.level) : 0; if (tmp) msg += ` <span class="tnote">Ganas <b>${tmp} PG temporales</b>.</span>`; }
   if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
   // Conjuros que solo pueden afectarte a ti (alcance Lanzador): se activan solos al lanzarlos
@@ -88,6 +89,7 @@ export function cast(S, bi, mode, L, rec = null, { ajeno = null, forzar = false 
     if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
     if (solo) ponerEfecto(c, ef.k, { conc: s.conc ? s.es : '' });
+    const tmp = mode !== 'ritual' ? temporalesDeConjuro(s.es, mode === 'slot' ? L : s.level) : 0; if (tmp) ponerTemporales(c, tmp);
   });
   if (fuera.length) msg += ` Terminan sobre ti: ${esc(joinY(fuera.map(e => e.nombre)))}.`;
   if (solo) setTimeout(() => golpe('buff'), 200);

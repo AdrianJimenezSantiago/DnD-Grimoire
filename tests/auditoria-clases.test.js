@@ -275,3 +275,34 @@ test('canjes: recuperar usos gastando espacios, Furia o puntos de hechicería', 
   assert.deepEqual(fuenteDeMagia(h).crear.map(x => [x.L, x.coste]), [[3, 5]]);
   assert.equal(puntosAEspacio(h, 3), 5); assert.equal(h.play.used[3], 0); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 5);
 });
+
+test('conjuros: el analizador lee dardos, rayos, PG temporales, modificador de curación y tipos a elegir', async () => {
+  const { analizarTiradas, dadosPara } = await import('../web/src/domain/tiradas.js');
+  const mm = analizarTiradas('You create three glowing darts of magical force. A dart deals 1d4 + 1 Force damage to its target.', 'The spell creates one more dart for each spell slot level above 1.');
+  assert.equal(dadosPara(mm, { nivelEspacio: 3, nivelConjuro: 1 })[0].veces, 5);
+  const fl = analizarTiradas('You gain 2d4 + 4 Temporary Hit Points.', 'You gain 5 additional Temporary Hit Points for each spell slot level above 1.');
+  assert.ok(fl.curacion.temp); assert.equal(dadosPara(fl, { nivelEspacio: 2, nivelConjuro: 1 })[0].bono, 9);
+  assert.equal(analizarTiradas('A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier.', '').curacion.mod, true);
+  assert.equal(analizarTiradas('On a hit, the target takes 3d8 damage of the chosen type.', '').danos[0].tipo, 'a elegir');
+  assert.equal(analizarTiradas('On a hit, the target takes Force damage equal to 1d8 plus your spellcasting ability modifier.', '').danos[0].tipo, 'fuerza');
+  const sw = analizarTiradas('damage 1d8', 'The damage increases by 1d8 for every slot level above 2.'); assert.equal(sw.escala.desde, 2);
+});
+test('conjuros sin texto del SRD tienen sus datos mecánicos de respaldo', async () => {
+  const { tiradasBase } = await import('../web/src/domain/tiradasBase.js');
+  assert.equal(tiradasBase('Mind Sliver').salvacion, 'Inteligencia');
+  assert.equal(tiradasBase('Toll the Dead').danos[1].caras, 12);
+});
+test('conjuros con efecto sobre ti: Manto del cruzado, Presciencia, Vínculo protector', async () => {
+  const { efectoDeConjuro, caEfectiva } = await import('../web/src/domain/efectos.js');
+  assert.equal(efectoDeConjuro('Manto del cruzado').danoArma, '1d4');
+  assert.equal(efectoDeConjuro('Agrandar/reducir').k, 'agrandar');
+  const p = ch({ clase: 'Mago', nivel: 17 }); ponerEfecto(p, 'presciencia');
+  assert.ok(modsTirada(p, { sobre: 'iniciativa' }).some(m => m.fuente === 'Presciencia'));
+  const v = ch({ clase: 'Clérigo', nivel: 3 }); const ca = caEfectiva(v).ca; ponerEfecto(v, 'vinculo'); assert.equal(caEfectiva(v).ca, ca + 1);
+});
+test('Armadura de Agathys y Heroísmo dan PG temporales', async () => {
+  const { temporalesDeConjuro } = await import('../web/src/domain/automatismos.js');
+  assert.equal(temporalesDeConjuro('Armadura de Agathys', 3), 15);
+  const b = ch({ clase: 'Bardo', nivel: 3 }); b.play.conc = 'Heroísmo'; ponerEfecto(b, 'heroismo', { conc: 'Heroísmo' });
+  alEmpezarTurno(b); assert.equal(vidaDe(b).temp, 2);
+});

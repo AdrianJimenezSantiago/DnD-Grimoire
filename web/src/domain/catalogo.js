@@ -1,5 +1,6 @@
 import { esc, norm, uid } from '../core/util.js';
-import { tiradasDe } from './tiradas.js';
+import { tiradasDe, tieneTiradas } from './tiradas.js';
+import { tiradasBase } from './tiradasBase.js';
 import { formasDeEstado } from './glosario.js';
 import { CLASES } from './reglas2024.js';
 import { claveNombre } from './manual.js';
@@ -164,6 +165,8 @@ export function tiradasConjuro(s) {
   const x = srdFor(s), man = manualFor(x);
   const k = `${s.id || s.es}|${man ? 1 : 0}|${(s.desc || '').length}`;
   if (tirMemo.has(k)) return tirMemo.get(k);
-  const r = tiradasDe([[man?.d, man?.h], [s.desc, s.sup], [x?.dEs, x?.hEs], [x?.d, x?.h]]);
+  let r = tiradasDe([[man?.d, man?.h], [s.desc, s.sup], [x?.dEs, x?.hEs], [x?.d, x?.h]]);
+  // Conjuros del manual que no están en el SRD: sus datos mecánicos mientras no se importe el libro
+  if (!tieneTiradas(r) && !r?.salvacion) r = tiradasBase(s.en || x?.en) || r;
   tirMemo.set(k, r); return r;
 }

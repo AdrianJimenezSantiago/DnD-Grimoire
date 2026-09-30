@@ -15,8 +15,8 @@ const dlg = () => $('#efectosDlg');
 
 const GRUPOS = {
   bueno: [
-    ['Dados y ventaja', 'd20', ['bendicion', 'guia', 'heroismo', 'esperanza', 'potenciar', 'agrandar', 'favordivino', 'armamagica', 'pasarsinrastro', 'furia', 'cancion']],
-    ['Defensa', 'ca', ['escudo', 'escudofe', 'pielrobliza', 'armaduramago', 'pielpetrea', 'resistenciat', 'proteccion', 'protenergia', 'protveneno', 'santuario', 'escudofuego', 'guardamuerte', 'auxilio']],
+    ['Dados y ventaja', 'd20', ['bendicion', 'guia', 'heroismo', 'esperanza', 'potenciar', 'presciencia', 'agrandar', 'favordivino', 'mantocruzado', 'fuentelunar', 'armamagica', 'armaelemental', 'pasarsinrastro', 'furia', 'cancion']],
+    ['Defensa', 'ca', ['escudo', 'escudofe', 'pielrobliza', 'armaduramago', 'pielpetrea', 'resistenciat', 'vinculo', 'aurasagrada', 'circulopoder', 'guardiacuchillas', 'proteccion', 'protenergia', 'protveneno', 'santuario', 'escudofuego', 'guardamuerte', 'auxilio']],
     ['Ocultación y sentidos', 'ojo', ['invisible', 'invismejor', 'borroso', 'imagen', 'desplazamiento', 'vision']],
     ['Movimiento', 'velocidad', ['acelerar', 'zancada', 'volar', 'libertad', 'retirada']],
   ],

@@ -64,7 +64,12 @@ export function alTirarIniciativa(ch, tirar = tirarDado) {
 // Al empezar tu turno (al pasar de ronda en combate)
 export function alEmpezarTurno(ch) {
   const out = [], v = vidaDe(ch), g = subDe(ch, 'Guerrero', /campeon/);
-  if (!g || estadoVital(ch) !== 'vivo') return out;
+  if (estadoVital(ch) !== 'vivo') return out;
+  // Heroísmo lanzado por ti mismo: PG temporales iguales a tu modificador de aptitud mágica al empezar cada turno
+  if (v.efectos.some(e => e.k === 'heroismo') && norm(ch.play?.conc || '') === 'heroismo') {
+    const m = perfilDe(ch).mod || 0; if (m > 0 && ponerTemporales(ch, m)) out.push({ nombre: 'Heroísmo', texto: `Tienes ${v.temp} PG temporales.` });
+  }
+  if (!g) return out;
   // Guerrero heroico (campeón 10): ganas inspiración heroica si no la tienes
   if (g.nivel >= 10 && !v.inspiracion) { v.inspiracion = true; out.push({ nombre: 'Guerrero heroico', texto: 'Ganas inspiración heroica.' }); }
   // Superviviente (campeón 18), Desafiar a la muerte: si estás maltrecho y te queda algún PG, recuperas 5 + Constitución
@@ -138,6 +143,8 @@ export function alGastarRecurso(ch, id) {
   }
   return out;
 }
+// Armadura de Agathys: 5 PG temporales por nivel del espacio
+export const temporalesDeConjuro = (nombre, L) => (norm(nombre) === 'armadura de agathys' ? 5 * Math.max(1, L || 1) : 0);
 // Resiliencia celestial (celestial 10): al terminar un descanso corto o largo ganas nivel de brujo + Carisma PG temporales
 export function temporalesAlDescansar(ch) {
   const c = subDe(ch, 'Brujo', /celestial/); return c && c.nivel >= 10 ? c.nivel + modOf(statsEfectivos(ch).car) : 0;
