@@ -68,7 +68,7 @@ export function plantillas(ch) {
         if (L >= 10) uno('feerico.escape', 'Defensas seductoras', 'Reacción al recibir un acierto: mitad de daño y el atacante hace una salvación de Sabiduría o sufre daño psíquico igual al que recibes. También puedes restablecerlo gastando un espacio de pacto.');
       }
       if (has(/infernal/i)) {
-        if (L >= 6) R('infernal.suerte', { tipo: 'recurso', nombre: 'Suerte del Oscuro', max: mod('car'), nota: 'Suma 1d10 a una prueba de característica o tirada de salvación.' });
+        if (L >= 6) R('infernal.suerte', { tipo: 'recurso', nombre: 'La suerte del Oscuro', max: mod('car'), nota: 'Suma 1d10 a una prueba de característica o tirada de salvación.' });
         if (L >= 14) uno('infernal.arrastrar', 'Arrastrar por el infierno', 'También puedes restablecerlo gastando un espacio de pacto.');
       }
       if (has(/primigenio/i) && L >= 6) uno('primigenio.combatiente', 'Combatiente clarividente', 'También puedes restablecerlo gastando un espacio de pacto.', 'corto');

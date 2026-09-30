@@ -84,6 +84,8 @@ export function salvacionesCompetentes(ch) {
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Pícaro' && c.nivel >= 15) { out.add('sab'); out.add('car'); }
     if (c.clase === 'Monje' && c.nivel >= 14) KS.forEach(k => out.add(k));
+    // Mente ilimitada (dominio del conocimiento 6): Inteligencia, o Sabiduría/Carisma si ya la tenías
+    if (c.clase === 'Clérigo' && c.nivel >= 6 && /conocimiento/i.test(c.subclase || '')) out.add(!out.has('int') ? 'int' : !out.has('sab') ? 'sab' : 'car');
     // Mente de hierro (acechador en la penumbra 7): Sabiduría, o Inteligencia si ya la tenías
     if (c.clase === 'Explorador' && c.nivel >= 7 && /acechador|penumbra/i.test(c.subclase || '')) out.add(out.has('sab') ? 'int' : 'sab');
   }

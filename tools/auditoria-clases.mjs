@@ -32,7 +32,7 @@ const E = {
   'Aprendiz de mucho': ['A', 'Mitad de competencia a pruebas de habilidad sin competencia (no a la iniciativa, regla de 2024).'],
   'Fuente de inspiración': ['A', 'Recarga en descanso corto y canje por espacio.'], 'Inspiración superior': ['A', 'Al tirar iniciativa recuperas hasta tener 2.'],
   'Palabras de creación': ['A', 'Palabra de poder: sanar y matar siempre preparadas.'], 'Secretos mágicos': ['T', ''], 'Contraencantamiento': ['T', 'Reacción.'],
-  'Juego de pies deslumbrante': ['A', 'CA 10 + Des + Car sin armadura ni escudo.'], 'Competencias adicionales': ['A', 'Pide 3 habilidades.'],
+   'Competencias adicionales': ['A', 'Pide 3 habilidades.'],
   'Magia cautivadora': ['A', 'Contador; canje por Inspiración bárdica.'], 'Manto de majestad': ['A', 'Contador; canje por espacio de nivel 3+.'], 'Majestad inquebrantable': ['A', 'Contador (descanso corto).'],
   'Entrenamiento marcial': ['A', 'Armadura media, escudo y armas marciales.'], 'Bendición de la luz lunar': ['A', 'Contador.'],
   // Brujo
@@ -42,7 +42,12 @@ const E = {
   'Maestro sobrenatural': ['A', 'Astucia mágica recupera todos los espacios.'], 'Luz sanadora': ['A', 'Reserva de d6; botón «Curarme».'], 'Alma radiante': ['A', 'Carisma a una tirada de daño radiante o de fuego.'],
   'Resiliencia celestial': ['A', 'PG temporales al terminar descansos y al usar Astucia mágica.'], 'Venganza ardiente': ['A', 'Contador.'],
   'Pasos feéricos': ['A', 'Paso brumoso gratis (Car usos).'], 'Escape brumoso': ['P', 'Usa los Pasos feéricos.'], 'Defensas seductoras': ['A', 'Inmune a hechizado; contador con canje por espacio de pacto.'],
-  'La suerte del Oscuro': ['A', 'Contador (Car usos).'], 'Resistencia infernal': ['A', 'Opción de tipo de daño; se cambia en cada descanso.'], 'Arrastrar por el infierno': ['A', 'Contador con canje por espacio de pacto.'],
+  'La suerte del Oscuro': ['A', 'Contador (Car usos).'], 'Lealtad aterradora': ['A', 'Opción de dios (Bhaal, Myrkul, Perdición): cambia el truco siempre preparado y se avisa en el descanso largo.'],
+  'Esplendor del genio': ['A', 'CA 10 + Des + Con sin armadura y una habilidad.'], 'Castigo elemental': ['A', 'Furia del ifrit al impactar (gasta Canalizar divinidad).'], 'Aura de escudo elemental': ['A', 'Opción de tipo de daño en cada turno.'],
+  'Explorador gélido': ['A', 'Golpes polares +1d4 de frío al impactar (1d6 a nivel 11).'], 'Escarcha del cazador': ['A', 'Al lanzar Marca del cazador ganas 1d10 + nivel PG temporales.'],
+  'Conocimientos primigenios': ['A', 'Pide una habilidad; truco de druida.'], 'Mente ilimitada': ['A', 'Competencia en salvaciones de Inteligencia.'], 'Comandante inspirador': ['A', 'Inmune a asustado y hechizado.'],
+  'Asesinar': ['A', 'Ventaja en iniciativa; en el primer asalto, Golpes sorprendentes suma tu nivel al Ataque furtivo.'], 'Juego de pies deslumbrante': ['A', 'CA 10 + Des + Car y Daño bárdico (dado de inspiración + Des) sin armadura ni escudo.'],
+  'Mareas del caos': ['A', 'Contador; se restablece al lanzar un conjuro de hechicero con espacio y te avisa de la sobrecarga.'], 'Resistencia infernal': ['A', 'Opción de tipo de daño; se cambia en cada descanso.'], 'Arrastrar por el infierno': ['A', 'Contador con canje por espacio de pacto.'],
   'Combatiente clarividente': ['A', 'Contador (descanso corto) con canje por espacio de pacto.'], 'Maleficio sobrenatural': ['A', 'Maleficio siempre preparado; +1d6 al impactar.'],
   // Clérigo
   'Orden divina': ['A', 'Protector (armas marciales, armadura pesada) o Taumaturgo (truco + Sab a Arcanos/Religión).'], 'Golpes benditos': ['A', 'Variante: Golpe divino al impactar o Lanzamiento potente en trucos.'],
@@ -64,7 +69,7 @@ const E = {
   'Infatigable': ['A', 'PG temporales 1d8 + Sab al gastarlo; baja el agotamiento en el descanso corto.'], 'Cazador persistente': ['A', 'El daño no rompe la concentración en Marca del cazador.'],
   'Velo de la naturaleza': ['A', 'Contador (Sab).'], 'Azote de enemigos': ['A', 'Marca del cazador hace 1d10.'], 'Cazador preciso': ['T', ''],
   'Emboscador pavoroso': ['A', 'Sabiduría a la iniciativa; Golpe pavoroso +2d6 al impactar (Sab usos).'], 'Mente de hierro': ['A', 'Competencia en salvaciones de Sabiduría.'],
-  'El cazador y la presa': ['A', 'Opción Asesino de colosos (+1d8 al impactar) o Rompehordas; se cambia en cada descanso.'], 'Tácticas defensivas': ['A', 'Opción; se cambia en cada descanso.'],
+  'El cazador y la presa': ['A', 'Opción Azote de colosos (+1d8 al impactar) o Destructor de hordas; se cambia en cada descanso.'], 'Tácticas defensivas': ['A', 'Opción; se cambia en cada descanso.'],
   'Glamur sobrenatural': ['A', 'Sabiduría a las pruebas de Carisma y una habilidad.'], 'Golpes pavorosos': ['A', '+1d4 psíquico al impactar (1d6 a nivel 11).'],
   'Refuerzos feéricos': ['A', 'Invocar feérico gratis 1/día.'], 'Errante brumoso': ['A', 'Paso brumoso gratis (Sab usos).'],
   'Alma fortalecedora': ['A', 'Contador.'], 'Represalia escalofriante': ['A', 'Contador.'], 'Espectro congelado': ['A', 'Contador con canje por espacio de nivel 4+.'],
@@ -85,7 +90,7 @@ const E = {
   'Resistencia dracónica': ['A', 'PG +1 por nivel y CA 10 + Des + Car.'], 'Afinidad elemental': ['A', 'Opción de tipo; Carisma a una tirada de daño de ese tipo.'],
   'Alas de dragón': ['A', 'Contador con canje por 3 puntos.'], 'Compañero dragón': ['A', 'Invocar dragón gratis 1/día.'],
   'Restablecer equilibrio': ['A', 'Contador (Car).'], 'Trance de orden': ['A', 'Contador con canje por 5 puntos.'], 'Cabalgata mecánica': ['A', 'Contador con canje por 7 puntos.'],
-  'Implosión deformadora': ['A', 'Contador con canje por 5 puntos.'], 'Mareas del caos': ['A', 'Contador.'], 'Sobrecarga domada': ['A', 'Contador.'], 'Corona de fuego mágico': ['A', 'Contador con canje por 5 puntos.'],
+  'Implosión deformadora': ['A', 'Contador con canje por 5 puntos.'], 'Sobrecarga domada': ['A', 'Contador.'], 'Corona de fuego mágico': ['A', 'Contador con canje por 5 puntos.'],
   // Mago
   'Adepto en rituales': ['A', 'Rituales del libro sin prepararlos.'], 'Recuperación arcana': ['A', 'Recuperar espacios tras el descanso corto (mitad del nivel, hasta nivel 5).'],
   'Académico': ['A', 'Pericia en una habilidad.'], 'Memorizar conjuro': ['A', 'Aviso en el descanso corto.'], 'Conjuros característicos': ['A', 'Contador (descanso corto).'],
@@ -95,7 +100,7 @@ const E = {
   'Resistencia a conjuros': ['A', 'Ventaja en salvaciones contra conjuros.'], 'Presagio': ['A', 'Dados d20 anotados tras el descanso largo.'], 'Adivino avezado': ['A', 'Al lanzar adivinación de nivel 2+ ofrece recuperar un espacio.'],
   'El tercer ojo': ['A', 'Contador (descanso corto).'], 'Presagio mayor': ['A', '3 dados.'], 'Evocación potenciada': ['A', 'Inteligencia a una tirada de daño de evocación.'],
   'Sobrecanalizar': ['A', 'Contador.'], 'Criaturas fantasmales': ['A', 'Invocar bestia/feérico siempre preparados y gratis.'], 'Yo ilusorio': ['A', 'Contador con canje por espacio de nivel 2+.'],
-  'Canción de la hoja': ['A', 'Contador; al gastarla: +Int a CA, +3 m, ataques con Int y + Int a la concentración.'], 'Canción de la victoria': ['A', '+Int al daño cuerpo a cuerpo con la canción.'],
+  'Canción de la hoja': ['A', 'Contador; al gastarla: +Int a CA, +3 m, ataques con Int y + Int a la concentración.'], 'Canción de la victoria': ['T', 'Tras lanzar un conjuro de acción, un ataque como acción adicional.'],
   // Monje
   'Artes marciales': ['A', 'Dado de artes marciales en golpes y armas de monje, con Des.'], 'Concentración de monje': ['A', 'Puntos (descanso corto) y su CD.'],
   'Metabolismo asombroso': ['A', 'Al tirar iniciativa recuperas los puntos y te curas nivel + dado (1/día).'], 'Movimiento sin armadura': ['A', 'Velocidad extra sin armadura ni escudo.'],
@@ -117,7 +122,7 @@ const E = {
   // Pícaro
   'Ataque furtivo': ['A', 'Al impactar con arma sutil o a distancia, una vez por turno.'], 'Acción astuta': ['A', 'Correr, Destrabarse y Esconderse como acción adicional.'],
   'Puntería certera': ['A', 'Se activa en «En juego»: ventaja y velocidad 0.'], 'Golpe astuto': ['P', 'Muestra la CD.'], 'Talentos fiables': ['A', 'En pruebas con competencia, un 9 o menos cuenta como 10.'],
-  'Mente escurridiza': ['A', 'Competencia en salvaciones de Sabiduría y Carisma.'], 'Golpe de suerte': ['A', 'Contador (descanso corto).'], 'Asesinar': ['A', 'Ventaja en iniciativa.'],
+  'Mente escurridiza': ['A', 'Competencia en salvaciones de Sabiduría y Carisma.'], 'Golpe de suerte': ['A', 'Contador (descanso corto).'], 
   'Cuchillas psíquicas': ['A', 'Dados de energía psiónica.'], 'Velo psíquico': ['A', 'Contador con canje por dado.'], 'Desgarro mental': ['A', 'Contador con canje por 3 dados.'],
   'Ladrón de conjuros': ['A', 'Contador.'], 'Destreza con mano de mago': ['A', 'Mano de mago siempre preparada.'], 'Sed de sangre': ['A', 'Contador.'],
 };

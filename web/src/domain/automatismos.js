@@ -144,8 +144,26 @@ export function alGastarRecurso(ch, id) {
   return out;
 }
 // Armadura de Agathys: 5 PG temporales por nivel del espacio
-export const temporalesDeConjuro = (nombre, L) => (norm(nombre) === 'armadura de agathys' ? 5 * Math.max(1, L || 1) : 0);
+// Escarcha del cazador (caminante invernal 3): al lanzar Marca del cazador, 1d10 + nivel de explorador
+export function temporalesDeConjuro(nombre, L, ch = null, tirar = tirarDado) {
+  const n = norm(nombre);
+  if (n === 'armadura de agathys') return 5 * Math.max(1, L || 1);
+  const inv = ch && subDe(ch, 'Explorador', /invernal/);
+  if (n === 'marca del cazador' && inv && inv.nivel >= 3) return tirar(10) + inv.nivel;
+  return 0;
+}
 // Resiliencia celestial (celestial 10): al terminar un descanso corto o largo ganas nivel de brujo + Carisma PG temporales
 export function temporalesAlDescansar(ch) {
   const c = subDe(ch, 'Brujo', /celestial/); return c && c.nivel >= 10 ? c.nivel + modOf(statsEfectivos(ch).car) : 0;
+}
+
+// Superviviente (campeón 18), Desafiar a la muerte: un 18-20 en la salvación contra muerte cuenta como un 20
+export const rangoMuerte = ch => { const g = subDe(ch, 'Guerrero', /campeon/); return g && g.nivel >= 18 ? 18 : 20; };
+// Mareas del caos (magia salvaje 3): se restablece al lanzar un conjuro de hechicero con espacio (y entonces tiras en la tabla de sobrecarga)
+export function alLanzarConEspacio(ch, fuente = '') {
+  const out = [], r = regla(ch, 'tpl:salvaje.mareas');
+  if (r && usosGastados(ch, r) > 0 && (!fuente || /hechicer|drac|salvaje/i.test(norm(fuente)) || !/mago|clerigo|druida|bardo|brujo|paladin|explorador|dote/.test(norm(fuente)))) {
+    recState(ch, r.id).used = 0; out.push('Mareas del caos se restablece: tira en la tabla de sobrecarga de magia salvaje.');
+  }
+  return out;
 }

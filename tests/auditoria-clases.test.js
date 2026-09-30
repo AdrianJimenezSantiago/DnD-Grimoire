@@ -36,7 +36,7 @@ test('Círculo de la tierra: al cambiar de terreno, los del anterior dejan de es
   assert.deepEqual(sobrantesAutomaticos(db, d).map(e => db.catalog[e.sid].es), ['Manos ardientes']);
 });
 test('opciones de rasgo: se guardan normalizadas y avisan en el descanso adecuado', () => {
-  assert.deepEqual(normOpciones({ 'cazador.presa': 'asesino de colosos', 'x': 'y', 'tierra.terreno': 'Lunar' }), { 'cazador.presa': 'Asesino de colosos' });
+  assert.deepEqual(normOpciones({ 'cazador.presa': 'azote de colosos', 'x': 'y', 'tierra.terreno': 'Lunar' }), { 'cazador.presa': 'Azote de colosos' });
   const e = ch({ clase: 'Explorador', subclase: 'Cazador', nivel: 7 });
   assert.deepEqual(opcionesDe(e).map(d => d.id), ['cazador.presa', 'cazador.tacticas']);
   assert.equal(opcionesCambiables(e, 'corto').length, 2);
@@ -54,8 +54,8 @@ test('En juego: el rasgo con opciones la muestra y deja elegirla', () => {
   assert.equal(r.numeros[0].valor, 'Tropical');
 });
 test('Asesino de colosos: +1d8 una vez por turno al impactar', () => {
-  const e = ch({ clase: 'Explorador', subclase: 'Cazador', nivel: 3, opciones: { 'cazador.presa': 'Asesino de colosos' } });
-  const op = opcionesAlImpactar(e, arma('Arco largo')).find(o => o.k === 'op:Asesino de colosos');
+  const e = ch({ clase: 'Explorador', subclase: 'Cazador', nivel: 3, opciones: { 'cazador.presa': 'Azote de colosos' } });
+  const op = opcionesAlImpactar(e, arma('Arco largo')).find(o => o.k === 'op:Azote de colosos');
   assert.equal(op.dado, '1d8'); assert.ok(op.unaVez);
 });
 
@@ -314,4 +314,36 @@ test('vida 6/17: Sanador bendito y Sanación suprema; evocador: Truco potente', 
   assert.equal(x.maximo, true); assert.equal(x.sanador, 3); assert.equal(x.bono, 3);
   assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 5 }), { level: 1 }, 'Clérigo', cura, 1)[0].sanador, undefined);
   assert.ok(trucoPotenteEvocador(ch({ clase: 'Mago', subclase: 'Evocador', nivel: 3 })));
+});
+
+test('Faerûn: Vástago de los Tres cambia truco con el dios; genios, invernal, luna, conocimiento y abanderado', async () => {
+  const { claseArmadura } = await import('../web/src/domain/equipo.js');
+  const { salvacionesCompetentes } = await import('../web/src/domain/habilidades.js');
+  const { inmunidadesEstado } = await import('../web/src/domain/efectos.js');
+  const { fuentesExtra } = await import('../web/src/domain/creacion.js');
+  const { temporalesDeConjuro } = await import('../web/src/domain/automatismos.js');
+  const v = ch({ clase: 'Pícaro', subclase: 'Vástago de los Tres', nivel: 3 });
+  assert.deepEqual(conjurosAutomaticos(v).map(c => c.nombre), ['Guardia de cuchillas']);
+  v.opciones = { 'vastago.lealtad': 'Myrkul' }; assert.deepEqual(conjurosAutomaticos(v).map(c => c.nombre), ['Toque helado']);
+  assert.equal(claseArmadura(ch({ clase: 'Paladín', subclase: 'Juramento de los genios nobles', nivel: 3 })).ca, 10 + 3 + 2);
+  assert.ok(fuentesExtra(ch({ clase: 'Paladín', subclase: 'Juramento de los genios nobles', nivel: 3 })).some(f => f.nombre === 'Esplendor del genio'));
+  assert.ok(fuentesExtra(ch({ clase: 'Bardo', subclase: 'Colegio de la luna', nivel: 3 })).some(f => f.nombre === 'Conocimientos primigenios'));
+  assert.ok(salvacionesCompetentes(ch({ clase: 'Clérigo', subclase: 'Dominio del conocimiento', nivel: 6 })).has('int'));
+  assert.equal(inmunidadesEstado(ch({ clase: 'Guerrero', subclase: 'Abanderado', nivel: 18 })).get('asustado'), 'Comandante inspirador');
+  const w = ch({ clase: 'Explorador', subclase: 'Caminante invernal', nivel: 11 });
+  assert.equal(opcionesAlImpactar(w, arma('Arco largo')).find(o => o.k === 'polares').dado, '1d6');
+  assert.equal(temporalesDeConjuro('Marca del cazador', 1, w, () => 5), 16);
+  const g = ch({ clase: 'Paladín', subclase: 'Juramento de los genios nobles', nivel: 3 });
+  assert.ok(opcionesAlImpactar(g, arma('Espada larga')).some(o => o.k === 'ifrit'));
+});
+test('libro: Canción de la victoria ya no suma Inteligencia al daño; Daño bárdico de la danza; Mareas del caos', async () => {
+  const { ataqueArma } = await import('../web/src/domain/equipo.js');
+  const { alLanzarConEspacio, rangoMuerte } = await import('../web/src/domain/automatismos.js');
+  const m = ch({ clase: 'Mago', subclase: 'Hojacantante', nivel: 14 }); ponerEfecto(m, 'cancion');
+  assert.ok(!ataqueArma(m, arma('Espada larga')).estilos.some(e => /victoria/i.test(e)));
+  const b = ch({ clase: 'Bardo', subclase: 'Colegio de la danza', nivel: 5 });
+  assert.equal(golpeSinArmas(b).arma.dano, '1d8'); assert.match(ataqueArma(b, golpeSinArmas(b)).dano, /^1d8 \+ 3/);
+  const s = ch({ clase: 'Hechicero', subclase: 'Hechicería de magia salvaje', nivel: 3 }); recState(s, 'tpl:salvaje.mareas').used = 1;
+  assert.equal(alLanzarConEspacio(s, 'Hechicero').length, 1); assert.equal(recState(s, 'tpl:salvaje.mareas').used, 0);
+  assert.equal(rangoMuerte(ch({ clase: 'Guerrero', subclase: 'Campeón', nivel: 18 })), 18);
 });

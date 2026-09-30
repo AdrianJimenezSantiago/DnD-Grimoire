@@ -168,6 +168,8 @@ function claseArmaduraBase(ch) {
   const opciones = [{ ca: 10 + des + bonoEsc, detalle: `10 + Des${esc ? ', escudo' : ''}` }];
   if (clases.includes('Bárbaro')) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Defensa sin armadura (10 + Des + Con)${esc ? ', escudo' : ''}` });
   if (clases.includes('Monje') && !esc) opciones.push({ ca: 10 + des + modOf(st.sab), detalle: 'Defensa sin armadura (10 + Des + Sab)' });
+  // Esplendor del genio (juramento de los genios nobles 3): 10 + Des + Con sin armadura, con escudo
+  if (clasesDe(ch).some(c => c.clase === 'Paladín' && /genios/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Esplendor del genio (10 + Des + Con)${esc ? ', escudo' : ''}` });
   // Juego de pies deslumbrante (colegio de la danza 3): 10 + Des + Car sin armadura ni escudo
   if (!esc && clasesDe(ch).some(c => c.clase === 'Bardo' && /danza/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.car), detalle: 'Juego de pies deslumbrante (10 + Des + Car)' });
   if (clasesDe(ch).some(c => c.clase === 'Hechicero' && /drac[oó]n/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.car) + bonoEsc, detalle: `Resistencia dracónica (10 + Des + Car)${esc ? ', escudo' : ''}` });
@@ -189,8 +191,12 @@ function artesMarciales(ch, o, props, distancia) {
 // El golpe sin armas: 1 + Fuerza, o mejor con Artes marciales, Matón de taberna o el estilo Combate sin armas
 export const GOLPE_SIN_ARMAS = 'sinarmas';
 export function golpeSinArmas(ch) {
-  const dotes = dotesDe(ch).map(d => norm(d.nombre)), dano = tieneEstilo(ch, 'sinarmas') ? '1d6' : dotes.includes('maton de taberna') ? '1d4' : '1';
-  return { id: GOLPE_SIN_ARMAS, nombre: 'Golpe sin armas', cat: 'arma', sinArmas: true, cantidad: 1, equipado: false, arma: { dano, tipo: 'contundente', props: [], maestria: '', distancia: '' } };
+  const dotes = dotesDe(ch).map(d => norm(d.nombre));
+  let dano = tieneEstilo(ch, 'sinarmas') ? '1d6' : dotes.includes('maton de taberna') ? '1d4' : '1', props = [];
+  // Daño bárdico (colegio de la danza 3): sin armadura ni escudo, dado de inspiración + Destreza
+  const danza = clasesDe(ch).find(c => c.clase === 'Bardo' && c.nivel >= 3 && /danza/i.test(c.subclase || ''));
+  if (danza && !conArmadura(ch) && !conEscudo(ch)) { const d = danza.nivel >= 15 ? '1d12' : danza.nivel >= 10 ? '1d10' : danza.nivel >= 5 ? '1d8' : '1d6'; if (MEDIA(d) > MEDIA(dano)) dano = d; props = ['Sutil']; }
+  return { id: GOLPE_SIN_ARMAS, nombre: 'Golpe sin armas', cat: 'arma', sinArmas: true, cantidad: 1, equipado: false, arma: { dano, tipo: 'contundente', props, maestria: '', distancia: '' } };
 }
 export const armasCombate = ch => [...equipoDe(ch).objetos.filter(x => x.arma), golpeSinArmas(ch)];
 export const armaCombate = (ch, id) => armasCombate(ch).find(x => x.id === id) || null;
@@ -214,9 +220,6 @@ export function ataqueArma(ch, o) {
   // Furia: suma su daño a los ataques que usan la Fuerza
   const barb = clasesDe(ch).find(c => c.clase === 'Bárbaro'), furia = barb && efectoActivo(ch, 'furia') && mod === fue && !distancia ? DANO_FURIA(barb.nivel) : 0;
   if (furia) estilos.push(`Furia +${furia} al daño`);
-  // Canción de la victoria (hojacantante 14): Inteligencia al daño cuerpo a cuerpo con la Canción de la hoja activa
-  const victoria = cancion && !distancia && clasesDe(ch).some(c => c.clase === 'Mago' && c.nivel >= 14 && /hojacantante|cantante/i.test(c.subclase || '')) ? Math.max(0, modOf(st.int)) : 0;
-  if (victoria) estilos.push(`Canción de la victoria +${victoria} al daño`);
   for (const g of golpeExtra(ch)) estilos.push(`${g.nombre}: una vez por turno, +${g.dado} ${g.tipos} al impactar`);
   const notas = [];
   if (artes) notas.push(`Artes marciales (${artes})`);
@@ -224,7 +227,7 @@ export function ataqueArma(ch, o) {
   if (!competente) notas.push('Sin competencia: no sumas tu bonificador');
   let dado = a.dano || '1d4';
   if (artes && MEDIA(artes) > MEDIA(dado)) dado = artes;
-  const md = mod + bono + dmg + furia + victoria;
+  const md = mod + bono + dmg + furia;
   const plano = !/d/.test(dado), total = plano ? Math.max(0, (parseInt(dado, 10) || 0) + md) : 0;
   const expr = plano ? String(total) : `${dado}${md ? s(md) : ''}`;
   return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas,

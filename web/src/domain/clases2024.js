@@ -182,7 +182,7 @@ export const SUBCLASES = {
     { nombre: 'Ladrón', re: /ladron/, libro: PHB, rasgos: { 3: ['Balconero', 'Manos rápidas'], 9: ['Sigilo supremo'], 13: ['Usar objetos mágicos'], 17: ['Reflejos de ladrón'] } },
     { nombre: 'Rebanaalmas', re: /rebanaalmas|cuchilla|alma/, libro: PHB, rasgos: { 3: ['Cuchillas psíquicas', 'Poder psiónico'], 9: ['Cuchillas del alma'], 13: ['Velo psíquico'], 17: ['Desgarro mental'] } },
     { nombre: 'Vástago de los Tres', re: /vastago|tres/, libro: HF, prio: ['des', 'int', 'con', 'sab', 'car', 'fue'], rasgos: { 3: ['Lealtad aterradora', 'Sed de sangre'], 9: ['Golpe terrorífico'], 13: ['Aura de maldad'], 17: ['Encarnación del terror'] },
-      conjuros: { 3: ['Guardia de cuchillas'] } },
+      conjuros: { 3: ['Guardia de cuchillas'] }, trucoOpcion: 'vastago.lealtad' },
   ],
 };
 
@@ -222,7 +222,9 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   if (sc?.conjuros) {
     const fuente = (sc.rasgos[3] || []).find(r => /^Conjuros/.test(r)) || sc.nombre;
     // Círculo de la tierra: los del terreno elegido (Árido si aún no se ha elegido)
-    const lista0 = sc.terrenos ? sc.terrenos[opcionDe(ch, 'tierra.terreno')?.nombre] || sc.conjuros : sc.conjuros;
+    // Vástago de los Tres: el truco del dios elegido
+    const lista0 = sc.terrenos ? sc.terrenos[opcionDe(ch, 'tierra.terreno')?.nombre] || sc.conjuros
+      : sc.trucoOpcion ? { 3: [opcionDe(ch, sc.trucoOpcion)?.truco || sc.conjuros[3][0]] } : sc.conjuros;
     for (const [L, lista] of Object.entries(lista0)) if (hasta >= +L) lista.forEach(nombre => out.push({ nombre, nivel: +L, fuente, gratis: '', ritual: !!sc.ritual }));
   }
   return out;

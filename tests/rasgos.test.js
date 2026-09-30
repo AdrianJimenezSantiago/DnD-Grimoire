@@ -72,7 +72,7 @@ test('guerrero: nombres oficiales, Indómito y subclases con dados', () => {
 test('subclases con recursos: brujo, clérigo, druida, monje, pícaro', () => {
   const car16 = { fue: 10, des: 10, con: 10, int: 10, sab: 16, car: 16 };
   assert.ok(names(blankChar({ clase: 'Brujo', subclase: 'Patrón celestial', nivel: 5, stats: car16 })).includes('Luz sanadora:6'));
-  assert.ok(names(blankChar({ clase: 'Brujo', subclase: 'Patrón infernal', nivel: 6, stats: car16 })).includes('Suerte del Oscuro:3'));
+  assert.ok(names(blankChar({ clase: 'Brujo', subclase: 'Patrón infernal', nivel: 6, stats: car16 })).includes('La suerte del Oscuro:3'));
   assert.ok(names(blankChar({ clase: 'Clérigo', subclase: 'Dominio de la guerra', nivel: 3, stats: car16 })).includes('Sacerdote guerrero:3'));
   assert.ok(names(blankChar({ clase: 'Druida', subclase: 'Círculo de las estrellas', nivel: 6, stats: car16 })).includes('Presagio cósmico:3'));
   assert.ok(names(blankChar({ clase: 'Monje', nivel: 2 })).includes('Metabolismo asombroso:1'));

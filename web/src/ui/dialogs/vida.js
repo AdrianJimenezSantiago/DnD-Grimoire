@@ -1,4 +1,5 @@
 import { esc, norm, numLibre } from '../../core/util.js';
+import { rangoMuerte } from '../../domain/automatismos.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
@@ -103,8 +104,8 @@ export function temporales(S2, n) {
 }
 function golpeFx(tipo, n = null, opts = {}) { golpe(tipo, n, { max: pgMaximo(S.cur()), ...opts }); }
 export function tirarSalvacionMuerte(S2) {
-  tirarPrueba({ titulo: 'Salvación contra muerte', sub: 'd20 sin modificadores', bono: 0, tipo: 'muerte',
-    alTirar: (nat, total = nat) => { let r; S2.act(`Salvación contra muerte: ${total}${total !== nat ? ` (d20 ${nat})` : ''}`, (db, x) => { r = salvacionMuerte(x, nat, total); });
+  tirarPrueba({ titulo: 'Salvación contra muerte', sub: 'd20 sin modificadores', bono: 0, tipo: 'muerte', critMin: rangoMuerte(S2.cur()),
+    alTirar: (nat, total = nat) => { let r; S2.act(`Salvación contra muerte: ${total}${total !== nat ? ` (d20 ${nat})` : ''}`, (db, x) => { r = salvacionMuerte(x, nat >= rangoMuerte(x) ? 20 : nat, total); });
       if (r === 'revive') { burstFrom($('#daOut'), { n: 50, speed: 5 }); return '<b class="ok">¡Recupera 1 PG y despierta!</b>'; }
       return { muere: '<b class="ko">Tercer fallo: muere.</b>', estable: '<b class="ok">Tercer éxito: queda estable.</b>', exito: 'Un éxito más.', fallo: nat === 1 ? 'Dos fallos.' : 'Un fallo más.' }[r] + ` ${pipsMuerte(S2.cur())}`; } });
 }

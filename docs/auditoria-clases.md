@@ -6,7 +6,7 @@ Generado por `tools/auditoria-clases.mjs`. Cada rasgo, nivel a nivel, con lo que
 
 Las pruebas `tests/auditoria-*.test.js` recorren todas las clases y subclases de nivel 1 a 20 y todas las multiclases de dos clases.
 
-Recuento: 328 automáticos, 12 en parte y 201 de consulta.
+Recuento: 336 automáticos, 12 en parte y 193 de consulta.
 
 ## Bárbaro
 
@@ -106,7 +106,7 @@ Conjuros siempre preparados: nivel 3: Hablar con los animales, Sentidos de la be
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Juego de pies deslumbrante | Automático | CA 10 + Des + Car sin armadura ni escudo. |
+| 3 | Juego de pies deslumbrante | Automático | CA 10 + Des + Car y Daño bárdico (dado de inspiración + Des) sin armadura ni escudo. |
 | 6 | Juego de pies conjunto | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 6 | Movimiento inspirador | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 14 | Evasión dirigida | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
@@ -144,7 +144,7 @@ Conjuros siempre preparados: nivel 3: Hechizar persona, Imagen múltiple; nivel 
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Conocimientos primigenios | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 3 | Conocimientos primigenios | Automático | Pide una habilidad; truco de druida. |
 | 3 | Inspiración lunar | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 6 | Bendición de la luz lunar | Automático | Contador. |
 | 14 | Esplendor del ocaso | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
@@ -300,7 +300,7 @@ Conjuros siempre preparados: nivel 3: Disfrazarse, Hechizar persona, Invisibilid
 | 3 | Bendiciones del conocimiento | Automático | Pide 2 habilidades con pericia. |
 | 3 | Conjuros del dominio del conocimiento | Automático | Conjuros siempre preparados por nivel. |
 | 3 | Magia mental | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 6 | Mente ilimitada | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 6 | Mente ilimitada | Automático | Competencia en salvaciones de Inteligencia. |
 | 17 | Precognición divina | Automático | Contador; canje por espacio de nivel 6+. |
 
 Conjuros siempre preparados: nivel 3: Clavo mental, Detectar magia, Detectar pensamientos, Entender idiomas, Identificar, Orden imperiosa; nivel 5: Disipar magia, Don de lenguas, Indetectable; nivel 7: Confusión, Destierro, Ojo arcano; nivel 9: Conocer las leyendas, Escudriñar, Estática sináptica.
@@ -424,7 +424,7 @@ Conjuros siempre preparados: nivel 3: Disfrazarse; nivel 5: Truco de la cuerda; 
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | El cazador y la presa | Automático | Opción Asesino de colosos (+1d8 al impactar) o Rompehordas; se cambia en cada descanso. |
+| 3 | El cazador y la presa | Automático | Opción Azote de colosos (+1d8 al impactar) o Destructor de hordas; se cambia en cada descanso. |
 | 3 | Sabiduría del cazador | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 7 | Tácticas defensivas | Automático | Opción; se cambia en cada descanso. |
 | 11 | El cazador experto y la presa | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
@@ -457,8 +457,8 @@ Conjuros siempre preparados: nivel 3: Hechizar persona; nivel 5: Paso brumoso; n
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
 | 3 | Conjuros de caminante invernal | Automático | Conjuros siempre preparados por nivel. |
-| 3 | Escarcha del cazador | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 3 | Explorador gélido | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 3 | Escarcha del cazador | Automático | Al lanzar Marca del cazador ganas 1d10 + nivel PG temporales. |
+| 3 | Explorador gélido | Automático | Golpes polares +1d4 de frío al impactar (1d6 a nivel 11). |
 | 7 | Alma fortalecedora | Automático | Contador. |
 | 11 | Represalia escalofriante | Automático | Contador. |
 | 15 | Espectro congelado | Automático | Contador con canje por espacio de nivel 4+. |
@@ -551,7 +551,7 @@ Conjuros siempre preparados: nivel 18: Telequinesis.
 | 7 | Tácticas de equipo | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 10 | Arenga súbita | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 15 | Resistencia compartida | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 18 | Comandante inspirador | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 18 | Comandante inspirador | Automático | Inmune a asustado y hechizado. |
 
 Conjuros siempre preparados: nivel 3: Entender idiomas.
 
@@ -595,7 +595,7 @@ Conjuros siempre preparados: nivel 3: Brazos de Hadar, Calmar emociones, Detecta
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Mareas del caos | Automático | Contador. |
+| 3 | Mareas del caos | Automático | Contador; se restablece al lanzar un conjuro de hechicero con espacio y te avisa de la sobrecarga. |
 | 3 | Sobrecarga de magia salvaje | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 6 | Doblegar la suerte | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 14 | Caos controlado | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
@@ -710,7 +710,7 @@ Conjuros siempre preparados: nivel 3: Ilusión menor; nivel 6: Invocar bestia, I
 | 3 | Entrenarse en la guerra y la canción | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 6 | Ataque adicional | Automático | Ataques por acción en combate. |
 | 10 | Canción de defensa | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 14 | Canción de la victoria | Automático | +Int al daño cuerpo a cuerpo con la canción. |
+| 14 | Canción de la victoria | Se consulta | Tras lanzar un conjuro de acción, un ataque como acción adicional. |
 
 ## Monje
 
@@ -869,10 +869,10 @@ Conjuros siempre preparados: nivel 3: Marca del cazador, Perdición; nivel 5: In
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Castigo elemental | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 3 | Castigo elemental | Automático | Furia del ifrit al impactar (gasta Canalizar divinidad). |
 | 3 | Conjuros de genio | Automático | Conjuros siempre preparados por nivel. |
-| 3 | Esplendor del genio | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
-| 7 | Aura de escudo elemental | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 3 | Esplendor del genio | Automático | CA 10 + Des + Con sin armadura y una habilidad. |
+| 7 | Aura de escudo elemental | Automático | Opción de tipo de daño en cada turno. |
 | 15 | Represalia elemental | Automático | Contador (Car). |
 | 20 | Vástago noble | Automático | Contador con canje por espacio de nivel 5. |
 
@@ -913,7 +913,7 @@ Conjuros siempre preparados: nivel 3: Castigo atronador, Elementalismo, Orbe cro
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Asesinar | Automático | Ventaja en iniciativa. |
+| 3 | Asesinar | Automático | Ventaja en iniciativa; en el primer asalto, Golpes sorprendentes suma tu nivel al Ataque furtivo. |
 | 3 | Herramientas de asesino | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 9 | Pericia en infiltrarse | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 13 | Envenenar armas | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
@@ -955,7 +955,7 @@ Conjuros siempre preparados: nivel 3: Mano de mago.
 
 | Nivel | Rasgo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 3 | Lealtad aterradora | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
+| 3 | Lealtad aterradora | Automático | Opción de dios (Bhaal, Myrkul, Perdición): cambia el truco siempre preparado y se avisa en el descanso largo. |
 | 3 | Sed de sangre | Automático | Contador. |
 | 9 | Golpe terrorífico | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |
 | 13 | Aura de maldad | Se consulta | La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano. |

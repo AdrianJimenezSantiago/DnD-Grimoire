@@ -80,11 +80,22 @@ export function opcionesAlImpactar(ch, o) {
   const errante = sub('Explorador', /errante/);
   if (errante && una('pavorosos')) { const d = errante.nivel >= 11 ? '1d6' : '1d4';
     out.push({ k: 'pavorosos', grupo: '', titulo: 'Golpes pavorosos', nombre: `+${d} psíquico`, dado: d, unaVez: true, nota: 'Una vez por turno a cada criatura.' }); }
+  // Caminante invernal: Golpes polares, +1d4 de frío (1d6 a nivel 11) una vez por turno con un arma
+  const inv = sub('Explorador', /invernal/);
+  if (inv && una('polares')) { const d = inv.nivel >= 11 ? '1d6' : '1d4'; out.push({ k: 'polares', grupo: '', titulo: 'Golpes polares', nombre: `+${d} de frío`, dado: d, unaVez: true, nota: 'Una vez por turno.' }); }
+  // Genios nobles: Castigo elemental (Furia del ifrit), justo después de Castigo divino, gasta Canalizar divinidad
+  const cdiv = libres(ch, 'tpl:paladin.canalizar');
+  if (sub('Paladín', /genios/) && cuerpo && cdiv > 0) out.push({ k: 'ifrit', grupo: '', titulo: 'Castigo elemental', nombre: 'Furia del ifrit: +2d4 de fuego', dado: '2d4', gasta: { rec: 'tpl:paladin.canalizar' },
+    nota: `Solo junto a Castigo divino; otra criatura a 9 m también sufre 2d4 de fuego. Gasta Canalizar divinidad (te quedan ${cdiv}).` });
   // Conjuros en marcha que suman daño a cada impacto: Marca del cazador y Maleficio
   const conc = norm(ch.play?.conc || '');
   if (conc === 'marca del cazador') { const d = clasesDe(ch).some(x => x.clase === 'Explorador' && x.nivel >= 20) ? '1d10' : '1d6';
     out.push({ k: 'marca', grupo: '', titulo: 'Marca del cazador', nombre: `+${d} de fuerza`, dado: d, nota: 'Si el objetivo es la criatura marcada.' }); }
   if (conc === 'maleficio') out.push({ k: 'maleficio', grupo: '', titulo: 'Maleficio', nombre: '+1d6 necrótico', dado: '1d6', nota: 'Si el objetivo es la criatura maldita.' });
+  // Asesino: Golpes sorprendentes, en el primer asalto el Ataque furtivo hace además tu nivel de pícaro
+  const ases = sub('Pícaro', /asesin/);
+  if (ases && c.activo && c.ronda === 1 && (props.includes('sutil') || distancia) && una('sorprendentes'))
+    out.push({ k: 'sorprendentes', grupo: '', titulo: 'Golpes sorprendentes', nombre: `+${ases.nivel} del tipo del arma`, dado: String(ases.nivel), unaVez: true, nota: 'Primer asalto: si el Ataque furtivo acierta. Ventaja contra quien aún no haya jugado su turno.' });
   // Pícaro: Ataque furtivo con arma sutil o a distancia, una vez por turno
   const pic = clasesDe(ch).find(x => x.clase === 'Pícaro');
   if (pic && (props.includes('sutil') || distancia) && !hechas.includes('furtivo'))
