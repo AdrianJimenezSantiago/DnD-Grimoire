@@ -1,8 +1,9 @@
 import { norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
-import { clasesDe, modOf } from './reglas2024.js';
+import { clasesDe, modOf, competencia, nivelTotal } from './reglas2024.js';
 import { trucoPotente } from './variantes.js';
 import { opcionDe } from './opcionesRasgo.js';
+import { linajeDe } from './especies.js';
 
 // Lo que tus rasgos suman a las tiradas de daño y curación de un conjuro (Manual del Jugador de 2024).
 // dados: las líneas de dados del conjuro (tipo 'curación' o de daño). Devuelve, por línea, { bono, notas }.
@@ -35,5 +36,8 @@ export function bonosDeConjuro(ch, s, fuente, dados, nivelEspacio = null) {
   const af = sub('Hechicero', /dracon/, 6) && opcionDe(ch, 'draconica.afinidad');
   if (af) una(d => tipo(d.tipo) === norm(af.tipo), mod('car'), 'Afinidad elemental');
   if (sub('Mago', /evoca/, 10) && /^evoca/.test(norm(s.escuela || ''))) una(() => true, mod('int'), 'Evocación potenciada');
+  // Revelación celestial (aasimar 3): una vez por turno, +competencia de daño radiante o necrótico a un conjuro
+  const rev = (ch.vida?.efectos || []).some(e => e.k === 'revelacion') && dados.findIndex((d, k) => dano(k));
+  if (rev !== false && rev >= 0) out[rev].notas.push(`Revelación celestial: +${competencia(nivelTotal(ch))} de daño ${linajeDe(ch, 'especie.aasimar')?.tipo || 'radiante o necrótico'} a un objetivo, una vez por turno`);
   return out;
 }

@@ -92,8 +92,8 @@ export function opcionesAlImpactar(ch, o) {
   const gig = linajeDe(ch, 'especie.goliat'), usosGig = libres(ch, 'tpl:especie.gigante');
   if (gig?.golpe && usosGig > 0) out.push({ k: 'gigante', grupo: '', titulo: gig.nombre, nombre: gig.golpe.dado ? `+${gig.golpe.dado} de ${gig.golpe.tipo}` : 'Derribar', dado: gig.golpe.dado, gasta: { rec: 'tpl:especie.gigante' },
     nota: `${gig.texto} Te quedan ${usosGig} usos.` });
-  if ((ch.vida?.efectos || []).some(e => e.k === 'revelacion') && una('revelacion')) { const pb = competencia(nivelTotal(ch));
-    out.push({ k: 'revelacion', grupo: '', titulo: 'Revelación celestial', nombre: `+${pb} radiante o necrótico`, dado: String(pb), unaVez: true, nota: 'Una vez en cada uno de tus turnos mientras dure la transformación.' }); }
+  if ((ch.vida?.efectos || []).some(e => e.k === 'revelacion') && una('revelacion')) { const pb = competencia(nivelTotal(ch)), tipo = linajeDe(ch, 'especie.aasimar')?.tipo || 'radiante o necrótico';
+    out.push({ k: 'revelacion', grupo: '', titulo: 'Revelación celestial', nombre: `+${pb} ${tipo}`, dado: String(pb), unaVez: true, nota: 'Una vez en cada uno de tus turnos mientras dure la transformación.' }); }
   // Atacante a la carga: tras moverte 3 m en línea recta, +1d8 una vez en cada uno de tus turnos
   if (cuerpo && dotesDe(ch).some(d => norm(d.nombre) === 'atacante a la carga') && una('carga'))
     out.push({ k: 'carga', grupo: '', titulo: 'Atacante a la carga', nombre: '+1d8', dado: '1d8', unaVez: true, nota: 'Si te moviste al menos 3 m en línea recta hacia el objetivo justo antes (o empújalo 3 m en su lugar).' });

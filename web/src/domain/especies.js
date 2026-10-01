@@ -11,12 +11,59 @@ export const RASGOS_ESPECIE = {
   elfo: [[1, 'Linaje élfico'], [1, 'Linaje feérico'], [1, 'Sentidos agudos'], [1, 'Trance'], [1, 'Visión en la oscuridad']],
   enano: [[1, 'Afinidad con la piedra'], [1, 'Aguante enano'], [1, 'Resistencia enana'], [1, 'Visión en la oscuridad']],
   gnomo: [[1, 'Astucia gnoma'], [1, 'Linaje gnomo'], [1, 'Visión en la oscuridad']],
-  goliat: [[1, 'Constitución poderosa'], [1, 'Forma grande'], [1, 'Linaje gigante']],
+  goliat: [[1, 'Constitución poderosa'], [5, 'Forma grande'], [1, 'Linaje gigante']],
   humano: [[1, 'Diestro'], [1, 'Ingenioso'], [1, 'Versátil']],
   mediano: [[1, 'Agilidad de mediano'], [1, 'Fortuna'], [1, 'Sigiloso por naturaleza'], [1, 'Valiente']],
   orco: [[1, 'Aguante incansable'], [1, 'Descarga de adrenalina'], [1, 'Visión en la oscuridad']],
   tiefling: [[1, 'Legado infernal'], [1, 'Presencia sobrenatural'], [1, 'Visión en la oscuridad']],
 };
+
+// Nivel de personaje al que se gana cada atributo (para corregir lo que lea el libro: «A partir del nivel 5»)
+export const nivelRasgoEspecie = (ch, nombre) => (RASGOS_ESPECIE[especieBase(ch)] || []).find(([, n]) => norm(n) === norm(nombre))?.[0] || 1;
+
+// Visión en la oscuridad: 36 m el enano, el orco y el drow; 18 m el resto de especies que la tienen
+const VISION = { aasimar: 18, draconido: 18, elfo: 18, enano: 36, gnomo: 18, orco: 36, tiefling: 18 };
+export const visionOscuridad = ch => (linajeActual(ch)?.vision || VISION[especieBase(ch)] || 0);
+
+// Resumen de cada atributo (sin el manual importado, para que «En juego» no quede vacío)
+const RESUMEN = {
+  'manos curativas': 'Acción de magia: tocas a una criatura y recupera tantos d4 como tu bonificador por competencia. Una vez por descanso largo.',
+  'portador de luz': 'Conoces el truco luz (aptitud mágica: Carisma).',
+  'resistencia celestial': 'Resistencia al daño necrótico y radiante.',
+  'revelacion celestial': 'Acción adicional, una vez por descanso largo: te transformas 1 minuto (Alas celestiales, Fulgor interior o Mortaja necrótica, a elegir cada vez). Una vez por turno sumas tu competencia como daño radiante (necrótico con Mortaja) a un ataque o conjuro.',
+  'linaje draconico': 'Tu dragón progenitor fija el tipo de tu Ataque de aliento y de tu resistencia.',
+  'ataque de aliento': 'Sustituye un ataque de la acción de Atacar: cono de 4,5 m o línea de 9 m, salvación de Destreza (CD 8 + Con + competencia), 1d10 (2d10 a nivel 5, 3d10 a 11, 4d10 a 17), mitad si la supera. Usos: competencia por descanso largo.',
+  'resistencia al dano': 'Resistencia al tipo de daño de tu linaje dracónico.',
+  'vuelo draconico': 'Acción adicional, una vez por descanso largo: alas espectrales 10 minutos con velocidad volando igual a tu velocidad. Terminan si quedas incapacitado.',
+  'linaje elfico': 'Truco de tu linaje y, a niveles 3 y 5, un conjuro siempre preparado que lanzas una vez gratis por descanso largo.',
+  'linaje feerico': 'Ventaja en las salvaciones para evitar o poner fin al estado de hechizado.',
+  'sentidos agudos': 'Competencia en Percepción, Perspicacia o Supervivencia.',
+  trance: 'No necesitas dormir y la magia no puede dormirte. Terminas un descanso largo en 4 horas de trance.',
+  'afinidad con la piedra': 'Acción adicional: sentir vibraciones a 18 m durante 10 minutos, sobre piedra. Usos: competencia por descanso largo.',
+  'aguante enano': 'Tus PG máximos suben 1 por nivel.',
+  'resistencia enana': 'Resistencia al veneno y ventaja en las salvaciones para evitar o poner fin al estado de envenenado.',
+  'astucia gnoma': 'Ventaja en las salvaciones de Inteligencia, Sabiduría y Carisma.',
+  'linaje gnomo': 'Gnomo de las rocas: prestidigitación, reparar y dispositivos mecánicos. Gnomo de los bosques: ilusión menor y hablar con los animales gratis (competencia por descanso largo).',
+  'constitucion poderosa': 'Ventaja en las pruebas para poner fin al estado de agarrado; tu capacidad de carga es la de un tamaño más.',
+  'forma grande': 'Desde el nivel 5, acción adicional una vez por descanso largo: eres Grande 10 minutos, con ventaja en las pruebas de Fuerza y +3 m de velocidad.',
+  'linaje gigante': 'Un beneficio de tu gigante ancestral; lo usas tantas veces como tu competencia por descanso largo.',
+  diestro: 'Competencia en una habilidad a tu elección.',
+  ingenioso: 'Ganas inspiración heroica al terminar un descanso largo.',
+  versatil: 'Una dote de origen a tu elección.',
+  'agilidad de mediano': 'Puedes atravesar el espacio de criaturas más grandes que tú, sin detenerte en él.',
+  fortuna: 'Si sacas un 1 en una prueba con d20, repites la tirada y usas el nuevo resultado.',
+  'sigiloso por naturaleza': 'Puedes esconderte tras una criatura al menos una categoría de tamaño mayor que tú.',
+  valiente: 'Ventaja en las salvaciones para evitar o poner fin al estado de asustado.',
+  'aguante incansable': 'Al caer a 0 PG sin morir, te quedas a 1 PG. Una vez por descanso largo.',
+  'descarga de adrenalina': 'Correr como acción adicional y ganas PG temporales iguales a tu competencia. Usos: competencia por descanso corto o largo.',
+  'legado infernal': 'Resistencia y truco de tu legado y, a niveles 3 y 5, un conjuro siempre preparado que lanzas una vez gratis por descanso largo.',
+  'presencia sobrenatural': 'Conoces el truco taumaturgia, con la aptitud mágica de tu Legado infernal.',
+};
+export function resumenRasgoEspecie(ch, nombre) {
+  const n = norm(nombre);
+  if (n === 'vision en la oscuridad') { const m = visionOscuridad(ch); return m ? `Ves en la oscuridad hasta ${m} m (la luz tenue como brillante y la oscuridad como tenue, en tonos de gris).` : ''; }
+  return RESUMEN[n] || '';
+}
 
 const O = (nombre, texto, extra = {}) => ({ nombre, texto, ...extra });
 const DRAGONES = [['Azul', 'Relámpago'], ['Blanco', 'Frío'], ['Bronce', 'Relámpago'], ['Cobre', 'Ácido'], ['Negro', 'Ácido'], ['Oro', 'Fuego'], ['Oropel', 'Fuego'], ['Plata', 'Frío'], ['Rojo', 'Fuego'], ['Verde', 'Veneno']];
@@ -43,9 +90,9 @@ export const LINAJES = [
   { id: 'especie.draconido', especie: 'draconido', rasgo: 'Linaje dracónico', cambia: 'fija', opciones: DRAGONES.map(([d, t]) =>
     O(`Dragón ${d.toLowerCase()}`, `Tu Ataque de aliento y tu resistencia son de ${t.toLowerCase()}.`, { re: new RegExp(`\\b${norm(d)}\\b`), dano: t.toLowerCase(), resiste: t.toLowerCase() })) },
   { id: 'especie.aasimar', especie: 'aasimar', rasgo: 'Revelación celestial', nivel: 3, cambia: 'uso', opciones: [
-    O('Alas celestiales', 'Velocidad volando igual a tu velocidad; +competencia de daño radiante una vez por turno.'),
-    O('Fulgor interior', 'Luz brillante de 3 m; al final de cada turno, daño radiante igual a tu competencia a las criaturas a 3 m; +competencia de daño radiante una vez por turno.'),
-    O('Mortaja necrótica', 'Salvación de Carisma o asustadas las criaturas a 3 m; +competencia de daño necrótico una vez por turno.') ] },
+    O('Alas celestiales', 'Velocidad volando igual a tu velocidad; +competencia de daño radiante una vez por turno.', { tipo: 'radiante' }),
+    O('Fulgor interior', 'Luz brillante de 3 m; al final de cada turno, daño radiante igual a tu competencia a las criaturas a 3 m; +competencia de daño radiante una vez por turno.', { tipo: 'radiante' }),
+    O('Mortaja necrótica', 'Salvación de Carisma o asustadas las criaturas a 3 m; +competencia de daño necrótico una vez por turno.', { tipo: 'necrótico' }) ] },
 ];
 
 // Opción de linaje: la elegida, o la que diga el nombre de la especie («Elfo (drow)», «Tiefling infernal»)
@@ -56,6 +103,20 @@ export function linajeDe(ch, id) {
   return resto.trim() ? d.opciones.find(o => o.re?.test(resto)) || null : null;
 }
 export const linajeActual = ch => { const d = LINAJES.find(x => x.especie === especieBase(ch) && x.cambia !== 'uso'); return d ? linajeDe(ch, d.id) : null; };
+
+// Aptitud mágica de los conjuros de especie (elfo, gnomo y tiefling): Inteligencia, Sabiduría o Carisma, a elegir.
+// Sin elegir: la de tu clase si es una de esas tres; si no, la más alta.
+export const ESPECIES_APTITUD = { elfo: 'Linaje élfico', gnomo: 'Linaje gnomo', tiefling: 'Legado infernal' };
+export const APTITUD_ESPECIE = { id: 'especie.aptitud', rasgo: 'Aptitud mágica de especie', cambia: 'fija', opciones: [
+  O('Inteligencia', 'Tus conjuros de especie usan la Inteligencia.', { ab: 'int' }), O('Sabiduría', 'Tus conjuros de especie usan la Sabiduría.', { ab: 'sab' }),
+  O('Carisma', 'Tus conjuros de especie usan el Carisma.', { ab: 'car' })] };
+export const FUENTES_APTITUD = ['Linaje élfico', 'Linaje gnomo', 'Legado infernal', 'Presencia sobrenatural'];
+export function aptitudEspecie(ch, stats = ch.stats || {}, apClase = '') {
+  if (!ESPECIES_APTITUD[especieBase(ch)]) return '';
+  const elegida = APTITUD_ESPECIE.opciones.find(o => o.nombre === ch.opciones?.[APTITUD_ESPECIE.id]); if (elegida) return elegida.ab;
+  if (['int', 'sab', 'car'].includes(apClase)) return apClase;
+  return ['int', 'sab', 'car'].reduce((a, b) => ((parseInt(stats[b], 10) || 10) > (parseInt(stats[a], 10) || 10) ? b : a));
+}
 
 // Conjuros de especie: trucos y, a niveles 3 y 5, conjuros con un uso gratis al día
 export function conjurosEspecie(ch, nivel) {

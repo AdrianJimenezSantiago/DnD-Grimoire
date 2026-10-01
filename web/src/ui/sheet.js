@@ -72,7 +72,10 @@ function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
   if (!P.c) {
-    const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }] : [];
+    // Sin clase lanzadora: la CD y el ataque de los conjuros de especie (linaje élfico o gnomo, legado infernal)
+    const esp = !P.apKey && P.cds?.find(x => x.especie);
+    const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }]
+      : esp ? [{ nombre: 'CD de especie', valor: String(esp.cd) }, { nombre: 'Ataque de especie', valor: sgn(esp.atk) }] : [];
     return [...magia, ...numerosMarciales(ch)].slice(0, 4).map((n, i) => st(esc(n.valor), esc(n.nombre), i < 2 ? 'key' : '')).join('');
   }
   const AB = { fue: 'Fue', des: 'Des', con: 'Con', int: 'Int', sab: 'Sab', car: 'Car' }, varias = (P.cds || []).length > 1;

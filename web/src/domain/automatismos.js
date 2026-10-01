@@ -2,10 +2,10 @@ import { norm } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe, dotesDe } from './reglas2024.js';
 import { reglas, recState, usosGastados } from './rasgos.js';
-import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital } from './vida.js';
+import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital, fijarPg } from './vida.js';
 import { DADO_ARTES } from './equipo.js';
 import { nivelHabilidad } from './habilidades.js';
-import { linajeDe } from './especies.js';
+import { linajeDe, linajeActual } from './especies.js';
 
 // Reglas de clase que la app aplica sola en momentos concretos (Manual del Jugador de 2024):
 // al tirar iniciativa, al empezar tu turno y al gastar un uso que cura o da puntos de golpe temporales.
@@ -138,6 +138,17 @@ export function alGastarRecurso(ch, id) {
   }
   // Ataque de aliento (dracónido): CD 8 + Con + competencia, 1d10 a 4d10 del tipo de su linaje
   if (id === 'tpl:especie.aliento') { const a = alientoDe(ch); out.push(`Salvación de Destreza CD ${a.cd}: ${a.dado}${a.tipo ? ` de ${a.tipo}` : ''}, mitad si la supera.`); }
+  // Revelación celestial (aasimar 3): lo que hace la opción elegida
+  if (id === 'tpl:especie.revelacion') {
+    const o = linajeDe(ch, 'especie.aasimar'), pb = competencia(nivelTotal(ch)), cd = 8 + modOf(statsEfectivos(ch).car) + pb;
+    if (!o) out.push('Elige la transformación en «En juego» (Alas celestiales, Fulgor interior o Mortaja necrótica).');
+    else if (o.nombre === 'Alas celestiales') out.push('Alas celestiales: velocidad volando igual a tu velocidad.');
+    else if (o.nombre === 'Fulgor interior') out.push(`Fulgor interior: luz brillante de 3 m; al final de cada uno de tus turnos, ${pb} de daño radiante a cada criatura a 3 m.`);
+    else out.push(`Mortaja necrótica: las criaturas a 3 m que no sean aliadas hacen una salvación de Carisma CD ${cd} o quedan asustadas hasta el final de tu siguiente turno.`);
+    if (o) out.push(`Una vez por turno, +${pb} de daño ${o.tipo} a un ataque o conjuro.`);
+  }
+  // Excursión de las nubes (goliat): teletransporte como acción adicional
+  if (id === 'tpl:especie.gigante' && linajeActual(ch)?.nombre === 'Excursión de las nubes') out.push('Acción adicional: te teletransportas hasta 9 m a un espacio sin ocupar que veas.');
   // Forma salvaje (druida 2): PG temporales iguales a tu nivel de druida (el triple con Formas del círculo, luna 3)
   if (id === 'tpl:druida.forma') {
     const L = nivelClase(ch, 'Druida'), luna = subDe(ch, 'Druida', /luna/), t = luna && luna.nivel >= 3 ? 3 * L : L;
@@ -196,5 +207,18 @@ export function reaccionesDano(ch, tirar = tirarDado) {
   const sup = regla(ch, 'tpl:maestro.supremacia'), dados = sup ? sup.max - usosGastados(ch, sup) : 0;
   if (dados > 0 && (ch.maniobras || []).some(m => norm(m) === 'parada')) { const g = nivelClase(ch, 'Guerrero'), caras = g >= 18 ? 12 : g >= 10 ? 10 : 8, bono = Math.max(modOf(st.fue), modOf(st.des));
     out.push({ k: 'parada', label: `Parada: −1d${caras} + ${bono}`, aplica: (c, n) => { gastar(c, sup.id); return Math.max(0, n - (tirar(caras) + bono)); } }); }
+  // Linaje gigante del goliat (usos = competencia): Resistencia de la piedra reduce el daño; Trueno de la tormenta lo devuelve
+  const gig = libres(ch, 'tpl:especie.gigante'), lin = gig > 0 ? linajeActual(ch)?.nombre : '';
+  if (lin === 'Resistencia de la piedra') { const con = modOf(st.con);
+    out.push({ k: 'piedra', label: `Resistencia de la piedra: −1d12 ${con < 0 ? '−' : '+'} ${Math.abs(con)}`, aplica: (c, n) => { gastar(c, 'tpl:especie.gigante'); return Math.max(0, n - Math.max(0, tirar(12) + con)); } }); }
+  if (lin === 'Trueno de la tormenta')
+    out.push({ k: 'trueno', label: 'Trueno de la tormenta: 1d8 de trueno', tirada: { titulo: 'Trueno de la tormenta', expr: '1d8', tipo: 'trueno' }, aplica: (c, n) => { gastar(c, 'tpl:especie.gigante'); return n; } });
+  return out;
+}
+
+// Al caer a 0 PG sin morir: Aguante incansable (orco) te deja a 1 PG, una vez por descanso largo
+export function alCaerA0(ch) {
+  const out = [];
+  if (libres(ch, 'tpl:especie.aguante') > 0) out.push({ k: 'aguante', label: 'Aguante incansable: te quedas a 1 PG', aplica: c => { gastar(c, 'tpl:especie.aguante'); fijarPg(c, 1); } });
   return out;
 }

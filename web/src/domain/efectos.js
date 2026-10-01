@@ -107,7 +107,7 @@ export const EFECTOS = [
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
 // Rasgos con usos que, al gastarse, ponen un efecto sobre ti
 export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion', 'tpl:hechicero.innata': 'innata',
-  'tpl:especie.revelacion': 'revelacion', 'tpl:especie.grande': 'formagrande', 'tpl:especie.vuelo': 'vuelodraconico' };
+  'tpl:especie.revelacion': 'revelacion', 'tpl:especie.grande': 'formagrande', 'tpl:especie.vuelo': 'vuelodraconico', 'tpl:especie.adrenalina': 'correr' };
 // Rasgos que se activan desde «En juego» y dejan un efecto sobre ti; gasta: el uso que consumen
 export const EFECTO_DE_RASGO = {
   'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
@@ -145,6 +145,7 @@ export function pasivosDe(ch) {
   if (especie === 'gnomo') out.push({ nombre: 'Astucia gnoma', reglas: ['int', 'sab', 'car'].map(ab => R('salvacion', 'ventaja', { ab })) });
   if (especie === 'enano') out.push({ nombre: 'Resistencia enana', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de envenenado' })] });
   if (especie === 'mediano') out.push({ nombre: 'Valiente', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de asustado' })] });
+  if (especie === 'goliat') out.push({ nombre: 'Constitución poderosa', reglas: [R('prueba', 'ventaja', { cond: 'para poner fin al estado de agarrado' })] });
   if (especie === 'elfo') out.push({ nombre: 'Linaje feérico', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de hechizado' })] });
   return out.map(p => ({ bueno: !p.mal, ...p, pasivo: true }));
 }
