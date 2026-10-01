@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🌐 Abrir la app en el navegador
+    url: https://dnd-grimoire-five.vercel.app
+    about: Usa Grimorio sin instalar nada.
+  - name: ⬇️ Descargar la última versión
+    url: https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest
+    about: APK para Android y archivo para Windows.

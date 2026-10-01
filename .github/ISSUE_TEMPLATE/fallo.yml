@@ -1,0 +1,51 @@
+name: 🐞 Algo no funciona
+description: Cuéntanos un fallo de la app. No hace falta ser técnico.
+title: "[Fallo] "
+labels: ["fallo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por avisar! Rellena lo que puedas; con una descripción sencilla basta.
+  - type: textarea
+    id: que-pasa
+    attributes:
+      label: ¿Qué ha pasado?
+      description: Describe lo que ha salido mal.
+      placeholder: "Al lanzar Bola de fuego a nivel 4 no me gasta el espacio..."
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: ¿Qué estabas haciendo?
+      description: Los pasos que diste justo antes, si los recuerdas.
+      placeholder: |
+        1. Abrí a mi personaje
+        2. Toqué...
+  - type: textarea
+    id: esperado
+    attributes:
+      label: ¿Qué esperabas que pasara?
+  - type: dropdown
+    id: dispositivo
+    attributes:
+      label: ¿Dónde usas la app?
+      options:
+        - Móvil o tablet Android (APK)
+        - Navegador en el móvil (iPhone o Android)
+        - Navegador en el ordenador
+        - Windows (archivo .html)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión de la app (si la sabes)
+      description: Aparece en el nombre del archivo que descargaste, por ejemplo grimorio-1.0.80.apk.
+      placeholder: "1.0.80"
+  - type: textarea
+    id: capturas
+    attributes:
+      label: Capturas de pantalla
+      description: Si tienes alguna, arrástrala aquí. Ayudan mucho.
