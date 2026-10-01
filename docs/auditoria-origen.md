@@ -11,8 +11,8 @@ Generado por `tools/auditoria-origen.mjs`, contrastado con el Manual del Jugador
 | 1 | Manos curativas | Automático | Contador; botón «Curarme» con competencia d4. |
 | 1 | Portador de luz | Automático | Luz siempre preparado. |
 | 1 | Resistencia celestial | Automático | Resistencia necrótica y radiante. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
-| 3 | Revelación celestial | Automático | Contador; al gastarlo pone la transformación (opción por uso) y ofrece +competencia al impactar. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
+| 3 | Revelación celestial | Automático | Contador; al gastarlo pone la transformación (opción por uso): CD de Mortaja necrótica, daño de Fulgor interior y +competencia radiante o necrótico al impactar y en conjuros. |
 
 Revelación celestial: Alas celestiales, Fulgor interior, Mortaja necrótica.
 
@@ -23,8 +23,8 @@ Revelación celestial: Alas celestiales, Fulgor interior, Mortaja necrótica.
 | 1 | Linaje dracónico | Automático | Opción de dragón: tipo del aliento y resistencia. |
 | 1 | Ataque de aliento | Automático | Usos = competencia; CD, dados (1d10 a 4d10) y tipo; botón para tirar el daño. |
 | 1 | Resistencia al daño | Automático | Resistencia del tipo del linaje. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
-| 5 | Vuelo dracónico | Automático | Contador; pone el efecto de vuelo 10 minutos. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
+| 5 | Vuelo dracónico | Automático | Nivel 5; contador; pone el efecto de vuelo 10 minutos. |
 
 Linaje dracónico: Dragón azul, Dragón blanco, Dragón bronce, Dragón cobre, Dragón negro, Dragón oro, Dragón oropel, Dragón plata, Dragón rojo, Dragón verde.
 
@@ -32,11 +32,11 @@ Linaje dracónico: Dragón azul, Dragón blanco, Dragón bronce, Dragón cobre, 
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Linaje élfico | Automático | Opción (alto elfo, drow, bosques): trucos y conjuros de nivel 3 y 5 con uso gratis diario; velocidad del elfo de los bosques. |
+| 1 | Linaje élfico | Automático | Opción (alto elfo, drow, bosques): trucos y conjuros de nivel 3 y 5 con uso gratis diario; velocidad del elfo de los bosques y visión del drow; aptitud mágica (Int, Sab o Car) con su CD y ataque. |
 | 1 | Linaje feérico | Automático | Ventaja en salvaciones contra hechizado. |
 | 1 | Sentidos agudos | Automático | Pide una habilidad. |
-| 1 | Trance | Se consulta | Texto en «En juego» con el manual importado. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Trance | Se consulta | Resumen integrado; sin efecto mecánico. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
 
 Linaje élfico: Alto elfo, Drow, Elfo de los bosques.
 
@@ -47,15 +47,15 @@ Linaje élfico: Alto elfo, Drow, Elfo de los bosques.
 | 1 | Afinidad con la piedra | Automático | Contador (competencia). |
 | 1 | Aguante enano | Automático | +1 PG por nivel. |
 | 1 | Resistencia enana | Automático | Resistencia al veneno y ventaja contra envenenado. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
 
 ### Gnomo
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
 | 1 | Astucia gnoma | Automático | Ventaja en salvaciones de Int, Sab y Car. |
-| 1 | Linaje gnomo | Automático | Opción (rocas, bosques): trucos; Hablar con los animales gratis (competencia) en el de los bosques. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Linaje gnomo | Automático | Opción (rocas, bosques): trucos; Hablar con los animales gratis (competencia) en el de los bosques; aptitud mágica (Int, Sab o Car). |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
 
 Linaje gnomo: Gnomo de las rocas, Gnomo de los bosques.
 
@@ -63,9 +63,9 @@ Linaje gnomo: Gnomo de las rocas, Gnomo de los bosques.
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Constitución poderosa | Automático | Capacidad de carga doble. |
-| 1 | Forma grande | Automático | Contador; pone el efecto (ventaja en Fuerza, +3 m). |
-| 1 | Linaje gigante | Automático | Opción; usos = competencia; Abrasión del fuego, Frío de la escarcha y Caída de las colinas al impactar. |
+| 1 | Constitución poderosa | Automático | Ventaja para librarse de agarrado; carga ×2 (×4 en Forma grande). |
+| 5 | Forma grande | Automático | Nivel 5; contador; pone el efecto (ventaja en Fuerza, +3 m). |
+| 1 | Linaje gigante | Automático | Opción; usos = competencia; Abrasión, Escarcha y Colinas al impactar; Piedra y Tormenta como reacción al recibir daño; Nubes avisa del teletransporte. |
 
 Linaje gigante: Abrasión del fuego, Caída de las colinas, Excursión de las nubes, Frío de la escarcha, Resistencia de la piedra, Trueno de la tormenta.
 
@@ -73,7 +73,7 @@ Linaje gigante: Abrasión del fuego, Caída de las colinas, Excursión de las nu
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Diestro | Automático | Pide una habilidad. |
+| 1 | Diestro | Automático | Pide una habilidad (Humano (Diestro)). |
 | 1 | Ingenioso | Automático | Inspiración heroica en cada descanso largo. |
 | 1 | Versátil | Automático | Pide una dote de origen. |
 
@@ -81,26 +81,26 @@ Linaje gigante: Abrasión del fuego, Caída de las colinas, Excursión de las nu
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Agilidad de mediano | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Agilidad de mediano | Se consulta | Resumen integrado; sin efecto mecánico. |
 | 1 | Fortuna | Automático | Los 1 en pruebas con d20 se repiten solos. |
-| 1 | Sigiloso por naturaleza | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Sigiloso por naturaleza | Se consulta | Resumen integrado; sin efecto mecánico. |
 | 1 | Valiente | Automático | Ventaja contra asustado. |
 
 ### Orco
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Aguante incansable | Automático | Contador. |
-| 1 | Descarga de adrenalina | Automático | Contador; al gastarlo da PG temporales = competencia. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Aguante incansable | Automático | Al caer a 0 PG, botón para quedarte a 1 PG (gasta el uso). |
+| 1 | Descarga de adrenalina | Automático | Contador (descanso corto); al gastarlo da PG temporales = competencia y pone Correr. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
 
 ### Tiefling
 
 | Nivel | Atributo | Estado | Cómo lo aplica la app |
 |---|---|---|---|
-| 1 | Legado infernal | Automático | Opción (abisal, ctónico, infernal): resistencia, truco y conjuros de nivel 3 y 5 con uso gratis. |
-| 1 | Presencia sobrenatural | Automático | Taumaturgia siempre preparado. |
-| 1 | Visión en la oscuridad | Se consulta | Texto en «En juego» con el manual importado. |
+| 1 | Legado infernal | Automático | Opción (abisal, ctónico, infernal): resistencia, truco y conjuros de nivel 3 y 5 con uso gratis; aptitud mágica (Int, Sab o Car) con su CD y ataque. |
+| 1 | Presencia sobrenatural | Automático | Taumaturgia siempre preparado, con la aptitud del legado. |
+| 1 | Visión en la oscuridad | Automático | Alcance en «En juego» (18 m; 36 m enano, orco y drow). |
 
 Legado infernal: Abisal, Ctónico, Infernal.
 

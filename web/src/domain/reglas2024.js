@@ -1,6 +1,7 @@
 import { clamp, norm } from '../core/util.js';
 import { statsEfectivos, bonoMagiaObjetos } from './objetosEfecto.js';
 import { ordenDe } from './ordenes.js';
+import { aptitudEspecie, FUENTES_APTITUD } from './especies.js';
 
 export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
 export const ABIL_NAME = Object.fromEntries(ABILS);
@@ -130,9 +131,16 @@ export function perfil(ch) {
     const x = SUB_APTITUD.find(a => a.clase === k.clase && a.re.test(norm(k.subclase || ''))); if (!x || cds.some(y => y.claves.includes(norm(k.subclase)))) continue;
     const m = modOf(st[x.ap]); cds.push({ ap: x.ap, mod: m, cd: 8 + pb + m + mo.cd, atk: pb + m + mo.atk, claves: [norm(k.subclase)] });
   }
+  // Conjuros de especie (linaje élfico o gnomo, legado infernal): su propia aptitud mágica
+  const apEsp = aptitudEspecie(ch, st, prim?.l.cast.ap || '');
+  if (apEsp) {
+    const claves = FUENTES_APTITUD.map(norm), x = cds.find(y => y.ap === apEsp);
+    if (x) x.claves.push(...claves);
+    else { const m = modOf(st[apEsp]); cds.push({ ap: apEsp, mod: m, cd: 8 + pb + m + mo.cd, atk: pb + m + mo.atk, claves, especie: true }); }
+  }
   const trucos = ({ c: k, l }) => (l.cast.cant ? l.cast.cant[0] + l.cast.cant.slice(1).filter(t => k.nivel >= t).length + (l.viaSub ? 0 : ordenDe(ch, k.clase)?.truco || 0) : 0);
   return {
-    c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases, cds,
+    c, viaSub: !!prim?.l.viaSub, lvl, pb, apKey, mod, clases, cds, apEspecie: apEsp,
     lista: prim ? prim.l.lista : '',
     listaNombre: prim ? prim.l.nombre : '',
     listas: lanzan.map(x => x.l.lista),
