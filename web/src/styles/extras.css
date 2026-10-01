@@ -366,44 +366,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .dote-chip small { color: var(--ink-3); font-size: var(--fs-xs); }
 .dote-add { display: flex; gap: 8px; } .dote-add input { flex: 1; min-width: 0; }
 @media (max-width: 640px) { .mc-row { grid-template-columns: 1fr 1fr; } .mc-row .mc-del { justify-self: end; } }
-.inv-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 2px 0 12px; }
-.inv-card { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 10px 12px; border-radius: 12px; text-align: left;
-  border: 1px solid color-mix(in srgb, var(--gold) 16%, var(--line-soft)); background: var(--raised); color: var(--ink); font: inherit; }
-.inv-card small { font: 600 var(--fs-xs) / 1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
-.inv-card b { font: 700 24px / 1.1 var(--display); }
-.inv-card span { font-size: var(--fs-xs); color: var(--ink-2); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.inv-card.over b, .inv-card.over span { color: var(--danger, #d0584f); }
-button.inv-card { cursor: pointer; } button.inv-card:hover { border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
-.inv-bar { display: block !important; height: 6px; border-radius: 3px; background: var(--line-soft); overflow: hidden; margin: 2px 0; }
-.inv-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-2)); border-radius: 3px; }
-.inv-card.over .inv-bar i { background: var(--danger, #d0584f); }
-.inv-coins { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: -4px 0 14px; padding: 10px; border-radius: 12px; border: 1px dashed color-mix(in srgb, var(--gold) 30%, var(--line)); }
-.inv-bar-add { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.inv-tools { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-.inv-cats { width: fit-content; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-.inv-grupo { margin-top: 12px; }
-.inv-grupo h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 600 var(--fs-xs) / 1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
-.inv-grupo h3 .gi { width: 16px; height: 16px; } .inv-grupo h3 small { margin-left: auto; letter-spacing: 0; text-transform: none; color: var(--ink-3); font-weight: 400; }
-.inv-list { list-style: none; margin: 0; padding: 0; }
-.inv-it { --rar: var(--ink-3); position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0 4px 12px; border-bottom: 1px solid var(--line-soft); }
-.inv-it::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--rar); opacity: .7; }
-.inv-it.on::before { background: var(--gold); opacity: 1; }
-.inv-it.agotado { opacity: .55; }
-.inv-it[class*=" r-"] .obj-ico { color: var(--rar); }
-.inv-main { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; flex: 1 1 240px; min-width: 0; padding: 6px 0; border-radius: 8px; }
-.inv-main:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.inv-x { font: 500 var(--fs-s) / 1 var(--sans); color: var(--ink-3); }
-.inv-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
-.inv-qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--r-pill); overflow: hidden; }
-.inv-qty button { min-width: 34px; min-height: 32px; border: 0; background: transparent; font-size: 16px; }
-.inv-qty b { min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; }
-.inv-form { margin: 0 0 14px; padding: 12px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); background: color-mix(in srgb, var(--gold) 4%, var(--raised)); }
-.inv-form h3 { margin: 0 0 8px; font: 600 var(--fs-l) / 1.2 var(--display); }
-.inv-form .frow { margin-bottom: 10px; }
-.inv-form-acts { display: flex; gap: 8px; margin-top: 10px; }
-.inv-mon { align-items: flex-start; justify-content: flex-start; }
-.inv-form-acts .gold { margin-left: auto; }
-@media (max-width: 520px) { .inv-sum { grid-template-columns: 1fr 1fr; } .inv-card b { font-size: 20px; } .inv-acts { width: 100%; justify-content: flex-end; } }
 .scp { position: relative; display: flex; align-items: center; }
 .scp input { width: 100%; padding-left: 50px; padding-right: 42px; }
 .scp-sello { --sh: var(--acc-h); --ss: 30%; position: absolute; left: 8px; z-index: 1; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; pointer-events: none;

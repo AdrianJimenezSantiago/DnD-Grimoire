@@ -15,7 +15,7 @@ Creas a tu personaje (clase, subclase, especie, trasfondo, nivel y característi
 - **Libro de conjuros** con un compendio de conjuros del SRD, filtros, rituales, concentración y tiradas de daño y curación.
 - **Reglas que se aplican solas:** Furia, Canción de la hoja, Aura de protección, Artes marciales, golpe sin armas, competencia con armas y armaduras (con desventaja si llevas una sin entrenamiento), Orden divina y primigenia, dotes con usos, conjuros gratis por rasgo y ventajas pasivas de clase, especie y dote.
 - **«En juego»:** los rasgos de tu clase, especie y dotes agrupados por cuándo se usan (acción, acción adicional, reacción…).
-- **Inventario** con armas y armaduras calculadas, monedas, carga y objetos mágicos con sintonización y cargas.
+- **Inventario** con un maniquí de equipo (mano principal, mano secundaria, armadura y tres engastes de sintonía): las armas a dos manos ocupan las dos, el escudo suelta lo que estorba y las armaduras aplican su Fuerza mínima y la desventaja en Sigilo. Mochila en casillas o en lista, alijo que no pesa, bolsa de monedas que paga con cambio, venta a mitad de precio, munición de cada arma, pociones que curan al beberlas y objetos mágicos con sintonización y cargas.
 - **Diario de sesiones y bestiario** para apuntar lo que pasa en la campaña y lo que sabéis de cada criatura.
 - **Tus libros dentro:** importa el PDF de tu Manual del Jugador, de la Guía del Dungeon Master o de una expansión. La app lee en tu dispositivo las descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos y subclases, y nada sale de él.
 - **Varios personajes**, cada uno con el color y el emblema de su clase, que puedes exportar por separado para pasarlos a otro dispositivo o a tu DJ.

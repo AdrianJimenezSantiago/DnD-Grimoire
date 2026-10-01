@@ -35,7 +35,7 @@ button.primary { background: var(--ink); color: var(--surface); border-color: va
 button.gold { background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: #1b1406; border-color: transparent; box-shadow: 0 6px 20px var(--glow); }
 button.ghost { background: transparent; border-color: transparent; }
 button.warn { color: var(--danger); }
-button[aria-pressed="true"]:not(.dockbtn):not(.slotbtn):not(.tick):not(.vg-pip):not(.es-tog):not(.pip):not(.da-mod):not(.cb-eco-b):not(.es-insp):not(.leg-prep):not(.hero-insp):not(.cb-g-estado):not(.mz-arma):not(.lv-estilo):not(.efx-card):not(.efx-est-b):not(.oy-yo):not(.obj-yo):not(.cb-ac) { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+button[aria-pressed="true"]:not(.dockbtn):not(.slotbtn):not(.tick):not(.vg-pip):not(.es-tog):not(.pip):not(.da-mod):not(.cb-eco-b):not(.es-insp):not(.leg-prep):not(.hero-insp):not(.cb-g-estado):not(.mz-arma):not(.lv-estilo):not(.efx-card):not(.efx-est-b):not(.oy-yo):not(.obj-yo):not(.cb-ac):not(.inv-vista) { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 input, select, textarea { font: 400 16px / 1.3 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line);

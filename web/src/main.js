@@ -21,6 +21,7 @@ import './styles/juego.css';
 import './styles/portada.css';
 import './styles/dados.css';
 import './styles/creacion.css';
+import './styles/inventario.css';
 import './styles/impacto.css';
 import './styles/movil.css';
 

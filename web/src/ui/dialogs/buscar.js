@@ -38,7 +38,7 @@ function fuentes() {
       ...ABILS.map(([k, n]) => ({ nombre: `Salvación de ${n}`, sub: `Tirar ${sgn(bonoSalvacion(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: `Salvación de ${n}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k }) })),
       { nombre: 'Iniciativa', sub: `Tirar ${sgn(iniciativa(ch) - ag)}`, ico: 'iniciativa', abrir: () => tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa' }) }] });
     F.push({ clave: 'rasgos', titulo: 'Rasgos de tu personaje', ico: 'dote', peso: 5, items: rasgosEnJuego(ch, lib, reglasVisibles(ch)).map(r => ({ nombre: r.nombre, texto: r.texto, sub: r.etiqueta, ico: 'dote', abrir: () => abrirRasgoJuego(r.clave) })) });
-    F.push({ clave: 'inv', titulo: 'Inventario', ico: 'cofre', peso: 4, items: equipoDe(ch).objetos.map(o => ({ nombre: o.nombre, texto: o.notas, sub: `${o.cantidad > 1 ? `${o.cantidad} × ` : ''}${o.equipado ? 'equipado' : 'en la mochila'}`, ico: 'cofre', abrir: () => openEquipo() })) });
+    F.push({ clave: 'inv', titulo: 'Inventario', ico: 'cofre', peso: 4, items: equipoDe(ch).objetos.map(o => ({ nombre: o.nombre, texto: o.notas, sub: `${o.cantidad > 1 ? `${o.cantidad} × ` : ''}${o.equipado ? 'equipado' : o.guardado ? 'en el alijo' : 'en la mochila'}`, ico: 'cofre', abrir: () => openEquipo(o.id) })) });
     F.push({ clave: 'diario', titulo: 'Diario', ico: 'glosario', peso: 2, items: diarioDe(ch).sesiones.flatMap(s => [
       { nombre: s.titulo || `Sesión ${s.n}`, texto: s.texto, sub: `Sesión ${s.n}`, ico: 'glosario', abrir: () => openDiario(s.id) },
       ...s.notas.map(n => ({ nombre: n.texto, sub: `Nota · sesión ${s.n}`, ico: 'glosario', abrir: () => openDiario(s.id) }))]) });

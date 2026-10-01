@@ -28,6 +28,12 @@ const USO = {
   muerte: 'grim-reaper', dado_golpe: 'heart-drop', cubilete: 'rolling-dice-cup', combate: 'crossed-sabres', buscar: 'magnifying-glass', exportar: 'scroll-unfurled',
   md_borrar: 'burning-book', md_tiempo: 'sands-of-time', md_guardar: 'locked-chest', md_pluma: 'quill-ink',
   d20: 'dice-twenty-faces-twenty', dados: 'rolling-dices', libro: 'spell-book', vela: 'candle-light', glosario: 'scroll-unfurled', ojo: 'all-seeing-eye',
+  inv_mano: 'gauntlet', inv_mochila: 'light-backpack', inv_alijo: 'wooden-crate', inv_monedas: 'two-coins', inv_bolsa: 'swap-bag', inv_carga: 'weight',
+  inv_municion: 'quiver', inv_vender: 'sell-card', inv_pagar: 'pay-money', inv_cobrar: 'receive-money', inv_juntar: 'coins-pile', inv_beber: 'drink-me', inv_equipo: 'battle-gear',
+  it_antorcha: 'torch', it_cuerda: 'rope-coil', it_tienda: 'camping-tent', it_linterna: 'lantern-flame', it_palanca: 'crowbar', it_racion: 'meat', it_pan: 'bread',
+  it_queso: 'cheese-wedge', it_vino: 'wine-bottle', it_agua: 'water-flask', it_gema: 'cut-diamond', it_bendita: 'holy-water', it_fuego: 'fire-bottle', it_saco: 'sleeping-bag',
+  it_manta: 'blanket', it_ganzuas: 'lockpicks', it_laud: 'lyre', it_herrero: 'hammer-nails', it_hierbas: 'herbs-bundle', it_tinta: 'quill-ink', it_olla: 'cooking-pot',
+  it_grilletes: 'manacles', it_perfume: 'perfume-bottle', it_ropa: 'robe', it_sanador: 'first-aid-kit', it_yesquero: 'matchbox', it_arte: 'painted-pottery', it_lampara: 'candle-holder',
 };
 const out = {};
 for (const [k, n] of Object.entries(USO)) { if (!ic.icons[n]) throw new Error('No existe ' + n); out[k] = ic.icons[n].body; }
