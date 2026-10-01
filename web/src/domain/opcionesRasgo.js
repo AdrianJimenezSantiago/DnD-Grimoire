@@ -1,6 +1,6 @@
 import { norm } from '../core/util.js';
 import { clasesDe, nivelTotal } from './reglas2024.js';
-import { LINAJES, linajeDe, especieBase } from './especies.js';
+import { LINAJES, linajeDe, especieBase, APTITUD_ESPECIE } from './especies.js';
 
 // Rasgos de subclase que obligan a escoger una opción entre varias (Manual del Jugador de 2024 y Héroes de Faerûn).
 // cambia: cuándo se puede cambiar la elección
@@ -48,7 +48,7 @@ export const OPCIONES_RASGO = [
   { id: 'draconica.afinidad', clase: 'Hechicero', sub: /dracon/, nivel: 6, rasgo: 'Afinidad elemental', cambia: 'fija', opciones: ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Veneno'].map(t =>
     O(t, `Resistencia al daño de ${t.toLowerCase()} y sumas tu Carisma a una tirada de daño de ${t.toLowerCase()} de cada conjuro.`, { tipo: t.toLowerCase() })) },
 ];
-export const OPCION_RASGO = Object.fromEntries([...OPCIONES_RASGO, ...LINAJES].map(d => [d.id, d]));
+export const OPCION_RASGO = Object.fromEntries([...OPCIONES_RASGO, ...LINAJES, APTITUD_ESPECIE].map(d => [d.id, d]));
 export const CAMBIA_TXT = { largo: 'Puedes cambiarla al terminar un descanso largo.', corto: 'Puedes cambiarla al terminar un descanso corto o largo.', uso: 'Se elige cada vez que usas el rasgo.', fija: 'Se elige al aprender el rasgo.' };
 
 export function normOpciones(x) {

@@ -74,7 +74,7 @@ export const HAB_SUBCLASE = {
   'Mago': [{ re: /hojacantante|cantante/i, nombre: 'Hojacantante', n: 1, lista: ['acrobacias', 'atletismo', 'interpretacion', 'persuasion'] }],
   'Monje': [{ re: /misericordia/i, nombre: 'Instrumentos de misericordia', n: 2, lista: ['perspicacia', 'medicina'], fijas: true }],
 };
-const EXTRA_ESPECIE = { humano: [1, TODAS, 'Humano (Habilidoso)'], elfo: [1, ['perspicacia', 'percepcion', 'supervivencia'], 'Elfo (Sentidos agudos)'] };
+const EXTRA_ESPECIE = { humano: [1, TODAS, 'Humano (Diestro)'], elfo: [1, ['perspicacia', 'percepcion', 'supervivencia'], 'Elfo (Sentidos agudos)'] };
 const EXTRA_MULTICLASE = { 'Bardo': [1, TODAS], 'Explorador': [1, HAB_CLASE['Explorador'][1]], 'Pícaro': [1, HAB_CLASE['Pícaro'][1]] };
 export function fuentesExtra(ch) {
   const out = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];

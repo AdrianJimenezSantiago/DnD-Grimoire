@@ -1,11 +1,11 @@
 import { estiloDe, esAlternativa } from './estilos.js';
 import { norm } from '../core/util.js';
 import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';
-import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES } from './reglas2024.js';
+import { clasesDe, vistaClase, nivelTotal, dotesDe, competencia, CLASES, perfil } from './reglas2024.js';
 import { maniobrasDe, cdManiobras, dadoSupremacia } from './maniobras.js';
 import { VARIANTES, varianteDe } from './variantes.js';
 import { opcionDeRasgo, opcionDe, CAMBIA_TXT } from './opcionesRasgo.js';
-import { RASGOS_ESPECIE, especieBase } from './especies.js';
+import { RASGOS_ESPECIE, especieBase, nivelRasgoEspecie, resumenRasgoEspecie, visionOscuridad, ESPECIES_APTITUD, APTITUD_ESPECIE } from './especies.js';
 
 export const FUENTES = [['', 'Todo'], ['clase', 'Clase'], ['especie', 'Especie'], ['dote', 'Dotes']];
 const tipoFuente = origen => (origen === 'especie' || origen === 'dote' ? origen : 'clase');
@@ -119,11 +119,23 @@ export function rasgosEnJuego(ch, lib = {}, recursos = []) {
   // Atributos de especie: los del libro importado o, sin él, sus nombres (para usos y elecciones)
   const rasgosEsp = esp ? esp.rasgos : (RASGOS_ESPECIE[especieBase(ch)] || []).map(([nivel, nombre]) => ({ nivel, nombre, texto: '' }));
   const nombreEsp = esp?.nombre || String(ch.especie || '').replace(/\s*\(.*$/, '');
-  for (const r of rasgosEsp) if ((r.nivel || 1) <= total) {
+  const AB_NOMBRE = { int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
+  for (const r0 of rasgosEsp) {
+    // El nivel del atributo: el que diga el libro o el de la tabla integrada si es mayor (Forma grande: «A partir del nivel 5»)
+    const r = { ...r0, nivel: Math.max(r0.nivel || 1, nivelRasgoEspecie(ch, r0.nombre)) }; if (r.nivel > total) continue;
     const n = norm(r.nombre), recurso = recursos.find(x => x.tipo === 'recurso' && /^tpl:especie\./.test(x.id) && (norm(x.nombre) === n || norm(x.nombre).startsWith(n + ' ('))) || null;
-    nuevo(`especie:${n}`, { nombre: r.nombre, nivel: r.nivel || 1, origen: 'especie', etiqueta: nombreEsp + (r.nivel > 1 ? ` · nivel ${r.nivel}` : '') }, r.texto ? { texto: r.texto, fuente: esp.fuente } : null, [], recurso);
+    const propio = resumenRasgoEspecie(ch, r.nombre);
+    nuevo(`especie:${n}`, { nombre: r.nombre, nivel: r.nivel, origen: 'especie', etiqueta: nombreEsp + (r.nivel > 1 ? ` · nivel ${r.nivel}` : '') }, r.texto ? { texto: r.texto, fuente: esp.fuente } : propio ? { texto: propio, fuente: '' } : null, [], recurso);
     const op = opcionDeRasgo(ch, r.nombre), x = out[out.length - 1];
+    if (n === 'vision en la oscuridad' && visionOscuridad(ch)) x.numeros = [{ nombre: 'Alcance', valor: `${visionOscuridad(ch)} m` }];
     if (op) { x.eleccion = { id: op.id, rasgo: op.rasgo, opciones: op.opciones, actual: opcionDe(ch, op.id)?.nombre || '', cambia: op.cambia, cuando: CAMBIA_TXT[op.cambia] }; if (x.eleccion.actual) x.numeros = [{ nombre: op.rasgo, valor: x.eleccion.actual }]; }
+    // Aptitud mágica de los conjuros de especie: en el atributo del linaje o legado
+    if (norm(ESPECIES_APTITUD[especieBase(ch)] || '') === n) {
+      const elegida = APTITUD_ESPECIE.opciones.find(o => o.nombre === ch.opciones?.[APTITUD_ESPECIE.id])?.nombre || '';
+      x.eleccion2 = { id: APTITUD_ESPECIE.id, rasgo: APTITUD_ESPECIE.rasgo, opciones: APTITUD_ESPECIE.opciones, actual: elegida, cambia: 'fija',
+        cuando: elegida ? CAMBIA_TXT.fija : `Sin elegir usa ${AB_NOMBRE[perfil(ch).apEspecie]}.` };
+      x.numeros.push({ nombre: 'Aptitud mágica', valor: AB_NOMBRE[perfil(ch).apEspecie] });
+    }
   }
   for (const d of dotesDe(ch, lib.trasfondos || [])) {
     const n = norm(d.nombre); if (NO_JUEGO.test(n)) continue;

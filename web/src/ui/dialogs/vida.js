@@ -1,5 +1,5 @@
 import { esc, norm, numLibre } from '../../core/util.js';
-import { rangoMuerte, reduccionArmaduraPesada, reaccionesDano } from '../../domain/automatismos.js';
+import { rangoMuerte, reduccionArmaduraPesada, reaccionesDano, alCaerA0 } from '../../domain/automatismos.js';
 import { sgn, modOf } from '../../domain/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/vida.js';
@@ -17,7 +17,7 @@ import { toast } from '../toast.js';
 import { burstFrom } from '../fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
-import { tirarPrueba } from './dados.js';
+import { tirarPrueba, tirarDano } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
 import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../vitales.js';
 import { EFECTOS, EFECTO, efectosDe, normEfectos, fmtRondas, inmunidadesEstado, resistenciasDe } from '../../domain/efectos.js';
@@ -63,7 +63,15 @@ export function danar(S2, n, critico = false) {
   const c2 = S2.cur(), acts = [undoBtn(S2, h)], res = resistenciasDe(c2);
   // Resistencias: si el daño es de uno de esos tipos, rehace el golpe con la mitad
   // Reacciones que reducen el daño: Esquiva asombrosa, Desviar ataques, Salvaguarda arcana, Parada
-  for (const op of reaccionesDano(c2)) if (n > 0) acts.push({ label: op.label, fn: () => { S2.undo(h); let n2 = n; S2.act(op.label, (db, x) => { n2 = op.aplica(x, n); }); danar(S2, n2, critico); } });
+  for (const op of reaccionesDano(c2)) if (n > 0) acts.push({ label: op.label, fn: () => { S2.undo(h); let n2 = n; S2.act(op.label, (db, x) => { n2 = op.aplica(x, n); }); danar(S2, n2, critico);
+    // Trueno de la tormenta: no reduce el daño, se lo devuelves a quien te lo hizo
+    if (op.tirada) tirarDano({ titulo: op.tirada.titulo, sub: `de daño ${op.tirada.tipo}`, expr: op.tirada.expr, clave: op.tirada.tipo }); } });
+  // Aguante incansable (orco): en vez de caer a 0 PG te quedas a 1 (sin perder la concentración: tiras la salvación)
+  if (r.cayo && !r.muerte) for (const op of alCaerA0(c2)) acts.unshift({ label: op.label, hl: true, fn: () => {
+    S2.undo(h); let r2 = null; const h2 = S2.act(op.label, (db, x) => { r2 = aplicarDano(x, n, { critico }); op.aplica(x); });
+    golpeFx('cura', 1, { desde: 0, hasta: 1 }); haptic('medium');
+    toast(`<b>${n}</b> de daño, pero te quedas a <b>1 PG</b> (Aguante incansable).${r2?.concentracion ? ` Concentración en <b>${esc(r2.concentracion.conjuro)}</b>: salvación de Constitución CD <b>${r2.concentracion.cd}</b>.` : ''}`, [undoBtn(S2, h2)]);
+    if (r2?.concentracion) setTimeout(() => tirarConcentracion(S2, n), 450); } });
   const red = reduccionArmaduraPesada(c2);
   if (red && n > 0) acts.push({ label: `Maestro en armaduras pesadas: −${red}`, fn: () => { S2.undo(h); danar(S2, Math.max(0, n - red), critico); } });
   if (res.length && n > 1) acts.push({ label: 'Tengo resistencia: la mitad', fn: () => { S2.undo(h); danar(S2, Math.floor(n / 2), critico); } });

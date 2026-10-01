@@ -207,7 +207,8 @@ export function pesoTotal(ch) {
   return Math.round((pesoDe(equipoDe(ch).objetos.filter(o => !o.guardado)) + pesoMonedas(ch)) * 10) / 10;
 }
 export const pesoGuardado = ch => Math.round(pesoDe(equipoDe(ch).objetos.filter(o => o.guardado)) * 10) / 10;
-export const capacidadCarga = ch => (statsEfectivos(ch).fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? 2 : 1);
+// Constitución poderosa (goliat): cuenta como un tamaño más (Grande, ×2); en Forma grande ya es Grande y cuenta como Enorme (×4)
+export const capacidadCarga = ch => (statsEfectivos(ch).fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? ((ch.vida?.efectos || []).some(e => e.k === 'formagrande') ? 4 : 2) : 1);
 // Empujar, arrastrar o levantar: hasta el doble de la capacidad de carga
 export const capacidadArrastre = ch => capacidadCarga(ch) * 2;
 export const valorMonedas = ch => Math.round(MONEDAS.reduce((s, [k, , v]) => s + (equipoDe(ch).monedas[k] || 0) * v, 0) * 100) / 100;

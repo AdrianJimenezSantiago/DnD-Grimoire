@@ -288,7 +288,7 @@ export function parseEspecies(pages) {
     }
     if (!rasgos.length) continue;
     out.push({ clave: claveNombre(nombre), nombre, tipo: dato(/^Tipo de criatura\s*:\s*(.+)$/i), tamano: dato(/^Tama[ñn]o\s*:\s*(.+)$/i), velocidad: dato(/^Velocidad\s*:\s*(.+)$/i),
-      rasgos: rasgos.map(r => { const texto = r.partes.join('\n\n'), nv = /cuando alcanzas el nivel (\d+) de personaje/i.exec(texto); return { nombre: r.nombre, texto, nivel: nv && /^cuando alcanzas/i.test(r.partes[0]) ? +nv[1] : 1 }; }) });
+      rasgos: rasgos.map(r => { const texto = r.partes.join('\n\n'), nv = /(?:cuando alcanzas el|a partir del) nivel (\d+) de personaje/i.exec(texto); return { nombre: r.nombre, texto, nivel: nv && /^(cuando alcanzas|a partir del)/i.test(r.partes[0]) ? +nv[1] : 1 }; }) });
   }
   return out;
 }
