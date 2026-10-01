@@ -5,6 +5,7 @@ import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './regl
 import { CLASES_INFO } from './clases2024.js';
 import { biblioteca } from './catalogo.js';
 import { ordenDe } from './ordenes.js';
+import { penalizacionArmadura } from './equipo.js';
 
 export const HABILIDADES = [
   ['acrobacias', 'Acrobacias', 'des'], ['arcanos', 'Arcanos', 'int'], ['atletismo', 'Atletismo', 'fue'], ['engano', 'Engaño', 'car'],
@@ -141,6 +142,8 @@ export function velocidad(ch) {
     // Aura de celeridad (juramento de gloria 7)
     if (c.clase === 'Paladín' && c.nivel >= 7 && /gloria/i.test(c.subclase || '')) m += 3;
   }
+  // Armadura pesada sin la Fuerza que pide: −3 m
+  m -= penalizacionArmadura(ch).lenta;
   m -= 1.5 * Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
   return Math.max(0, m);
 }

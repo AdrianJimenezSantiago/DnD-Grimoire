@@ -1,6 +1,6 @@
 import { norm, uid } from '../core/util.js';
 import { statsEfectivos } from './objetosEfecto.js';
-import { claseArmadura } from './equipo.js';
+import { claseArmadura, penalizacionArmadura } from './equipo.js';
 import { velocidad, abDe } from './habilidades.js';
 import { clasesDe, modOf, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { armadurasDe } from './competencias.js';
@@ -131,6 +131,9 @@ export function pasivosDe(ch) {
   const puestas = (ch.equipo?.objetos || []).filter(o => o.equipado && o.armadura).map(o => o.armadura.tipo), sabe = armadurasDe(ch), sin = puestas.filter(t => !sabe.has(t));
   if (sin.length) out.push({ nombre: `Sin entrenamiento (${sin.map(t => t === 'escudo' ? 'escudo' : `armadura ${t}`).join(', ')})`, mal: true,
     reglas: [R('ataque', 'desventaja'), ...['fue', 'des'].flatMap(ab => [R('prueba', 'desventaja', { ab }), R('salvacion', 'desventaja', { ab })])] });
+  // Armaduras ruidosas (acolchada, de escamas, media armadura y las pesadas): desventaja en Sigilo
+  const pa = penalizacionArmadura(ch);
+  if (pa.sigilo) out.push({ nombre: pa.armadura.nombre, mal: true, reglas: [R('prueba', 'desventaja', { hab: 'sigilo' })] });
   const dotes = (ch.dotes || []).map(d => norm(d).replace(/\s*\(.*$/, ''));
   if (dotes.includes('lanzador en combate')) out.push({ nombre: 'Lanzador en combate', reglas: [R('salvacion', 'ventaja', { ab: 'con', motivo: 'concentracion' })] });
   if (dotesDe(ch).some(d => norm(d.nombre) === 'comandante del dragon purpura') && maltrecho(ch)) out.push({ nombre: 'Último esfuerzo', reglas: [R('ataque', 'ventaja')] });
