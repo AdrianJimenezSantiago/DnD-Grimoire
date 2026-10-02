@@ -9,14 +9,16 @@ import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
 let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null, SUBS = {};
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
-let LIBROS = [];
+let LIBROS = [], NOMBRES = null;
+// Los nombres en castellano de todos los conjuros conocidos (para marcarlos en cursiva en los textos)
+export const nombresConjuros = () => (NOMBRES ||= (SRD || []).map(x => x.es).filter(Boolean));
 function reindexar() {
   const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
   for (const lb of LIBROS) for (const x of lb.nuevos || []) { const c = claveEs(x.es, x.l); if (!vistos.has(c)) { vistos.add(c); extra.push(x); } }
   SRD = BASE ? [...BASE, ...extra] : null; SRDK = {}; SRDN = {};
   (SRD || []).forEach(limpiarDatos);
   (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
-  itemsMemo = null; tirMemo.clear();
+  itemsMemo = null; tirMemo.clear(); NOMBRES = null;
 }
 const LIMPIOS = new WeakSet();
 function limpiarDatos(x) {

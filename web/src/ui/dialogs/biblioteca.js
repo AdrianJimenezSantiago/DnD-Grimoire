@@ -260,8 +260,8 @@ export function abrirResumen(clase, subclase = '') {
   if (!rz) return toast(`La app no conoce los rasgos de ${esc(subclase || clase)}: si es de otro libro, impórtalo en Libros y manuales.`);
   const [h, sat, ico] = (subclase && TEMAS.sub[rz.subclase]) || TEMAS.clase[clase] || [40, 50, 'subclase'];
   const rasgo = r => r.texto
-    ? `<details class="rz-r ${r.sub ? 'sub' : ''}"><summary><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</summary><div class="sp-text">${md(r.texto)}</div></details>`
-    : `<div class="rz-r ${r.sub ? 'sub' : ''}"><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</div>`;
+    ? `<details class="rz-r ${r.sub ? 'sub' : ''}"><summary><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${rico(r.resumen)}</span>` : ''}</summary><div class="sp-text">${md(r.texto)}</div></details>`
+    : `<div class="rz-r ${r.sub ? 'sub' : ''}"><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${rico(r.resumen)}</span>` : ''}</div>`;
   const lista = `<ol class="rz-lista">${rz.niveles.map(n => `<li><span class="rz-lv" aria-label="Nivel ${n.nivel}">${n.nivel}</span><div class="rz-rs">${n.rasgos.map(rasgo).join('')}</div></li>`).join('')}</ol>`;
   const conj = rz.conjuros?.length ? `<h3 class="rz-h">Conjuros siempre preparados</h3><dl class="rz-conj">${rz.conjuros.map(c => `<div><dt>Nivel ${c.nivel}</dt><dd>${c.conjuros.map(esc).join(', ')}</dd></div>`).join('')}</dl>` : '';
   const aviso = rz.conTextos ? '' : '<p class="note">Importa el Manual del Jugador (o el libro de esta subclase) en Libros y manuales para leer qué hace cada rasgo. Se lee en este dispositivo.</p>';
@@ -355,7 +355,7 @@ function fichaRegla({ nombre, cat = '', texto = '', clave = '' }) {
   const largo = texto.length > 2500, apartados = [...texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
   const indice = largo && apartados.length >= 3 ? `<nav class="fi-toc" aria-label="Apartados">${apartados.map((a, i) => `<a href="#ap-${i}">${esc(a)}</a>`).join('')}</nav>` : '';
   // El término no se enlaza a sí mismo dentro de su propia regla
-  let n = 0; const html = texto ? md(texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`).replace(new RegExp(`<button type="button" class="term" data-term="${clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">(.*?)</button>`, 'g'), '$1') : '';
+  let n = 0; const html = texto ? md(texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`).replace(new RegExp(`<button type="button" class="term[^"]*" data-term="${clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">(.*?)</button>`, 'g'), '$1') : '';
   const rel = texto ? relacionados({ clave, texto }) : [];
   FICHA = { tipo: 'regla', clave, nombre, cat };
   ficha({ titulo: nombre, ico: k.ico, clase: 'regla',

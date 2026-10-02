@@ -49,8 +49,24 @@ Destrabarse, Ataque de oportunidad; agotamiento (−2 por nivel a las pruebas d2
 - **Ficha de una regla**: cabecera con el color de su categoría; «En resumen» con el resumen de la app; «Lo que hace la hoja»
   para los estados; botón para poner o quitar el estado al personaje; la regla completa con capitular; «Ver también» con los
   términos que cita; y **Volver** para regresar a la ficha anterior al saltar de un término a otro.
-- **Realce del texto** (reglas y conjuros), siempre con el mismo significado:
-  **CD** en negrita · ventaja en verde y desventaja en rojo · *cuándo y cuántas veces* en cursiva ·
-  ACCIÓN ADICIONAL y REACCIÓN en versalitas · términos del glosario subrayados con puntos · dados y tipos de daño como antes.
+- **Realce del texto** en reglas, conjuros, rasgos, dotes, objetos y subclases (`web/src/domain/realce.js`), siempre con el mismo significado:
+
+  | Qué | Cómo se ve |
+  |---|---|
+  | Dados (`2d6`, `1d8 + 3`) | Cifra dorada en su cajita |
+  | CD y CA (`CD 15`, `CA de 16`), bonificadores (`+2`, `−1`) | **Negrita** |
+  | Tirada de salvación | <u>Subrayado dorado</u> |
+  | Ataque (con arma o de conjuro) | <u>Subrayado azul</u> |
+  | Prueba de característica (con su habilidad) | <u>Subrayado verde azulado</u> |
+  | Tipo de daño | Su color y su icono |
+  | Curación (`recuperas 1d8 + 2 puntos de golpe`) | Verde |
+  | Puntos de golpe temporales | Azul |
+  | Ventaja / desventaja | Verde / rojo |
+  | Cuándo, cuánto dura, cuántas veces (`1 hora`, `una vez por turno`, `hasta que termines un descanso largo`) | *Cursiva* |
+  | Acción adicional, reacción | VERSALITAS |
+  | Nombres de conjuro de varias palabras (`Bola de fuego`) | *Cursiva* con subrayado fino, como en el manual |
+  | Términos del glosario | Subrayado de puntos (dorado; rojo si es un estado) que abre su regla |
+  | Etiqueta de un párrafo (`Golpe atronador.`) | **Negrita** |
+
 - **Economía del turno y velocidad**: cada acción enlaza a su regla del manual si está importado, y la ficha añade lo propio del
   personaje (cuántos ataques da su acción de Atacar, qué puede hacer como acción adicional, cuánto salta).
