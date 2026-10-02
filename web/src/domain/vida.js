@@ -8,17 +8,17 @@ export const ESTADOS = [
   ['agarrado', 'Agarrado', 'Velocidad 0; desventaja al atacar a quien no te agarra.'],
   ['apresado', 'Apresado', 'Velocidad 0; ataques contra ti con ventaja; tus ataques y salvaciones de Destreza, con desventaja.'],
   ['asustado', 'Asustado', 'Desventaja en pruebas y ataques mientras veas la fuente; no puedes acercarte a ella.'],
-  ['aturdido', 'Aturdido', 'Incapacitado; fallas las salvaciones de Fuerza y Destreza; ataques contra ti con ventaja.'],
+  ['aturdido', 'Aturdido', 'Incapacitado; fallas las salvaciones de Fuerza y Destreza; los ataques contra ti tienen ventaja.'],
   ['cegado', 'Cegado', 'Fallas lo que requiere vista; tus ataques con desventaja y los que recibes, con ventaja.'],
   ['derribado', 'Derribado', 'Solo te arrastras; desventaja al atacar; ventaja para quien te ataca a 1,5 m, desventaja si es a distancia.'],
-  ['encantado', 'Encantado', 'No puedes atacar a quien te encanta; tiene ventaja en sus pruebas sociales contigo.'],
+  ['encantado', 'Encantado', 'No puedes atacar a quien te encanta ni dañarlo con rasgos o efectos mágicos; tiene ventaja en sus pruebas para interactuar socialmente contigo.'],
   ['ensordecido', 'Ensordecido', 'No oyes y fallas lo que requiere oído.'],
   ['envenenado', 'Envenenado', 'Desventaja en ataques y pruebas de característica.'],
-  ['incapacitado', 'Incapacitado', 'Sin acciones, acciones adicionales ni reacciones; se rompe la concentración.'],
-  ['inconsciente', 'Inconsciente', 'Incapacitado y derribado; fallas Fuerza y Destreza; los golpes a 1,5 m son críticos.'],
+  ['incapacitado', 'Incapacitado', 'Sin acciones, acciones adicionales ni reacciones; no puedes hablar; se rompe la concentración; desventaja en la iniciativa.'],
+  ['inconsciente', 'Inconsciente', 'Incapacitado y derribado; sueltas lo que sostienes; velocidad 0; fallas Fuerza y Destreza; ataques contra ti con ventaja y críticos si impactan a 1,5 m.'],
   ['invisible', 'Invisible', 'Ventaja en iniciativa y en tus ataques; los ataques contra ti, con desventaja.'],
-  ['paralizado', 'Paralizado', 'Incapacitado y velocidad 0; fallas Fuerza y Destreza; los golpes a 1,5 m son críticos.'],
-  ['petrificado', 'Petrificado', 'Convertido en piedra: incapacitado, resistencia a todo el daño, inmune a veneno.'],
+  ['paralizado', 'Paralizado', 'Incapacitado y velocidad 0; fallas Fuerza y Destreza; ataques contra ti con ventaja y críticos si impactan a 1,5 m.'],
+  ['petrificado', 'Petrificado', 'Convertido en piedra: incapacitado y velocidad 0; fallas Fuerza y Destreza; ataques contra ti con ventaja; resistencia a todo el daño e inmune al estado envenenado.'],
 ];
 export const NOMBRE_ESTADO = Object.fromEntries(ESTADOS.map(([k, n]) => [k, n]));
 export const RESUMEN_ESTADO = Object.fromEntries(ESTADOS.map(([k, , t]) => [k, t]));

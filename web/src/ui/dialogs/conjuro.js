@@ -34,8 +34,18 @@ const PASOS = [
   [/(^|[^\p{L}\d,])(\d+(?:,\d+)?\s?(?:m|km))(?![\p{L}\d])/gu, '$1<span class="k-dist">$2</span>'],
   [/(de daño )(de |por )?(ácido|contundente|cortante|frío|fuego|fuerza|necrótico|perforante|psíquico|radiante|relámpago|trueno|veneno)(?![\p{L}])/giu,
     (m, a, b, tipo) => `${a}${b || ''}<span class="k-dmg dmg-${TIPOS[tipo.toLowerCase()] || 'fuerza'}">${gi(TIPOS[tipo.toLowerCase()] || 'fuerza')}${tipo}</span>`],
+  // Lo que se tira contra un número: la CD, en negrita
+  [/(^|[^\p{L}])(CD \d{1,2})(?![\p{L}\d])/gu, '$1<span class="k-cd">$2</span>'],
+  // Ventaja en verde, desventaja en rojo: el color dice hacia dónde empuja la tirada
+  [/(^|[^\p{L}])(desventaja|ventaja)(?![\p{L}])/giu, (m, pre, w) => `${pre}<span class="k-${/^d/i.test(w) ? 'dis' : 'adv'}">${w}</span>`],
+  // Cuándo y cuántas veces: en cursiva
+  [/(^|[^\p{L}])(una vez por (?:turno|ronda)|hasta (?:el (?:inicio|comienzo|final) de )?tu siguiente turno|(?:al )?(?:terminar|finalizar) un descanso (?:corto|largo))(?![\p{L}])/giu, '$1<em class="k-time">$2</em>'],
+  // Lo que gasta del turno: versalitas
+  [/(^|[^\p{L}])(acci[oó]n adicional|reacci[oó]n)(?![\p{L}])/giu, '$1<span class="k-eco">$2</span>'],
 ];
 export const realzar = h => PASOS.reduce((acc, [re, rep]) => porTexto(acc, t => t.replace(re, rep)), h);
+// Un texto corto de la app (sin markdown) con el mismo realce y los enlaces al glosario
+export const rico = t => enlazar(realzar(esc(t)));
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
 const DADO_CAB = /^(\d{0,2})d(\d{1,3})$/i;
 const enLinea = t => enlazar(realzar(cabecilla(esc(t))))
