@@ -89,7 +89,8 @@ function repartir(txt) {
 }
 
 export function parseCriaturas(pages) {
-  const L = aplanar(pages).map(l => ({ ...l, barra: /^\s*[^\p{L}\d¿(+\-−–\s]/u.test(l.s), s: limpiaIni(l.s) })).filter(l => l.s);
+  // «barra»: la línea empieza con el borde del recuadro del perfil (se mira en el texto antes de corregir el OCR)
+  const L = aplanar(pages).map(l => ({ ...l, barra: /^\s*[^\p{L}\d¿(+\-−–\s]/u.test(l.raw ?? l.s), s: limpiaIni(l.s) })).filter(l => l.s);
   const inicios = [];
   for (let i = 1; i < L.length - 2; i++) {
     if (!TIPO_RE.test(L[i].s)) continue;

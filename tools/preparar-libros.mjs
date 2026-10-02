@@ -29,9 +29,10 @@ async function leer(archivo) {
     paginas.push({ p, w, items });
   }
   await doc.destroy();
-  return { titulo, ...analizarLibro(paginas) };
+  return { titulo, ...analizarLibro(paginas, () => {}, { vocabulario }) };
 }
 
+const vocabulario = JSON.parse(fs.readFileSync(path.join(RAIZ, 'web/public/data/vocabulario.json'), 'utf8'));
 const compendio = JSON.parse(fs.readFileSync(path.join(RAIZ, 'web/public/data/compendio.json'), 'utf8'));
 if (!(await loadSrd(Promise.resolve(compendio)))) throw new Error('No se pudo cargar el compendio');
 fs.mkdirSync(destino, { recursive: true });

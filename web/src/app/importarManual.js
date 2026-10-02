@@ -1,6 +1,14 @@
 import { abrirPdf } from './pdf.js';
 import { analizarLibro } from '../domain/libroCompleto.js';
 
+// Frecuencias de palabras de los manuales para corregir el OCR; si no se puede cargar, se corrige solo con el propio libro
+async function vocabularioBase() {
+  try {
+    if (import.meta.env.MODE === 'windows') return (await import('../../public/data/vocabulario.json')).default;
+    return await (await fetch('data/vocabulario.json')).json();
+  } catch { return {}; }
+}
+
 export async function leerLibro(file, onProgress = () => {}) {
   onProgress({ fase: 'abrir' });
   const doc = await abrirPdf(file);
@@ -18,5 +26,5 @@ export async function leerLibro(file, onProgress = () => {}) {
   await doc.destroy();
   onProgress({ fase: 'analizar' });
   await new Promise(r => setTimeout(r, 30));
-  return { titulo, ...analizarLibro(paginas, fase => onProgress({ fase })) };
+  return { titulo, ...analizarLibro(paginas, fase => onProgress({ fase }), { vocabulario: await vocabularioBase() }) };
 }

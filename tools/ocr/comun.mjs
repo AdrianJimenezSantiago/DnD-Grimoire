@@ -35,3 +35,15 @@ export async function textoPagina(doc, p) {
 
 export const leerPaginas = () => JSON.parse(fs.readFileSync(path.join(DIR, 'paginas.json'), 'utf8')).paginas;
 export const nombreRef = pg => `${pg.libro}-${String(pg.pagina).padStart(3, '0')}.txt`;
+
+// Texto de todas las páginas de un libro (para el vocabulario), guardado en .cache/ porque leer el PDF entero tarda
+export async function textoLibro(id) {
+  const st = fs.statSync(archivoLibro(id)), dir = path.join(DIR, '.cache'), f = path.join(dir, `${id}.json`), clave = `${st.size}-${st.mtimeMs}`;
+  try { const c = JSON.parse(fs.readFileSync(f, 'utf8')); if (c.clave === clave) return c.paginas; } catch {}
+  const doc = await abrir(id), paginas = [];
+  for (let p = 1; p <= doc.numPages; p++) paginas.push(await textoPagina(doc, p));
+  await doc.destroy();
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(f, JSON.stringify({ clave, paginas }));
+  return paginas;
+}
