@@ -8,7 +8,11 @@ const isFooter = s => /^AP[ÉE]NDICE/i.test(s) || /^\d{1,3}$/.test(s) || /GLOSAR
 // Une dos líneas del PDF; una palabra partida con guion al final de línea («trans-» + «portarte») se junta sin guion
 export const juntar = (a, b) => (/\p{Ll}-$/u.test(a) && /^\p{Ll}/u.test(b) ? a.slice(0, -1) + b : a + ' ' + b);
 // Lo mismo en un texto ya importado, donde las líneas quedaron unidas con un espacio
-export const sinCortes = t => String(t || '').replace(/(\p{Ll})- (\p{Ll})/gu, '$1$2');
+// y las erratas de lectura del PDF: «2420» por 2d20 (la d se lee como 4) y la letra O por un cero en «Velocidad O» o «O PG»
+export const sinCortes = t => String(t || '').replace(/(\p{Ll})- (\p{Ll})/gu, '$1$2')
+  .replace(/\b([1-9])420\b/g, '$1d20')
+  .replace(/(\bvelocidad(?: es| pasa a| queda en| de)?\s+)O\b/giu, '$10')
+  .replace(/(^|[\s(])O(?=\s+(?:PG|puntos de golpe)\b)/gu, '$10');
 export function parseGlosario(pages) {
   const L = [];
   for (const pg of pages) pg.cols.forEach(col => {
