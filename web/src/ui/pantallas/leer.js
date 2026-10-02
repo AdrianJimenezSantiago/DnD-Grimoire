@@ -1,6 +1,6 @@
 import { esc, norm } from '../../core/util.js';
 import { glosario } from '../../domain/conjuros/catalogo.js';
-import { equipoDe, ataqueArma, armaCombate } from '../../domain/equipo/equipo.js';
+import { ataqueArma, armaCombate } from '../../domain/equipo/equipo.js';
 import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas } from '../../domain/combate/efectos.js';
 import { NOMBRE_ESTADO } from '../../domain/combate/vida.js';
 import { fmtMetros, NOMBRE_HAB } from '../../domain/reglas/habilidades.js';
@@ -9,8 +9,7 @@ import { ataquesPorAccion } from '../../domain/combate/maestria.js';
 import { statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
 import { ECONOMIA_INFO, textoPropiedad, textoMaestria, salto } from '../../domain/reglas/referencia.js';
 import { ficha, abrirTermino, abrirRasgoJuego, abrirResumenRegla } from '../dialogs/biblioteca.js';
-import { openSpell } from '../dialogs/conjuro.js';
-import { md, rico } from '../dialogs/conjuro.js';
+import { openSpell, md, rico } from '../dialogs/conjuro.js';
 import { gi } from '../componentes/tema.js';
 
 let S = null;

@@ -16,12 +16,12 @@ import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { openSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { pedir } from '../componentes/modal.js';
 import { burstFrom, reducedMotion } from '../animaciones/fx.js';
 import { golpe } from '../animaciones/golpes.js';
 import { haptic } from '../../platform/native.js';
-import { undoBtn, stepResource } from '../../app/acciones.js';
+import { stepResource } from '../../app/acciones.js';
 import { RAR_K, TIPO_I, abrirObjeto, openBiblioteca } from './biblioteca.js';
 
 let S;

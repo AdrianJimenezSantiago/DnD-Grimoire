@@ -1,11 +1,10 @@
 import { norm } from '../../core/util.js';
-import { clasesDe, perfil, dotesDe } from '../reglas/reglas2024.js';
+import { clasesDe, perfil, dotesDe, modOf, competencia, nivelTotal } from '../reglas/reglas2024.js';
 import { reglas, usosGastados } from '../clases/rasgos.js';
 import { maniobrasDe, dadoSupremacia, cdManiobras } from '../clases/maniobras.js';
 import { golpeExtra } from '../clases/variantes.js';
 import { combateDe } from './combate.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
-import { modOf, competencia, nivelTotal } from '../reglas/reglas2024.js';
 import { golpesDeOpciones } from '../clases/opcionesRasgo.js';
 import { DADO_ARTES, DANO_FURIA } from '../equipo/equipo.js';
 import { esMarcial } from '../reglas/competencias.js';

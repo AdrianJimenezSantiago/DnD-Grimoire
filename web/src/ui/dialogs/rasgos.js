@@ -5,12 +5,12 @@ import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../doma
 import { anadirPendientes, conjurosPendientes } from '../../domain/clases/progresion.js';
 import { compendio } from '../../domain/conjuros/catalogo.js';
 import { $, on } from '../componentes/dom.js';
-import { claseLinea, freeOf, usedOf } from '../pantallas/sheet.js';
+import { claseLinea } from '../../domain/personaje/descripcion.js';
+import { freeOf, usedOf } from '../../domain/conjuros/espacios.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { slotFx } from '../animaciones/fx.js';
 import { haptic } from '../../platform/native.js';
-import { undoBtn } from '../../app/acciones.js';
 import { confirmar } from '../componentes/modal.js';
 import { icon } from '../componentes/icons.js';
 

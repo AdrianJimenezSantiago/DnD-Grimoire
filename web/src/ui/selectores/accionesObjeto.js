@@ -8,10 +8,10 @@ import { usosGastados } from '../../domain/clases/rasgos.js';
 import { elegir } from '../dialogs/elegir.js';
 import { openRollObjeto } from '../dialogs/tiradas.js';
 import { previewSpell } from '../dialogs/conjuro.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { golpe } from '../animaciones/golpes.js';
 import { haptic } from '../../platform/native.js';
-import { undoBtn, registrarGastoObjeto } from '../../app/acciones.js';
+import { registrarGastoObjeto } from '../../app/acciones.js';
 
 const buscar = (ch, id) => equipoDe(ch).objetos.find(o => o.id === id) || null;
 const pl = (n, s, p = `${s}s`) => `${n} ${n === 1 ? s : p}`;

@@ -1,6 +1,6 @@
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas/reglas2024.js';
-import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro, termino, nombresConjuros } from '../../domain/conjuros/catalogo.js';
+import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro, termino, nombresConjuros, biblioteca, criaturaImportada } from '../../domain/conjuros/catalogo.js';
 import { realzador, porTexto } from '../../domain/presentacion/realce.js';
 import { lanzadorTira } from '../../domain/combate/efectos.js';
 import { gi } from '../componentes/tema.js';
@@ -8,16 +8,15 @@ import { openRoll, iconoDano } from './tiradas.js';
 import { openArea } from './area.js';
 import { parseArea, describir } from '../../domain/combate/area.js';
 import { $, on } from '../componentes/dom.js';
-import { freeOf, isPrepared, schoolKey, slotsOf } from '../pantallas/sheet.js';
+import { freeOf, isPrepared, schoolKey, slotsOf } from '../../domain/conjuros/espacios.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
-import { cast, undoBtn } from '../../app/acciones.js';
+import { toast, undoBtn } from '../componentes/toast.js';
+import { cast } from '../../app/acciones.js';
 import { confirmar } from '../componentes/modal.js';
 import { notasConjuro } from '../../domain/criaturas/bestiario.js';
 import { openBestiario } from './diario.js';
 import { haptic } from '../../platform/native.js';
 import { CAR_TXT, ESPIRITUS, PERFILES, caracteristicas, criaturasDe, perfilDe } from '../../domain/criaturas/criaturas.js';
-import { biblioteca, criaturaImportada } from '../../domain/conjuros/catalogo.js';
 import { formasPosibles } from '../../domain/criaturas/monstruos.js';
 import { openFormas } from './formas.js';
 

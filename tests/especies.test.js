@@ -6,7 +6,7 @@ import { rasgosEnJuego } from '../web/src/domain/clases/enJuego.js';
 import { parseEspecies } from '../web/src/domain/libros/contenido.js';
 import { reaccionesDano, alCaerA0, alGastarRecurso } from '../web/src/domain/combate/automatismos.js';
 import { reglas, recState } from '../web/src/domain/clases/rasgos.js';
-import { vidaDe, aplicarDano, pgActuales, ponerEfecto } from '../web/src/domain/combate/vida.js';
+import { aplicarDano, pgActuales, ponerEfecto } from '../web/src/domain/combate/vida.js';
 import { modsTirada, EFECTO_DE_RECURSO } from '../web/src/domain/combate/efectos.js';
 import { capacidadCarga, PREDEFINIDOS } from '../web/src/domain/equipo/equipo.js';
 import { opcionesAlImpactar } from '../web/src/domain/combate/alImpactar.js';

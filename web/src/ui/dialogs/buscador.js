@@ -2,10 +2,9 @@ import { esc, norm, uid } from '../../core/util.js';
 import { LISTAS, SCHOOLS, perfil } from '../../domain/reglas/reglas2024.js';
 import { allSpellItems, itemMeta, itemTag, itemToSid, listFilter, invalidateItems } from '../../domain/conjuros/catalogo.js';
 import { $, on } from '../componentes/dom.js';
-import { prepCount } from '../pantallas/sheet.js';
+import { prepCount } from '../../domain/conjuros/espacios.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
-import { undoBtn } from '../../app/acciones.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { previewSpell } from './conjuro.js';
 
 let S;

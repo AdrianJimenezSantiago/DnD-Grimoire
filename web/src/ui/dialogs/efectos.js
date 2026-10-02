@@ -5,9 +5,8 @@ import { vidaDe, quitarMax, ESTADOS } from '../../domain/combate/vida.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { openSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { haptic } from '../../platform/native.js';
-import { undoBtn } from '../../app/acciones.js';
 import { alternarEfecto, alternarEstado } from './vida.js';
 
 let S, TAB = 'bueno', Q = '';

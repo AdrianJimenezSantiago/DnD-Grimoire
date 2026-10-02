@@ -4,7 +4,7 @@ import { gi, temaDe, aplicarTema } from '../componentes/tema.js';
 import { estiloPaleta, paleta } from '../../domain/presentacion/paleta.js';
 import { TEMAS } from '../../domain/clases/clases2024.js';
 import { icon } from '../componentes/icons.js';
-import { claseLinea } from './sheet.js';
+import { claseLinea } from '../../domain/personaje/descripcion.js';
 import { estadoVital } from '../../domain/combate/vida.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { viewTransition, reducedMotion } from '../animaciones/fx.js';

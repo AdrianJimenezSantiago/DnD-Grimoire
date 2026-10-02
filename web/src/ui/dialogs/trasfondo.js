@@ -4,10 +4,9 @@ import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/personaje/
 import { $, on } from '../componentes/dom.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { openSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
 import { mdDoc } from '../componentes/mdDoc.js';
-import { undoBtn } from '../../app/acciones.js';
 
 let S, V = { editando: false, q: '' };
 const dlg = () => $('#trasDlg');

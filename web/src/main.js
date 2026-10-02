@@ -27,13 +27,11 @@ import './styles/movil.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/personaje/modelo.js';
-import { compendio, linkCatalog, loadSrd } from './domain/conjuros/catalogo.js';
+import { compendio, linkCatalog, loadSrd, libros } from './domain/conjuros/catalogo.js';
 import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
-import { toast } from './ui/componentes/toast.js';
+import { toast, undoBtn } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';
-import { undoBtn } from './app/acciones.js';
 import { confirmar } from './ui/componentes/modal.js';
-import { libros } from './domain/conjuros/catalogo.js';
 import { storage, setBars, onAppEvents } from './platform/native.js';
 import { renderBar, renderSheet } from './ui/pantallas/sheet.js';
 import * as eventos from './app/eventos.js';

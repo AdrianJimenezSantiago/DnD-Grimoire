@@ -13,3 +13,5 @@ export function toast(msg, actions = []) {
 }
 export const hideToast = () => $('#toast').classList.remove('show');
 export const toastOpen = () => $('#toast').classList.contains('show');
+// Botón «Deshacer» para un aviso: h es lo que devuelven S.act, S.edit o S.replace.
+export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });

@@ -6,10 +6,9 @@ import { CLASES_ES } from '../../domain/libros/libros.js';
 import { claveNombre } from '../../domain/libros/manual.js';
 import { $, on } from '../componentes/dom.js';
 import { openSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
 import { fileStore } from '../../platform/native.js';
-import { undoBtn } from '../../app/acciones.js';
 import { gi } from '../componentes/tema.js';
 import { openBiblioteca } from './biblioteca.js';
 

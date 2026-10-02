@@ -1,8 +1,8 @@
 import { esc, joinY } from '../core/util.js';
 import { perfil, clasesDe } from '../domain/reglas/reglas2024.js';
 import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/clases/rasgos.js';
-import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/pantallas/sheet.js';
-import { toast } from '../ui/componentes/toast.js';
+import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../domain/conjuros/espacios.js';
+import { toast, undoBtn } from '../ui/componentes/toast.js';
 import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/animaciones/fx.js';
 import { haptic } from '../platform/native.js';
 import { pedir } from '../ui/componentes/modal.js';
@@ -18,7 +18,6 @@ import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanza
 import { avisar } from '../ui/dialogs/aviso.js';
 import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe, recuerdoDeConjuros } from '../domain/combate/automatismos.js';
 
-export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
 
 function castEffects(S, ch, P, s, mode, L) {

@@ -3,9 +3,8 @@ import { charFromV1, normDb, importarPersonaje, SCHEMA } from '../../domain/pers
 import { linkCatalog, invalidateItems } from '../../domain/conjuros/catalogo.js';
 import { $ } from '../componentes/dom.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast } from '../componentes/toast.js';
+import { toast, undoBtn } from '../componentes/toast.js';
 import { shareJson } from '../../platform/native.js';
-import { undoBtn } from '../../app/acciones.js';
 import { avisar } from '../componentes/modal.js';
 
 let S;

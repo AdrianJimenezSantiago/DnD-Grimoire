@@ -2,7 +2,7 @@
 import { esc } from '../../core/util.js';
 import { efectoDeConjuro, fmtRondas } from '../../domain/combate/efectos.js';
 import { esYo, listaObjetivos } from '../../domain/combate/vida.js';
-import { schoolKey } from '../pantallas/sheet.js';
+import { schoolKey } from '../../domain/conjuros/espacios.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { avatarHtml } from '../componentes/avatar.js';

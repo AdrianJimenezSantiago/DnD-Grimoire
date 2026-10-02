@@ -6,7 +6,7 @@ import { icon, ASTROLABE } from '../componentes/icons.js';
 import { pop } from '../animaciones/fx.js';
 import { runaSvg } from '../animaciones/magia.js';
 import { aplicarTema, gi, temaDe } from '../componentes/tema.js';
-import { tiradasConjuro } from '../../domain/conjuros/catalogo.js';
+import { tiradasConjuro, biblioteca } from '../../domain/conjuros/catalogo.js';
 import { iconoDano } from '../dialogs/tiradas.js';
 import { avatarHtml, botonYo } from '../componentes/avatar.js';
 import { efectoDeConjuro } from '../../domain/combate/efectos.js';
@@ -14,25 +14,15 @@ import { paraRecordar } from '../../domain/personaje/diario.js';
 import { notaHtml } from '../dialogs/diario.js';
 import { rasgosConObjetivo } from '../../domain/combate/concentracion.js';
 import { rasgosEnJuego, agrupar, numerosMarciales, FUENTES } from '../../domain/clases/enJuego.js';
-import { biblioteca } from '../../domain/conjuros/catalogo.js';
 import { vitalesHtml, caracteristicasHtml } from './vitales.js';
 import { combateHtml, escuelaIco } from './combate.js';
 import { combateDe } from '../../domain/combate/combate.js';
 import { vidaDe, esYo } from '../../domain/combate/vida.js';
 import { percepcionPasiva } from '../../domain/reglas/habilidades.js';
 import { actualizarLuto, memorialHtml } from './luto.js';
+import { slotsOf, freeOf, firstFreeFrom, isPrepared, prepCount, cantCount, conConjuros, schoolKey } from '../../domain/conjuros/espacios.js';
+import { origenLinea } from '../../domain/personaje/descripcion.js';
 
-export const slotsOf = (P, n) => P.slots[n] || 0;
-export const usedOf = (ch, P, n) => Math.min(ch.play.used[n] || 0, slotsOf(P, n));
-export const freeOf = (ch, P, n) => slotsOf(P, n) - usedOf(ch, P, n);
-export function firstFreeFrom(ch, P, n) { for (let L = Math.max(1, n); L <= 9; L++) if (freeOf(ch, P, L) > 0) return L; return 0; }
-export const isPrepared = e => !!(e.prep || e.always);
-export const prepCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level > 0 && e.prep && !e.always; }).length;
-export const cantCount = (db, ch) => ch.book.filter(e => { const s = db.catalog[e.sid]; return s && s.level === 0 && !e.always; }).length;
-export const claseLinea = ch => { const cs = clasesDe(ch); return cs.length > 1 ? cs.map(c => `${c.clase} ${c.nivel}${c.subclase ? ` (${c.subclase})` : ''}`).join(' / ') : `${ch.clase}${ch.subclase ? ` (${ch.subclase})` : ''}, nivel ${ch.nivel}`; };
-export const origenLinea = ch => [ch.especie, ch.trasfondo].filter(Boolean).join(', ');
-const SC = { abj: 'abj', adi: 'adi', con: 'con', enc: 'enc', evo: 'evo', ilu: 'ilu', nig: 'nig', tra: 'tra' };
-export const schoolKey = esc2 => SC[norm(esc2).slice(0, 3)] || '';
 const lemaHtml = t => esc(t).replace(/_(.+?)_/g, '<span class="u">$1</span>');
 
 function candles(ch, P, L) {
@@ -67,7 +57,6 @@ function heroHtml(ch, P) {
       ${P.lvl < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${P.lvl + 1}</button>` : ''}
     </div>`;
 }
-export const conConjuros = (ch, P) => !!P.apKey || P.maxSlot > 0 || ch.book.length > 0 || !!ch.enJuego?.conjuros;
 function statsHtml(db, ch, P) {
   const pc = prepCount(db, ch), cc = cantCount(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
