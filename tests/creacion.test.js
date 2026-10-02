@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { dotesDe } from '../web/src/domain/reglas2024.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { dotesDe } from '../web/src/domain/reglas/reglas2024.js';
 import { MATRIZ, PUNTOS, costeCompra, tirar4d6, repartoSugerido, caracteristicasTrasfondo, estadoBonos, bonosSugeridos, conBonos,
-  repartoHabilidades, completarHabilidades, doteRepetida, esRepetible, versatilPendiente, mejorasHasta } from '../web/src/domain/creacion.js';
+  repartoHabilidades, completarHabilidades, doteRepetida, esRepetible, versatilPendiente, mejorasHasta } from '../web/src/domain/personaje/creacion.js';
 
 test('sin trasfondo no hay dote de origen, aunque un libro importado tenga trasfondos sin nombre', () => {
   const lib = [{ nombre: '', dote: 'Alerta' }, { nombre: 'Guardia', dote: 'Alerta' }];

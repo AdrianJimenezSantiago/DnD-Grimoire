@@ -1,22 +1,22 @@
 import { esc, joinY } from '../core/util.js';
-import { perfil, clasesDe } from '../domain/reglas2024.js';
-import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/rasgos.js';
-import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/sheet.js';
-import { toast } from '../ui/toast.js';
-import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/fx.js';
+import { perfil, clasesDe } from '../domain/reglas/reglas2024.js';
+import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/clases/rasgos.js';
+import { firstFreeFrom, freeOf, isPrepared, schoolKey, slotsOf, usedOf } from '../ui/pantallas/sheet.js';
+import { toast } from '../ui/componentes/toast.js';
+import { castFx, dawn, pop, schoolColor, slotFx } from '../ui/animaciones/fx.js';
 import { haptic } from '../platform/native.js';
-import { pedir } from '../ui/modal.js';
-import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/catalogo.js';
-import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/concentracion.js';
+import { pedir } from '../ui/componentes/modal.js';
+import { manualFor, srdFor, tiradasConjuro, biblioteca } from '../domain/conjuros/catalogo.js';
+import { conObjetivos, nuevoEfecto, objetivosNuevos, terminarConc } from '../domain/combate/concentracion.js';
 import { openRoll } from '../ui/dialogs/tiradas.js';
-import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, ponerTemporales, curar, soltarConc, cambiarConc, rondasDeDuracion, esYo, sincronizarYo, listaObjetivos, conjuroDeObjetivos } from '../domain/vida.js';
+import { descansoLargoVida, dadosDeGolpe, pgActuales, pgMaximo, vidaDe, ponerEfecto, ponerTemporales, curar, soltarConc, cambiarConc, rondasDeDuracion, esYo, sincronizarYo, listaObjetivos, conjuroDeObjetivos } from '../domain/combate/vida.js';
 import { openObjetivos } from '../ui/dialogs/objetivos.js';
-import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate.js';
-import { golpe } from '../ui/golpes.js';
-import { opcionesIntercambio, esHumano } from '../domain/intercambios.js';
-import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/efectos.js';
+import { combateDe, limiteEspacio, lanzarEnCombate } from '../domain/combate/combate.js';
+import { golpe } from '../ui/animaciones/golpes.js';
+import { opcionesIntercambio, esHumano } from '../domain/clases/intercambios.js';
+import { efectosDe, efectoDeConjuro, fmtRondas, EFECTO, EFECTO_DE_RECURSO, lanzadorTira, soloSobreTi } from '../domain/combate/efectos.js';
 import { avisar } from '../ui/dialogs/aviso.js';
-import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe, recuerdoDeConjuros } from '../domain/automatismos.js';
+import { curacionDeRecurso, aplicarCuracion, temporalesAlEnfurecer, alGastarRecurso, temporalesAlDescansar, temporalesDeConjuro, alLanzarConEspacio, alientoDe, recuerdoDeConjuros } from '../domain/combate/automatismos.js';
 
 export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
 const row = bi => document.getElementById('sp-' + bi);
@@ -323,7 +323,7 @@ function avisoGasto(S, id, h, g) {
     g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : '', armado ? '<span class="tnote"><b>Llevas armadura o escudo</b>: la Canción de la hoja no funciona con ellos.</span>' : ''].filter(Boolean).join(' ');
   toast(texto, [...extra, undoBtn(S, h)]);
 }
-// Gastar el contador de un objeto mágico puede hacer algo más (recuperar un espacio, lanzar un conjuro…): lo decide ui/accionesObjeto.js
+// Gastar el contador de un objeto mágico puede hacer algo más (recuperar un espacio, lanzar un conjuro…): lo decide ui/selectores/accionesObjeto.js
 let gastoObjeto = null;
 export const registrarGastoObjeto = f => { gastoObjeto = f; };
 export async function tickResource(S, id, i) {

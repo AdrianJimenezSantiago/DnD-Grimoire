@@ -1,15 +1,15 @@
 // Mide los errores del texto que lee la app frente a las páginas de referencia corregidas a mano.
 //   node tools/ocr/medir.mjs                 OCR tal cual
-//   node tools/ocr/medir.mjs --corregir      tras pasar el corrector (web/src/domain/corrector.js)
+//   node tools/ocr/medir.mjs --corregir      tras pasar el corrector (web/src/domain/libros/corrector.js)
 //   node tools/ocr/medir.mjs --errores 40    además, las 40 confusiones de palabra más frecuentes
 //   node tools/ocr/medir.mjs --conjunto desarrollo|prueba
-//   node tools/ocr/medir.mjs --corregir --fusionar tess-fast   base del PDF fusionada con otro OCR (web/src/domain/fusion.js)
+//   node tools/ocr/medir.mjs --corregir --fusionar tess-fast   base del PDF fusionada con otro OCR (web/src/domain/libros/fusion.js)
 //   node tools/ocr/medir.mjs --motor tess-best   texto de otro OCR (lo deja reocr.mjs en .cache/motores/<motor>/)
 // CER: distancia de edición entre caracteres / caracteres de la referencia.
 // WER: lo mismo contando palabras. Los saltos de línea cuentan como un espacio.
 import fs from 'node:fs';
 import path from 'node:path';
-import { pageToColumns } from '../../web/src/domain/manualLineas.js';
+import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
 import { DIR, abrir, textoPagina, textoLibro, leerPaginas, nombreRef } from './comun.mjs';
 
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
@@ -17,13 +17,13 @@ const motor = arg('--motor'), conFusion = arg('--fusionar'), conCorrector = proc
 let corregir = lineas => lineas;
 if (conCorrector) {
   // Vocabulario de los libros con texto: es lo que tendría la app con los libros incluidos
-  const { crearVocabulario, corregirLineas } = await import('../../web/src/domain/corrector.js'), textos = [];
+  const { crearVocabulario, corregirLineas } = await import('../../web/src/domain/libros/corrector.js'), textos = [];
   for (const id of ['phb', 'dmg', 'faerun']) textos.push(...await textoLibro(id));
   const voc = crearVocabulario(textos);
   if (process.argv.includes('--traza')) voc.traza = [];
   globalThis.__voc = voc;
   corregir = lineas => corregirLineas(lineas, voc);
-  if (conFusion) { const { fusionar } = await import('../../web/src/domain/fusion.js'); globalThis.__fusionar = (l, o) => fusionar(l, o, voc); }
+  if (conFusion) { const { fusionar } = await import('../../web/src/domain/libros/fusion.js'); globalThis.__fusionar = (l, o) => fusionar(l, o, voc); }
 }
 const textoMotor = (m, pg) => { const { w, items } = JSON.parse(fs.readFileSync(path.join(DIR, '.cache/motores', m, nombreRef(pg).replace(/\.txt$/, '.json')), 'utf8'));
   return pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n'); };

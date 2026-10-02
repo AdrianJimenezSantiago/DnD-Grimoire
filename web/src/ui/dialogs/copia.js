@@ -1,12 +1,12 @@
 import { esc } from '../../core/util.js';
-import { charFromV1, normDb, importarPersonaje, SCHEMA } from '../../domain/modelo.js';
-import { linkCatalog, invalidateItems } from '../../domain/catalogo.js';
-import { $ } from '../dom.js';
-import { openSheet, closeSheet } from '../dialog.js';
-import { toast } from '../toast.js';
+import { charFromV1, normDb, importarPersonaje, SCHEMA } from '../../domain/personaje/modelo.js';
+import { linkCatalog, invalidateItems } from '../../domain/conjuros/catalogo.js';
+import { $ } from '../componentes/dom.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
 import { shareJson } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
-import { avisar } from '../modal.js';
+import { avisar } from '../componentes/modal.js';
 
 let S;
 const name = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return `grimorio-${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}.json`; };

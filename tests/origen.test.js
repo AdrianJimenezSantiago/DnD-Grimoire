@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { faltaRequisito, aumentoDeDote, equipoInicial, herramientasDe, eleccionesHerramienta, datosObjeto, tirarOro } from '../web/src/domain/origen.js';
-import { reglas } from '../web/src/domain/rasgos.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { faltaRequisito, aumentoDeDote, equipoInicial, herramientasDe, eleccionesHerramienta, datosObjeto, tirarOro } from '../web/src/domain/origen/origen.js';
+import { reglas } from '../web/src/domain/clases/rasgos.js';
 
 const pj = o => normChar(blankChar({ clase: 'Paladín', nivel: 1, stats: { fue: 15, des: 10, con: 13, int: 8, sab: 12, car: 14 }, ...o }));
 

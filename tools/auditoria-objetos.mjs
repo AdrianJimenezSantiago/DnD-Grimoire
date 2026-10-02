@@ -5,20 +5,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../web/src/domain/equipo.js';
-import { pasosVariante, concretar } from '../web/src/domain/variantesObjeto.js';
-import { efectoDe, describirEfecto } from '../web/src/domain/objetosEfecto.js';
-import { usoDe, efectoAlUsar } from '../web/src/domain/usarObjeto.js';
-import { accionesDe } from '../web/src/domain/accionesObjeto.js';
-import { reglas, etiquetaRecarga } from '../web/src/domain/rasgos.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../web/src/domain/equipo/equipo.js';
+import { pasosVariante, concretar } from '../web/src/domain/equipo/variantesObjeto.js';
+import { efectoDe, describirEfecto } from '../web/src/domain/equipo/objetosEfecto.js';
+import { usoDe, efectoAlUsar } from '../web/src/domain/equipo/usarObjeto.js';
+import { accionesDe } from '../web/src/domain/equipo/accionesObjeto.js';
+import { reglas, etiquetaRecarga } from '../web/src/domain/clases/rasgos.js';
 
 const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 async function objetosDelLibro() {
   const json = process.argv[2] || path.join(RAIZ, 'www/libros/guia-del-dungeon-master-2024.json');
   if (fs.existsSync(json)) return JSON.parse(fs.readFileSync(json, 'utf8')).objetos;
   const pdf = fs.readdirSync(path.join(RAIZ, 'tools/resources')).find(f => /DMG/i.test(f));
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'), { analizarLibro } = await import('../web/src/domain/libroCompleto.js');
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'), { analizarLibro } = await import('../web/src/domain/libros/libroCompleto.js');
   const doc = await pdfjs.getDocument({ url: path.join(RAIZ, 'tools/resources', pdf), disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise, paginas = [];
   for (let p = 1; p <= doc.numPages; p++) {
     const page = await doc.getPage(p), tc = await page.getTextContent(), w = page.getViewport({ scale: 1 }).width;

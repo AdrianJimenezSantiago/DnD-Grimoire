@@ -3,9 +3,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { analizarLibro } from '../web/src/domain/libroCompleto.js';
-import { loadSrd } from '../web/src/domain/catalogo.js';
-import { componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domain/componerLibro.js';
+import { analizarLibro } from '../web/src/domain/libros/libroCompleto.js';
+import { loadSrd } from '../web/src/domain/conjuros/catalogo.js';
+import { componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domain/libros/componerLibro.js';
 
 const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const [origen = path.join(RAIZ, 'tools/resources'), destino = path.join(RAIZ, 'www/libros')] = process.argv.slice(2);

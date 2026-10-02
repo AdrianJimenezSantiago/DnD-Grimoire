@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tituloLibro, propuestasSubclase, componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domain/componerLibro.js';
+import { tituloLibro, propuestasSubclase, componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domain/libros/componerLibro.js';
 
 const leido = extra => ({ titulo: 'archivo', spells: [], glosario: [], subclases: [], objetos: [], dotes: [], trasfondos: [], subTextos: [], rasgosClase: [], especies: [], criaturas: [], ...extra });
 

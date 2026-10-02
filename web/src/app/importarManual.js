@@ -1,5 +1,5 @@
-import { abrirPdf } from './pdf.js';
-import { analizarLibro } from '../domain/libroCompleto.js';
+import { abrirPdf } from '../platform/pdf.js';
+import { analizarLibro } from '../domain/libros/libroCompleto.js';
 
 // Frecuencias de palabras de los manuales para corregir el OCR; si no se puede cargar, se corrige solo con el propio libro
 async function vocabularioBase() {

@@ -1,7 +1,7 @@
 // Genera docs/auditoria-clases.md: cada rasgo de cada clase y subclase (2024) con lo que hace la app.
 // Uso: node tools/auditoria-clases.mjs
 import fs from 'node:fs';
-import { CLASES_INFO, SUBCLASES } from '../web/src/domain/clases2024.js';
+import { CLASES_INFO, SUBCLASES } from '../web/src/domain/clases/clases2024.js';
 
 // A = la app lo aplica sola · P = en parte (contador, número o botón; el resto lo decides tú) · T = se consulta (texto en «En juego»)
 const E = {

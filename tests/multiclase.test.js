@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { perfil, clasesDe, nivelTotal, requisitosMulticlase, dotesDe } from '../web/src/domain/reglas2024.js';
-import { normChar } from '../web/src/domain/modelo.js';
-import { reglas } from '../web/src/domain/rasgos.js';
-import { limiteFormaSalvaje } from '../web/src/domain/monstruos.js';
-import { rasgosEnJuego, agrupar, numerosMarciales } from '../web/src/domain/enJuego.js';
-import { parseEspecies } from '../web/src/domain/contenido.js';
+import { perfil, clasesDe, nivelTotal, requisitosMulticlase, dotesDe } from '../web/src/domain/reglas/reglas2024.js';
+import { normChar } from '../web/src/domain/personaje/modelo.js';
+import { reglas } from '../web/src/domain/clases/rasgos.js';
+import { limiteFormaSalvaje } from '../web/src/domain/criaturas/monstruos.js';
+import { rasgosEnJuego, agrupar, numerosMarciales } from '../web/src/domain/clases/enJuego.js';
+import { parseEspecies } from '../web/src/domain/libros/contenido.js';
 
 const pj = (clase, nivel, multiclase = [], extra = {}) => ({ clase, subclase: '', nivel, multiclase, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14 }, play: { rec: {} }, rasgos: [], ...extra });
 

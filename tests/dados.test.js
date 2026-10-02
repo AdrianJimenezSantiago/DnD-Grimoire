@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parsear, tirar, texto, esD20Simple, media, resolver, distribucion, probAlMenos, mediaDist, maxDist, rango } from '../web/src/domain/dados.js';
+import { parsear, tirar, texto, esD20Simple, media, resolver, distribucion, probAlMenos, mediaDist, maxDist, rango } from '../web/src/domain/reglas/dados.js';
 
 const fijo = (...vals) => { let i = 0; return () => vals[i++ % vals.length]; };
 test('dados: expresiones válidas e inválidas', () => {

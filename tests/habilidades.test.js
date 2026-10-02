@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { bonoHabilidad, bonoSalvacion, iniciativa, percepcionPasiva, competenciasIniciales, velocidad, periciasDisponibles, tablaCaracteristicas } from '../web/src/domain/habilidades.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { bonoHabilidad, bonoSalvacion, iniciativa, percepcionPasiva, competenciasIniciales, velocidad, periciasDisponibles, tablaCaracteristicas } from '../web/src/domain/reglas/habilidades.js';
 
 const pj = over => normChar(blankChar({ nivel: 5, stats: { fue: 8, des: 14, con: 12, int: 18, sab: 12, car: 10 }, ...over }));
 

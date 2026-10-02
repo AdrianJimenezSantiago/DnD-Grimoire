@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { anadirObjeto, alternarSintonia, alternarGuardado } from '../web/src/domain/equipo.js';
-import { ACCIONES, accionesDe, motivoAccion, usarAccion, opcionesEscala, espaciosRecuperables, recursoDe } from '../web/src/domain/accionesObjeto.js';
-import { reglas, usosGastados, recState } from '../web/src/domain/rasgos.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { pgActuales, aplicarDano } from '../web/src/domain/vida.js';
-import { loadSrd, compendio } from '../web/src/domain/catalogo.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { anadirObjeto, alternarSintonia, alternarGuardado } from '../web/src/domain/equipo/equipo.js';
+import { ACCIONES, accionesDe, motivoAccion, usarAccion, opcionesEscala, espaciosRecuperables, recursoDe } from '../web/src/domain/equipo/accionesObjeto.js';
+import { reglas, usosGastados, recState } from '../web/src/domain/clases/rasgos.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { pgActuales, aplicarDano } from '../web/src/domain/combate/vida.js';
+import { loadSrd, compendio } from '../web/src/domain/conjuros/catalogo.js';
 import { norm } from '../web/src/core/util.js';
 
 const ch = (o = {}) => normChar(blankChar({ clase: 'Mago', nivel: 7, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));

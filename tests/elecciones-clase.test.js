@@ -1,14 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { fuentesExtra, repartoHabilidades } from '../web/src/domain/creacion.js';
-import { periciasDisponibles } from '../web/src/domain/habilidades.js';
-import { varianteDe, variantesPendientes, golpeExtra, trucoPotente } from '../web/src/domain/variantes.js';
-import { cupoManiobras, cdManiobras, maniobrasDe, alternarManiobra, MANIOBRAS } from '../web/src/domain/maniobras.js';
-import { escalas } from '../web/src/domain/clases2024.js';
-import { ataqueArma, golpeSinArmas } from '../web/src/domain/equipo.js';
-import { rasgosEnJuego } from '../web/src/domain/enJuego.js';
-import { reglas } from '../web/src/domain/rasgos.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { fuentesExtra, repartoHabilidades } from '../web/src/domain/personaje/creacion.js';
+import { periciasDisponibles } from '../web/src/domain/reglas/habilidades.js';
+import { varianteDe, variantesPendientes, golpeExtra, trucoPotente } from '../web/src/domain/clases/variantes.js';
+import { cupoManiobras, cdManiobras, maniobrasDe, alternarManiobra, MANIOBRAS } from '../web/src/domain/clases/maniobras.js';
+import { escalas } from '../web/src/domain/clases/clases2024.js';
+import { ataqueArma, golpeSinArmas } from '../web/src/domain/equipo/equipo.js';
+import { rasgosEnJuego } from '../web/src/domain/clases/enJuego.js';
+import { reglas } from '../web/src/domain/clases/rasgos.js';
 
 const ch = (o = {}) => normChar(blankChar({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
 

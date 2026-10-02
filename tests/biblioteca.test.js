@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leerTablaDado, leerTablaColumnas, tablaATexto, arreglarDados, normRotulo, intervalo } from '../web/src/domain/tablas.js';
-import { parseObjetos, leerTipo, leerCargas } from '../web/src/domain/objetos.js';
-import { parseDotes, parseTrasfondos, parseSubclases, separarRasgos, completarSubclases, nombrarTrasfondos, corregirConTabla, frecuencias } from '../web/src/domain/contenido.js';
-import { anadirObjeto, quitarObjeto, alternarSintonia, rasgoDeCargas } from '../web/src/domain/equipo.js';
-import { nuevaCriatura, notasConjuro, resumenCriatura } from '../web/src/domain/bestiario.js';
+import { leerTablaDado, leerTablaColumnas, tablaATexto, arreglarDados, normRotulo, intervalo } from '../web/src/domain/libros/tablas.js';
+import { parseObjetos, leerTipo, leerCargas } from '../web/src/domain/libros/objetos.js';
+import { parseDotes, parseTrasfondos, parseSubclases, separarRasgos, completarSubclases, nombrarTrasfondos, corregirConTabla, frecuencias } from '../web/src/domain/libros/contenido.js';
+import { anadirObjeto, quitarObjeto, alternarSintonia, rasgoDeCargas } from '../web/src/domain/equipo/equipo.js';
+import { nuevaCriatura, notasConjuro, resumenCriatura } from '../web/src/domain/criaturas/bestiario.js';
 
 const L = (x, y, s, h = 16, segs) => ({ x, y, h, s, segs: segs || [{ x, w: s.length * 7, s }], cells: segs ? segs.map(g => ({ x: g.x, s: g.s })) : [{ x, s }] });
 const pag = cols => [{ p: 1, cols }];

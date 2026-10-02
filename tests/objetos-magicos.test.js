@@ -1,16 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { parseObjetos, leerCargas, leerUsos, corregirNombre } from '../web/src/domain/objetos.js';
-import { anadirObjeto, quitarObjeto, alternarSintonia, alternarGuardado, motivoSintonia, equipar, claseArmadura, ataqueArma, armaCombate, golpeSinArmas, municionDe, anadirComun } from '../web/src/domain/equipo.js';
-import { pasosVariante, concretar } from '../web/src/domain/variantesObjeto.js';
-import { efectoDe, statsEfectivos, objetoActivo } from '../web/src/domain/objetosEfecto.js';
-import { usoDe, usarObjeto } from '../web/src/domain/usarObjeto.js';
-import { reglas, reglasVisibles, recuperarEnDescanso } from '../web/src/domain/rasgos.js';
-import { pasivosDe, resistenciasDe } from '../web/src/domain/efectos.js';
-import { bonoHabilidad, velocidad } from '../web/src/domain/habilidades.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { pgActuales, pgMaximo, vidaDe, aplicarDano } from '../web/src/domain/vida.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { parseObjetos, leerCargas, leerUsos, corregirNombre } from '../web/src/domain/libros/objetos.js';
+import { anadirObjeto, quitarObjeto, alternarSintonia, alternarGuardado, motivoSintonia, equipar, claseArmadura, ataqueArma, armaCombate, golpeSinArmas, municionDe, anadirComun } from '../web/src/domain/equipo/equipo.js';
+import { pasosVariante, concretar } from '../web/src/domain/equipo/variantesObjeto.js';
+import { efectoDe, statsEfectivos, objetoActivo } from '../web/src/domain/equipo/objetosEfecto.js';
+import { usoDe, usarObjeto } from '../web/src/domain/equipo/usarObjeto.js';
+import { reglas, reglasVisibles, recuperarEnDescanso } from '../web/src/domain/clases/rasgos.js';
+import { pasivosDe, resistenciasDe } from '../web/src/domain/combate/efectos.js';
+import { bonoHabilidad, velocidad } from '../web/src/domain/reglas/habilidades.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { pgActuales, pgMaximo, vidaDe, aplicarDano } from '../web/src/domain/combate/vida.js';
 
 const L = (x, y, s, h = 16) => ({ x, y, h, s, segs: [{ x, w: s.length * 7, s }], cells: [{ x, s }] });
 const pag = cols => [{ p: 1, cols }];

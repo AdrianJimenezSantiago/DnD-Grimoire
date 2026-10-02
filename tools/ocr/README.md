@@ -1,7 +1,7 @@
 # Medición y corrección del OCR de los manuales
 
 Los PDF de `tools/resources` ya traen una capa de texto hecha por OCR. La app la lee con pdf.js, la pasa por el
-corrector (`web/src/domain/corrector.js`) y luego por los lectores de conjuros, dotes, objetos…
+corrector (`web/src/domain/libros/corrector.js`) y luego por los lectores de conjuros, dotes, objetos…
 
 ## Páginas de referencia
 
@@ -40,7 +40,7 @@ Las imágenes del Manual del Jugador y de la Guía están a 96 ppp y su capa de 
 original, así que volver a pasar OCR no la mejora por sí solo. En Faerûn el texto está en una capa de 1 bit a 600 ppp
 comprimida con JBIG2, que a veces cambia unas letras por otras dentro de la propia imagen.
 
-Aun así, Tesseract (5.3, español, 300 ppp) se equivoca en sitios distintos que la capa original. `web/src/domain/fusion.js`
+Aun así, Tesseract (5.3, español, 300 ppp) se equivoca en sitios distintos que la capa original. `web/src/domain/libros/fusion.js`
 toma la capa del PDF como base y, donde sus palabras no son palabras y las de la otra lectura sí (y se parecen), usa las
 de la otra lectura. `tools/ocr/lecturas/` guarda esa segunda lectura de los tres libros (con la huella del PDF), y
 `preparar-libros.mjs` la usa al generar los libros incluidos. El modelo «best» de Tesseract, los 600 ppp o fusionar

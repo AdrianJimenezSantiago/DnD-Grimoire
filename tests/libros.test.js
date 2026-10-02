@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { detectarSubclases, idLibro } from '../web/src/domain/libros.js';
-import { loadSrd, setLibros, emparejarLibro, allSpellItems, subclasesDe, manualFor, srdFor, compendio } from '../web/src/domain/catalogo.js';
+import { detectarSubclases, idLibro } from '../web/src/domain/libros/libros.js';
+import { loadSrd, setLibros, emparejarLibro, allSpellItems, subclasesDe, manualFor, srdFor, compendio } from '../web/src/domain/conjuros/catalogo.js';
 
 const L = (s, h = 16) => ({ x: 60, y: 0, h, s });
 test('subclases: etiqueta partida, clase por capítulo o por familia del nombre', () => {

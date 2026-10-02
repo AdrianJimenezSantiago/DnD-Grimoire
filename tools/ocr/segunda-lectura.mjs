@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DIR, abrir, archivoLibro, textoLibro, itemsDeTsv } from './comun.mjs';
-import { pageToColumns } from '../../web/src/domain/manualLineas.js';
+import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
 
 const ejecutar = promisify(execFile), DPI = 300;
 export const huella = f => new Promise((ok, mal) => { const h = crypto.createHash('sha256'); fs.createReadStream(f).on('data', d => h.update(d)).on('end', () => ok(h.digest('hex'))).on('error', mal); });

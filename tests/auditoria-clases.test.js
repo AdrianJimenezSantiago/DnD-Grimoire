@@ -1,20 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { conjurosAutomaticos, escalas } from '../web/src/domain/clases2024.js';
-import { opcionesDe, opcionesPendientes, opcionesCambiables, normOpciones } from '../web/src/domain/opcionesRasgo.js';
-import { opcionesIntercambio } from '../web/src/domain/intercambios.js';
-import { alTirarIniciativa, alEmpezarTurno, curacionDeRecurso, aplicarCuracion, rangoCritico, minimoD20Habilidad, temporalesAlEnfurecer, totalMinimoFuerza } from '../web/src/domain/automatismos.js';
-import { reglas, recState } from '../web/src/domain/rasgos.js';
-import { vidaDe, aplicarDano, pgActuales, pgMaximo } from '../web/src/domain/vida.js';
-import { opcionesAlImpactar, danoSiempre, gastarAlImpactar } from '../web/src/domain/alImpactar.js';
-import { PREDEFINIDOS, golpeSinArmas } from '../web/src/domain/equipo.js';
-import { ponerEfecto } from '../web/src/domain/vida.js';
-import { modsTirada } from '../web/src/domain/efectos.js';
-import { velocidad } from '../web/src/domain/habilidades.js';
-import { rasgosEnJuego } from '../web/src/domain/enJuego.js';
-import { sobrantesAutomaticos } from '../web/src/domain/progresion.js';
-import { perfil, magiaPara } from '../web/src/domain/reglas2024.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { conjurosAutomaticos, escalas } from '../web/src/domain/clases/clases2024.js';
+import { opcionesDe, opcionesPendientes, opcionesCambiables, normOpciones } from '../web/src/domain/clases/opcionesRasgo.js';
+import { opcionesIntercambio } from '../web/src/domain/clases/intercambios.js';
+import { alTirarIniciativa, alEmpezarTurno, curacionDeRecurso, aplicarCuracion, rangoCritico, minimoD20Habilidad, temporalesAlEnfurecer, totalMinimoFuerza } from '../web/src/domain/combate/automatismos.js';
+import { reglas, recState } from '../web/src/domain/clases/rasgos.js';
+import { vidaDe, aplicarDano, pgActuales, pgMaximo } from '../web/src/domain/combate/vida.js';
+import { opcionesAlImpactar, danoSiempre, gastarAlImpactar } from '../web/src/domain/combate/alImpactar.js';
+import { PREDEFINIDOS, golpeSinArmas } from '../web/src/domain/equipo/equipo.js';
+import { ponerEfecto } from '../web/src/domain/combate/vida.js';
+import { modsTirada } from '../web/src/domain/combate/efectos.js';
+import { velocidad } from '../web/src/domain/reglas/habilidades.js';
+import { rasgosEnJuego } from '../web/src/domain/clases/enJuego.js';
+import { sobrantesAutomaticos } from '../web/src/domain/clases/progresion.js';
+import { perfil, magiaPara } from '../web/src/domain/reglas/reglas2024.js';
 
 const stats = { fue: 16, des: 16, con: 14, int: 12, sab: 14, car: 14 };
 const ch = o => normChar(blankChar({ stats, ...o }));
@@ -174,7 +174,7 @@ test('conjuros de subclases sin lanzamiento usan su característica (monje de la
 });
 
 test('inmunidades a estados: Aura de coraje, Aura de entrega y Furia irracional', async () => {
-  const { inmunidadesEstado } = await import('../web/src/domain/efectos.js');
+  const { inmunidadesEstado } = await import('../web/src/domain/combate/efectos.js');
   const p = ch({ clase: 'Paladín', subclase: 'Juramento de entrega', nivel: 10 });
   vidaDe(p).estados = ['asustado'];
   assert.deepEqual([...inmunidadesEstado(p).keys()].sort(), ['asustado', 'encantado']);
@@ -184,7 +184,7 @@ test('inmunidades a estados: Aura de coraje, Aura de entrega y Furia irracional'
   assert.equal(inmunidadesEstado(b).get('encantado'), 'Furia irracional');
 });
 test('efectos de rasgo: Arma sagrada suma el Carisma al ataque; Puntería certera deja la velocidad a 0', async () => {
-  const { velocidadEfectiva, EFECTO_DE_RASGO } = await import('../web/src/domain/efectos.js');
+  const { velocidadEfectiva, EFECTO_DE_RASGO } = await import('../web/src/domain/combate/efectos.js');
   const p = ch({ clase: 'Paladín', subclase: 'Juramento de entrega', nivel: 3 }); ponerEfecto(p, 'armasagrada');
   assert.equal(modsTirada(p, { sobre: 'ataque' }).find(m => m.fuente === 'Arma sagrada').valor, 2);
   const r = ch({ clase: 'Pícaro', nivel: 3 }); ponerEfecto(r, 'punteria');
@@ -192,7 +192,7 @@ test('efectos de rasgo: Arma sagrada suma el Carisma al ataque; Puntería certer
   assert.equal(EFECTO_DE_RASGO['voto de enemistad'].gasta, 'tpl:paladin.canalizar');
 });
 test('explorador: Cazador implacable protege la Marca del cazador; acechador suma Sabiduría a la iniciativa', async () => {
-  const { iniciativa, salvacionesCompetentes, bonoHabilidad } = await import('../web/src/domain/habilidades.js');
+  const { iniciativa, salvacionesCompetentes, bonoHabilidad } = await import('../web/src/domain/reglas/habilidades.js');
   const e = ch({ clase: 'Explorador', nivel: 13 }); e.play.conc = 'Marca del cazador';
   assert.equal(aplicarDano(e, 12).concentracion, null);
   const e2 = ch({ clase: 'Explorador', nivel: 12 }); e2.play.conc = 'Marca del cazador';
@@ -209,7 +209,7 @@ test('Aura de celeridad (gloria 7): +3 m de velocidad', () => {
 });
 
 test('lanzadores: Astucia mágica, Recuperación mágica y Forma salvaje al gastarse', async () => {
-  const { alGastarRecurso } = await import('../web/src/domain/automatismos.js');
+  const { alGastarRecurso } = await import('../web/src/domain/combate/automatismos.js');
   const b = ch({ clase: 'Brujo', nivel: 11 }); b.play.used = { 5: 3 };
   assert.match(alGastarRecurso(b, 'tpl:brujo.astucia')[0], /Recuperas 2 espacios/); assert.equal(b.play.used[5], 1);
   const b20 = ch({ clase: 'Brujo', nivel: 20 }); b20.play.used = { 5: 4 }; alGastarRecurso(b20, 'tpl:brujo.astucia'); assert.equal(b20.play.used[5], 0);
@@ -229,7 +229,7 @@ test('lanzadores: Hechicería innata sube 1 la CD de hechicero', () => {
   ponerEfecto(h, 'innata'); assert.equal(perfil(h).cd, cd + 1);
 });
 test('bonos a conjuros: Discípulo de la vida, Alma radiante, Afinidad elemental, Evocación potenciada', async () => {
-  const { bonosDeConjuro } = await import('../web/src/domain/bonosConjuro.js');
+  const { bonosDeConjuro } = await import('../web/src/domain/conjuros/bonosConjuro.js');
   const cura = [{ tipo: 'curación', n: 2, caras: 8, bono: 0 }];
   assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 3 }), { level: 1 }, 'Clérigo', cura, 2)[0].bono, 4);
   assert.equal(bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 3 }), { level: 0 }, 'Clérigo', cura)[0].bono, 0);
@@ -248,12 +248,12 @@ test('conjuros siempre preparados que faltaban: Contactar patrón, Maleficio pri
   assert.ok(n({ clase: 'Bardo', nivel: 20 }).includes('Palabra de poder: matar'));
 });
 test('CA: Juego de pies deslumbrante del colegio de la danza', async () => {
-  const { claseArmadura } = await import('../web/src/domain/equipo.js');
+  const { claseArmadura } = await import('../web/src/domain/equipo/equipo.js');
   assert.equal(claseArmadura(ch({ clase: 'Bardo', subclase: 'Colegio de la danza', nivel: 3 })).ca, 10 + 3 + 2);
 });
 
 test('canjes: recuperar usos gastando espacios, Furia o puntos de hechicería', async () => {
-  const { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } = await import('../web/src/domain/canjes.js');
+  const { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } = await import('../web/src/domain/clases/canjes.js');
   const b = ch({ clase: 'Bárbaro', subclase: 'Senda del berserker', nivel: 14 });
   assert.deepEqual(canjesDe(b, 'tpl:berserker.presencia'), [], 'sin gastar no hay nada que recuperar');
   recState(b, 'tpl:berserker.presencia').used = 1;
@@ -277,7 +277,7 @@ test('canjes: recuperar usos gastando espacios, Furia o puntos de hechicería', 
 });
 
 test('conjuros: el analizador lee dardos, rayos, PG temporales, modificador de curación y tipos a elegir', async () => {
-  const { analizarTiradas, dadosPara } = await import('../web/src/domain/tiradas.js');
+  const { analizarTiradas, dadosPara } = await import('../web/src/domain/conjuros/tiradas.js');
   const mm = analizarTiradas('You create three glowing darts of magical force. A dart deals 1d4 + 1 Force damage to its target.', 'The spell creates one more dart for each spell slot level above 1.');
   assert.equal(dadosPara(mm, { nivelEspacio: 3, nivelConjuro: 1 })[0].veces, 5);
   const fl = analizarTiradas('You gain 2d4 + 4 Temporary Hit Points.', 'You gain 5 additional Temporary Hit Points for each spell slot level above 1.');
@@ -288,12 +288,12 @@ test('conjuros: el analizador lee dardos, rayos, PG temporales, modificador de c
   const sw = analizarTiradas('damage 1d8', 'The damage increases by 1d8 for every slot level above 2.'); assert.equal(sw.escala.desde, 2);
 });
 test('conjuros sin texto del SRD tienen sus datos mecánicos de respaldo', async () => {
-  const { tiradasBase } = await import('../web/src/domain/tiradasBase.js');
+  const { tiradasBase } = await import('../web/src/domain/conjuros/tiradasBase.js');
   assert.equal(tiradasBase('Mind Sliver').salvacion, 'Inteligencia');
   assert.equal(tiradasBase('Toll the Dead').danos[1].caras, 12);
 });
 test('conjuros con efecto sobre ti: Manto del cruzado, Presciencia, Vínculo protector', async () => {
-  const { efectoDeConjuro, caEfectiva } = await import('../web/src/domain/efectos.js');
+  const { efectoDeConjuro, caEfectiva } = await import('../web/src/domain/combate/efectos.js');
   assert.equal(efectoDeConjuro('Manto del cruzado').danoArma, '1d4');
   assert.equal(efectoDeConjuro('Agrandar/reducir').k, 'agrandar');
   const p = ch({ clase: 'Mago', nivel: 17 }); ponerEfecto(p, 'presciencia');
@@ -301,14 +301,14 @@ test('conjuros con efecto sobre ti: Manto del cruzado, Presciencia, Vínculo pro
   const v = ch({ clase: 'Clérigo', nivel: 3 }); const ca = caEfectiva(v).ca; ponerEfecto(v, 'vinculo'); assert.equal(caEfectiva(v).ca, ca + 1);
 });
 test('Armadura de Agathys y Heroísmo dan PG temporales', async () => {
-  const { temporalesDeConjuro } = await import('../web/src/domain/automatismos.js');
+  const { temporalesDeConjuro } = await import('../web/src/domain/combate/automatismos.js');
   assert.equal(temporalesDeConjuro('Armadura de Agathys', 3), 15);
   const b = ch({ clase: 'Bardo', nivel: 3 }); b.play.conc = 'Heroísmo'; ponerEfecto(b, 'heroismo', { conc: 'Heroísmo' });
   alEmpezarTurno(b); assert.equal(vidaDe(b).temp, 2);
 });
 
 test('vida 6/17: Sanador bendito y Sanación suprema; evocador: Truco potente', async () => {
-  const { bonosDeConjuro, trucoPotenteEvocador } = await import('../web/src/domain/bonosConjuro.js');
+  const { bonosDeConjuro, trucoPotenteEvocador } = await import('../web/src/domain/conjuros/bonosConjuro.js');
   const cura = [{ tipo: 'curación', n: 2, caras: 8, bono: 0 }];
   const [x] = bonosDeConjuro(ch({ clase: 'Clérigo', subclase: 'Dominio de la vida', nivel: 17 }), { level: 1 }, 'Clérigo', cura, 1);
   assert.equal(x.maximo, true); assert.equal(x.sanador, 3); assert.equal(x.bono, 3);
@@ -317,11 +317,11 @@ test('vida 6/17: Sanador bendito y Sanación suprema; evocador: Truco potente', 
 });
 
 test('Faerûn: Vástago de los Tres cambia truco con el dios; genios, invernal, luna, conocimiento y abanderado', async () => {
-  const { claseArmadura } = await import('../web/src/domain/equipo.js');
-  const { salvacionesCompetentes } = await import('../web/src/domain/habilidades.js');
-  const { inmunidadesEstado } = await import('../web/src/domain/efectos.js');
-  const { fuentesExtra } = await import('../web/src/domain/creacion.js');
-  const { temporalesDeConjuro } = await import('../web/src/domain/automatismos.js');
+  const { claseArmadura } = await import('../web/src/domain/equipo/equipo.js');
+  const { salvacionesCompetentes } = await import('../web/src/domain/reglas/habilidades.js');
+  const { inmunidadesEstado } = await import('../web/src/domain/combate/efectos.js');
+  const { fuentesExtra } = await import('../web/src/domain/personaje/creacion.js');
+  const { temporalesDeConjuro } = await import('../web/src/domain/combate/automatismos.js');
   const v = ch({ clase: 'Pícaro', subclase: 'Vástago de los Tres', nivel: 3 });
   assert.deepEqual(conjurosAutomaticos(v).map(c => c.nombre), ['Guardia de cuchillas']);
   v.opciones = { 'vastago.lealtad': 'Myrkul' }; assert.deepEqual(conjurosAutomaticos(v).map(c => c.nombre), ['Toque helado']);
@@ -337,8 +337,8 @@ test('Faerûn: Vástago de los Tres cambia truco con el dios; genios, invernal, 
   assert.ok(opcionesAlImpactar(g, arma('Espada larga')).some(o => o.k === 'ifrit'));
 });
 test('libro: Canción de la victoria ya no suma Inteligencia al daño; Daño bárdico de la danza; Mareas del caos', async () => {
-  const { ataqueArma } = await import('../web/src/domain/equipo.js');
-  const { alLanzarConEspacio, rangoMuerte } = await import('../web/src/domain/automatismos.js');
+  const { ataqueArma } = await import('../web/src/domain/equipo/equipo.js');
+  const { alLanzarConEspacio, rangoMuerte } = await import('../web/src/domain/combate/automatismos.js');
   const m = ch({ clase: 'Mago', subclase: 'Hojacantante', nivel: 14 }); ponerEfecto(m, 'cancion');
   assert.ok(!ataqueArma(m, arma('Espada larga')).estilos.some(e => /victoria/i.test(e)));
   const b = ch({ clase: 'Bardo', subclase: 'Colegio de la danza', nivel: 5 });
@@ -349,9 +349,9 @@ test('libro: Canción de la victoria ya no suma Inteligencia al daño; Daño bá
 });
 
 test('especies: linajes, conjuros de especie, usos y resistencias del Manual', async () => {
-  const { conjurosEspecie, linajeActual } = await import('../web/src/domain/especies.js');
-  const { resistenciasDe } = await import('../web/src/domain/efectos.js');
-  const { alientoDe } = await import('../web/src/domain/automatismos.js');
+  const { conjurosEspecie, linajeActual } = await import('../web/src/domain/origen/especies.js');
+  const { resistenciasDe } = await import('../web/src/domain/combate/efectos.js');
+  const { alientoDe } = await import('../web/src/domain/combate/automatismos.js');
   const drow = ch({ clase: 'Mago', nivel: 5, especie: 'Elfo (drow)' });
   assert.equal(linajeActual(drow).nombre, 'Drow');
   assert.deepEqual(conjurosEspecie(drow, 5).map(c => `${c.nombre}:${c.gratis}`), ['Luces danzantes:', 'Fuego feérico:1/DL', 'Oscuridad:1/DL']);
@@ -374,14 +374,14 @@ test('especies: linajes, conjuros de especie, usos y resistencias del Manual', a
 });
 
 test('dotes del Manual y de Faerûn: aumentos, acciones adicionales, combate, descansos y defensas', async () => {
-  const { AUMENTO_DOTE } = await import('../web/src/domain/dotesDatos.js');
-  const { accionesAdicionales } = await import('../web/src/domain/combate.js');
-  const { cupoMaestrias } = await import('../web/src/domain/maestria.js');
-  const { ataqueArma } = await import('../web/src/domain/equipo.js');
-  const { temporalesAlDescansar, recuerdoDeConjuros, reduccionArmaduraPesada } = await import('../web/src/domain/automatismos.js');
-  const { resistenciasDe, inmunidadesEstado, caEfectiva } = await import('../web/src/domain/efectos.js');
-  const { gastarDadoGolpe } = await import('../web/src/domain/vida.js');
-  const { dotesConConjuros } = await import('../web/src/domain/conjurosDote.js');
+  const { AUMENTO_DOTE } = await import('../web/src/domain/origen/dotesDatos.js');
+  const { accionesAdicionales } = await import('../web/src/domain/combate/combate.js');
+  const { cupoMaestrias } = await import('../web/src/domain/combate/maestria.js');
+  const { ataqueArma } = await import('../web/src/domain/equipo/equipo.js');
+  const { temporalesAlDescansar, recuerdoDeConjuros, reduccionArmaduraPesada } = await import('../web/src/domain/combate/automatismos.js');
+  const { resistenciasDe, inmunidadesEstado, caEfectiva } = await import('../web/src/domain/combate/efectos.js');
+  const { gastarDadoGolpe } = await import('../web/src/domain/combate/vida.js');
+  const { dotesConConjuros } = await import('../web/src/domain/origen/conjurosDote.js');
   assert.deepEqual(AUMENTO_DOTE['maestro en armas pesadas'], ['fue']);
   assert.deepEqual(AUMENTO_DOTE['don de las formas fluidas'], ['int', 'sab', 'car']);
   assert.ok(accionesAdicionales(ch({ clase: 'Mago', nivel: 4, dotes: ['Observador'] })).some(a => a.k === 'buscar'));
@@ -404,8 +404,8 @@ test('dotes del Manual y de Faerûn: aumentos, acciones adicionales, combate, de
 });
 
 test('conjuros en español (Manual importado): mitad solo con daño, PG temporales, daño base, tipos a elegir y OCR', async () => {
-  const { analizarTiradas, dadosPara } = await import('../web/src/domain/tiradas.js');
-  const { ajustarTiradas } = await import('../web/src/domain/tiradasBase.js');
+  const { analizarTiradas, dadosPara } = await import('../web/src/domain/conjuros/tiradas.js');
+  const { ajustarTiradas } = await import('../web/src/domain/conjuros/tiradasBase.js');
   assert.equal(analizarTiradas('Debe superar una tirada de salvación de Sabiduría. Un objetivo afectado ve cómo su velocidad se reduce a la mitad.', '').mitad, false);
   const fv = analizarTiradas('Obtienes 2d4 + 4 puntos de golpe temporales.', 'Obtienes 5 puntos de golpe temporales adicionales por cada nivel por encima de 1 que tenga el espacio.');
   assert.ok(fv.curacion.temp); assert.equal(dadosPara(fv, { nivelEspacio: 3, nivelConjuro: 1 })[0].bono, 14);
@@ -421,7 +421,7 @@ test('conjuros en español (Manual importado): mitad solo con daño, PG temporal
 });
 
 test('reacciones al recibir daño y Golpe guiado, Cazador preciso', async () => {
-  const { reaccionesDano } = await import('../web/src/domain/automatismos.js');
+  const { reaccionesDano } = await import('../web/src/domain/combate/automatismos.js');
   const p = ch({ clase: 'Pícaro', nivel: 5 });
   assert.equal(reaccionesDano(p).find(r => r.k === 'esquiva').aplica(p, 11), 5);
   const m = ch({ clase: 'Monje', nivel: 3 });

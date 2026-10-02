@@ -32,7 +32,7 @@ El salto de la segunda ronda viene sobre todo de sacar el fondo animado a un Wor
 
 ## Qué se encontró y qué se ha cambiado
 
-### 1. El fondo animado competía con el scroll (`ui/fondo.js`)
+### 1. El fondo animado competía con el scroll (`ui/animaciones/fondo.js`)
 El lienzo de partículas ocupa toda la pantalla y se repinta 30 veces por segundo. En las trazas era lo que más costaba con diferencia. Además, en cada fotograma:
 - buscaba en todo el DOM si había una ventana abierta (`querySelector('dialog.tall[open]')`);
 - leía `innerWidth`, que puede forzar un layout.
@@ -64,15 +64,15 @@ Cada 4,2 s la rueda cambia de tono con una transición de 1,6 s sobre variables 
 - El tono de destino se aplica solo a los bloques que no tienen paleta propia (cabecera, títulos, acciones, pie y un nuevo `.l-cielo` para el degradado de fondo), no al contenedor. Las tarjetas de personaje, que ya tienen su propio color, no se tocan.
 - En móvil la transición avanza en 12 saltos muy cortos (`steps(12, jump-none)`). Entre salto y salto el valor no cambia y el navegador no recalcula nada. De 56 recálculos por transición se pasa a 12.
 
-### 7. Layout forzado en cada acción (`ui/sheet.js`)
+### 7. Layout forzado en cada acción (`ui/pantallas/sheet.js`)
 `renderBar` medía la barra (`scrollWidth`, `getBoundingClientRect`) a mitad del render, lo que forzaba un cálculo de estilos y de layout extra, y reescribía `--appbar-h` en `:root` en cada acción aunque no hubiera cambiado. Tocar una variable de `:root` invalida los estilos de todo el documento.
 - La medida va al siguiente fotograma, agrupada, y además con un `ResizeObserver` sobre la barra.
 - `--appbar-h` solo se escribe si cambia.
 
-### 8. La onda de los botones se creaba al empezar a desplazar (`ui/magia.js`)
+### 8. La onda de los botones se creaba al empezar a desplazar (`ui/animaciones/magia.js`)
 En cada `pointerdown` la onda medía el botón y metía nodos en el DOM, justo en el instante en que arranca un desplazamiento si el dedo cae sobre un botón (algo constante en listas de conjuros). Con el dedo, ahora la onda espera un instante: si el gesto resulta ser un scroll no hace nada, y si es un toque aparece al soltar o a los 70 ms. Con ratón sigue siendo inmediata.
 
-### 9. Partículas de los efectos (`ui/fx.js`)
+### 9. Partículas de los efectos (`ui/animaciones/fx.js`)
 - Cada chispa creaba un `createRadialGradient` nuevo en cada fotograma. Ahora el degradado se pinta una vez por color en un sprite de 64 px y se estampa con `drawImage`, con la vida en `globalAlpha`. El resultado es idéntico.
 - La física dependía de la tasa de refresco: a 120 Hz las chispas iban al doble de velocidad y en un móvil lento, a cámara lenta. Ahora se escala por el tiempo real del fotograma.
 - Tope de 500 partículas, resolución máxima 1,5× (antes 2×) y tamaño de pantalla guardado en lugar de leer `innerWidth` en cada fotograma.
@@ -89,7 +89,7 @@ Se han renombrado a `cc-latido` y `cc-llama` y cada animación vuelve a ser la q
 
 ## Segunda ronda
 
-### 12. El fondo animado se dibuja en un Worker (`ui/fondoMotor.js`, `ui/fondoWorker.js`)
+### 12. El fondo animado se dibuja en un Worker (`ui/animaciones/fondoMotor.js`, `ui/animaciones/fondoWorker.js`)
 Las escenas y el bucle de dibujo están en `fondoMotor.js`, sin tocar el DOM. `fondo.js` pasa el lienzo al Worker con `transferControlToOffscreen()` y solo le cuenta lo que pasa en la página: tamaño, escena, tema, si hay una ventana a pantalla completa (se comprueba al abrirse o cerrarse una, ya no en cada fotograma), si la pestaña está oculta y si se está desplazando. El hilo principal ya no dibuja partículas ni sube el lienzo en cada fotograma.
 Si el navegador no admite `OffscreenCanvas` o el Worker falla, el mismo motor corre en la página como antes. En la versión de Windows (un solo HTML abierto desde disco) siempre se usa este modo.
 

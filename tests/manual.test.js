@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSpells, nombreBonito } from '../web/src/domain/manual.js';
-import { pageToColumns } from '../web/src/domain/manualLineas.js';
+import { parseSpells, nombreBonito } from '../web/src/domain/libros/manual.js';
+import { pageToColumns } from '../web/src/domain/libros/manualLineas.js';
 
 const L = (x, y, s, h = 16) => ({ x, y, h, s });
 const page = { p: 1, cols: [[

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { aBestiario, arreglarDadosCon, arreglarDadosTexto, formasPosibles, leerCaracteristicas, limiteFormaSalvaje, parseCriaturas, vdNumero } from '../web/src/domain/monstruos.js';
+import { aBestiario, arreglarDadosCon, arreglarDadosTexto, formasPosibles, leerCaracteristicas, limiteFormaSalvaje, parseCriaturas, vdNumero } from '../web/src/domain/criaturas/monstruos.js';
 
 const linea = (s, y, x = 50, h = 10) => ({ s, x, y, h });
 const pagina = (lineas, p = 1) => ({ p, cols: [lineas.map((s, i) => (typeof s === 'string' ? linea(s, 900 - i * 16) : s)), []] });

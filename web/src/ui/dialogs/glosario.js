@@ -1,4 +1,4 @@
-import { on } from '../dom.js';
+import { on } from '../componentes/dom.js';
 import { abrirTermino } from './biblioteca.js';
 
 export function init() {

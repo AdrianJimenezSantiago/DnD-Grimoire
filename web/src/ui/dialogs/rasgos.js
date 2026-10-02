@@ -1,18 +1,18 @@
 import { clone, esc, uid } from '../../core/util.js';
-import { ABILS, SCHOOLS, perfil, clasesDe, vistaClase } from '../../domain/reglas2024.js';
-import { dadoRecarga, maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/rasgos.js';
-import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases2024.js';
-import { anadirPendientes, conjurosPendientes } from '../../domain/progresion.js';
-import { compendio } from '../../domain/catalogo.js';
-import { $, on } from '../dom.js';
-import { claseLinea, freeOf, usedOf } from '../sheet.js';
-import { openSheet, closeSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { slotFx } from '../fx.js';
+import { ABILS, SCHOOLS, perfil, clasesDe, vistaClase } from '../../domain/reglas/reglas2024.js';
+import { dadoRecarga, maxFrom, recState, reglas, ruleSummary, TIPO_TXT } from '../../domain/clases/rasgos.js';
+import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases/clases2024.js';
+import { anadirPendientes, conjurosPendientes } from '../../domain/clases/progresion.js';
+import { compendio } from '../../domain/conjuros/catalogo.js';
+import { $, on } from '../componentes/dom.js';
+import { claseLinea, freeOf, usedOf } from '../pantallas/sheet.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { slotFx } from '../animaciones/fx.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
-import { confirmar } from '../modal.js';
-import { icon } from '../icons.js';
+import { confirmar } from '../componentes/modal.js';
+import { icon } from '../componentes/icons.js';
 
 let S, RD = null, REC = null, PESTANA = 'progresion';
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analizarTiradas, dadosPara, tiradasDe, tieneTiradas } from '../web/src/domain/tiradas.js';
-import { formasDeEstado } from '../web/src/domain/glosario.js';
+import { analizarTiradas, dadosPara, tiradasDe, tieneTiradas } from '../web/src/domain/conjuros/tiradas.js';
+import { formasDeEstado } from '../web/src/domain/libros/glosario.js';
 
 test('truco con ataque que escala con el nivel del personaje', () => {
   const r = analizarTiradas('Haz un ataque de conjuro a distancia. Si impacta, sufre 1d10 de daño de fuego.', 'El daño aumenta en 1d10 cuando alcanzas los niveles 5 (2d10), 11 y 17.');

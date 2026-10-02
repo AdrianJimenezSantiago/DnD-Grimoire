@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { caEfectiva, efectoDeConjuro, fmtRondas, efectosDe } from '../web/src/domain/efectos.js';
-import { pgMaximo, ponerEfecto, pasarRonda, soltarConc, cambiarConc, rondasDeDuracion, cdConcentracion, aplicarDano } from '../web/src/domain/vida.js';
-import { opcionesIntercambio, nivelCambia, esHumano } from '../web/src/domain/intercambios.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { caEfectiva, efectoDeConjuro, fmtRondas, efectosDe } from '../web/src/domain/combate/efectos.js';
+import { pgMaximo, ponerEfecto, pasarRonda, soltarConc, cambiarConc, rondasDeDuracion, cdConcentracion, aplicarDano } from '../web/src/domain/combate/vida.js';
+import { opcionesIntercambio, nivelCambia, esHumano } from '../web/src/domain/clases/intercambios.js';
 
 const pj = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
 
@@ -83,14 +83,14 @@ test('descansos: qué conjuros y opciones puedes cambiar según tu clase', () =>
   assert.ok(esHumano(pj({ especie: 'Humano' }))); assert.ok(!esHumano(pj({ especie: 'Mediano' })));
 });
 test('combate: la iniciativa escrita a mano se recuerda y se limpia al empezar otro', async () => {
-  const { normCombate, empezarCombate, combateDe } = await import('../web/src/domain/combate.js');
+  const { normCombate, empezarCombate, combateDe } = await import('../web/src/domain/combate/combate.js');
   assert.equal(normCombate({ iniciativa: '17', iniManual: true }).iniManual, true);
   assert.equal(normCombate({ iniciativa: null, iniManual: true }).iniManual, false);
   const ch = pj({ combate: { activo: true, iniciativa: 19, iniManual: true } });
   empezarCombate(ch); assert.equal(combateDe(ch).iniciativa, null); assert.equal(combateDe(ch).iniManual, false);
 });
 test('tiradas: el resumen suma agotamiento y efectos, y marca ventaja o desventaja', async () => {
-  const { resumenTirada } = await import('../web/src/domain/efectos.js');
+  const { resumenTirada } = await import('../web/src/domain/combate/efectos.js');
   const { numLibre } = await import('../web/src/core/util.js');
   const ch = pj({ vida: { agotamiento: 1, estados: ['envenenado'] } });
   ponerEfecto(ch, 'bendicion'); ponerEfecto(ch, 'agrandar');

@@ -1,8 +1,8 @@
 import { esc } from '../../core/util.js';
-import { parseArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/area.js';
-import { $, on } from '../dom.js';
-import { openSheet } from '../dialog.js';
-import { avatarHtml } from '../avatar.js';
+import { parseArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/combate/area.js';
+import { $, on } from '../componentes/dom.js';
+import { openSheet } from '../componentes/dialog.js';
+import { avatarHtml } from '../componentes/avatar.js';
 
 let S, A = null;
 const dlg = () => $('#areaDlg');

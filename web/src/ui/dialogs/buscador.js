@@ -1,10 +1,10 @@
 import { esc, norm, uid } from '../../core/util.js';
-import { LISTAS, SCHOOLS, perfil } from '../../domain/reglas2024.js';
-import { allSpellItems, itemMeta, itemTag, itemToSid, listFilter, invalidateItems } from '../../domain/catalogo.js';
-import { $, on } from '../dom.js';
-import { prepCount } from '../sheet.js';
-import { openSheet, closeSheet } from '../dialog.js';
-import { toast } from '../toast.js';
+import { LISTAS, SCHOOLS, perfil } from '../../domain/reglas/reglas2024.js';
+import { allSpellItems, itemMeta, itemTag, itemToSid, listFilter, invalidateItems } from '../../domain/conjuros/catalogo.js';
+import { $, on } from '../componentes/dom.js';
+import { prepCount } from '../pantallas/sheet.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
 import { undoBtn } from '../../app/acciones.js';
 import { previewSpell } from './conjuro.js';
 

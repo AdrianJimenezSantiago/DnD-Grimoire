@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { alcance, campo, componentes, duracion, escuelaOficial, material, usoGratis } from '../web/src/domain/validar.js';
-import { ESPIRITUS, PERFILES, caracteristicas, criaturasDe, perfilDe } from '../web/src/domain/criaturas.js';
-import { conObjetivos, empezarConc, objetivosNuevos, rasgosConObjetivo, terminarConc } from '../web/src/domain/concentracion.js';
-import { analizarTiradas, dadosPara, media } from '../web/src/domain/tiradas.js';
-import { blankChar, normDb } from '../web/src/domain/modelo.js';
-import { SCHOOLS } from '../web/src/domain/reglas2024.js';
+import { alcance, campo, componentes, duracion, escuelaOficial, material, usoGratis } from '../web/src/domain/conjuros/validar.js';
+import { ESPIRITUS, PERFILES, caracteristicas, criaturasDe, perfilDe } from '../web/src/domain/criaturas/criaturas.js';
+import { conObjetivos, empezarConc, objetivosNuevos, rasgosConObjetivo, terminarConc } from '../web/src/domain/combate/concentracion.js';
+import { analizarTiradas, dadosPara, media } from '../web/src/domain/conjuros/tiradas.js';
+import { blankChar, normDb } from '../web/src/domain/personaje/modelo.js';
+import { SCHOOLS } from '../web/src/domain/reglas/reglas2024.js';
 
 const { conjuros } = JSON.parse(fs.readFileSync(new URL('../web/public/data/compendio.json', import.meta.url)));
 

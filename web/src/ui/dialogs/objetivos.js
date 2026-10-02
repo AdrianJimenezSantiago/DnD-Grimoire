@@ -1,12 +1,12 @@
 // «¿Sobre quién?»: al lanzar un conjuro que ayuda, marca a quién afecta; si te incluyes, el efecto se te aplica solo
 import { esc } from '../../core/util.js';
-import { efectoDeConjuro, fmtRondas } from '../../domain/efectos.js';
-import { esYo, listaObjetivos } from '../../domain/vida.js';
-import { schoolKey } from '../sheet.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { avatarHtml } from '../avatar.js';
-import { openSheet, closeSheet } from '../dialog.js';
+import { efectoDeConjuro, fmtRondas } from '../../domain/combate/efectos.js';
+import { esYo, listaObjetivos } from '../../domain/combate/vida.js';
+import { schoolKey } from '../pantallas/sheet.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { avatarHtml } from '../componentes/avatar.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo, claveObjetivos } from '../../app/acciones.js';
 
 let S, O = null;

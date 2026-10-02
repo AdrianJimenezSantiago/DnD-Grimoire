@@ -1,11 +1,11 @@
 import { esc, norm, uid } from '../../core/util.js';
-import { biblioteca } from '../../domain/catalogo.js';
-import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/monstruos.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { icon } from '../icons.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
+import { biblioteca } from '../../domain/conjuros/catalogo.js';
+import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/criaturas/monstruos.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { icon } from '../componentes/icons.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
 import { abrirCriatura } from './biblioteca.js';
 
 let S, F = { modo: 'salvaje', vd: 1, q: '', solo: false, abrirMano: false };

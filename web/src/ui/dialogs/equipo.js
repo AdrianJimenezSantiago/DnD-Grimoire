@@ -1,25 +1,25 @@
-import { campoElegible, ponerValor, elegirObjetoComun } from '../elecciones.js';
+import { campoElegible, ponerValor, elegirObjetoComun } from '../selectores/elecciones.js';
 import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, equipar, desequipar, cambiarCantidad,
   quitarObjeto, anadirComun, normObjeto, pesoTotal, pesoGuardado, capacidadCarga, capacidadArrastre, valorMonedas, valorObjetos, claseArmadura, ataqueArma,
   manos, esEscudo, aDosManos, vaEnMano, armaduraPuesta, dosArmasLigeras, requisitosArmadura, penalizacionArmadura, alternarGuardado,
-  pagar, cobrar, juntarMonedas, enCobre, precioVenta, venderObjeto, municionDe, curacionDe, motivoSintonia, requisitoSintonia } from '../../domain/equipo.js';
-import { usoDe, usarObjeto } from '../../domain/usarObjeto.js';
-import { accionesDe, motivoAccion } from '../../domain/accionesObjeto.js';
-import { accionObjeto, costeTexto } from '../accionesObjeto.js';
-import { reglas, usosGastados } from '../../domain/rasgos.js';
-import { efectoDe, objetoActivo, bonoDeNombre, describirEfecto, statsEfectivos } from '../../domain/objetosEfecto.js';
-import { armadurasDe, competenteConArma } from '../../domain/competencias.js';
-import { biblioteca } from '../../domain/catalogo.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { icon } from '../icons.js';
-import { avatarHtml } from '../avatar.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { pedir } from '../modal.js';
-import { burstFrom, reducedMotion } from '../fx.js';
-import { golpe } from '../golpes.js';
+  pagar, cobrar, juntarMonedas, enCobre, precioVenta, venderObjeto, municionDe, curacionDe, motivoSintonia, requisitoSintonia } from '../../domain/equipo/equipo.js';
+import { usoDe, usarObjeto } from '../../domain/equipo/usarObjeto.js';
+import { accionesDe, motivoAccion } from '../../domain/equipo/accionesObjeto.js';
+import { accionObjeto, costeTexto } from '../selectores/accionesObjeto.js';
+import { reglas, usosGastados } from '../../domain/clases/rasgos.js';
+import { efectoDe, objetoActivo, bonoDeNombre, describirEfecto, statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
+import { armadurasDe, competenteConArma } from '../../domain/reglas/competencias.js';
+import { biblioteca } from '../../domain/conjuros/catalogo.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { icon } from '../componentes/icons.js';
+import { avatarHtml } from '../componentes/avatar.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { pedir } from '../componentes/modal.js';
+import { burstFrom, reducedMotion } from '../animaciones/fx.js';
+import { golpe } from '../animaciones/golpes.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn, stepResource } from '../../app/acciones.js';
 import { RAR_K, TIPO_I, abrirObjeto, openBiblioteca } from './biblioteca.js';

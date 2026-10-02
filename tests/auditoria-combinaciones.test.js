@@ -1,20 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { CLASES, perfil } from '../web/src/domain/reglas2024.js';
-import { SUBCLASES, conjurosAutomaticos, escalas, progresion } from '../web/src/domain/clases2024.js';
-import { reglas, recState, recuperarEnDescanso } from '../web/src/domain/rasgos.js';
-import { rasgosEnJuego } from '../web/src/domain/enJuego.js';
-import { opcionesAlImpactar, danoSiempre } from '../web/src/domain/alImpactar.js';
-import { alTirarIniciativa, alEmpezarTurno, alGastarRecurso, curacionDeRecurso } from '../web/src/domain/automatismos.js';
-import { opcionesIntercambio } from '../web/src/domain/intercambios.js';
-import { opcionesDe } from '../web/src/domain/opcionesRasgo.js';
-import { canjesDe } from '../web/src/domain/canjes.js';
-import { PREDEFINIDOS, golpeSinArmas, claseArmadura } from '../web/src/domain/equipo.js';
-import { velocidad, iniciativa } from '../web/src/domain/habilidades.js';
-import { modsTirada, caEfectiva } from '../web/src/domain/efectos.js';
-import { pgMaximo } from '../web/src/domain/vida.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { CLASES, perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { SUBCLASES, conjurosAutomaticos, escalas, progresion } from '../web/src/domain/clases/clases2024.js';
+import { reglas, recState, recuperarEnDescanso } from '../web/src/domain/clases/rasgos.js';
+import { rasgosEnJuego } from '../web/src/domain/clases/enJuego.js';
+import { opcionesAlImpactar, danoSiempre } from '../web/src/domain/combate/alImpactar.js';
+import { alTirarIniciativa, alEmpezarTurno, alGastarRecurso, curacionDeRecurso } from '../web/src/domain/combate/automatismos.js';
+import { opcionesIntercambio } from '../web/src/domain/clases/intercambios.js';
+import { opcionesDe } from '../web/src/domain/clases/opcionesRasgo.js';
+import { canjesDe } from '../web/src/domain/clases/canjes.js';
+import { PREDEFINIDOS, golpeSinArmas, claseArmadura } from '../web/src/domain/equipo/equipo.js';
+import { velocidad, iniciativa } from '../web/src/domain/reglas/habilidades.js';
+import { modsTirada, caEfectiva } from '../web/src/domain/combate/efectos.js';
+import { pgMaximo } from '../web/src/domain/combate/vida.js';
 
 const compendio = JSON.parse(fs.readFileSync(new URL('../web/public/data/compendio.json', import.meta.url), 'utf8')).conjuros;
 const nombres = new Set(compendio.map(c => c.es.toLowerCase()));
@@ -72,7 +72,7 @@ test('los recursos de todas las subclases a nivel 20 tienen máximo positivo y r
 });
 
 test('todas las especies y sus linajes, de nivel 1 a 20: el motor responde y sus conjuros existen', async () => {
-  const { LINAJES, conjurosEspecie, RASGOS_ESPECIE } = await import('../web/src/domain/especies.js');
+  const { LINAJES, conjurosEspecie, RASGOS_ESPECIE } = await import('../web/src/domain/origen/especies.js');
   const especies = { aasimar: 'Aasimar', draconido: 'Dracónido', elfo: 'Elfo', enano: 'Enano', gnomo: 'Gnomo', goliat: 'Goliat', humano: 'Humano', mediano: 'Mediano', orco: 'Orco', tiefling: 'Tiefling' };
   assert.deepEqual(Object.keys(RASGOS_ESPECIE).sort(), Object.keys(especies).sort());
   for (const [k, especie] of Object.entries(especies)) {

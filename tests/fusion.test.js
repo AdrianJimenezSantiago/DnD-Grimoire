@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { crearVocabulario } from '../web/src/domain/corrector.js';
-import { fusionar } from '../web/src/domain/fusion.js';
+import { crearVocabulario } from '../web/src/domain/libros/corrector.js';
+import { fusionar } from '../web/src/domain/libros/fusion.js';
 
 const rep = (txt, n) => Array(n).fill(txt).join(' ');
 const voc = crearVocabulario([

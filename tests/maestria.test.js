@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { cupoMaestrias, armaElegible, efectoMaestria, ataquesPorAccion, cupoEn } from '../web/src/domain/maestria.js';
-import { registrarAtaque, siguienteTurno, empezarCombate } from '../web/src/domain/combate.js';
-import { ataqueArma, anadirComun, PREDEFINIDOS } from '../web/src/domain/equipo.js';
-import { nivelImpacto } from '../web/src/ui/impacto.js';
-import { parsear, distribucion } from '../web/src/domain/dados.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { cupoMaestrias, armaElegible, efectoMaestria, ataquesPorAccion, cupoEn } from '../web/src/domain/combate/maestria.js';
+import { registrarAtaque, siguienteTurno, empezarCombate } from '../web/src/domain/combate/combate.js';
+import { ataqueArma, anadirComun, PREDEFINIDOS } from '../web/src/domain/equipo/equipo.js';
+import { nivelImpacto } from '../web/src/ui/animaciones/impacto.js';
+import { parsear, distribucion } from '../web/src/domain/reglas/dados.js';
 
 const de = n => structuredClone(PREDEFINIDOS.find(p => p.nombre === n));
 const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar, upsertSpell, importarPersonaje, emptyDb } from '../web/src/domain/modelo.js';
+import { blankChar, normChar, upsertSpell, importarPersonaje, emptyDb } from '../web/src/domain/personaje/modelo.js';
 
 test('exportar e importar un personaje suelto, con sus conjuros', () => {
   const a = emptyDb(), sid = upsertSpell(a, { es: 'Escudo', en: 'Shield', level: 1 });

@@ -1,16 +1,16 @@
 import { esc } from '../../core/util.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
-import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/catalogo.js';
-import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/componerLibro.js';
-import { CLASES_ES } from '../../domain/libros.js';
-import { claveNombre } from '../../domain/manual.js';
-import { $, on } from '../dom.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { confirmar } from '../modal.js';
+import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/conjuros/catalogo.js';
+import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/libros/componerLibro.js';
+import { CLASES_ES } from '../../domain/libros/libros.js';
+import { claveNombre } from '../../domain/libros/manual.js';
+import { $, on } from '../componentes/dom.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { confirmar } from '../componentes/modal.js';
 import { fileStore } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
-import { gi } from '../tema.js';
+import { gi } from '../componentes/tema.js';
 import { openBiblioteca } from './biblioteca.js';
 
 const pl = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;

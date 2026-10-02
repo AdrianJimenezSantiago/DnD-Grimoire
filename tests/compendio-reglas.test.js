@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { PREDEFINIDOS } from '../web/src/domain/equipo.js';
-import { modsTirada, inmunidadesEstado, REGLAS_ESTADO } from '../web/src/domain/efectos.js';
-import { ESTADOS, RESUMEN_ESTADO } from '../web/src/domain/vida.js';
-import { ACCION_COMUN } from '../web/src/domain/combate.js';
-import { ECONOMIA_INFO, PROPIEDADES, textoPropiedad, textoMaestria, salto } from '../web/src/domain/referencia.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { PREDEFINIDOS } from '../web/src/domain/equipo/equipo.js';
+import { modsTirada, inmunidadesEstado, REGLAS_ESTADO } from '../web/src/domain/combate/efectos.js';
+import { ESTADOS, RESUMEN_ESTADO } from '../web/src/domain/combate/vida.js';
+import { ACCION_COMUN } from '../web/src/domain/combate/combate.js';
+import { ECONOMIA_INFO, PROPIEDADES, textoPropiedad, textoMaestria, salto } from '../web/src/domain/reglas/referencia.js';
 
 const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
 const conEstados = (...estados) => { const ch = pj(); ch.vida.estados = estados; return ch; };
@@ -73,7 +73,7 @@ test('saltos en metros', () => {
 });
 
 test('las mazas y lanzas ya guardadas pasan a Debilitar', async () => {
-  const { normObjeto } = await import('../web/src/domain/equipo.js');
+  const { normObjeto } = await import('../web/src/domain/equipo/equipo.js');
   const vieja = { nombre: 'Maza', cat: 'arma', arma: { dano: '1d6', tipo: 'contundente', props: [], maestria: 'Irritar' } };
   assert.equal(normObjeto(vieja).arma.maestria, 'Debilitar');
   assert.equal(normObjeto({ nombre: 'Lanza +1', cat: 'arma', arma: { base: 'Lanza', maestria: 'Derribar' } }).arma.maestria, 'Debilitar');
@@ -81,7 +81,7 @@ test('las mazas y lanzas ya guardadas pasan a Debilitar', async () => {
 });
 
 test('glosario: las palabras partidas con guion al final de línea se unen', async () => {
-  const { juntar, sinCortes } = await import('../web/src/domain/glosario.js');
+  const { juntar, sinCortes } = await import('../web/src/domain/libros/glosario.js');
   assert.equal(juntar('puede arrastrarte o trans-', 'portarte al moverse'), 'puede arrastrarte o transportarte al moverse');
   assert.equal(juntar('Velocidad 0 -', 'Tu velocidad'), 'Velocidad 0 - Tu velocidad');
   assert.equal(sinCortes('arrastrarte o trans- portarte'), 'arrastrarte o transportarte');
@@ -89,7 +89,7 @@ test('glosario: las palabras partidas con guion al final de línea se unen', asy
 });
 
 test('glosario: erratas del PDF en dados y ceros', async () => {
-  const { sinCortes } = await import('../web/src/domain/glosario.js');
+  const { sinCortes } = await import('../web/src/domain/libros/glosario.js');
   assert.equal(sinCortes('Si tienes ventaja, tira 2420 y usa el más alto.'), 'Si tienes ventaja, tira 2d20 y usa el más alto.');
   assert.equal(sinCortes('**Velocidad O.** Tu velocidad es O y no puede aumentar.'), '**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.');
   assert.equal(sinCortes('Quedas a O PG.'), 'Quedas a 0 PG.');

@@ -1,8 +1,8 @@
 import { esc } from '../../core/util.js';
-import { $, on } from '../dom.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { confirmar } from '../modal.js';
+import { $, on } from '../componentes/dom.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { confirmar } from '../componentes/modal.js';
 
 let S;
 const fmtDay = t => new Date(t).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });

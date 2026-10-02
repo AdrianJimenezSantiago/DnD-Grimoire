@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { crearVocabulario, corregirLinea, corregirLineas, plausible } from '../web/src/domain/corrector.js';
+import { crearVocabulario, corregirLinea, corregirLineas, plausible } from '../web/src/domain/libros/corrector.js';
 
 // Vocabulario de juguete: cada palabra repetida tantas veces como «aparece en el libro»
 const rep = (txt, n) => Array(n).fill(txt).join(' ');

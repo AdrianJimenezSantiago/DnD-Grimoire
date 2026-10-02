@@ -3,8 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DIR, abrir, textoPagina, textoLibro } from './comun.mjs';
-import { crearVocabulario, corregirLineas } from '../../web/src/domain/corrector.js';
-import { fusionar } from '../../web/src/domain/fusion.js';
+import { crearVocabulario, corregirLineas } from '../../web/src/domain/libros/corrector.js';
+import { fusionar } from '../../web/src/domain/libros/fusion.js';
 const [id, p] = process.argv.slice(2), textos = [];
 for (const b of ['phb', 'dmg', 'faerun']) textos.push(...await textoLibro(b));
 const voc = crearVocabulario(textos), doc = await abrir(id), lineas = (await textoPagina(doc, +p)).split('\n');

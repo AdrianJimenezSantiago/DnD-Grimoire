@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { puntuar, buscar } from '../web/src/domain/busqueda.js';
+import { puntuar, buscar } from '../web/src/domain/presentacion/busqueda.js';
 
 test('búsqueda: exacto, prefijo, palabra, dentro y en el texto', () => {
   assert.equal(puntuar('bola', 'Bola de fuego'), 80);

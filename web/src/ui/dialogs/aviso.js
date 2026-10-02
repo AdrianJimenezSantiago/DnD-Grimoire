@@ -1,8 +1,8 @@
 import { esc } from '../../core/util.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { runaSvg } from '../magia.js';
-import { openSheet, closeSheet } from '../dialog.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { runaSvg } from '../animaciones/magia.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
 
 let acciones = [];
 const dlg = () => $('#avisoDlg');

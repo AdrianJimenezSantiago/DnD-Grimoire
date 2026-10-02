@@ -1,15 +1,15 @@
 // Un combate por rondas con un grupo de cuatro (marciales y lanzadores) usando solo las reglas del dominio
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { reglas, recState, recuperarEnDescanso, usosGastados } from '../web/src/domain/rasgos.js';
-import { empezarCombate, registrarAtaque, siguienteTurno, combateDe } from '../web/src/domain/combate.js';
-import { ataquesPorAccion } from '../web/src/domain/maestria.js';
-import { PREDEFINIDOS, anadirComun, alternarEquipado, ataqueArma } from '../web/src/domain/equipo.js';
-import { aplicarDano, curar, pasarRonda, cambiarConc, ponerEfecto, pgActuales, pgMaximo, salvacionMuerte, estadoVital, descansoLargoVida, gastarDadoGolpe, dadosDeGolpe, ponerTemporales } from '../web/src/domain/vida.js';
-import { caEfectiva, modsTirada, resolverModo } from '../web/src/domain/efectos.js';
-import { bonoSalvacion } from '../web/src/domain/habilidades.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { reglas, recState, recuperarEnDescanso, usosGastados } from '../web/src/domain/clases/rasgos.js';
+import { empezarCombate, registrarAtaque, siguienteTurno, combateDe } from '../web/src/domain/combate/combate.js';
+import { ataquesPorAccion } from '../web/src/domain/combate/maestria.js';
+import { PREDEFINIDOS, anadirComun, alternarEquipado, ataqueArma } from '../web/src/domain/equipo/equipo.js';
+import { aplicarDano, curar, pasarRonda, cambiarConc, ponerEfecto, pgActuales, pgMaximo, salvacionMuerte, estadoVital, descansoLargoVida, gastarDadoGolpe, dadosDeGolpe, ponerTemporales } from '../web/src/domain/combate/vida.js';
+import { caEfectiva, modsTirada, resolverModo } from '../web/src/domain/combate/efectos.js';
+import { bonoSalvacion } from '../web/src/domain/reglas/habilidades.js';
 
 const st = o => ({ fue: 10, des: 10, con: 14, int: 10, sab: 10, car: 10, ...o });
 const pj = o => normChar(blankChar(o));
@@ -95,7 +95,7 @@ test('combate simulado: guerrero, bárbaro, maga y clérigo durante tres rondas 
 });
 
 test('un espacio de conjuro por turno (Manual del Jugador 2024): trucos y reacciones en otro turno sí', async () => {
-  const { limiteEspacio, lanzarEnCombate, terminarCombate } = await import('../web/src/domain/combate.js');
+  const { limiteEspacio, lanzarEnCombate, terminarCombate } = await import('../web/src/domain/combate/combate.js');
   const maga = pj({ clase: 'Mago', nivel: 5, stats: st({ int: 18 }) });
   assert.equal(limiteEspacio(maga, 'Acción'), '');                     // fuera de combate no hay turnos
   empezarCombate(maga);

@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { opcionesAlImpactar, gastarAlImpactar } from '../web/src/domain/alImpactar.js';
-import { golpeSinArmas, PREDEFINIDOS } from '../web/src/domain/equipo.js';
-import { empezarCombate, siguienteTurno, combateDe } from '../web/src/domain/combate.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { opcionesAlImpactar, gastarAlImpactar } from '../web/src/domain/combate/alImpactar.js';
+import { golpeSinArmas, PREDEFINIDOS } from '../web/src/domain/equipo/equipo.js';
+import { empezarCombate, siguienteTurno, combateDe } from '../web/src/domain/combate/combate.js';
 
 const stats = { fue: 16, des: 14, con: 14, int: 10, sab: 12, car: 16 };
 const ch = o => normChar(blankChar({ stats, ...o }));

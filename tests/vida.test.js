@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { pgMaximo, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, descansoLargoVida, cdConcentracion, pgMaximoCalculado, revivir } from '../web/src/domain/vida.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { pgMaximo, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, descansoLargoVida, cdConcentracion, pgMaximoCalculado, revivir } from '../web/src/domain/combate/vida.js';
 
 const pj = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14 }, ...over }));
 

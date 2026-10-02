@@ -1,8 +1,8 @@
 // Genera docs/auditoria-origen.md: atributos de especie y dotes (Manual del Jugador 2024 y Héroes de Faerûn) con lo que hace la app.
 // Uso: node tools/auditoria-origen.mjs
 import fs from 'node:fs';
-import { RASGOS_ESPECIE, LINAJES } from '../web/src/domain/especies.js';
-import { AUMENTO_DOTE } from '../web/src/domain/dotesDatos.js';
+import { RASGOS_ESPECIE, LINAJES } from '../web/src/domain/origen/especies.js';
+import { AUMENTO_DOTE } from '../web/src/domain/origen/dotesDatos.js';
 
 const TXT = { A: 'Automático', P: 'En parte', T: 'Se consulta' };
 const ESP = {

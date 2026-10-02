@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clasificar, resumen, rasgosEnJuego, agrupar, numerosMarciales } from '../web/src/domain/enJuego.js';
+import { clasificar, resumen, rasgosEnJuego, agrupar, numerosMarciales } from '../web/src/domain/clases/enJuego.js';
 
 test('en juego: el tipo de acción sale del texto (manda la primera mención)', () => {
   assert.equal(clasificar('Puedes entrar en trance como acción adicional si no llevas armadura.'), 'adicional');
@@ -39,7 +39,7 @@ test('en juego: rasgos del personaje con texto, números, recurso, grupo manual 
   assert.deepEqual(numerosMarciales(ch).map(n => n.nombre), ['Daño por furia', 'Maestría con armas', 'Competencia', 'Dado de golpe']);
 });
 test('resumen de clase y subclase: datos clave, niveles 1 a 20 y conjuros de la subclase', async () => {
-  const { resumenClase, resumenSubclase } = await import('../web/src/domain/enJuego.js');
+  const { resumenClase, resumenSubclase } = await import('../web/src/domain/clases/enJuego.js');
   const lib = { rasgosClase: [{ clase: 'Pícaro', fuente: 'Libro', rasgos: [{ nivel: 1, nombre: 'Ataque furtivo', texto: 'Una vez por turno puedes infligir 1d6 de daño adicional con ventaja.' }] }] };
   const c = resumenClase('Pícaro', lib);
   assert.deepEqual(c.datos[0], ['Dado de golpe', 'd8']); assert.match(c.datos[3][1], /Embaucador arcano/);

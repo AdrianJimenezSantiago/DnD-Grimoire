@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { claseArmadura, anadirObjeto, alternarSintonia, alternarEquipado, ataqueArma } from '../web/src/domain/equipo.js';
-import { bonoSalvacion, bonoHabilidad, tablaCaracteristicas } from '../web/src/domain/habilidades.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { efectoDe, statsEfectivos } from '../web/src/domain/objetosEfecto.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { claseArmadura, anadirObjeto, alternarSintonia, alternarEquipado, ataqueArma } from '../web/src/domain/equipo/equipo.js';
+import { bonoSalvacion, bonoHabilidad, tablaCaracteristicas } from '../web/src/domain/reglas/habilidades.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { efectoDe, statsEfectivos } from '../web/src/domain/equipo/objetosEfecto.js';
 
 const ch = (o = {}) => normChar(blankChar({ clase: 'Mago', nivel: 5, stats: { fue: 8, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
 const poner = (c, nombre, extra = {}) => { const o = anadirObjeto(c, { nombre, tipo: extra.tipo || 'Objeto maravilloso', clave: nombre.toLowerCase(), sintonia: extra.sintonia ?? true }); return o; };

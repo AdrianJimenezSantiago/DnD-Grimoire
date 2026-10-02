@@ -1,8 +1,8 @@
 import { esc, norm } from '../../core/util.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { icon } from '../icons.js';
-import { openSheet, closeSheet } from '../dialog.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { icon } from '../componentes/icons.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
 
 let E = null;
 const dlg = () => $('#elegirDlg');

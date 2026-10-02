@@ -1,10 +1,10 @@
 // Genera docs/auditoria-conjuros.md: cada conjuro del compendio con lo que la app lee y aplica sola.
 // Uso: node tools/auditoria-conjuros.mjs
 import fs from 'node:fs';
-import { analizarTiradas, tieneTiradas } from '../web/src/domain/tiradas.js';
-import { tiradasBase, ajustarTiradas } from '../web/src/domain/tiradasBase.js';
-import { efectoDeConjuro } from '../web/src/domain/efectos.js';
-import { RECURSO_DE_CONJURO } from '../web/src/domain/rasgos.js';
+import { analizarTiradas, tieneTiradas } from '../web/src/domain/conjuros/tiradas.js';
+import { tiradasBase, ajustarTiradas } from '../web/src/domain/conjuros/tiradasBase.js';
+import { efectoDeConjuro } from '../web/src/domain/combate/efectos.js';
+import { RECURSO_DE_CONJURO } from '../web/src/domain/clases/rasgos.js';
 
 const d = JSON.parse(fs.readFileSync(new URL('../web/public/data/compendio.json', import.meta.url), 'utf8')).conjuros;
 const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();

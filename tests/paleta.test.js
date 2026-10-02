@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { paleta, luminancia, contraste, tinteDe } from '../web/src/domain/paleta.js';
-import { TEMAS } from '../web/src/domain/clases2024.js';
+import { paleta, luminancia, contraste, tinteDe } from '../web/src/domain/presentacion/paleta.js';
+import { TEMAS } from '../web/src/domain/clases/clases2024.js';
 
 const hex = h => { const f = c => { c = parseInt(c, 16) / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(h.slice(1, 3)) + 0.7152 * f(h.slice(3, 5)) + 0.0722 * f(h.slice(5, 7)); };
 const todos = [...Object.entries(TEMAS.clase), ...Object.entries(TEMAS.sub)].map(([n, [h, s]]) => ({ n, h, s }));

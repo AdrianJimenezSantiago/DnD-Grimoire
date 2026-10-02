@@ -1,16 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { CLASES, perfil, nivelTotal } from '../web/src/domain/reglas2024.js';
-import { CLASES_INFO, SUBCLASES, TEMAS, conjurosAutomaticos, escalas, progresion, rasgosEnNivel, subclaseDe } from '../web/src/domain/clases2024.js';
-import { featuresAt, conjurosPendientes, anadirPendientes } from '../web/src/domain/progresion.js';
-import { reglas } from '../web/src/domain/rasgos.js';
-import { blankChar } from '../web/src/domain/modelo.js';
-import { combinaciones, sembrarPruebas, statsPrueba, NIVEL_PRUEBA } from '../web/src/domain/pruebas.js';
+import { CLASES, perfil, nivelTotal } from '../web/src/domain/reglas/reglas2024.js';
+import { CLASES_INFO, SUBCLASES, TEMAS, conjurosAutomaticos, escalas, progresion, rasgosEnNivel, subclaseDe } from '../web/src/domain/clases/clases2024.js';
+import { featuresAt, conjurosPendientes, anadirPendientes } from '../web/src/domain/clases/progresion.js';
+import { reglas } from '../web/src/domain/clases/rasgos.js';
+import { blankChar } from '../web/src/domain/personaje/modelo.js';
+import { combinaciones, sembrarPruebas, statsPrueba, NIVEL_PRUEBA } from '../web/src/domain/personaje/pruebas.js';
 
 const { conjuros } = JSON.parse(fs.readFileSync(new URL('../web/public/data/compendio.json', import.meta.url)));
-const GI = JSON.stringify((await import('../web/src/ui/gameIcons.js')).GI);
-const ESCENAS = fs.readFileSync(new URL('../web/src/ui/fondo.js', import.meta.url), 'utf8');
+const GI = JSON.stringify((await import('../web/src/ui/componentes/gameIcons.js')).GI);
+const ESCENAS = fs.readFileSync(new URL('../web/src/ui/animaciones/fondo.js', import.meta.url), 'utf8');
 const ch = (clase, subclase = '', nivel = 8, stats = {}) => blankChar({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
 
 test('clases: las 12 clases tienen progresión de 1 a 20, con subclase a nivel 3 y don épico a 19', () => {

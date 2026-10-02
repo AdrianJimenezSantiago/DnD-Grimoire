@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { realzador } from '../web/src/domain/realce.js';
+import { realzador } from '../web/src/domain/presentacion/realce.js';
 
 const r = realzador({ icono: k => `[${k}]`, conjuros: () => ['Bola de fuego', 'Luz', 'Curar heridas'] });
 const tiene = (html, cls, txt) => assert.ok(html.includes(`class="${cls}">${txt}<`), `${cls} «${txt}» en: ${html}`);

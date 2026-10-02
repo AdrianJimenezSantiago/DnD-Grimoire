@@ -7,10 +7,10 @@ Revisión de las reglas y términos de consulta rápida que usa la app: el glosa
 
 | Fuente | Qué contiene | Cuándo se ve |
 |---|---|---|
-| Glosario importado (`domain/glosario.js`) | Las definiciones del apéndice del Manual del Jugador y las herramientas de la Guía del DM | Biblioteca → Reglas, y cada término subrayado en un texto |
-| `domain/referencia.js` | Acción, acción adicional, reacción, movimiento, propiedades y maestrías de armas | Al tocar la economía del turno, la velocidad o un arma |
-| `domain/combate.js` (`ACCIONES_COMUNES`) | Correr, Destrabarse, Esquivar, Ayudar, Esconderse, Buscar, Estudiar, Influir, Preparar, Usar un objeto, Ataque de oportunidad | Vista de combate |
-| `domain/vida.js` (`ESTADOS`) y `domain/efectos.js` (`REGLAS_ESTADO`) | Resumen de los 14 estados y lo que la hoja aplica sola | Estados, tiradas y la ficha de cada estado |
+| Glosario importado (`domain/libros/glosario.js`) | Las definiciones del apéndice del Manual del Jugador y las herramientas de la Guía del DM | Biblioteca → Reglas, y cada término subrayado en un texto |
+| `domain/reglas/referencia.js` | Acción, acción adicional, reacción, movimiento, propiedades y maestrías de armas | Al tocar la economía del turno, la velocidad o un arma |
+| `domain/combate/combate.js` (`ACCIONES_COMUNES`) | Correr, Destrabarse, Esquivar, Ayudar, Esconderse, Buscar, Estudiar, Influir, Preparar, Usar un objeto, Ataque de oportunidad | Vista de combate |
+| `domain/combate/vida.js` (`ESTADOS`) y `domain/combate/efectos.js` (`REGLAS_ESTADO`) | Resumen de los 14 estados y lo que la hoja aplica sola | Estados, tiradas y la ficha de cada estado |
 
 Con el manual importado, la regla completa siempre manda; los resúmenes de la app aparecen encima como «En resumen».
 
@@ -49,7 +49,7 @@ Destrabarse, Ataque de oportunidad; agotamiento (−2 por nivel a las pruebas d2
 - **Ficha de una regla**: cabecera con el color de su categoría; «En resumen» con el resumen de la app; «Lo que hace la hoja»
   para los estados; botón para poner o quitar el estado al personaje; la regla completa con capitular; «Ver también» con los
   términos que cita; y **Volver** para regresar a la ficha anterior al saltar de un término a otro.
-- **Realce del texto** en reglas, conjuros, rasgos, dotes, objetos y subclases (`web/src/domain/realce.js`), siempre con el mismo significado:
+- **Realce del texto** en reglas, conjuros, rasgos, dotes, objetos y subclases (`web/src/domain/presentacion/realce.js`), siempre con el mismo significado:
 
   | Qué | Cómo se ve |
   |---|---|

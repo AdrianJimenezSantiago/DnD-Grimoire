@@ -1,12 +1,12 @@
 import { esc } from '../../core/util.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
-import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/historia.js';
-import { $, on } from '../dom.js';
-import { avatarHtml } from '../avatar.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { confirmar } from '../modal.js';
-import { mdDoc } from '../mdDoc.js';
+import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/personaje/historia.js';
+import { $, on } from '../componentes/dom.js';
+import { avatarHtml } from '../componentes/avatar.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { confirmar } from '../componentes/modal.js';
+import { mdDoc } from '../componentes/mdDoc.js';
 import { undoBtn } from '../../app/acciones.js';
 
 let S, V = { editando: false, q: '' };
@@ -43,7 +43,7 @@ async function importar(file) {
   try {
     if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
       toast('Leyendo el PDF…');
-      const { paginasSimples } = await cargar(() => import('../../app/pdf.js'));
+      const { paginasSimples } = await cargar(() => import('../../platform/pdf.js'));
       md = pdfAMarkdown(await paginasSimples(file));
     } else {
       const txt = await file.text();

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStore } from '../web/src/core/store.js';
-import { seedDb, fromStored } from '../web/src/domain/modelo.js';
+import { seedDb, fromStored } from '../web/src/domain/personaje/modelo.js';
 
 const mem = () => { const m = new Map(); return { get: async k => m.get(k) ?? null, set: async (k, v) => { m.set(k, v); }, m }; };
 

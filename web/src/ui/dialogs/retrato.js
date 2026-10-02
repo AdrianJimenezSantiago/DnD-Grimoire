@@ -1,7 +1,7 @@
-import { $ } from '../dom.js';
-import { openSheet, closeSheet } from '../dialog.js';
-import { toast } from '../toast.js';
-import { confirmar } from '../modal.js';
+import { $ } from '../componentes/dom.js';
+import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
+import { confirmar } from '../componentes/modal.js';
 import { fileStore } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 

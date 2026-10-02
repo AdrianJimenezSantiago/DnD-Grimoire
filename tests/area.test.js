@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseArea, celdasArea, alcanceMetros } from '../web/src/domain/area.js';
-import { recuperarEnDescanso, etiquetaRecarga } from '../web/src/domain/rasgos.js';
+import { parseArea, celdasArea, alcanceMetros } from '../web/src/domain/combate/area.js';
+import { recuperarEnDescanso, etiquetaRecarga } from '../web/src/domain/clases/rasgos.js';
 
 test('áreas: formas en español e inglés, con palabras intermedias', () => {
   assert.deepEqual(parseArea('Creas una esfera de niebla de 6 m de radio.'), { forma: 'esfera', r: 6 });

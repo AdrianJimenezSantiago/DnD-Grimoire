@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { pageToColumns } from '../../web/src/domain/manualLineas.js';
+import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
 
 export const RAIZ = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));
 export const DIR = path.join(RAIZ, 'tools/ocr');

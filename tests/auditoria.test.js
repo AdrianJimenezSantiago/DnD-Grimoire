@@ -1,21 +1,21 @@
 // Auditoría de reglas de 2024: clases, subclases, dotes, trasfondos de otros libros, armas, pasivos y conjuros
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { reglas } from '../web/src/domain/rasgos.js';
-import { bonoSalvacion, salvacionesCompetentes, bonoHabilidad, velocidad } from '../web/src/domain/habilidades.js';
-import { pgMaximo, ponerEfecto, rondasDeDuracion } from '../web/src/domain/vida.js';
-import { caEfectiva, modsTirada, resolverModo, efectoDeConjuro } from '../web/src/domain/efectos.js';
-import { PREDEFINIDOS, anadirComun, alternarEquipado, ataqueArma, armasCombate } from '../web/src/domain/equipo.js';
-import { armadurasDe, competenteConArma } from '../web/src/domain/competencias.js';
-import { faltaRequisito, aumentoDeDote, entrenamientoDe, extraTrasfondo, sinCortes } from '../web/src/domain/origen.js';
-import { estiloDe, estadoEstilo } from '../web/src/domain/estilos.js';
-import { caracteristicasTrasfondo, fuentesExtra } from '../web/src/domain/creacion.js';
-import { habilidadesTrasfondo, periciasDisponibles } from '../web/src/domain/habilidades.js';
-import { setLibros } from '../web/src/domain/catalogo.js';
-import { analizarTiradas, dadosPara } from '../web/src/domain/tiradas.js';
-import { separarRasgos } from '../web/src/domain/contenido.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { reglas } from '../web/src/domain/clases/rasgos.js';
+import { bonoSalvacion, salvacionesCompetentes, bonoHabilidad, velocidad } from '../web/src/domain/reglas/habilidades.js';
+import { pgMaximo, ponerEfecto, rondasDeDuracion } from '../web/src/domain/combate/vida.js';
+import { caEfectiva, modsTirada, resolverModo, efectoDeConjuro } from '../web/src/domain/combate/efectos.js';
+import { PREDEFINIDOS, anadirComun, alternarEquipado, ataqueArma, armasCombate } from '../web/src/domain/equipo/equipo.js';
+import { armadurasDe, competenteConArma } from '../web/src/domain/reglas/competencias.js';
+import { faltaRequisito, aumentoDeDote, entrenamientoDe, extraTrasfondo, sinCortes } from '../web/src/domain/origen/origen.js';
+import { estiloDe, estadoEstilo } from '../web/src/domain/clases/estilos.js';
+import { caracteristicasTrasfondo, fuentesExtra } from '../web/src/domain/personaje/creacion.js';
+import { habilidadesTrasfondo, periciasDisponibles } from '../web/src/domain/reglas/habilidades.js';
+import { setLibros } from '../web/src/domain/conjuros/catalogo.js';
+import { analizarTiradas, dadosPara } from '../web/src/domain/conjuros/tiradas.js';
+import { separarRasgos } from '../web/src/domain/libros/contenido.js';
 
 const st = (v = 14, o = {}) => ({ fue: v, des: v, con: v, int: v, sab: v, car: v, ...o });
 const pj = o => normChar(blankChar({ stats: st(), ...o }));
@@ -184,7 +184,7 @@ test('lector de libros: encabezados de rasgo con mayúsculas mezcladas por el OC
 });
 
 test('conjuros gratis por rasgo: Marca del cazador gasta Enemigo predilecto antes que un espacio', async () => {
-  const { recursoParaConjuro, recState } = await import('../web/src/domain/rasgos.js');
+  const { recursoParaConjuro, recState } = await import('../web/src/domain/clases/rasgos.js');
   const ex = pj({ clase: 'Explorador', nivel: 1 });
   assert.equal(recursoParaConjuro(ex, 'Marca del cazador').nombre, 'Enemigo predilecto');
   recState(ex, 'tpl:explorador.enemigo').used = 2;
@@ -194,8 +194,8 @@ test('conjuros gratis por rasgo: Marca del cazador gasta Enemigo predilecto ante
 });
 
 test('conjuros de las dotes: Iniciado en la magia, Influencia feérica y su uso gratis', async () => {
-  const { conjurosDeDote, dotesConConjuros, filtroEleccion } = await import('../web/src/domain/conjurosDote.js');
-  const { recursoParaConjuro } = await import('../web/src/domain/rasgos.js');
+  const { conjurosDeDote, dotesConConjuros, filtroEleccion } = await import('../web/src/domain/origen/conjurosDote.js');
+  const { recursoParaConjuro } = await import('../web/src/domain/clases/rasgos.js');
   const im = conjurosDeDote({ nombre: 'Iniciado en la magia', detalle: 'clérigo' });
   assert.deepEqual(im.elegir.map(e => [e.k, e.n, e.nivel, e.lista]), [['trucos', 2, 0, 'Clérigo'], ['nivel1', 1, 1, 'Clérigo']]);
   const fe = conjurosDeDote({ nombre: 'Influencia feérica' });

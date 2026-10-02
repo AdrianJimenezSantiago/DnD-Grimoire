@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { capitulos, textoAMarkdown, pdfAMarkdown, slug } from '../web/src/domain/historia.js';
-import { nuevaSesion, nuevaNota, paraRecordar, buscarDiario } from '../web/src/domain/diario.js';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
+import { capitulos, textoAMarkdown, pdfAMarkdown, slug } from '../web/src/domain/personaje/historia.js';
+import { nuevaSesion, nuevaNota, paraRecordar, buscarDiario } from '../web/src/domain/personaje/diario.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
 
 test('capítulos con anclas únicas', () => {
   const c = capitulos('# Ana\n\n## La noche\n\ntexto\n\n### Detalle\n\n## La noche');

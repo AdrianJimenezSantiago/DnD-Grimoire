@@ -1,11 +1,11 @@
 // Menús de combate para marcar rápido los conjuros que te han lanzado: beneficios y perjuicios
 import { esc, norm } from '../../core/util.js';
-import { EFECTOS, efectosDe, fmtRondas, fmtMod } from '../../domain/efectos.js';
-import { vidaDe, quitarMax, ESTADOS } from '../../domain/vida.js';
-import { $, on } from '../dom.js';
-import { gi } from '../tema.js';
-import { openSheet } from '../dialog.js';
-import { toast } from '../toast.js';
+import { EFECTOS, efectosDe, fmtRondas, fmtMod } from '../../domain/combate/efectos.js';
+import { vidaDe, quitarMax, ESTADOS } from '../../domain/combate/vida.js';
+import { $, on } from '../componentes/dom.js';
+import { gi } from '../componentes/tema.js';
+import { openSheet } from '../componentes/dialog.js';
+import { toast } from '../componentes/toast.js';
 import { haptic } from '../../platform/native.js';
 import { undoBtn } from '../../app/acciones.js';
 import { alternarEfecto, alternarEstado } from './vida.js';

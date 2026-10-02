@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { blankChar, seedDb } from '../web/src/domain/modelo.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { blankChar, seedDb } from '../web/src/domain/personaje/modelo.js';
 
 const pj = o => blankChar(o);
 

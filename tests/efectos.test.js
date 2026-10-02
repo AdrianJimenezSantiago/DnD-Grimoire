@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra, lanzadorTira, soloSobreTi, efectoDeConjuro, EFECTOS } from '../web/src/domain/efectos.js';
-import { pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida, esYo, sincronizarYo, cambiarConc } from '../web/src/domain/vida.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra, lanzadorTira, soloSobreTi, efectoDeConjuro, EFECTOS } from '../web/src/domain/combate/efectos.js';
+import { pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida, esYo, sincronizarYo, cambiarConc } from '../web/src/domain/combate/vida.js';
 
 const pj = vida => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, vida }));
 
@@ -87,8 +87,8 @@ test('objetivos: si tu nombre está entre ellos, el efecto se te aplica y se qui
 });
 
 test('acciones de combate: gastan la parte del turno, dejan su efecto y se deshacen', async () => {
-  const { combateDe, empezarCombate, hacerAccionComun, deshacerAccionComun, siguienteTurno, accionesAdicionales } = await import('../web/src/domain/combate.js');
-  const { ponerEfecto, pasarRonda } = await import('../web/src/domain/vida.js');
+  const { combateDe, empezarCombate, hacerAccionComun, deshacerAccionComun, siguienteTurno, accionesAdicionales } = await import('../web/src/domain/combate/combate.js');
+  const { ponerEfecto, pasarRonda } = await import('../web/src/domain/combate/vida.js');
   const ch = pj(); empezarCombate(ch);
   assert.ok(hacerAccionComun(ch, 'esquivar'));
   ponerEfecto(ch, 'esquivar');

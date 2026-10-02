@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { reglas, reglasVisibles, maxFrom, hasShortRest } from '../web/src/domain/rasgos.js';
-import { perfil } from '../web/src/domain/reglas2024.js';
-import { blankChar, normChar } from '../web/src/domain/modelo.js';
-import { levelDiff } from '../web/src/domain/progresion.js';
+import { reglas, reglasVisibles, maxFrom, hasShortRest } from '../web/src/domain/clases/rasgos.js';
+import { perfil } from '../web/src/domain/reglas/reglas2024.js';
+import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { levelDiff } from '../web/src/domain/clases/progresion.js';
 
 const names = ch => reglas(ch).map(r => `${r.nombre}:${r.max}`);
 
