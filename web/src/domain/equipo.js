@@ -23,8 +23,8 @@ const E = (nombre, cat, peso, valor = '', extra = {}) => ({ nombre, cat, peso, v
 export const PREDEFINIDOS = [
   A('Bastón', '1d6', 'contundente', 2, '2 pp', ['Versátil (1d8)'], 'Derribar'), A('Daga', '1d4', 'perforante', 0.5, '2 po', ['Sutil', 'Ligera', 'Arrojadiza'], 'Mella', '6/18 m'),
   A('Garrote', '1d4', 'contundente', 1, '1 pp', ['Ligera'], 'Ralentizar'), A('Hacha de mano', '1d6', 'cortante', 1, '5 po', ['Ligera', 'Arrojadiza'], 'Irritar', '6/18 m'),
-  A('Jabalina', '1d6', 'perforante', 1, '5 pp', ['Arrojadiza'], 'Ralentizar', '9/36 m'), A('Lanza', '1d6', 'perforante', 1.5, '1 po', ['Arrojadiza', 'Versátil (1d8)'], 'Derribar', '6/18 m'),
-  A('Maza', '1d6', 'contundente', 2, '5 po', [], 'Irritar'), A('Hoz', '1d4', 'cortante', 1, '1 po', ['Ligera'], 'Mella'),
+  A('Jabalina', '1d6', 'perforante', 1, '5 pp', ['Arrojadiza'], 'Ralentizar', '9/36 m'), A('Lanza', '1d6', 'perforante', 1.5, '1 po', ['Arrojadiza', 'Versátil (1d8)'], 'Debilitar', '6/18 m'),
+  A('Maza', '1d6', 'contundente', 2, '5 po', [], 'Debilitar'), A('Hoz', '1d4', 'cortante', 1, '1 po', ['Ligera'], 'Mella'),
   A('Arco corto', '1d6', 'perforante', 1, '25 po', ['Munición', 'Dos manos'], 'Irritar', '24/96 m'), A('Ballesta ligera', '1d8', 'perforante', 2.5, '25 po', ['Munición', 'Carga', 'Dos manos'], 'Ralentizar', '24/96 m'),
   A('Espada corta', '1d6', 'perforante', 1, '10 po', ['Sutil', 'Ligera'], 'Irritar'), A('Espada larga', '1d8', 'cortante', 1.5, '15 po', ['Versátil (1d10)'], 'Debilitar'),
   A('Espadón', '2d6', 'cortante', 3, '50 po', ['Pesada', 'Dos manos'], 'Rozar'), A('Estoque', '1d8', 'perforante', 1, '25 po', ['Sutil'], 'Irritar'),
@@ -78,6 +78,7 @@ export function baseMagica(nombre) {
   if (c.arma) { c.arma.bono = bono; c.arma.base = p.nombre; } if (c.armadura) c.armadura.bono = bono;
   return c;
 }
+const MAESTRIA_CORREGIDA = { maza: ['Irritar', 'Debilitar'], lanza: ['Derribar', 'Debilitar'] };
 export function normObjeto(o) {
   const consumible = o.clave && (o.municion || /^municion/.test(norm(o.nombre || '')) || CONSUMIBLE_MAGICO.test(norm(o.nombre || '')));
   const cat = CATEGORIAS.some(([k]) => k === o.cat) ? o.cat : o.clave ? (consumible ? 'consumible' : CAT_TIPO[o.tipo] || 'magico') : 'otro';
@@ -87,6 +88,9 @@ export function normObjeto(o) {
   if (out.sintoniaCon != null) out.sintoniaCon = String(out.sintoniaCon || '');
   if (out.usos != null && !Array.isArray(out.usos)) delete out.usos;
   if (!out.equipado) delete out.mano;
+  // Maza y lanza llevaban una maestría que no es la del manual de 2024: se corrige en las que ya estaban en el inventario
+  const mal = out.arma && MAESTRIA_CORREGIDA[norm(out.arma.base || out.nombre)];
+  if (mal && out.arma.maestria === mal[0]) out.arma = { ...out.arma, maestria: mal[1] };
   // Las armas y armaduras mágicas del libro llegaban sin daño ni CA: se completan con la normal de su nombre
   if (out.magico && (cat === 'arma' || cat === 'armadura') && !out.arma && !out.armadura) {
     const b = baseMagica(out.nombre);

@@ -209,3 +209,85 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .di-bar input { min-width: 0; }
 .di-bar select { width: auto; flex: 0 1 140px; min-width: 0; border-radius: var(--r-pill); }
 .di-bar input[type="search"] { flex: 1 1 150px; }
+
+/* ── Compendio de reglas ─────────────────────────────────────────────
+   Cada categoría del glosario tiene su tono (--sh, --ss): rojo los estados, azul las acciones, violeta las áreas…
+   Ese color marca la tarjeta de la lista, la cabecera de la ficha y sus «Ver también». */
+.gl-cats small { font: 600 10px / 1 var(--sans); color: var(--ink-3); margin-left: 2px; }
+.gl-cats .rar-chip[aria-pressed="true"] small { color: var(--ink-2); }
+.gl-cards { list-style: none; margin: 0 0 6px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 6px; }
+.gl-card { --c: hsl(var(--sh, 40) var(--ss, 60%) var(--acc-l)); all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: flex; flex-direction: column; gap: 3px; width: 100%; height: 100%;
+  padding: 10px 12px 10px 16px; border-radius: 10px; border: 1px solid var(--line-soft); background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  content-visibility: auto; contain-intrinsic-size: 64px; transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast) var(--ease); }
+.gl-card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--c); }
+.gl-card.dm::before { background: repeating-linear-gradient(var(--c) 0 4px, transparent 4px 7px); }
+.gl-card:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--c) 40%, var(--line-soft)); }
+.gl-card:active { transform: scale(.985); }
+.gl-card:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.gl-card b { font: 600 var(--fs-l) / 1.2 var(--serif); color: var(--ink); }
+.gl-card small { font: 400 var(--fs-xs) / 1.4 var(--sans); color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.gl-card mark { background: color-mix(in srgb, var(--c) 22%, transparent); color: inherit; box-shadow: inset 0 -1.5px 0 var(--c); border-radius: 2px; }
+
+/* Ficha de una regla */
+#fichaDlg.regla { --sh: 40; --ss: 60%; --c: hsl(var(--sh) var(--ss) var(--acc-l)); }
+#fichaDlg.regla .dhead { position: relative; overflow: hidden; flex: none; background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent 85%); border-bottom-color: color-mix(in srgb, var(--c) 30%, var(--line-soft)); }
+#fichaDlg.regla .dhead::after { content: ""; position: absolute; right: -40px; top: -60px; width: 200px; height: 200px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, hsl(var(--sh) var(--ss) 55% / .18), transparent 70%); }
+#fichaDlg.regla .fi-ico { color: var(--c); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .28), transparent 72%); box-shadow: inset 0 0 0 1px hsl(var(--sh) var(--ss) 55% / .35); }
+#fichaDlg.regla #fiTitle { font-family: var(--display); letter-spacing: .02em; }
+#fichaDlg.regla .rar-pill { --rar: var(--c); }
+#fichaDlg.regla .md-h { color: var(--c); }
+#fichaDlg.regla .md-ul li::marker { color: var(--c); }
+.rg-auto { color: var(--ok) !important; border-color: color-mix(in srgb, var(--ok) 40%, transparent) !important; }
+.rg-auto .icon { width: 13px; height: 13px; }
+.fi-pills > span > .gi { opacity: .8; }
+
+.rg-resumen { position: relative; margin: 0 0 16px; padding: 12px 14px 12px 18px; border-radius: var(--r-m); background: linear-gradient(100deg, hsl(var(--sh, 40) var(--ss, 60%) 50% / .12), transparent 80%);
+  border: 1px solid hsl(var(--sh, 40) var(--ss, 60%) 55% / .28); animation: pop-in var(--t-med) var(--ease-out) both; }
+.rg-resumen::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 2px 2px 0; background: var(--c, var(--gold)); }
+.rg-resumen p { margin: 0; font: 400 var(--fs-l) / 1.5 var(--serif); }
+.rg-lbl { display: block; margin-bottom: 4px; font: 700 10.5px / 1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--c, var(--gold)); }
+.rg-h { margin: 18px 0 8px; font: 700 10.5px / 1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 10px; }
+.rg-h::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+.rg-auto-l ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rg-auto-l li { display: flex; align-items: flex-start; gap: 10px; font: 400 var(--fs-m) / 1.45 var(--sans); }
+.rg-auto-l li .gi { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--c, var(--gold)); }
+.rg-hoja { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin: 14px 0 4px; padding: 10px 12px; border-radius: var(--r-m); border: 1px dashed var(--line); }
+.rg-hoja.on { border-style: solid; border-color: color-mix(in srgb, var(--c) 55%, transparent); background: hsl(var(--sh) var(--ss) 50% / .08); }
+.rg-hoja p { flex: 1 1 200px; margin: 0; font: 400 var(--fs-m) / 1.4 var(--sans); }
+.rg-hoja small { color: var(--ink-3); }
+.rg-hoja .rg-est { color: var(--c); }
+.rg-hoja button { min-height: 38px; border-radius: var(--r-pill); padding: 0 14px; }
+.rg-hoja button .gi { width: 17px; height: 17px; }
+.rg-h-txt { margin-top: 22px; }
+/* Sin capitular (se leía mal en entradas cortas): el primer párrafo, la definición, va un punto más grande */
+.rg-texto > p:first-child { font-size: 1.06em; line-height: 1.55; }
+.rg-rel { margin-top: 22px; padding-top: 2px; }
+.rg-rel-l { display: flex; flex-wrap: wrap; gap: 6px; }
+.rg-chip { --c: hsl(var(--sh) var(--ss) var(--acc-l)); min-height: 34px; padding: 0 12px 0 9px; border-radius: var(--r-pill); font: 500 var(--fs-s) / 1 var(--sans); color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent); background: color-mix(in srgb, var(--c) 8%, transparent); display: inline-flex; align-items: center; gap: 6px; }
+.rg-chip .gi { width: 15px; height: 15px; color: var(--c); }
+.rg-chip:hover { background: color-mix(in srgb, var(--c) 18%, transparent); border-color: var(--c); }
+.rg-mas { margin-top: 14px; min-height: 40px; border-radius: var(--r-pill); padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; }
+.rg-mas .gi { width: 17px; height: 17px; color: var(--gold); }
+.fi-volver { display: inline-flex; align-items: center; gap: 6px; max-width: 46%; min-height: 40px; padding: 0 14px 0 10px; border-radius: var(--r-pill); }
+.fi-volver .icon { width: 16px; height: 16px; flex: none; transform: rotate(90deg); }
+.fi-volver span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-lista dt button.term { font: inherit; color: inherit; }
+
+/* Realce del texto de reglas y conjuros: cada estilo significa una cosa */
+.k-cd { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.k-adv { font-weight: 600; color: var(--ok); }
+.k-dis { font-weight: 600; color: var(--danger); }
+.k-adv button.term, .k-dis button.term { color: inherit; text-decoration-color: currentColor; }
+.k-time { font-style: italic; color: var(--ink-2); }
+.k-eco { font-variant: small-caps; font-weight: 600; letter-spacing: .02em; }
+@media (prefers-reduced-motion: reduce) { .rg-resumen { animation: none; } .gl-card { transition: none; } }
+.k-check { font-weight: 700; color: var(--ink); box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--sc-con) 70%, transparent); }
+.k-heal { font-weight: 700; color: var(--ok); }
+.k-temp { font-weight: 700; color: var(--sc-abj); }
+.k-bono { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.k-spell { font-style: italic; color: var(--ink); text-decoration: underline 1px color-mix(in srgb, var(--sc-evo) 55%, transparent); text-underline-offset: 3px; }
+/* Los estados enlazados llevan el subrayado del color de su categoría (rojo), el resto de términos el dorado */
+button.term.est { text-decoration-color: hsl(8 68% var(--acc-l)); }
+button.term.est:hover { background: hsl(8 68% 50% / .14); color: hsl(8 68% var(--acc-l)); }

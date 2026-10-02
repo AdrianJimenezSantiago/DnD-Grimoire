@@ -197,7 +197,7 @@ export function efectosDe(ch) {
     ca: e.propio?.ca || 0, vel: e.propio?.vel || 0, reglas: reglasPropias(e.propio || {}) }; });
 }
 // Estados a los que eres inmune ahora mismo: Aura de coraje (paladín 10), Aura de entrega (entrega 7), Furia irracional (berserker 6, en furia),
-// Heroísmo (asustado)
+// Heroísmo (asustado), Petrificado (envenenado)
 export function inmunidadesEstado(ch) {
   const out = new Map(), efs = (ch.vida?.efectos || []).map(e => e.k), ests = ch.vida?.estados || [];
   const incap = ests.some(k => ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'].includes(k));
@@ -210,6 +210,7 @@ export function inmunidadesEstado(ch) {
     if (c.clase === 'Druida' && c.nivel >= 10 && /tierra/i.test(c.subclase || '')) out.set('envenenado', 'Protección de la naturaleza');
   }
   if (efs.includes('heroismo')) out.set('asustado', 'Heroísmo');
+  if (ests.includes('petrificado')) out.set('envenenado', 'Petrificado');
   for (const d of dotesDe(ch)) { const n = norm(d.nombre); if (n === 'don del terror') out.set('asustado', d.nombre); if (n === 'don del dominio de los venenos') out.set('envenenado', d.nombre); }
   return out;
 }
@@ -227,7 +228,9 @@ export function modsTirada(ch, { sobre, ab = '', hab = '', motivo = '' }) {
     return r.sobre === 'prueba' && sobre === 'iniciativa';
   };
   const out = [];
-  for (const k of estadosActivos(ch)) for (const r of REGLAS_ESTADO[k].reglas) if (aplica(r)) out.push({ fuente: k.charAt(0).toUpperCase() + k.slice(1), mal: r.efecto !== 'ventaja', ...r });
+  // Aturdido, inconsciente, paralizado y petrificado incluyen el estado incapacitado (y su desventaja en la iniciativa)
+  const activos = estadosActivos(ch), reglasDe = k => (REGLAS_ESTADO[k].incap && k !== 'incapacitado' && !activos.includes('incapacitado') ? [...REGLAS_ESTADO[k].reglas, ...REGLAS_ESTADO.incapacitado.reglas] : REGLAS_ESTADO[k].reglas);
+  for (const k of activos) for (const r of reglasDe(k)) if (aplica(r)) out.push({ fuente: k.charAt(0).toUpperCase() + k.slice(1), mal: r.efecto !== 'ventaja', ...r });
   // Esquivar se pierde si quedas incapacitado o tu velocidad es 0
   const sinEsquivar = () => incapacitado(ch).length > 0 || velocidadEfectiva(ch).m === 0;
   const conAb = r => (r.valorAb ? { ...r, valor: Math.max(1, modOf(statsEfectivos(ch)[r.valorAb])) } : r);

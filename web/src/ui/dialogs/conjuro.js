@@ -1,6 +1,7 @@
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas2024.js';
-import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro } from '../../domain/catalogo.js';
+import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro, termino, nombresConjuros } from '../../domain/catalogo.js';
+import { realzador, porTexto } from '../../domain/realce.js';
 import { lanzadorTira } from '../../domain/efectos.js';
 import { gi } from '../tema.js';
 import { openRoll, iconoDano } from './tiradas.js';
@@ -23,19 +24,11 @@ import { openFormas } from './formas.js';
 let S, SP = null;
 const dlg = () => $('#spellDlg');
 
-export const porTexto = (html, fn) => html.split(/(<[^>]+>)/).map(p => (p.startsWith('<') ? p : fn(p))).join('');
-const enlazar = h => { const e = estadosRegex(); return e ? porTexto(h, t => t.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term" data-term="${k}">${w}</button>` : m; })) : h; };
-const TIPOS = { 'ácido': 'acido', contundente: 'contundente', cortante: 'cortante', 'frío': 'frio', fuego: 'fuego', fuerza: 'fuerza', 'necrótico': 'necrotico',
-  perforante: 'perforante', 'psíquico': 'psiquico', radiante: 'radiante', 'relámpago': 'relampago', trueno: 'trueno', veneno: 'veneno' };
-const PASOS = [
-  [/\b(\d+d\d+(?:\s*\+\s*\d+)?)\b/g, '<span class="k-dice">$1</span>'],
-  [/(tirada de salvación de (?:Fuerza|Destreza|Constitución|Inteligencia|Sabiduría|Carisma))/g, '<span class="k-save">$1</span>'],
-  [/(ataque de conjuro (?:a distancia|cuerpo a cuerpo))/g, '<span class="k-atk">$1</span>'],
-  [/(^|[^\p{L}\d,])(\d+(?:,\d+)?\s?(?:m|km))(?![\p{L}\d])/gu, '$1<span class="k-dist">$2</span>'],
-  [/(de daño )(de |por )?(ácido|contundente|cortante|frío|fuego|fuerza|necrótico|perforante|psíquico|radiante|relámpago|trueno|veneno)(?![\p{L}])/giu,
-    (m, a, b, tipo) => `${a}${b || ''}<span class="k-dmg dmg-${TIPOS[tipo.toLowerCase()] || 'fuerza'}">${gi(TIPOS[tipo.toLowerCase()] || 'fuerza')}${tipo}</span>`],
-];
-export const realzar = h => PASOS.reduce((acc, [re, rep]) => porTexto(acc, t => t.replace(re, rep)), h);
+const enlazar = h => { const e = estadosRegex(); return e ? porTexto(h, t => t.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term${termino(k)?.cat === 'Estado' ? ' est' : ''}" data-term="${k}">${w}</button>` : m; })) : h; };
+export { porTexto };
+export const realzar = realzador({ icono: gi, conjuros: nombresConjuros });
+// Un texto corto de la app (sin markdown) con el mismo realce y los enlaces al glosario
+export const rico = t => enlazar(realzar(esc(t)));
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
 const DADO_CAB = /^(\d{0,2})d(\d{1,3})$/i;
 const enLinea = t => enlazar(realzar(cabecilla(esc(t))))
@@ -53,7 +46,7 @@ function tablaHtml(lineas) {
     <tbody>${cuerpo.map(f => `<tr${numerada && esRot(f[0]) ? ` data-rot="${esc(f[0].replace(/\.$/, ''))}"` : ''}>${pad(f).map((c, k) => td(c, k)).join('')}</tr>`).join('')}</tbody></table></div></figure>`;
 }
 // El mismo texto sin botones del glosario, para meterlo dentro de otro botón (una tarjeta que se elige)
-export const mdPlano = t => md(t).replace(/<button type="button" class="term"[^>]*>(.*?)<\/button>/g, '<b class="term-plano">$1</b>');
+export const mdPlano = t => md(t).replace(/<button type="button" class="term[^"]*"[^>]*>(.*?)<\/button>/g, '<b class="term-plano">$1</b>');
 export function md(t) {
   const bloques = String(t || '').trim().split(/\n{2,}/).filter(b => b.trim());
   let h = '', lista = [];

@@ -1,7 +1,7 @@
 import { esc, norm, uid } from '../core/util.js';
 import { tiradasDe, tieneTiradas } from './tiradas.js';
 import { tiradasBase, ajustarTiradas } from './tiradasBase.js';
-import { formasDeEstado } from './glosario.js';
+import { formasDeEstado, sinCortes } from './glosario.js';
 import { CLASES } from './reglas2024.js';
 import { claveNombre } from './manual.js';
 import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
@@ -9,14 +9,16 @@ import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
 let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null, SUBS = {};
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
-let LIBROS = [];
+let LIBROS = [], NOMBRES = null;
+// Los nombres en castellano de todos los conjuros conocidos (para marcarlos en cursiva en los textos)
+export const nombresConjuros = () => (NOMBRES ||= (SRD || []).map(x => x.es).filter(Boolean));
 function reindexar() {
   const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
   for (const lb of LIBROS) for (const x of lb.nuevos || []) { const c = claveEs(x.es, x.l); if (!vistos.has(c)) { vistos.add(c); extra.push(x); } }
   SRD = BASE ? [...BASE, ...extra] : null; SRDK = {}; SRDN = {};
   (SRD || []).forEach(limpiarDatos);
   (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
-  itemsMemo = null; tirMemo.clear();
+  itemsMemo = null; tirMemo.clear(); NOMBRES = null;
 }
 const LIMPIOS = new WeakSet();
 function limpiarDatos(x) {
@@ -131,7 +133,7 @@ export const srdAsSpell = x => ({ es: x.es, en: x.en, level: x.l, escuela: x.esc
 
 let GLOS = null, RE_EST = null;
 export function setGlosario(lista) {
-  GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, e])) : null; RE_EST = null;
+  GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, { ...e, texto: sinCortes(e.texto) }])) : null; RE_EST = null;
 }
 export const glosario = () => (GLOS ? [...GLOS.values()] : []);
 export const termino = clave => GLOS?.get(clave) || null;
@@ -139,10 +141,14 @@ const CURADOS = {
   'vision ciega': ['visión ciega'], 'vision verdadera': ['visión verdadera'], 'vision en la oscuridad': ['visión en la oscuridad'],
   'sentir vibraciones': ['sentir vibraciones'], 'luz brillante': ['luz brillante'], 'luz tenue': ['luz tenue'], 'oscuridad': ['oscuridad'],
   'muy oscuro': ['muy oscuro', 'muy oscura', 'muy oscuros', 'muy oscuras'], 'terreno dificil': ['terreno difícil'], 'cobertura': ['cobertura'],
-  'puntos de golpe temporales': ['puntos de golpe temporales'], 'concentracion': ['concentración'], 'ventaja': ['ventaja', 'desventaja'],
+  'puntos de golpe temporales': ['puntos de golpe temporales'], 'concentracion': ['concentración'], 'ventaja': ['ventaja', 'desventaja'], 'desventaja': ['desventaja'],
   'maltrecho': ['maltrecho', 'maltrecha', 'maltrechos', 'maltrechas'], 'teletransporte': ['teletransporte'], 'resistencia': ['resistencia'],
   'inmunidad': ['inmunidad'], 'esfera': ['esfera'], 'cubo': ['cubo'], 'cono': ['cono'], 'linea': ['línea'], 'emanacion': ['emanación'],
   'cilindro': ['cilindro'], 'area de efecto': ['área de efecto'], 'critico': ['crítico'], 'invisible': ['invisible', 'invisibles'],
+  // El glosario de 2024 trae también estos; solo se enlazan si el manual importado tiene la entrada
+  'ataque de oportunidad': ['ataque de oportunidad', 'ataques de oportunidad'], 'descanso largo': ['descanso largo'], 'descanso corto': ['descanso corto'],
+  'inspiracion heroica': ['inspiración heroica'], 'impacto critico': ['impacto crítico'], 'salvacion contra muerte': ['salvación contra muerte', 'salvaciones contra muerte'],
+  'sorpresa': ['sorpresa'], 'accion adicional': ['acción adicional'], 'reaccion': ['reacción'],
 };
 const tolerante = s => s.replace(/[aá]/g, '[aá]').replace(/[eé]/g, '[eé]').replace(/[ií]/g, '[ií]').replace(/[oó]/g, '[oó]').replace(/[uúü]/g, '[uúü]').replace(/[nñ]/g, '[nñ]').replace(/ /g, '\\s+');
 export function estadosRegex() {

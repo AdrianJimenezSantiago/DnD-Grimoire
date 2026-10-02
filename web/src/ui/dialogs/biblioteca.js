@@ -21,15 +21,41 @@ import { EFECTO, EFECTO_DE_RASGO } from '../../domain/efectos.js';
 import { ponerEfecto } from '../../domain/vida.js';
 import { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } from '../../domain/canjes.js';
 import { anadirPendientes, conjurosPendientes, quitarSobrantes } from '../../domain/progresion.js';
+import { NOMBRE_ESTADO, RESUMEN_ESTADO, vidaDe } from '../../domain/vida.js';
+import { REGLAS_ESTADO, inmunidadesEstado } from '../../domain/efectos.js';
+import { ACCIONES_COMUNES } from '../../domain/combate.js';
+import { ECONOMIA_INFO, textoMaestria, textoPropiedad } from '../../domain/referencia.js';
+import { alternarEstado } from './vida.js';
+import { rico } from './conjuro.js';
 
 let S;
-const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', clase: '', orden: 'tipo', ctipo: '', cvd: '' };
+const V = { tab: 'reglas', q: '', rar: '', tipo: '', sint: false, cat: '', gcat: null, clase: '', orden: 'tipo', ctipo: '', cvd: '' };
 const dlg = () => $('#bibDlg');
 export const RAR_K = { 'Común': 'comun', Infrecuente: 'infrec', Raro: 'raro', 'Muy raro': 'muyraro', Legendario: 'legend', Artefacto: 'artef', 'Varía': 'varia' };
 export const TIPO_I = { Arma: 'o_arma', Armadura: 'o_armadura', Anillo: 'o_anillo', 'Bastón': 'o_baston', 'Objeto maravilloso': 'o_maravilloso', Pergamino: 'o_pergamino', 'Poción': 'o_pocion', Vara: 'o_vara', Varita: 'o_varita' };
 const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'], ['dotes', 'Dotes', 'dote'], ['trasfondos', 'Trasfondos', 'trasfondo'], ['subclases', 'Subclases', 'subclase'], ['criaturas', 'Criaturas', 'criatura']];
 const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
-const TIT_G = { Estado: 'Estados', 'Acción': 'Acciones', 'Área de efecto': 'Áreas de efecto', Peligro: 'Peligros', Actitud: 'Actitudes', '': 'Reglas generales', 'Herramientas del DM': 'Herramientas del DM', 'Objetos mágicos': 'Objetos mágicos: reglas' };
+// Cada categoría del glosario con su color (tono, saturación), su icono y su título en plural
+export const CAT_REGLA = {
+  Estado: { h: 8, s: 68, ico: 'estados', tit: 'Estados', corto: 'Estados' },
+  'Acción': { h: 212, s: 62, ico: 'combate', tit: 'Acciones', corto: 'Acciones' },
+  'Área de efecto': { h: 272, s: 52, ico: 'esc_evo', tit: 'Áreas de efecto', corto: 'Áreas' },
+  Peligro: { h: 26, s: 78, ico: 'muerte', tit: 'Peligros', corto: 'Peligros' },
+  Actitud: { h: 150, s: 42, ico: 'corazon', tit: 'Actitudes', corto: 'Actitudes' },
+  '': { h: 40, s: 62, ico: 'glosario', tit: 'Reglas generales', corto: 'Generales' },
+  'Herramientas del DM': { h: 186, s: 46, ico: 'dados', tit: 'Herramientas del DM', corto: 'Del DM' },
+  'Objetos mágicos': { h: 300, s: 42, ico: 'o_maravilloso', tit: 'Objetos mágicos: reglas', corto: 'Objetos' },
+};
+export const catRegla = c => CAT_REGLA[c || ''] || CAT_REGLA[''];
+const TIT_G = Object.fromEntries(Object.entries(CAT_REGLA).map(([k, v]) => [k, v.tit]));
+const sinParen = t => String(t || '').replace(/\s*\(.*$/, '');
+// La primera frase de una regla, sin marcas, para la tarjeta de la lista
+const primeraFrase = t => {
+  const p = String(t || '').split(/\n{2,}/).find(b => b.trim() && !/^(###|\|)/.test(b.trim())) || '';
+  const x = p.replace(/[*_]/g, '').replace(/^•\s*/, '').replace(/\s+/g, ' ').trim(), m = /^(.{20,140}?[.:;])(\s|$)/.exec(x);
+  return m ? m[1] : x.slice(0, 120) + (x.length > 120 ? '…' : '');
+};
+const marcar = (t, q) => { const i = q ? norm(t).indexOf(q) : -1; return i < 0 ? esc(t) : `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + q.length))}</mark>${esc(t.slice(i + q.length))}`; };
 const coincide = (q, ...t) => !q || norm(t.join(' ')).includes(q);
 const ORDEN_OBJ = { tipo: ['Por tipo', 'rar'], rar: ['Por rareza', 'az'], az: ['A–Z', 'tipo'] };
 const ORDEN_TIPOS = ['Arma', 'Armadura', 'Anillo', 'Poción', 'Pergamino', 'Varita', 'Vara', 'Bastón', 'Objeto maravilloso'];
@@ -50,6 +76,11 @@ function herramientas() {
       <button type="button" class="chip" id="bibSint" aria-pressed="${V.sint}">${gi('sintonia')}Sin sintonización</button>
       <button type="button" class="chip" id="bibOrden" title="Cambiar cómo se agrupa la lista">${icon('sliders')}${ORDEN_OBJ[V.orden][0]}</button></div>`;
   }
+  if (V.tab === 'reglas' && glosario().length) {
+    const hay = new Map(); for (const e of glosario()) hay.set(e.cat || '', (hay.get(e.cat || '') || 0) + 1);
+    f = `<div class="bib-rar gl-cats" role="group" aria-label="Categoría"><button type="button" class="rar-chip" style="--rar:var(--gold)" aria-pressed="${V.gcat == null}" data-gcat="*">Todas</button>${ORDEN_G.filter(c => hay.has(c)).map(c => { const k = catRegla(c);
+      return `<button type="button" class="rar-chip" style="--rar:hsl(${k.h} ${k.s}% var(--acc-l))" aria-pressed="${V.gcat === c}" data-gcat="${esc(c)}">${esc(k.corto)}<small>${hay.get(c)}</small></button>`; }).join('')}</div>`;
+  }
   if (V.tab === 'dotes') f = `<div class="bib-sel una">${['', 'Origen', 'General', 'Estilo de combate', 'Don épico'].map(c => `<button type="button" class="chip" aria-pressed="${V.cat === c}" data-cat="${c}">${c || 'Todas'}</button>`).join('')}</div>`;
   if (V.tab === 'criaturas') f = `<div class="bib-sel una"><select id="bibCTipo" aria-label="Tipo de criatura"><option value="">Todos los tipos</option>${TIPOS_BASE.map(t => `<option ${V.ctipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <select id="bibCVd" aria-label="Valor de desafío máximo"><option value="">Cualquier VD</option>${[0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 8, 10, 15, 20, 30].map(v => `<option value="${v}" ${String(V.cvd) === String(v) ? 'selected' : ''}>VD ${vdTexto(v)} o menos</option>`).join('')}</select></div>`;
@@ -63,9 +94,17 @@ function cuerpo() {
     const todo = glosario();
     if (!todo.length) h = vacio('Aquí aparecen el glosario de reglas del Manual del Jugador y las herramientas de la Guía del Dungeon Master.', 'Manual del Jugador o de la Guía del DM');
     else {
-      const f = todo.filter(e => coincide(q, e.nombre) || (q.length > 3 && coincide(q, e.texto))); n = f.length;
-      h = ORDEN_G.map(c => [c, f.filter(e => (e.cat || '') === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length)
-        .map(([c, v]) => `<h3 class="bib-g obj-g">${gi(c === 'Estado' ? 'ojo' : 'glosario')}${esc(TIT_G[c] ?? c)}<small>${v.length}</small></h3><div class="gl-grid">${v.map(e => `<button type="button" class="gl-item ${e.cat === 'Estado' ? 'estado' : ''} ${/Herramientas|Objetos/.test(e.cat) ? 'dm' : ''}" data-term="${e.clave}">${esc(e.nombre)}</button>`).join('')}</div>`).join('');
+      const enCat = todo.filter(e => V.gcat == null || (e.cat || '') === V.gcat);
+      const porNombre = enCat.filter(e => coincide(q, e.nombre)), nombres = new Set(porNombre);
+      const porTexto = q.length > 3 ? enCat.filter(e => !nombres.has(e) && coincide(q, e.texto)) : [];
+      n = porNombre.length + porTexto.length;
+      const carta = e => { const k = catRegla(e.cat);
+        return `<li><button type="button" class="gl-card ${/Herramientas|Objetos/.test(e.cat) ? 'dm' : ''}" style="--sh:${k.h};--ss:${k.s}%" data-term="${e.clave}">
+          <b>${marcar(e.nombre, q)}</b><small>${esc(primeraFrase(e.texto))}</small></button></li>`; };
+      const titulo = (c, v) => { const k = catRegla(c); return `<h3 class="bib-g obj-g" style="--rar:hsl(${k.h} ${k.s}% var(--acc-l))">${gi(k.ico)}${esc(TIT_G[c] ?? c)}<small>${v.length}</small></h3>`; };
+      h = ORDEN_G.map(c => [c, porNombre.filter(e => (e.cat || '') === c).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))]).filter(([, v]) => v.length)
+        .map(([c, v]) => `${titulo(c, v)}<ul class="gl-cards">${v.map(carta).join('')}</ul>`).join('')
+        + (porTexto.length ? `<h3 class="bib-g obj-g">${gi('buscar')}También lo mencionan<small>${porTexto.length}</small></h3><ul class="gl-cards">${porTexto.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')).map(carta).join('')}</ul>` : '');
     }
   }
   if (V.tab === 'objetos') {
@@ -157,12 +196,24 @@ export function openBiblioteca(tab) {
 }
 
 let FICHA = null;
+// Fichas que se abren desde otra ficha (un término del glosario dentro de una regla, de un objeto…): «Volver» deja la anterior como estaba
+const PILA = [];
+const foto = () => { const d = $('#fichaDlg'); return { cls: d.className, estilo: d.getAttribute('style') || '', t: $('#fiTitle').innerHTML, nombre: $('#fiTitle').textContent.trim(), s: $('#fiSub').innerHTML, b: $('#fiBody').innerHTML, f: $('#fiFoot').innerHTML, y: $('#fiBody').scrollTop, FICHA }; };
+export function apilarFicha() { const d = $('#fichaDlg'); if (d.open) { PILA.push(foto()); if (PILA.length > 20) PILA.shift(); } }
+function volverFicha() {
+  const p = PILA.pop(); if (!p) return;
+  const d = $('#fichaDlg'); d.className = p.cls; d.setAttribute('style', p.estilo);
+  $('#fiTitle').innerHTML = p.t; $('#fiSub').innerHTML = p.s; $('#fiBody').innerHTML = p.b; $('#fiFoot').innerHTML = p.f; FICHA = p.FICHA;
+  $('#fiBody').scrollTop = p.y;
+}
 export function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase = '' }) {
   const d = $('#fichaDlg');
-  d.className = `tall ficha ${clase}`;
+  if (!d.open) PILA.length = 0;
+  d.className = `tall ficha ${clase}`; d.removeAttribute('style');
   $('#fiTitle').innerHTML = (ico ? `<span class="fi-ico">${gi(ico)}</span>` : '') + `<span>${esc(titulo)}</span>`;
   $('#fiSub').innerHTML = sub; $('#fiBody').innerHTML = h;
-  $('#fiFoot').innerHTML = `${pie}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
+  const volver = PILA.length ? `<button type="button" class="fi-volver" data-fivolver title="Volver a ${esc(PILA[PILA.length - 1].nombre)}">${icon('chevron')}<span>${esc(PILA[PILA.length - 1].nombre)}</span></button>` : '';
+  $('#fiFoot').innerHTML = `${volver}${pie}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
   openSheet(d); $('#fiBody').scrollTop = 0;
 }
 const fuente = f => (f ? `<p class="fi-src">${gi('libro')}${esc(f)} · importado de tu PDF</p>` : '');
@@ -209,8 +260,8 @@ export function abrirResumen(clase, subclase = '') {
   if (!rz) return toast(`La app no conoce los rasgos de ${esc(subclase || clase)}: si es de otro libro, impórtalo en Libros y manuales.`);
   const [h, sat, ico] = (subclase && TEMAS.sub[rz.subclase]) || TEMAS.clase[clase] || [40, 50, 'subclase'];
   const rasgo = r => r.texto
-    ? `<details class="rz-r ${r.sub ? 'sub' : ''}"><summary><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</summary><div class="sp-text">${md(r.texto)}</div></details>`
-    : `<div class="rz-r ${r.sub ? 'sub' : ''}"><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${esc(r.resumen)}</span>` : ''}</div>`;
+    ? `<details class="rz-r ${r.sub ? 'sub' : ''}"><summary><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${rico(r.resumen)}</span>` : ''}</summary><div class="sp-text">${md(r.texto)}</div></details>`
+    : `<div class="rz-r ${r.sub ? 'sub' : ''}"><b>${esc(r.nombre)}</b>${r.resumen ? `<span>${rico(r.resumen)}</span>` : ''}</div>`;
   const lista = `<ol class="rz-lista">${rz.niveles.map(n => `<li><span class="rz-lv" aria-label="Nivel ${n.nivel}">${n.nivel}</span><div class="rz-rs">${n.rasgos.map(rasgo).join('')}</div></li>`).join('')}</ol>`;
   const conj = rz.conjuros?.length ? `<h3 class="rz-h">Conjuros siempre preparados</h3><dl class="rz-conj">${rz.conjuros.map(c => `<div><dt>Nivel ${c.nivel}</dt><dd>${c.conjuros.map(esc).join(', ')}</dd></div>`).join('')}</dl>` : '';
   const aviso = rz.conTextos ? '' : '<p class="note">Importa el Manual del Jugador (o el libro de esta subclase) en Libros y manuales para leer qué hace cada rasgo. Se lee en este dispositivo.</p>';
@@ -259,13 +310,70 @@ export function abrirRasgoJuego(clave) {
     sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
     cuerpo: `${grupos}${eleccionHtml(r)}${r.eleccion2 ? eleccionHtml({ eleccion: r.eleccion2 }) : ''}${activarHtml(ch, r)}${canjesHtml(ch, r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
-export function abrirTermino(clave) {
-  const e = termino(clave); if (!e) return;
-  const largo = e.texto.length > 2500, apartados = [...e.texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
-  const indice = largo && apartados.length >= 3 ? `<nav class="fi-toc" aria-label="Apartados">${apartados.map((a, i) => `<a href="#ap-${i}">${esc(a)}</a>`).join('')}</nav>` : '';
-  let n = 0; const html = md(e.texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`);
-  ficha({ titulo: e.nombre, ico: 'glosario', sub: e.cat ? `<div class="fi-pills"><span class="rar-pill ${e.cat === 'Estado' ? 'estado' : ''}">${esc(e.cat)}</span></div>` : '', cuerpo: `${indice}<section class="sp-text">${html}</section>` });
+// Lo que la app sabe de una regla sin el manual: el resumen de un estado, de una acción, de una propiedad o maestría de arma
+const ESTADO_K = nombre => Object.keys(NOMBRE_ESTADO).find(k => norm(NOMBRE_ESTADO[k]) === norm(sinParen(nombre))) || '';
+function resumenRegla(nombre, cat = '') {
+  const n = norm(sinParen(nombre));
+  const k = ESTADO_K(nombre); if (k && (!cat || cat === 'Estado')) return RESUMEN_ESTADO[k];
+  const a = ACCIONES_COMUNES.find(x => [x.nombre, ...(x.alias || [])].some(y => norm(y) === n)); if (a) return a.texto;
+  const eco = Object.values(ECONOMIA_INFO).find(x => norm(x.titulo) === n); if (eco) return eco.texto;
+  const l = ECONOMIA_INFO.accion.lista.find(([t]) => norm(t) === n); if (l) return l[1];
+  return textoMaestria(nombre) || textoPropiedad(nombre) || '';
 }
+// Cómo aplica la hoja un estado: lo que pasa sola al tirar y al moverte
+const SOBRE = { ataque: 'tus tiradas de ataque', prueba: 'tus pruebas de característica', salvacion: 'tus tiradas de salvación', iniciativa: 'la iniciativa' };
+const CAR_LARGA = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
+function automatismos(k) {
+  const r = REGLAS_ESTADO[k]; if (!r) return [];
+  const out = [];
+  if (r.vel0) out.push(['velocidad', 'Tu velocidad pasa a 0.']);
+  if (r.arrastra) out.push(['velocidad', 'Moverte cuesta el doble: solo puedes arrastrarte o levantarte.']);
+  if (r.incap) out.push(['estados', 'Incapacitado: pierdes la concentración y tienes desventaja en la iniciativa.']);
+  const fallas = r.reglas.filter(x => x.efecto === 'falla').map(x => CAR_LARGA[x.ab]);
+  if (fallas.length) out.push(['muerte', `Fallas automáticamente las salvaciones de ${fallas.join(' y ')}.`]);
+  for (const x of r.reglas.filter(y => y.efecto !== 'falla' && !(r.incap && k !== 'incapacitado' && y.sobre === 'iniciativa')))
+    out.push([x.efecto === 'ventaja' ? 'inspiracion' : 'd20', `${x.efecto === 'ventaja' ? 'Ventaja' : 'Desventaja'} en ${x.ab ? `${SOBRE[x.sobre].replace('tus tiradas de salvación', 'tus salvaciones')} de ${CAR_LARGA[x.ab]}` : SOBRE[x.sobre]}${x.cond ? ` ${x.cond}` : ''}.`]);
+  return out;
+}
+// Términos del glosario que aparecen en el texto de otro, en el orden en que salen
+const palabras = t => ` ${norm(t).replace(/[^a-z0-9ñ]+/g, ' ').trim()} `;
+function relacionados(e) {
+  const t = palabras(e.texto);
+  return glosario().filter(x => x.clave !== e.clave && sinParen(x.nombre).length >= 4).map(x => [x, t.indexOf(palabras(sinParen(x.nombre)))])
+    .filter(([, i]) => i >= 0).sort((a, b) => a[1] - b[1]).slice(0, 12).map(([x]) => x);
+}
+// Ficha de una regla: color de su categoría, el resumen de la app, qué hace la hoja con ella y el texto completo del manual
+function fichaRegla({ nombre, cat = '', texto = '', clave = '' }) {
+  const k = catRegla(cat), ch = S.cur(), ek = cat === 'Estado' || !texto ? ESTADO_K(nombre) : '';
+  const resumen = resumenRegla(nombre, cat), auto = ek ? automatismos(ek) : [];
+  let hoja = '';
+  if (ek && ch) {
+    const on = vidaDe(ch).estados.includes(ek), inm = inmunidadesEstado(ch).get(ek);
+    hoja = `<section class="rg-hoja ${on ? 'on' : ''}"><p>En la hoja de <b>${esc(ch.nombre)}</b>: ${inm ? `<b class="rg-est">inmunidad</b> <small>(${esc(inm)})</small>` : on ? '<b class="rg-est">activo</b>' : 'no lo tiene'}.</p>
+      <button type="button" class="${on ? '' : 'gold'}" data-rgestado="${ek}">${gi('estados')}${on ? 'Quitar el estado' : 'Ponerle el estado'}</button></section>`;
+  }
+  const largo = texto.length > 2500, apartados = [...texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
+  const indice = largo && apartados.length >= 3 ? `<nav class="fi-toc" aria-label="Apartados">${apartados.map((a, i) => `<a href="#ap-${i}">${esc(a)}</a>`).join('')}</nav>` : '';
+  // El término no se enlaza a sí mismo dentro de su propia regla
+  let n = 0; const html = texto ? md(texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`).replace(new RegExp(`<button type="button" class="term[^"]*" data-term="${clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">(.*?)</button>`, 'g'), '$1') : '';
+  const rel = texto ? relacionados({ clave, texto }) : [];
+  FICHA = { tipo: 'regla', clave, nombre, cat };
+  ficha({ titulo: nombre, ico: k.ico, clase: 'regla',
+    sub: `<div class="fi-pills"><span class="rar-pill">${esc(cat || 'Regla')}</span>${auto.length ? `<span class="rg-auto">${icon('sparkles')}La hoja lo aplica</span>` : ''}${texto ? `<span>${gi('libro')}Manual importado</span>` : '<span>Resumen de la app</span>'}</div>`,
+    cuerpo: `${resumen ? `<aside class="rg-resumen"><span class="rg-lbl">En resumen</span><p>${rico(resumen)}</p></aside>` : ''}
+      ${auto.length ? `<section class="rg-auto-l"><h4 class="rg-h">Lo que hace la hoja</h4><ul>${auto.map(([i, t]) => `<li>${gi(i)}<span>${rico(t)}</span></li>`).join('')}</ul></section>` : ''}
+      ${hoja}
+      ${texto ? `${resumen || auto.length ? '<h4 class="rg-h rg-h-txt">La regla completa</h4>' : ''}${indice}<section class="sp-text rg-texto">${html}</section>` : '<p class="note">Resumen de la app. Importa el Manual del Jugador en Libros y manuales para leer la regla completa: se lee en este dispositivo.</p>'}
+      ${rel.length ? `<section class="rg-rel"><h4 class="rg-h">Ver también</h4><div class="rg-rel-l">${rel.map(x => { const c = catRegla(x.cat); return `<button type="button" class="rg-chip" style="--sh:${c.h};--ss:${c.s}%" data-term="${x.clave}">${gi(c.ico)}${esc(x.nombre)}</button>`; }).join('')}</div></section>` : ''}` });
+  const d = $('#fichaDlg'); d.style.setProperty('--sh', k.h); d.style.setProperty('--ss', k.s + '%');
+}
+export function abrirTermino(clave, { apilar = false } = {}) {
+  const e = termino(clave); if (!e) return;
+  if (apilar) apilarFicha();
+  fichaRegla({ nombre: e.nombre, cat: e.cat, texto: e.texto, clave: e.clave });
+}
+// Sin manual importado: la misma ficha con el resumen de la app
+export function abrirResumenRegla(nombre, cat = '') { fichaRegla({ nombre, cat }); }
 
 export function init(store) {
   S = store;
@@ -273,6 +381,7 @@ export function init(store) {
   on(d, 'click', '[data-tab]', (e, b) => { V.tab = b.dataset.tab; V.q = ''; pintar(); });
   on(d, 'click', '[data-rar]', (e, b) => { V.rar = V.rar === b.dataset.rar ? '' : b.dataset.rar; herramientas(); cuerpo(); });
   on(d, 'click', '[data-cat]', (e, b) => { V.cat = b.dataset.cat; herramientas(); cuerpo(); });
+  on(d, 'click', '[data-gcat]', (e, b) => { const c = b.dataset.gcat; V.gcat = c === '*' || V.gcat === c ? null : c; herramientas(); cuerpo(); });
   on(d, 'click', '#bibSint', () => { V.sint = !V.sint; herramientas(); cuerpo(); });
   on(d, 'click', '#bibOrden', () => { V.orden = ORDEN_OBJ[V.orden][1]; herramientas(); cuerpo(); });
   on(d, 'click', '[data-obj]', (e, b) => abrirObjeto(b.dataset.obj));
@@ -287,6 +396,14 @@ export function init(store) {
   });
   on($('#fichaDlg'), 'click', '.fi-toc a, a.lvl-pill', (e, a) => { e.preventDefault(); $('#fiBody').querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   on($('#fichaDlg'), 'click', '[data-rzclase]', (e, b) => abrirResumen(b.dataset.rzclase));
+  on($('#fichaDlg'), 'click', '[data-fivolver]', () => volverFicha());
+  on($('#fichaDlg'), 'click', '[data-rgestado]', (e, b) => {
+    if (FICHA?.tipo !== 'regla' || !S.cur()) return; const { clave, nombre, cat } = FICHA, y = $('#fiBody').scrollTop;
+    alternarEstado(S, b.dataset.rgestado);
+    if (clave) abrirTermino(clave); else abrirResumenRegla(nombre, cat);
+    $('#fiBody').scrollTop = y;
+  });
+  $('#fichaDlg').addEventListener('close', () => { PILA.length = 0; });
   on($('#fichaDlg'), 'click', '[data-ejvar]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [clase, v] = b.dataset.ejvar.split('|');
     const h = S.act(`${clase}: variante ${v}`, (db, ch) => { ch.variantes = { ...(ch.variantes || {}), [clase]: v }; });
