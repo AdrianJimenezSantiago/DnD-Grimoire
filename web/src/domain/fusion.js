@@ -11,6 +11,7 @@ function valida(t, voc) {
   const s = sinSignos(t);
   if (!s) return true;
   if (/\d/.test(s)) return /^(?:\d+(?:[.,]\d+)?|\d*d\d+|\d+[-–]\d+|[+-]\d+|\d+\/\d+)$/.test(s);
+  if (/^\p{Lu}(?:[,&/]\p{Lu}){1,3}$/u.test(s)) return true; // «C,M», «D&D», «C,R»
   return /^\p{L}+$/u.test(s) && plausible(s.toLowerCase(), voc);
 }
 function lev(a, b) {
@@ -43,12 +44,25 @@ export function fusionar(lineas, otro, voc) {
     const nb = i1 - i0, no = j1 - j0;
     if (!nb || !no || nb > 3 || no > 3) continue;
     const base = toks.slice(i0, i1), alt = otros.slice(j0, j1);
-    if (base.every(x => valida(x.t, voc)) || !alt.every(t => valida(t, voc))) continue;
+    if (base.every(x => valida(x.t, voc))) continue;
+    // Mismo número de palabras: se cambian una a una, solo las que en la base no son palabras («Dote: 1niciado» → «Dote: Iniciado»)
+    if (nb === no && nb > 1) {
+      base.forEach((x, k) => { if (!valida(x.t, voc) && valida(alt[k], voc)) cambiar([x], [alt[k]]); });
+      continue;
+    }
+    // Distinto número (palabras pegadas o partidas): solo si ninguna palabra de la base es válida
+    if (base.some(x => valida(x.t, voc)) || !alt.every(t => valida(t, voc))) continue;
+    cambiar(base, alt);
+  }
+  return nuevas.map(ws => ws.filter(w => w !== null).join(' '));
+
+  function cambiar(base, alt) {
+    const nb = base.length;
     // Las dos lecturas tienen que parecerse: es el mismo texto mal leído, no otro trozo de la página
     const ka = base.map(x => clave(x.t)).join(''), kb = alt.map(clave).join('');
-    if (!ka || lev(ka, kb) > Math.max(1, Math.round(Math.max(ka.length, kb.length) * 0.34))) continue;
+    if (!ka || lev(ka, kb) > Math.max(1, Math.round(Math.max(ka.length, kb.length) * 0.34))) return;
     // Un tramo partido entre dos líneas no se toca (corte de palabra con guion, final de columna)
-    if (base.some(x => x.li !== base[0].li)) continue;
+    if (base.some(x => x.li !== base[0].li)) return;
     const { li, ti } = base[0], pre = base[0].t.match(/^[^\p{L}\d]*/u)[0], suf = base[nb - 1].t.match(/[^\p{L}\d]*$/u)[0];
     // Respeta las mayúsculas de la base: «MACIOS» → «MAGOS», «1nteligencía» → «Inteligencia»
     const letrasBase = base.map(x => x.t).join('').replace(/[^\p{L}]/gu, ''), mayus = letrasBase.length > 1 && letrasBase === letrasBase.toUpperCase();
@@ -59,5 +73,4 @@ export function fusionar(lineas, otro, voc) {
     nuevas[li].splice(ti, nb, conSuf, ...Array(nb - 1).fill(null));
     if (voc.traza) voc.traza.push(['fusión', base.map(x => x.t).join(' '), conSuf]);
   }
-  return nuevas.map(ws => ws.filter(w => w !== null).join(' '));
 }

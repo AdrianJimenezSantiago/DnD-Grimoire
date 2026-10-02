@@ -26,16 +26,35 @@ node tools/ocr/medir.mjs --conjunto prueba     # solo un conjunto
 node tools/ocr/diferencias.mjs phb 182         # líneas que cambia el corrector en una página
 node tools/ocr/extraer.mjs --imagenes /tmp/x   # borradores de referencias nuevas y la imagen de cada página
 node tools/ocr/vocabulario.mjs                 # regenera web/public/data/vocabulario.json
+node tools/ocr/reocr.mjs --nombre tess-fast    # otro OCR (Tesseract) de las páginas de referencia, para medirlo
+node tools/ocr/medir.mjs --motor tess-fast     # ese OCR por sí solo
+node tools/ocr/medir.mjs --corregir --fusionar tess-fast   # capa del PDF + corrector + fusión con ese OCR
+node tools/ocr/segunda-lectura.mjs phb dmg faerun          # segunda lectura de los libros enteros (lecturas/, ~1 h)
 ```
 
 CER: caracteres mal / caracteres de la referencia. WER: lo mismo con palabras.
 
-## Resultados
+## Segunda lectura y fusión
 
-| Conjunto | CER sin corregir | CER corregido | WER sin corregir | WER corregido |
+Las imágenes del Manual del Jugador y de la Guía están a 96 ppp y su capa de texto la hizo Tesseract sobre el escaneo
+original, así que volver a pasar OCR no la mejora por sí solo. En Faerûn el texto está en una capa de 1 bit a 600 ppp
+comprimida con JBIG2, que a veces cambia unas letras por otras dentro de la propia imagen.
+
+Aun así, Tesseract (5.3, español, 300 ppp) se equivoca en sitios distintos que la capa original. `web/src/domain/fusion.js`
+toma la capa del PDF como base y, donde sus palabras no son palabras y las de la otra lectura sí (y se parecen), usa las
+de la otra lectura. `tools/ocr/lecturas/` guarda esa segunda lectura de los tres libros (con la huella del PDF), y
+`preparar-libros.mjs` la usa al generar los libros incluidos. El modelo «best» de Tesseract, los 600 ppp o fusionar
+dos lecturas no mejoran lo bastante para compensar el tiempo.
+
+## Resultados (WER, palabras mal)
+
+| | PDF tal cual | Tesseract solo | PDF + corrector | PDF + corrector + fusión |
 |---|---|---|---|---|
-| desarrollo | 0,74 % | 0,53 % | 2,36 % | 1,30 % |
-| prueba | 1,25 % | 0,94 % | 4,43 % | 2,90 % |
+| Manual del Jugador | 1,79 % | 3,92 % | 0,75 % | 0,72 % |
+| Guía del DM | 2,21 % | 2,91 % | 1,74 % | 1,70 % |
+| Héroes de Faerûn | 5,50 % | 4,61 % | 3,12 % | 2,59 % |
+| Desarrollo (41 págs.) | 2,36 % | 2,64 % | 1,30 % | 1,15 % |
+| Prueba (19 págs.) | 4,43 % | 6,45 % | 2,90 % | 2,68 % |
 
 Parte del error que queda no es de caracteres: texto de las ilustraciones, celdas de tablas desordenadas o números que el
 OCR leyó como otros números (705 en vez de 105). Arreglar eso queda para un OCR nuevo (paso 3).

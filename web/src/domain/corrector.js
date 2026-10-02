@@ -100,7 +100,8 @@ function candidatoDe(w, voc) {
 // Una palabra desconocida que son dos conocidas pegadas: «tormentay», «almenos», «deterreno», «recompensaa», «alos»
 function partir(w, voc) {
   const k = w.toLowerCase();
-  if (voc.n(k) >= 3 || k.length < 4 || !/^\p{L}+$/u.test(k)) return null;
+  // En MAYÚSCULAS no se parte: las versalitas mal leídas («AACCIÓN») engañan
+  if (voc.n(k) >= 3 || k.length < 4 || !/^\p{L}+$/u.test(k) || w === w.toUpperCase()) return null;
   let best = null, bs = 0;
   for (let i = 1; i < k.length; i++) {
     const a = k.slice(0, i), b = k.slice(i), na = voc.n(a), nb = voc.n(b);
