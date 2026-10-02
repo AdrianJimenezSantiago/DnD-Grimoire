@@ -3,14 +3,16 @@
 //   node tools/ocr/medir.mjs --corregir      tras pasar el corrector (web/src/domain/corrector.js)
 //   node tools/ocr/medir.mjs --errores 40    además, las 40 confusiones de palabra más frecuentes
 //   node tools/ocr/medir.mjs --conjunto desarrollo|prueba
+//   node tools/ocr/medir.mjs --motor tess-best   texto de otro OCR (lo deja reocr.mjs en .cache/motores/<motor>/)
 // CER: distancia de edición entre caracteres / caracteres de la referencia.
 // WER: lo mismo contando palabras. Los saltos de línea cuentan como un espacio.
 import fs from 'node:fs';
 import path from 'node:path';
-import { DIR, abrir, textoPagina, textoLibro, leerPaginas, nombreRef, LIBROS } from './comun.mjs';
+import { pageToColumns } from '../../web/src/domain/manualLineas.js';
+import { DIR, abrir, textoPagina, textoLibro, leerPaginas, nombreRef } from './comun.mjs';
 
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
-const conCorrector = process.argv.includes('--corregir'), nErrores = +(arg('--errores') || 0), soloConjunto = arg('--conjunto');
+const motor = arg('--motor'), conCorrector = process.argv.includes('--corregir'), nErrores = +(arg('--errores') || 0), soloConjunto = arg('--conjunto');
 let corregir = lineas => lineas;
 if (conCorrector) {
   // Vocabulario de los libros con texto: es lo que tendría la app con los libros incluidos
@@ -54,8 +56,12 @@ function sustituciones(a, b) {
 
 const paginas = leerPaginas().filter(pg => !soloConjunto || pg.conjunto === soloConjunto), docs = {}, filas = [], confusiones = new Map();
 for (const pg of paginas) {
-  const doc = docs[pg.libro] ||= await abrir(pg.libro);
-  const ocr = normal(await textoPagina(doc, pg.pagina)), ref = fs.readFileSync(path.join(DIR, 'referencia', nombreRef(pg)), 'utf8').replace(/\s+/g, ' ').trim();
+  let crudo;
+  if (motor) {
+    const { w, items } = JSON.parse(fs.readFileSync(path.join(DIR, '.cache/motores', motor, nombreRef(pg).replace(/\.txt$/, '.json')), 'utf8'));
+    crudo = pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
+  } else crudo = await textoPagina(docs[pg.libro] ||= await abrir(pg.libro), pg.pagina);
+  const ocr = normal(crudo), ref = fs.readFileSync(path.join(DIR, 'referencia', nombreRef(pg)), 'utf8').replace(/\s+/g, ' ').trim();
   const po = ocr.split(' '), pr = ref.split(' ');
   filas.push({ ...pg, c: distancia(ocr, ref), nc: ref.length, w: distancia(po, pr), nw: pr.length });
   if (nErrores) for (const s of sustituciones(po, pr)) confusiones.set(s, (confusiones.get(s) || 0) + 1);
@@ -67,7 +73,7 @@ const resumen = (nombre, fs_) => {
   const s = k => fs_.reduce((t, f) => t + f[k], 0);
   console.log(`${nombre.padEnd(24)} CER ${pct(s('c'), s('nc'))}   WER ${pct(s('w'), s('nw'))}   (${fs_.length} págs., ${s('nw')} palabras)`);
 };
-console.log(conCorrector ? 'Con corrector' : 'OCR sin corregir');
+console.log(`${motor ? `Motor ${motor}` : 'OCR original'}, ${conCorrector ? 'con corrector' : 'sin corregir'}`);
 if (process.argv.includes('--paginas')) for (const f of filas) console.log(`  ${f.libro} p.${f.pagina} ${f.conjunto} CER ${pct(f.c, f.nc)} WER ${pct(f.w, f.nw)}`);
 for (const f of filas.sort((a, b) => b.w / b.nw - a.w / a.nw).slice(0, 8)) console.log(`  peor: ${f.libro} p.${f.pagina} (${f.tipo})  CER ${pct(f.c, f.nc)}  WER ${pct(f.w, f.nw)}`);
 for (const l of [...new Set(filas.map(f => f.libro))]) resumen(l, filas.filter(f => f.libro === l));

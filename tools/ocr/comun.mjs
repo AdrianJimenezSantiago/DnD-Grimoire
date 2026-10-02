@@ -47,3 +47,34 @@ export async function textoLibro(id) {
   fs.writeFileSync(f, JSON.stringify({ clave, paginas }));
   return paginas;
 }
+
+// Elementos de texto (como los de pdf.js) a partir de la salida TSV de Tesseract: las palabras de cada línea se agrupan en
+// frases y solo se cortan en huecos grandes (celdas de tabla), para que pageToColumns vea lo mismo que con un PDF normal
+export function itemsDeTsv(tsv, dpi, altoPx) {
+  const k = 72 / dpi, lineas = new Map();
+  for (const fila of tsv.split('\n').slice(1)) {
+    const c = fila.split('\t');
+    if (c.length < 12 || c[0] !== '5' || !c[11].trim()) continue;
+    const [blo, par, lin, x, y, w, h] = [c[2], c[3], c[4], +c[6], +c[7], +c[8], +c[9]];
+    const id = `${blo}.${par}.${lin}`;
+    if (!lineas.has(id)) lineas.set(id, []);
+    lineas.get(id).push({ x, y, w, h, s: c[11].trim() });
+  }
+  const items = [];
+  for (const ps of lineas.values()) {
+    ps.sort((a, b) => a.x - b.x);
+    const alto = ps.map(p => p.h).sort((a, b) => a - b)[Math.floor(ps.length / 2)];
+    let frase = [ps[0]];
+    const cierra = () => {
+      const x0 = frase[0].x, x1 = Math.max(...frase.map(p => p.x + p.w)), abajo = Math.max(...frase.map(p => p.y + p.h)), arriba = Math.min(...frase.map(p => p.y));
+      const fs = (abajo - arriba) * k * 0.8;
+      items.push({ str: frase.map(p => p.s).join(' '), transform: [fs, 0, 0, fs, x0 * k, (altoPx - abajo) * k + fs * 0.2], width: (x1 - x0) * k, height: fs });
+    };
+    for (let i = 1; i < ps.length; i++) {
+      const prev = frase[frase.length - 1];
+      if (ps[i].x - (prev.x + prev.w) > alto * 1.8) { cierra(); frase = [ps[i]]; } else frase.push(ps[i]);
+    }
+    cierra();
+  }
+  return items;
+}
