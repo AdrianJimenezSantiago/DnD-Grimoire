@@ -46,6 +46,11 @@ de la otra lectura. `tools/ocr/lecturas/` guarda esa segunda lectura de los tres
 `preparar-libros.mjs` la usa al generar los libros incluidos. El modelo «best» de Tesseract, los 600 ppp o fusionar
 dos lecturas no mejoran lo bastante para compensar el tiempo.
 
+PaddleOCR también está probado (`reocr.mjs --motor paddle`, con el modelo PP-OCRv4 que trae `rapidocr_onnxruntime`; los
+modelos latinos y Surya necesitan Hugging Face o los servidores de Paddle, cerrados en el entorno donde se probó). Ese
+modelo está entrenado para chino e inglés: quita todas las tildes y pega palabras («Encontrarinformacion»). Solo tiene un
+43 % de palabras mal, y fusionado empeora el resultado (1,70 % frente a 1,59 % con Tesseract).
+
 ## Resultados (WER, palabras mal)
 
 | | PDF tal cual | Tesseract solo | PDF + corrector | PDF + corrector + fusión |
