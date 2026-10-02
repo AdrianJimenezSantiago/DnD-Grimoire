@@ -20,6 +20,7 @@ import './styles/extras.css';
 import './styles/biblioteca.css';
 import './styles/arcano.css';
 import './styles/juego.css';
+import './styles/placas.css';
 import './styles/portada.css';
 import './styles/dados.css';
 import './styles/creacion.css';
