@@ -1,5 +1,5 @@
 import { clamp, norm } from '../core/util.js';
-import { statsEfectivos } from './objetosEfecto.js';
+import { statsEfectivos, objetoDisponible } from './objetosEfecto.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from './reglas2024.js';
 import { cdManiobras } from './maniobras.js';
 import { linajeActual } from './especies.js';
@@ -258,7 +258,8 @@ export function reglas(ch, todas = false) {
   const sust = new Set(ch.rasgosOff || []), ocultos = new Set(ch.rasgosOcultos || []);
   const list = [
     ...[...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))), ...plantillasOrigen(ch)].map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
-    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off, max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
+    // Las cargas y usos de un objeto mágico solo se ven mientras se puede usar: encima, y sintonizado si lo pide
+    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off || (!!r.objetoId && !objetoDisponible((ch.equipo?.objetos || []).find(o => o.id === r.objetoId))), max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.sustituida);
 }

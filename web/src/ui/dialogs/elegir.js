@@ -8,7 +8,9 @@ let E = null;
 const dlg = () => $('#elegirDlg');
 
 export function elegir({ titulo, sub = '', items, grupos = null, actual = '', libre = true, placeholder = 'Buscar', vacio = '', ico = 'dote', grupoInicial = '' }) {
-  return new Promise(resolve => {
+  // Si la elección anterior aún se está cerrando, se espera a que termine: si no, su cierre se llevaría también esta
+  const libreYa = dlg().open ? new Promise(r => dlg().addEventListener('close', r, { once: true })) : Promise.resolve();
+  return libreYa.then(() => new Promise(resolve => {
     const orden = grupos || [...new Set(items.map(i => i.grupo || ''))];
     E = { items, orden, actual, libre, resolve, q: '', grupo: orden.includes(grupoInicial) ? grupoInicial : '', abierto: null, hecho: false, vacio, ico };
     $('#elTitle').innerHTML = `${gi(ico, 'el-tit-ico')}<span>${esc(titulo)}</span>`;
@@ -18,7 +20,7 @@ export function elegir({ titulo, sub = '', items, grupos = null, actual = '', li
     openSheet(dlg());
     const sel = dlg().querySelector('.el-card.on'); if (sel) setTimeout(() => sel.scrollIntoView({ block: 'center' }), 80);
     dlg().addEventListener('close', () => { if (!E?.hecho) E?.resolve(null); E = null; }, { once: true });
-  });
+  }));
 }
 
 function pintarGrupos() {

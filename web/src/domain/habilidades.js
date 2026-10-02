@@ -1,6 +1,6 @@
 import { norm } from '../core/util.js';
 import { linajeActual } from './especies.js';
-import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos } from './objetosEfecto.js';
+import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos, bonoHabilidadObjetos, velocidadMinimaObjetos } from './objetosEfecto.js';
 import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from './clases2024.js';
 import { biblioteca } from './catalogo.js';
@@ -109,7 +109,7 @@ export function nivelHabilidad(ch, k) { return Math.max(0, Math.min(2, parseInt(
 export function bonoHabilidad(ch, k) {
   const pb = competencia(nivelTotal(ch)), n = nivelHabilidad(ch, k);
   const extra = n === 2 ? pb * 2 : n === 1 ? pb : esBardo(ch) ? Math.floor(pb / 2) : 0;
-  return modOf(statsEfectivos(ch)[abDe(k)]) + extra + bonoOrden(ch, k) + bonoGlamur(ch, k) + bonoPruebasObjetos(ch);
+  return modOf(statsEfectivos(ch)[abDe(k)]) + extra + bonoOrden(ch, k) + bonoGlamur(ch, k) + bonoPruebasObjetos(ch) + bonoHabilidadObjetos(ch, k);
 }
 // Taumaturgo y Naturalista suman la Sabiduría (mínimo +1) a sus dos habilidades de Inteligencia
 export const bonoOrden = (ch, k) => clasesDe(ch).some(c => ordenDe(ch, c.clase)?.habilidades?.includes(k)) ? Math.max(1, modOf(statsEfectivos(ch).sab)) : 0;
@@ -144,6 +144,8 @@ export function velocidad(ch) {
   }
   // Armadura pesada sin la Fuerza que pide: −3 m
   m -= penalizacionArmadura(ch).lenta;
+  // Botas de zancadas y brincos: al menos 9 m, sin que la armadura pesada las reduzca
+  m = Math.max(m, velocidadMinimaObjetos(ch));
   m -= 1.5 * Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
   return Math.max(0, m);
 }

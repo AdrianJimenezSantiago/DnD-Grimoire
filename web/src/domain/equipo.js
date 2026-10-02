@@ -13,6 +13,8 @@ export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras 
 export const NOMBRE_CAT = Object.fromEntries(CATEGORIAS.map(([k, t]) => [k, t]));
 export const MONEDAS = [['ppt', 'Platino', 10], ['po', 'Oro', 1], ['pe', 'Electro', 0.5], ['pp', 'Plata', 0.1], ['pc', 'Cobre', 0.01]];
 const CAT_TIPO = { Arma: 'arma', Armadura: 'armadura', Escudo: 'armadura', 'Poción': 'consumible', Pergamino: 'consumible', 'Munición': 'consumible' };
+// Objetos maravillosos de un solo uso o con dosis: se gastan como las pociones
+const CONSUMIBLE_MAGICO = /^(polvo|ficha de pluma|gema elemental|perfume|ungüento|unguento|canica de fuerza|bolsa de judias|disolvente universal|pegamento soberano|aceite)\b/;
 
 const A = (nombre, dano, tipo, peso, valor, props = [], maestria = '', distancia = '') => ({ nombre, cat: 'arma', peso, valor, arma: { dano, tipo, props, maestria, distancia } });
 // fue: Fuerza mínima (si no llega, −3 m de velocidad); sigilo: desventaja en Destreza (Sigilo) al llevarla
@@ -32,6 +34,12 @@ export const PREDEFINIDOS = [
   A('Mayal', '1d8', 'contundente', 1, '10 po', [], 'Debilitar'), A('Lucero del alba', '1d8', 'perforante', 2, '15 po', [], 'Debilitar'), A('Tridente', '1d8', 'perforante', 2, '5 po', ['Arrojadiza', 'Versátil (1d10)'], 'Derribar', '6/18 m'),
   A('Látigo', '1d4', 'cortante', 1.5, '2 po', ['Sutil', 'Alcance'], 'Ralentizar'), A('Arco largo', '1d8', 'perforante', 1, '50 po', ['Munición', 'Pesada', 'Dos manos'], 'Ralentizar', '45/180 m'),
   A('Ballesta de mano', '1d6', 'perforante', 1.5, '75 po', ['Munición', 'Ligera', 'Carga'], 'Irritar', '9/36 m'), A('Ballesta pesada', '1d10', 'perforante', 9, '50 po', ['Munición', 'Pesada', 'Carga', 'Dos manos'], 'Empujar', '30/120 m'),
+  A('Garrote grande', '1d8', 'contundente', 5, '2 pp', ['Dos manos'], 'Empujar'), A('Martillo ligero', '1d4', 'contundente', 1, '2 po', ['Ligera', 'Arrojadiza'], 'Mella', '6/18 m'),
+  A('Dardo', '1d4', 'perforante', 0.125, '5 pc', ['Sutil', 'Arrojadiza'], 'Irritar', '6/18 m'), A('Honda', '1d4', 'contundente', 0, '1 pp', ['Munición'], 'Ralentizar', '9/36 m'),
+  A('Guja', '1d10', 'cortante', 3, '20 po', ['Pesada', 'Alcance', 'Dos manos'], 'Rozar'), A('Pica', '1d10', 'perforante', 9, '5 po', ['Pesada', 'Alcance', 'Dos manos'], 'Empujar'),
+  A('Lanza de caballería', '1d10', 'perforante', 3, '10 po', ['Pesada', 'Alcance', 'Dos manos'], 'Derribar'), A('Pico de guerra', '1d8', 'perforante', 1, '5 po', ['Versátil (1d10)'], 'Debilitar'),
+  A('Mosquete', '1d12', 'perforante', 5, '500 po', ['Munición', 'Carga', 'Dos manos'], 'Ralentizar', '12/36 m'), A('Pistola', '1d10', 'perforante', 1.5, '250 po', ['Munición', 'Carga'], 'Irritar', '9/27 m'),
+  A('Cerbatana', '1', 'perforante', 0.5, '10 po', ['Munición', 'Carga'], 'Irritar', '7,5/30 m'),
   R('Armadura acolchada', 11, 'todo', 'ligera', 4, '5 po', 0, true), R('Armadura de cuero', 11, 'todo', 'ligera', 5, '10 po'), R('Armadura de cuero tachonado', 12, 'todo', 'ligera', 6.5, '45 po'),
   R('Armadura de pieles', 12, 'max2', 'media', 6, '10 po'), R('Camisote de mallas', 13, 'max2', 'media', 10, '50 po'), R('Cota de escamas', 14, 'max2', 'media', 22.5, '50 po', 0, true),
   R('Coraza', 14, 'max2', 'media', 10, '400 po'), R('Media armadura', 15, 'max2', 'media', 20, '750 po', 0, true), R('Cota de anillas', 14, 'no', 'pesada', 20, '30 po', 0, true),
@@ -39,7 +47,7 @@ export const PREDEFINIDOS = [
   R('Escudo', 2, 'todo', 'escudo', 3, '10 po'),
   E('Mochila', 'equipo', 2.5, '2 po'), E('Saco de dormir', 'equipo', 3.5, '1 po'), E('Cuerda de cáñamo (15 m)', 'equipo', 2.5, '1 po'), E('Antorcha', 'equipo', 0.5, '1 pc'),
   E('Yesquero', 'equipo', 0.5, '5 pp'), E('Odre', 'equipo', 2.5, '2 pp'), E('Palanca', 'equipo', 2.5, '2 po'), E('Linterna sorda', 'equipo', 1, '10 po'), E('Manta', 'equipo', 1.5, '5 pp'),
-  E('Aceite (frasco)', 'consumible', 0.5, '1 pp'), E('Flechas', 'consumible', 0.05, '1 pc'), E('Virotes', 'consumible', 0.075, '1 pc'), E('Poción de curación', 'consumible', 0.25, '50 po', { notas: 'Recuperas 2d4 + 2 puntos de golpe.' }),
+  E('Aceite (frasco)', 'consumible', 0.5, '1 pp'), E('Flechas', 'consumible', 0.05, '1 pc'), E('Virotes', 'consumible', 0.075, '1 pc'), E('Balas de honda', 'consumible', 0.035, '2 pc'), E('Agujas de cerbatana', 'consumible', 0.01, '2 pc'), E('Balas de arma de fuego', 'consumible', 0.1, '3 pc'), E('Poción de curación', 'consumible', 0.25, '50 po', { notas: 'Recuperas 2d4 + 2 puntos de golpe.' }),
   E('Kit de sanador', 'consumible', 1.5, '5 po', { notas: '10 usos.' }), E('Agua bendita (frasco)', 'consumible', 0.5, '25 po'), E('Fuego de alquimista (frasco)', 'consumible', 0.5, '50 po'),
   E('Raciones (1 día)', 'comida', 1, '5 pp'), E('Agua (odre lleno, 1 día)', 'comida', 2.5, ''), E('Pan', 'comida', 0.25, '2 pc'), E('Queso', 'comida', 0.5, '1 pp'), E('Vino (botella)', 'comida', 0.75, '2 po'),
   E('Herramientas de ladrón', 'herramienta', 0.5, '25 po'), E('Kit de herborista', 'herramienta', 1.5, '5 po'), E('Útiles de herrero', 'herramienta', 4, '20 po'),
@@ -67,13 +75,17 @@ const BASES = [...PREDEFINIDOS].filter(p => p.arma || p.armadura).sort((a, b) =>
 export function baseMagica(nombre) {
   const n = norm(nombre || ''), p = BASES.find(x => n.includes(norm(x.nombre))); if (!p) return null;
   const bono = bonoDeNombre(nombre), c = JSON.parse(JSON.stringify(p));
-  if (c.arma) c.arma.bono = bono; if (c.armadura) c.armadura.bono = bono;
+  if (c.arma) { c.arma.bono = bono; c.arma.base = p.nombre; } if (c.armadura) c.armadura.bono = bono;
   return c;
 }
 export function normObjeto(o) {
-  const cat = CATEGORIAS.some(([k]) => k === o.cat) ? o.cat : o.clave ? (CAT_TIPO[o.tipo] || 'magico') : 'otro';
+  const consumible = o.clave && (o.municion || /^municion/.test(norm(o.nombre || '')) || CONSUMIBLE_MAGICO.test(norm(o.nombre || '')));
+  const cat = CATEGORIAS.some(([k]) => k === o.cat) ? o.cat : o.clave ? (consumible ? 'consumible' : CAT_TIPO[o.tipo] || 'magico') : 'otro';
   const out = { ...o, id: o.id || uid('ob'), nombre: String(o.nombre || 'Objeto').trim(), cat, cantidad: Math.max(0, Math.round(num(o.cantidad, 1))), peso: Math.max(0, num(o.peso)),
     valor: String(o.valor || ''), notas: String(o.notas || ''), equipado: !!o.equipado, guardado: !!o.guardado && !o.equipado, magico: !!(o.magico || o.clave || o.rareza), sintonia: !!o.sintonia || !!efectoDe(o.nombre)?.sintonia, sintonizado: !!o.sintonizado };
+  if (!out.sintonia) out.sintonizado = false;
+  if (out.sintoniaCon != null) out.sintoniaCon = String(out.sintoniaCon || '');
+  if (out.usos != null && !Array.isArray(out.usos)) delete out.usos;
   if (!out.equipado) delete out.mano;
   // Las armas y armaduras mágicas del libro llegaban sin daño ni CA: se completan con la normal de su nombre
   if (out.magico && (cat === 'arma' || cat === 'armadura') && !out.arma && !out.armadura) {
@@ -86,25 +98,56 @@ export function normObjeto(o) {
 export function normEquipo(ch) {
   const eq = equipoDe(ch);
   eq.objetos = eq.objetos.filter(Boolean).map(normObjeto);
+  // Partidas antiguas: los recursos de cargas no sabían de qué objeto eran
+  for (const o of eq.objetos) for (const id of [o.rasgo, ...(o.usos || [])].filter(Boolean)) { const r = (ch.rasgos || []).find(x => x.id === id); if (r && !r.objetoId) r.objetoId = o.id; }
   for (const [k] of MONEDAS) eq.monedas[k] = Math.max(0, Math.round(num(eq.monedas[k])));
   ordenarManos(eq);
   return eq;
 }
 
-export function rasgoDeCargas(o) {
-  const c = o.cargas; if (!c || !c.max) return null;
+const tirarDado = caras => 1 + Math.floor(Math.random() * caras);
+// «1d6+3», «2d4 + 2» o «5»: tira la expresión
+export function tirarCantidad(expr, tirar = tirarDado) {
+  const m = /^(\d+)d(\d+)(?:\s*\+\s*(\d+))?$/.exec(String(expr || '').replace(/\s+/g, ''));
+  if (!m) return parseInt(expr, 10) || 0;
+  let t = +(m[3] || 0); for (let i = 0; i < +m[1]; i++) t += tirar(+m[2]); return t;
+}
+// Cargas del objeto como recurso de la hoja. max puede venir ya tirado (cargas de «1d3», cuentas de «1d6 + 3»)
+export function rasgoDeCargas(o, max = o.cargas?.max) {
+  const c = o.cargas; if (!c || !max) return null;
   const m = /^(\d+d\d+)(?:\+(\d+))?$/.exec(c.recarga || '');
-  const base = { id: uid('r'), tipo: 'recurso', nombre: `${o.nombre} (cargas)`, nota: 'Cargas del objeto mágico.', maxBase: 'fijo', maxN: c.max, maxAb: 'car', dado: 'd20', nivMax: 5, escuela: '', espacioMin: 0, soloEspacio: true, efecto: 'aviso', efectoN: 5, texto: '', objeto: o.clave };
+  const nota = [c.cuentas ? 'Cuentas del objeto mágico.' : 'Cargas del objeto mágico.', c.ultima || ''].filter(Boolean).join(' ');
+  const base = { id: uid('r'), tipo: 'recurso', nombre: `${o.nombre} (${c.cuentas ? 'cuentas' : 'cargas'})`, nota, maxBase: 'fijo', maxN: max, maxAb: 'car', dado: 'd20', nivMax: 5, escuela: '', espacioMin: 0, soloEspacio: true, efecto: 'aviso', efectoN: 5, texto: '', objeto: o.clave };
   if (m) return { ...base, recarga: 'dado', recDado: m[1], recBono: +(m[2] || 0), recMomento: 'largo' };
   if (/todas/.test(c.recarga || '')) return { ...base, recarga: 'largo' };
   if (/^\d+$/.test(c.recarga || '')) return { ...base, recarga: 'dado', recDado: `${c.recarga}d1`, recBono: 0, recMomento: 'largo' };
   return { ...base, recarga: 'nunca' };
 }
-export function anadirObjeto(ch, o) {
-  const e = normObjeto({ clave: o.clave, nombre: o.nombre, tipo: o.tipo, rareza: o.rareza, sintonia: !!o.sintonia, magico: true, cantidad: 1, rasgo: null });
-  const r = rasgoDeCargas(o);
-  if (r) { (ch.rasgos ||= []).push(r); e.rasgo = r.id; }
-  equipoDe(ch).objetos.push(e);
+// Dosis o unidades con las que se encuentra: «1d4 + 1 dosis», «1d6 + 4 pizcas», «3d4 judías», «1d4 + 4 canicas de fuerza»
+export function dosisDe(t) {
+  const m = /(\d+d\d+(?:\s*\+\s*\d+)?|\d+)\s+(dosis|pizcas|jud[ií]as|canicas)\b/i.exec(String(t || ''));
+  return m ? m[1].replace(/\s+/g, '') : '';
+}
+// Añade un objeto de la biblioteca (ya concretado si tenía variantes): sus cargas y sus usos diarios pasan a la hoja como recursos
+export function anadirObjeto(ch, o, tirar = tirarDado) {
+  const e = normObjeto({ clave: o.clave, nombre: o.nombre, tipo: o.tipo, rareza: o.rareza, sintonia: !!o.sintonia, sintoniaCon: o.sintoniaCon || '', magico: true, cantidad: 1, rasgo: null,
+    ...(o.arma ? { arma: o.arma, cat: 'arma' } : {}), ...(o.armadura ? { armadura: o.armadura, cat: 'armadura' } : {}), ...(o.peso ? { peso: o.peso } : {}),
+    ...(o.municion ? { municion: o.municion } : {}), ...(o.base ? { base: o.base } : {}) });
+  // Los bastones y varas que se empuñan como arma siguen siendo objetos mágicos en el inventario
+  if (o.arma && o.tipo && !['Arma', 'Armadura'].includes(o.tipo)) e.cat = 'magico';
+  const dosis = dosisDe(o.texto);
+  if (dosis && e.cat === 'consumible') e.cantidad = Math.max(1, tirarCantidad(dosis, tirar));
+  const eq = equipoDe(ch);
+  // Pociones y otros consumibles iguales se apilan
+  const igual = e.cat === 'consumible' && !o.cargas && eq.objetos.find(x => x.clave === e.clave && norm(x.nombre) === norm(e.nombre) && !x.rasgo);
+  if (igual) { igual.cantidad += e.cantidad; return igual; }
+  const r = rasgoDeCargas(o, o.cargas?.dado ? tirarCantidad(o.cargas.dado, tirar) : o.cargas?.max);
+  if (r) { r.objetoId = e.id; (ch.rasgos ||= []).push(r); e.rasgo = r.id; }
+  for (const u of o.usos || []) {
+    const x = { ...rasgoDeCargas({ ...o, cargas: { max: 1 } }, 1), nombre: u.nombre, nota: 'Propiedad del objeto mágico: una vez y se recupera.', recarga: u.recarga === 'corto' ? 'corto' : 'largo', objetoId: e.id };
+    (ch.rasgos ||= []).push(x); (e.usos ||= []).push(x.id);
+  }
+  eq.objetos.push(e);
   return e;
 }
 export function anadirComun(ch, datos) {
@@ -116,12 +159,34 @@ export function anadirComun(ch, datos) {
 export function quitarObjeto(ch, id) {
   const eq = equipoDe(ch), e = eq.objetos.find(x => x.id === id); if (!e) return null;
   eq.objetos = eq.objetos.filter(x => x !== e);
-  if (e.rasgo) { ch.rasgos = (ch.rasgos || []).filter(r => r.id !== e.rasgo); if (ch.play?.rec) delete ch.play.rec[e.rasgo]; }
+  for (const id of [e.rasgo, ...(e.usos || [])].filter(Boolean)) { ch.rasgos = (ch.rasgos || []).filter(r => r.id !== id); if (ch.play?.rec) delete ch.play.rec[id]; }
   return e;
+}
+// Requisitos de sintonización: «por parte de un brujo, hechicero o mago», «de un lanzador de conjuros», «de un enano»…
+const CLASES_REQ = { bardo: 'Bardo', brujo: 'Brujo', clerigo: 'Clérigo', druida: 'Druida', explorador: 'Explorador', guerrero: 'Guerrero', hechicero: 'Hechicero', mago: 'Mago', monje: 'Monje', paladin: 'Paladín', picaro: 'Pícaro', barbaro: 'Bárbaro' };
+export function requisitoSintonia(ch, o) {
+  const req = norm(o?.sintoniaCon || ''); if (!req) return '';
+  const clases = Object.entries(CLASES_REQ).filter(([k]) => new RegExp(`\\b${k}s?\\b`).test(req)).map(([, c]) => c);
+  const lanzador = /lanzador/.test(req), especie = /\benan[oa]\b/.test(req) ? 'enano' : /\belf[oa]\b/.test(req) ? 'elfo' : '';
+  if (!clases.length && !lanzador && !especie) return '';
+  const tiene = clasesDe(ch).map(c => c.clase);
+  if (clases.some(c => tiene.includes(c))) return '';
+  if (lanzador && (perfil(ch).cds.length || (ch.book || []).length)) return '';
+  if (especie && norm(ch.especie || '').startsWith(especie)) return '';
+  return `Solo puede sintonizarlo ${o.sintoniaCon.replace(/^parte de /, '')}.`;
+}
+// Por qué no se puede sintonizar ahora ('' si se puede)
+export function motivoSintonia(ch, id) {
+  const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return 'No está en el inventario.';
+  if (e.sintonizado) return '';
+  if (!e.sintonia) return `${e.nombre} no necesita sintonización.`;
+  if (e.guardado) return 'Está en el alijo: llévalo encima para sintonizarlo.';
+  if (sintonizados(ch).length >= MAX_SINTONIA) return `Ya hay ${MAX_SINTONIA} objetos sintonizados. Deshaz una sintonía antes.`;
+  return requisitoSintonia(ch, e);
 }
 export function alternarSintonia(ch, id) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return false;
-  if (!e.sintonizado && sintonizados(ch).length >= MAX_SINTONIA) return false;
+  if (!e.sintonizado && motivoSintonia(ch, id)) return false;
   e.sintonizado = !e.sintonizado; return true;
 }
 
@@ -259,16 +324,17 @@ export function venderObjeto(ch, id, n = 1) {
 }
 
 // La munición de cada arma: flechas para los arcos, virotes para las ballestas…
-const MUNICION = [[/\barco/, /flecha/], [/ballesta/, /virote/], [/honda/, /bala/], [/cerbatana/, /aguja|dardo/], [/mosquete|pistola/, /bala/]];
+const MUNICION = [[/\barco/, /flecha/], [/ballesta/, /virote/], [/honda/, /balas? de honda|^balas?$/], [/cerbatana/, /aguja/], [/mosquete|pistola/, /balas? de (arma de )?fuego|cartucho/]];
 export function municionDe(ch, o) {
   if (!(o?.arma?.props || []).some(p => norm(p).startsWith('municion'))) return null;
   const r = MUNICION.find(([a]) => a.test(norm(o.nombre))); if (!r) return null;
   const c = equipoDe(ch).objetos.filter(x => x !== o && !x.arma && !x.guardado && r[1].test(norm(x.nombre)));
-  return c.find(x => x.cantidad > 0) || c[0] || null;
+  // La munición mágica que se haya elegido para disparar va primero
+  return c.find(x => x.cantidad > 0 && x.id === o.municionId) || c.find(x => x.cantidad > 0) || c[0] || null;
 }
 // Pociones de curación (Guía del Dungeon Master de 2024)
 const POCIONES = [[/suprema/, '10d4+20'], [/superior/, '8d4+8'], [/mayor/, '4d4+4'], [/./, '2d4+2']];
-export const curacionDe = o => (/^pocion de curacion/.test(norm(o?.nombre || '')) ? POCIONES.find(([r]) => r.test(norm(o.nombre)))[1] : '');
+export const curacionDe = o => { const n = norm(o?.nombre || ''); return /^pocion(es)? de curacion/.test(n) ? POCIONES.find(([r]) => r.test(n))[1] : /^ung(u|ü)ento de keoghtom/.test(n) ? '2d8+2' : ''; };
 
 // CA con los objetos mágicos puestos: Capa y Anillo de protección, Brazales de defensa, Ropajes del archimago…
 export function claseArmadura(ch) {
@@ -325,7 +391,12 @@ export function golpeSinArmas(ch) {
   // Daño bárdico (colegio de la danza 3): sin armadura ni escudo, dado de inspiración + Destreza
   const danza = clasesDe(ch).find(c => c.clase === 'Bardo' && c.nivel >= 3 && /danza/i.test(c.subclase || ''));
   if (danza && !conArmadura(ch) && !conEscudo(ch)) { const d = danza.nivel >= 15 ? '1d12' : danza.nivel >= 10 ? '1d10' : danza.nivel >= 5 ? '1d8' : '1d6'; if (MEDIA(d) > MEDIA(dano)) dano = d; props = ['Sutil']; }
-  return { id: GOLPE_SIN_ARMAS, nombre: 'Golpe sin armas', cat: 'arma', sinArmas: true, cantidad: 1, equipado: false, arma: { dano, tipo: 'contundente', props, maestria: '', distancia: '' } };
+  // Armadura demoníaca: garras de 1d8 cortante con +1; Vendas de poder sin armas: +1, +2 o +3
+  let tipo = 'contundente', bono = 0;
+  const demonio = equipoDe(ch).objetos.find(o => o.equipado && o.armadura && /^armadura demoniaca/.test(norm(o.nombre)) && (!o.sintonia || o.sintonizado));
+  if (demonio) { if (MEDIA('1d8') > MEDIA(dano)) dano = '1d8'; tipo = 'cortante'; bono += 1; }
+  bono += Math.max(0, ...objetosActivos(ch).map(({ e }) => e.sinArmas || 0));
+  return { id: GOLPE_SIN_ARMAS, nombre: 'Golpe sin armas', cat: 'arma', sinArmas: true, cantidad: 1, equipado: false, arma: { dano, tipo, props, maestria: '', distancia: '', bono } };
 }
 export const armasCombate = ch => [...equipoDe(ch).objetos.filter(x => x.arma), golpeSinArmas(ch)];
 export const armaCombate = (ch, id) => armasCombate(ch).find(x => x.id === id) || null;
@@ -336,9 +407,14 @@ export function ataqueArma(ch, o) {
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
   const artes = artesMarciales(ch, o, props, distancia), cancion = efectoActivo(ch, 'cancion') && clasesDe(ch).some(c => c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || ''));
   let mod = distancia ? des : sutil || artes ? Math.max(fue, des) : fue;
-  const competente = !!o.sinArmas || competenteConArma(ch, o);
+  // Brazales de arquería: competencia y +2 al daño con arcos cortos y largos
+  const nombreBase = a.base || o.base || String(o.nombre || '').replace(/\s*\+\d+\s*$/, '').replace(/\s*\(.*\)\s*$/, ''), act = objetosActivos(ch);
+  const arco = /^arco (corto|largo)$/.test(norm(nombreBase)), brazales = arco ? Math.max(0, ...act.map(({ e }) => e.danoArcos || 0)) : 0;
+  const competente = !!o.sinArmas || !!brazales || competenteConArma(ch, o);
   if (cancion && competente && modOf(st.int) > mod) mod = modOf(st.int);
-  const pb = competencia(nivelTotal(ch)), bono = parseInt(a.bono, 10) || 0;
+  // Munición mágica (Flechas +1…): su bonificador se suma al del arma
+  const mun = distancia ? municionDe(ch, o) : null, bonoMun = mun ? bonoDeNombre(mun.nombre) : 0;
+  const pb = competencia(nivelTotal(ch)), bono = (parseInt(a.bono, 10) || 0) + bonoMun;
   const s = n => (n >= 0 ? `+${n}` : String(n)), dosManos = props.includes('dos manos'), estilos = [];
   const atk = distancia && tieneEstilo(ch, 'arqueria') ? (estilos.push('Tiro con arco +2 al ataque'), 2) : 0;
   const dmg = !distancia && !dosManos && !o.sinArmas && tieneEstilo(ch, 'duelo') ? (estilos.push('Duelo +2 al daño (en una mano, sin otra arma)'), 2) : 0;
@@ -353,18 +429,22 @@ export function ataqueArma(ch, o) {
   const pesadas = props.includes('pesada') && dotesDe(ch).some(d => norm(d.nombre) === 'maestro en armas pesadas') ? pb : 0;
   if (pesadas) estilos.push(`Maestro en armas pesadas +${pesadas} al daño`);
   for (const g of golpeExtra(ch)) estilos.push(`${g.nombre}: una vez por turno, +${g.dado} ${g.tipos} al impactar`);
+  if (a.alImpactar) estilos.push(a.alImpactar);
+  if (brazales) estilos.push(`Brazales de arquería +${brazales} al daño`);
+  if (bonoMun) estilos.push(`${mun.nombre}: +${bonoMun} al ataque y al daño`);
+  if (o.sinArmas && efectoActivo(ch, 'pugilismo')) estilos.push('Poción de pugilismo: +1d6 de daño de fuerza al impactar');
   const notas = [];
   if (artes) notas.push(`Artes marciales (${artes})`);
   if (cancion && mod === modOf(st.int)) notas.push('Canción de la hoja: usa tu Inteligencia');
   if (!competente) notas.push('Sin competencia: no sumas tu bonificador');
   let dado = a.dano || '1d4';
   if (artes && MEDIA(artes) > MEDIA(dado)) dado = artes;
-  const md = mod + bono + dmg + furia + pesadas;
+  const md = mod + bono + dmg + furia + pesadas + brazales;
   const plano = !/d/.test(dado), total = plano ? Math.max(0, (parseInt(dado, 10) || 0) + md) : 0;
   const expr = plano ? String(total) : `${dado}${md ? s(md) : ''}`;
   // Versátil: empuñada a dos manos usa el dado mayor, y ya no cuenta para Duelo
   const dv = props.map(p => /^versatil \((\d+d\d+)\)/.exec(p)?.[1]).find(Boolean), mv = md - dmg;
   const versatil = dv && MEDIA(dv) > MEDIA(dado) ? { expr: `${dv}${mv ? s(mv) : ''}`, dano: `${dv}${mv ? ` ${s(mv).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim() } : null;
-  return { mod: mod + bono, maestria: a.maestria || '', domina: tieneMaestria(ch, o.nombre) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas, versatil,
+  return { mod: mod + bono, maestria: a.maestria || '', domina: (tieneMaestria(ch, o.nombre) || tieneMaestria(ch, nombreBase)) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas, versatil,
     ataque: s(mod + (competente ? pb : 0) + bono + atk), dano: `${plano ? total : `${dado}${md ? ` ${s(md).replace(/^([+-])/, '$1 ')}` : ''}`} ${a.tipo || ''}`.trim(), estilos };
 }

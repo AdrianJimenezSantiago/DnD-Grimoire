@@ -3,6 +3,8 @@ import { biblioteca, glosario, termino, libros, compendio } from '../../domain/c
 import { RAREZAS, TIPOS_OBJ, ordenRareza } from '../../domain/objetos.js';
 import { CLASES } from '../../domain/reglas2024.js';
 import { anadirObjeto, tieneObjeto } from '../../domain/equipo.js';
+import { pasosVariante, concretar } from '../../domain/variantesObjeto.js';
+import { elegir } from './elegir.js';
 import { $, on } from '../dom.js';
 import { gi } from '../tema.js';
 import { icon } from '../icons.js';
@@ -171,9 +173,11 @@ export function abrirObjeto(clave) {
   ficha({ titulo: o.nombre, ico: TIPO_I[o.tipo] || 'o_maravilloso', clase: `r-${rk}`,
     sub: `<div class="fi-pills"><span class="rar-pill r-${rk}">${esc(rareza(o))}</span><span>${esc(o.tipo)}${o.subtipo ? ` (${esc(o.subtipo)})` : ''}</span>
       ${o.sintonia ? `<span class="sin-pill">${gi('sintonia')}Sintonización${o.sintoniaCon ? ` con ${esc(o.sintoniaCon.replace(/^(parte de |un |una )/, ''))}` : ''}</span>` : ''}
-      ${o.cargas ? `<span>${o.cargas.max} cargas${o.cargas.recarga ? ` · recupera ${esc(o.cargas.recarga)} al ${esc(o.cargas.cuando || 'amanecer')}` : ''}</span>` : ''}</div>`,
+      ${o.cargas ? `<span>${esc(o.cargas.dado || String(o.cargas.max))} ${o.cargas.cuentas ? 'cuentas' : 'cargas'}${o.cargas.recarga ? ` · recupera ${esc(/todas|^la$/.test(o.cargas.recarga) ? 'todas' : o.cargas.recarga)} al ${esc(o.cargas.cuando || 'amanecer')}` : ''}</span>` : ''}
+      ${(o.usos || []).length ? `<span>${o.usos.length === 1 ? 'Un uso' : `${o.usos.length} usos`} que se recupera${o.usos.length === 1 ? '' : 'n'}</span>` : ''}</div>`,
     cuerpo: `<section class="sp-text">${md(o.texto)}</section>${fuente(o.fuente)}`,
-    pie: ch ? (ya ? `<span class="fi-ya">${icon('user')}${esc(ch.nombre)} ya lo lleva</span><button type="button" data-cmd="equipo">Ver sus objetos</button>`
+    // Se puede tener más de uno: otra poción, otra piedra ioun, otra arma +1…
+    pie: ch ? (ya ? `<span class="fi-ya">${icon('user')}${esc(ch.nombre)} ya lo lleva</span><button type="button" data-cmd="equipo">Ver sus objetos</button><button type="button" data-fi="anadir">${icon('plus')}Añadir otro</button>`
       : `<button type="button" class="gold" data-fi="anadir">${icon('plus')}Añadir a ${esc(ch.nombre)}</button>`) : '' });
 }
 export function abrirDote(clave) {
@@ -320,7 +324,7 @@ export function init(store) {
     S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.grupo = { ...(ch.enJuego.grupo || {}) }; ch.enJuego.grupo[k] = g; });
     abrirRasgoJuego(k);
   });
-  on($('#fichaDlg'), 'click', '[data-fi]', (e, b) => {
+  on($('#fichaDlg'), 'click', '[data-fi]', async (e, b) => {
     if (b.dataset.fi === 'bestiario' && FICHA?.tipo === 'cria') {
       const c = FICHA.c;
       const h = S.edit((db, ch) => { Object.assign(nuevaCriatura(ch, c.nombre), aBestiario(c)); });
@@ -328,9 +332,18 @@ export function init(store) {
       return abrirCriatura(c.clave);
     }
     if (b.dataset.fi !== 'anadir' || FICHA?.tipo !== 'obj') return;
-    const o = FICHA.o; let nuevo;
+    // Objetos con variantes (arma de base, +1/+2/+3, tipo de gigante, piedra ioun…): se concretan antes de añadirlos
+    const o0 = FICHA.o, eleccion = {};
+    for (const p of pasosVariante(o0)) {
+      const v = await elegir({ titulo: `${o0.nombre}: ${p.titulo.toLowerCase()}`, sub: 'Elige la variante que tiene tu personaje', libre: false, ico: 'o_maravilloso',
+        items: p.opciones.map(x => ({ nombre: x.nombre, valor: String(x.valor), sub: x.sub || '' })) });
+      if (v == null) return;
+      eleccion[p.id] = p.id === 'mas' ? +v : v;
+    }
+    const o = concretar(o0, eleccion); let nuevo;
     const h = S.edit((db, ch) => { nuevo = anadirObjeto(ch, o); });
-    toast(`<b>${esc(o.nombre)}</b> añadido a ${esc(S.cur().nombre)}.${nuevo.rasgo ? ' Sus cargas ya están en la hoja.' : ''}`, [undoBtn(S, h)]);
+    const extra = [nuevo.rasgo ? 'Sus cargas ya están en la hoja.' : '', nuevo.usos?.length ? 'Sus usos diarios, también.' : ''].filter(Boolean).join(' ');
+    toast(`<b>${esc(nuevo.nombre)}</b> añadido a ${esc(S.cur().nombre)}.${extra ? ` ${extra}` : ''}`, [undoBtn(S, h)]);
     abrirObjeto(o.clave); if (dlg().open) cuerpo();
   });
   d.addEventListener('close', () => { if ($('#fichaDlg').open) closeSheet($('#fichaDlg')); });

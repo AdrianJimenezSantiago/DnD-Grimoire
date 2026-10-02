@@ -7,4 +7,5 @@ Documentos de trabajo sobre cómo se ha contrastado la app con las reglas y cóm
 | [Auditoría de clases](auditoria-clases.md) | Clases y subclases comparadas con el Manual del Jugador, rasgo a rasgo. |
 | [Auditoría de conjuros](auditoria-conjuros.md) | Conjuros revisados uno a uno: datos, efectos y textos. |
 | [Auditoría de origen](auditoria-origen.md) | Especies, trasfondos y dotes de origen. |
+| [Auditoría de objetos mágicos](auditoria-objetos.md) | Los 350 objetos de la Guía del DM: sintonía, cargas, usos, variantes y efectos. |
 | [Rendimiento en móvil](rendimiento-movil.md) | Mediciones de fluidez y las mejoras aplicadas. |

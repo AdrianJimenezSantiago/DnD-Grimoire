@@ -1,5 +1,5 @@
 import { norm, uid } from '../core/util.js';
-import { statsEfectivos } from './objetosEfecto.js';
+import { statsEfectivos, pasivosObjetos, resistenciasObjetos } from './objetosEfecto.js';
 import { claseArmadura, penalizacionArmadura } from './equipo.js';
 import { velocidad, abDe } from './habilidades.js';
 import { clasesDe, modOf, dotesDe, competencia, nivelTotal } from './reglas2024.js';
@@ -102,6 +102,14 @@ export const EFECTOS = [
     reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' }), R('salvacion', 'desventaja', { cond: 'si es de la característica elegida' })] },
   { k: 'calentar', dur: 10, conjuro: /^calentar metal$/i, nombre: 'Calentar metal', bueno: false, ico: 'fuego', texto: 'Mientras sigas sosteniendo o llevando el objeto ardiente tienes desventaja en ataques y pruebas de característica.',
     reglas: [R('ataque', 'desventaja', { cond: 'si sigues con el objeto' }), R('prueba', 'desventaja', { cond: 'si sigues con el objeto' })] },
+  // Pociones (Guía del Dungeon Master de 2024)
+  ...[21, 23, 25, 27, 29].map(f => ({ k: `pfg${f}`, dur: 600, pocion: true, nombre: `Fuerza de gigante (${f})`, bueno: true, ico: 'fuerza', texto: `Tu Fuerza es ${f} durante 1 hora (si no era ya igual o mayor).`, reglas: [] })),
+  { k: 'invulnerable', dur: 10, pocion: true, nombre: 'Invulnerabilidad', bueno: true, ico: 'esc_abj', texto: 'Resistencia a todo el daño durante 1 minuto.', reglas: [] },
+  { k: 'resistenciapocion', dur: 600, pocion: true, nombre: 'Poción de resistencia', bueno: true, ico: 'esc_abj', texto: 'Resistencia al tipo de daño de la poción durante 1 hora.', reglas: [] },
+  { k: 'reducir', dur: 600, pocion: true, nombre: 'Reducir', bueno: true, ico: 'fuerza', texto: 'Eres una categoría de tamaño menor: desventaja en pruebas y salvaciones de Fuerza y −1d4 al daño con armas.',
+    reglas: [R('prueba', 'desventaja', { ab: 'fue' }), R('salvacion', 'desventaja', { ab: 'fue' })] },
+  { k: 'trepar', dur: 600, pocion: true, nombre: 'Trepar', bueno: true, ico: 'velocidad', texto: 'Velocidad trepando igual a tu velocidad y ventaja en Atletismo para trepar durante 1 hora.', reglas: [R('prueba', 'ventaja', { hab: 'atletismo', cond: 'para trepar' })] },
+  { k: 'pugilismo', dur: 100, pocion: true, nombre: 'Pugilismo', bueno: true, ico: 'fuerza', texto: 'Tus golpes sin armas hacen 1d6 de daño de fuerza adicional durante 10 minutos.', reglas: [] },
   { k: 'confusion', dur: 10, conjuro: /^confusi[oó]n$/i, nombre: 'Confusión', bueno: false, ico: 'psiquico', texto: 'No puedes hacer reacciones y al empezar cada turno tiras 1d10 para ver qué haces. Repites la salvación al final de cada turno.', reglas: [] },
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
@@ -147,6 +155,7 @@ export function pasivosDe(ch) {
   if (especie === 'mediano') out.push({ nombre: 'Valiente', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de asustado' })] });
   if (especie === 'goliat') out.push({ nombre: 'Constitución poderosa', reglas: [R('prueba', 'ventaja', { cond: 'para poner fin al estado de agarrado' })] });
   if (especie === 'elfo') out.push({ nombre: 'Linaje feérico', reglas: [R('salvacion', 'ventaja', { cond: 'contra el estado de hechizado' })] });
+  out.push(...pasivosObjetos(ch));
   return out.map(p => ({ bueno: !p.mal, ...p, pasivo: true }));
 }
 const sinTildes = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -183,7 +192,7 @@ function reglasPropias(p) {
 }
 export function efectosDe(ch) {
   const v = ch.vida || {};
-  return (v.efectos || []).map(e => { const d = EFECTO[e.k]; return d ? { ...d, id: e.id, rondas: e.rondas ?? null, conc: e.conc || '' } : { k: e.k || 'propio', id: e.id, nombre: e.nombre, bueno: true, ico: 'inspiracion', propio: e.propio, rondas: e.rondas ?? null, conc: e.conc || '',
+  return (v.efectos || []).map(e => { const d = EFECTO[e.k]; return d ? { ...d, nombre: e.nombre || d.nombre, id: e.id, rondas: e.rondas ?? null, conc: e.conc || '' } : { k: e.k || 'propio', id: e.id, nombre: e.nombre, bueno: true, ico: 'inspiracion', propio: e.propio, rondas: e.rondas ?? null, conc: e.conc || '',
     texto: [e.propio?.ca && `CA ${e.propio.ca > 0 ? '+' : ''}${e.propio.ca}`, e.propio?.ataque && `ataques ${e.propio.ataque}`, e.propio?.salvacion && `salvaciones ${e.propio.salvacion}`, e.propio?.prueba && `pruebas ${e.propio.prueba}`, e.propio?.vel && `velocidad ${e.propio.vel > 0 ? '+' : ''}${e.propio.vel} m`].filter(Boolean).join(', ') || 'Efecto propio.',
     ca: e.propio?.ca || 0, vel: e.propio?.vel || 0, reglas: reglasPropias(e.propio || {}) }; });
 }
@@ -324,6 +333,9 @@ export function resistenciasDe(ch) {
   if (efs.includes('vinculo')) add(['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'], 'Vínculo protector');
   if (efs.includes('protveneno')) add('veneno', 'Protección contra veneno');
   if (efs.includes('fuentelunar')) add('radiante', 'Fuente de luz lunar');
+  if (efs.includes('invulnerable')) add(TIPOS, 'Poción de invulnerabilidad');
+  for (const e of (ch.vida?.efectos || []).filter(x => x.k === 'resistenciapocion')) add(TIPOS.filter(t => norm(e.nombre || '').includes(`(${norm(t)})`)), e.nombre);
+  for (const r of resistenciasObjetos(ch)) add(r.tipo, r.fuente);
   return [...out].map(([tipo, fuente]) => ({ tipo, fuente }));
 }
 
