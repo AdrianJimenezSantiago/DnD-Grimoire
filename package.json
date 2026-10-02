@@ -7,7 +7,7 @@
     "dev": "vite --config web/vite.config.js",
     "build": "vite build --config web/vite.config.js",
     "preview": "vite preview --config web/vite.config.js",
-    "test": "node --test \"tests/*.test.js\"",
+    "test": "node --test \"tests/**/*.test.js\"",
     "sync": "npm run build && cap sync android",
     "icons": "python3 tools/make_icons.py",
     "srd": "python3 tools/build_compendio.py",
