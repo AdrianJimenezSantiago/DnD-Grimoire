@@ -31,3 +31,10 @@ test('fusión: no toca la base si ya está bien o si la otra lectura es peor o e
   // Sin segunda lectura no cambia nada
   assert.deepEqual(fusionar(['el uhjetivo'], '', voc), ['el uhjetivo']);
 });
+
+test('fusión: nunca cambia cifras', () => {
+  // Con varias líneas parecidas, la alineación puede emparejar «BC+2)» con un «BC» de otra línea: no se pierde el «+2»
+  assert.deepEqual(fusionar(['VD: 1/8 (25 PX; BC+2)'], 'VD: 1/8 (25 PX; BC)', voc), ['VD: 1/8 (25 PX; BC+2)']);
+  // Una cifra dentro de una palabra sí es una letra mal leída
+  assert.deepEqual(fusionar(['la 1nteligencía'], 'la inteligencia', voc), ['la Inteligencia']);
+});

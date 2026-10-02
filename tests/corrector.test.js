@@ -77,3 +77,16 @@ test('corrector: viñetas, restos de marcos y ruido de las ilustraciones', () =>
   // «O» al principio de línea en mitad de una frase es la conjunción
   assert.deepEqual(corregirLineas(['las alas permanecen 1 hora', 'O hasta que las hagas desaparecer'], voc), ['las alas permanecen 1 hora', 'o hasta que las hagas desaparecer']);
 });
+
+test('corrector: líneas de perfil, abreviaturas y detalles de formato', () => {
+  assert.equal(c('FuE 15 +2 +2 Des 14 +2 +2 CoN12'), 'Fue 15 +2 +2 Des 14 +2 +2 Con 12');
+  assert.equal(c('Fue 14 +2 +2 Des16 +3 +3 Conl2 +1 +l'), 'Fue 14 +2 +2 Des 16 +3 +3 Con 12 +1 +1');
+  assert.equal(c('InTr 2-4 -4 Sap 10+0 +0 Car'), 'Int 2 -4 -4 Sab 10 +0 +0 Car');
+  assert.equal(c('Le da a Con 13 puntos'), 'Le da a Con 13 puntos');
+  assert.equal(c('con cD 15 y 2 Pp)'), 'con CD 15 y 2 PP)');
+  assert.equal(c('MOD SALV MOD SALV'), 'MOD. SALV. MOD. SALV.');
+  assert.equal(c('a -18 *C o menos'), 'a -18 °C o menos');
+  assert.equal(c('“TIRADAS DE ATAQUE'), 'TIRADAS DE ATAQUE');
+  assert.equal(c('Obtienes los siguientes beneficios;'), 'Obtienes los siguientes beneficios:');
+  assert.equal(c('en campañas de Dé:D. En esta'), 'en campañas de D&D. En esta');
+});

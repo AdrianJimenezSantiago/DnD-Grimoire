@@ -45,6 +45,7 @@ const VERBAL = new RegExp(`(?:${'ar|er|ir|aba|abas|aban|ábamos|aré|arás|ará|
 const TERMINACIONES = VERBAL.source.slice(3, -2).split('|');
 export function plausible(k, voc) {
   if (voc.n(k) >= 3) return true;
+  if (/([aiou])\1$/.test(k)) return false;
   const base = sinTildes(k), vale = x => x && x.length >= 3 && x !== k && voc.n(x) >= 3;
   if ((voc.acc.get(base) || []).some(w => w !== k)) return true;
   const raices = new Set([k.replace(/es$/, ''), k.replace(/s$/, ''), k.replace(/[oa]s?$/, 'o'), k.replace(/[oa]s?$/, 'a'), k.replace(/[oa]s?$/, 'os'), k.replace(/[oa]s?$/, 'as'),
@@ -80,7 +81,9 @@ function candidatoDe(w, voc) {
   const conf2 = [];
   if (k.length >= 4) for (const x of conf1) for (const [a, b] of CONF) { let i = x.indexOf(a); while (i >= 0) { conf2.push(x.slice(0, i) + b + x.slice(i + a.length)); i = x.indexOf(a, i + 1); } }
   // Las de dos cambios necesitan diez veces más apoyo, y en nombres propios mucho más
-  const propio = /^\p{Lu}/u.test(w) && /\p{Ll}/u.test(w), c1 = mejor(conf1, 3, 3), c2 = mejor(conf2, propio ? 100 : 5, propio ? 100 : 5);
+  // Palabras cortas: solo hacia palabras muy frecuentes (los restos del OCR también se repiten: «cou», «pn», «is»)
+  const corta = k.length <= 4, propio = /^\p{Lu}/u.test(w) && /\p{Ll}/u.test(w);
+  const c1 = mejor(conf1, corta ? 100 : 3, corta ? 30 : 3), c2 = mejor(conf2, propio || corta ? 100 : 5, propio || corta ? 30 : 5);
   let c = c1 && (!c2 || voc.n(c1) * 10 >= voc.n(c2)) ? c1 : c2;
   voc.regla = c === c1 ? 'confusión' : 'confusión×2';
   if (c) return c;
@@ -106,12 +109,12 @@ function partir(w, voc) {
   for (let i = 1; i < k.length; i++) {
     const a = k.slice(0, i), b = k.slice(i), na = voc.n(a), nb = voc.n(b);
     // Solo se separa una palabra de enlace al principio («almenos», «deterreno», «alos») o una «y»/«a» al final («tormentay», «cercanoa»)
-    if (!(/^(?:a|al|de|del|y|o|la|el|los|las)$/.test(a) && (b.length >= 4 || /^(?:los|las|les|una|uno|más)$/.test(b)) && nb >= 20 || (b === 'y' || b === 'a' && /[aon]$/.test(a)) && a.length >= 4 && na >= 5) || na < 5) continue;
+    if (!(/^(?:a|al|de|del|y|o|la|el|los|las)$/.test(a) && (b.length >= 4 || /^(?:los|las|les|una|uno|más)$/.test(b)) && nb >= 20 || (b === 'y' || b === 'a' && /[aon]$/.test(a)) && a.length >= 4 && na >= 3) || na < 3) continue;
     if (plausible(k, voc)) return null;
     const s = Math.min(na, nb);
     if (s > bs) { bs = s; best = [w.slice(0, i), w.slice(i)]; }
   }
-  return best && bs >= 5 ? best.join(' ') : null;
+  return best && bs >= 3 ? best.join(' ') : null;
 }
 
 // Media de una tirada «NdC + M» (como en los perfiles: «11 (2d10)»)
@@ -143,7 +146,7 @@ export function corregirLinea(s, voc, anterior = '') {
   // «NIVEL l:», «NIVEL lL», «NIVEL 15,», «NIvEL 3:» (cabeceras de rasgos de clase)
   t = t.replace(/^(?!Nivel )N[iIr]{1,2}[vV][eE]{0,2}[lL](?= [\dlI|])/u, 'NIVEL').replace(/^NIVEL ([lIL1|]{1,2}|\d{1,2})\s*[:;,.]?\s+/u, (m, n) => `NIVEL ${n.replace(/[lIL|]/g, '1')}: `);
   // «D&D» en sus muchas lecturas
-  t = t.replace(/\bD[EÉ&][:.,]?D\b|\bDÉD\b|\bDE\.D\b/g, 'D&D');
+  t = t.replace(/\bD[EÉeé&8][:.,¿]?D\b|\bDÉD\b|\bDE\.D\b/g, 'D&D');
   // Cifras con letras: «l,S m», «l O días», «a SO,», «(O PX», «a O los»
   t = t.replace(/(^|[\s(])([\dlIOS]+,[\dlIOS]+)(?= ?(?:m|km|kg|cm)\b)/g, (m, a, n) => /\d/.test(n) || /,/.test(n) ? a + n.replace(/[lI]/g, '1').replace(/O/g, '0').replace(/S/g, '5') : m)
     .replace(/\b[lI] ?[O0](?= (?:días|minutos|horas|m|kg|po)\b)/g, '10').replace(/\bl(?= ?\d)/g, '1').replace(/(\d)l\b/g, '$11')
@@ -151,6 +154,18 @@ export function corregirLinea(s, voc, anterior = '') {
   // Una «l» suelta es casi siempre un 1 («en l, hasta», «suma l nivel»); tras una cifra es un litro
   t = t.replace(/(?<![\d,]\s?)(?<=^|[\s(])l(?=[\s,.:;)]|$)/g, (m, i) => (i === 0 && /^l\s+\p{Lu}/u.test(t) ? m : '1'));
   t = t.replace(/(\d(?:,\d+)?) 1(?= de (?:líquido|agua|aceite|vino)\b)/g, '$1 l');
+  // Abreviaturas de las reglas con mayúsculas mezcladas: «cD», «Pp», «Ca»; «MOD SALV» de los perfiles; grados
+  t = t.replace(/(^|[\s(])(c[DA]|C[da]|p[GXPOC]|P[gxpoc])(?=[\s,.:;)]|$)/g, (m, a, x) => a + x.toUpperCase())
+    .replace(/\bMOD\.? SALV\.?(?= |$)/g, 'MOD. SALV.').replace(/(\d) ?\*C\b/g, '$1 °C');
+  // Líneas de características de los perfiles: «FuE 15 … CoN12», «Conl3», «ConNl 6», «InTr 2», «Sap 10» → «Fue 15 … Con 12»
+  const CAR = [[/F[uU][eE]x?/, 'Fue'], [/D[eE][sS]/, 'Des'], [/C[oO][nN]{1,2}/, 'Con'], [/I[nN][tTrR]{1,2}/, 'Int'], [/S[aA][bBpP]/, 'Sab'], [/C[aA][rR]/, 'Car']];
+  const reCar = new RegExp(`(^|\\s)(${CAR.map(([r]) => r.source).join('|')})([lI]?) ?(\\d{1,2})(?=[\\s+\\-—]|$)`, 'g');
+  if ((t.match(reCar) || []).length >= 2)
+    t = t.replace(reCar, (m, a, et, l, n) => `${a}${CAR.find(([r]) => new RegExp(`^${r.source}$`).test(et))[1]} ${l ? '1' : ''}${n}`).replace(/(\d)([+\-−][\d]|—)/g, '$1 $2');
+  // Comillas sueltas delante de una cabecera en mayúsculas («“TIRADAS DE ATAQUE»)
+  t = t.replace(/^[“"'‘]+(?=\p{Lu}{3,}(?: \p{Lu}+)*$)/u, '');
+  // «Obtienes los siguientes beneficios;» → «:»
+  t = t.replace(/\b(beneficios|siguientes|efectos|opciones|reglas)\s*;$/u, '$1:');
   // «x» entre cifras
   t = t.replace(/(\d) x (\d)/g, '$1 × $2').replace(/(^|\s)([+-])[lI](?=\s|$)/g, '$1$21');
   // Espacios antes de la puntuación y puntos dobles
@@ -190,6 +205,9 @@ export function corregirLinea(s, voc, anterior = '') {
     }
     const enLex = RE_LEXICO.find(([re]) => re.test(core));
     if (enLex) { core = comoOriginal(core, enLex[1]); toks[i] = pre + core + suf; continue; }
+    // Palabra de enlace pegada tras un punto espurio: «cansancio.a», «objetivo.y»
+    const trasPunto = /^(\p{L}{4,})\.([yao])$/u.exec(core);
+    if (trasPunto && voc.n(trasPunto[1]) >= 3 && i < toks.length - 1) { toks[i] = `${pre}${trasPunto[1]} ${trasPunto[2]}${suf}`; continue; }
     // Cifras pegadas a una palabra conocida: «nivel1», «Con13», «10po», «1kg»
     const pegada = /^(\p{L}{2,})(\d+)$/u.exec(core) || /^(\d+)(\p{L}{2,})$/u.exec(core);
     if (pegada) { if (voc.n(/\d/.test(pegada[1]) ? pegada[2] : pegada[1]) >= 3) core = `${pegada[1]} ${pegada[2]}`; toks[i] = pre + core + suf; continue; }

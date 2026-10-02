@@ -61,6 +61,12 @@ export function fusionar(lineas, otro, voc) {
     // Las dos lecturas tienen que parecerse: es el mismo texto mal leído, no otro trozo de la página
     const ka = base.map(x => clave(x.t)).join(''), kb = alt.map(clave).join('');
     if (!ka || lev(ka, kb) > Math.max(1, Math.round(Math.max(ka.length, kb.length) * 0.34))) return;
+    // Las cifras no se tocan: si no coinciden, la otra lectura está emparejada con otra línea («BC+2)» ≠ «BC»)
+    // (una cifra dentro de una palabra de letras es una letra mal leída: «1nteligencía», «competenci:1»)
+    const cifras = ts => ts.filter(t => !(/\p{L}{3,}/u.test(t) && (t.match(/\d/g) || []).length <= 2)).join('').replace(/\D/g, '');
+    if (cifras(base.map(x => x.t)) !== cifras(alt)) return;
+    // Palabras de dos letras: solo hacia palabras frecuentes («co» → «eo» no)
+    if (kb.length <= 2 && voc.n(kb) < 50) return;
     // Un tramo partido entre dos líneas no se toca (corte de palabra con guion, final de columna)
     if (base.some(x => x.li !== base[0].li)) return;
     const { li, ti } = base[0], pre = base[0].t.match(/^[^\p{L}\d]*/u)[0], suf = base[nb - 1].t.match(/[^\p{L}\d]*$/u)[0];

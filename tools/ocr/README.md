@@ -55,11 +55,11 @@ modelo está entrenado para chino e inglés: quita todas las tildes y pega palab
 
 | | PDF tal cual | Tesseract solo | PDF + corrector | PDF + corrector + fusión |
 |---|---|---|---|---|
-| Manual del Jugador | 1,79 % | 3,92 % | 0,75 % | 0,72 % |
-| Guía del DM | 2,21 % | 2,91 % | 1,74 % | 1,70 % |
-| Héroes de Faerûn | 5,50 % | 4,61 % | 3,12 % | 2,59 % |
-| Desarrollo (41 págs.) | 2,36 % | 2,64 % | 1,30 % | 1,15 % |
-| Prueba (19 págs.) | 4,43 % | 6,45 % | 2,90 % | 2,68 % |
+| Manual del Jugador | 1,79 % | 3,92 % | 0,75 % | 0,70 % |
+| Guía del DM | 2,21 % | 2,91 % | 1,74 % | 1,65 % |
+| Héroes de Faerûn | 5,50 % | 4,61 % | 3,12 % | 2,51 % |
+| Desarrollo (41 págs.) | 2,36 % | 2,64 % | 1,30 % | 1,08 % |
+| Prueba (19 págs.) | 4,43 % | 6,45 % | 2,90 % | 2,67 % |
 
 Parte del error que queda no es de caracteres: texto de las ilustraciones, celdas de tablas desordenadas o números que el
 OCR leyó como otros números (705 en vez de 105), que ninguna de las dos lecturas tiene bien.
