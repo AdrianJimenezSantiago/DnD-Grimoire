@@ -323,14 +323,19 @@ function avisoGasto(S, id, h, g) {
     g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : '', armado ? '<span class="tnote"><b>Llevas armadura o escudo</b>: la Canción de la hoja no funciona con ellos.</span>' : ''].filter(Boolean).join(' ');
   toast(texto, [...extra, undoBtn(S, h)]);
 }
-export function tickResource(S, id, i) {
+// Gastar el contador de un objeto mágico puede hacer algo más (recuperar un espacio, lanzar un conjuro…): lo decide ui/accionesObjeto.js
+let gastoObjeto = null;
+export const registrarGastoObjeto = f => { gastoObjeto = f; };
+export async function tickResource(S, id, i) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max), left = r.max - used, spend = i < left;
+  if (spend && r.objetoId && gastoObjeto && await gastoObjeto(S, id)) return;
   let g = null;
   const h = S.act(`${r.nombre}: ${spend ? 'usa 1' : 'recupera 1'} (quedan ${left + (spend ? -1 : 1)})`, (db, c) => { recState(c, id).used = used + (spend ? 1 : -1); if (spend) g = alGastar(c, id); });
   haptic(); if (spend) avisoGasto(S, id, h, g);
 }
 export async function stepResource(S, id, d) {
   const ch = S.cur(), r = ruleOf(ch, id), used = Math.min(recState(ch, id).used || 0, r.max);
+  if (d > 0 && r.objetoId && !r.reserva && gastoObjeto && used < r.max && await gastoObjeto(S, id)) return;
   if (r.reserva && d > 0) {
     if (used >= r.max) return;
     const v = await pedir({ titulo: r.nombre, texto: `¿Cuántos ${r.reserva} gastas? Te quedan ${r.max - used}.`, valor: String(Math.min(5, r.max - used)), tipo: 'number', min: 1, max: r.max - used, ok: 'Gastar' }); if (v == null) return;

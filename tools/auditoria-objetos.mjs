@@ -10,6 +10,7 @@ import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../web/s
 import { pasosVariante, concretar } from '../web/src/domain/variantesObjeto.js';
 import { efectoDe, describirEfecto } from '../web/src/domain/objetosEfecto.js';
 import { usoDe, efectoAlUsar } from '../web/src/domain/usarObjeto.js';
+import { accionesDe } from '../web/src/domain/accionesObjeto.js';
 import { reglas, etiquetaRecarga } from '../web/src/domain/rasgos.js';
 
 const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -73,6 +74,10 @@ for (const o of objetos) {
   const cargas = rs.map(r => `${r.nombre.replace(`${e.nombre}: `, '').replace(`${o.nombre}: `, '').replace(e.nombre, '').replace(/^ \(|\)$/g, '') || 'uso'}: ${o.cargas?.dado && r.id === e.rasgo ? o.cargas.dado : r.max}, ${etiquetaRecarga(r).toLowerCase()}`).join('; ');
   const variantes = pasos.map(p => `${p.titulo}: ${p.opciones.length}`).join(', ');
   const sintonia = o.sintonia ? (o.sintoniaCon ? `Sí (${o.sintoniaCon.replace(/^parte de /, '')}; se comprueba)` : 'Sí') : '—';
+  // Acciones del objeto: recuperar espacios, curar, lanzar conjuros con cargas (se ejecutan desde el inventario o el contador de la hoja)
+  const coste = a => (a.uso === 'diario' ? '1/día' : a.uso === 'largo' ? '1/descanso largo' : a.uso === 'libre' ? 'a voluntad' : a.porNivel ? '1 carga/nivel' : a.escala ? `${a.coste}–${a.coste + a.escala - 1} cargas` : a.coste ? `${a.coste} c.` : 'a voluntad');
+  const acs = accionesDe(x);
+  if (acs.length) hace.push(`usos: ${acs.map(a => `${a.tipo === 'conjuro' ? `${a.nombre}${a.nivel && !a.escala ? ` (${a.nivel})` : ''}${a.cd ? ` CD ${a.cd}` : ''}` : a.titulo} [${coste(a)}]`).join(', ')}`);
   const numerico = hace.length > 0, cont = rs.length > 0 || !!gasta;
   if (gasta) hace.length ? hace.push(gasta) : null;
   const k = NOTAS[o.nombre] && numerico ? 'P' : numerico ? 'A' : cont ? 'P' : 'T';
@@ -99,6 +104,7 @@ Resumen: ${cuenta.A} automáticos, ${cuenta.P} en parte y ${cuenta.T} que se con
 - **Cargas**: se crean como contador al añadir el objeto; si el libro da las cargas en dados («1d3 cargas», «1d6 + 3 cuentas») se tiran entonces. Se recargan al amanecer (descanso largo) con su tirada, todas o ninguna, y la nota dice qué pasa al gastar la última. Solo se ven en la hoja mientras el objeto se puede usar.
 - **Usos diarios**: las propiedades que «no pueden volver a usarse hasta el siguiente amanecer» (o hasta un descanso) tienen su propio contador.
 - **Consumibles**: pociones, pergaminos, aceites, polvos, fichas de pluma, gemas elementales, munición… se apilan y «Beber» o «Usar» gasta uno. Las dosis («1d4 + 1 dosis», «3d4 judías») se tiran al añadirlo.
+- **Usos del objeto**: botones en el inventario (y al gastar su contador en la hoja) que hacen lo que dice el objeto: recuperar un espacio de conjuro (Perla de poder, Vara del pacto), curarte (Talismán de salud), tirar su daño (Bastón de impacto) o lanzar un conjuro gastando sus cargas, con la versión de nivel que pagan y la CD del objeto si la fija; la tirada del conjuro se abre sola.
 - **Manuales y tomos**: «Leer» sube la característica 2 (hasta 30) y el libro pierde su magia.
 
 ## Objetos

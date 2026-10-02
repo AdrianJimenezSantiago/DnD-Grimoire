@@ -8,7 +8,7 @@ pide elegir al añadirlo, y lo que la hoja aplica sola.
 - **En parte**: lleva la cuenta de cargas o usos, o automatiza una parte; el resto se consulta en el texto.
 - **Se consulta**: efectos narrativos o de situación (volar, ver, invocar…): el texto está en la biblioteca.
 
-Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
+Resumen: 171 automáticos, 78 en parte y 101 que se consultan.
 
 ## Cómo funcionan en la hoja
 
@@ -17,6 +17,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 - **Cargas**: se crean como contador al añadir el objeto; si el libro da las cargas en dados («1d3 cargas», «1d6 + 3 cuentas») se tiran entonces. Se recargan al amanecer (descanso largo) con su tirada, todas o ninguna, y la nota dice qué pasa al gastar la última. Solo se ven en la hoja mientras el objeto se puede usar.
 - **Usos diarios**: las propiedades que «no pueden volver a usarse hasta el siguiente amanecer» (o hasta un descanso) tienen su propio contador.
 - **Consumibles**: pociones, pergaminos, aceites, polvos, fichas de pluma, gemas elementales, munición… se apilan y «Beber» o «Usar» gasta uno. Las dosis («1d4 + 1 dosis», «3d4 judías») se tiran al añadirlo.
+- **Usos del objeto**: botones en el inventario (y al gastar su contador en la hoja) que hacen lo que dice el objeto: recuperar un espacio de conjuro (Perla de poder, Vara del pacto), curarte (Talismán de salud), tirar su daño (Bastón de impacto) o lanzar un conjuro gastando sus cargas, con la versión de nivel que pagan y la CD del objeto si la fija; la tirada del conjuro se abre sola.
 - **Manuales y tomos**: «Leer» sube la característica 2 (hasta 30) y el libro pierde su magia.
 
 ## Objetos
@@ -25,7 +26,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 |---|---|---|---|---|---|---|---|
 | Abalorio de nutrición | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Abalorio de refrigerio | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
-| Abanico del viento | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
+| Abanico del viento | Objeto maravilloso | Infrecuente | — | — | — | Automático | usos: Ráfaga de viento CD 13 [a voluntad] |
 | Aceite de afilado | Poción | Muy raro | — | — | — | En parte | Consumible: «Usar» gasta uno; el efecto se consulta en el texto. |
 | Aceite de etereidad | Poción | Raro | — | — | — | En parte | Consumible: «Usar» gasta uno; el efecto se consulta en el texto. |
 | Aceite escurridizo | Poción | Infrecuente | — | — | — | En parte | Consumible: «Usar» gasta uno; el efecto se consulta en el texto. |
@@ -43,23 +44,23 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Anillo de caminar sobre las aguas | Anillo | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Anillo de comandar elementales | Anillo | Legendario | Sí | cargas: 5, recupera 1d4+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Anillo de escudo mental | Anillo | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Anillo de estrellas fugaces | Anillo | Muy raro | Sí | cargas: 6, recupera 1d6 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Anillo de estrellas fugaces | Anillo | Muy raro | Sí | cargas: 6, recupera 1d6 al amanecer | — | Automático | usos: Luces danzantes [a voluntad], Luz [a voluntad], Fuego feérico [1 c.] |
 | Anillo de evasión | Anillo | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Anillo de influencia animal | Anillo | Raro | — | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Anillo de influencia animal | Anillo | Raro | — | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Encantar animal CD 13 [1 c.], Hablar con los animales [1 c.], Terror CD 13 [1 c.] |
 | Anillo de invisibilidad | Anillo | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Anillo de invocar djinns | Anillo | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Anillo de libertad de acción | Anillo | Raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Anillo de los tres deseos | Anillo | Legendario | — | cargas: 3, no se recarga | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Anillo de los tres deseos | Anillo | Legendario | — | cargas: 3, no se recarga | — | Automático | usos: Deseo [1 c.] |
 | Anillo de natación | Anillo | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Anillo de protección | Anillo | Raro | Sí | — | — | Automático | +1 CA; +1 a salvaciones |
-| Anillo de regeneración | Anillo | Muy raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
+| Anillo de regeneración | Anillo | Muy raro | Sí | — | — | Automático | usos: Regenerar 1d6 PG [a voluntad] |
 | Anillo de resistencia | Anillo | Raro | — | — | Tipo de daño: 10 | Automático | resistencia: ácido; resistencia: frío; resistencia: fuego; resistencia: fuerza; resistencia: necrótico; resistencia: psíquico; resistencia: radiante; resistencia: relámpago; resistencia: trueno; resistencia: veneno |
 | Anillo de retorno de conjuros | Anillo | Legendario | Sí | — | — | Automático | ventaja en salvaciones contra conjuros |
-| Anillo de salto | Anillo | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Anillo de telequinesis | Anillo | Muy raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
+| Anillo de salto | Anillo | Infrecuente | Sí | — | — | Automático | usos: Salto [a voluntad] |
+| Anillo de telequinesis | Anillo | Muy raro | Sí | — | — | Automático | usos: Telequinesis [a voluntad] |
 | Anillo de visión de rayos X | Anillo | Raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Anillo del carnero | Anillo | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Anteojos de encantamiento | Objeto maravilloso | Infrecuente | Sí | cargas: 3, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Anillo del carnero | Anillo | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Cabeza de carnero [1–3 cargas] |
+| Anteojos de encantamiento | Objeto maravilloso | Infrecuente | Sí | cargas: 3, descanso largo | — | Automático | usos: Hechizar persona CD 13 [1–3 cargas] |
 | Anteojos de la noche | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Anteojos de visión minuciosa | Objeto maravilloso | Infrecuente | — | — | — | Automático | ventaja en Investigación si depende de la vista, a 30 cm o menos |
 | Anteojos de vista de águila | Objeto maravilloso | Infrecuente | — | — | — | Automático | ventaja en Percepción si depende de la vista |
@@ -75,7 +76,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Armadura +1, +2 o +3 | Armadura (ligera, media o pesada) | Varía | — | — | Armadura de base: 12, Bonificador: 3 | Automático | CA de armadura +1 (Armadura acolchada +1 12, Des +0) |
 | Armadura adamantina | Armadura (cualquier armadura media o pesada, salvo armadura depieles) | Infrecuente | — | — | Armadura de base: 8 | Automático | CA de armadura (Armadura adamantina (camisote de mallas) 13, Des +0) |
 | Armadura de invulnerabilidad | Armadura (armadura de placas) | Legendario | Sí | Armazón de metal: 1, descanso largo | — | Automático | CA de armadura (Armadura de invulnerabilidad 18); resistencia: contundente, cortante, perforante |
-| Armadura de marinero | Armadura (ligera, media o pesada) | Infrecuente | — | — | Armadura de base: 12 | Automático | CA de armadura (Armadura de marinero (armadura acolchada) 11, Des +0) |
+| Armadura de marinero | Armadura (ligera, media o pesada) | Infrecuente | — | — | Armadura de base: 12 | Automático | CA de armadura (Armadura de marinero (armadura acolchada) 11, Des +0); usos: Recuperar 1d4 PG [1/día] |
 | Armadura de mithral | Armadura (cualquier armadura media o pesada, salvo armadura de pieles) | Infrecuente | — | — | Armadura de base: 8 | Automático | CA de armadura (Armadura de mithral (camisote de mallas) 13, Des +0) |
 | Armadura de placas de etereidad | Armadura (armadura de placas o media armadura) | Legendario | Sí | Armadura de placas de etereidad: 1, descanso largo | Armadura de base: 2 | Automático | CA de armadura (Armadura de placas de etereidad (armadura de placas) 18) |
 | Armadura de placas enana | Armadura (media armadura o armadura de placas) | Muy raro | — | — | Armadura de base: 2 | Automático | CA de armadura +2 (Armadura de placas enana (media armadura) 17, Des +0) |
@@ -91,34 +92,34 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Baraja de ilusiones | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Baraja de múltiples cosas | Objeto maravilloso | Legendario | — | — | — | Se consulta | Cada carta se resuelve a mano. |
 | Bastón de acróbata | Arma (bastón) | Muy raro | Sí | Desviar ataque: 1, descanso corto o largo | — | Automático | arma (Bastón +2): ataque y daño en combate; ventaja en Acrobacias |
-| Bastón de curación | Bastón | Raro | Sí (un bardo, clérigo o druida; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Bastón de enjambre de insectos | Bastón | Raro | Sí (un bardo, brujo, clérigo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Bastón de escarcha | Bastón | Muy raro | Sí (un brujo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | resistencia: frío |
-| Bastón de fuego | Bastón | Muy raro | Sí (un brujo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | resistencia: fuego |
-| Bastón de impacto | Bastón | Muy raro | Sí | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | arma (Bastón +3): ataque y daño en combate; daño adicional anotado junto al ataque |
+| Bastón de curación | Bastón | Raro | Sí (un bardo, clérigo o druida; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | usos: Curar heridas [1 carga/nivel], Curar heridas en masa [5 c.], Restablecimiento menor [2 c.] |
+| Bastón de enjambre de insectos | Bastón | Raro | Sí (un bardo, brujo, clérigo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | usos: Insecto gigante [4 c.], Plaga de insectos [5 c.] |
+| Bastón de escarcha | Bastón | Muy raro | Sí (un brujo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | resistencia: frío; usos: Cono de frío [5 c.], Muro de hielo [4 c.], Nube de oscurecimiento [1 c.], Tormenta de hielo [4 c.] |
+| Bastón de fuego | Bastón | Muy raro | Sí (un brujo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | resistencia: fuego; usos: Bola de fuego [3 c.], Manos ardientes [1 c.], Muro de fuego [4 c.] |
+| Bastón de impacto | Bastón | Muy raro | Sí | cargas: 10, recupera 1d6+4 al amanecer | — | Automático | arma (Bastón +3): ataque y daño en combate; daño adicional anotado junto al ataque; usos: Golpe de impacto [1–3 cargas] |
 | Bastón de la pitón | Bastón | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Bastón de la víbora | Bastón | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Bastón de las flores | Bastón | Común | — | cargas: 10, recupera 1d6+4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Bastón de llamada de ave | Bastón | Común | — | cargas: 10, recupera 1d6+4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Bastón de los bosques | Bastón | Raro | Sí | cargas: 6, recupera 1d6 al amanecer | — | Automático | arma (Bastón +2): ataque y daño en combate; +2 a ataque de conjuro |
-| Bastón de los magos | Bastón | Legendario | Sí (un brujo, hechicero o mago; se comprueba) | cargas: 50, recupera 4d6+2 al amanecer | — | En parte | arma (Bastón +2): ataque y daño en combate; +2 a ataque de conjuro; ventaja en salvaciones contra conjuros. +2 al ataque de conjuro y ventaja contra conjuros mientras lo empuñas. |
-| Bastón de marchitamiento | Bastón | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Bastón de poder | Bastón | Muy raro | Sí (un brujo, hechicero o mago; se comprueba) | cargas: 20, recupera 2d8+4 al amanecer | — | En parte | arma (Bastón +2): ataque y daño en combate; +2 CA; +2 a salvaciones; +2 a ataque de conjuro. +2 a la CA, salvaciones y ataque de conjuro mientras lo empuñas (equipado). |
+| Bastón de los bosques | Bastón | Raro | Sí | cargas: 6, recupera 1d6 al amanecer | — | Automático | arma (Bastón +2): ataque y daño en combate; +2 a ataque de conjuro; usos: Despertar [5 c.], Encantar animal [1 c.], Hablar con las plantas [3 c.], Hablar con los animales [1 c.], Localizar animales o plantas [2 c.], Muro de espinas [6 c.], Pasar sin rastro [2 c.], Piel robliza [2 c.] |
+| Bastón de los magos | Bastón | Legendario | Sí (un brujo, hechicero o mago; se comprueba) | cargas: 50, recupera 4d6+2 al amanecer | — | En parte | arma (Bastón +2): ataque y daño en combate; +2 a ataque de conjuro; ventaja en salvaciones contra conjuros; usos: Abrir [2 c.], Agrandar/reducir [a voluntad], Bola de fuego (7) [7 c.], Cerradura arcana [a voluntad], Conjurar elemental [7 c.], Desplazamiento entre planos [7 c.], Detectar magia [a voluntad], Disipar magia [3 c.], Esfera de llamas [2 c.], Invisibilidad [2 c.], Luz [a voluntad], Mano de mago [a voluntad], Muro de fuego [4 c.], Pasamuros [5 c.], Protección contra el bien y el mal [a voluntad], Relámpago (7) [7 c.], Telaraña [2 c.], Telequinesis [5 c.], Tormenta de hielo [4 c.]. +2 al ataque de conjuro y ventaja contra conjuros mientras lo empuñas. |
+| Bastón de marchitamiento | Bastón | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Marchitar [1 c.] |
+| Bastón de poder | Bastón | Muy raro | Sí (un brujo, hechicero o mago; se comprueba) | cargas: 20, recupera 2d8+4 al amanecer | — | En parte | arma (Bastón +2): ataque y daño en combate; +2 CA; +2 a salvaciones; +2 a ataque de conjuro; usos: Bola de fuego (5) [5 c.], Cono de frío [5 c.], Globo de invulnerabilidad [6 c.], Inmovilizar monstruo [5 c.], Levitar [2 c.], Muro de fuerza [5 c.], Proyectil mágico [1 c.], Rayo debilitador [1 c.], Relámpago (5) [5 c.]. +2 a la CA, salvaciones y ataque de conjuro mientras lo empuñas (equipado). |
 | Bastón de truenos y relámpagos | Bastón | Muy raro | Sí | — | — | Automático | arma (Bastón +2): ataque y daño en combate |
 | Bastón del adorno | Bastón | Común | — | — | — | Se consulta | Texto en la biblioteca. |
-| Bastón del cautivador | Bastón | Raro | Sí (un bardo, brujo, clérigo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d8+2 al amanecer; Resistir encantamiento: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Bastón del cautivador | Bastón | Raro | Sí (un bardo, brujo, clérigo, druida, hechicero o mago; se comprueba) | cargas: 10, recupera 1d8+2 al amanecer; Resistir encantamiento: 1, descanso largo | — | Automático | usos: Entender idiomas [1 c.], Hechizar persona [1 c.], Orden imperiosa [1 c.] |
 | Bastón lanzaconjuro | Bastón | Varía | Sí (un lanzador de conjuros; se comprueba) | cargas: 6, recupera 1d6 al amanecer | Nivel del conjuro: 9 | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Bola de cristal | Objeto maravilloso | Muy raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Bola de cristal de leer mentes | Objeto maravilloso | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Bola de cristal de telepatía | Objeto maravilloso | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Bola de cristal de visión veraz | Objeto maravilloso | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
+| Bola de cristal | Objeto maravilloso | Muy raro | Sí | — | — | Automático | usos: Escudriñar CD 17 [a voluntad] |
+| Bola de cristal de leer mentes | Objeto maravilloso | Legendario | Sí | — | — | Automático | usos: Escudriñar CD 17 [a voluntad] |
+| Bola de cristal de telepatía | Objeto maravilloso | Legendario | Sí | — | — | Automático | usos: Escudriñar CD 17 [a voluntad] |
+| Bola de cristal de visión veraz | Objeto maravilloso | Legendario | Sí | — | — | Automático | usos: Escudriñar CD 17 [a voluntad] |
 | Bolsa de contención | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Bolsa de judías | Objeto maravilloso | Raro | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Bolsa de trucos | Objeto maravilloso | Infrecuente | — | — | Color: 3 | Se consulta | Texto en la biblioteca. |
 | Bolsa devoradora | Objeto maravilloso | Muy raro | — | — | — | Se consulta | Texto en la biblioteca. |
 | Botas aladas | Objeto maravilloso | Infrecuente | Sí | cargas: 4, recupera 1d4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Botas de las tierras invernales | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | resistencia: frío |
-| Botas de levitación | Objeto maravilloso | Raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
+| Botas de levitación | Objeto maravilloso | Raro | Sí | — | — | Automático | usos: Levitar [a voluntad] |
 | Botas de pista falsa | Objeto maravilloso | Común | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Botas de velocidad | Objeto maravilloso | Raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Botas de zancadas y brincos | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | velocidad mínima 9 m |
@@ -139,7 +140,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Capa de muchas modas | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Capa de murciélago | Objeto maravilloso | Raro | Sí | uso: 1, descanso largo | — | Automático | ventaja en Sigilo |
 | Capa de protección | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | +1 CA; +1 a salvaciones |
-| Capa del charlatán | Objeto maravilloso | Raro | — | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Capa del charlatán | Objeto maravilloso | Raro | — | uso: 1, descanso largo | — | Automático | usos: Puerta dimensional [1/día] |
 | Capa élfica | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | ventaja en Sigilo |
 | Capa ondulante | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Carcaj de Ehlonna | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
@@ -154,9 +155,9 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Colgante de inmunidad al veneno | Objeto maravilloso | Raro | Sí | — | — | Automático | inmunidad: veneno |
 | Collar de adaptación | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | ventaja en salvaciones contra el estado de envenenado |
 | Collar de bolas de fuego | Objeto maravilloso | Raro | — | cuentas: 1d6+3, no se recarga | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Collar de plegarias | Objeto maravilloso | Raro | Sí (un clérigo, druida o paladín; se comprueba) | cuentas: 1d4+2, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Collar de plegarias | Objeto maravilloso | Raro | Sí (un clérigo, druida o paladín; se comprueba) | cuentas: 1d4+2, descanso largo | — | Automático | usos: Castigo brillante [1 c.], Curar heridas (2) [1 c.], Bendición [1 c.], Viajar con el viento [1 c.], Restablecimiento mayor [1 c.], Guardián de la fe [1 c.] |
 | Cota de escamas de dragón | Armadura (cota de escamas) | Muy raro | Sí | — | Dragón: 10 | Automático | CA de armadura +1 (Cota de escamas de dragón (azul) 15, Des +0); ventaja en salvaciones contra los ataques de aliento de los dragones; resistencia: relámpago; resistencia: frío; resistencia: ácido; resistencia: fuego; resistencia: veneno |
-| Cubo de fuerza | Objeto maravilloso | Raro | Sí | cargas: 10, recupera 1d6 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Cubo de fuerza | Objeto maravilloso | Raro | Sí | cargas: 10, recupera 1d6 al amanecer | — | Automático | usos: Armadura de mago CD 17 [1 c.], Escudo CD 17 [1 c.], Pequeña choza de Leomund CD 17 [3 c.], Esfera elástica de Otiluke CD 17 [4 c.], Sanctasanctórum privado de Mordenkainen CD 17 [4 c.], Muro de fuerza CD 17 [5 c.] |
 | Cubo de invocación | Objeto maravilloso | Raro | — | — | — | Se consulta | Texto en la biblioteca. |
 | Cuenco para controlar elementales de agua | Objeto maravilloso | Raro | — | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Cuerda de escalada | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
@@ -171,7 +172,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Decantador de agua interminable | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Defensora | Arma (cualquier arma cuerpo a cuerpo) | Legendario | Sí | — | Arma de base: 29 | En parte | arma (Bastón +3): ataque y daño en combate. Pasar el bonificador del arma a la CA se anota a mano. |
 | Demonomicón de Iggwilv | Objeto maravilloso | Artefacto | Sí | cargas: 8, recupera 1d8 al amanecer; Contención: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Diadema de estallidos | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
+| Diadema de estallidos | Objeto maravilloso | Infrecuente | — | — | — | Automático | usos: Rayo abrasador [1/día] |
 | Diadema de intelecto | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | Inteligencia 19 |
 | Disolvente universal | Objeto maravilloso | Legendario | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Elixir de salud | Poción | Raro | — | — | — | Automático | «Beber»: curas las enfermedades mágicas y dejas de estar cegado, ensordecido, envenenado y paralizado. |
@@ -200,7 +201,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Espejo atrapavidas | Objeto maravilloso | Muy raro | — | — | — | Se consulta | Texto en la biblioteca. |
 | Estatuilla de poder maravilloso | Objeto maravilloso | Varía | — | — | Tipo: 9 | Se consulta | Texto en la biblioteca. |
 | Ficha de pluma de Quaal | Objeto maravilloso | Varía | — | — | Tipo: 6 | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
-| Filo de la fortuna | Arma (cimitarra, espada corta, espada larga, espadón, estoque, guja u hoz) | Legendario | Sí | cargas: 1d3, no se recarga; Deseo: 1, descanso largo; Fortuna: 1, descanso largo | Arma de base: 5 | Automático | arma (Cimitarra +1): ataque y daño en combate; +1 a salvaciones |
+| Filo de la fortuna | Arma (cimitarra, espada corta, espada larga, espadón, estoque, guja u hoz) | Legendario | Sí | cargas: 1d3, no se recarga; Deseo: 1, descanso largo; Fortuna: 1, descanso largo | Arma de base: 5 | Automático | arma (Cimitarra +1): ataque y daño en combate; +1 a salvaciones; usos: Deseo [1 c.] |
 | Filtro de amor | Poción | Infrecuente | — | — | — | En parte | Consumible: «Beber» gasta uno; el efecto se consulta en el texto. |
 | Flauta de la aparición | Objeto maravilloso | Infrecuente | — | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Flauta de las cloacas | Objeto maravilloso | Infrecuente | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
@@ -208,7 +209,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Frasco de hierro | Objeto maravilloso | Legendario | — | — | — | Se consulta | Texto en la biblioteca. |
 | Garra silvana | Arma (cimitarra, daga, espada corta, estoque, hoz o lanza) | Común | Sí | Mensaje secreto: 1, descanso largo | Arma de base: 6 | Automático | arma (Cimitarra): ataque y daño en combate |
 | Garrote grande atronador | Arma (garrote grande) | Muy raro | Sí | Terremoto: 1, descanso largo | — | Automático | arma (Garrote grande): ataque y daño en combate; Fuerza 20; daño adicional anotado junto al ataque |
-| Gema de visión | Objeto maravilloso | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Gema de visión | Objeto maravilloso | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Visión veraz [1 c.] |
 | Gema del resplandor | Objeto maravilloso | Infrecuente | — | cargas: 50, no se recarga | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Gema elemental | Objeto maravilloso | Infrecuente | — | — | Gema: 4 | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Globo flotante | Objeto maravilloso | Infrecuente | — | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
@@ -256,7 +257,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Maza castigadora | Arma (maza) | Raro | — | — | — | Automático | arma (Maza +1): ataque y daño en combate |
 | Maza del terror | Arma (maza) | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | arma (Maza): ataque y daño en combate |
 | Maza disruptiva | Arma (maza) | Raro | Sí | — | — | Automático | arma (Maza): ataque y daño en combate; daño adicional anotado junto al ataque |
-| Medallón de los pensamientos | Objeto maravilloso | Infrecuente | Sí | cargas: 5, recupera 1d4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Medallón de los pensamientos | Objeto maravilloso | Infrecuente | Sí | cargas: 5, recupera 1d4 al amanecer | — | Automático | usos: Detectar pensamientos CD 13 [1 c.] |
 | Moneda de rivalidad | Objeto maravilloso | Común | — | cargas: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Morral práctico de Heward | Objeto maravilloso | Raro | — | — | — | Se consulta | Texto en la biblioteca. |
 | Munición +1, +2 o +3 | Arma (cualquier munición) | Varía | — | — | Munición: 5, Bonificador: 3 | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
@@ -264,10 +265,10 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Munición poderosa | Arma (cualquier munición) | Común | — | — | Munición: 5 | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Muñeca parlante | Objeto maravilloso | Común | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Negrarma | Arma (espadón) | Artefacto | Sí | — | — | Automático | arma (Espadón +3): ataque y daño en combate |
-| Ojo de bruja | Objeto maravilloso | Infrecuente | — | cargas: 3, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Ojo de bruja | Objeto maravilloso | Infrecuente | — | cargas: 3, descanso largo | — | Automático | usos: Ver invisibilidad [1 c.], Visión en la oscuridad [1 c.] |
 | Ojo de imitación | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Ojo y mano de Vecna | Objeto maravilloso | Artefacto | Sí | cargas: 8, recupera 1d4+4 al amanecer | — | En parte | La Fuerza 20 de la mano y los conjuros del ojo se consultan. |
-| Oleaje | Arma (tridente) | Artefacto | Sí | cargas: 3, recupera 1d3 al amanecer; Globo de invulnerabilidad: 1, descanso largo | — | Automático | arma (Tridente +3): ataque y daño en combate |
+| Oleaje | Arma (tridente) | Artefacto | Sí | cargas: 3, recupera 1d3 al amanecer; Globo de invulnerabilidad: 1, descanso largo | — | Automático | arma (Tridente +3): ataque y daño en combate; usos: Dominar bestia CD 20 [1 c.] |
 | Orbe de la dirección | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Orbe de los dragones | Objeto maravilloso | Artefacto | Sí | cargas: 7, recupera 1d4+3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Orbe del tiempo | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
@@ -276,7 +277,7 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Pergamino de conjuro | Pergamino | Varía | — | — | Nivel del conjuro: 10 | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Pergamino de invocar titán | Pergamino | Legendario | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Pergamino de protección | Pergamino | Raro | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
-| Perla de poder | Objeto maravilloso | Infrecuente | Sí (un lanzador de conjuros; se comprueba) | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Perla de poder | Objeto maravilloso | Infrecuente | Sí (un lanzador de conjuros; se comprueba) | uso: 1, descanso largo | — | Automático | usos: Recuperar un espacio de conjuro (nivel 3 o inferior) [1/día] |
 | Pértiga contraíble | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Pértiga de pescar | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Piedra de controlar elementales de tierra | Objeto maravilloso | Raro | — | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
@@ -310,28 +311,28 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Polvo de desaparición | Objeto maravilloso | Infrecuente | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Polvo de estornudar y atragantarse | Objeto maravilloso | Infrecuente | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
 | Polvo de sequedad | Objeto maravilloso | Infrecuente | — | — | — | En parte | Consumible: «Usar uno» gasta uno; el efecto se consulta en el texto. |
-| Portal cúbico | Objeto maravilloso | Legendario | — | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Portal cúbico | Objeto maravilloso | Legendario | — | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Desplazamiento entre planos [1 c.], Portal [1 c.] |
 | Pozo de los muchos mundos | Objeto maravilloso | Legendario | — | — | — | Se consulta | Texto en la biblioteca. |
 | Prótesis de extremidad | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Ropas de remiendo | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Rotundo | Arma (martillo de guerra) | Artefacto | Sí | Onda sísmica: 1, descanso largo | — | Automático | arma (Martillo de guerra +3): ataque y daño en combate; daño adicional anotado junto al ataque |
 | Rubí del mago de guerra | Objeto maravilloso | Común | Sí (un lanzador de conjuros; se comprueba) | — | — | Se consulta | Texto en la biblioteca. |
 | Silla de monta del caballero | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
-| Sombrero de disfraz | Objeto maravilloso | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
+| Sombrero de disfraz | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | usos: Disfrazarse [a voluntad] |
 | Sombrero de hechicería | Objeto maravilloso | Común | Sí (un mago; se comprueba) | Conjuro desconocido: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Sombrero de las alimañas | Objeto maravilloso | Común | — | cargas: 3, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Sombrero de múltiples conjuros | Objeto maravilloso | Muy raro | Sí (un mago; se comprueba) | Conjuro desconocido: 1, descanso corto o largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Tablero de espiritismo | Objeto maravilloso | Muy raro | — | cargas: 3, recupera 1d1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Talismán de cerrar heridas | Objeto maravilloso | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Talismán de la esfera | Objeto maravilloso | Legendario | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Talismán de salud | Objeto maravilloso | Infrecuente | Sí | uso: 1, descanso largo | — | Automático | ventaja en salvaciones contra el estado de envenenado |
+| Talismán de salud | Objeto maravilloso | Infrecuente | Sí | uso: 1, descanso largo | — | Automático | ventaja en salvaciones contra el estado de envenenado; usos: Recuperar 2d4 + 2 PG [1/día] |
 | Talismán del bien puro | Objeto maravilloso | Legendario | Sí (un clérigo o paladín; se comprueba) | cargas: 7, no se recarga | — | En parte | +2 a ataque de conjuro. El +2 al ataque de conjuro es automático; el daño a los malvados al tocarlo, no. |
 | Talismán del mal definitivo | Objeto maravilloso | Legendario | Sí | cargas: 6, no se recarga | — | En parte | +2 a ataque de conjuro. El +2 al ataque de conjuro es automático; el daño a los buenos al tocarlo, no. |
 | Tomo de entendimiento | Objeto maravilloso | Muy raro | — | — | — | Automático | Leer (+2 Sabiduría) permanente (máx. 30) |
 | Tomo de la lengua detenida | Objeto maravilloso | Legendario | Sí (un mago; se comprueba) | uso: 1, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Tomo de liderazgo e influencia | Objeto maravilloso | Muy raro | — | — | — | Automático | Leer (+2 Carisma) permanente (máx. 30) |
 | Tomo de pensamiento claro | Objeto maravilloso | Muy raro | — | — | — | Automático | Leer (+2 Inteligencia) permanente (máx. 30) |
-| Tridente de comandar peces | Arma (tridente) | Infrecuente | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | arma (Tridente): ataque y daño en combate |
+| Tridente de comandar peces | Arma (tridente) | Infrecuente | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | arma (Tridente): ataque y daño en combate; usos: Dominar bestia CD 15 [1 c.] |
 | Trompetilla de escucha | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Túnica de colores hipnóticos | Objeto maravilloso | Muy raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Túnica de las estrellas | Objeto maravilloso | Muy raro | Sí | — | — | Automático | +1 a salvaciones |
@@ -342,34 +343,34 @@ Resumen: 131 automáticos, 105 en parte y 114 que se consultan.
 | Útil bolsita de especias de Heward | Objeto maravilloso | Común | — | cargas: 10, recupera 1d6+4 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Vara de la absorción | Vara | Muy raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Vara de la alerta | Vara | Muy raro | Sí | uso: 1, descanso largo | — | Automático | ventaja en iniciativa; ventaja en Percepción |
-| Vara de la resurrección | Vara | Legendario | Sí | cargas: 5, recupera 1d1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Vara de la resurrección | Vara | Legendario | Sí | cargas: 5, recupera 1d1 al amanecer | — | Automático | usos: Curar [1 c.], Resurrección [5 c.] |
 | Vara de la seguridad | Vara | Muy raro | — | — | — | Se consulta | Texto en la biblioteca. |
 | Vara de tentáculos | Vara | Raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Vara del pacto | Vara | Varía | Sí (un brujo; se comprueba) | Vara del pacto: 1, descanso largo | Bonificador: 3 | En parte | +1 a CD y ataque de conjuro; +2 a CD y ataque de conjuro; +3 a CD y ataque de conjuro. Suma a la CD y al ataque de todos tus conjuros (la Guía lo limita a los de brujo). |
+| Vara del pacto | Vara | Varía | Sí (un brujo; se comprueba) | Vara del pacto: 1, descanso largo | Bonificador: 3 | En parte | +1 a CD y ataque de conjuro; +2 a CD y ataque de conjuro; +3 a CD y ataque de conjuro; usos: Recuperar un espacio de conjuro [1/descanso largo]. Suma a la CD y al ataque de todos tus conjuros (la Guía lo limita a los de brujo). |
 | Vara inamovible | Vara | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
-| Varita de atadura | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de bolas de fuego | Varita | Raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de detección mágica | Varita | Infrecuente | — | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Varita de atadura | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Inmovilizar monstruo CD 17 [5 c.], Inmovilizar persona CD 17 [2 c.] |
+| Varita de bolas de fuego | Varita | Raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Bola de fuego CD 15 [1–3 cargas] |
+| Varita de detección mágica | Varita | Infrecuente | — | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Detectar magia [1 c.] |
 | Varita de detectar enemigos | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Varita de dirección | Varita | Común | — | cargas: 3, descanso largo | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Varita de las maravillas | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Varita de Orcus | Varita | Artefacto | Sí | cargas: 7, recupera 1d4+3 al amanecer; Llamar a los muertos vivientes: 1, descanso largo | — | Automático | arma (Maza +3): ataque y daño en combate; +3 CA |
 | Varita de parálisis | Varita | Raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
 | Varita de pirotecnia | Varita | Común | — | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de polimorfar | Varita | Muy raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de proyectiles mágicos | Varita | Infrecuente | — | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de relámpagos | Varita | Raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Varita de polimorfar | Varita | Muy raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Polimorfar CD 15 [1 c.] |
+| Varita de proyectiles mágicos | Varita | Infrecuente | — | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Proyectil mágico [1–3 cargas] |
+| Varita de relámpagos | Varita | Raro | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Relámpago CD 15 [1–3 cargas] |
 | Varita de secretos | Varita | Infrecuente | — | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
-| Varita de telaraña | Varita | Infrecuente | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Varita de telaraña | Varita | Infrecuente | Sí (un lanzador de conjuros; se comprueba) | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Telaraña CD 13 [1 c.] |
 | Varita del mago de guerra +1, +2 o +3 | Varita | Varía | Sí (un lanzador de conjuros; se comprueba) | — | Bonificador: 3 | Automático | +1 a ataque de conjuro; +2 a ataque de conjuro; +3 a ataque de conjuro |
-| Varita del terror | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Varita del terror | Varita | Raro | Sí | cargas: 7, recupera 1d6+1 al amanecer | — | Automático | usos: Orden imperiosa CD 15 [1 c.], Terror CD 15 [3 c.] |
 | Vasija alquímica | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
 | Vela de invocación | Objeto maravilloso | Muy raro | Sí | — | — | Se consulta | Texto en la biblioteca. |
 | Vela de la profundidad | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |
 | Vendas de poder sin armas | Objeto maravilloso | Varía | — | — | Bonificador: 3 | Automático | +1 al ataque y daño sin armas; +2 al ataque y daño sin armas; +3 al ataque y daño sin armas |
 | Vengadora sagrada | Arma (cualquiera sencilla o marcial) | Legendario | Sí (un paladín; se comprueba) | — | Arma de base: 38 | Automático | arma (Bastón +3): ataque y daño en combate; daño adicional anotado junto al ataque |
-| Yelmo de entender idiomas | Objeto maravilloso | Infrecuente | — | — | — | Se consulta | Texto en la biblioteca. |
+| Yelmo de entender idiomas | Objeto maravilloso | Infrecuente | — | — | — | Automático | usos: Entender idiomas [a voluntad] |
 | Yelmo de fulgor | Objeto maravilloso | Muy raro | Sí | — | — | Automático | resistencia: fuego |
-| Yelmo de telepatía | Objeto maravilloso | Infrecuente | Sí | — | — | Se consulta | Texto en la biblioteca. |
-| Yelmo de teletransporte | Objeto maravilloso | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | En parte | Contadores en la hoja; el efecto se consulta en el texto. |
+| Yelmo de telepatía | Objeto maravilloso | Infrecuente | Sí | — | — | Automático | usos: Detectar pensamientos CD 13 [1/día], Sugestión CD 13 [1/día] |
+| Yelmo de teletransporte | Objeto maravilloso | Raro | Sí | cargas: 3, recupera 1d3 al amanecer | — | Automático | usos: Teletransporte [1 c.] |
 | Yelmo temible | Objeto maravilloso | Común | — | — | — | Se consulta | Texto en la biblioteca. |

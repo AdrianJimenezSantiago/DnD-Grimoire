@@ -5,6 +5,8 @@ import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados
   manos, esEscudo, aDosManos, vaEnMano, armaduraPuesta, dosArmasLigeras, requisitosArmadura, penalizacionArmadura, alternarGuardado,
   pagar, cobrar, juntarMonedas, enCobre, precioVenta, venderObjeto, municionDe, curacionDe, motivoSintonia, requisitoSintonia } from '../../domain/equipo.js';
 import { usoDe, usarObjeto } from '../../domain/usarObjeto.js';
+import { accionesDe, motivoAccion } from '../../domain/accionesObjeto.js';
+import { accionObjeto, costeTexto } from '../accionesObjeto.js';
 import { reglas, usosGastados } from '../../domain/rasgos.js';
 import { efectoDe, objetoActivo, bonoDeNombre, describirEfecto, statsEfectivos } from '../../domain/objetosEfecto.js';
 import { armadurasDe, competenteConArma } from '../../domain/competencias.js';
@@ -300,6 +302,8 @@ function inspector(ch) {
         <button type="button" class="chip" data-insp="carga" data-d="1" ${usados >= r.max ? 'disabled' : ''}>Gastar</button><button type="button" class="chip" data-insp="carga" data-d="-1" ${usados ? '' : 'disabled'}>Recuperar</button></div>` : ''}
       ${usosDia.map(u => { const g = usosGastados(ch, u), q = u.max - g; return `<div class="inv-cargas"><small>${esc(u.nombre.replace(`${o.nombre}: `, '').replace(o.nombre, 'Uso'))}</small><span class="inv-pips">${Array.from({ length: u.max }, (_, i) => `<i class="${i < q ? 'on' : ''}"></i>`).join('')}</span><b>${q}/${u.max}</b>
         <button type="button" class="chip" data-insp="usodia" data-rid="${u.id}" data-d="1" ${g >= u.max ? 'disabled' : ''}>Usar</button><button type="button" class="chip" data-insp="usodia" data-rid="${u.id}" data-d="-1" ${g ? '' : 'disabled'}>Recuperar</button></div>`; }).join('')}
+      ${accionesDe(o).length ? `<div class="inv-acciones" role="group" aria-label="Usos del objeto"><small>Usos del objeto</small><div>${accionesDe(o).map(a => { const m = motivoAccion(ch, o, a);
+        return `<button type="button" class="inv-acc ${m ? 'no' : ''}" data-insp="accion" data-acc="${esc(a.id)}" ${m ? `aria-disabled="true" title="${esc(m)}"` : ''}><b>${esc(a.titulo)}</b><small>${esc(m || costeTexto(a))}</small></button>`; }).join('')}</div></div>` : ''}
       ${o.sintonia && !o.sintonizado && requisitoSintonia(ch, o) ? `<p class="inv-nota mal">${esc(requisitoSintonia(ch, o))}</p>` : ''}
       ${mu ? `<div class="inv-mun ${mu.cantidad ? '' : 'mal'}">${gi('inv_municion')}<span><b>${esc(mu.nombre)}</b> · quedan ${mu.cantidad}</span><button type="button" class="chip" data-insp="disparo" ${mu.cantidad ? '' : 'disabled'}>Gastar una</button></div>` : ''}
       ${APILABLE.has(o.cat) || o.cantidad > 1 ? `<div class="inv-cant"><small>Cantidad</small><span class="inv-qty"><button type="button" data-invcant="${o.id}|-1" aria-label="Quitar uno">−</button><b>${o.cantidad}</b><button type="button" data-invcant="${o.id}|1" aria-label="Añadir uno">+</button></span></div>` : ''}
@@ -479,6 +483,7 @@ export function init(store) {
     if (a === 'sintonia') return sintonizarYa(id);
     if (a === 'usar') return usarYa(id);
     if (a === 'vender') return venderYa(id);
+    if (a === 'accion') { Promise.resolve(accionObjeto(S, id, b.dataset.acc)).then(() => repintar()); return; }
     if (a === 'usodia') { Promise.resolve(stepResource(S, b.dataset.rid, +b.dataset.d)).then(() => repintar()); return; }
     if (a === 'carga') { const o = buscar(S.cur(), id); if (o?.rasgo) Promise.resolve(stepResource(S, o.rasgo, +b.dataset.d)).then(() => repintar()); return; }
     if (a === 'disparo') { const mu = municionDe(S.cur(), buscar(S.cur(), id)); if (!mu) return; let x; const h = S.edit((db, ch) => { x = cambiarCantidad(ch, mu.id, -1); }); haptic('light'); repintar(); return toast(`<b>${esc(x.nombre)}</b>: quedan ${x.cantidad}.`, [undoBtn(S, h)]); }
