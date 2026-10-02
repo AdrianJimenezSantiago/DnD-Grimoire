@@ -28,6 +28,33 @@ const TODOS = modulos().map(f => ({ rel: path.relative(SRC, f), imports: imports
 const infracciones = (filtro, permitido) => TODOS.filter(m => filtro(m.rel)).flatMap(m =>
   m.imports.filter(i => !permitido(i)).map(i => `${m.rel} → ${i.spec}`));
 
+// Nombres que exporta un módulo: export const/function/class y listas export { a, b as c }
+function exportsDe(rel) {
+  const src = fs.readFileSync(path.join(SRC, rel), 'utf8');
+  const nombres = [...src.matchAll(/^export (?:const|let|function|async function|class) ([\w$]+)/gm)].map(m => m[1]);
+  for (const [, lista] of src.matchAll(/^export \{([^}]*)\}/gm)) nombres.push(...lista.split(',').map(s => s.trim().split(/\s+as\s+/).pop()).filter(Boolean));
+  return new Set(nombres);
+}
+// Lo que un módulo usa de cada import relativo: nombres de import { … } y miembros de import * as X (X.nombre)
+function usosDe(rel) {
+  const src = fs.readFileSync(path.join(SRC, rel), 'utf8'), usos = [];
+  const destino = spec => path.relative(SRC, path.resolve(path.dirname(path.join(SRC, rel)), spec));
+  for (const [, lista, spec] of src.matchAll(/^import \{([^}]*)\} from '(\.[^']+)'/gm))
+    for (const n of lista.split(',').map(s => s.trim().split(/\s+as\s+/)[0]).filter(Boolean)) usos.push({ destino: destino(spec), nombre: n });
+  for (const [, ns, spec] of src.matchAll(/^import \* as ([\w$]+) from '(\.[^']+)'/gm))
+    for (const [, n] of src.matchAll(new RegExp(`(?<![\\w$.'"/])${ns}\\.([\\w$]+)`, 'g'))) usos.push({ destino: destino(spec), nombre: n });
+  return usos;
+}
+
+describe('imports y exports de web/src', () => {
+  test('todo lo que se importa (también con import * as X y X.nombre) existe en el módulo de destino', () => {
+    const cache = new Map(), exp = d => { if (!cache.has(d)) cache.set(d, exportsDe(d)); return cache.get(d); };
+    const rotos = TODOS.flatMap(m => usosDe(m.rel)
+      .filter(u => u.destino.endsWith('.js') && !exp(u.destino).has(u.nombre)).map(u => `${m.rel}: ${u.nombre} no existe en ${u.destino}`));
+    assert.deepEqual([...new Set(rotos)], []);
+  });
+});
+
 describe('capas de web/src', () => {
   test('core no depende de ninguna otra capa ni de paquetes externos', () => {
     assert.deepEqual(infracciones(r => capa(r) === 'core', i => i.destino && capa(i.destino) === 'core'), []);

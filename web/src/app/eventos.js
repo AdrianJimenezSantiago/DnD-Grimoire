@@ -9,7 +9,7 @@ import { REL_FIELDS, emptyDb } from '../domain/personaje/modelo.js';
 import { invalidateItems } from '../domain/conjuros/catalogo.js';
 import { $, on } from '../ui/componentes/dom.js';
 import { icon } from '../ui/componentes/icons.js';
-import { toast, hideToast, toastOpen } from '../ui/componentes/toast.js';
+import { toast, hideToast, toastOpen, undoBtn } from '../ui/componentes/toast.js';
 import { closeSheet, openSheet, topSheet } from '../ui/componentes/dialog.js';
 import { pop, viewTransition, reducedMotion, burst } from '../ui/animaciones/fx.js';
 import { NATIVE, haptic, keepAwake, minimize, setBars, storage } from '../platform/native.js';
@@ -165,7 +165,7 @@ const COMMANDS = {
   reset: async () => {
     if (!(await confirmar({ titulo: '¿Borrar todos los datos?', texto: 'Se borran todos los personajes, el catálogo y el historial de este dispositivo. Justo después podrás deshacerlo.', ok: 'Borrar todo', peligro: true }))) return;
     const db = emptyDb(); invalidateItems(); S.editing = false;
-    const h = S.replace(db); toast('Datos borrados.', [A.undoBtn(S, h)]);
+    const h = S.replace(db); toast('Datos borrados.', [undoBtn(S, h)]);
   },
 };
 function lanzadoFx(el) {
@@ -219,7 +219,7 @@ async function iniciativaManual() {
   let auto = [];
   const h = S.act(`Iniciativa a mano: ${n}${antes != null ? ` (antes ${antes})` : ''}`, (db, x) => { combateDe(x).iniciativa = n; combateDe(x).iniManual = true; if (antes == null) auto = alTirarIniciativa(x); });
   pop(document.querySelector('.cb-ini-v'), 'fx-pop'); haptic('light');
-  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.${textoAuto(auto)}`, [A.undoBtn(S, h)]);
+  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.${textoAuto(auto)}`, [undoBtn(S, h)]);
 }
 function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
@@ -228,7 +228,7 @@ function nuevoTurno() {
   const ronda = combateDe(ch).ronda + 1;
   let auto = [];
   const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); auto = alEmpezarTurno(x); });
-  if (auto.length) { S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')); if (!fuera.length) toast(textoAuto(auto).trim(), [A.undoBtn(S, h)]); }
+  if (auto.length) { S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')); if (!fuera.length) toast(textoAuto(auto).trim(), [undoBtn(S, h)]); }
   if (fuera.length) {
     S.note(`Terminan: ${fuera.map(e => (e.finConc ? `concentración en ${e.nombre}` : e.nombre)).join(', ')}`);
     setTimeout(() => avisoFinEfectos(fuera, ronda, h), 380);
@@ -245,7 +245,7 @@ function avisoFinEfectos(fuera, ronda, h) {
     sub: `Empieza la ronda ${ronda}: ${fin ? `se agota la duración de ${fin.nombre} y dejas de concentrarte` : fuera.length === 1 ? 'se agota la duración de un efecto' : `se agota la duración de ${fuera.length} efectos`}.`,
     secciones: [{ titulo: 'Ya no te ayuda', ico: 'inspiracion', items: buenos.map(cierra) }, { titulo: 'Te libras de', ico: 'estados', items: malos.map(cierra) },
       { titulo: 'Sigue activo', ico: 'md_tiempo', items: [...(S.cur().play.conc ? [{ ico: 'esc_adi', titulo: `Concentración en ${S.cur().play.conc}`, texto: S.cur().play.concRondas != null ? `Quedan ${fmtRondas(S.cur().play.concRondas)}.` : 'Hasta que la termines o la pierdas.' }] : []), ...efectosDe(S.cur()).map(e => ({ ico: e.ico, titulo: e.nombre, texto: e.rondas != null ? `Quedan ${fmtRondas(e.rondas)}.` : 'Hasta que lo quites o descanses.' }))] }],
-    botones: [{ ...A.undoBtn(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
+    botones: [{ ...undoBtn(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
   haptic('light');
 }
 function tirarDesde(clave) {
@@ -316,7 +316,7 @@ function bindSheet() {
       if (sel.length) {
         const txt = sel.map(o => o.grupo === 'maniobra' ? o.nombre : o.grupo === 'castigo' ? `Castigo divino (${o.nombre.toLowerCase()})` : o.titulo);
         const h = S.act(`${x.o.nombre}: ${txt.join(', ')}`, (db, c) => gastarAlImpactar(c, sel));
-        toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [A.undoBtn(S, h)]);
+        toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [undoBtn(S, h)]);
         mas = sel.filter(o => o.dado).map(o => ({ fuente: o.grupo === 'maniobra' ? o.nombre : o.titulo, valor: o.dado }));
       }
     }
@@ -328,12 +328,12 @@ function bindSheet() {
     // Golpe guiado (dominio de la guerra 3): al fallar, +10 a la tirada gastando Canalizar divinidad
     const guerra = clasesDe(ch).some(c => c.clase === 'Clérigo' && c.nivel >= 3 && /guerra/i.test(c.subclase || '')), cd = reglas(ch).find(x => x.id === 'tpl:clerigo.canalizar');
     const guiado = guerra && cd && cd.max - usosGastados(ch, cd) > 0 ? { nombre: 'Golpe guiado', fijo: 10, quedan: cd.max - usosGastados(ch, cd), texto: 'gasta Canalizar divinidad y suma +10 a la tirada',
-      fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { recState(c, cd.id).used = (recState(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [A.undoBtn(S, h)]); } } : null;
+      fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { recState(c, cd.id).used = (recState(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [undoBtn(S, h)]); } } : null;
     if (!maniobrasDe(ch).some(m => m.nombre === 'Ataque de precisión')) return guiado;
     const r = reglas(ch).find(x => x.id === 'tpl:maestro.supremacia'); if (!r) return null;
     const quedan = r.max - usosGastados(ch, r); if (quedan < 1) return null;
     return { dado: dadoSupremacia(clasesDe(ch).find(c => c.clase === 'Guerrero').nivel), quedan,
-      fn: () => { const h = S.act('Ataque de precisión: gasta un dado de supremacía', (db, c) => { recState(c, r.id).used = (recState(c, r.id).used || 0) + 1; }); toast('Ataque de precisión: dado de supremacía gastado.', [A.undoBtn(S, h)]); } };
+      fn: () => { const h = S.act('Ataque de precisión: gasta un dado de supremacía', (db, c) => { recState(c, r.id).used = (recState(c, r.id).used || 0) + 1; }); toast('Ataque de precisión: dado de supremacía gastado.', [undoBtn(S, h)]); } };
   };
   const tirarAtaque = (x, eco = '') => {
     const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
@@ -354,7 +354,7 @@ function bindSheet() {
     const ch = S.cur(), a = ACCION_COMUN[k], c = combateDe(ch); if (!ch || !a) return;
     if (c.hechas.some(h => h.k === k && h.via === via)) {
       const h = S.act(`Deshace ${a.nombre}`, (db, x) => { deshacerAccionComun(x, k, via); if (a.efecto) vidaDe(x).efectos = vidaDe(x).efectos.filter(e => e.k !== a.efecto); });
-      haptic('light'); toast(`<b>${esc(a.nombre)}</b> desmarcada: ${esc(VIA_TXT[via])} vuelve a estar libre.`, [A.undoBtn(S, h)]); return;
+      haptic('light'); toast(`<b>${esc(a.nombre)}</b> desmarcada: ${esc(VIA_TXT[via])} vuelve a estar libre.`, [undoBtn(S, h)]); return;
     }
     if (c.turno[via] && !forzar) {
       toast(`Ya has gastado ${esc(VIA_TXT[via])} este turno.`, [{ label: 'Hacerlo igualmente', hl: true, fn: () => accionComun(k, via, true) }]); return;
@@ -368,7 +368,7 @@ function bindSheet() {
       if (o) setTimeout(() => tirarAtaque(arma(o.id), 'ataque de oportunidad · gasta tu reacción'), 200);
     } else if (a.tirar?.length === 1) setTimeout(() => tirarDesde(`hab:${a.tirar[0]}`), 250);
     else if (a.tirar) extra.push(...a.tirar.slice(0, 3).map((hk, i) => ({ label: NOMBRE_HAB[hk], hl: i === 0, fn: () => tirarDesde(`hab:${hk}`) })));
-    toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, A.undoBtn(S, h)]);
+    toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, undoBtn(S, h)]);
   };
   on(sheet, 'click', '[data-accom]', (e, b) => { const [k, via] = b.dataset.accom.split('|'); accionComun(k, via); });
   on(sheet, 'click', '[data-cbdano]', (e, b) => { const x = arma(b.dataset.cbdano); if (x) danoArma(x); });
@@ -397,7 +397,7 @@ function bindSheet() {
     if (d.flag) { if (!S.editing) return; const sid = S.cur().book[+d.bi].sid; S.edit(db => { db.catalog[sid][d.flag] = !db.catalog[sid][d.flag]; }); return; }
     if (d.add !== undefined) return openPicker(d.add);
     if (d.del) { const bi = +d.del, s = S.db.catalog[S.cur().book[bi].sid]; const h = S.edit((db, ch) => { ch.book.splice(bi, 1); });
-      return toast(`<b>${esc(s.es)}</b> quitado del libro. Sigue en el catálogo.`, [A.undoBtn(S, h)]); }
+      return toast(`<b>${esc(s.es)}</b> quitado del libro. Sigue en el catálogo.`, [undoBtn(S, h)]); }
     if (d.text !== undefined) return openSpell(+d.text, { edit: true });
     if (d.cast !== undefined) {
       if (S.editing) return; if (lpFired) { lpFired = false; return; }
@@ -455,7 +455,7 @@ function bindSheet() {
     const sid = ch.book[escuelaBi].sid, s = S.db.catalog[sid], antes = s.escuela, nueva = b.dataset.school; if (antes === nueva) return;
     const otros = S.db.chars.filter(c => c !== ch && c.book.some(x => x.sid === sid)).length;
     const h = S.edit(db => { db.catalog[sid].escuela = nueva; }); invalidateItems();
-    toast(`<b>${esc(s.es)}</b>: ${esc(nueva.toLowerCase())}.${otros ? ` También cambia en ${otros === 1 ? 'otro personaje' : otros + ' personajes'}.` : ''}`, [A.undoBtn(S, h)]);
+    toast(`<b>${esc(s.es)}</b>: ${esc(nueva.toLowerCase())}.${otros ? ` También cambia en ${otros === 1 ? 'otro personaje' : otros + ' personajes'}.` : ''}`, [undoBtn(S, h)]);
   });
   on(sheet, 'click', '[data-comp]', (e, b) => {
     const [bi, c] = b.dataset.comp.split('|'), sid = S.cur().book[+bi].sid, act = (S.db.catalog[sid].comp || '').split(' ').filter(Boolean);
