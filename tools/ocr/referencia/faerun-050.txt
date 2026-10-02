@@ -2,11 +2,11 @@ FESTEJO DE LA LUNA
 Cuando las noches se alargan y los vientos del invierno
 se acercan, el Festejo de la Luna es el momento en el que
 la gente homenajea a sus ancestros y a sus muertos más
-queridos. Dura.nte los festejos de ese día, la gente se reúue
+queridos. Durante los festejos de ese día, la gente se reúne
 para compartir historias y leyendas, rezar por los caídos
 y prepararse para el frío que se avecina.
 CONTROLAR EL TIEMPO DÍA A DÍA
-La mayor parte de la gente uo lleva un control de la
+La mayor parte de la gente no lleva un control de la
 hora del día más allá de nociones como "media mañana"
 o "casi al anochecer". Si la gente hace planes para verse
 a una hora en concreto, basa su cita en esas expresiones.
@@ -14,32 +14,32 @@ El concepto de horas y minutos existe principalmente
 allí donde hay gente adinerada que usa relojes, pero los
 relojes mecánicos suelen ser poco fiables y rara vez están
 bien ajustados. Si un templo o una estructura civil de
-un Jugar cuenta con un reloj que taña con el paso de las
+un lugar cuenta con un reloj que taña con el paso de las
 horas, la gente se refiere a las horas como "campanas";
 por ejemplo, dirían "nos vemos a las siete campanas".
 DINERO
-Casi todas las grandes potencias de Faerün acuñan sus
-propias monedas dent ro de sus fronteras para representar
+Casi todas las grandes potencias de Faerûn acuñan sus
+propias monedas dentro de sus fronteras para representar
 tanto su influencia como su riqueza material. La mayoría
 de las monedas de composición pura y peso estándar
 se aceptan en todo el continente, aunque no todas las
 ciudades-Estado ni todas las naciones acuñan todos los
-tipos de moneda. El estánda r usado para establecer el
+tipos de moneda. El estándar usado para establecer el
 peso y el valor de las monedas es la Moneda de Oro de
 Waukeen, una reliquia que reposa sobre una balanza
 sagrada en la ciudad de Schamedar, en Calimshan.
 Después de este párrafo se incluye un resumen de las
 monedas más habituales y comúnmente aceptadas en los
-"Reinos. Cada agrupación está dispuesta en orden de valor:
+Reinos. Cada agrupación está dispuesta en orden de valor:
 cobre, plata, electro, oro y (si la hay) platino. La mayoría
 de la gente se refiere a las monedas con el nombre que
 usa para ellas el gobierno que las acuña, sin importar su
 origen, excepto en el caso del Alcázar Zhentil; por alguna
 razón, las monedas de los Zhentarim tienen asociados
-epítetos poco ha.lagadores:
+epítetos poco halagadores:
 Aguas Profundas: punta, esquirla, sambar, dragón, sol.
 Alcázar Zhentil: colmillo ("trozo de estiércol"),
-garra/naal ("mordisco de pulga"), tar enth ("martillazo"),
+garra/naal ("mordisco de pulga"), tarenth ("martillazo"),
 gloria ("lobo que llora"), gloria de platino ("gema
 metálica plana").
 Amn: fander, taran, centauro, danter, roldan.
@@ -53,7 +53,7 @@ ojo azul, noble.
 
 CRONOLOGÍA DE LOS REINOS
 Esta cronología proporciona un resumen de la
-historia de Faeríln. Las fechas siguen el cómputo
+historia de Faerûn. Las fechas siguen el cómputo
 de los valles (CV). A partir del año -700 CV, los años
 tienen un nombre que se encuentra en el Censo de
 los Años, unos escritos proféticos obra de la maga
@@ -64,43 +64,43 @@ Las aguas retroceden y dejan a la vista el super-
 continente de Merrouroboros, que acaban habitando
 las conocidas como razas creadoras.
 La Era del Alba (de -30000 CV a -24000 CV).
-Los imperios de las razas creadoras desapa recen
+Los imperios de las razas creadoras desaparecen
 y los sustituyen reinos de dragones y gigantes.
 Estos dos grandes pueblos luchan intensamente
 entre sí durante siglos.
 El Primer Florecimiento (de -24000 CV a -12000 CV).
 Las civilizaciones élficas sustituyen a las de los
-dragones y gigantes. En - 17600, la alta magia élfica
-crea Etern ión y provoca un catacl ismo en Toril
-conocido como la Seces ión.
+dragones y gigantes. En -17600, la alta magia élfica
+crea Eternión y provoca un cataclismo en Toril
+conocido como la Secesión.
 Las Guerras de la Corona (de -12000 CV a -9000 CV).
-Los elfos guerrean entre sí d urante generaciones.
+Los elfos guerrean entre sí durante generaciones.
 La Era de la Fundación (de -9000 CV a -3000 CV).
-A medida que la iníluencia élfica decae, surgen
+A medida que la influencia élfica decae, surgen
 otras naciones como Imaskar, Netheril, Rashemen
-y Unther. Los gen ios Cálim y Memnon son
+y Unther. Los genios Cálim y Memnon son
 aprisionados.
 La Era de la Humanidad (de -3000 CV a 1000 CV).
 Los reinos gobernados por humanos (como los
 imperios de Mulhorand, Narfell y Raumathar)
-se extienden por todo FaerOn y lo dominan.
+se extienden por todo Faerûn y lo dominan.
 Empieza la era actual (1000 CV). La era actual está
-dominada por los confüctos, las aventuras y las
+dominada por los conflictos, las aventuras y las
 crisis globales.
 La Era de los Trastornos (1358 CV). Diversas deidades
-cam inan por la tierra como mortales y se enfrentan
-entre s í.
-El regreso de Netheril (1372 CV). La ciudad ílotante
+caminan por la tierra como mortales y se enfrentan
+entre sí.
+El regreso de Netheril (1372 CV). La ciudad flotante
 de Thultanthar regresa a Anauroch desde el Páramo
-Sombrío y los um brinos empiezan a reconstruir
+Sombrío y los umbrinos empiezan a reconstruir
 su imperio.
 La Plaga de Conjuros (1385 CV). Cyric y Shar asesinan
 a Mystra, lo que desencadena una serie de desastres.
-Toril se fus iona brevemente con el mundo de Abeir.
+Toril se fusiona brevemente con el mundo de Abeir.
 La Segunda Secesión (de 1482 CV a 1489 CV).
-Abeir y Toril se vuelven a separar y, a lo la rgo de
+Abeir y Toril se vuelven a separar y, a lo largo de
 varios años, se revierten muchos de los efectos
 de la Plaga de Conjuros.
 Presente (1501 CV). El año actual es el Año del
-Mythal Bri llante.
-CAPÍTULO GUÍA DE LOS REINOS L +~
+Mythal Brillante.
+CAPÍTULO 2 | GUÍA DE LOS REINOS

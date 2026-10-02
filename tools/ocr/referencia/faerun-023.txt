@@ -1,57 +1,59 @@
-NIVEL lL REPRESALIA
+NIVEL 11: REPRESALIA
 ESCALOFRIANTE
 Cuando una criatura te acierte con
 una tirada de ataque, puedes usar
 una reacción para obligarla a hacer
 una tirada de salvación de Sabiduría
 contra tu CD de salvación de conjuros.
-Si la falla, e] objetivo tendrá el estado
+Si la falla, el objetivo tendrá el estado
 de aturdido hasta el final de tu siguiente
 turno. Mientras el objetivo esté aturdido,
-su velocidad se reducirá a O m.
+su velocidad se reducirá a 0 m.
 Puedes usar este rasgo una cantidad de
 veces igual a tu modificador por Sabiduría
 (mínimo una vez) y recuperas todos los usos
 tras finalizar un descanso largo.
-NIVEL 15, ESPECTRO CONGELADO
+NIVEL 15: ESPECTRO CONGELADO
 Cuando lances marca del cazador, puedes adoptar
-una forma gélida y fantasma l. Esta forma dura
+una forma gélida y fantasmal. Esta forma dura
 hasta que el conjuro termine y, mientras la tengas,
 obtienes los siguientes beneficios. Cuando uses este
 rasgo, no podrás volver a hacerlo hasta que finalices
-uu descanso largo, a menos que gastes un espacio de
+un descanso largo, a menos que gastes un espacio de
 conjuro de nivel 4 o superior (no requiere acción).
-Alma helada. Tienes inmunidad al daño <le frío.
+Alma helada. Tienes inmunidad al daño de frío.
 Cuando adoptes esta forma y al principio de cada
 uno de tus siguientes turnos, todas las criaturas de
-tu elección eu una emanación de 4,5 m que se origina
+tu elección en una emanación de 4,5 m que se origina
 en ti sufrirán 2d4 de daño de frío.
-lncorporeida.d parcia.l. Tienes iumunidad a los
+Incorporeidad parcial. Tienes inmunidad a los
 estados de agarrado, apresado y derribado. Puedes
 moverte a través de criaturas y objetos como si fueran
-terreno difícil, pero recibirás ldlü de daño de fuerza si
-terminas tu turno dentro de uua criatura o un objeto.
+terreno difícil, pero recibirás 1d10 de daño de fuerza si
+terminas tu turno dentro de una criatura o un objeto.
 Si pierdes esta forma mientras estás dentro de una
 criatura o un objeto, te desplazarás al espacio sin
 ocupar más cercano.
+SUBCLASE DE
+ABANDERADO
 ABANDERADO (GUERRERO)
-Congrega a otros héroes medianl"e un liderazgo inspirador.
+Congrega a otros héroes mediante un liderazgo inspirador.
 Los abanderados son un ejemplo de valor
-y liderazgo qne protegen a los inocentes
+y liderazgo que protegen a los inocentes
 y congregan a otros aventureros para defender
 la justicia y la libertad. Muchos son caballeros
 que sirven en Cormyr, la Marca Argéntea,
-0amara. Chessenta u otras t ierras de Faeriln.
-Recorren los reinos como caballeros errautes
+Damara, Chessenta u otras tierras de Faerûn.
+Recorren los reinos como caballeros errantes
 que luchan contra el mal más allá de las fronteras
 de su territorio.
 Un abanderado confía en su criterio, valor y lealtad
 al código de caballería como guía para derrotar a los
 malhechores. Un abanderado solitario es un guerrero
-cualificado, pero cuando lidera a uu grupo de aliados
+cualificado, pero cuando lidera a un grupo de aliados
 puede transformar incluso una milicia mal equipada
 en una feroz partida de guerra.
-NIVEL 3: ÜABALLERO EMISARIO
+NIVEL 3: CABALLERO EMISARIO
 Sabes manejarte con soltura como un noble embajador.
 Obtienes los siguientes beneficios:
 Comprensión. Puedes lanzar el conjuro entender

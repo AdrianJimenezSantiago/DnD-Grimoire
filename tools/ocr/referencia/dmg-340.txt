@@ -1,3 +1,4 @@
+UN BASTIÓN VA CRECIENDO A LO LARGO DEL TIEMPO.
 ARCHIVO
 Instalación de bastión de nivel 13
 Requisitos: ninguno
@@ -52,6 +53,4 @@ plantas, animales y climas.
 Ampliar la instalación. Puedes ampliar el archivo para
 convertirlo en una instalación enorme por 2000 po.
 Si lo haces, obtendrás dos obras de consulta adicionales
-elegidas de entre las de la lista anterior. MA
-MAMA
-AIDA
+elegidas de entre las de la lista anterior.

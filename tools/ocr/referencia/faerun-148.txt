@@ -1,9 +1,9 @@
 ESTRELLA SAGRADA DE MYSTRA
-Evocación de nivel B (clérigo, mago)
+Evocación de nivel 8 (clérigo, mago)
 Tiempo de lanzamiento: Acción adicional
 Alcance: Lanzador
 Componentes: V, S
-Duración: Concentración, hasta l minuto
+Duración: Concentración, hasta 1 minuto
 Creas una mota luminosa de energía que levita sobre ti
 hasta que el conjuro termina. La mota emite luz brillante
 en un radio de 1,5 m y luz tenue 1,5 m más allá.
@@ -12,15 +12,15 @@ en turnos posteriores, puedes generar un rayo refulgente
 desde la mota y hacer objetivo a una criatura a 36 m
 o menos de ti. Haz un ataque de conjuro a distancia.
 Si acierta, el objetivo sufre una cantidad de daño de
-fuerza o radiante (a tu elección) igual a 4dl0 más tu
+fuerza o radiante (a tu elección) igual a 4d10 más tu
 modificador por aptitud mágica.
-Además, mientras la mota este presente, tienes
+Además, mientras la mota esté presente, tienes
 cobertura tres cuartos y, si superas una tirada de
 salvación contra un conjuro de nivel 7 o inferior que
 solo te hacía objetivo a ti y no creó un área de efecto,
 puedes utilizar una reacción para devolverle el conjuro
 al lanzador, que hará una tirada de salvación contra él
-usando la CD de 8alvación de conjuros de ese lanzador.
+usando la CD de salvación de conjuros de ese lanzador.
 FULGOR DE FUEGO MÁGICO
 Evocación de nivel 1 (hechicero, mago)
 Tiempo de lanzamiento: Acción
@@ -31,14 +31,14 @@ Emites una ráfaga de fuego brillante. Haz un ataque de
 conjuro a distancia contra un objetivo dentro del alcance;
 no podrá beneficiarse de la cobertura media o tres cuartos
 contra esta tirada. Si acierta, el objetivo recibe 2d10 de
-daño radia nte.
+daño radiante.
 Con un espacio de conjuro de nivel superior. Creas una
 ráfaga adicional por cada nivel por encima de 1 que tenga
 el espacio. Puedes dirigir las ráfagas contra el mismo
 objetivo o contra objetivos distintos. Haz una tirada
 de ataque por separado para cada ráfaga.
 HAZ DESORIENTADOR
-A~juración de nivel 1 (bardo, clérigo, mago, palad1n)
+Abjuración de nivel 1 (bardo, clérigo, mago, paladín)
 Tiempo de lanzamiento: Acción
 Alcance: 18 m
 Componentes: V, S, M (una mano de arcilla en miniatura)
@@ -48,27 +48,27 @@ criatura dentro del alcance. El objetivo hace una tirada
 de salvación de Constitución; los autómatas y los muertos
 vivientes superan la tirada automáticamente.
 
-Si la falla , el objetivo sufrirá 2<l4 de daño de fuerza ,
-su velocidad se reducirá a la mitad hasta el principió de
-tu siguiente turno y, en su siguie.ute turno, solo podrá
+Si la falla, el objetivo sufrirá 2d4 de daño de fuerza,
+su velocidad se reducirá a la mitad hasta el principio de
+tu siguiente turno y, en su siguiente turno, solo podrá
 realizar una acción o una acción adicional (pero no ambas).
 Si la supera, solo sufrirá la mitad de ese daño.
-Co·n un espacio de conjuro de nivel superior. El daño
-aumenta en 2d4 por cada nivel por encima de l que tenga
+Con un espacio de conjuro de nivel superior. El daño
+aumenta en 2d4 por cada nivel por encima de 1 que tenga
 el espacio.
 HOJA DE DESASTRE
 Conjuración de nivel 9 (brujo, hechicero, mago)
-Tiempo de lanzamiento: Acción ad icional
+Tiempo de lanzamiento: Acción adicional
 Alcance: 18 m
-Componentes: Y, S
-Duración: Concentración , hasta l minuto
+Componentes: V, S
+Duración: Concentración, hasta 1 minuto
 Creas una grieta planar de 90 cm de largo con forma de
 espada que dura hasta que termine el conjuro. La grieta
 aparece dentro del alcance en un espacio de tu elección
-y puedes hacer inmedia tamente hasta dos ataques de
+y puedes hacer inmediatamente hasta dos ataques de
 conjuro cuerpo a cuerpo, cada uno contra una criatura
-u objeto que esté a 1,5 m o menus de la grieta. Si acierta,
-el uhjetivo recibe 10d6 de daiio de fuerza. Este ataque
+u objeto que esté a 1,5 m o menos de la grieta. Si acierta,
+el objetivo recibe 10d6 de daño de fuerza. Este ataque
 causará un crítico si el resultado del d20 es de 18 o más.
 Como acción adicional en tus siguientes turnos, podrás
 mover la grieta hasta 18 m y repetir los dos ataques contra
@@ -76,9 +76,9 @@ una criatura u objeto que esté a 1,5 m o menos de ella.
 Puedes dirigir los ataques contra el mismo objetivo
 o contra objetivos distintos.
 La hoja puede atravesar cualquier barrera sin dañarse,
-incluidas las creadas por conjuros como mum de fuerza.
+incluidas las creadas por conjuros como muro de fuerza.
 HOMÚNCULOS SERVICIALES DE DERYAN
-Col"\iuración de nivel 2 (clérigo, mago)
+Conjuración de nivel 2 (clérigo, mago)
 Tiempo de lanzamiento: Acción o ritual
 Alcance: Lanzador
 Componentes: V, S, M (polvo de piedras preciosas que
@@ -86,7 +86,7 @@ valga al menos 100 po, que se consume como parte
 del conjuro, y un juego de herramientas de artesano
 con las que tengas competencia)
 Duración: 8 horas
-Tnvocas un grupo de espíritus serviciales que permanece
+Invocas un grupo de espíritus serviciales que permanece
 hasta que el conjuro termine. Los espíritus se muestran
 como homúnculos o como otro autómata de tu elección,
 pero son intangibles e invulnerables, y se considera que
@@ -96,4 +96,4 @@ lanzar el conjuro.
 Si estás fabricando un objeto, los espíritus actúan como
 un único ayudante en el proceso y reducen el tiempo
 de fabricación a la mitad.
-CAPÍTULO 5 MAGIA DE FAERÚ N
+CAPÍTULO 5 | MAGIA DE FAERÛN

@@ -4,24 +4,24 @@ Cuando alcances un nivel de clérigo especificado en la
 tabla "Conjuros del dominio del conocimiento", a partir
 de entonces siempre tendrás preparados los conjuros
 que se indican.
-CONJUROS D EL DOM I N I O DEL CO N OC I M I ENTO
+CONJUROS DEL DOMINIO DEL CONOCIMIENTO
 Nivel de clérigo Conjuros preparados
 3 Clavo mental*, detectar magia*,
 detectar pensamientos*,
-entender idiomas'<, identificar*,
+entender idiomas*, identificar*,
 orden imperiosa
-5 Disipar magia, don de lenguas'',
+5 Disipar magia, don de lenguas*,
 indetectable
 7 Confusión, destierro, ojo arcano*
-9 Conocer las leyendas*, escudrirlar*,
-est6tica sináptica
-*Conjuro de la escuela de ad ívinación
+9 Conocer las leyendas*, escudriñar*,
+estática sináptica
+*Conjuro de la escuela de adivinación
 NIVEL 3: MAGIA MENTAL
 Como acción de magia, puedes gastar uno de los usos de
 Canalizar divinidad para manifestar tus conocimientos
 mágicos. Elige un conjuro de la escuela de adivinación
 de la tabla "Conjuros del dominio del conocimiento" que
-tengas preparado. Como parte de esa acción , lanzas ese
+tengas preparado. Como parte de esa acción, lanzas ese
 conjuro sin gastar un espacio de conjuro o sin necesidad
 de componentes materiales.
 NIVEL 6: MENTE ILIMITADA
@@ -49,6 +49,6 @@ Los caminantes invernales perfeccionan su arte en
 lugares gélidos y desoladores, como el Valle del Viento
 Helado. Estos implacables exploradores del hielo dan caza
 a los monstruos que asolan los páramos glaciales, aunque
-acaban convirtiéndose ellos mismos en ter roríficos
-seres frígidos. Conocen bien Los fenómenos del Valle del
+acaban convirtiéndose ellos mismos en terroríficos
+seres frígidos. Conocen bien los fenómenos del Valle del
 Viento Helado, incluida la magia latente de las ciudades

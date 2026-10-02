@@ -12,82 +12,77 @@ denominados maravillas mecánicas.
 MARAVILLAS MECÁNICAS
 Objeto Precio
 Maravilla mecánica (doméstica) 400 po
-¡:::,--- «:.,,.::,--"'"
 MARAVILLA DOMÉSTICA (400 PO)
 Las maravillas mecánicas han revolucionado la vida en
-Puerto Cálim. lmagina una máquina que haga la colada. lave
-los platosy limpie la casa. Pues ahom puedes hacer realidad
+Puerto Cálim. Imagina una máquina que haga la colada, lave
+los platos y limpie la casa. Pues ahora puedes hacer realidad
 ese sueño en cualquier tienda del emporio.
-MA;-Av
-- ,-L-LA- DOMÉSTICA l
---~--
-Autómata Mediano. sin alineamiento
+MARAVILLA DOMÉSTICA
+Autómata Mediano, sin alineamiento
 CA: 9 Iniciativa: -1 (9)
-PG: 5 (ld8 + l)
+PG: 5 (1d8 + 1)
 Velocidad: 9 m
-MOD. SALV MOD SALV MOD ~ALV.
-FUE 13 +l +1 DES 8 -1 -1 CON 13 +1 +l
-_,
-INT 3 -4 -4 SAB 8 -1 CAR 1 -5 -5
+MOD. SALV. MOD. SALV. MOD. SALV.
+Fue 13 +1 +1 Des 8 -1 -1 Con 13 +1 +1
+Int 3 -4 -4 Sab 8 -1 -1 Car 1 -5 -5
 Inmunidades: veneno; cansancio, envenenado
 Sentidos: Percepción pasiva 9
-Idiomas: entiende común , pero no puede hablar
-VD: ninguno (O PX; BC +2)
+Idiomas: entiende común, pero no puede hablar
+VD: ninguno (0 PX; BC +2)
 ATRIBUTOS
 Dar cuerda. La maravilla tiene el estado de inconsciente
-hasta que otra criatura le dé cue rda con su llave exclusiva
-durante l minuto. Cuando tenga cue rda, la maravilla
-estará activa durante l O días o hasta que una criatura
-toque a la maravil la con su llave como acción de utilizar
+hasta que otra criatura le dé cuerda con su llave exclusiva
+durante 1 minuto. Cuando tenga cuerda, la maravilla
+estará activa durante 10 días o hasta que una criatura
+toque a la maravilla con su llave como acción de utilizar
 para desactivarla, después de lo cual tendrá el estado de
 inconsciente hasta que vuelvan a darle cuerda.
-Determinaci6n mecánica. Si el daño reduce a O los puntos
+Determinación mecánica. Si el daño reduce a 0 los puntos
 de golpe de la maravilla, hará una tirada de salvación de
-Constitución con CD 5 más el daño sufrido, siem pre que este
-no sea de relámpago o proceda de un crítico. Si la su pera,
-la maravilla se queda con l punto de golpe.
-~ CAPÍTULO CA~-~GO DI:: AUROR,-<\ PARA TODOS LOS
-•• • ---
+Constitución con CD 5 más el daño sufrido, siempre que este
+no sea de relámpago o proceda de un crítico. Si la supera,
+la maravilla se queda con 1 punto de golpe.
+CAPÍTULO 4 | CATÁLOGO DE AURORA PARA TODOS LOS REINOS
 
 MARAVILLA MECÁNICA
 Objeto maravilloso, rareza variable
 Una maravilla mecánica es un objeto semiautónomo
 imbuido de poder mágico. Las maravillas mecánicas varían
-mucho en tamano y forma dependiendo de su función .
+mucho en tamaño y forma dependiendo de su función.
 Hasta que se active, una maravilla mecánica es un objeto
 durmiente. Para activar una maravilla mecánica, debes darle
 cuerda con una llave portátil exclusiva de esa maravilla.
-Se tarda l minuto en dar cuerda a una maravilla mecánica.
-Mientras lo hagas, tlehes emplear la acción de utilizar
+Se tarda 1 minuto en dar cuerda a una maravilla mecánica.
+Mientras lo hagas, debes emplear la acción de utilizar
 cada turno.
-Cuando tenga cuerda, la maravillo mecánica permanecerá
+Cuando tenga cuerda, la maravilla mecánica permanecerá
 activada durante el tiempo que se indica a continuación.
-Maravilla doméstica (infrecue nte). Esta maravilla bípeda
-está dise11ada para ayudar con las tareas domésticas y tiene
+Maravilla doméstica (infrecuente). Esta maravilla bípeda
+está diseñada para ayudar con las tareas domésticas y tiene
 cierto parecido con la especie que su creador empleó
 como inspiración. Una maravilla doméstica activada
 usa el perfil de la maravilla doméstica. La maravilla se
-considera un aliado para tus a liados y para ti. En combate,
+considera un aliado para tus aliados y para ti. En combate,
 la maravilla comparte tu orden de iniciativa, pero su
 turno va justo después del tuyo, obedece tus órdenes
 verbales (no requiere acción) y, si no le das ninguna,
-realiza la acción Je esquivar y usa su movimiento para
-evitar el peligro. Si sus puntos de golpe se reducen a O,
+realiza la acción de esquivar y usa su movimiento para
+evitar el peligro. Si sus puntos de golpe se reducen a 0,
 la maravilla doméstica se destruye.
 MONTURAS Y OTROS ANIMALES
-Los habitantes de Faerún usan animales como transporte
+Los habitantes de Faerûn usan animales como transporte
 y para otras tareas.
-MONTURAS Y OTROS AN IMA LES
+MONTURAS Y OTROS ANIMALES
 Animal Capacidad de carga Precio
-Perro de trineo 705 kg 50 po
-Pico de hacha 705 kg 50 po
+Perro de trineo 105 kg 50 po
+Pico de hacha 105 kg 50 po
 Serpiente voladora 30 kg 25 po
 PERRO DE TRINEO (50 PO)
 Te recomendamos un equipo de estos perros para reducir
-la cargo de cada uno y que vayas cambiando a los perros
+la carga de cada uno y que vayas cambiando a los perros
 en cabeza para dar un descanso a los fatigados.
 Un perro de trineo usa el perfil del lobo (consulta el
-Manual de monstruos). Un perro que tire de un triuco
+Manual de monstruos). Un perro que tire de un trineo
 en solitario deberá realizar un descanso corto tras
 tirar durante 1 hora o sumará 1 nivel de cansancio.
 PICO DE HACHA (50 PO)
@@ -96,4 +91,3 @@ trabajadoras: un equipo de picos de hacha puede tirar de
 un trineo con una velocidad y eficiencia extraordinarias.
 Usa el perfil del pico de hacha (consulta el Manual
 de monstruos).
-RE!NO?

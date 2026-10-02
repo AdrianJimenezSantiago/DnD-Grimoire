@@ -1,17 +1,15 @@
-'«;
-TOCADO POR UN GENIO .. ~
-,,.
+TOCADO POR UN GENIO
 Puntuaciones de característica: Destreza, Sabiduría,
 Carisma
 Dote: Iniciado en la magia (mago)
-Competencias en habilidades: Percepció n y Persuasión
-Competencia con herramientas: herra mientas de soplador
+Competencias en habilidades: Percepción y Persuasión
+Competencia con herramientas: herramientas de soplador
 de vidrio
-Equipo: elige A o 8: (a) martillo ligero, herramientas
-de soplador de vidrio, aceite (3 frascos), cantimplora ,
-lámpara, ro pas de calidad y 2 po, o (8) 50 po
+Equipo: elige A o B: (A) martillo ligero, herramientas
+de soplador de vidrio, aceite (3 frascos), cantimplora,
+lámpara, ropas de calidad y 2 po, o (B) 50 po
 VASALLO DE LA ALIANZA DE LOS LORES
-Puntuaciones de característica: Fuerza, 1nteligencía,
+Puntuaciones de característica: Fuerza, Inteligencia,
 Carisma
 Dote: Agente de la Alianza de los Lores (consulta "Dotes"
 más adelante en este capítulo)
@@ -25,7 +23,7 @@ Aunque los genios ya no gobiernan Calimshan, su magia
 sigue estando muy presente en tu tierra natal. Quizá
 invocaste a un djinn sin querer con una lámpara mágica
 o puede que te toparas con un oasis custodiado por un
-marid. Un dao podría haberte salvaJo de un corrimiento
+marid. Un dao podría haberte salvado de un corrimiento
 de tierras o tal vez hiciste un trato con un ifrit a cambio
 de riquezas pasajeras. Sea como sea, tu destino se cruzó
 con un genio y esa experiencia te proporcionó una vista
@@ -39,6 +37,6 @@ comprometido a traer el honor y la gloria a la casa de tu
 señor y eso puede implicar proteger las rutas comerciales
 de un importante mercader de Aguas Profundas
 o derrotar a los monstruos que habitan río arriba de
-Vado de la Daga. Te has entrenado en la!> artes de la
+Vado de la Daga. Te has entrenado en las artes de la
 esgrima y la política, y eres tan hábil con la espada
 como con la pluma.

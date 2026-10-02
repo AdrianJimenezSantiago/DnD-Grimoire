@@ -8,7 +8,7 @@ Recibes un bonificador de +3 a las tiradas de ataque
 y de daño que hagas con esta arma mágica. Si golpeas a un
 muerto viviente con ella, recibirás 1d10 de daño necrótico
 y el objetivo recuperará 1d10 puntos de golpe. Si este daño
-necrótico reduce tus puntos de golpe a O, Negrarma consu-
+necrótico reduce tus puntos de golpe a 0, Negrarma consu-
 mirá tu alma (consulta “Devorar alma” a continuación).
 Mientras empuñes esta arma, tendrás inmunidad a los
 estados de asustado y hechizado, así como visión ciega
@@ -21,7 +21,7 @@ y tendrá efecto al principio de tu turno. El conjuro durará
 decida ponerle fin, y podrá hacerlo al final de cualquiera
 de tus turnos.
 Devorar alma. Cuando uses a Negrarma para reducir los
-puntos de golpe de una criatura a O, la espada matará a la
+puntos de golpe de una criatura a 0, la espada matará a la
 criatura y devorará su alma, a menos que la criatura sea
 un autómata o muerto viviente. Una criatura cuya alma
 haya sido consumida por Negrarma solo puede volver a la
@@ -39,10 +39,10 @@ bante. Mientras tengas sintonización con ella, Negrarma
 también entenderá cualquier idioma que conozcas.
 Personalidad. Negrarma habla con tono imperioso, pues
 acostumbra a que la obedezcan.
-Su propósito es consumir almas y nó le importa
+Su propósito es consumir almas y no le importa
 de quién provengan, lo que incluye a quien la porte.
 La espada cree que toda la materia y la energía surgieron
-de un vacío de energía negativa y que un día volverána él.
+de un vacío de energía negativa y que un día volverán a él.
 El propósito de Negrarma es acelerar este proceso.
 Pese a su nihilismo, Negrarma siente un extraño vínculo
 con Oleaje y Rotundo, otras dos armas encerradas bajo la
@@ -86,4 +86,4 @@ aquelarre que creó el ojo de bruja puede ver a través de
 Este efecto durará mientras la saga mantenga la concen-
 tración. Varias sagas del aquelarre pueden ver a través
 del ojo de bruja al mismo tiempo.
-CAPÍTULO | TESOROS
+CAPÍTULO 7 | TESOROS

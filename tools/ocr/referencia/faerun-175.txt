@@ -3,15 +3,15 @@ Los personajes obtienen prestigio con los Magos Rojos
 cuando completan misiones para la facción, consiguen
 magia poderosa y contribuyen a la reconstrucción de
 Thay. Conforme aumenta su puntuación de prestigio,
-los personajes reciben varias beneficios, tal y como
+los personajes reciben varios beneficios, tal y como
 aparece en la tabla "Prestigio en los Magos Rojos".
 Si en tu campaña no se utiliza el prestigio, tu DM decide
 si los personajes consiguen estos beneficios y cuándo.
-PRESTICilO EN LOS MACiOS ROJOS
+PRESTIGIO EN LOS MAGOS ROJOS
 Puntuación
 de prestigio Recompensa
-3 o más Conoce') la ubicación de los enclaves
-thayanos en FaerCm y puedes entrar
+3 o más Conoces la ubicación de los enclaves
+thayanos en Faerûn y puedes entrar
 y quedarte en ellos, donde te ofrecerán
 un nivel de vida cómodo gratuitamente.
 5 o más Puedes comprar los siguientes artículos
@@ -19,19 +19,19 @@ para aventureros a los comerciantes
 thayanos a mitad de precio: canalizador
 arcano, papel, pergamino, pergamino
 de conjuro (truco o de nivel 1), pluma,
-poción de curación y tinta .
+poción de curación y tinta.
 10 La primera vez que tu puntuación de
 prestigio llegue a 10, los Magos Rojos te
 entregan un objeto mágico infrecuente de
 las categorías de bastones, varas o varitas,
-a elección de tu DM .
+a elección de tu DM.
 15 o más Tienes ventaja en las pruebas de
-característica para influi r en una criatura
+característica para influir en una criatura
 mientras regateáis en la compra o venta
 de un objeto mágico.
 25 o más Puedes acudir a un tatuador capaz de
 hacerte tatuajes de conjuros thayanos en el
-cuerpo (consulta la sección "Magia tatuada''
+cuerpo (consulta la sección "Magia tatuada"
 más adelante).
 30 La primera vez que tu puntuación de
 prestigio llegue a 30, los Magos Rojos
@@ -39,27 +39,26 @@ te entregan un objeto mágico raro de las
 categorías de bastones, objetos maravillosos,
 varas o varitas, a elección de tu DM.
 40 o más Al prepararte para lanzar un conjuro de
-círculo (consulta el capítulo S) en un pueblo
+círculo (consulta el capítulo 5) en un pueblo
 o un asentamiento más grande, puedes
-reclutar ld4 magos para que te ayuden
-gratis. Los magos llegan tras l dlO días.
+reclutar 1d4 magos para que te ayuden
+gratis. Los magos llegan tras 1d10 días.
 Cuando uses esta recompensa, no podrás
 volver a hacerlo hasta que aumente tu
 puntuación de prestigio.
 50 La primera vez que tu puntuación de
-prestigio llegue a SO, los Magos Rojos
+prestigio llegue a 50, los Magos Rojos
 te entregan un objeto mágico muy raro
 de las categorías de bastones, objetos
-maravillosos, varas o varitas , a elección
-detu DM.
-r7~~ CAPÍTULO 6 l.:::..:_IONES DE LOS REINOS
+maravillosos, varas o varitas, a elección
+de tu DM.
+CAPÍTULO 6 | FACCIONES DE LOS REINOS
 
 PERSONAJES DE LOS MAGOS ROJOS
----
 Los magos rojos que se embarcan en la vida aventurera
-sirven a Szass Tamo a alguno de los otros zulkires.
+sirven a Szass Tam o a alguno de los otros zulkires.
 Cuando no están cumpliendo una misión de sus superiores,
-se dedican a buscar poder mágico y a explorar Faerún en
+se dedican a buscar poder mágico y a explorar Faerûn en
 pos de secretos y conocimiento.
 La ambición es el motor principal del mago rojo
 arquetípico. Son leales a sus amigos, a los buenos aliados
@@ -68,7 +67,7 @@ entre los Magos Rojos, pero, cuando se da, es aún más
 especial. La mayoría de los personajes de los Magos Rojos
 son magos. A veces, aunque es poco habitual, también hay
 brujos y hechiceros.
-Aunque no son auténtico.s magos rojos, los caballeros
+Aunque no son auténticos magos rojos, los caballeros
 thayanos suelen colaborar con la orden. Para interpretar
 a un caballero thayano, plantéate subir niveles como
 guerrero y elegir la subclase de caballero arcano.
@@ -81,15 +80,15 @@ Túnica roja. Recibes un juego de túnicas carmesí.
 Mientras seas miembro de los Magos Rojos, las túnicas
 se arreglan y limpian solas mágicamente todos los días
 al amanecer.
-BAGATELAS DE LOS MACiOS ROJOS
-ld6 Bagatela
-Una varita nudosa hecha de tejo petrificado.
+BAGATELAS DE LOS MAGOS ROJOS
+1d6 Bagatela
+1 Una varita nudosa hecha de tejo petrificado.
 2 Un tarro de cristal que contiene el corazón
 conservado de un animal desconocido.
 3 Una figurita de un unicornio de obsidiana.
 4 Una aguja para tatuar hecha con un hueso tuyo.
-s Un amuleto de bronce con forma de escorpión.
-6 Una cuchil la de acero carmesí.
+5 Un amuleto de bronce con forma de escorpión.
+6 Una cuchilla de acero carmesí.
 MAGIA TATUADA
 Los magos rojos suelen adornar sus cuerpos con
 tatuajes. Muchos de ellos tienen un carácter decorativo
