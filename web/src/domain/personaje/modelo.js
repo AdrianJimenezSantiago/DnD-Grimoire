@@ -22,7 +22,7 @@ export const THEO = {
   campana: 'Crónicas de La Argos, Aequus. Temporada 2026/2027',
 };
 const STATS0 = { fue: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 };
-const PLAY0 = () => ({ used: {}, conc: '', concObj: [], concRondas: null, efectos: [], rec: {}, log: [], onlyPrep: false });
+const PLAY0 = () => ({ used: {}, conc: '', concObj: [], concRondas: null, efectos: [], rec: {}, log: [] });
 
 export const claveConjuro = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
 
@@ -57,7 +57,7 @@ export function normPersonaje(c) {
   }
   if (Array.isArray(c.play.presagio) && c.play.presagio.length && !c.play.rec['tpl:adivino.presagio']) c.play.rec['tpl:adivino.presagio'] = { used: 0, dice: c.play.presagio };
   if (c.play.recupUsed && !c.play.rec['tpl:mago.recuperacion']) c.play.rec['tpl:mago.recuperacion'] = { used: 1, dice: [] };
-  delete c.play.presagio; delete c.play.recupUsed;
+  delete c.play.presagio; delete c.play.recupUsed; delete c.play.onlyPrep;
   if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
   if (typeof c.historia !== 'string') c.historia = '';
   if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
@@ -124,7 +124,7 @@ export function personajeDeV1(d, v1) {
     ch.book.push({ sid, prep: !!s.prep, always: !!s.always || (l.level === 0 && /iniciado|dote|especie/i.test(s.fuente || '')),
       fuente: s.fuente || '', gratis: s.gratis || '', used: !!s.used });
   }));
-  ch.play = { ...PLAY0(), used: { ...(v1.used || {}) }, conc: v1.conc || '', recupUsed: !!v1.recupUsed, onlyPrep: !!v1.onlyPrep };
+  ch.play = { ...PLAY0(), used: { ...(v1.used || {}) }, conc: v1.conc || '', recupUsed: !!v1.recupUsed };
   const P = perfil(ch);
   const oldSlots = {};
   (v1.levels || []).forEach(l => { const n = parseInt(l.slots, 10) || 0; if (l.level > 0 && n > 0) oldSlots[l.level] = n; });

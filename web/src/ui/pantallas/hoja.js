@@ -169,8 +169,7 @@ function enJuegoHtml(ch, P) {
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
-  const preparables = P.maxSlot > 0;
-  return `${preparables ? `<button type="button" class="chip leg-prep" data-cmd="filter" aria-pressed="${!!ch.play.onlyPrep}">${icon('book')}${ch.play.onlyPrep ? 'Mostrando solo preparados' : 'Solo preparados'}</button>` : ''}<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las velas encendidas son espacios libres.</span>
+  return `<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las velas encendidas son espacios libres.</span>
     <details><summary>Símbolos de la hoja ${icon('chevron')}</summary><div class="keys">
       <span><b>◆</b> preparado</span><span><b style="color:var(--gold)">◆</b> siempre preparado, no cuenta</span>
       <span><b>R</b> ritual: ${ritualTxt}</span><span><b>C</b> concentración</span>
@@ -189,7 +188,6 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
   const trig = L > 0 && schools.includes(norm(s.escuela || '').slice(0, 5));
   const tir = tiradasConjuro(s), dmg = tir ? [...new Set([...tir.danos.map(x => x.tipo), ...(tir.curacion ? ['curación'] : [])])].slice(0, 2) : [];
   const castable = L === 0 || (e.gratis && !e.used) || (s.ritual && (estaPreparado(e) || P.ritualLibro)) || primerLibreDesde(ch, P, L) > 0;
-  const ritualOnly = ch.play.onlyPrep && L > 0 && !estaPreparado(e) && s.ritual && P.ritualLibro;
   const lvlSel = editing ? `<label>nivel <select data-lvl="${bi}">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}" ${n === L ? 'selected' : ''}>${n === 0 ? 'truco' : n}</option>`).join('')}</select></label>` : '';
   const cell = (cls, v, key) => `<span class="${cls}">${editing || v ? ce(v, `${k} data-k="${key}"`, editing) : ''}</span>`;
   const escuela = editing ? `<span class="c-school ${trig ? 'trig' : ''}"><button type="button" class="sch-pick" data-schoolpick="${bi}" aria-haspopup="menu"><i class="sch-dot" aria-hidden="true"></i>${esc(s.escuela || 'Escuela')}${icon('chevron')}</button></span>`
@@ -200,7 +198,7 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
     <div class="c-prep">${prep}</div>
     <div class="c-name"><div class="castzone" data-cast="${bi}" ${editing ? '' : 'role="button" tabindex="0"'} aria-label="${editing ? '' : 'Lanzar ' + esc(s.es)}">
       <span class="nm ${e.gratis ? (e.used ? 'spentfree' : 'free') : ''}">${ce(s.es, `${k} data-k="es"`, editing)}</span><span class="badges">
-      <span class="bd ${s.ritual ? '' : 'off'}" data-flag="ritual" ${k} title="Ritual">R</span><span class="bd ${s.conc ? '' : 'off'}" data-flag="conc" ${k} title="Concentración">C</span></span>${dmg.map(x => iconoDano(x, 'sm')).join('')}${ritualOnly ? '<span class="tag">solo ritual</span>' : ''}
+      <span class="bd ${s.ritual ? '' : 'off'}" data-flag="ritual" ${k} title="Ritual">R</span><span class="bd ${s.conc ? '' : 'off'}" data-flag="conc" ${k} title="Concentración">C</span></span>${dmg.map(x => iconoDano(x, 'sm')).join('')}
       <div class="en">${ce(s.en, `${k} data-k="en"`, editing)}</div></div>
       ${editing ? `<div class="flags edit-only"><label><input type="checkbox" data-always ${k} ${e.always ? 'checked' : ''}> ${L === 0 ? 'de otra fuente, no cuenta' : 'siempre preparado'}</label>${lvlSel}<button type="button" data-text="${bi}">Texto</button><button type="button" class="warn" data-del="${bi}">Quitar</button></div>` : ''}
     </div>
@@ -214,8 +212,7 @@ function levelHtml(db, ch, P, L, rows, schools, editing) {
   else if (espaciosDe(P, L)) slot = `<span class="lbl">${P.pact && L === P.pact.level ? 'Pacto' : ''}</span>${candles(ch, P, L)}`;
   else if (P.pact && L < P.pact.level) slot = `Con espacios de pacto (nivel ${P.pact.level})`;
   else slot = 'Sin espacios de este nivel';
-  const vis = rows.filter(({ e, s }) => editing || !ch.play.onlyPrep || L === 0 || estaPreparado(e) || (s.ritual && P.ritualLibro));
-  const body = vis.map(({ e, s, bi }) => rowHtml(db, ch, P, e, s, bi, schools, editing)).join('')
+  const body = rows.map(({ e, s, bi }) => rowHtml(db, ch, P, e, s, bi, schools, editing)).join('')
     || `<div class="empty-row">${rows.length ? 'Nada preparado de este nivel.' : 'Aún no hay conjuros de este nivel. Añádelos con «Añadir».'}</div>`;
   return `<div class="lvl-head"><span class="lvl-num">${L}</span><span class="lvl-title">${L === 0 ? 'Trucos' : 'Nivel ' + L}</span>
       <button class="addrow" type="button" data-add="${L}">${icon('plus')}Añadir</button><span class="lvl-slots">${slot}</span></div>
@@ -227,7 +224,7 @@ export function pintarBarra(S) {
   const ch = S.cur();
   const dockLbl = (id, ic, t) => patch($(id), `${icon(ic)}<span>${t}</span>`);
   const deskLbl = (id, ic, t) => { patch($(id), `${icon(ic)}${t}`); $(id).title = t; $(id).setAttribute('aria-label', t); };
-  dockLbl('#dRest', 'moon', 'Descansar'); dockLbl('#dFilter', 'book', 'Preparados'); dockLbl('#dEdit', 'quill', S.editing ? 'Terminar' : 'Editar');
+  dockLbl('#dRest', 'moon', 'Descansar'); dockLbl('#dEdit', 'quill', S.editing ? 'Terminar' : 'Editar');
   dockLbl('#dAdd', 'plus', 'Añadir'); dockLbl('#dHist', 'hourglass', 'Historial');
   const combate = !!(ch && combateDe(ch).activo);
   patch($('#dDados'), `${gi('cubilete', 'icon')}<span>Dados</span>`); patch($('#dCombate'), `${gi('combate', 'icon')}<span>${combate ? 'Salir' : 'Combate'}</span>`);
@@ -239,14 +236,12 @@ export function pintarBarra(S) {
   deskLbl('#bRest', 'moon', 'Descansar'); deskLbl('#bEdit', 'quill', S.editing ? 'Terminar edición' : 'Editar conjuros');
   deskLbl('#bAdd', 'plus', 'Añadir conjuro');
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
-  $('#dFilter').setAttribute('aria-pressed', !!ch?.play.onlyPrep);
   $('#dAdd').hidden = !S.editing;
   $('#dCombate').hidden = $('#bCombate').hidden = $('#dDados').hidden = !ch;
   if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const conj = conConjuros(ch, P);
-  const preparables = P.maxSlot > 0 || ch.book.some(e => (S.db.catalog[e.sid]?.level || 0) > 0);
-  $('#dFilter').hidden = !conj || !preparables || combate; $('#bAdd').hidden = !conj || combate;
+  $('#bAdd').hidden = !conj || combate;
   $('#bRest').hidden = $('#dRest').hidden = combate;
   $('#bEdit').hidden = $('#dEdit').hidden = (!conj && !S.editing) || combate;
   if (combate) $('#dAdd').hidden = true;

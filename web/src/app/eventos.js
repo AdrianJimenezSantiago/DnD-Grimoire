@@ -101,7 +101,6 @@ const COMMANDS = {
   hist: () => abrirHistorial(),
   add: () => S.cur() && abrirBuscador(''),
   edit: () => S.cur() && setEditing(!S.editing),
-  filter: () => { if (!S.cur()) return; S.edit((db, ch) => { ch.play.onlyPrep = !ch.play.onlyPrep; }); },
   rest: (el) => S.cur() && abrirMenu($('#restMenu'), el, restItems()),
   more: (el) => abrirMenu($('#moreMenu'), el, moreMenuHtml()),
   long: () => A.descansoLargo(S),

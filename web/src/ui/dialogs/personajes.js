@@ -40,7 +40,7 @@ function duplicate(id) {
   const src = S.db.chars.find(c => c.id === id); if (!src) return;
   const h = S.edit(db => {
     const c = clone(src); c.id = uid('c'); c.nombre = `${src.nombre} (copia)`;
-    c.play = { used: {}, conc: '', rec: {}, log: [], onlyPrep: src.play.onlyPrep }; c.book.forEach(e => { e.used = false; }); c.diario = { sesiones: [] };
+    c.play = { used: {}, conc: '', rec: {}, log: [] }; c.book.forEach(e => { e.used = false; }); c.diario = { sesiones: [] };
     db.chars.splice(db.chars.findIndex(x => x.id === id) + 1, 0, c);
   });
   renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [botonDeshacer(S, h)]);
