@@ -1,3 +1,4 @@
+// Personajes de prueba (uno por subclase a nivel 8) que se crean en las ramas de desarrollo.
 import { competenciasIniciales, periciasDisponibles, abDe } from '../reglas/habilidades.js';
 import { norm, uid } from '../../core/util.js';
 import { CLASES, ESPECIES, TRASFONDOS_2024, competencia, perfil } from '../reglas/reglas2024.js';

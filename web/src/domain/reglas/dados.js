@@ -1,3 +1,4 @@
+// Expresiones de dados («2d6+3», «4d6kh3»): parsear, tirar, ventaja y desventaja, y distribución de probabilidad.
 export const rngCripto = caras => { const a = new Uint32Array(1); crypto.getRandomValues(a); return 1 + (a[0] % caras); };
 
 // Un término es «2d6», «4d6kh3» (se queda los 3 mayores), «2d20kl1» (el menor) o un número.

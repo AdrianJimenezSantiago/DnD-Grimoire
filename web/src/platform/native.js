@@ -1,3 +1,5 @@
+// Puente con la plataforma: Capacitor en Android (preferencias, archivos, vibración, compartir, barras del sistema)
+// y las alternativas del navegador en la web y en Windows. Ningún otro módulo importa Capacitor.
 import { Capacitor, SystemBars } from '@capacitor/core';
 
 export const NATIVE = Capacitor.isNativePlatform();

@@ -1,3 +1,4 @@
+// Inventario: maniquí con lo equipado, mochila, monedas, carga, sintonía y acciones de cada objeto.
 import { campoElegible, ponerValor, elegirObjetoComun } from '../selectores/elecciones.js';
 import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, equipar, desequipar, cambiarCantidad,

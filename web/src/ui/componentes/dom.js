@@ -1,3 +1,4 @@
+// Ayudas del DOM: selectores, delegación de eventos y repintado que solo toca lo que cambia (patch, patchKeyed).
 export const $ = (s, root = document) => root.querySelector(s);
 export const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 

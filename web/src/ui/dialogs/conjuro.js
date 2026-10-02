@@ -1,3 +1,4 @@
+// Ficha de un conjuro: texto con realce y enlaces al glosario, nivel al que lanzarlo, ritual y tablas.
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas/reglas2024.js';
 import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro, termino, nombresConjuros, biblioteca, criaturaImportada } from '../../domain/conjuros/catalogo.js';

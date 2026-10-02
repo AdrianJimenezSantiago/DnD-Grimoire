@@ -1,3 +1,4 @@
+// Convierte un documento Markdown (historia del personaje) en HTML con índice y resaltado de la búsqueda.
 import { esc } from '../../core/util.js';
 import { capitulos } from '../../domain/personaje/historia.js';
 

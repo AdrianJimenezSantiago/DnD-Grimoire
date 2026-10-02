@@ -1,3 +1,4 @@
+// Canjes entre recursos: rasgos que se restablecen gastando un espacio u otro uso, y la Fuente de magia del hechicero.
 import { perfil } from '../reglas/reglas2024.js';
 import { reglas, recState, usosGastados } from './rasgos.js';
 

@@ -1,3 +1,4 @@
+// Portada: rueda de clases, tarjetas de personajes y accesos a crear, libros, biblioteca y copia de seguridad.
 import { esc } from '../../core/util.js';
 import { $, on, patch } from '../componentes/dom.js';
 import { gi, temaDe, aplicarTema } from '../componentes/tema.js';

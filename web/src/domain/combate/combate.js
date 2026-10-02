@@ -1,3 +1,4 @@
+// Estado del combate: ronda, iniciativa, economía del turno, ataques hechos y acciones comunes.
 import { norm } from '../../core/util.js';
 import { clasesDe, dotesDe } from '../reglas/reglas2024.js';
 

@@ -1,3 +1,4 @@
+// Selector genérico de una opción de una lista, con búsqueda y grupos. Devuelve una promesa con la elección.
 import { esc, norm } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';

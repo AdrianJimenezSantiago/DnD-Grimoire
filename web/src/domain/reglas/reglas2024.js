@@ -1,3 +1,5 @@
+// Núcleo de las reglas de 2024: características, competencia, niveles y multiclase, listas de conjuros
+// y perfil(ch), que reúne CD, ataque, espacios y preparados de un personaje.
 import { clamp, norm } from '../../core/util.js';
 import { statsEfectivos, bonoMagiaObjetos } from '../equipo/objetosEfecto.js';
 import { ordenDe } from '../clases/ordenes.js';

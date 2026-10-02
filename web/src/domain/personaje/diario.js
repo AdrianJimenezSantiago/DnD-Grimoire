@@ -1,3 +1,4 @@
+// Diario de campaña: sesiones, notas por tipo y lo pendiente «para recordar».
 import { uid } from '../../core/util.js';
 
 export const TIPOS = { nombre: 'Nombre', suceso: 'Suceso', pendiente: 'Pendiente', nota: 'Nota' };

@@ -1,3 +1,4 @@
+// Bloques de la hoja: puntos de golpe, CA, velocidad, estados, características, salvaciones y habilidades.
 import { esc } from '../../core/util.js';
 import { sgn } from '../../domain/reglas/reglas2024.js';
 import { caEfectiva, velocidadEfectiva, efectosDe, fmtRondas, resumenTirada } from '../../domain/combate/efectos.js';

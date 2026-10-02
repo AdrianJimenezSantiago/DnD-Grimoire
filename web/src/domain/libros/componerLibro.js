@@ -1,3 +1,4 @@
+// Junta lo leído de un libro y propone qué subclases nuevas añadir al catálogo.
 import { emparejarLibro, subclasesDe } from '../conjuros/catalogo.js';
 import { CLASES_ES, idLibro } from './libros.js';
 import { claveNombre } from './manual.js';

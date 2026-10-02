@@ -1,3 +1,4 @@
+// Historial de lo que ha hecho el personaje (lanzar, gastar, tirar) con deshacer varios pasos.
 import { esc } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
 import { openSheet } from '../componentes/dialog.js';

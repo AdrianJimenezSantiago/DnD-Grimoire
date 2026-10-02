@@ -1,3 +1,4 @@
+// Lo que se puede hacer con un objeto mágico (recuperar espacios, lanzar conjuros, curar) y lo que gasta.
 import { norm, uid } from '../../core/util.js';
 import { recState, usosGastados, reglas } from '../clases/rasgos.js';
 import { perfil } from '../reglas/reglas2024.js';

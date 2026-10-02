@@ -1,3 +1,4 @@
+// Rejilla para elegir las armas con maestría.
 import { esc, norm } from '../../core/util.js';
 import { PREDEFINIDOS } from '../../domain/equipo/equipo.js';
 import { armaElegible, esSencilla, cupoMaestrias } from '../../domain/combate/maestria.js';

@@ -1,3 +1,4 @@
+// Lectores de dotes, trasfondos, subclases, especies, rasgos de clase y secciones de reglas de un libro.
 import { aplanar, bloques, esMayus, letras, tituloBonito, sinTildes } from './lector.js';
 import { claveNombre } from './manual.js';
 import { CLASES, ESPECIES } from '../reglas/reglas2024.js';

@@ -1,3 +1,4 @@
+// Asistente para subir de nivel: qué se gana y qué hay que elegir (subclase, dotes, conjuros, opciones).
 import { campoElegible, ponerValor, elegirDote } from '../selectores/elecciones.js';
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { NOMBRE_HAB as HAB_NOMBRE, periciasDisponibles } from '../../domain/reglas/habilidades.js';

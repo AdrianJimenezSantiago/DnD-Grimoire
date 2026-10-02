@@ -1,3 +1,4 @@
+// Orden divina del clérigo y Orden primigenia del druida.
 import { norm } from '../../core/util.js';
 
 // Orden divina (clérigo) y Orden primigenia (druida), Manual del Jugador de 2024: se eligen a nivel 1 de la clase

@@ -1,3 +1,4 @@
+// Vida y estados: daño, curación, PG temporales, salvaciones contra muerte, concentración y estados.
 import { esc, norm, numLibre } from '../../core/util.js';
 import { rangoMuerte, reduccionArmaduraPesada, reaccionesDano, alCaerA0 } from '../../domain/combate/automatismos.js';
 import { sgn, modOf } from '../../domain/reglas/reglas2024.js';

@@ -1,3 +1,4 @@
+// Concentración: objetivos del conjuro concentrado y rasgos que también fijan un objetivo.
 import { norm, uid } from '../../core/util.js';
 import { parseArea } from './area.js';
 import { progresion } from '../clases/clases2024.js';

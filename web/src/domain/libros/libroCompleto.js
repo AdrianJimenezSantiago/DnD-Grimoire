@@ -1,3 +1,4 @@
+// Analiza un libro entero: corrige el OCR, separa columnas y llama a cada lector (conjuros, dotes, objetos…).
 import { pageToColumns } from './manualLineas.js';
 import { parseSpells } from './manual.js';
 import { parseGlosario } from './glosario.js';

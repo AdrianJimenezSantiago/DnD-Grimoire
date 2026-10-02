@@ -1,3 +1,4 @@
+// Tarjetas de clase y subclase para elegirlas en la creación y al subir de nivel.
 import { esc, norm } from '../../core/util.js';
 import { SUBCLASES, TEMAS, CLASES_INFO } from '../../domain/clases/clases2024.js';
 import { CLASES } from '../../domain/reglas/reglas2024.js';

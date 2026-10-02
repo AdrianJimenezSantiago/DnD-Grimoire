@@ -1,3 +1,4 @@
+// Retrato del personaje: elegir una imagen y reencuadrarla.
 import { $ } from '../componentes/dom.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
 import { toast, undoBtn } from '../componentes/toast.js';

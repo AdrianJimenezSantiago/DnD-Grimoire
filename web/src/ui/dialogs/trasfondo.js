@@ -1,3 +1,4 @@
+// Historia del personaje: documento con índice y búsqueda, editable o importado de un PDF o un texto.
 import { esc } from '../../core/util.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/personaje/historia.js';

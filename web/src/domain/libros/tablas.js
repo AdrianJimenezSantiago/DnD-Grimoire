@@ -1,3 +1,4 @@
+// Lector de tablas de los libros (tablas de dado y de columnas) y arreglo de dados mal leídos.
 const DADO = /^(?:\d{0,2}d\d{1,3}|1[4d](?:100|4|6|8|10|12|20)|d%)$/i;
 const ROTULO = /^(?:\d{1,3}(?:\s*[-–]\s*\d{1,3})?|\d{4}|\d{2}\+)$/;
 const CAMPO = /^(Tiempo de lanza|Alcance:|Componentes:|Duraci|NIVEL \d{1,2}: [A-ZÁÉÍÓÚÑ])/;

@@ -1,3 +1,4 @@
+// Maestría con armas: cuántas armas por clase y nivel, qué hace cada una y los ataques por acción.
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal, dotesDe } from '../reglas/reglas2024.js';

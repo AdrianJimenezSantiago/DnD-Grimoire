@@ -1,3 +1,4 @@
+// Ventana «al impactar»: elige qué añadir al daño de un ataque (maniobras, Castigo divino, Ataque furtivo…).
 import { esc } from '../../core/util.js';
 import { openSheet, closeSheet } from '../componentes/dialog.js';
 import { gi } from '../componentes/tema.js';

@@ -1,3 +1,4 @@
+// Rejilla para elegir las maniobras del Maestro del combate.
 import { esc, norm } from '../../core/util.js';
 import { MANIOBRAS } from '../../domain/clases/maniobras.js';
 import { gi } from '../componentes/tema.js';

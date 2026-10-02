@@ -1,3 +1,5 @@
+// Fichas de lectura rápida (mantener pulsado en la hoja): conjuros, armas, rasgos, estados, CA, velocidad
+// y acciones, con la regla que aplica a este personaje.
 import { esc, norm } from '../../core/util.js';
 import { glosario } from '../../domain/conjuros/catalogo.js';
 import { ataqueArma, armaCombate } from '../../domain/equipo/equipo.js';

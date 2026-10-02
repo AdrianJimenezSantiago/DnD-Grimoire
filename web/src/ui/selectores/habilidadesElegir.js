@@ -1,3 +1,4 @@
+// Elección de habilidades y pericias según la fuente que las da (clase, trasfondo, dote, subclase).
 import { esc } from '../../core/util.js';
 import { HABILIDADES, NOMBRE_HAB } from '../../domain/reglas/habilidades.js';
 import { icon } from '../componentes/icons.js';

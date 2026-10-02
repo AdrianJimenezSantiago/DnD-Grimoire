@@ -1,3 +1,4 @@
+// Tema visual de cada personaje (color y emblema de su clase y subclase) y el helper gi() para pintar iconos.
 import { GI } from './gameIcons.js';
 import { TEMAS, subclaseDe } from '../../domain/clases/clases2024.js';
 import { setEscena } from '../animaciones/fondo.js';

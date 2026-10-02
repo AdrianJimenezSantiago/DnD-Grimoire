@@ -1,3 +1,4 @@
+// Objetos mágicos con variantes (arma o armadura de base, bonificador +1/+2/+3): concretarlos al añadirlos.
 import { norm } from '../../core/util.js';
 import { PREDEFINIDOS } from './equipo.js';
 

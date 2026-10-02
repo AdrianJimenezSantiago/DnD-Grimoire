@@ -1,3 +1,4 @@
+// Reconstruye las líneas y columnas de una página del PDF a partir de los trozos de texto con posición.
 export function gutterOf(items, pageWidth) {
   const count = new Map();
   for (const it of items) {

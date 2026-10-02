@@ -1,3 +1,4 @@
+// Modo combate: ronda, iniciativa, economía del turno y ataques, conjuros y rasgos ordenados por acción.
 import { ataquesPorAccion } from '../../domain/combate/maestria.js';
 import { esc, norm } from '../../core/util.js';
 import { perfil, sgn, magiaPara, nivelTotal } from '../../domain/reglas/reglas2024.js';

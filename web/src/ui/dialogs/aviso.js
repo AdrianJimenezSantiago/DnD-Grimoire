@@ -1,3 +1,4 @@
+// Diálogo de aviso con secciones e iconos: lo que se recupera al descansar, lo que termina al pasar la ronda…
 import { esc } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';

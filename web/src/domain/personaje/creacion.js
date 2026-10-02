@@ -1,3 +1,4 @@
+// Creación de personaje: características (matriz, compra de puntos, 4d6), bonos del trasfondo, dotes y habilidades.
 import { norm } from '../../core/util.js';
 import { ABILS, TRASFONDOS_2024, clasesDe, dotesDe, nivelTotal } from '../reglas/reglas2024.js';
 import { CLASES_INFO } from '../clases/clases2024.js';

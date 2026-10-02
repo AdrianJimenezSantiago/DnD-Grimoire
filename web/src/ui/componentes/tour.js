@@ -1,3 +1,4 @@
+// Tutorial guiado: resalta elementos de la pantalla paso a paso y recuerda si ya se ha visto.
 import { esc } from '../../core/util.js';
 import { storage } from '../../platform/native.js';
 

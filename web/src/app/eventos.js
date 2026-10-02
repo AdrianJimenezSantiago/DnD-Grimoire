@@ -1,3 +1,5 @@
+// Controlador de la hoja: conecta los botones (data-cmd, data-slotbtn…) con las acciones y los diálogos,
+// y gestiona el modo edición, el modo combate, el menú y el botón atrás.
 import { esc, joinY, norm, numLibre } from '../core/util.js';
 import { SCHOOLS, perfil, clasesTexto, ABIL_NAME, modOf, clasesDe } from '../domain/reglas/reglas2024.js';
 import { campo } from '../domain/conjuros/validar.js';

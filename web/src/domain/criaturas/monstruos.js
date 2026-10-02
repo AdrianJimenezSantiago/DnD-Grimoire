@@ -1,3 +1,4 @@
+// Lector de perfiles de criatura de los libros (Manual de Monstruos) y formas posibles de la Forma salvaje.
 import { aplanar, esMayus, letras, limpiarRestos, tituloBonito } from '../libros/lector.js';
 import { claveNombre } from '../libros/manual.js';
 import { norm } from '../../core/util.js';

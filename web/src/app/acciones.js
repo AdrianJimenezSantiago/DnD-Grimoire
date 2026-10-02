@@ -1,3 +1,5 @@
+// Casos de uso del juego que combinan reglas y avisos: lanzar conjuros, gastar espacios y recursos, descansos,
+// concentración y objetivos. Modifican el estado con S.act() y avisan con toast().
 import { esc, joinY } from '../core/util.js';
 import { perfil, clasesDe } from '../domain/reglas/reglas2024.js';
 import { reglas, recState, schoolMatch, recuperarEnDescanso, recursoParaConjuro, usosGastados } from '../domain/clases/rasgos.js';

@@ -1,3 +1,4 @@
+// Bestiario de la campaña: criaturas con lo que el grupo sabe de ellas (daños, estados, salvaciones, notas).
 import { uid, norm } from '../../core/util.js';
 
 export const TIPOS_CRIATURA = ['Aberración', 'Autómata', 'Bestia', 'Celestial', 'Cieno', 'Dragón', 'Elemental', 'Feérico', 'Gigante', 'Humanoide', 'Infernal', 'Monstruosidad', 'Muerto viviente', 'Planta'];

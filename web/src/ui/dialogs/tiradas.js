@@ -1,3 +1,4 @@
+// Tirada de un conjuro o de un objeto: ataque, salvación, daño y curación con los bonos que aplican.
 import { esc, norm } from '../../core/util.js';
 import { bonosDeConjuro, trucoPotenteEvocador } from '../../domain/conjuros/bonosConjuro.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas/reglas2024.js';

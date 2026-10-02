@@ -1,3 +1,4 @@
+// Pantalla de luto cuando el personaje muere: memorial, órdenes permitidas y resurrección.
 import { esc } from '../../core/util.js';
 import { clasesTexto } from '../../domain/reglas/reglas2024.js';
 import { vidaDe, estadoVital, CAUSAS } from '../../domain/combate/vida.js';

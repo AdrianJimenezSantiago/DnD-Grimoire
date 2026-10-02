@@ -1,3 +1,4 @@
+// Reglas que la app aplica sola en momentos concretos: al tirar iniciativa, al empezar el turno, al gastar usos.
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe, dotesDe } from '../reglas/reglas2024.js';

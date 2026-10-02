@@ -1,3 +1,4 @@
+// Caso de uso «importar un libro»: lee el PDF y lo analiza con domain/libros. Se carga solo cuando hace falta.
 import { abrirPdf } from '../platform/pdf.js';
 import { analizarLibro } from '../domain/libros/libroCompleto.js';
 

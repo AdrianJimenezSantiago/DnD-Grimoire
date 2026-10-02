@@ -1,3 +1,4 @@
+// Animación de impacto de las tiradas de daño y curación, más intensa cuanto más supera la media.
 import { burst, reducedMotion } from './fx.js';
 import { mediaDist, maxDist } from '../../domain/reglas/dados.js';
 import { haptic } from '../../platform/native.js';

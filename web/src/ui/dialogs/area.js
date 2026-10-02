@@ -1,3 +1,4 @@
+// Diálogo de área de efecto: dibuja la plantilla de un conjuro sobre una cuadrícula y cuenta las casillas.
 import { esc } from '../../core/util.js';
 import { parseArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/combate/area.js';
 import { $, on } from '../componentes/dom.js';

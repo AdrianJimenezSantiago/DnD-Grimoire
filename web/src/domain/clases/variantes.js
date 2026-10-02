@@ -1,3 +1,4 @@
+// Rasgos de clase con dos variantes a elegir: Golpes benditos (clérigo) y Furia elemental (druida).
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf } from '../reglas/reglas2024.js';

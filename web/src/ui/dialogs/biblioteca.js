@@ -1,3 +1,5 @@
+// Biblioteca: reglas, objetos mágicos, dotes, trasfondos, subclases y criaturas de los libros importados,
+// con filtros y fichas que se pueden apilar.
 import { esc, norm } from '../../core/util.js';
 import { biblioteca, glosario, termino, libros, compendio } from '../../domain/conjuros/catalogo.js';
 import { RAREZAS, TIPOS_OBJ, ordenRareza } from '../../domain/libros/objetos.js';

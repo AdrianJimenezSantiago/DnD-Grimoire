@@ -1,3 +1,5 @@
+// Modelo de datos: forma de un personaje y de la base de datos, normalización de datos antiguos,
+// importación y migración desde la primera versión.
 import { clamp, clone, uid } from '../../core/util.js';
 import { perfil } from '../reglas/reglas2024.js';
 import { HOJA_THEO } from './ejemplo.js';

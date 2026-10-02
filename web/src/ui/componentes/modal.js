@@ -1,3 +1,4 @@
+// Diálogos modales genéricos que devuelven una promesa: confirmar, avisar y pedir un texto.
 import { esc } from '../../core/util.js';
 import { gi } from './tema.js';
 import { runaSvg } from '../animaciones/magia.js';

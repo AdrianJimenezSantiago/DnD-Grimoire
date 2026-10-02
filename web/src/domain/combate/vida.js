@@ -1,3 +1,4 @@
+// Puntos de golpe, daño, curación, PG temporales, salvaciones contra muerte, estados, agotamiento y duraciones.
 import { norm, uid } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { normEfectos, EFECTO, efectoDeConjuro } from './efectos.js';

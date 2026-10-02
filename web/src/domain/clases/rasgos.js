@@ -1,3 +1,4 @@
+// Rasgos y recursos del personaje: plantillas de clase, subclase, especie y dotes, sus máximos y su recarga.
 import { clamp, norm } from '../../core/util.js';
 import { statsEfectivos, objetoDisponible } from '../equipo/objetosEfecto.js';
 import { modOf, nivelDe, competencia, clasesDe, vistaClase, dotesDe, nivelTotal } from '../reglas/reglas2024.js';

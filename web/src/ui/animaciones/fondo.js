@@ -1,3 +1,4 @@
+// Fondo animado de la app: elige la escena según la clase del personaje y la manda al motor (fondoMotor.js).
 import { tinteDe } from '../../domain/presentacion/paleta.js';
 import { reducedMotion } from './fx.js';
 import FondoWorker from './fondoWorker.js?worker&inline';

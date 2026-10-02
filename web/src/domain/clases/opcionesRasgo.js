@@ -1,3 +1,4 @@
+// Rasgos que obligan a escoger una opción (terreno, linaje, tipo de daño…) y cuándo se puede cambiar.
 import { norm } from '../../core/util.js';
 import { clasesDe, nivelTotal } from '../reglas/reglas2024.js';
 import { LINAJES, linajeDe, especieBase, APTITUD_ESPECIE } from '../origen/especies.js';

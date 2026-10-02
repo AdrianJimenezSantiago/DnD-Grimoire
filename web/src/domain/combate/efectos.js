@@ -1,3 +1,4 @@
+// Efectos activos (conjuros, estados, rasgos) y lo que cambian: ventaja, desventaja, CA, velocidad, daño extra.
 import { norm, uid } from '../../core/util.js';
 import { statsEfectivos, pasivosObjetos, resistenciasObjetos } from '../equipo/objetosEfecto.js';
 import { claseArmadura, penalizacionArmadura } from '../equipo/equipo.js';

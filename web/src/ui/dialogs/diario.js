@@ -1,3 +1,4 @@
+// Diario de campaña (sesiones y notas) y bestiario (lo que se sabe de cada criatura).
 import { campoElegible, ponerValor, elegirCriatura } from '../selectores/elecciones.js';
 import { esc } from '../../core/util.js';
 import { TIPOS, diarioDe, nuevaSesion, nuevaNota, paraRecordar, buscarDiario, fechaLarga } from '../../domain/personaje/diario.js';

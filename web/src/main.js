@@ -1,3 +1,5 @@
+// Arranque de la app: estilos y fuentes, carga de los datos guardados, creación del store, inicio de cada diálogo,
+// tutoriales y carga en segundo plano del compendio y de los libros importados.
 import '@fontsource/alegreya/latin-400.css';
 import '@fontsource/alegreya/latin-500.css';
 import '@fontsource/alegreya/latin-700.css';

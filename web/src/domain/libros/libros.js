@@ -1,3 +1,4 @@
+// Identificación de libros: nombre de las clases, id estable de cada libro y detección de subclases por capítulo.
 import { claveNombre } from './manual.js';
 
 export const CLASES_ES = ['Bárbaro', 'Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Guerrero', 'Hechicero', 'Mago', 'Monje', 'Paladín', 'Pícaro'];

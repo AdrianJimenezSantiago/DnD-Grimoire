@@ -1,3 +1,4 @@
+// Búsqueda global (Ctrl+K): conjuros, reglas, objetos, rasgos, inventario y diario en una sola lista.
 import { esc, norm } from '../../core/util.js';
 import { sgn, ABILS } from '../../domain/reglas/reglas2024.js';
 import { buscar } from '../../domain/presentacion/busqueda.js';

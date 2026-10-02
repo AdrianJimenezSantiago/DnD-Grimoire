@@ -1,3 +1,4 @@
+// Conjuros que dan las dotes: fijos (siempre preparados) y a elegir, con su uso gratis.
 import { norm } from '../../core/util.js';
 import { dotesDe } from '../reglas/reglas2024.js';
 

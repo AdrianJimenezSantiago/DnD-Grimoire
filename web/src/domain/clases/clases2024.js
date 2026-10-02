@@ -1,3 +1,5 @@
+// Datos de las doce clases y sus subclases (Manual del Jugador de 2024 y Héroes de Faerûn): rasgos por nivel,
+// conjuros siempre preparados, valores que escalan y tema visual de cada una.
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { competencia, modOf, nivelDe } from '../reglas/reglas2024.js';

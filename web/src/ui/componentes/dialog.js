@@ -1,3 +1,4 @@
+// Apertura y cierre de los <dialog> de la app como hojas: pila de diálogos abiertos, animación y botón atrás.
 import { reducedMotion } from '../animaciones/fx.js';
 const stack = [];
 export function openSheet(d) {

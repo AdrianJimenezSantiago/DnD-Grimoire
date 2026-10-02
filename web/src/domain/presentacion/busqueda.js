@@ -1,3 +1,4 @@
+// Puntuación de resultados de búsqueda: exacto, prefijo, palabra o dentro del texto.
 import { norm } from '../../core/util.js';
 
 export function puntuar(q, nombre, texto = '') {

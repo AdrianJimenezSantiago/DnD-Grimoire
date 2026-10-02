@@ -1,3 +1,4 @@
+// Copia de seguridad: exportar e importar todos los personajes como JSON.
 import { esc } from '../../core/util.js';
 import { charFromV1, normDb, importarPersonaje, SCHEMA } from '../../domain/personaje/modelo.js';
 import { linkCatalog, invalidateItems } from '../../domain/conjuros/catalogo.js';

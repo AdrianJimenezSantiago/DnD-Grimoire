@@ -1,3 +1,5 @@
+// Efectos visuales cortos: chispas, destellos al lanzar conjuros y gastar espacios, pulsos y transiciones de vista.
+// Respetan «reducir movimiento».
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 export const reducedMotion = () => mq.matches;
 

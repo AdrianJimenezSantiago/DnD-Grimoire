@@ -1,3 +1,4 @@
+// Maniobras del Maestro del combate: cupo por nivel, dado de supremacía y CD.
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, competencia, modOf, nivelTotal } from '../reglas/reglas2024.js';

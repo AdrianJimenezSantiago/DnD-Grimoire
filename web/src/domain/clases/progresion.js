@@ -1,3 +1,4 @@
+// Subir de nivel: qué rasgos y conjuros se ganan y qué conjuros automáticos sobran o faltan.
 import { joinY, norm } from '../../core/util.js';
 import { reglas } from './rasgos.js';
 import { conjurosAutomaticos, rasgosEnNivel } from './clases2024.js';

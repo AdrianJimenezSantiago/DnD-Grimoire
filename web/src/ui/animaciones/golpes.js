@@ -1,3 +1,4 @@
+// Animación de un golpe que se recibe o se cura, con el color y la forma del tipo de daño.
 import { burst, reducedMotion, alFrente } from './fx.js';
 import { runaSvg } from './magia.js';
 

@@ -1,3 +1,5 @@
+// Gestión de personajes y asistente de creación paso a paso (clase, origen, características, equipo, conjuros).
+// Es el módulo más pesado: se carga aparte (app/asistentes.js).
 import { clamp, clone, esc, joinY, norm, uid } from '../../core/util.js';
 import { ABILS, ABIL_NAME, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase, nivelTotal } from '../../domain/reglas/reglas2024.js';
 import { reglas } from '../../domain/clases/rasgos.js';

@@ -1,3 +1,4 @@
+// Habilidades, salvaciones, iniciativa, percepción pasiva y velocidad, con pericias, dotes y objetos.
 import { norm } from '../../core/util.js';
 import { linajeActual } from '../origen/especies.js';
 import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos, bonoHabilidadObjetos, velocidadMinimaObjetos } from '../equipo/objetosEfecto.js';

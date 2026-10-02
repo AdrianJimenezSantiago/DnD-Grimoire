@@ -1,3 +1,4 @@
+// Lectura de PDF con pdf.js: abre el documento y devuelve sus páginas como texto con posiciones.
 import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 

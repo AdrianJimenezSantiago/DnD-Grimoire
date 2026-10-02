@@ -1,3 +1,4 @@
+// Utilidades sin dependencias que usa toda la app: números, identificadores, normalización y escape de texto.
 export const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 export const clone = o => (typeof structuredClone === 'function' ? structuredClone(o) : JSON.parse(JSON.stringify(o)));
 export const uid = p => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;

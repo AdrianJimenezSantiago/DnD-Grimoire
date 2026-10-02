@@ -1,3 +1,4 @@
+// Catálogo de conjuros: compendio del SRD, conjuros importados de los libros, glosario y estado de la biblioteca.
 import { esc, norm, uid } from '../../core/util.js';
 import { tiradasDe, tieneTiradas } from './tiradas.js';
 import { tiradasBase, ajustarTiradas } from './tiradasBase.js';

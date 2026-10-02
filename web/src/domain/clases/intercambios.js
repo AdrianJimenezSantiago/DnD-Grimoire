@@ -1,3 +1,4 @@
+// Lo que se puede cambiar en cada descanso o al subir de nivel (conjuros, trucos, opciones de rasgo).
 import { clasesDe, dotesDe } from '../reglas/reglas2024.js';
 import { opcionesCambiables, opcionDe } from './opcionesRasgo.js';
 

@@ -1,3 +1,4 @@
+// Lo que suman los rasgos del personaje al daño y la curación de cada conjuro.
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal } from '../reglas/reglas2024.js';

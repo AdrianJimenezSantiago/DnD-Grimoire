@@ -1,3 +1,4 @@
+// Áreas de efecto: lee la forma y el tamaño del texto de un conjuro y calcula las casillas que cubre.
 const num = s => parseFloat(String(s).replace(',', '.'));
 const ft = s => Math.round(num(s) * 0.3 * 10) / 10;
 export const CASILLA = 1.5;

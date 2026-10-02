@@ -1,3 +1,4 @@
+// Inventario: objetos, equipar y manos, armaduras y CA, armas y ataques, monedas, peso y carga, sintonía.
 import { uid, norm } from '../../core/util.js';
 import { modOf, clasesDe, perfil, dotesDe, competencia, nivelTotal } from '../reglas/reglas2024.js';
 import { competenteConArma, esMarcial as esMarcialArma } from '../reglas/competencias.js';

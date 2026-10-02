@@ -1,3 +1,4 @@
+// Efectos pasivos de los objetos mágicos (CA, salvaciones, características fijadas, resistencias).
 import { norm } from '../../core/util.js';
 
 // Efectos de los objetos mágicos (Guía del Dungeon Master de 2024) que la hoja aplica sola.

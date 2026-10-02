@@ -1,3 +1,4 @@
+// Lector de conjuros del Manual del Jugador: cabecera, campos, descripción y nivel superior.
 const LV = /^(?:Truco de ([a-záéíóúñ]+)|([A-ZÁÉÍÓÚH][a-záéíóúñ]+) de nivel ?[.,]? ?([\dBlI]))\s*(\(.*)?$/;
 const DIGITO_OCR = { B: 8, l: 1, I: 1 };
 const FIELD = /^(Tiempo de lanza\S*|Alcance|Componentes|Duraci\S*)\s*:\s*(.*)$/;

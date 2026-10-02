@@ -1,3 +1,4 @@
+// Estilos de combate: cuándo se eligen, qué dan y sus alternativas de paladín y explorador.
 import { norm } from '../../core/util.js';
 import { clasesDe } from '../reglas/reglas2024.js';
 

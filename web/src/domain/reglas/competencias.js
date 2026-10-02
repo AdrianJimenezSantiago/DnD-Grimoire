@@ -1,3 +1,4 @@
+// Entrenamiento con armaduras y competencia con armas, por clase, multiclase, subclase, orden y dote.
 import { norm } from '../../core/util.js';
 import { clasesDe, dotesDe } from './reglas2024.js';
 import { ordenDe } from '../clases/ordenes.js';

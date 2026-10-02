@@ -1,3 +1,4 @@
+// Validación de los campos de un conjuro (escuela, alcance, duración, componentes) al guardarlo o cargarlo.
 import { norm } from '../../core/util.js';
 import { SCHOOLS } from '../reglas/reglas2024.js';
 

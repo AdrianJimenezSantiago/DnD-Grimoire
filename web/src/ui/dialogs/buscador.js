@@ -1,3 +1,4 @@
+// Selector de conjuros del catálogo y del compendio para añadirlos al libro del personaje.
 import { esc, norm, uid } from '../../core/util.js';
 import { LISTAS, SCHOOLS, perfil } from '../../domain/reglas/reglas2024.js';
 import { allSpellItems, itemMeta, itemTag, itemToSid, listFilter, invalidateItems } from '../../domain/conjuros/catalogo.js';

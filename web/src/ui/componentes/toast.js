@@ -1,3 +1,4 @@
+// Avisos breves en la parte inferior de la pantalla, con botones de acción como «Deshacer».
 import { $ } from './dom.js';
 let timer = null;
 export function toast(msg, actions = []) {

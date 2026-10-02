@@ -1,3 +1,4 @@
+// Enlaces al glosario: cualquier elemento con data-term abre la regla en la biblioteca.
 import { on } from '../componentes/dom.js';
 import { abrirTermino } from './biblioteca.js';
 

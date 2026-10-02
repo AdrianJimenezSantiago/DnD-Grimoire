@@ -1,3 +1,4 @@
+// Usar un consumible: pociones, venenos y objetos de un solo uso, con su efecto en la vida del personaje.
 import { norm } from '../../core/util.js';
 import { equipoDe, curacionDe, cambiarCantidad } from './equipo.js';
 import { vidaDe, curar, ponerTemporales, ponerEfecto, aplicarDano } from '../combate/vida.js';

@@ -1,3 +1,4 @@
+// Lo que se puede añadir al daño de un ataque que impacta y lo que gasta (maniobras, Castigo divino, Ataque furtivo…).
 import { norm } from '../../core/util.js';
 import { clasesDe, perfil, dotesDe, modOf, competencia, nivelTotal } from '../reglas/reglas2024.js';
 import { reglas, usosGastados } from '../clases/rasgos.js';

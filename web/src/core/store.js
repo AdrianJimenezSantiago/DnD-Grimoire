@@ -1,3 +1,5 @@
+// Estado de la app: la base de datos de personajes, suscripción a cambios, guardado diferido y deshacer.
+// act() para acciones de juego (van al historial del personaje), edit() para ediciones, replace() para restaurar copias.
 import { clone, uid } from './util.js';
 
 const MAX_HIST = 60, MAX_LOG = 120;

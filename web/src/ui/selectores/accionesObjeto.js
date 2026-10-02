@@ -1,3 +1,4 @@
+// Menú de acciones de un objeto mágico (recuperar espacios, lanzar conjuros, curar) dentro del inventario.
 import { esc, norm } from '../../core/util.js';
 import { accionesDe, motivoAccion, opcionesEscala, usarAccion, espaciosRecuperables, recursoDe, libresDe } from '../../domain/equipo/accionesObjeto.js';
 import { equipoDe } from '../../domain/equipo/equipo.js';

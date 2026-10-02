@@ -1,3 +1,4 @@
+// Lector de objetos mágicos de la Guía del Dungeon Master: tipo, rareza, sintonía, cargas y usos.
 import { aplanar, bloques, esMayus, letras, tituloBonito, sinTildes } from './lector.js';
 import { claveNombre } from './manual.js';
 

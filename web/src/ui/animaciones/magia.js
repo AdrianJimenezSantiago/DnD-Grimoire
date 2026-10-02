@@ -1,3 +1,4 @@
+// Adornos mágicos de la interfaz: runas y sellos en SVG, ondas al tocar botones y portales al abrir diálogos.
 import { reducedMotion, burst } from './fx.js';
 
 const RUNAS = [

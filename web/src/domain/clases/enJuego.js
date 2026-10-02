@@ -1,3 +1,4 @@
+// «En juego»: los rasgos del personaje agrupados por cuándo se usan (acción, adicional, reacción, pasivo).
 import { estiloDe, esAlternativa } from './estilos.js';
 import { norm } from '../../core/util.js';
 import { progresion, escalas, CLASES_INFO, SUBCLASES } from './clases2024.js';

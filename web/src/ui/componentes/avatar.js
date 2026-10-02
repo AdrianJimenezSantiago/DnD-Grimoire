@@ -1,3 +1,4 @@
+// Retrato del personaje (o su emblema de clase) en miniatura.
 import { esc } from '../../core/util.js';
 import { gi, temaDe } from './tema.js';
 import { esYo } from '../../domain/combate/vida.js';

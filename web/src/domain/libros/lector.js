@@ -1,3 +1,4 @@
+// Utilidades básicas de lectura de un libro: letras, mayúsculas, títulos, bloques de texto y restos del OCR.
 import { leerTabla, tablaATexto, arreglarDados } from './tablas.js';
 
 export const letras = s => String(s).replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');

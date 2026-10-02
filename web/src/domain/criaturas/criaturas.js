@@ -1,3 +1,4 @@
+// Perfiles de las criaturas que el personaje puede invocar o adoptar: familiares, monturas y espíritus.
 import { norm } from '../../core/util.js';
 
 export const CARS = ['fue', 'des', 'con', 'int', 'sab', 'car'];

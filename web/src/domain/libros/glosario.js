@@ -1,3 +1,4 @@
+// Lector del glosario de reglas del Manual y limpieza de cortes de línea y erratas del PDF.
 import { claveNombre } from './manual.js';
 
 const letters = s => s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');

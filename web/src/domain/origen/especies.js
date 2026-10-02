@@ -1,3 +1,4 @@
+// Especies: atributos por nivel, linajes y legados, conjuros de especie, visión y resistencias.
 import { norm } from '../../core/util.js';
 
 // Especies del Manual del Jugador de 2024: atributos por nivel de personaje, linajes y legados que se eligen,

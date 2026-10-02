@@ -1,3 +1,4 @@
+// Trasfondos y dotes de origen: herramientas, idiomas, equipo inicial, requisitos y aumentos de característica.
 import { norm } from '../../core/util.js';
 import { ABILS, CLASES, clasesDe, dotesDe, nivelTotal, perfil } from '../reglas/reglas2024.js';
 import { PREDEFINIDOS } from '../equipo/equipo.js';

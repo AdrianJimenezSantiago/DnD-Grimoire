@@ -1,3 +1,5 @@
+// Hoja de personaje: cabecera, estadísticas, barra de espacios, libro de conjuros y rasgos «En juego».
+// renderSheet() y renderBar() repintan la hoja entera a partir del estado.
 import { esc, norm } from '../../core/util.js';
 import { ABIL_NAME, perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
 import { castSchools, castTriggerDesc, reglasVisibles, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../../domain/clases/rasgos.js';

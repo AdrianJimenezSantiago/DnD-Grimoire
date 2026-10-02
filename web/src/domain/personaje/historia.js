@@ -1,3 +1,4 @@
+// Historia del personaje: capítulos y conversión de texto plano o PDF a Markdown.
 const sinTildes = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 export const slug = s => sinTildes(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'capitulo';
 
