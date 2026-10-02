@@ -1,0 +1,101 @@
+EFECTOS PLANARES
+Algunos planos de existencia (y las zonas del Plano Mate-
+rial a las que afectan) tienen efectos sobrenaturales en las
+criaturas que haya en ellos. A continuación se presentan
+varios ejemplos y el capítulo 6 contiene más información
+sobre los planos de existencia.
+BENEVOLENCIA BENDITA
+En el plano del Monte Celestia y en las regiones donde
+se percibe su influencia, las criaturas reciben la bendición
+de la benevolencia que permea este plano. Las criaturas
+que no sean infernales ni muertos vivientes obtienen el
+beneficio del conjuro bendición mientras permanezcan
+en una zona de benevolencia bendita. Además, finalizar
+un descanso largo en ellas concede a esas criaturas el
+beneficio de un conjuro restablecimiento menor.
+CRUELDAD DE GEHENNA
+En el plano de Gehenna y en las regiones donde se percibe
+su influencia, las criaturas odiarán ayudarse unas a otras.
+Cuando una criatura sujeta a la crueldad de Gehenna
+lance un conjuro que haga recuperar puntos de golpe
+o elimine un estado que no sea el de invisible, deberá
+superar una tirada de salvación de Carisma con CD 10
+o el conjuro fallará y se desperdiciará.
+SED DE SANGRE DE AQUERONTE
+El plano de Aqueronte recompensa a las criaturas por
+dañar a otras y las imbuye de la fuerza necesaria para
+seguir luchando. Mientras esté en Aqueronte o en una
+región bajo su influencia, una criatura obtiene una canti-
+dad de puntos de golpe temporales igual a la mitad de sus
+puntos de golpe máximos cada vez que reduzca a 0 los
+puntos de golpe de otra criatura.
+VIENTOS DE PANDEMÓNIUM
+Los vientos de Pandemónium son habituales en ese plano
+y en regiones donde se percibe su influencia, incluidas
+algunas zonas de la Infraoscuridad. Por cada hora que
+pase entre los vientos aullantes, una criatura deberá
+hacer una tirada de salvación de Sabiduría con CD 10.
+Si la falla, sumará 1 nivel de cansancio. Los vientos no
+pueden imponer niveles de cansancio a una criatura por
+encima del 3. Finalizar un descanso largo no reducirá
+el nivel de cansancio de una criatura salvo que consiga
+evitar los vientos de algún modo.
+VITALIDAD DE ARCADIA
+En el plano de Arcadia y en las regiones donde se percibe
+su influencia, las criaturas obtienen una vitalidad sobre-
+natural, lo que les proporciona inmunidad a los estados
+de asustadas y envenenadas.
+FRÍO EXTREMO
+Cuando la temperatura sea de -18 °C o menos, una cria-
+tura expuesta al frío extremo deberá superar una tirada
+de salvación de Constitución con CD 10 al final de cada
+hora o sumará 1 nivel de cansancio. Las criaturas que
+tengan resistencia o inmunidad al daño de frío superan
+automáticamente la tirada.
+
+HIELO DELGADO
+El hielo delgado puede aguantar un peso de hasta
+3d10 × 5 kg por cada área cuadrada de 3 m de lado.
+Si el peso total en un área de hielo delgado excede
+su límite, ese trozo de hielo se romperá y todas las
+criaturas situadas en él caerán al agua helada que
+hay debajo (consulta “Agua helada” anteriormente).
+HIELO RESBALADIZO
+El hielo resbaladizo constituye terreno difícil. Las cria-
+turas que entren en hielo resbaladizo por primera vez en
+un turno o empiecen su turno allí deberán superar una
+tirada de salvación de Destreza con CD 10 o tendrán el
+estado de derribadas.
+PRECIPITACIONES INTENSAS
+Todo lo que haya dentro de una zona de lluvia o nevada
+intensa se considera ligeramente oscuro, y las criaturas
+en ella tendrán desventaja en todas las pruebas de Sabi-
+duría (Percepción). La lluvia intensa también extingue
+las llamas desprotegidas.
+VIENTO FUERTE
+El viento fuerte impone desventaja en las tiradas de
+ataque a distancia con armas, extingue las llamas des-
+protegidas y dispersa la niebla. Las criaturas voladoras
+en vientos fuertes deben aterrizar al final de su turno
+o caerán.
+Un viento fuerte en un desierto puede crear tormentas
+de arena que imponen desventaja en las pruebas de Sabi-
+duría (Percepción).
+ZONA DE MAGIA SALVAJE
+Un desastre mágico del pasado o una oleada de energía
+descontrolada en un lugar concreto pueden hacer que
+se deshaga el tejido de la magia y se forme una zona de
+magia salvaje. En esas zonas, que no suelen ser de más
+de 90 m de diámetro, la magia se comporta de forma
+impredecible.
+Cuando una criatura gaste un espacio de conjuro
+para lanzar un conjuro en una zona de magia salvaje,
+tira 1d20. Si sacas un 20, tira en la tabla “Sobrecarga
+de magia salvaje” del Manual del jugador para crear un
+efecto mágico.
+ZONA SIN MAGIA
+Una zona sin magia es un lugar donde se ha desgarrado
+el tejido de la magia. El efecto es el mismo que el de un
+conjuro campo antimagia, solo que es permanente y suele
+cubrir una zona de un máximo de 90 m de diámetro.
+CAPÍTULO 3 | HERRAMIENTAS DE DM

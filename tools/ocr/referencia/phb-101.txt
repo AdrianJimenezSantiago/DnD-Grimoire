@@ -1,0 +1,110 @@
+TERRENO TEMPLADO
+Nivel de druida Conjuros de círculo
+3 Agarre electrizante, dormir, paso brumoso
+5 Relámpago
+7 Libertad de movimiento
+9 Paso arbóreo
+TERRENO TROPICAL
+Nivel de druida Conjuros de círculo
+3 Rayo nauseabundo, salpicadura ácida,
+telaraña
+5 Nube apestosa
+7 Polimorfar
+9 Plaga de insectos
+NIVEL 6: RECUPERACIÓN NATURAL
+Puedes lanzar un conjuro de nivel 1 o superior que tengas
+preparado por el rasgo Conjuros de círculo sin gastar un
+espacio de conjuro. Deberás finalizar un descanso largo
+antes de volver a hacerlo.
+Además, tras finalizar un descanso corto, puedes elegir
+espacios de conjuro gastados y recuperarlos. La suma
+de niveles de estos espacios de conjuro debe ser igual
+o inferior a la mitad de tu nivel de druida (redondeando
+hacia arriba) y ninguno de los espacios puede ser de
+nivel 6 o más. Por ejemplo, si eres une druide de nivel 6,
+puedes recuperar hasta tres niveles en espacios de conjuro:
+puedes recuperar un espacio de conjuro de nivel 3,
+un espacio de nivel 2 y otro de nivel 1 o tres espacios de
+nivel 1. Cuando recuperes espacios de conjuro con este
+rasgo, no podrás volver a hacerlo hasta que finalices un
+descanso largo.
+NIVEL 10: PROTECCIÓN DE LA NATURALEZA
+Eres inmune al estado de envenenado y tienes resistencia
+a un tipo de daño asociado con tu elección de terreno
+actual del rasgo Conjuros de círculo, como se muestra
+en la tabla “Protección de la naturaleza”.
+PROTECCIÓN DE LA NATURALEZA
+Tipo de terreno Resistencia Tipo de terreno Resistencia
+Árido Fuego Templado Relámpago
+Polar Frío Tropical Veneno
+NIVEL 14: SANTUARIO DE LA NATURALEZA
+Como acción de magia, puedes gastar un uso de tu rasgo
+Forma salvaje y hacer que aparezcan árboles y enredaderas
+espectrales en un cubo de 4,5 m de lado sobre el suelo
+a 36 m o menos de ti. Permanecerán ahí 1 minuto o hasta
+que tengas el estado de incapacitado o mueras. Tus aliados
+y tú tendréis cobertura media mientras estéis en esa
+zona y tus aliados obtendrán la resistencia actual de tu
+Protección de la naturaleza mientras estén ahí.
+Como acción adicional, puedes mover el cubo hasta 18 m
+a una parte del suelo que esté a 36 m o menos de ti.
+
+CÍRCULO DE LAS ESTRELLAS
+Utiliza los secretos que se ocultan en las constelaciones.
+El círculo de las estrellas lleva estudiando los patrones
+celestes desde tiempos inmemoriales para descubrir
+los secretos ocultos entre las constelaciones. Mediante
+la comprensión de dichos secretos, los druidas de este
+círculo aspiran a acceder a los poderes del cosmos.
+NIVEL 3: FORMA ESTELAR
+Como acción adicional, puedes gastar un uso de tu rasgo
+Forma salvaje para adoptar una forma estelar en lugar
+de transformarte en una bestia.
+Mientras estés en tu forma estelar, sigues teniendo
+el mismo perfil, pero tu cuerpo se vuelve luminoso:
+tus articulaciones resplandecen como estrellas y están
+conectadas por líneas brillantes, como en un mapa estelar.
+Esta forma emite luz brillante en un radio de 3 m y luz
+tenue 3 m más allá. La forma dura 10 minutos y termina
+antes de tiempo si la cancelas (no requiere acción), si tienes
+el estado de incapacitado, si mueres o si vuelves a usar este
+rasgo.
+Siempre que adoptes tu forma estelar, elige cuál de las
+siguientes constelaciones brillará en tu cuerpo; en función
+de tu elección, gozarás de ciertos beneficios mientras dure
+la forma:
+Arquero. En tu cuerpo aparece una constelación con
+forma de arquero. Cuando activas esta forma y como
+acción adicional en tus turnos siguientes mientras dure,
+puedes realizar un ataque de conjuro a distancia con el que
+lanzas una flecha luminosa a una criatura a 18 m o menos
+de ti. Si acierta, el ataque causará una cantidad de daño
+radiante igual a 1d8 más tu modificador por Sabiduría.
+Cáliz. En tu cuerpo aparece una constelación con forma
+de cáliz de vida. Siempre que gastes un espacio de conjuro
+para lanzar un conjuro que haga recuperar puntos de golpe
+a una criatura, tú u otra criatura a 9 m o menos de ti podréis
+recuperar una cantidad de puntos de golpe igual a 1d8 más
+tu modificador por Sabiduría.
+Dragón. En tu cuerpo aparece una constelación con
+forma de un sabio dragón. Cuando hagas una prueba
+de Inteligencia o Sabiduría o una tirada de salvación de
+Constitución para mantener la concentración, podrás
+sustituir un resultado de 9 o menos en el d20 por un 10.
+NIVEL 3: MAPA ESTELAR
+Has creado un mapa estelar como parte de tus estudios
+del firmamento. Es un objeto Diminuto y puedes utilizarlo
+como canalizador mágico para tus conjuros de druida.
+Escoge su forma de entre las opciones de la tabla “Mapa
+estelar” o tira un dado para decidirlo.
+Mientras sostienes el mapa, tienes los conjuros guía
+y saeta guía preparados, y puedes lanzar saeta guía sin
+gastar un espacio de conjuro. Puedes lanzarlo de esa
+forma una cantidad de veces igual a tu modificador por
+Sabiduría (mínimo una vez) y recuperas todos los usos
+tras finalizar un descanso largo.
+Si pierdes el mapa, puedes realizar una ceremonia
+de 1 hora para crear un sustituto mágicamente. Esta
+ceremonia se puede llevar a cabo durante un descanso
+corto o largo y destruye el mapa anterior.
+CAPÍTULO 3 | CLASES DE PERSONAJE

@@ -1,0 +1,106 @@
+ATRIBUTOS BÁSICOS DE PALADÍN
+Característica principal Fuerza y Carisma
+Dado de puntos de golpe 1d10 por nivel de Paladín
+Competencias en Sabiduría y Carisma
+tiradas de salvación
+Competencias Elige dos: Atletismo, Intimidación,
+en habilidades Medicina, Perspicacia,
+Persuasión o Religión
+Competencias Armas sencillas y marciales
+con armas
+Entrenamiento Armaduras ligeras, medias
+con armaduras y pesadas y escudos
+Equipo inicial Elige A o B: (A) cota de malla,
+escudo, espada larga, 6 jabalinas,
+símbolo sagrado, paquete de
+sacerdote y 9 po, o (B) 150 po
+LOS PALADINES ESTÁN UNIDOS POR SUS
+juramentos, que les llevan a enfrentarse a las
+fuerzas de la aniquilación y la corrupción.
+Ya sea ante el altar de un dios, en un claro sagrado
+frente a espíritus de la naturaleza o en un momento de
+desesperación y pesar, con los difuntos como únicos
+testigos, el juramento de un paladín es un vínculo muy
+poderoso. Se trata de una fuente de poder que transforma
+a un combatiente devoto en un campeón bendito.
+Los paladines entrenan para adquirir sus habilidades de
+combate y llegan a dominar muchas armas y armaduras.
+A pesar de ello, sus habilidades marciales palidecen en
+comparación con el poder mágico que poseen; un poder
+que les permite curar a los heridos, castigar a sus
+enemigos y proteger a los inocentes y a los que se unen
+a ellos para luchar.
+Casi por definición, la vida de un paladín es una vida
+de aventuras, ya que todos ellos se encuentran en primera
+línea del conflicto cósmico contra la aniquilación.
+Los guerreros son personas poco frecuentes, incluso
+entre las filas de los ejércitos del mundo, pero los que
+siguen el camino del paladín son aún menos numerosos.
+Cuando sienten la llamada, estos individuos benditos
+abandonan sus ocupaciones anteriores y se equipan
+con sus armas y magia.
+CONVERTIRSE EN PALADÍN
+COMO PERSONAJE DE NIVEL 1
+• Obtienes todos los atributos de la tabla “Atributos
+básicos de paladín”.
+• Obtienes los rasgos de nivel 1 de paladín, que se
+muestran en la tabla “Rasgos de paladín”.
+COMO PERSONAJE MULTICLASE
+• Obtienes los siguientes atributos de la tabla “Atributos
+básicos de paladín”: dado de puntos de golpe,
+competencia con armas marciales y entrenamiento
+con armaduras ligeras y medias y escudos.
+
+• Obtienes los rasgos de nivel 1 de paladín, que se
+muestran en la tabla “Rasgos de paladín”. Consulta las
+reglas de multiclase del capítulo 2 para determinar tus
+espacios de conjuro disponibles.
+RASGOS DE CLASE DE PALADÍN
+Como paladín, obtienes los siguientes rasgos de clase
+cuando alcanzas los niveles de paladín especificados.
+Estos rasgos se muestran en la tabla “Rasgos de paladín”.
+NIVEL 1: IMPONER LAS MANOS
+Tu toque bendito puede curar heridas. Tienes una reserva
+de poder de curación que se rellena tras finalizar un
+descanso largo. Puedes recurrir a esta reserva para
+restaurar tantos puntos de golpe como cinco veces
+tu nivel de paladín.
+Como acción adicional, puedes tocar a una criatura
+(que puedes ser tú) y extraer energía de la reserva de
+curación para hacer que esa criatura recupere una
+cantidad de puntos de golpe, que como máximo será
+la cantidad que te quede en dicha reserva.
+También puedes gastar 5 puntos de golpe de la reserva
+para eliminar el estado de envenenada de la criatura,
+pero esos puntos gastados no restaurarán puntos de golpe.
+NIVEL 1: LANZAMIENTO DE CONJUROS
+Has aprendido a lanzar conjuros gracias a la oración y la
+meditación. Consulta el capítulo 7 para ver las reglas sobre
+el lanzamiento de conjuros. La información presentada
+a continuación detalla cómo usar esas reglas con los
+conjuros de paladín, que encontrarás más adelante en la
+lista de conjuros de paladín de la descripción de la clase.
+Espacios de conjuro. La tabla “Rasgos de paladín”
+muestra cuántos espacios de conjuro tienes para lanzar
+tus conjuros de nivel 1 y superiores. Recuperas todos
+los espacios utilizados tras finalizar un descanso largo.
+Conjuros preparados de nivel 1 y superiores. Preparas
+una serie de conjuros de nivel 1 y superiores, que son los
+que podrás lanzar con este rasgo. Para empezar, elige dos
+conjuros de paladín de nivel 1. Se recomiendan castigo
+abrasador y heroísmo.
+El número de conjuros de tu lista aumenta conforme
+subes de nivel de paladín, como se muestra en la columna
+“Conjuros preparados” de la tabla “Rasgos de paladín”.
+Cuando ese número aumente, elige conjuros de paladín
+adicionales hasta que el número de conjuros de tu lista
+coincida con el número de la tabla “Rasgos de paladín”.
+Estos conjuros deben ser de un nivel para el que tengas
+espacios de conjuro. Por ejemplo, si eres un paladín de
+nivel 5, podrías preparar cualquier combinación de seis
+conjuros de paladín de nivel 1 o 2.
+Si otro rasgo de paladín te proporciona conjuros que
+siempre tienes preparados, esos conjuros no cuentan
+para el total que puedes preparar con este rasgo, pero
+sí que cuentan como conjuros de paladín para ti.
+CAPÍTULO 3 | CLASES DE PERSONAJE

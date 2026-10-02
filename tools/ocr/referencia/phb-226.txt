@@ -1,0 +1,83 @@
+AGUA BENDITA (25 PO)
+Cuando lleves a cabo la acción de atacar, puedes sustituir
+uno de tus ataques por lanzar un frasco de agua bendita.
+Haz objetivo a una criatura que puedas ver a 6 m o menos
+de ti. El objetivo deberá superar una tirada de salvación
+de Destreza (CD 8 más tu modificador por Destreza y tu
+bonificador por competencia) o sufrirá 2d8 de daño
+radiante si es un infernal o un muerto viviente.
+ALJABA (1 PO)
+En una aljaba caben hasta 20 flechas.
+ANTITOXINA (50 PO)
+Como acción adicional, puedes beber un vial de antitoxina
+para obtener ventaja en las tiradas de salvación para evitar
+o poner fin al estado de envenenado durante 1 hora.
+ANTORCHA (1 PC)
+Una antorcha arde durante 1 hora y emite luz brillante en
+un radio de 6 m y luz tenue 6 m más allá. Cuando llevas
+a cabo la acción de atacar, puedes hacerlo con la antorcha
+como si fuera un arma cuerpo a cuerpo sencilla. Si acierta,
+el objetivo sufre 1 de daño de fuego.
+ARIETE PORTÁTIL (4 PO)
+Puedes usar un ariete portátil para derribar puertas.
+Cuando lo hagas, obtendrás un bonificador de +4 a la
+prueba de Fuerza. Si otro personaje te ayuda a usar
+el ariete, tendrás ventaja en esta prueba.
+BARRIL (2 PO)
+En un barril caben 160 l de líquido o un volumen de 120 l
+de mercancías secas.
+BOLAS DE METAL (1 PO)
+Como acción de utilizar, puedes verter las bolas de metal
+de su bolsa. Se esparcirán para cubrir una zona cuadrada
+y plana de 3 m de lado a 3 m o menos de ti. Las criaturas
+que entren en esta zona por primera vez en un turno
+deberán superar una tirada de salvación de Destreza
+con CD 10 o tendrán el estado de derribadas. Se tarda
+10 minutos en recuperar las bolas de metal.
+BOLSA (5 PP)
+Una bolsa soporta hasta 3 kg en un volumen de 6 l.
+BOTELLA DE CRISTAL (2 PO)
+En una botella de cristal caben hasta 0,75 l de líquido.
+CAPÍTULO 6 | EQUIPO
+
+CADENA (5 PO)
+Como acción de utilizar, puedes atar con una cadena a una
+criatura no voluntaria a 1,5 m o menos de ti que tenga el
+estado de agarrada, apresada o incapacitada si superas
+una prueba de Fuerza (Atletismo) con CD 13. Si la criatura
+tiene las piernas atadas, tendrá el estado de apresada hasta
+que se libere. Para liberarse de la cadena, deberá superar
+una prueba de Destreza (Acrobacias) con CD 18 como
+acción. Romper la cadena requiere superar una prueba
+de Fuerza (Atletismo) con CD 20 como acción.
+CAMPANA (1 PO)
+Al tañer una campana como acción de utilizar, producirá
+un sonido audible a 18 m de distancia.
+CANALIZADOR ARCANO (VARIABLE)
+Un canalizador arcano puede ser uno de los objetos de
+la tabla “Canalizadores arcanos” y está ornamentado
+o tallado para canalizar la magia arcana. Los brujos,
+hechiceros o magos pueden utilizar estos objetos como
+canalizadores mágicos.
+CANALIZADORES ARCANOS
+Canalizador Peso Precio
+Bastón 2 kg 5 po
+Cristal 0,5 kg 10 po
+Orbe 1,5 kg 20 po
+Vara 1 kg 10 po
+Varita 0,5 kg 10 po
+CANALIZADOR DRUÍDICO (VARIABLE)
+Un canalizador druídico puede ser uno de los objetos de
+la tabla “Canalizadores druídicos” y está tallado, atado
+con un lazo o pintado para canalizar la magia primigenia.
+Los druidas o exploradores pueden utilizar estos objetos
+como canalizadores mágicos.
+CANALIZADORES DRUÍDICOS
+Canalizador Peso Precio
+Bastón de madera (también bastón) 2 kg 5 po
+Rama de muérdago — 1 po
+Varita de tejo 0,5 kg 10 po
+CANTIMPLORA (2 PP)
+En una cantimplora caben hasta 2 l de líquido. Si no
+bebes suficiente agua, te arriesgas a sufrir deshidratación
+(consulta el glosario de reglas).

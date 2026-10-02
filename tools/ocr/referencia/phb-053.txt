@@ -1,0 +1,102 @@
+ATRIBUTOS BÁSICOS DE BÁRBARO
+Característica principal Fuerza
+Dado de puntos de golpe 1d12 por nivel de bárbaro
+Competencias en Fuerza y Constitución
+tiradas de salvación
+Competencias en Elige dos: Atletismo, Intimidación,
+habilidades Naturaleza, Percepción, Super-
+vivencia o Trato con animales
+Competencias con armas Armas sencillas y marciales
+Entrenamiento con Armaduras ligeras y medias
+armaduras y escudos
+Equipo inicial Elige A o B: (A) hacha a dos
+manos, 4 hachas de mano,
+paquete de explorador y 15 po,
+o (B) 75 po
+LOS BÁRBAROS SON PODEROSOS COMBATIENTES
+que se alimentan de las fuerzas primigenias del
+multiverso y las manifiestan a modo de furia.
+No se trata de una simple emoción, ni mucho menos un
+enfado: esta furia refleja la ferocidad de un depredador,
+la violencia de una tormenta y la agitación de un mar.
+Algunos bárbaros conciben su furia como si fuera un
+espíritu feroz o un antepasado al que veneran. Otros la
+ven como una conexión con el dolor y la angustia del
+mundo, como una maraña impersonal de magia salvaje
+o como la expresión de su yo más profundo. Para todos los
+bárbaros, la furia es un poder que no solo aviva su arrojo
+en el combate, sino que también afila sus asombrosos
+reflejos y agudiza sus sentidos.
+Los bárbaros normalmente actúan de protectores
+y líderes de sus comunidades, por lo que no dudan en
+lanzarse al peligro para evitar que sean sus protegidos
+quienes pasen por ello. El valor frente a la adversidad
+los convierte en excelentes aventureros.
+CONVERTIRSE EN BÁRBARO
+COMO PERSONAJE DE NIVEL 1
+• Obtienes todos los atributos de la tabla “Atributos
+básicos de bárbaro”.
+• Obtienes los rasgos de nivel 1 de bárbaro, que se
+muestran en la tabla “Rasgos de bárbaro”.
+COMO PERSONAJE MULTICLASE
+• Obtienes los siguientes atributos de la tabla “Atributos
+básicos de bárbaro”: dado de puntos de golpe, competencia
+con armas marciales y entrenamiento con escudos.
+• Obtienes los rasgos de nivel 1 de bárbaro, que se muestran
+en la tabla “Rasgos de bárbaro”.
+
+RASGOS DE CLASE DE BÁRBARO
+Como bárbaro, obtienes los siguientes rasgos de clase
+cuando alcanzas los niveles de bárbaro especificados.
+Estos rasgos se muestran en la tabla “Rasgos de bárbaro”.
+NIVEL 1: DEFENSA SIN ARMADURA
+Mientras no lleves armadura alguna, tu clase de armadura
+base será igual a 10 más tus modificadores por Destreza
+y Constitución. Obtienes este beneficio aunque lleves un
+escudo.
+NIVEL 1: FURIA
+Puedes imbuirte de un poder primigenio llamado furia,
+que te otorga una fuerza y resistencia extraordinarias.
+Puedes dejarte llevar por ella como acción adicional si
+no llevas puesta una armadura pesada.
+Puedes dejarte llevar por la furia tantas veces como se
+indica para tu nivel de bárbaro en la columna “N.º de furias”
+de la tabla “Rasgos de bárbaro”. Recuperas uno de los usos
+gastados tras finalizar un descanso corto y todos tras
+finalizar un descanso largo.
+Mientras estés enfurecido, usa las siguientes reglas.
+Resistencia al daño. Tienes resistencia al daño
+contundente, cortante y perforante.
+Daño por furia. Cuando llevas a cabo un ataque que
+use la Fuerza (ya sea con un arma o un ataque sin armas)
+y causas daño al objetivo, obtienes un bonificador al daño
+que aumenta conforme subes de nivel de bárbaro, como
+se muestra en la columna “Daño por furia” de la tabla
+“Rasgos de bárbaro”.
+Ventaja en Fuerza. Tienes ventaja en las pruebas
+de Fuerza y en las tiradas de salvación de Fuerza.
+Sin concentración ni conjuros. No puedes mantener
+la concentración ni lanzar conjuros.
+Duración. La furia dura hasta el final de tu siguiente
+turno y termina antes si te pones una armadura pesada
+o recibes el estado de incapacitado. Si la furia sigue activa
+en tu siguiente turno, puedes prolongarla otro asalto de
+una de las siguientes formas:
+• Haces una tirada de ataque contra un enemigo.
+• Obligas a un enemigo a hacer una tirada de salvación.
+• Empleas una acción adicional para prolongar tu furia.
+Cada vez que prolongues la furia, durará hasta el final
+de tu siguiente turno. Puedes mantener una furia hasta
+10 minutos.
+NIVEL 1: MAESTRÍA CON ARMAS
+Tu entrenamiento con armas te permite utilizar las
+propiedades de maestría con dos tipos de armas cuerpo
+a cuerpo sencillas o marciales de tu elección, como las
+hachas a dos manos y las hachas de mano. Tras finalizar
+un descanso largo, puedes llevar a cabo ejercicios con
+armas y cambiar una de dichas elecciones.
+Cuando alcances ciertos niveles de bárbaro, adquirirás
+la capacidad de usar las propiedades de maestría con más
+tipos de armas, como se muestra en la columna “Maestría
+con armas” de la tabla “Rasgos de bárbaro”.
+CAPÍTULO 3 | CLASES DE PERSONAJE

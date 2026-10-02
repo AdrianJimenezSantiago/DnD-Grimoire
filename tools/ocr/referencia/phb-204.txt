@@ -1,0 +1,89 @@
+MATÓN DE TABERNA
+Dote de origen
+Obtienes los siguientes beneficios:
+Ataque sin armas mejorado. Cuando aciertes con
+tu ataque sin armas y causes daño, puedes infligir
+una cantidad de daño contundente igual a 1d4 más tu
+modificador por Fuerza en lugar del daño habitual de
+un ataque sin armas.
+Repetir tiradas de daño. Siempre que tires un dado de
+daño para un ataque sin armas, podrás volver a tirarlo
+si sacas un 1 y deberás utilizar el nuevo resultado.
+Armas improvisadas. Tienes competencia con las armas
+improvisadas.
+Empujar. Cuando aciertes a una criatura con un ataque
+sin armas como parte de la acción de atacar en tu turno,
+causarás daño al objetivo y también podrás empujarlo
+1,5 m respecto a ti. Solo puedes usar este beneficio una
+vez por turno.
+MÚSICO
+Dote de origen
+Obtienes los siguientes beneficios:
+Formación instrumental. Ganas competencia con tres
+instrumentos musicales de tu elección.
+Canción alentadora. Cuando termines un descanso corto
+o largo, puedes tocar una canción con un instrumento
+musical con el que seas competente y darles inspiración
+heroica a los aliados que te escuchen. La cantidad de
+aliados a los que puedas influir de esta forma es igual
+a tu bonificador por competencia.
+SANADOR
+Dote de origen
+Obtienes los siguientes beneficios:
+Médico de batalla. Si tienes útiles de sanador, puedes
+gastar un uso y tratar a una criatura que esté a 1,5 m
+o menos de ti como acción de utilizar. La criatura puede
+gastar uno de sus dados de puntos de golpe y luego
+tirarás ese dado. La criatura recupera una cantidad de
+puntos de golpe igual al resultado más tu bonificador
+por competencia.
+Repetir tiradas de curación. Siempre que tires un dado
+para determinar cuántos puntos de golpe restableces con
+un conjuro o con el beneficio de médico de batalla de esta
+dote, podrás volver a tirarlo si sacas un 1 y deberás utilizar
+el nuevo resultado.
+
+DOTES GENERALES
+Estas dotes pertenecen a la categoría general.
+ACECHADOR
+Dote general (requisitos: nivel 4 o más, Destreza 13 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta tu puntuación
+de Destreza en 1, hasta un máximo de 20.
+Visión ciega. Tienes visión ciega hasta 3 m.
+Niebla de guerra. Aprovechas las distracciones de la
+batalla, lo que te da ventaja en las pruebas de Destreza
+(Sigilo) que hagas como parte de la acción de esconderse
+durante el combate.
+En la sombra. Si haces una tirada de ataque mientras
+estás escondido y no acierta, la tirada no revelará tu
+ubicación.
+ACTOR
+Dote general (requisitos: nivel 4 o más, Carisma 13 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta tu puntuación
+de Carisma en 1, hasta un máximo de 20.
+Suplantación. Mientras te disfraces de alguien real
+o ficticio, tendrás ventaja en las pruebas de Carisma
+(Engaño o Interpretación) para convencer a los demás
+de que eres esa persona.
+Imitación. Puedes imitar el sonido de otras criaturas,
+incluida el habla. Una criatura que escuche la imitación
+deberá superar una prueba de Sabiduría (Perspicacia) para
+darse cuenta de que es una farsa (CD 8 más tu modificador
+por Carisma y tu bonificador por competencia).
+APRESADOR
+Dote general (requisitos: nivel 4 o más, Fuerza o Destreza 13
+o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta tu puntuación
+de Fuerza o Destreza en 1, hasta un máximo de 20.
+Golpear y agarrar. Cuando aciertes a una criatura con
+un ataque sin armas como parte de la acción de atacar en
+tu turno, puedes utilizar las opciones de daño y agarre.
+Solo puedes usar este beneficio una vez por turno.
+Ventaja al atacar. Tienes ventaja en las tiradas de ataque
+contra una criatura a la que estés agarrando.
+Luchador rápido. No tienes que invertir movimiento
+adicional para mover a una criatura a la que estés agarrando
+si la criatura es de tu tamaño o más pequeña.

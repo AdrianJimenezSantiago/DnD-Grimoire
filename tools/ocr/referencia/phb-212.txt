@@ -1,0 +1,85 @@
+LUCHA A CIEGAS
+Dote de estilo de combate (requisitos: rasgo Estilo de combate)
+Tienes visión ciega hasta 3 m.
+PROTECCIÓN
+Dote de estilo de combate (requisitos: rasgo Estilo de combate)
+Cuando una criatura que puedas ver ataque a un objetivo
+que no seas tú y esté a 1,5 m o menos de ti, puedes llevar
+a cabo una reacción para interponer tu escudo si estás
+embrazando uno. Impones desventaja a la tirada de ataque
+a la que reaccionas y al resto de tiradas de ataque contra
+el objetivo hasta el principio de tu siguiente turno si
+permaneces a 1,5 m o menos del objetivo.
+TIRO CON ARCO
+Dote de estilo de combate (requisitos: rasgo Estilo de combate)
+Recibes un bonificador de +2 a las tiradas de ataque con
+armas a distancia.
+DOTES DE DON ÉPICO
+Estas dotes pertenecen a la categoría de don épico.
+DON DE LA FORTALEZA
+Dote de don épico (requisito: nivel 19 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta una puntuación de
+característica de tu elección en 1, hasta un máximo de 30.
+Salud fortalecida. Tus puntos de golpe máximos
+aumentan en 40. Además, cada vez que recuperes puntos
+de golpe, podrás recuperar una cantidad de puntos de
+golpe adicionales igual a tu modificador por Constitución.
+Cuando hayas recuperado esos puntos de golpe adicionales,
+no podrás volver a hacerlo hasta el principio de tu siguiente
+turno.
+DON DE LA HABILIDAD
+Dote de don épico (requisito: nivel 19 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta una puntuación de
+característica de tu elección en 1, hasta un máximo de 30.
+Experto polifacético. Ganas competencia en todas las
+habilidades.
+Pericia. Elige una habilidad en la que no tengas pericia.
+Ganas pericia en esa habilidad.
+CAPÍTULO 5 | DOTES
+
+DON DE LA PERICIA EN COMBATE
+Dote de don épico (requisito: nivel 19 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta una puntuación de
+característica de tu elección en 1, hasta un máximo de 30.
+Precisión sin igual. Cuando falles con una tirada de
+ataque, puedes acertarla. Cuando uses este beneficio, no
+podrás volver a hacerlo hasta el principio de tu siguiente
+turno.
+DON DE LA RECUPERACIÓN
+Dote de don épico (requisito: nivel 19 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta una puntuación de
+característica de tu elección en 1, hasta un máximo de 30.
+Última defensa. Cuando tus puntos de golpe fueran
+a reducirse a 0, puedes quedarte con 1 punto de golpe
+y recuperar una cantidad de puntos de golpe igual a la
+mitad de tus puntos de golpe máximos. Cuando uses este
+beneficio, no podrás volver a hacerlo hasta que finalices
+un descanso largo.
+Recuperar vitalidad. Tienes una reserva de 10d10.
+Como acción adicional, puedes gastar dados de la reserva,
+tirarlos y recuperar una cantidad de puntos de golpe igual
+al resultado total de la tirada. Recuperas todos los dados
+gastados tras finalizar un descanso largo.
+DON DE LA RESISTENCIA A ENERGÍAS
+Dote de don épico (requisito: nivel 19 o más)
+Obtienes los siguientes beneficios:
+Mejora de característica. Aumenta una puntuación de
+característica de tu elección en 1, hasta un máximo de 30.
+Resistencias a energías. Ganas resistencia a dos de los
+siguientes tipos de daño, a tu elección: ácido, frío, fuego,
+necrótico, psíquico, radiante, relámpago, trueno o veneno.
+Tras finalizar un descanso largo, puedes cambiar de
+opciones.
+Redirigir la energía. Cuando recibas daño de uno de los
+tipos elegidos con el beneficio de resistencias a energías,
+puedes llevar a cabo una reacción para dirigir un daño
+del mismo tipo hacia otra criatura que puedas ver a 18 m
+o menos de ti que no esté tras cobertura completa. Si lo
+haces, esa criatura deberá superar una tirada de salvación
+de Destreza (CD 8 más tu modificador por Constitución
+y tu bonificador por competencia) o recibirá una cantidad
+de daño igual a 2d12 más tu modificador por Constitución.

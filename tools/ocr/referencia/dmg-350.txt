@@ -1,0 +1,110 @@
+Opciones de fabricación. Cuando des la orden de fabri-
+cación a esta instalación, escoge una de las siguientes
+opciones:
+Fabricación: equipo de aventureros. Los asalariados
+de esta instalación fabrican cualquier cosa que pueda
+hacerse con las herramientas que hayas elegido al
+incorporar el taller a tu bastión (consulta arriba),
+conforme a las reglas del Manual del jugador.
+Fabricación: objeto mágico (instrumento). Si eres de
+nivel 9 o superior, puedes encomendar a los asalariados
+de la instalación que fabriquen un objeto mágico común
+o infrecuente que elijas de las tablas de instrumentos
+del capítulo 7. La instalación tiene la herramienta nece-
+saria para fabricar el objeto y los asalariados tienen
+competencia con esa herramienta y en la habilidad
+Conocimiento arcano. Consulta el apartado “Fabricar
+objetos mágicos” en el capítulo 7 para saber cuánto
+tiempo y dinero hacen falta para fabricar el objeto.
+Si el objeto permite al usuario lanzar conjuros desde él,
+tendrás que fabricar el objeto con tus propias manos
+(los asalariados de la instalación pueden ayudarte)
+y deberás tener todos esos conjuros preparados cada
+día que pases fabricando el objeto.
+Fuente de inspiración. Tras completar un descanso
+corto en el taller, obtienes inspiración heroica. No puedes
+volver a obtener este beneficio hasta que finalices un
+descanso largo.
+Ampliar la instalación. Puedes ampliar tu taller para
+convertirlo en una instalación enorme por 2000 po.
+Si lo haces, el taller obtiene dos asalariados adicionales
+y otras tres herramientas de artesano (de las de la lista
+anterior).
+TEATRO
+Instalación de bastión de nivel 9
+Requisitos: ninguno
+Espacio: enorme
+Asalariados: 4
+Orden: fortalecimiento
+El teatro dispone de un escenario, una zona entre basti-
+dores donde se guardan el atrezo y los decorados, y una
+zona de butacas para un público poco numeroso.
+Fortalecimiento: producción teatral. Cuando das la
+orden de fortalecimiento a esta instalación, sus asala-
+riados comienzan a preparar una obra de teatro o un
+concierto. Los ensayos y otros preparativos duran 14 días,
+seguidos de al menos 7 días de representaciones. Las fun-
+ciones pueden continuar de forma indefinida hasta que
+se ponga en marcha una nueva producción.
+Otro personaje o tú podéis contribuir a la producción
+de las siguientes formas:
+Artista. Un personaje que permanezca en el bastión
+durante todo el periodo de ensayos puede ser el artista
+principal de una o varias actuaciones; uno de los asa-
+lariados del teatro puede actuar de suplente en otras
+actuaciones.
+
+Compositor/dramaturgo. Un personaje puede componer
+la música de un concierto o escribir el guion de una
+obra si aún no han comenzado los ensayos. Tardará
+14 días en hacerlo.
+Director de orquesta/de escena. Un personaje que
+permanezca en el bastión durante toda la producción
+puede hacer de director de orquesta de un concierto
+o de director de escena de una obra.
+Al final del periodo de ensayos, cada personaje que haya
+participado en el concierto u obra podrá hacer una
+prueba de Carisma (Interpretación) con CD 15. Si se supe-
+ran más pruebas que las que se fallan, tú y cualquier otro
+personaje que hayáis participado en el concierto u obra
+obtendréis un dado de teatro, un d6. Este dado se con-
+vierte en un d8 cuando alcanzas el nivel 13 y en un d10
+cuando alcanzas el nivel 17. En cualquier momento tras
+el final de los ensayos, un personaje puede gastar su dado
+de teatro para tirarlo y sumar el resultado a una prueba
+con d20 que haga, justo tras tirar el d20. Si el personaje
+no ha gastado su dado de teatro antes de obtener otro,
+perderá el primer dado.
+ZONA DE ENTRENAMIENTO
+Instalación de bastión de nivel 9
+Requisitos: ninguno
+Espacio: enorme
+Asalariados: 4
+Orden: fortalecimiento
+Un bastión puede tener más de una zona de entrena-
+miento. Una zona de entrenamiento puede ser un patio
+abierto, un gimnasio, un auditorio o una pista de baile,
+o un circuito de trampas y peligros diseñado con ingenio.
+Podría contener objetivos inanimados (para practicar
+con armas), colchonetas y otro equipamiento. Uno de los
+asalariados de la instalación es un entrenador especia-
+lizado, mientras que los otros actuarán de compañeros
+de entrenamiento.
+Cuando incorpores una zona de entrenamiento
+a tu bastión, elige un entrenador de entre los de la tabla
+“Entrenadores especializados”. En cada turno de bastión,
+puedes sustituir a ese entrenador por otro de la tabla.
+ENTRENADORES ESPECIALIZADOS
+Tipo de
+entrenador Efecto de fortalecimiento
+Especialista en Elige un tipo de arma sencilla
+armas o marcial, como la lanza o el arco
+largo. Si no eres competente con esa
+arma, ganarás competencia con ella.
+Si ya eres competente con el arma,
+podrás usar su propiedad de maestría.
+Especialista en Cuando sufras daño de un ataque
+combate sin armas o realizado con un arma,
+puedes usar una reacción para reducir
+este daño en 1d4.
+CAPÍTULO 8 | BASTIONES

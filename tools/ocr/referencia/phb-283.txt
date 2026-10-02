@@ -1,0 +1,109 @@
+ESFERA VITRIÓLICA
+Evocación de nivel 4 (hechicero, mago)
+Tiempo de lanzamiento: Acción
+Alcance: 45 m
+Componentes: V, S, M (una gota de bilis)
+Duración: Instantáneo
+Señalas un lugar dentro del alcance y una bola
+resplandeciente de ácido de 30 cm de diámetro vuela
+hacia el punto escogido y explota en una esfera de 6 m de
+radio. Todas las criaturas situadas en esa zona realizan
+una tirada de salvación de Destreza. Si la fallan, recibirán
+10d4 de daño de ácido y otros 5d4 de daño de ácido al final
+de su siguiente turno. Si la superan, solo sufren la mitad
+del daño inicial.
+Con un espacio de conjuro de nivel superior. El daño
+inicial aumenta en 2d4 por cada nivel por encima de 4 que
+tenga el espacio.
+ESPADA DE MORDENKAINEN
+Evocación de nivel 7 (bardo, mago)
+Tiempo de lanzamiento: Acción
+Alcance: 27 m
+Componentes: V, S, M (una espada en miniatura que valga
+al menos 250 po)
+Duración: Concentración, hasta 1 minuto
+Creas una espada espectral que levitará dentro del alcance
+y durará hasta que termine el conjuro.
+Cuando aparezca la espada, puedes realizar un ataque
+de conjuro cuerpo a cuerpo contra un objetivo que se
+encuentre a 1,5 m o menos de ella. Si acierta, el objetivo
+recibe una cantidad de daño de fuerza igual a 4d12 más
+tu modificador por aptitud mágica.
+En tus turnos posteriores, puedes emplear una acción
+adicional para mover la espada hasta 9 m a un lugar que
+puedas ver y repetir el ataque contra el mismo objetivo
+u otro distinto.
+ESPEJISMO ARCANO
+Ilusionismo de nivel 7 (bardo, druida, mago)
+Tiempo de lanzamiento: 10 minutos
+Alcance: Vista
+Componentes: V, S
+Duración: 10 días
+Haces que el terreno de una zona cuadrada de hasta
+1,5 km de lado tenga el aspecto, los sonidos, los olores
+e incluso las sensaciones de otro tipo de terreno. Podrías
+hacer que un campo abierto o una carretera se parezcan
+a un pantano, una colina, una grieta u otro tipo de terreno
+difícil o infranqueable. Se puede hacer que un estanque
+parezca una pradera cubierta de hierba, que un precipicio
+se aparezca como una suave cuesta o que un barranco
+pedregoso y estrecho se presente como una carretera
+amplia y lisa.
+De forma similar, puedes alterar el aspecto de las
+estructuras o añadir algunas donde no las hay. El conjuro
+no disfraza, oculta ni añade criaturas.
+
+La ilusión incluye elementos sonoros, visuales, táctiles
+y olfativos, por lo que puede convertir un lugar despejado
+en un terreno difícil (o viceversa) o entorpecer de otra
+forma el movimiento por la zona. Cualquier parte del
+terreno ilusorio (como una piedra o un palo) que se saque
+de la zona desaparece de inmediato.
+Las criaturas con visión verdadera pueden ver a través
+de la ilusión y distinguir la verdadera forma del terreno.
+Sin embargo, todos los demás elementos de la ilusión
+permanecen, por lo que, aunque dichas criaturas serán
+conscientes de que se trata de una ilusión, podrán
+interactuar físicamente con ella.
+ESPÍRITUS GUARDIANES
+Conjuración de nivel 3 (clérigo)
+Tiempo de lanzamiento: Acción
+Alcance: Lanzador
+Componentes: V, S, M (un pergamino de plegarias)
+Duración: Concentración, hasta 10 minutos
+Unos espíritus protectores revolotean a tu alrededor en
+una emanación de 4,5 m hasta que el conjuro termine.
+Si tu alineamiento es bueno o neutral, su forma espectral
+parece angelical o feérica (a tu elección). Si es malvado,
+su forma es infernal.
+Cuando lanzas este conjuro, puedes elegir criaturas para
+que no les afecte. La velocidad de las demás criaturas se
+reducirá a la mitad en la emanación. Cuando esta entre en
+el espacio de una criatura o cuando una criatura entre en
+la emanación o termine su turno en ella, la criatura deberá
+hacer una tirada de salvación de Sabiduría. Si la falla,
+recibirá 3d8 de daño radiante (si tu alineamiento es bueno
+o neutral) o 3d8 de daño necrótico (si tu alineamiento
+es malvado). Si la supera, recibirá la mitad de daño.
+Una criatura solo hace esta tirada una vez por turno.
+Con un espacio de conjuro de nivel superior. El daño
+aumenta en 1d8 por cada nivel por encima de 3 que tenga
+el espacio.
+ESTALLIDO MÁGICO
+Truco de evocación (hechicero)
+Tiempo de lanzamiento: Acción
+Alcance: 36 m
+Componentes: V, S
+Duración: Instantáneo
+Lanzas energía mágica contra una criatura u objeto
+dentro del alcance. Haz un ataque de conjuro a distancia
+contra el objetivo. Si acierta, el objetivo recibe 1d8 de daño
+del tipo que elijas: ácido, frío, fuego, psíquico, relámpago,
+trueno o veneno.
+Si sacas un 8 en un d8 con este conjuro, puedes tirar
+otro d8 y sumarlo al daño. Cuando lances este conjuro,
+la cantidad máxima de d8 que puedes sumar al daño del
+conjuro es igual a tu modificador por aptitud mágica.
+Mejora de truco. El daño aumenta en 1d8 cuando
+alcanzas los niveles 5 (2d8), 11 (3d8) y 17 (4d8).
+CAPÍTULO 7 | CONJUROS

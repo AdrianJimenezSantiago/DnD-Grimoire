@@ -1,0 +1,78 @@
+COBERTURA
+MEDIA
+COBERTURA
+EN CASILLAS
+Y HEXÁGONOS
+LÍNEA DE VISIÓN
+Para determinar si existe una línea de visión entre
+dos espacios, elige una esquina de uno de ellos y traza
+una línea imaginaria desde esa esquina hasta cualquier
+punto de otro espacio. Si puedes trazar una línea que
+no atraviese o toque ningún objeto o efecto que bloquee
+la visión (como una pared, una cortina gruesa o una
+nube de niebla), habrá línea de visión.
+COBERTURA
+Los diagramas de esta página ilustran la cobertura en
+casillas o hexágonos. Para saber si un objetivo tiene
+cobertura contra un ataque u otro efecto, escoge una
+esquina del espacio del atacante o el punto de origen del
+área de efecto, según corresponda. A continuación, traza
+varias líneas imaginarias que partirán de esa esquina
+y llegarán hasta todas las esquinas de cualquier casilla
+que ocupe el objetivo. Si una o dos líneas están bloquea-
+das por algún obstáculo (lo que incluye otras criaturas),
+el objetivo tendrá cobertura media. Si tres o las cuatro
+líneas están bloqueadas pero el ataque o efecto todavía
+puede alcanzar a su objetivo (porque esté, por ejemplo,
+tras una aspillera), este tendrá cobertura tres cuartos.
+Con los hexágonos, utiliza el mismo proceso y dibuja
+líneas entre las esquinas de los hexágonos. En este caso,
+el objetivo tendrá cobertura media si hay hasta tres líneas
+bloqueadas por obstáculos, y cobertura tres cuartos
+si hay cuatro o más líneas bloqueadas pero el ataque
+o efecto aún puede alcanzar a su objetivo.
+MOVIMIENTO EN DIAGONAL
+El Manual del jugador explica una forma sencilla de calcu-
+lar el movimiento y medir las distancias en una cuadrí-
+cula de casillas: contar cada casilla como 1,5 m incluso si
+una criatura se mueve en diagonal. Aunque es un método
+rápido, rompe las reglas de la geometría.
+
+COBERTURA
+TRES CUARTOS
+Si quieres más precisión, usa la siguiente regla: la
+primera casilla en diagonal cuenta como 1,5 m, pero la
+segunda cuenta como 3 m. Este patrón de primero 1,5 m
+y luego 3 m continúa siempre que cuentes en diagonal,
+incluso si la criatura se mueve en línea recta entre dos
+movimientos en diagonal. Así, un personaje podría
+moverse una casilla en diagonal (1,5 m), luego tres en
+línea recta (4,5 m) y después otra en diagonal (3 m),
+lo que da un movimiento total de 9 m.
+REGISTRAR LA POSICIÓN
+A GRAN DISTANCIA
+Si estalla un combate entre dos bandos que se encuentran
+a decenas o cientos de metros de distancia, prueba las
+siguientes técnicas para registrar dónde están las
+criaturas:
+Apuntar en un papel. Anota a todos los combatientes en
+un papel y lleva un cómputo actualizado de la distancia
+de cada criatura respecto al punto de partida del grupo
+(el grupo comienza a 0 m). Aumenta las cifras de los
+personajes conforme estos avancen y reduce las de los
+monstruos según se acerquen al grupo.
+Ajustar la escala de la cuadrícula. Si utilizas una cuadrí-
+cula de combate, elige una parte y úsala para controlar
+la posición ajustando la escala para que cada casilla
+represente 9 m. No necesitas precisar mucho la posición
+de las criaturas, solo la distancia que las separa.
+Usar dados como medidores de la distancia. Prescinde
+de la cuadrícula, coloca las miniaturas en sus posiciones
+aproximadas y pon dados junto a cada miniatura
+para mostrar la distancia que ha recorrido. Puedes
+usar los dados percentiles (o tres d10, cada uno de
+los cuales representará un dígito en un número de
+tres cifras si el encuentro comienza a una distancia
+de entre 100 y 1000 m) o un d20 o más para mostrar
+cuántas casillas de 1,5 o 3 m ha avanzado la criatura.
+CAPÍTULO 2 | DIRIGIR EL JUEGO

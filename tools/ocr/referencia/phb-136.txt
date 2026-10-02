@@ -1,0 +1,88 @@
+NIVEL 3: CONJUROS DRACÓNICOS
+Cuando alcances un nivel de hechicero especificado en la
+tabla “Conjuros dracónicos”, a partir de entonces siempre
+tendrás preparados los conjuros que se indican.
+CONJUROS DRACÓNICOS
+Nivel de hechicero Conjuros
+3 Aliento de dragón, alterar el propio
+aspecto, orbe cromático, orden imperiosa
+5 Terror, volar
+7 Hechizar monstruo, ojo arcano
+9 Conocer las leyendas, invocar dragón
+NIVEL 3: RESISTENCIA DRACÓNICA
+La magia de tu cuerpo manifiesta tu don dracónico de forma
+física. Tus puntos de golpe máximos aumentan en 3 y en 1
+más por cada nivel de hechicero que subas en el futuro.
+Además, partes de tu cuerpo se cubren de escamas
+similares a las de los dragones. Mientras no lleves
+armadura, tu clase de armadura base será igual a 10 más
+tus modificadores por Destreza y Carisma.
+NIVEL 6: AFINIDAD ELEMENTAL
+Tu magia dracónica tiene afinidad con un tipo de daño
+asociado a los dragones. Elige uno de estos tipos: ácido,
+frío, fuego, relámpago o veneno.
+Tienes resistencia a ese tipo de daño. Además, cuando
+lances un conjuro que inflija daño de ese tipo, puedes
+sumar tu modificador por Carisma a una tirada de daño
+del conjuro.
+NIVEL 14: ALAS DE DRAGÓN
+Como acción adicional, puedes hacer que te crezcan alas
+dracónicas de la espalda. Las alas permanecen 1 hora
+o hasta que las hagas desaparecer (no requiere acción).
+Mientras dure el efecto, tienes una velocidad volando
+de 18 m.
+Cuando uses este rasgo, no podrás volver a hacerlo
+hasta que finalices un descanso largo, a menos que
+gastes 3 puntos de hechicería (no requiere acción)
+para restablecer su uso.
+NIVEL 18: COMPAÑERO DRAGÓN
+Puedes lanzar invocar dragón sin ningún componente
+material. También puedes lanzarlo una vez sin gastar un
+espacio de conjuro y recuperas la capacidad de hacerlo
+de esta forma tras finalizar un descanso largo.
+Cuando empieces a lanzar el conjuro, puedes modificarlo
+para que no requiera concentración. Si lo haces, la duración
+del conjuro es de 1 minuto para ese lanzamiento.
+
+HECHICERÍA MECÁNICA
+Canaliza las fuerzas cósmicas del orden.
+La fuerza cósmica del orden te ha imbuido de magia.
+Ese poder surge de Mechanus o de un reino similar,
+un plano de existencia modelado enteramente por la
+eficacia de la mecánica de un reloj. O tú o alguien de tu
+linaje habéis debido enredaros en las maquinaciones de
+los modrons, los organizados seres que habitan Mechanus.
+Incluso es posible que un antepasado tuyo participase en
+la Gran Marcha Modron. Sea cual sea su origen en tu caso,
+el poder del orden puede parecerle extraño a otros, pero,
+para ti, forma parte de un inmenso y glorioso sistema.
+NIVEL 3: CONJUROS MECÁNICOS
+Cuando alcances un nivel de hechicero especificado en la
+tabla “Conjuros mecánicos”, a partir de entonces siempre
+tendrás preparados los conjuros que se indican.
+CONJUROS MECÁNICOS
+Nivel de hechicero Conjuros
+3 Alarma, auxilio, protección contra el
+bien y el mal, restablecimiento menor
+5 Disipar magia, protección contra
+energía
+7 Invocar autómata, libertad de
+movimiento
+9 Muro de fuerza, restablecimiento
+mayor
+Además, consulta la tabla “Manifestaciones del orden”
+y elige o determina al azar el modo en que quieres que
+se manifieste tu conexión con el orden mientras lanzas
+cualquiera de tus conjuros de hechicero.
+MANIFESTACIONES DEL ORDEN
+1d6 Manifestación
+1 Unos engranajes espectrales levitan tras de ti.
+2 Las manecillas de un reloj giran en tus ojos.
+3 Tu piel resplandece con un brillo metálico.
+4 Objetos geométricos y ecuaciones flotantes
+recubren tu cuerpo.
+5 Tu canalizador mágico adopta temporalmente
+la forma de un mecanismo de relojería Diminuto.
+6 Tanto tú como aquellos afectados por tu magia
+podéis escuchar el tictac de los engranajes
+o el timbre de un reloj.

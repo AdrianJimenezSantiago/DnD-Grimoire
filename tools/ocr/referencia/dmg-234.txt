@@ -1,0 +1,69 @@
+ANILLO
+DE EVASIÓN
+ANILLO DE ESTRELLAS
+FUGACES
+ANILLO DE ESTRELLAS FUGACES
+Anillo, muy raro (requiere sintonización)
+Puedes lanzar luces danzantes o luz desde este anillo.
+El anillo tiene 6 cargas y recupera 1d6 cargas empleadas
+cada día, al amanecer. Puedes gastar las cargas para usar
+las propiedades a continuación.
+Esferas de rayos. Como acción de magia, puedes gastar
+2 cargas para crear hasta cuatro esferas de rayos con un
+diámetro de 90 cm.
+Cada esfera aparece en un espacio sin ocupar que pue-
+das ver a 36 m o menos de ti. Las esferas permanecerán
+mientras mantengas la concentración, hasta 1 minuto.
+Cada una emite luz tenue en un radio de 9 m.
+Como acción adicional, puedes mover cada esfera hasta
+9 m, pero no más allá de 36 m respecto a ti. La primera
+vez que la esfera se acerque a 1,5 m o menos de una cria-
+tura distinta de ti que no esté tras cobertura completa, la
+esfera descargará un relámpago sobre ella y desaparecerá.
+Esa criatura hará una tirada de salvación de Destreza
+con CD 15. Si la falla, recibirá daño de relámpago según
+la cantidad de esferas que hayas creado, como se muestra
+en la tabla a continuación. Si la supera, recibirá la mitad
+de daño.
+Cantidad de Daño de Cantidad de Daño de
+esferas relámpago esferas relámpago
+1 4d12 3 2d6
+2 5d4 4 2d4
+Estrellas fugaces. Como acción de magia, puedes gastar
+entre 1 y 3 cargas. Por cada carga que emplees, lanzarás
+una mota de luz brillante desde el anillo hacia un punto
+que puedas ver a 18 m o menos de ti. A todas las criaturas
+situadas en un cubo de 4,5 m de lado que parta de ese
+CAPÍTULO 7 | TESOROS
+
+ANILLO DE INFLUENCIA
+ANIMAL
+ANILLO DE
+INVISIBILIDAD
+punto les caerá una lluvia de chispas y harán una tirada
+de salvación de Destreza con CD 15; sufrirán 5d4 de daño
+radiante si la fallan o la mitad del daño si la superan.
+Fuego feérico. Puedes gastar 1 carga para lanzar fuego
+feérico desde el anillo.
+ANILLO DE EVASIÓN
+Anillo, raro (requiere sintonización)
+Este anillo tiene 3 cargas y recupera 1d3 cargas emplea-
+das cada día, al amanecer. Cuando falles una tirada de
+salvación de Destreza mientras lo llevas puesto, puedes
+usar una reacción para gastar 1 carga y superar esa tirada.
+ANILLO DE INFLUENCIA ANIMAL
+Anillo, raro
+Este anillo tiene 3 cargas y recupera 1d3 cargas emplea-
+das cada día, al amanecer. Mientras lo lleves puesto,
+puedes gastar 1 carga para lanzar uno de los siguientes
+conjuros (CD de salvación 13) desde él:
+• Encantar animal
+• Hablar con los animales
+• Terror (solo afecta a bestias)
+ANILLO DE INVISIBILIDAD
+Anillo, legendario (requiere sintonización)
+Mientras lleves puesto este anillo, puedes utilizar una
+acción de magia para otorgarte el estado de invisible.
+Permanecerás invisible hasta que te quites el anillo
+o hasta que emplees una acción adicional para volverte
+visible de nuevo.

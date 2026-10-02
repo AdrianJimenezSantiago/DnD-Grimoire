@@ -1,0 +1,58 @@
+CORTINAS ETÉREAS
+1d12 Plano
+1-2 Plano Material
+3 Páramo Sombrío
+4 Parajes Feéricos
+5 Plano Elemental del Aire
+6 Plano Elemental de la Tierra
+7 Plano Elemental del Fuego
+8 Plano Elemental del Agua
+9 Plano Paraelemental de la Ceniza
+10 Plano Paraelemental del Hielo
+11 Plano Paraelemental del Magma
+12 Plano Paraelemental del Cieno
+Los viajes por la Profundidad Etérea no se parecen en
+absoluto a un viaje físico. El concepto de distancia no
+significa nada, así que, aunque los viajeros sientan que
+pueden moverse con tan solo desearlo, es imposible medir
+la velocidad y resulta complicado controlar el paso del
+tiempo. Para ir de una cortina a otra por la Profundidad
+Etérea se tardan 1d10 × 10 horas, independientemente del
+origen y el destino. Sin embargo, las criaturas se mueven
+a sus velocidades normales durante los combates.
+LA CIUDADELA RADIANTE
+ES UN REFUGIO DEL
+PLANO ETÉREO, PESE
+A SU CERCANÍA A UN
+FURIBUNDO CICLÓN
+DE ÉTER.
+
+CICLONES DE ÉTER
+Un ciclón de éter es una columna serpenteante que
+Color de
+la cortina gira a través del plano. El ciclón aparece de repente,
+deformando y llevándose a kilómetros de distancia todo
+Turquesa
+lo que encuentra a su paso. Los viajeros que tengan una
+Gris negruzco puntuación de Percepción pasiva de 15 o más recibirán un
+Iridiscente aviso de 1 minuto: un zumbido grave en la materia etérea.
+Las criaturas que no sean capaces de llegar hasta una cor-
+Azul claro
+tina o portal que las lleve a otra parte sufrirán los efectos
+Castaño del ciclón. Tira 1d20 y consulta la tabla “Ciclones de éter”
+Naranja para determinar el efecto sobre todas las criaturas que se
+encuentren cerca.
+Verde
+Gris oscuro CICLONES DE ÉTER
+Aguamarina 1d20 Efecto
+Granate 1-12 Duración del viaje alargada. Todos los persona-
+Chocolate jes que viajen juntos en un grupo realizan una
+tirada de salvación de Carisma con CD 15. Si al
+menos la mitad del grupo la supera, el viaje se
+verá retrasado 1d10 horas. De lo contrario, el
+tiempo necesario para realizarlo se duplicará.
+13-19 Arrastradas a una zona de la Frontera Etérea
+solapada con un plano al azar (tira en la tabla
+“Cortinas etéreas”).
+20 Lanzadas a un destino aleatorio en el Plano
+Astral.

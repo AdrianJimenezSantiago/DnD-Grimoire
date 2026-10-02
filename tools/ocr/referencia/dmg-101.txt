@@ -1,0 +1,110 @@
+Una cerradura esconde una aguja envenenada. Si una
+criatura la abre con cualquier objeto que no sea la llave
+correcta, la aguja saltará y pinchará a la criatura, que
+hará una tirada de salvación de Constitución con CD 11.
+Si la falla, la criatura sufre 5 (1d10) de daño de veneno
+y tendrá el estado de envenenada durante 1 hora. Si la
+supera, solo sufrirá la mitad de ese daño.
+Evitar la trampa. La trampa no se activará si la cerra-
+dura se abre mediante un conjuro abrir u otro efecto
+mágico similar.
+Detectar y desarmar. Como acción de buscar, una
+criatura puede examinar la cerradura trampa y hacer
+una prueba de Sabiduría (Percepción) con CD 15. Si la
+supera, detectará la aguja. Una vez detectada la trampa,
+un personaje puede usar una acción para intentar desar-
+marla; lo logrará si supera una prueba de Destreza (Juego
+de manos) con CD 15. Si la falla, la criatura activará la
+trampa.
+A niveles superiores. Puedes adaptar la trampa a niveles
+superiores incrementando el daño y la CD de salvación,
+como se muestra en la siguiente tabla.
+Niveles Daño de veneno CD de salvación
+5-10 11 (2d10) 13
+11-16 22 (4d10) 15
+17-20 55 (10d10) 17
+DARDOS ENVENENADOS
+Trampa mortal (niveles 1-4)
+Activador: Una criatura que pise una placa de presión
+Duración: Instantánea, y la trampa se reinicia al principio
+del siguiente turno si se ha activado menos de tres veces
+Si una criatura pisa la placa de presión de la trampa por
+primera vez en un turno, unos dardos envenenados sal-
+drán disparados de unos tubos incrustados en las paredes
+circundantes. Los orificios de los tubos están ocultos por
+el polvo y las telarañas o camuflados entre bajorrelieves,
+murales o frescos.
+Todas las criaturas en la trayectoria de los dardos deben
+superar una tirada de salvación de Destreza con CD 13
+o serán alcanzados por 1d3 dardos y sufrirán 3 (1d6) de
+daño de veneno por cada uno.
+Detectar y desarmar. Como acción de buscar, una cria-
+tura puede examinar las paredes y hacer una prueba de
+Sabiduría (Percepción) con CD 15. Si la supera, detectará
+los orificios. Taponar los agujeros con cera, tela o residuos
+evitará que se disparen los dardos.
+Como acción de buscar, una criatura puede examinar
+la sección del suelo que conforma la placa de presión
+y hacer una prueba de Sabiduría (Percepción) con CD 15.
+Si la supera, detectará la placa. Si se introduce una punta
+de hierro o un objeto similar bajo la placa de presión,
+se impedirá que se active la trampa.
+A niveles superiores. Puedes adaptar la trampa
+a niveles superiores incrementando el daño de veneno
+de los dardos de la siguiente forma: 7 (2d6) en los nive-
+les 5-10, 14 (4d6) en los niveles 11-16 o 24 (7d6) en los
+niveles 17-20.
+
+ESTATUA QUE ESCUPE FUEGO
+Trampa mortal (niveles 1-4)
+Activador: Una criatura que pise una placa de presión
+Duración: Instantánea, y la trampa se reinicia al principio
+del siguiente turno
+Cuando una criatura pise la placa de presión de la
+trampa por primera vez en un turno o empiece su turno
+allí, una estatua cercana descarga una llamarada mágica
+en un cono de 4,5 m. La estatua puede representar
+cualquier cosa, como un dragón o un mago. Todas las
+criaturas situadas en el cono deberán hacer una tirada
+de salvación de Destreza con CD 15; sufrirán 11 (2d10)
+de daño de fuego si la fallan o la mitad del daño si la
+superan.
+Detectar y desarmar. Un conjuro detectar magia
+revelará un aura de magia de evocación alrededor de
+la estatua. Como acción de buscar, una criatura a 1,5 m
+o menos de la estatua puede examinarla y hacer una
+prueba de Sabiduría (Percepción) con CD 10. Si la supera,
+detectará un glifo diminuto en ella. Una vez encontrado
+el glifo, un personaje puede emplear una acción de
+estudiar para examinarlo y hacer una prueba de Inteli-
+gencia (Conocimiento arcano) con CD 15. Si la supera,
+descubrirá que el glifo significa “fuego”. Como acción,
+un personaje puede usar una herramienta afilada para
+rayar el glifo, lo que desarma la trampa.
+Como acción de buscar, una criatura puede examinar
+la sección del suelo que conforma la placa de presión
+y hacer una prueba de Sabiduría (Percepción) con CD 15.
+Si la supera, detectará la placa. Si se introduce una punta
+de hierro o un objeto similar bajo la placa de presión,
+se impedirá que se active la trampa.
+A niveles superiores. Puedes adaptar la trampa a niveles
+superiores incrementando el daño y el área de efecto,
+como se muestra en la siguiente tabla.
+Niveles Daño de fuego Área de efecto
+5-10 22 (4d10) Cono de 9 m
+11-16 55 (10d10) Cono de 18 m
+17-20 99 (18d10) Cono de 36 m
+POZO CON PINCHOS
+Trampa mortal (niveles 1-4)
+Activador: Una criatura que pise la tapa del pozo
+Duración: Instantánea
+Un pozo de 3 m de profundidad tiene una tapa con
+bisagras hecha del mismo material que el suelo que la
+rodea. Si una criatura pisa la tapa, esta se abrirá como
+una trampilla, provocando que la criatura caiga a un
+pozo con afilados pinchos de madera o hierro en el fondo.
+Una vez activada, la tapa permanecerá abierta.
+Una criatura que caiga en el pozo aterrizará en el fondo
+y sufrirá 3 (1d6) de daño contundente por la caída más
+9 (2d8) de daño perforante de los pinchos.
+CAPÍTULO 3 | HERRAMIENTAS DE DM

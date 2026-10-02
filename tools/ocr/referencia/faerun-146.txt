@@ -1,0 +1,111 @@
+Cuando lances este conjuro y como acción de magia
+en los turnos posteriores, puedes ordenar a los espíritus
+que hagan objetivo a una criatura u objeto que puedas
+ver a 1,5 m o menos de ellos y creen uno de los siguientes
+efectos:
+Fuerza mecánica. El objetivo hace una tirada de salvación
+de Destreza; sufrirá 3d6 de daño de fuerza si la falla
+o la mitad del daño si la supera.
+Protección organizada. El objetivo obtiene una cantidad
+de puntos de golpe temporales igual a ld6 más tu
+modificador por aptitud mágica.
+Cuando te muevas en tu turno, también podrás mover
+a los espíritus hasta 9 m a un espacio sin ocupar que
+puedas ver.
+Con un espacio de conjuro de nivel superior. El daño
+y los puntos de golpe temporales aumentan en ld6 por
+cada nivel por encima de 3 que tenga el espacio.
+CONTRAGOLPE
+Abjuración de nivel 4 (bardo, brujo, hechicero, mago)
+Tiempo de lanzamiento: Reacción, que llevas a cabo
+en respuesta a recibir daño
+Alcance: 18 m
+Componentes: V
+Duración: Instantáneo
+Te proteges de la energía destructiva reduciendo el daño
+sufrido en 4d6 más tu modificador por aptitud mágica.
+Si el daño detonante lo provocó una criatura dentro del
+alcance, puedes obligarla a hacer una tirada de salvación
+de Constitución. Sufrirá 4d6 de daño de fuerza si la falla
+o la mitad del daño si la supera.
+Con un espacio de conjuro de nivel superior. La reducción
+de daño y el daño de fuerza de este conjuro aumentan en
+ld6 por cada nivel por encima de 4 que tenga el espacio.
+ELUSIÓN DE ELMINSTER
+Abjuración de nivel 2 (mago)
+Tiempo de lanzamiento: Acción adicional
+Alcance: Lanzador
+Componentes: V, S
+Duración: Concentración, hasta 10 minutos
+Hasta que termine el conjuro, unas bari·eras arcanas
+te protegen de la magia. Tienes ventaja en las tiradas
+de salvación contra conjuros y efectos mágicos. Además,
+si superas una tirada de salvación contra un conjuro
+o efecto mágico y normalmente recibirías la mitad
+de daño, no sufres ningún daño.
+EMANACIÓN ELEMENTAL DE SONGAL
+Transmutación de nivel 5 (druida, hechicero, mago)
+Tiempo de lanzamiento: Acción
+Alcance: lanzador
+Componentes: V, S, M (una perla que valga al menos 100 po)
+Duración: Concentración, hasta 1 minuto
+
+Te impregnas del poder elemental de los genios. Hasta que
+el conjuro termine, obtienes los siguientes beneficios:
+Resistencia elemental Cuando lances este conjuro, elige
+uno de los siguientes tipos de daño; ácido, frío, fuego,
+relámpago o trueno. Tienes resistencia al tipo de daño
+elegido.
+Pulso elemental. Cuando lances este conjuro y al principio
+de cada uno de tus siguientes turnos, emites una ráfaga
+de energía elemental en una emanación de 4,5 m que se
+origina en ti. Todas las criaturas de tu elección situadas
+en esa zona harán una tirada de salvación de Destreza.
+Si la fallan , sufrirán 2d6 de dan.o de ácido, frío, fuego,
+relámpago o trueno (a tu elección) y tendrán el estado
+de derribadas. Si la superan , solo sufrirán la mitad de
+ese daño.
+Vuelo. Ganas una velocidad volando de 9 m y puedes
+levitar.
+Como conjuro de círculo. Si el conjuro se lanza como
+un conjuro de círculo, su tiempo de lanzamiento aumenta
+a 1 minuto y su duración se vuelve de conceutración, hasta
+10 minutos. Por cada lanzador secundario que participe
+en el lanzamiento, puedes elegir una criatura adicional,
+hasta un máximo de nueve. Las criaturas elegidas también
+obtienen los beneficios del conjuro hasta que este termine.
+Cuando se lance el conjuro, cada lanzador secundario
+deberá gastar un espacio de conjuro de nivel 2 o más;
+de lo contrario, el cunjuro fallará .
+ENDECHA
+Encantamiento de nivel 6 (bardo, clérigo)
+Tiempo de lanzamiento: Acción
+Alcance: Lanzador
+Componentes: V
+Duración: Concentración, hasta 1 minuto
+Una energía letal inunda una emanación de 18 m que
+se origina en ti hasta que el conjuro termine.
+Cuando lanzas este conjuro, puedes elegir criaturas
+para que no les afecte. Las demás criaturas no pueden
+recuperar puntos de golpe dentro de la emanación. Cuando
+la emanación entre en el espacio de una criatura o cuando
+una criatura entre en la emanación o termine su turno en
+ella, la criatura deberá hacer una tirada de salvación de
+Constitucicín. Si la falla , sufrirá 3d10 de daño necrótico
+y tendrá el estado de derribada. Si la supera, sufrirá
+la mitad de daño y su velocidad se-reducirá a la mitad .
+Una criatura solo hace esta tirada una vez por turno.
+Como conjuro de círculo. Para lanzar este conjuro
+como un conjuro de círculo, se necesitan al menos dos
+lanzadores secundarios. Si se lanza como un conjuro
+de círculo, su duración se vuelve de concentración,
+hasta 10 minutos.
+Si una criatura falla su tirada de salvación contra el
+efecto del conjuro, también suma l nivel de cansancio.
+Mientras la criatura tenga niveles de cansancio, finalizar
+un descanso largo no restau r a los puntos de golpe
+perdidos ni reduce el nivel de cansancio de la criatura.
+Cuando se lance el conjuro, cada lanzador secundario
+deberá gastar un espacio de conjuro de nivel 4 o más;
+de lo contrario, el conjuro fallará.
+CAPÍTULO 5 MAGIA DE FA ERUN

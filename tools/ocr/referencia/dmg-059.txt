@@ -1,0 +1,56 @@
+CREAR UN CONJURO
+A la hora de crear un conjuro nuevo, usa otros que ya
+existan como ejemplo. Estas son algunas cosas que debes
+tener en cuenta:
+Nombre. El conjuro debe tener un nombre único.
+Equilibrio. Si el conjuro es tan bueno que quien lo lanza
+quiere usarlo todo el tiempo, seguramente sea dema-
+siado poderoso para su nivel.
+Identidad. Asegúrate de que el conjuro encaja con la
+identidad de quienes pueden lanzarlo. Por ejemplo,
+los hechiceros y los magos no suelen lanzar conjuros
+curativos.
+Duración, alcance y área del conjuro. Una duración
+más larga, un mayor alcance o un área de efecto más
+extensa pueden compensar un efecto menor, depen-
+diendo del conjuro.
+Utilidad. Evita los conjuros que tengan un uso muy
+limitado, como uno que solo funcione contra cienos,
+ya que pocos personajes se molestarán en aprenderlos
+o prepararlos.
+DAÑO DEL CONJURO
+Para cualquier conjuro que cause daño, usa la tabla
+“Daño de conjuros” para establecer de forma aproximada
+el daño adecuado según el nivel del conjuro. La tabla da
+por hecho que el conjuro causa la mitad de daño si se
+supera una tirada de salvación o si el ataque falla. Si tu
+conjuro no causa daño al superar una tirada de salvación,
+puedes aumentar el daño en un 25 %.
+
+LA INVESTIGACIÓN MÁGICA DE RINGLERUN LE LLEVA
+EN UNA DIRECCIÓN INESPERADA, YA QUE HA CREADO
+SIN QUERER UN CUBILETE GELATINOSO VOLADOR.
+Puedes usar dados de daño distintos a los de la tabla
+si la media de daño es más o menos igual. Por ejemplo,
+podrías cambiar el daño de un truco y pasarlo de 1d10
+(media de 5,5) a 2d4 (media de 5), lo que reduce el daño
+máximo y hace más probable que salga un resultado
+medio.
+DAÑO DE CONJUROS
+Nivel
+del conjuro Un objetivo Varios objetivos
+Truco 1d10 1d6
+1 2d10 2d6
+2 3d10 3d6
+3 5d10 6d6
+4 6d10 7d6
+5 7d10 8d6
+6 10d10 11d6
+7 11d10 12d6
+8 12d10 13d6
+9 15d10 16d6
+CONJUROS CURATIVOS
+También puedes usar la tabla “Daño de conjuros” para
+determinar cuántos puntos de golpe restaura un conjuro
+curativo. Los trucos no deberían servir para curar.
+CAPÍTULO 3 | HERRAMIENTAS DE DM

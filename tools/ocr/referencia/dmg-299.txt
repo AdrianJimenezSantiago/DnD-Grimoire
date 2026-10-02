@@ -1,0 +1,89 @@
+NEGRARMA
+Arma (espadón), artefacto (requiere sintonización)
+Escondida en la mazmorra de la montaña del Penacho
+Blanco, Negrarma brilla como un pedazo de cielo noc-
+turno cuajado de estrellas. Su vaina negra está decorada
+con incrustaciones talladas de obsidiana.
+Recibes un bonificador de +3 a las tiradas de ataque
+y de daño que hagas con esta arma mágica. Si golpeas a un
+muerto viviente con ella, recibirás 1d10 de daño necrótico
+y el objetivo recuperará 1d10 puntos de golpe. Si este daño
+necrótico reduce tus puntos de golpe a O, Negrarma consu-
+mirá tu alma (consulta “Devorar alma” a continuación).
+Mientras empuñes esta arma, tendrás inmunidad a los
+estados de asustado y hechizado, así como visión ciega
+hasta 9 m.
+Acelerar. Negrarma puede lanzar el conjuro acelerar
+sobre ti. Una vez lanzado, no podrá volver a hacerlo hasta
+el siguiente amanecer. Ella decidirá cuándo lanzarlo
+y tendrá efecto al principio de tu turno. El conjuro durará
+1 minuto (no requiere concentración) o hasta que Negrarma
+decida ponerle fin, y podrá hacerlo al final de cualquiera
+de tus turnos.
+Devorar alma. Cuando uses a Negrarma para reducir los
+puntos de golpe de una criatura a O, la espada matará a la
+criatura y devorará su alma, a menos que la criatura sea
+un autómata o muerto viviente. Una criatura cuya alma
+haya sido consumida por Negrarma solo puede volver a la
+vida mediante un conjuro deseo.
+Cuando Negrarma devora un alma que no sea la tuya,
+obtienes una cantidad de puntos de golpe temporales igual
+a los puntos de golpe máximos de la criatura asesinada.
+Consciencia. Negrarma es un arma consciente y caótica
+neutral con una Inteligencia de 17, una Sabiduría de 10
+y un Carisma de 19. Puede oír y tiene visión en la oscuri-
+dad hasta 36 m.
+El arma habla común y puede comunicarse telepática-
+mente con quien la empuña. Su voz es profunda y retum-
+bante. Mientras tengas sintonización con ella, Negrarma
+también entenderá cualquier idioma que conozcas.
+Personalidad. Negrarma habla con tono imperioso, pues
+acostumbra a que la obedezcan.
+Su propósito es consumir almas y nó le importa
+de quién provengan, lo que incluye a quien la porte.
+La espada cree que toda la materia y la energía surgieron
+de un vacío de energía negativa y que un día volverána él.
+El propósito de Negrarma es acelerar este proceso.
+Pese a su nihilismo, Negrarma siente un extraño vínculo
+con Oleaje y Rotundo, otras dos armas encerradas bajo la
+montaña del Penacho Blanco. Desea que las tres se reúnan
+y las empuñen juntas en combate, aunque está muy en
+desacuerdo con Rotundo y encuentra a Oleaje tedioso.
+El hambre de almas de Negrarma debe satisfacerse con
+frecuencia. Si la espada lleva 3 días o más sin consumir
+un alma, al siguiente amanecer surgirá un conflicto entre
+ella y quien la empuñe.
+Destruir a Negrarma. Es posible destruir a Negrarma
+aplastándola entre los enormes engranajes de Mechanus.
+Primus, creador de los modrons, también conoce una
+serie de melodías musicales que Negrarma no soporta
+escuchar, lo que provocará que se haga añicos.
+
+NEGRARMA
+OJO DE BRUJA
+Objeto maravilloso, infrecuente
+Un ojo de bruja tiene 3 cargas. Mientras lleves o sosten-
+gas este objeto, puedes gastar 1 carga para lanzar ver
+invisibilidad o visión en la oscuridad (solo puedes hacerte
+objetivo a ti). El ojo de bruja recupera todas las cargas
+empleadas cada día, al amanecer.
+Crear un ojo de bruja. Solo un aquelarre de sagas
+puede crear este objeto, que se elabora a partir de un
+ojo de verdad barnizado y a menudo se coloca en un
+colgante u otro accesorio que se pueda llevar puesto.
+Un aquelarre de sagas solo puede tener un ojo de bruja
+a la vez, y crear uno nuevo requiere que tres miembros
+del aquelarre lleven a cabo un rito especial. Este rito
+dura 1 hora y las sagas no pueden llevarlo a cabo si una
+o más tienen el estado de incapacitadas. Si las sagas
+efectúan otra acción durante el proceso, el rito fallará
+y terminará.
+Sensor del aquelarre. El ojo de bruja suele confiarse al
+esbirro de una saga para que lo custodie y transporte.
+Como acción de magia, una saga que pertenezca al
+aquelarre que creó el ojo de bruja puede ver a través de
+él si la saga y el ojo están en el mismo plano de existencia.
+Este efecto durará mientras la saga mantenga la concen-
+tración. Varias sagas del aquelarre pueden ver a través
+del ojo de bruja al mismo tiempo.
+CAPÍTULO | TESOROS

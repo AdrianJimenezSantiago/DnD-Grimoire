@@ -1,0 +1,50 @@
+SUBCLASE
+DE ASESINO
+
+SUBCLASES DE PÍCARO
+Una subclase de pícaro es una especialización que te
+proporciona rasgos cuando alcanzas ciertos niveles de
+pícaro, según se especifique en la subclase. Esta sección
+presenta las subclases de asesino, embaucador arcano,
+ladrón y rebanaalmas.
+ASESINO
+Practica el sombrío arte de la muerte.
+El entrenamiento de un asesino se centra en el uso
+del sigilo, el veneno y los disfraces para eliminar a sus
+oponentes con una eficacia mortífera. Aunque algunos
+pícaros que siguen este camino son asesinos a sueldo,
+espías o cazarrecompensas, las aptitudes de esta subclase
+son igual de útiles para aventureros que se enfrentan
+a una gran variedad de monstruos.
+NIVEL 3: ASESINAR
+Se te da muy bien emboscar objetivos, lo que te otorga
+los siguientes beneficios.
+Golpes sorprendentes. Durante el primer asalto de cada
+combate, tienes ventaja en las tiradas de ataque contra
+cualquier criatura que aún no haya jugado un turno.
+Si tu Ataque furtivo acierta a cualquier objetivo durante
+ese asalto, el objetivo recibirá un daño adicional del tipo
+del arma igual a tu nivel de pícaro.
+Iniciativa. Tienes ventaja en las tiradas de iniciativa.
+NIVEL 3: HERRAMIENTAS DE ASESINO
+Consigues útiles de envenenador y útiles para disfrazarse
+y tienes competencia con ellos.
+NIVEL 9: PERICIA EN INFILTRARSE
+Eres experto en las siguientes técnicas que te ayudan
+en tus infiltraciones.
+Imitación magistral. Puedes imitar a la perfección
+el habla de otra persona, su caligrafía o ambas si pasas
+al menos 1 hora estudiándolas.
+Puntería ambulante. Tu velocidad no se reduce a 0 cuando
+usas Puntería certera.
+NIVEL 13: ENVENENAR ARMAS
+Cuando utilizas la opción de veneno de tu Golpe astuto,
+el objetivo también recibirá 2d6 de daño de veneno si falla
+la tirada de salvación. Este daño ignora la resistencia al
+daño de veneno.
+NIVEL 17: GOLPE MORTAL
+Cuando aciertes con tu Ataque furtivo en el primer
+asalto de un combate, el objetivo deberá hacer una tirada
+de salvación de Constitución (CD 8 más tu modificador
+por Destreza y tu bonificador por competencia). Si no la
+supera, se duplicará el daño del ataque contra el objetivo.

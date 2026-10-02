@@ -1,0 +1,365 @@
+{
+ "descripcion": "Páginas de referencia para medir los errores del OCR. «desarrollo» sirve para ajustar el corrector; «prueba» no se mira al ajustarlo y mide si generaliza.",
+ "paginas": [
+  {
+   "libro": "phb",
+   "pagina": 16,
+   "tipo": "tabla",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 28,
+   "tipo": "reglas",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 47,
+   "tipo": "tabla",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 53,
+   "tipo": "rasgos de clase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 57,
+   "tipo": "subclase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 79,
+   "tipo": "rasgos de clase",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 101,
+   "tipo": "tabla",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 128,
+   "tipo": "opciones de clase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 136,
+   "tipo": "subclase",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 159,
+   "tipo": "rasgos de clase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 172,
+   "tipo": "subclase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 182,
+   "tipo": "trasfondo",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 185,
+   "tipo": "trasfondo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 193,
+   "tipo": "especie",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 204,
+   "tipo": "dote",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 212,
+   "tipo": "dote",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 226,
+   "tipo": "equipo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 259,
+   "tipo": "conjuro",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 283,
+   "tipo": "conjuro",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 319,
+   "tipo": "conjuro",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "phb",
+   "pagina": 352,
+   "tipo": "criatura",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "phb",
+   "pagina": 364,
+   "tipo": "glosario",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 14,
+   "tipo": "narrativo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 31,
+   "tipo": "reglas",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 47,
+   "tipo": "tabla",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 59,
+   "tipo": "reglas",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 69,
+   "tipo": "reglas",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 80,
+   "tipo": "tabla",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 85,
+   "tipo": "peligro",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 101,
+   "tipo": "trampas",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 117,
+   "tipo": "aventuras",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 127,
+   "tipo": "aventura",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 146,
+   "tipo": "ambientación",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 169,
+   "tipo": "ambientación",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 191,
+   "tipo": "cosmología",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 206,
+   "tipo": "tabla",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 224,
+   "tipo": "tabla",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 234,
+   "tipo": "objeto mágico",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 254,
+   "tipo": "objeto mágico",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 269,
+   "tipo": "objeto mágico",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 299,
+   "tipo": "objeto mágico",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 314,
+   "tipo": "objeto mágico",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 340,
+   "tipo": "bastión",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "dmg",
+   "pagina": 350,
+   "tipo": "bastión",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 10,
+   "tipo": "narrativo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 17,
+   "tipo": "especie",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 21,
+   "tipo": "subclase",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 23,
+   "tipo": "subclase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 27,
+   "tipo": "subclase",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 33,
+   "tipo": "trasfondo",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 39,
+   "tipo": "trasfondo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 43,
+   "tipo": "dote",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 50,
+   "tipo": "calendario",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 60,
+   "tipo": "ambientación",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 80,
+   "tipo": "ambientación",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 105,
+   "tipo": "deidad",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 137,
+   "tipo": "equipo",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 146,
+   "tipo": "conjuro",
+   "conjunto": "desarrollo"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 148,
+   "tipo": "conjuro",
+   "conjunto": "prueba"
+  },
+  {
+   "libro": "faerun",
+   "pagina": 175,
+   "tipo": "facción",
+   "conjunto": "desarrollo"
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+NIVEL 10: DEFENSAS SEDUCTORAS
+Tu patrón te enseña a proteger tu mente y cuerpo.
+Eres inmune al estado de hechizado.
+Además, inmediatamente después de que una criatura
+que puedas ver te acierte con una tirada de ataque, puedes
+usar una reacción para reducir a la mitad el daño que
+recibes (redondeando hacia abajo) y obligar al atacante
+a hacer una tirada de salvación de Sabiduría contra tu CD
+de salvación de conjuros. Si la falla, sufrirá una cantidad
+de daño psíquico igual al daño que tú recibas. Cuando
+uses esta reacción, no podrás volver a hacerlo hasta que
+finalices un descanso largo, a menos que gastes un espacio
+de conjuro de Magia del pacto (no requiere acción) para
+restablecer su uso.
+NIVEL 14: MAGIA EMBRUJADORA
+Tu patrón te otorga la capacidad de entrelazar tu magia
+con la teletransportación. Inmediatamente después de
+lanzar un conjuro de encantamiento o ilusionismo usando
+una acción y un espacio de conjuro, puedes lanzar paso
+brumoso como parte de la misma acción y sin gastar otro
+espacio de conjuro.
+PATRÓN INFERNAL
+Haz un trato con los Planos Inferiores.
+Tu pacto recurre a los Planos Inferiores, los reinos de
+la perdición. Puedes negociar con un señor demoníaco,
+como Demogorgon u Orcus, con un archidiablo como
+Asmodeo, o con un diablo de la sima, balor, yugoloth o una
+saga de la noche especialmente notable. Estos patrones
+desean la corrupción y la destrucción de todas las cosas
+(incluyéndote a ti en última instancia) y tu camino se verá
+definido por la medida en que luchas contra esos deseos.
+NIVEL 3: BENDICIÓN DEL OSCURO
+Cuando reduzcas a 0 los puntos de golpe de un enemigo,
+obtienes una cantidad de puntos de golpe temporales
+igual a tu modificador por Carisma más tu nivel de brujo
+(mínimo de 1 punto de golpe temporal). También obtienes
+este beneficio si otra criatura reduce a 0 los puntos de
+golpe de un enemigo a 3 m o menos de ti.
+NIVEL 3: CONJUROS DEL INFERNAL
+La magia de tu patrón garantiza que siempre tengas
+ciertos conjuros preparados. Cuando alcances un nivel
+de brujo especificado en la tabla “Conjuros del infernal”,
+a partir de entonces siempre tendrás preparados los
+conjuros que se indican.
+CONJUROS DEL INFERNAL
+Nivel de brujo Conjuros
+3 Manos ardientes, orden imperiosa,
+rayo abrasador, sugestión
+5 Bola de fuego, nube apestosa
+7 Escudo de fuego, muro de fuego
+9 Geas, plaga de insectos
+
+SUBCLASE DEL
+PATRÓN FEÉRICO

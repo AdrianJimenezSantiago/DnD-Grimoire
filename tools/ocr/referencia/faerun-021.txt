@@ -1,0 +1,54 @@
+NIVEL 3: CONJUROS DEL DOMINIO
+DEL CONOCIMIENTO
+Cuando alcances un nivel de clérigo especificado en la
+tabla "Conjuros del dominio del conocimiento", a partir
+de entonces siempre tendrás preparados los conjuros
+que se indican.
+CONJUROS D EL DOM I N I O DEL CO N OC I M I ENTO
+Nivel de clérigo Conjuros preparados
+3 Clavo mental*, detectar magia*,
+detectar pensamientos*,
+entender idiomas'<, identificar*,
+orden imperiosa
+5 Disipar magia, don de lenguas'',
+indetectable
+7 Confusión, destierro, ojo arcano*
+9 Conocer las leyendas*, escudrirlar*,
+est6tica sináptica
+*Conjuro de la escuela de ad ívinación
+NIVEL 3: MAGIA MENTAL
+Como acción de magia, puedes gastar uno de los usos de
+Canalizar divinidad para manifestar tus conocimientos
+mágicos. Elige un conjuro de la escuela de adivinación
+de la tabla "Conjuros del dominio del conocimiento" que
+tengas preparado. Como parte de esa acción , lanzas ese
+conjuro sin gastar un espacio de conjuro o sin necesidad
+de componentes materiales.
+NIVEL 6: MENTE ILIMITADA
+Obtienes telepatía hasta 18 m. Cuando uses esta
+telepatía, podrás contactar simultáneamente
+hasta con una cantidad de criaturas igual a tu
+modificador por Sabiduría (mínimo una).
+Además, ganas competencia en las tiradas
+de salvación de Inteligencia. Si ya tienes esta
+competencia, obtienes competencia en las
+tiradas de salvación de una característica en
+la que no la tengas.
+NIVEL 17: PRECOGNICIÓN DIVINA
+Como acción adicional, puedes expandir tu mente
+mágicamente hacia el futuro. Durante 1 hora, tendrás
+ventaja en las pruebas con d20. Cuando uses este
+rasgo, no podrás volver a hacerlo hasta que finalices
+un descanso largo. También puedes restablecer su uso
+gastando un espacio de conjuro de nivel 6 o superior
+(no requiere acción).
+CAMINANTE INVERNAL
+(EXPLORADOR)
+Resiste los horrores de los páramos glaciales.
+Los caminantes invernales perfeccionan su arte en
+lugares gélidos y desoladores, como el Valle del Viento
+Helado. Estos implacables exploradores del hielo dan caza
+a los monstruos que asolan los páramos glaciales, aunque
+acaban convirtiéndose ellos mismos en ter roríficos
+seres frígidos. Conocen bien Los fenómenos del Valle del
+Viento Helado, incluida la magia latente de las ciudades

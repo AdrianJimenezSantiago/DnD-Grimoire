@@ -1,0 +1,72 @@
+TALISMÁN DE
+CERRAR HERIDAS
+TALISMÁN
+DE LA ESFERA
+TALISMÁN DE CERRAR HERIDAS
+Objeto maravilloso, infrecuente (requiere sintonización)
+Mientras lleves puesto este colgante, obtienes los siguien-
+tes beneficios:
+Curación natural mejorada. Cuando tires un dado de
+puntos de golpe para recuperar puntos de golpe, se dupli-
+cará la cantidad de puntos de golpe que recuperas.
+Preservar la vida. Cuando hagas una tirada de salvación
+contra muerte, puedes cambiar un resultado fallido de 9
+o menos por 10, lo que te permite superar la tirada.
+TALISMÁN DE LA ESFERA
+Objeto maravilloso, legendario (requiere sintonización)
+Mientras sostengas o lleves puesto este talismán, tendrás
+ventaja en cualquier prueba de Inteligencia (Conocimiento
+arcano) para controlar una esfera de aniquilación. Además,
+siempre que comiences tu turno controlando una esfera
+de aniquilación, puedes emplear una acción de magia para
+moverla 3 m más una cantidad de metros adicionales
+igual a 3 x tu modificador por Inteligencia. Este movi-
+miento no tiene por qué ser en línea recta.
+TALISMÁN DE SALUD
+Objeto maravilloso, infrecuente (requiere sintonización)
+Mientras lleves este colgante, puedes emplear una acción
+de magia para recuperar 2d4 + 2 puntos de golpe. Una vez
+utilizada, esta propiedad no puede volver a usarse hasta el
+siguiente amanecer.
+Además, tienes ventaja en las tiradas de salvación para
+evitar o poner fin al estado de envenenado mientras lleves
+puesto el colgante.
+CAPÍTULO 7 | TESOROS
+
+TALISMÁN DEL
+MAL DEFINITIVO
+TALISMÁN DEL BIEN PURO
+Objeto maravilloso, legendario (requiere sintonización
+por parte de un clérigo o paladín)
+Este talismán es un poderoso símbolo del bien. Un infer-
+nal o muerto viviente que toque el talismán sufre 8d6 de
+daño radiante y sufrirá el daño de nuevo cada vez que
+sostenga o lleve puesto el talismán al terminar su turno.
+Represalia pura. El talismán tiene 7 cargas. Mientras lo
+lleves puesto o lo sostengas, puedes emplear una acción de
+magia para gastar 1 carga y hacer objetivo a una criatura
+que puedas ver en el suelo a 36 m o menos de ti. Una grieta
+ardiente se abrirá bajo el objetivo, que hará una tirada de
+salvación de Destreza con CD 20. Si el objetivo es un infer-
+nal o un muerto viviente, tendrá desventaja en la tirada.
+Si la falla, caerá en la grieta y será destruido, sin dejar
+restos. Si la supera, no caerá en la grieta, pero sufrirá 4d6
+de daño psíquico debido a la terrible experiencia. En cual-
+quier caso, la grieta se cerrará y no quedará huella de su
+existencia. Cuando gastes la última carga, el talismán se
+diseminará en unas motas de luz dorada y se destruirá.
+Símbolo sagrado. Puedes emplear el talismán como
+símbolo sagrado. Obtendrás un bonificador de +2 a las
+tiradas de ataque de conjuro mientras lo lleves puesto
+o lo sostengas.
+TALISMÁN DEL MAL DEFINITIVO
+Objeto maravilloso, legendario (requiere sintonización)
+Este objeto simboliza el mal impenitente. Una criatura que
+no sea infernal o muerto viviente que toque el talismán
+sufre 8d6 de daño necrótico y sufrirá el daño de nuevo
+cada vez que sostenga o lleve puesto el talismán al termi-
+nar su turno.
+Final definitivo. El talismán tiene 6 cargas. Mientras lo
+lleves puesto o lo sostengas, puedes emplear una acción
+de magia para gastar 1 carga y hacer objetivo a una
+criatura que puedas ver en el suelo a 36 m o menos de ti.

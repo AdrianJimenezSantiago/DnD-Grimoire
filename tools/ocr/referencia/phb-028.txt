@@ -1,0 +1,112 @@
+ATACANTES Y OBJETIVOS OCULTOS
+Cuando ataques a un objetivo al que no puedas ver,
+tendrás desventaja en la tirada. Esta regla se aplica
+tanto si estás intentando adivinar la ubicación del
+objetivo como si haces objetivo a una criatura a la que
+puedes oír pero no ver. Si el objetivo no se encuentra
+en el lugar al que diriges tu ataque, fallarás.
+Cuando ataques a un objetivo que no te pueda ver,
+tendrás ventaja en la tirada de ataque.
+Si estás escondido cuando haces una tirada de ataque,
+revelarás tu ubicación tanto si el ataque acierta como
+si no.
+(los niveles no se suman). Por ejemplo, si tu objetivo está
+tras una criatura, que le proporciona cobertura media,
+y un tronco de un árbol que le proporciona cobertura tres
+cuartos, el objetivo disfrutará de cobertura tres cuartos.
+COBERTURA
+Beneficio para
+Nivel el objetivo Qué lo ofrece
+Media Bonificador de +2 a la Otra criatura o un
+CA y a las tiradas de objeto que cubra al
+salvación de Destreza menos la mitad del
+objetivo
+Tres Bonificador de +5 a la Un objeto que cubra
+cuartos CA y a las tiradas de al menos tres cuartos
+salvación de Destreza del objetivo
+Completa No puede ser objetivo Un objeto que cubre
+directo de ataques ni todo el objetivo
+conjuros
+ATAQUES A DISTANCIA
+Un ataque a distancia se lleva a cabo cuando disparas un
+arco, lanzas un hacha o arrojas cualquier otro proyectil
+con el fin de golpear a un enemigo alejado. Muchos conjuros
+también implican hacer un ataque a distancia.
+ALCANCE
+Puedes hacer ataques a distancia solo contra objetivos
+que estén dentro de un alcance concreto. Si un ataque
+a distancia, como el que puede realizarse con un conjuro,
+posee un único alcance, no podrás atacar a objetivos que
+se encuentren más allá de dicho alcance.
+Ciertos ataques a distancia, como los que se realizan
+con un arco largo, cuentan con dos alcances: el menor de
+los dos es el alcance normal y el mayor es el alcance largo.
+Si tu objetivo está más allá del alcance normal, tu tirada de
+ataque tendrá desventaja, y si el objetivo está más allá del
+alcance largo, no podrás atacarlo.
+ATAQUES A DISTANCIA EN COMBATE CUERPO
+A CUERPO
+Intentar un ataque a distancia se complica si el enemigo
+está junto a ti. Cuando hagas un ataque a distancia,
+ya sea con un arma, un conjuro o cualquier otro medio,
+tendrás desventaja en la tirada si estás a 1,5 m o menos
+de un enemigo que pueda verte y no tenga el estado de
+incapacitado (consulta el glosario de reglas).
+CAPÍTULO 1 | CÓMO JUGAR
+
+ATAQUES CUERPO A CUERPO
+Los ataques cuerpo a cuerpo te permiten atacar a un
+objetivo que esté a tu alcance. Un ataque de este tipo
+suele emplear un arma de mano o bien hacerse sin armas.
+Muchos monstruos realizan ataques cuerpo a cuerpo
+con garras, colmillos u otras partes del cuerpo. Algunos
+conjuros implican también ataques cuerpo a cuerpo.
+ALCANCE
+Una criatura tiene un alcance de 1,5 m, por lo que podrá
+atacar cuerpo a cuerpo a enemigos que estén a esa distancia
+o menos. Por otra parte, algunos seres poseen un alcance
+cuerpo a cuerpo de más de 1,5 m, como se indica en sus
+descripciones.
+ATAQUES DE OPORTUNIDAD
+Los combatientes esperan a que sus enemigos bajen la
+guardia. Si te mueves entre tus enemigos sin cuidado,
+te pones en peligro y provocas un ataque de oportunidad.
+Evitar los ataques de oportunidad. Para no provocar
+un ataque de oportunidad, puedes llevar a cabo la acción
+de destrabarse. Tampoco provocarás un ataque de
+oportunidad si te teletransportas o si alguien o algo te
+mueve sin que para ello gastes tu movimiento, tu acción, tu
+acción adicional ni tu reacción. Por ejemplo, no provocarás
+ningún ataque de oportunidad si una explosión te empuja
+fuera del alcance de un enemigo o si pasas a su lado
+mientras caes.
+Realizar un ataque de oportunidad. Puedes realizar
+un ataque de oportunidad cuando una criatura a la que
+puedas ver esté saliendo de tu alcance. Para ello, usa una
+reacción para hacer un ataque cuerpo a cuerpo con un
+arma o un ataque sin armas contra la criatura. El ataque
+tendrá lugar justo antes de que salga de tu alcance.
+COMBATE MONTADO
+Se puede usar como montura a cualquier criatura
+voluntaria que sea al menos una categoría de tamaño
+superior al jinete y que tenga la anatomía apropiada para
+esa función conforme a las siguientes reglas.
+MONTAR Y DESMONTAR
+Durante tu movimiento, puedes montar o desmontar
+de una criatura que esté a 1,5 m o menos de ti. Para ello,
+necesitarás invertir la mitad de tu velocidad (redondeada
+hacia abajo). Por ejemplo, si tu velocidad fuera de 9 m,
+gastarías 4,5 m para montar en un caballo.
+CONTROLAR UNA MONTURA
+Solo puedes controlar la montura si está entrenada para
+aceptar un jinete. Los caballos domesticados, mulas y otras
+criaturas similares cuentan con ese adiestramiento.
+La iniciativa de una montura controlada cambiará para
+coincidir con la tuya cuando montes. Se moverá en tu
+turno siguiendo tus órdenes y solo tendrá tres opciones
+para su acción durante ese turno: correr, destrabarse
+y esquivar. Una montura controlada puede moverse
+y actuar incluso desde el mismo turno en que la montas.
+Por el contrario, una montura independiente (una que te
+deja montarla, pero no se somete a tu control) conserva su
+posición en el orden de iniciativa y actúa según su criterio.

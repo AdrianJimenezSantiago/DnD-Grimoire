@@ -1,0 +1,89 @@
+HABILIDADES
+Habilidad Característica Ejemplos de usos
+Acrobacias Destreza Conservar el equilibrio en situaciones difíciles o realizar una proeza acrobática.
+Atletismo Fuerza Saltar más lejos de lo normal, mantenerse a flote en aguas revueltas o romper algo.
+Conocimiento arcano Inteligencia Recordar información acerca de conjuros, objetos mágicos y los planos de existencia.
+Engaño Carisma Contar una mentira convincente o llevar un disfraz de manera creíble.
+Historia Inteligencia Recordar información sobre acontecimientos, personas, naciones y culturas
+de carácter histórico.
+Interpretación Carisma Actuar, contar una historia, tocar un instrumento o
+Intimidación Carisma Asustar o amenazar a alguien para que haga lo que tú quieres.
+Investigación Inteligencia Encontrar información oculta en libros o deducir cómo funciona algo.
+Juego de manos Destreza Vaciar los bolsillos a alguien, ocultar un objeto que llevas en la mano o hacer trucos
+de prestidigitación.
+Medicina Sabiduría Diagnosticar una enfermedad o determinar de qué ha muerto un fallecido reciente.
+Naturaleza Inteligencia Recordar información acerca del terreno, la flora, la fauna y el clima.
+Percepción Sabiduría Mediante una combinación de sentidos, darse cuenta de algo que es fácil pasar por alto.
+Perspicacia Sabiduría Discernir el estado de ánimo y las intenciones de una persona.
+Persuasión Carisma Convencer a alguien de algo de una manera sincera y amable.
+Religión Inteligencia Recordar información sobre dioses, rituales religiosos y símbolos sagrados.
+Sigilo Destreza Pasar desapercibido al caminar en silencio y ocultarse detrás de las cosas.
+Supervivencia Sabiduría Seguir huellas, forrajear, encontrar un camino o
+Trato con animales Sabiduría Tranquilizar o adiestrar
+determinada forma.
+pruebas de característica que la empleen, pero no sumará su
+bonificador por competencia. Por ejemplo, si un personaje
+trata de trepar por un acantilado, el DM podría pedirle una
+prueba de Fuerza (Atletismo). Si el personaje es competente
+en Atletismo, sumará su bonificador por competencia
+a la prueba de Fuerza. Por el contrario, si carece de esa
+competencia, realizará la prueba sin sumar su bonificador
+por competencia.
+LISTA DE HABILIDADES
+Las habilidades se recogen en la tabla “Habilidades”,
+que da ejemplos de uso de cada una e indica las pruebas de
+característica a las que normalmente se aplica la habilidad.
+DETERMINAR LAS HABILIDADES
+Las competencias en habilidades iniciales de un personaje
+se determinan durante su creación, mientras que las de un
+monstruo aparecen en su perfil.
+HABILIDADES CON CARACTERÍSTICAS
+DIFERENTES
+Cada competencia en una habilidad está asociada a una
+prueba de característica. Por ejemplo, la habilidad de
+Intimidación está asociada al Carisma. Sin embargo,
+en ciertas situaciones, tu DM podría dejarte aplicar
+tu competencia a otro tipo de prueba. Por ejemplo,
+si un personaje trata de intimidar a alguien haciendo
+alarde de su fuerza física, su DM podría pedir una
+prueba de Fuerza (Intimidación) en vez de una de
+Carisma (Intimidación). En ese caso, el personaje haría
+una prueba de Fuerza y sumaría su bonificador por
+competencia si tuviera competencia en Intimidación.
+CAPÍTULO 1 | CÓMO JUGAR
+
+bailar.
+evitar peligros naturales.
+a un animal, o conseguir que se comporte de una
+COMPETENCIAS EN TIRADAS
+DE SALVACIÓN
+La competencia en una tirada de salvación permite al
+personaje sumar su bonificador por competencia a las
+tiradas de salvación que empleen una característica
+concreta. Por ejemplo, la competencia en tiradas de
+salvación de Sabiduría te permite sumar tu bonificador
+por competencia a las tiradas de salvación de Sabiduría.
+Algunos monstruos también tienen competencias en
+tiradas de salvación, como se indica en sus perfiles.
+Cada clase otorga competencia en al menos dos tiradas
+de salvación, lo que representa el entrenamiento de
+esa clase en evadir o resistir determinadas amenazas.
+Los magos, por ejemplo, son competentes en tiradas de
+salvación de Inteligencia y Sabiduría, ya que se entrenan
+para resistir las agresiones mentales.
+COMPETENCIAS CON EQUIPO
+Un personaje adquiere competencia con diversas armas
+y herramientas debido a su clase y a su trasfondo. Existen
+dos categorías de competencia con equipo:
+Armas. Todo el mundo puede blandir un arma, pero
+lo haces mejor si eres competente con ella. Si tienes
+competencia con un arma, sumarás tu bonificador por
+competencia a las tiradas de ataque que hagas con ella.
+Herramientas. Si eres competente con una herramienta,
+podrás sumar tu bonificador por competencia a cualquier
+prueba de característica que hagas que emplee esa
+herramienta. Además, si eres competente en la habilidad
+que se utiliza en esa prueba, también tendrás ventaja al
+hacerla. Eso significa que puedes beneficiarte tanto de la
+competencia en la habilidad como de la competencia con
+la herramienta en la misma prueba de característica.

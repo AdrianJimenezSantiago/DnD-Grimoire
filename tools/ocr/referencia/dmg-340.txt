@@ -1,0 +1,57 @@
+ARCHIVO
+Instalación de bastión de nivel 13
+Requisitos: ninguno
+Espacio: amplio
+Asalariados: 1
+Orden: investigación
+Un archivo es un repositorio de libros, mapas y pergami-
+nos. Suele estar conectado a una biblioteca y situarse tras
+una puerta cerrada con llave o secreta.
+Investigación: conocimientos útiles. Cuando das la
+orden de investigación a esta instalación, encomiendas
+al asalariado que busque información útil en el archivo.
+El encargo lleva 7 días. Obtendrá información como si
+hubiera lanzado el conjuro conocer las leyendas y te trans-
+mitirá esos conocimientos la próxima vez que habléis.
+Obra de consulta. El archivo contiene una copia de un
+libro de consulta, que te otorga un beneficio mientras
+el libro y tú estéis en el bastión. Puedes elegir una de
+las siguientes opciones (tu DM podría poner más a tu
+disposición):
+Investigaciones de los indagadores. Tienes ventaja en
+cualquier prueba de Inteligencia (Investigación)
+que hagas cuando emplees la acción de estudiar
+para hacer deducciones basadas en pistas o pruebas
+y para recordar información sobre trampas, códigos,
+enigmas y artilugios.
+CAPÍTULO 8 | BASTIONES
+
+La Antigua Fe y otras religiones. Tienes ventaja en
+cualquier prueba de Inteligencia (Religión) que hagas
+cuando emplees la acción de estudiar para recordar
+información sobre deidades, ritos y oraciones,
+jerarquías, símbolos sagrados y prácticas de sectas
+secretas.
+Las crónicas de Cronepsis. Tienes ventaja en cualquier
+prueba de Inteligencia (Historia) que hagas cuando
+emplees la acción de estudiar para recordar informa-
+ción sobre sucesos históricos, personas legendarias,
+reinos antiguos, conflictos del pasado, guerras
+y civilizaciones olvidadas.
+Manual de conocimiento arcano de Bigby. Tienes ventaja
+en cualquier prueba de Inteligencia (Conocimiento
+arcano) que hagas cuando emplees la acción de
+estudiar para recordar información sobre conjuros,
+objetos mágicos, símbolos sobrenaturales, tradiciones
+mágicas y planos de existencia.
+Reflexiones materiales sobre la naturaleza del mundo.
+Tienes ventaja en cualquier prueba de Inteligencia
+(Naturaleza) que hagas cuando emplees la acción de
+estudiar para recordar información sobre terrenos,
+plantas, animales y climas.
+Ampliar la instalación. Puedes ampliar el archivo para
+convertirlo en una instalación enorme por 2000 po.
+Si lo haces, obtendrás dos obras de consulta adicionales
+elegidas de entre las de la lista anterior. MA
+MAMA
+AIDA

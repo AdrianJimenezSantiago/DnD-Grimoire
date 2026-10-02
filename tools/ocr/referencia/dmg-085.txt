@@ -1,0 +1,110 @@
+ENREDADERA AFILADA
+Peligro moderado (niveles 1-4)
+La enredadera afilada es una planta que crece formando
+setos o marañas. También se agarra a las paredes de
+los edificios y otras superficies, al igual que la hiedra.
+Un muro o un seto de enredadera afilada de 3 m de
+alto y de ancho y 1,5 m de espesor tiene una CA de 11,
+25 pg e inmunidad al daño contundente, perforante
+y psíquico.
+Si una criatura entra en contacto con una enredadera
+afilada por primera vez en un turno, deberá superar
+una tirada de salvación de Destreza con CD 10 o sufrirá
+5 (1d10) de daño cortante por las hojas afiladas de la
+planta.
+ENREDADERA FEROZ
+Peligro moderado (niveles 1-4)
+Las enredaderas feroces cobran vida mediante magia
+y suelen aferrarse a portales, arcos, paredes y estatuas.
+Hasta que se mueva, una enredadera feroz es indistingui-
+ble de una inanimada.
+Cada enredadera feroz tiene una CA de 11, 16 pg
+e inmunidad al daño contundente, perforante y psíquico.
+Cuando una criatura entre por primera vez en un turno
+en un espacio a 1,5 m o menos de la enredadera o empiece
+su turno allí, la enredadera intentará enroscarse alre-
+dedor de ella. El objetivo deberá superar una tirada de
+salvación de Destreza con CD 12 o tendrá el estado de
+agarrado (CD 12 para escapar). Mientras esté agarrado
+de esta forma, sufrirá 5 (1d10) de daño necrótico al princi-
+pio de cada uno de sus turnos por las espinas drenadoras
+de la planta. La enredadera solo puede agarrar a una
+criatura a la vez.
+Como acción de influir, un personaje bajo los efectos
+de un conjuro hablar con las plantas u otro efecto mágico
+similar puede intentar persuadir a la enredadera para
+que suelte a su víctima si supera una prueba de Carisma
+(Persuasión) con CD 10. La enredadera no volverá
+a atacar a una criatura a la que haya soltado de esta
+forma durante las próximas 24 horas.
+A niveles superiores. Puedes aumentar el peligro
+a niveles superiores incrementando el daño necrótico,
+la CD de salvación y la CD para escapar, como se muestra
+en la siguiente tabla.
+CD de salvación/
+Niveles Daño necrótico para escapar
+5-10 11 (2d10) 14
+11-16 22 (4d10) 16
+17-20 55 (10d10) 18
+GAS VENENOSO
+Peligro moderado (niveles 1-4)
+Los gases venenosos suelen encontrarse en entornos
+cerrados, como alcantarillas o tumbas selladas. El gas
+llena todo el espacio posible hasta un máximo de diez
+
+cubos de 3 m de lado, es transparente y desprende un
+olor nauseabundo. El gas se repone de forma continua
+o periódica mediante algún tipo de origen natural
+o mágico, aunque un viento fuerte lo dispersa durante
+1 minuto.
+Si una criatura entra en el gas venenoso por primera
+vez en un turno o comienza su turno en él, hará una
+tirada de salvación de Constitución con CD 12; sufrirá
+5 (1d10) de daño de veneno si la falla o la mitad del daño
+si la supera. Las criaturas dentro del gas también tienen
+desventaja en las tiradas de salvación contra muerte.
+A niveles superiores. Puedes aumentar el peligro
+a niveles superiores incrementando el daño de veneno
+y la CD de salvación, como se muestra en la siguiente
+tabla.
+Niveles Daño de veneno CD de salvación
+5-10 11 (2d10) 14
+11-16 22 (4d10) 16
+17-20 55 (10d10) 18
+INFIERNO
+Peligro mortal (niveles 5-10) o peligro moderado (niveles 11-16)
+Cuando se propague un fuego descontrolado, puede crear
+un infierno que engulle rápidamente cualquier criatura,
+objeto y vegetación.
+Un infierno consiste en al menos cuatro cubos
+de fuego contiguos de 3 m de lado. Cada uno de ellos
+puede extinguirse con 40 l de agua. La exposición a un
+viento fuerte durante 1 minuto hará que el infierno se
+propague y añadirá 1d4 cubos nuevos de 3 m de lado
+a su volumen. Si se queda sin combustible, se consume
+tras 1d10 minutos.
+Un infierno daña cualquier vegetación u objeto que
+toque y que no lleve ni vista nadie, lo que causa 22 (4d10)
+de daño de fuego inmediatamente y otra vez tras cada
+minuto posterior. Cualquier criatura que entre en el
+infierno por primera vez en un turno o que comience
+su turno en él sufrirá 22 (4d10) de daño de fuego y empe-
+zará a arder.
+LIMO VERDE
+Peligro moderado (niveles 1-4)
+El limo verde ácido devora carne, materia orgánica
+y metal con el mero contacto. Es húmedo, pegajoso
+y de un color verde brillante, y se adhiere a las paredes,
+suelos y techos formando parches.
+Un parche de limo verde cubre un cuadrado de 1,5 m
+de lado, tiene visión ciega hasta 9 m y se deja caer
+desde paredes y techos si percibe movimiento debajo
+de él. Más allá de esto, no puede moverse. Una criatura
+consciente de la presencia del limo puede evitar que la
+alcance si supera una tirada de salvación de Destreza
+con CD 10.
+Cualquier criatura que entre en contacto con el
+limo verde recibe 5 (1d10) de daño de ácido. Además,
+volverá a recibir este daño al principio de cada uno de
+sus turnos hasta que se limpie (requiere una acción)
+CAPÍTULO 3 | HERRAMIENTAS DE DM

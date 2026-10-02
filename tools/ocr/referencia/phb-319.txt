@@ -1,0 +1,100 @@
+PALABRA DE PODER: MATAR
+Encantamiento de nivel 9 (bardo, brujo, hechicero, mago)
+Tiempo de lanzamiento: Acción
+Alcance: 18 m
+Componentes: V
+Duración: Instantáneo
+Obligas a morir a una criatura que puedas ver dentro del
+alcance. Si el objetivo tiene 100 puntos de golpe o menos,
+morirá. De lo contrario, sufrirá 12d12 de daño psíquico.
+PALABRA DE PODER: SANAR
+Encantamiento de nivel 9 (bardo, clérigo)
+Tiempo de lanzamiento: Acción
+Alcance: 18 m
+Componentes: V
+Duración: Instantáneo
+Una criatura que puedas ver dentro del alcance se ve
+envuelta por una oleada de energía sanadora. El objetivo
+recupera todos sus puntos de golpe. Si la criatura tiene
+los estados de asustada, aturdida, envenenada, hechizada
+o paralizada, los estados terminan. Si la criatura tiene
+el estado de derribada, puede usar su reacción para
+levantarse.
+PALABRA DE REGRESO
+Conjuración de nivel 6 (clérigo)
+Tiempo de lanzamiento: Acción
+Alcance: 1,5 m
+Componentes: V
+Duración: Instantáneo
+Tú y hasta cinco criaturas voluntarias a 1,5 m o menos de
+ti os teletransportáis al instante a un santuario designado
+previamente. Tú y cualquier criatura que se teletransporte
+contigo apareceréis en el espacio sin ocupar más cercano
+al punto designado al preparar el santuario (consulta más
+adelante). Si lanzas este conjuro sin preparar antes un
+santuario, no tiene ningún efecto.
+Debes designar un lugar como santuario lanzando este
+conjuro allí; por ejemplo, en un templo.
+PALABRA DE RESPLANDOR
+Truco de evocación (clérigo)
+Tiempo de lanzamiento: Acción
+Alcance: Lanzador
+Componentes: V, M (un símbolo con forma de rayo)
+Duración: Instantáneo
+Un fulgor ardiente surge de ti en una emanación de 1,5 m.
+Todas las criaturas de tu elección que puedas ver en ella
+deberán superar una tirada de salvación de Constitución
+o sufrirán 1d6 de daño radiante.
+Mejora de truco. El daño aumenta en 1d6 cuando
+alcanzas los niveles 5 (2d6), 11 (3d6) y 17 (4d6).
+
+PALABRA DIVINA
+Evocación de nivel 7 (clérigo)
+Tiempo de lanzamiento: Acción adicional
+Alcance: 9 m
+Componentes: V
+Duración: Instantáneo
+Susurras una palabra imbuida con el poder de los Planos
+Superiores. Todas las criaturas de tu elección dentro
+del alcance realizan una tirada de salvación de Carisma.
+Si la fallan, los objetivos que tengan 50 puntos de golpe
+o menos sufrirán un efecto en función de sus puntos
+de golpe actuales, como se muestra en la tabla “Efectos
+de palabra divina”. Con independencia de sus puntos
+de golpe, cualquier objetivo celestial, elemental, feérico
+o infernal que falle su tirada de salvación se verá forzado
+a regresar a su plano de origen (si no está en él ya) y no
+podrá regresar al plano actual durante 24 horas por
+cualquier medio que no sea un conjuro deseo.
+EFECTOS DE PALABRA DIVINA
+Puntos de golpe Efecto
+0-20 El objetivo muere.
+21-30 El objetivo tiene los estados de aturdido,
+cegado y ensordecido durante 1 hora.
+31-40 El objetivo tiene los estados de cegado
+y ensordecido durante 10 minutos.
+41-50 El objetivo tiene el estado de
+ensordecido durante 1 minuto.
+PARAR EL TIEMPO
+Transmutación de nivel 9 (hechicero, mago)
+Tiempo de lanzamiento: Acción
+Alcance: Lanzador
+Componentes: V
+Duración: Instantáneo
+Detienes el paso del tiempo brevemente para todo el mundo
+menos para ti. Para las demás criaturas, el tiempo no
+avanza, mientras que tú puedes llevar a cabo 1d4 + 1 turnos
+seguidos, durante los cuales puedes usar acciones y moverte
+con normalidad.
+Este conjuro termina si una de las acciones que usas
+o uno de los efectos que creas durante este periodo afecta
+a una criatura que no seas tú o a un objeto que lleve o vista
+alguien que no seas tú. También termina si te mueves a un
+sitio que esté a más de 300 m del lugar donde lo lanzaste.
+PASAMUROS
+Transmutación de nivel 5 (mago)
+Tiempo de lanzamiento: Acción
+Alcance: 9 m
+Componentes: V, S, M (una pizca de semillas de sésamo)
+Duración: 1 hora
+CAPÍTULO 7 | CONJUROS

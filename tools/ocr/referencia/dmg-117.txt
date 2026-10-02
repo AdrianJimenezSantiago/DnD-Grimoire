@@ -1,0 +1,96 @@
+que emplear recursos curativos. Como pauta general,
+un único monstruo normalmente plantea un desafío de
+dificultad baja para un grupo de cuatro personajes cuyo
+nivel sea igual al valor de desafío del monstruo.
+Dificultad moderada. Sin emplear curación y otros
+recursos, un encuentro de dificultad moderada puede
+acabar mal para los aventureros. Los personajes más
+débiles podrían quedar fuera de combate y hay una
+ligera posibilidad de que uno o varios aventureros
+mueran.
+Dificultad alta. Un encuentro de dificultad alta podría
+resultar letal para uno o varios personajes. Para sobre-
+vivir, los personajes necesitarán tácticas inteligentes,
+razonamiento rápido y puede que incluso un poco de
+suerte.
+Paso 2: definir tu presupuesto de PX. Mediante la tabla
+“Presupuesto de PX por personaje”, comprueba el nivel
+del grupo y la dificultad deseada para el encuentro. Mul-
+tiplica la cifra de la tabla por el número de personajes que
+componen el grupo para obtener tu presupuesto de PX
+para el encuentro.
+PRESUPUESTO DE PX POR PERSONAJE
+Dificultad del encuentro
+Nivel del
+grupo Baja Moderada
+1 50 75
+2 100 150
+3 150 225
+4 250 375
+5 500 750
+6 600 1000
+7 750 1300
+8 1000 1700
+9 1300 2000
+10 1600 2300
+11 1900 2900
+12 2200 3700
+13 2600 4200
+14 2900 4900
+15 3300 5400
+16 3800 6100
+17 4500 7200
+18 5000 8700
+19 5500 10 700
+20 6400 13 200
+Paso 3: gastar el presupuesto. Cada criatura tiene un
+valor de PX en su perfil. Cuando añadas una criatura a un
+encuentro de combate, resta sus PX del presupuesto total
+para determinar cuántos PX te quedan por gastar. Gasta
+todo lo que puedas del presupuesto, pero sin excederlo.
+
+No pasa nada si te sobra algún PX. A continuación tienes
+varios ejemplos:
+Ejemplo 1. Un encuentro de dificultad baja para cuatro
+personajes de nivel 1 tiene un presupuesto de PX de
+50 × 4, lo que haría un total de 200 PX. Con él, podrías
+diseñar cualquiera de los siguientes encuentros:
+• 1 guerrero osgo (200 PX)
+• 2 avispas gigantes (100 PX cada una), 200 PX en total
+• 6 ramas marchitas (25 PX cada una), 150 PX en total
+Ejemplo 2. Un encuentro de dificultad moderada para
+cinco personajes de nivel 3 tiene un presupuesto de
+PX de 225 × 5, lo que haría un total de 1125 PX. Con él,
+podrías diseñar uno de estos encuentros:
+• 2 nóticos (450 PX cada uno) y 9 estirges (25 PX cada una),
+1125 PX en total
+• 1 tumulario (700 PX), 1 caballo de guerra esqueleto (100 PX)
+y 6 esqueletos (50 PX cada uno), 1100 PX en total
+Ejemplo 3. Un encuentro de dificultad alta para seis
+personajes de nivel 15 tiene un presupuesto de PX de
+7800 × 6, lo que haría un total de 46 800 PX. Con él,
+podrías diseñar este encuentro:
+• 2 dragones rojos adultos (18 000 PX cada uno) y 2 gigantes
+de fuego (5000 PX cada uno), 46 000 PX en total
+Alta
+100
+200
+400
+500
+1100
+1400
+1700
+2100
+2600
+3100
+4100
+4700
+5400
+6200
+7800
+9800
+11 700
+14 200
+17 200
+22 000
+CAPÍTULO 4 | CREAR AVENTURAS

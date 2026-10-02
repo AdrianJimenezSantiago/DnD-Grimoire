@@ -1,0 +1,49 @@
+LANZADOR DE CONJUROS MULTICLASE:
+ESPACIOS DE CONJURO POR CADA NIVEL
+DE CONJURO
+Nivel 1 2 3 4 5 6 7 8
+Espacios de conjuro. Determina tus espacios de conjuro
+sumando lo siguiente:
+• Todos tus niveles de bardo, clérigo, druida, hechicero
+y mago.
+• La mitad de tus niveles de explorador y paladín
+(redondeando hacia arriba).
+• Un tercio de tus niveles de guerrero y pícaro
+(redondeando hacia abajo) si tienes las subclases
+de caballero arcano o embaucador arcano.
+Después, busca ese total en la columna “Nivel” de la tabla
+“Lanzador de conjuros multiclase”. Utilizas los espacios
+de ese nivel para lanzar conjuros de un nivel apropiado
+de cualquier clase con la que poseas el rasgo Lanzamiento
+de conjuros.
+Esta tabla podría proporcionarte espacios de conjuro
+de un nivel superior que los conjuros que preparas. Puedes
+usar estos espacios igualmente, pero solo para lanzar tus
+conjuros de nivel inferior. Si un conjuro de nivel inferior
+que lances, como manos ardientes, tiene un efecto mejorado
+cuando se lanza a un nivel superior, puedes usar el efecto
+mejorado como es habitual.
+Por ejemplo, si eres una exploradora de nivel 4/
+hechicera de nivel 3, cuentas como un personaje de nivel 5
+al determinar tus espacios de conjuro, tras sumar todos
+tus niveles como hechicera y la mitad de tus niveles de
+exploradora. Según indica la tabla “Lanzador de conjuros
+multiclase”, tienes cuatro espacios de conjuro de nivel 1,
+tres de nivel 2 y dos de nivel 3. Sin embargo, no puedes
+
+9
+UN PERSONAJE CON NIVELES DE BRUJO Y PALADÍN PODRÍA
+RECURRIR A UN PATRÓN SOBRENATURAL Y A UN PODEROSO
+JURAMENTO.
+preparar conjuros de nivel 3 ni conjuros de explorador de
+nivel 2. Puedes usar los espacios de conjuro de esos niveles
+para lanzar los conjuros que prepares y, si es posible,
+mejorar sus efectos.
+Magia del pacto. Si posees el rasgo Magia del pacto de
+la clase brujo y el rasgo Lanzamiento de conjuros, puedes
+usar los espacios de conjuro que obtienes con Magia del
+pacto para lanzar conjuros preparados de clases con el
+rasgo Lanzamiento de conjuros y puedes usar los espacios
+que obtengas con el rasgo Lanzamiento de conjuros para
+lanzar los conjuros de brujo que tengas preparados.
+CAPÍTULO 2 | CREAR UN PERSONAJE

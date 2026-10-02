@@ -1,0 +1,43 @@
+SENDA DEL BERSERKER
+Canaliza la furia en una violencia indómita.
+Los bárbaros que recorren la senda del berserker ponen su
+furia principalmente al servicio de la violencia. Su senda
+se asienta en una rabia sin cortapisas y estos bárbaros se
+embriagan del caos del combate mientras dejan que su
+furia se apodere de ellos y los fortalezca.
+NIVEL 3: FRENESÍ
+Si utilizas Ataque temerario mientras estás enfurecido,
+causarás daño adicional al primer objetivo al que
+aciertes en tu turno con un ataque basado en la Fuerza.
+Para determinar el daño adicional, tira una cantidad de
+d6 igual a tu bonificación de daño por furia y suma los
+resultados. El daño será del mismo tipo que el del arma
+o ataque sin armas utilizado para el ataque.
+NIVEL 6: FURIA IRRACIONAL
+Tienes inmunidad a los estados de asustado y hechizado
+mientras estés enfurecido. Si estás asustado o hechizado
+cuando te dejes llevar por la furia, el estado terminará
+para ti.
+NIVEL 10: REPRESALIA
+Cuando recibas daño de una criatura que esté a 1,5 m
+o menos de ti, puedes llevar a cabo una reacción para
+hacer un ataque cuerpo a cuerpo contra esa criatura
+usando un arma o un ataque sin armas.
+NIVEL 14: PRESENCIA INTIMIDANTE
+Como acción adicional, puedes sembrar el terror en los
+demás con tu mera presencia amenazadora y tu poder
+primigenio. Cuando lo hagas, todas las criaturas de tu
+elección situadas en una emanación de 9 m originada
+en ti deberá hacer una tirada de salvación de Sabiduría
+(CD 8 más tu modificador por Fuerza y tu bonificador por
+competencia). Si la fallan, tendrán el estado de asustadas
+durante 1 minuto. Al final de cada uno de sus turnos,
+las criaturas asustadas repiten la tirada de salvación y,
+si tienen éxito, se librarán del efecto.
+Cuando uses este rasgo, no podrás volver a hacerlo
+hasta que finalices un descanso largo, a menos que gastes
+un uso de tu furia (no requiere acción) para restablecer
+su uso.
+
+SUBCLASE DE LA
+SENDA DEL BERSERKER

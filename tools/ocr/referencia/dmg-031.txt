@@ -1,0 +1,112 @@
+TIRADAS DE ATAQUE
+En un combate, las tiradas de ataque se utilizan para
+determinar si un ataque acierta.
+También puedes usarlas para resolver actividades
+pacíficas que sean similares a los ataques en combate,
+como un concurso de tiro con arco o una partida de dar-
+dos. Asigna una clase de armadura al objetivo, decide si
+el personaje es competente con el arma utilizada y pídele
+al jugador que haga una tirada de ataque (consulta tam-
+bién “Grados de acierto” en este capítulo).
+TIRADAS DE SALVACIÓN
+Al contrario que las pruebas de característica, las tiradas
+de salvación son respuestas inmediatas a un efecto y casi
+nunca se hacen de forma voluntaria. Una tirada de sal-
+vación tiene más sentido cuando algo malo amenaza
+a un personaje y este tiene la oportunidad de evitarlo
+o soportar sus efectos.
+La mayoría de las veces, las tiradas de salvación entran
+en juego cuando un efecto (como un conjuro, una capaci-
+dad de un monstruo o una trampa) las pide, te indica qué
+tipo de tirada de salvación hacer y te ofrece una CD.
+En otras situaciones que exigen una tirada de salvación,
+tú decides qué puntuación de característica procede.
+La tabla “Características, pruebas de característica y tira-
+das de salvación” ofrece algunas sugerencias al respecto.
+CLASE DE DIFICULTAD
+Tú determinas la clase de dificultad de una prueba de
+característica o una tirada de salvación si no la indican las
+reglas o la aventura. Elige una CD de la tabla “CD típicas”
+en función de la dificultad de la tarea.
+CD TÍPICAS
+Tarea CD Tarea CD
+Muy fácil 5 Difícil
+Fácil 10 Muy difícil
+Moderada 15 Casi imposible
+El grado de dificultad de las tareas se explica
+a continuación:
+Muy fácil. Casi todo el mundo puede superar una tarea
+con CD 5 con pocas posibilidades de fallo. A menos que
+las circunstancias sean extraordinarias, deja que los
+personajes realicen esa tarea sin tener que hacer una
+prueba.
+Fácil, moderada y difícil. Estos son los tipos de dificultad
+más habituales y puedes dirigir la partida solo con ellos.
+Si un personaje tiene un 10 en la característica en cues-
+tión, pero no posee competencia, podrá realizar una
+tarea fácil más o menos la mitad de las veces. En el caso
+de una tarea moderada, un personaje necesita o una
+puntuación más alta o competencia para tener unas
+posibilidades de éxito similares, mientras que una
+tarea difícil requiere ambas condiciones para que así
+sea. Si no tienes claro qué nivel de dificultad elegir de
+entre dos, elige una CD que esté más o menos a mitad,
+como 17 o 18 para una tarea que sea un poco más
+sencilla que “difícil”.
+
+Muy difícil y casi imposible. Una tarea con CD 25 es
+prácticamente imposible para los personajes de niveles
+bajos, pero empieza a ser factible tras el nivel 10, apro-
+ximadamente. Una tarea con CD 30 es imposible para
+un personaje de nivel bajo, e incluso un personaje de
+nivel 20 que aplique su competencia y tenga un 20 en
+una puntuación de característica relevante necesitará
+sacar un 19 o 20 en el dado para realizar una tarea de
+esta dificultad.
+Para elegir la CD de una tirada de salvación, no te vayas
+por debajo de 10 ni por encima de 20. Si una criatura es la
+fuente del efecto que provoca la tirada de salvación, uti-
+liza la fórmula estándar para calcular la CD de salvación
+(consulta “Calcular las CD” a continuación).
+CALCULAR LAS CD
+Para algunas pruebas de característica y la mayoría de
+las tiradas de salvación, las reglas usan por defecto la
+siguiente fórmula:
+CD = 8 + modificador por característica
++ bonificador por competencia
+Esta fórmula suele determinar la CD de la tirada de salva-
+ción cuando una criatura lanza un conjuro y utiliza una
+capacidad especial, pero también puede aplicarse a las
+pruebas de característica cuando se den tiradas enfren-
+tadas entre dos criaturas. Por ejemplo, si una criatura
+mantiene una puerta cerrada, utiliza su modificador por
+Fuerza y su bonificador por competencia para determinar
+la CD para abrir la puerta. Cuando otra criatura trate
+de abrir la puerta a la fuerza, realizará una prueba de
+Fuerza (Atletismo) contra esa CD.
+Otra forma de abordar situaciones similares es que la
+prueba de característica de una criatura establezca la CD
+de la prueba de otra criatura. Por ejemplo, así funciona
+la acción de esconderse: el resultado de la prueba de Des-
+treza (Sigilo) de una criatura que se esconda establece la
+20 CD para las pruebas de Sabiduría (Percepción) necesarias
+25 para encontrar a dicha criatura.
+30
+VENTAJA Y DESVENTAJA
+La ventaja y la desventaja son dos de las mejores herra-
+mientas de las que dispones como DM. Reflejan circuns-
+tancias temporales que podrían afectar a las posibilidades
+de que los personajes tengan éxito en una tarea. Además,
+la ventaja es una forma fantástica de recompensar a los
+jugadores que muestran una creatividad excepcional.
+Lo habitual es que los personajes obtengan ventaja
+o desventaja al usar capacidades especiales, acciones,
+conjuros u otros rasgos de sus clases o especies. En otros
+casos, tú decides si una circunstancia merece otorgar
+ventaja o desventaja.
+Como se describe en el Manual del jugador, si diversas
+circunstancias fuesen a otorgar tanto ventaja como
+desventaja en una situación, no se aplicará ninguna de las
+dos, independientemente del número de circunstancias
+que las concedan.
+CAPÍTULO 2 | DIRIGIR EL JUEGO

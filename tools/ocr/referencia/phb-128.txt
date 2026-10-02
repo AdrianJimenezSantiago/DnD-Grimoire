@@ -1,0 +1,73 @@
+CONJURO CUIDADOSO
+Coste: 1 punto de hechicería
+Cuando lanzas un conjuro que obliga a otras criaturas
+a realizar una tirada de salvación, puedes proteger
+a algunas de esas criaturas de la fuerza completa del
+conjuro. Para ello, gasta 1 punto de hechicería y escoge
+hasta una cantidad de criaturas igual tu modificador
+por Carisma (mínimo una criatura). Las criaturas
+elegidas tienen éxito automáticamente en sus tiradas de
+salvación contra el conjuro y no reciben daño alguno
+si normalmente recibirían la mitad de daño del mismo
+al superar una tirada de salvación.
+CONJURO DISTANTE
+Coste: 1 punto de hechicería
+Cuando lanzas un conjuro que tenga como mínimo un
+alcance de 1,5 m, puedes gastar 1 punto de hechicería para
+duplicar el alcance del conjuro. Como alternativa, cuando
+lanzas un conjuro que tenga un alcance de toque, puedes
+gastar 1 punto de hechicería para hacer que su alcance
+sea de 9 m.
+CAPÍTULO 3 | CLASES DE PERSONAJE
+
+CONJURO EXTENDIDO
+Coste: 1 punto de hechicería
+Cuando lanzas un conjuro que tenga una duración de al
+menos 1 minuto, puedes gastar 1 punto de hechicería para
+duplicar su duración, hasta un máximo de 24 horas.
+Si el conjuro afectado requiere concentración, tienes
+ventaja en cualquier tirada de salvación que hagas para
+mantener la concentración.
+CONJURO GEMELO
+Coste: 1 punto de hechicería
+Cuando lances un conjuro, como hechizar persona,
+que puede lanzarse mediante un espacio de conjuro
+de niveles superiores para hacer objetivo a criaturas
+adicionales, puedes gastar 1 punto de hechicería para
+aumentar el nivel efectivo del conjuro en 1.
+CONJURO INTENSIFICADO
+Coste: 2 puntos de hechicería
+Cuando lanzas un conjuro que obliga como mínimo a una
+criatura a hacer una tirada de salvación, puedes gastar
+2 puntos de hechicería para que uno de los objetivos del
+conjuro tenga desventaja en las tiradas de salvación que
+realice contra el conjuro.
+CONJURO POTENCIADO
+Coste: 1 punto de hechicería
+Cuando tiras el daño de un conjuro, puedes gastar 1 punto
+de hechicería para repetir la tirada de, como mucho,
+tantos dados de daño como tu modificador por Carisma
+(mínimo de un dado) y deberás usar los nuevos resultados.
+Puedes usar Conjuro potenciado aunque ya hayas
+empleado una opción diferente de metamagia durante
+el lanzamiento del conjuro.
+CONJURO SUTIL
+Coste: 1 punto de hechicería
+Cuando lanzas un conjuro, puedes gastar 1 punto
+de hechicería para hacerlo sin componentes verbales,
+somáticos ni materiales, salvo por componentes materiales
+que se consuman como parte del conjuro o que tengan un
+coste especificado en él.
+CONJURO TRANSMUTADO
+Coste: 1 punto de hechicería
+Cuando lances un conjuro que inflija un tipo de daño
+de la siguiente lista, puedes gastar 1 punto de hechicería
+para cambiar ese tipo de daño a uno de los otros tipos
+indicados: ácido, frío, fuego, relámpago, trueno y veneno.
+LISTA DE CONJUROS DE HECHICERO
+Esta sección presenta la lista de conjuros de hechicero.
+Los conjuros se organizan por su nivel y por orden
+alfabético y se indica la escuela mágica de cada uno de
+ellos. En la columna “Especial”, C significa que el conjuro
+requiere concentración, R significa que es un ritual y M
+significa que requiere un componente material específico.

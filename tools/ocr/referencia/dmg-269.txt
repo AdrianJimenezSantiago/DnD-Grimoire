@@ -1,0 +1,85 @@
+Azote de infernales. Mientras lleves el libro, cuando
+vayas a hacer una tirada de daño para un conjuro lanzado
+contra un infernal, usas el mayor resultado posible en
+lugar de tirar.
+Conjuros. El libro tiene 8 cargas y recupera 1d8 cargas
+empleadas cada día, al amanecer. Mientras lo sostienes,
+puedes emplear una acción de magia para lanzar uno de
+los conjuros (CD de salvación 20) de la siguiente tabla.
+En ella se indica cuántas cargas debes gastar para lanzar
+el conjuro.
+Conjuro Coste en cargas
+Aliado planar 3
+Atadura planar 2
+Círculo mágico 1
+Desplazamiento entre planos 3
+(solo al Abismo)
+Invocar infernal 3
+Risa horrible de Tasha 0
+Urna mágica 3
+Conocimiento abisal. Puedes consultar el Demonomicón
+siempre que hagas una prueba de Inteligencia para
+obtener información sobre demonios o una prueba de
+Sabiduría (Supervivencia) relacionada con el Abismo.
+Si lo haces, obtienes ventaja en la prueba.
+Contención. Las primeras diez páginas del Demono-
+micón están en blanco. Como acción de magia mientras
+sostienes el libro, puedes hacer objetivo a un infernal que
+puedas ver y que esté atrapado dentro de la zona de un
+conjuro de círculo mágico. El infernal deberá superar una
+tirada de salvación de Carisma con CD 20 y con desven-
+taja o quedará atrapado en una de las páginas en blanco
+del Demonomicón, en la que quedará escrito el nombre
+conocido y las depravaciones más famosas de la criatura.
+Una vez utilizada, esta acción no puede volver a usarse
+hasta el siguiente amanecer.
+Tras finalizar un descanso largo, si el Demonomicón
+y tú estáis en el mismo plano de existencia, una criatura
+atrapada en el libro puede intentar poseerte. Tendrás que
+hacer una tirada de salvación de Carisma con CD 20. Si la
+fallas, la criatura te poseerá y podrá controlarte como
+DIADEMA DE
+ESTALLIDOS
+DEMONOMICÓN
+DE IGGWILV
+
+a una marioneta. Como acción de magia, la criatura que te
+posea podrá liberarte y aparecer en el espacio sin ocupar
+más cercano a ti. Si superas la tirada, el infernal no podrá
+intentar poseerte de nuevo en los próximos 7 días, pero sí
+que podrá intentarlo otro infernal atrapado en el libro.
+Cuando descubres el tomo, tiene 1d4 infernales en sus
+páginas, normalmente demonios de varios tipos.
+Propiedades aleatorias. El artefacto tiene las siguientes
+propiedades aleatorias (consulta “Artefactos” en este
+capítulo):
+• 2 propiedades beneficiosas menores
+• 1 propiedad perjudicial menor
+• 1 propiedad perjudicial mayor
+Destruir el Demonomicón. Para destruir el libro, seis
+señores demoníacos diferentes deben arrancar cada uno
+la sexta parte de las páginas del libro. Si lo hacen, las pági-
+nas vuelven a aparecer transcurridas 24 horas. Antes de
+que pase ese tiempo, quienquiera que abra las tapas del
+libro es transportado a una capa incipiente del Abismo
+oculta en el tomo. En el centro de este dominio mortífero
+y semiconsciente se encuentra un artefacto perdido hace
+mucho tiempo, el Bastón de Fraz-Urb'luu. Si el bastón se
+saca de este plano oculto, el libro se convierte en una
+copia anticuada, vulgar y corriente del Tomo de Zyx,
+la obra en la que se basó el Demonomicón de Iggwilv.
+El Tomo de Zyx puede destruirse como cualquier otro
+libro. En cuanto el bastón emerge de este plano, el señor
+demoníaco Fraz-Urb'luu lo sabe al instante.
+DIADEMA DE ESTALLIDOS
+Objeto maravilloso, infrecuente
+Mientras lleves puesta esta diadema, puedes lanzar rayo
+abrasador desde ella (+5 a acertar). La diadema no podrá
+volver a lanzar este conjuro hasta el siguiente amanecer.
+DIADEMA DE INTELECTO
+Objeto maravilloso, infrecuente (requiere sintonización)
+Tu Inteligencia es de 19 mientras lleves esta diadema.
+No tiene efecto si tu Inteligencia es de 19 o más sin ella.
+DIADEMA DE
+INTELECTO
+CAPÍTULO 7 | TESOROS

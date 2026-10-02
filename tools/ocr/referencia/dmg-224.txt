@@ -1,0 +1,100 @@
+RASGOS ESPECIALES
+DE OBJETOS MÁGICOS
+Puedes darle un encanto especial a un objeto mágico
+reflexionando sobre su trasfondo. ¿Quién lo fabricó?
+¿Hay algo inusual en su construcción? ¿Para qué se
+hizo y cómo se utilizaba originalmente? ¿Qué particula-
+ridades mágicas menores lo diferencian de otros objetos
+del mismo tipo? Responder a estas preguntas puede
+ayudarte a convertir un objeto mágico genérico, como
+una espada larga +1, en un hallazgo más interesante.
+Emplea las siguientes tablas para definir los detalles
+sobre la historia de un objeto mágico. Algunas entradas
+de la tabla son más apropiadas para ciertos tipos de obje-
+tos. Si el resultado de una tirada no tiene sentido, repítela,
+elige una entrada más adecuada o utiliza el detalle obte-
+nido como idea para crear tu propio rasgo especial.
+En las tablas “Propiedad menor del objeto mágico”
+y “Peculiaridad del objeto mágico”, el uso de la segunda
+persona se refiere a quien porta el objeto.
+CREADOR O DESTINATARIO
+DEL OBJETO MÁGICO
+1d20 Creador o destinatario
+1 Aberración. Este objeto es muy antiguo.
+A simple vista, parece cubierto de mucosa.
+2 Celestial. Este objeto pesa la mitad de lo
+normal y está grabado con alas con plumas,
+soles y estrellas. Los infernales lo consideran
+repulsivo.
+3 Devotos de Lolth. Este objeto pesa la mitad de
+lo normal y está grabado con arañas y telarañas
+en honor a Lolth.
+4 Dragón. Este objeto incluye metales y piedras
+preciosas del tesoro de un dragón. Se calienta
+ligeramente cuando está a 36 m o menos de un
+dragón.
+5 Elemental de agua. Unas lustrosas escamas
+de pez han sustituido al cuero y la tela de este
+objeto, mientras que las partes normalmente
+metálicas están hechas de conchas y coral
+trabado, tan fuertes como cualquier metal.
+6 Elemental de aire. Este objeto pesa la mitad de
+lo normal y parece hueco. Si está hecho de un
+tejido, es diáfano.
+7 Elemental de fuego. Este objeto es cálido al
+tacto y las partes metálicas están hechas de
+hierro negro. Su superficie está cubierta de
+grabados de llamas.
+8 Elemental de tierra. Este objeto podría estar
+fabricado en piedra. Cualquier parte de tela
+o cuero está repujada con piedras cuidadosa-
+mente pulidas.
+CAPÍTULO 7 | TESOROS
+
+1d20 Creador o destinatario
+9-10 Elfo. Este objeto pesa la mitad de lo normal
+y está adornado con símbolos naturales: hojas,
+ramas, estrellas y similares.
+11-12 Enano. Este objeto es muy resistente y tiene
+runas enanas integradas en el diseño. Podría
+estar asociado con un clan, al que le gustaría
+que fuera devuelto a su morada ancestral.
+13 Feérico. Este objeto está cuidadosamente
+fabricado a partir de los mejores materiales
+y brilla a la luz de la luna con un fulgor pálido
+que emite luz tenue en un radio de 1,5 m.
+Cualquier elemento de hierro o acero del
+objeto se ha sustituido por plata o mithral.
+14 Gigante. Este objeto es más grande de lo
+normal. Lo fabricaron gigantes para que
+aliados más pequeños lo usaran.
+15 Gnomo. Este objeto está fabricado para
+parecer normal e incluso desgastado. Posible-
+mente incorpore engranajes y componentes
+mecánicos que no tienen por qué ser cruciales
+para su funcionamiento.
+16-18 Humano. Este objeto se creó durante el
+apogeo de un reino humano ya caído o está
+relacionado con un humano legendario.
+Podría tener escritura en una lengua olvidada
+o símbolos cuyo significado se ha perdido
+en el tiempo.
+19 Infernal. Este objeto esta hecho de hierro
+o de cuerno y se ha sustituido cualquier
+parte de cuero o tela por piel de infernales.
+Su superficie muestra caras maliciosas
+o runas repugnantes. Los celestiales lo
+consideran repulsivo.
+20 Muertos vivientes. Este objeto tiene imagi-
+nería de la muerte, como huesos y calaveras,
+y podría haber sido confeccionado a partir
+de trozos de cadáveres. Está frío al tacto.
+HISTORIA DEL OBJETO MÁGICO
+1d8 Historia
+1 Arcano. Una antigua orden de lanzadores
+de conjuros creó este objeto, que exhibe
+el símbolo de la organización.
+2 Heroico. Un gran héroe utilizó este objeto.
+Cualquiera que conozca la historia del objeto
+tendrá enormes expectativas de los actos del
+nuevo dueño.
