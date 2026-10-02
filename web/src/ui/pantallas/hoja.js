@@ -139,6 +139,7 @@ function efectosHtml(ch) {
   return `<div class="res wide ef-card"><strong>${gi('ojo')} Efectos activos</strong>${h || '<span class="rnote">Nada activo. Marca un rasgo cuando lo uses sobre alguien, o concéntrate en un conjuro.</span>'}${add}
     ${pl.conc ? `<label class="chk-line ef-pedir"><input type="checkbox" data-pedirobj ${pl.pedirObjetivos ? 'checked' : ''}> Preguntar sobre quién al concentrarme en un conjuro con objetivos</label>` : ''}</div>`;
 }
+const ICONO_GRUPO = { fijados: 'inspiracion', accion: 'combate', adicional: 'relampago', reaccion: 'ca', pasivo: 'estrellas', fuera: 'vela' };
 const iconoFuente = r => (r.fuente === 'especie' ? 'criatura' : r.fuente === 'dote' ? 'dote' : norm(r.clase || '').replace(/[^a-z]/g, ''));
 function enJuegoHtml(ch, P) {
   const todos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)); if (!todos.length) return '';
@@ -146,24 +147,25 @@ function enJuegoHtml(ch, P) {
   const fij = ch.enJuego?.fijados || [], hay = FUENTES.filter(([k]) => !k || todos.some(r => r.fuente === k));
   const filtro = hay.some(([k]) => k === ch.enJuego?.filtro) ? ch.enJuego.filtro : '';
   const cuenta = hay.filter(([k]) => k).map(([k]) => { const n = todos.filter(r => r.fuente === k).length; return k === 'dote' ? `${n} ${n === 1 ? 'dote' : 'dotes'}` : k === 'especie' ? `${n} de especie` : `${n} de clase`; });
-  const tarjeta = r => {
+  const tarjeta = (r, i) => {
     const rec = r.recurso, left = rec ? rec.max - usosGastados(ch, rec) : 0, fijo = fij.includes(r.clave);
-    return `<article class="ej-it f-${r.fuente} o-${r.origen}">
+    return `<article class="ej-it f-${r.fuente} o-${r.origen} ${fijo ? 'fijo' : ''}" style="--i:${Math.min(i, 8)}">
       <button type="button" class="ej-main" data-ejver="${esc(r.clave)}" aria-label="Leer ${esc(r.nombre)}"><b>${esc(r.nombre)}</b>
         <small>${gi(iconoFuente(r), 'ej-ico')}${esc(r.etiqueta)}</small>
         ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
       <div class="ej-side">${r.eleccion && !r.eleccion.actual && r.eleccion.cambia !== 'uso' ? `<button type="button" class="ej-num ej-pend" data-ejver="${esc(r.clave)}" title="Elige cómo funciona ${esc(r.nombre)}">${r.eleccion?.id ? 'Elegir opción' : 'Elegir variante'}</button>`
           : r.numeros.map(n => `<span class="ej-num" title="${esc(n.nombre)}">${esc(n.valor)}</span>`).join('')}
-        ${rec ? `<button type="button" class="ej-usos ${left ? '' : 'agotado'}" data-irrec="${esc(rec.id)}" aria-label="${esc(rec.nombre)}: quedan ${left} de ${rec.max}. Ir a su contador" title="Los usos se marcan en su tarjeta de recursos">${left}/${rec.max}<small>usos</small></button>` : ''}
+        ${rec ? `<button type="button" class="ej-usos ${left ? '' : 'agotado'}" data-irrec="${esc(rec.id)}" aria-label="${esc(rec.nombre)}: quedan ${left} de ${rec.max}. Ir a su contador" title="Los usos se marcan en su tarjeta de recursos">${rec.max <= 5
+          ? `<span class="ej-pips" aria-hidden="true">${Array.from({ length: rec.max }, (_, i) => `<i class="${i < left ? '' : 'gast'}"></i>`).join('')}</span>` : `${left}<small>/${rec.max}</small>`}</button>` : ''}
         <button type="button" class="ej-star" data-ejfijar="${esc(r.clave)}" aria-pressed="${fijo}" aria-label="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}: ${esc(r.nombre)}" title="${fijo ? 'Quitar de fijados' : 'Fijar arriba'}">★</button></div></article>`;
   };
   const sinTextos = todos.every(r => !r.texto), grupos = agrupar(todos, fij, filtro);
   return `<div class="ej-head"><span class="ej-emb">${gi('dote')}</span><h2>En juego</h2><small>${esc(cuenta.join(' · '))}</small>
       ${abierto ? `<button type="button" class="ruse ej-ajustes" data-cmd="rules" aria-label="Rasgos: progresión de la clase y recursos" title="Progresión y recursos">${icon('sliders')}</button>` : ''}
       <button type="button" class="ruse ej-toggle" data-ej="toggle" aria-expanded="${abierto}">${abierto ? 'Plegar' : 'Desplegar'}</button></div>
-    ${abierto ? `${hay.length > 2 ? `<div class="seg sm ej-filtro" role="radiogroup" aria-label="Mostrar rasgos de">${hay.map(([k, t]) => `<button type="button" role="radio" aria-checked="${filtro === k}" data-ejfiltro="${k}">${esc(t)}</button>`).join('')}</div>` : ''}
+    ${abierto ? `${hay.length > 2 ? `<div class="seg sm ej-filtro" role="radiogroup" aria-label="Mostrar rasgos de">${hay.map(([k, t]) => `<button type="button" role="radio" aria-checked="${filtro === k}" data-ejfiltro="${k}"><i class="ej-dot f-${k || 'todo'}" aria-hidden="true"></i>${esc(t)}<small>${k ? todos.filter(r => r.fuente === k).length : todos.length}</small></button>`).join('')}</div>` : ''}
       ${sinTextos ? `<p class="note ej-note">Importa el Manual del Jugador en <button type="button" class="linkish" data-cmd="manual">Libros y manuales</button> para ver qué hace cada rasgo. Se lee en este dispositivo.</p>` : ''}
-      ${grupos.map(g => `<div class="ej-grupo ej-${g.clave}"><h3>${esc(g.titulo)}</h3><div class="ej-grid">${g.rasgos.map(tarjeta).join('')}</div></div>`).join('')}` : ''}`;
+      ${grupos.map(g => `<div class="ej-grupo ej-${g.clave}"><h3>${gi(ICONO_GRUPO[g.clave] || 'estrellas', 'ej-gico')}<span>${esc(g.titulo)}</span><small>${g.rasgos.length}</small></h3><div class="ej-grid">${g.rasgos.map(tarjeta).join('')}</div></div>`).join('')}` : ''}`;
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
