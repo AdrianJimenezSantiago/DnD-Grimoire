@@ -128,6 +128,7 @@ Aplicación web en JavaScript (Vite) empaquetada para Android con Capacitor. Hac
 npm install
 npm run dev            # la app en local, con recarga
 npm test               # pruebas de reglas y estado
+npm run lint           # revisión del código con ESLint
 npm run build          # web en www/
 npm run build:windows  # versión de Windows en un solo HTML
 ```

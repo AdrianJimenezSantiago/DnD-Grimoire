@@ -2,7 +2,6 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { arma } from '../helpers/fixtures.js';
 import { normObjeto, PREDEFINIDOS } from '../../web/src/domain/equipo/equipo.js';
 import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
 import { modsTirada, inmunidadesEstado, REGLAS_ESTADO } from '../../web/src/domain/combate/efectos.js';

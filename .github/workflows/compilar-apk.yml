@@ -33,6 +33,9 @@ jobs:
       - name: Dependencias
         run: npm ci
 
+      - name: Revisión del código (ESLint)
+        run: npm run lint
+
       - name: Pruebas de reglas y estado
         run: npm test
 

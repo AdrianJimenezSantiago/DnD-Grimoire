@@ -1,6 +1,5 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { arma } from '../helpers/fixtures.js';
 import { parseObjetos, leerTipo, leerCargas, leerUsos, corregirNombre } from '../../web/src/domain/libros/objetos.js';
 
 const L = (x, y, s, h = 16, segs) => ({ x, y, h, s, segs: segs || [{ x, w: s.length * 7, s }], cells: segs ? segs.map(g => ({ x: g.x, s: g.s })) : [{ x, s }] });

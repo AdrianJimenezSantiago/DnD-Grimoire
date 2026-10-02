@@ -25,7 +25,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `core/` | El store (estado, guardado, deshacer), utilidades de texto y números, carga perezosa de módulos | Nada de la app |
 | `domain/` | Todas las reglas del juego y el modelo de datos. Funciones que reciben un personaje (`ch`) y calculan algo o lo modifican | `domain/`, `core/` |
 | `platform/` | Lo que depende del dispositivo: Capacitor en Android, almacenamiento, compartir archivos, pdf.js | Paquetes de npm, `core/` |
-| `app/` | Casos de uso que combinan reglas, estado y avisos: lanzar un conjuro, descansar, importar un libro. `eventos.js` conecta la hoja con todo lo demás | Todo |
+| `app/` | Casos de uso que combinan reglas, estado y avisos: `acciones.js` (lanzar, gastar, descansar), `combate.js` (iniciativa, rondas, ataques), `edicionConjuros.js`, `importarManual.js`. `eventos.js` conecta la hoja con todo lo demás | Todo |
 | `ui/` | HTML de pantallas y diálogos, componentes y animaciones | `domain/`, `core/`, `platform/`; de `app/` solo `acciones.js` (y `importarManual.js` con carga perezosa) |
 
 `tests/arquitectura/capas.test.js` comprueba las reglas principales: `core/` no importa nada, `domain/` solo usa `domain/` y `core/`, y solo `platform/` importa Capacitor o pdf.js. Si esa prueba falla, la lógica nueva está en la capa equivocada.
@@ -118,6 +118,7 @@ Los módulos pesados que no hacen falta al abrir la app (asistentes de personaje
 
 ```bash
 npm test                                   # todas
+npm run lint                               # ESLint: variables sin declarar e imports sin usar
 node --test tests/combate/vida.test.js     # un archivo
 node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contienen una palabra
 ```
@@ -128,7 +129,7 @@ node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contie
 | `tests/core/` | El store y las utilidades |
 | `tests/ui/` | Lógica pura de la interfaz que se puede probar sin navegador |
 | `tests/integracion/` | Pruebas que cruzan varios módulos: auditorías contra el Manual, todas las combinaciones de clase y especie, un combate simulado |
-| `tests/arquitectura/` | Las reglas de dependencia entre capas |
+| `tests/arquitectura/` | Las reglas de dependencia entre capas y que todo lo importado exista |
 | `tests/helpers/fixtures.js` | Utilidades comunes: leer el compendio, copiar un arma predefinida, leer un archivo del repositorio |
 
 Dentro de cada archivo, cada `describe` agrupa las pruebas de una función o de una regla (`describe('salvaciones contra muerte', …)`), y el título de cada `test` dice qué comportamiento comprueba. Los personajes de ejemplo se crean con `normChar(blankChar({ … }))` en un auxiliar al principio del archivo.

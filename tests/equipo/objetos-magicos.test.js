@@ -2,7 +2,6 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { arma } from '../helpers/fixtures.js';
 import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
 import { anadirObjeto, quitarObjeto, alternarSintonia, alternarGuardado, motivoSintonia, equipar, claseArmadura, ataqueArma, armaCombate, golpeSinArmas, municionDe, anadirComun } from '../../web/src/domain/equipo/equipo.js';
 import { pasosVariante, concretar } from '../../web/src/domain/equipo/variantesObjeto.js';

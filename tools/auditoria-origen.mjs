@@ -41,7 +41,6 @@ const DOT = {
   'don del terror': ['A', 'Inmune a asustado; contador.'], 'don del jolgorio': ['A', 'Baile irresistible de Otto gratis.'], 'don de las formas fluidas': ['A', 'Contador.'], 'don del fulgor exquisito': ['A', 'Contador.'],
   'determinacion senorial': ['A', 'Contador.'],
 };
-const n = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 let md = '# Auditoría de especies y dotes (reglas de 2024)\n\nGenerado por `tools/auditoria-origen.mjs`, contrastado con el Manual del Jugador de 2024 y Héroes de Faerûn.\n\n## Especies\n';
 for (const [esp, rs] of Object.entries(RASGOS_ESPECIE)) {
   md += `\n### ${esp.charAt(0).toUpperCase() + esp.slice(1)}\n\n| Nivel | Atributo | Estado | Cómo lo aplica la app |\n|---|---|---|---|\n`;

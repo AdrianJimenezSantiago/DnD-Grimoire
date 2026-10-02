@@ -1,11 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compendioJson } from '../helpers/fixtures.js';
-import { alcance } from '../../web/src/domain/conjuros/validar.js';
 import { conObjetivos, empezarConc, objetivosNuevos, rasgosConObjetivo, terminarConc } from '../../web/src/domain/combate/concentracion.js';
 import { blankChar } from '../../web/src/domain/personaje/modelo.js';
-
-const { conjuros } = compendioJson();
 
 describe('objetivos de concentración', () => {
   test('objetivos solo en conjuros sin área, y se olvidan al cambiar', () => {
