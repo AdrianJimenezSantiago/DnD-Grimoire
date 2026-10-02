@@ -6,7 +6,7 @@ import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, q
   ESTADOS, NOMBRE_ESTADO, RESUMEN_ESTADO } from '../../domain/combate/vida.js';
 import { bonoSalvacion } from '../../domain/reglas/habilidades.js';
 import { statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
-import { glosario } from '../../domain/conjuros/catalogo.js';
+import { glosario } from '../../domain/libros/terminos.js';
 import { rngCripto } from '../../domain/reglas/dados.js';
 import { combateDe } from '../../domain/combate/combate.js';
 import { $, on } from '../componentes/dom.js';

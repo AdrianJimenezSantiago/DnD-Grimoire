@@ -1,7 +1,9 @@
 // Ficha de un conjuro: texto con realce y enlaces al glosario, nivel al que lanzarlo, ritual y tablas.
 import { esc, norm } from '../../core/util.js';
 import { perfil, magiaPara } from '../../domain/reglas/reglas2024.js';
-import { srdFor, srdAsSpell, manualFor, estadosRegex, claveDeForma, tiradasConjuro, termino, nombresConjuros, biblioteca, criaturaImportada } from '../../domain/conjuros/catalogo.js';
+import { srdFor, srdAsSpell, manualFor, tiradasConjuro, nombresConjuros } from '../../domain/conjuros/catalogo.js';
+import { estadosRegex, claveDeForma, termino } from '../../domain/libros/terminos.js';
+import { biblioteca, criaturaImportada } from '../../domain/libros/biblioteca.js';
 import { realzador, porTexto } from '../../domain/presentacion/realce.js';
 import { lanzadorTira } from '../../domain/combate/efectos.js';
 import { gi } from '../componentes/tema.js';

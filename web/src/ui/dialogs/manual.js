@@ -1,7 +1,9 @@
 // Libros y manuales: importar PDF, ver los libros cargados y aplicar los que vienen incluidos con la app.
 import { esc } from '../../core/util.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
-import { libros, setLibros, oficializar, manualCount, glosario } from '../../domain/conjuros/catalogo.js';
+import { oficializar, manualCount } from '../../domain/conjuros/catalogo.js';
+import { glosario } from '../../domain/libros/terminos.js';
+import { libros, setLibros } from '../../domain/libros/biblioteca.js';
 import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/libros/componerLibro.js';
 import { CLASES_ES } from '../../domain/libros/libros.js';
 import { claveNombre } from '../../domain/libros/manual.js';

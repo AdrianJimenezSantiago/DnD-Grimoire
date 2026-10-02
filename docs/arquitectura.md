@@ -44,7 +44,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `conjuros/` | Catálogo y compendio, espacios de conjuro, análisis de tiradas de cada conjuro, validación | `catalogo.js`, `espacios.js` |
 | `equipo/` | Inventario, armas y armaduras, monedas y carga, objetos mágicos (efectos, variantes, acciones, consumibles) | `equipo.js` |
 | `criaturas/` | Bestiario de la campaña, perfiles para invocar o transformarse y lector de perfiles de los libros | `bestiario.js` |
-| `libros/` | Importación de PDF: corrección del OCR, columnas, tablas y un lector por tipo de contenido | `libroCompleto.js` (`analizarLibro`) |
+| `libros/` | Importación de PDF (corrección del OCR, columnas, tablas y un lector por tipo de contenido) y lo ya importado: libros cargados y glosario | `libroCompleto.js` (`analizarLibro`), `biblioteca.js` (`setLibros`), `terminos.js` |
 | `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, paleta de colores | — |
 
 ### `web/src/ui/` — interfaz

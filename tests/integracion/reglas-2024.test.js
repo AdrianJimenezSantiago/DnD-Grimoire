@@ -14,7 +14,7 @@ import { armadurasDe, competenteConArma } from '../../web/src/domain/reglas/comp
 import { faltaRequisito, aumentoDeDote, entrenamientoDe, extraTrasfondo, sinCortes } from '../../web/src/domain/origen/origen.js';
 import { estiloDe, estadoEstilo } from '../../web/src/domain/clases/estilos.js';
 import { caracteristicasTrasfondo, fuentesExtra } from '../../web/src/domain/personaje/creacion.js';
-import { setLibros } from '../../web/src/domain/conjuros/catalogo.js';
+import { setLibros } from '../../web/src/domain/libros/biblioteca.js';
 import { analizarTiradas, dadosPara } from '../../web/src/domain/conjuros/tiradas.js';
 import { separarRasgos } from '../../web/src/domain/libros/contenido.js';
 

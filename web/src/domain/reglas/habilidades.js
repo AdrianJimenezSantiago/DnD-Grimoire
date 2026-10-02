@@ -4,7 +4,7 @@ import { linajeActual } from '../origen/especies.js';
 import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos, bonoHabilidadObjetos, velocidadMinimaObjetos } from '../equipo/objetosEfecto.js';
 import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from '../clases/clases2024.js';
-import { biblioteca } from '../conjuros/catalogo.js';
+import { biblioteca } from '../libros/biblioteca.js';
 import { ordenDe } from '../clases/ordenes.js';
 import { penalizacionArmadura } from '../equipo/equipo.js';
 

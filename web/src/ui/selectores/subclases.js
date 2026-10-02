@@ -2,7 +2,7 @@
 import { esc, norm } from '../../core/util.js';
 import { SUBCLASES, TEMAS, CLASES_INFO } from '../../domain/clases/clases2024.js';
 import { CLASES } from '../../domain/reglas/reglas2024.js';
-import { biblioteca, subclasesDe } from '../../domain/conjuros/catalogo.js';
+import { biblioteca, subclasesDe } from '../../domain/libros/biblioteca.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { abrirResumen } from '../dialogs/biblioteca.js';

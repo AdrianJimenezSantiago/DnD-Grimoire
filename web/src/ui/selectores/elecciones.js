@@ -2,7 +2,7 @@
 import { esc, norm } from '../../core/util.js';
 import { ESPECIES, TRASFONDOS_2024, dotesDe } from '../../domain/reglas/reglas2024.js';
 import { HAB_TRASFONDO, NOMBRE_HAB, AB_CORTA } from '../../domain/reglas/habilidades.js';
-import { biblioteca } from '../../domain/conjuros/catalogo.js';
+import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { PREDEFINIDOS, NOMBRE_CAT, CATEGORIAS } from '../../domain/equipo/equipo.js';
 import { resumen } from '../../domain/clases/enJuego.js';
 import { vdTexto } from '../../domain/criaturas/monstruos.js';

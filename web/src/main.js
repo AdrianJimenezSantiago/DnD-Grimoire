@@ -29,7 +29,8 @@ import './styles/movil.css';
 
 import { createStore } from './core/store.js';
 import { fromStored } from './domain/personaje/modelo.js';
-import { compendio, linkCatalog, loadSrd, libros } from './domain/conjuros/catalogo.js';
+import { compendio, linkCatalog, loadSrd } from './domain/conjuros/catalogo.js';
+import { libros } from './domain/libros/biblioteca.js';
 import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
 import { toast, undoBtn } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';

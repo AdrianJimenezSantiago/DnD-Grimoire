@@ -3,7 +3,7 @@ import { norm } from '../../core/util.js';
 import { ABILS, CLASES, clasesDe, dotesDe, nivelTotal, perfil } from '../reglas/reglas2024.js';
 import { PREDEFINIDOS } from '../equipo/equipo.js';
 import { armadurasDe, marcialesDe } from '../reglas/competencias.js';
-import { biblioteca } from '../conjuros/catalogo.js';
+import { biblioteca } from '../libros/biblioteca.js';
 
 // Herramientas, idiomas y equipo inicial del Manual del Jugador de 2024
 export const JUEGOS = ['Juego de dados', 'Juego de naipes', 'Ajedrez de dragones', 'Ante de los tres dragones'];

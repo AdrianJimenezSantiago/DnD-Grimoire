@@ -11,7 +11,7 @@ import { accionObjeto, costeTexto } from '../selectores/accionesObjeto.js';
 import { reglas, usosGastados } from '../../domain/clases/rasgos.js';
 import { efectoDe, objetoActivo, bonoDeNombre, describirEfecto, statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
 import { armadurasDe, competenteConArma } from '../../domain/reglas/competencias.js';
-import { biblioteca } from '../../domain/conjuros/catalogo.js';
+import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';

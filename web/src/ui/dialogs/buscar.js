@@ -2,7 +2,9 @@
 import { esc, norm } from '../../core/util.js';
 import { sgn, ABILS } from '../../domain/reglas/reglas2024.js';
 import { buscar } from '../../domain/presentacion/busqueda.js';
-import { biblioteca, glosario, allSpellItems } from '../../domain/conjuros/catalogo.js';
+import { allSpellItems } from '../../domain/conjuros/catalogo.js';
+import { glosario } from '../../domain/libros/terminos.js';
+import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { rasgosEnJuego } from '../../domain/clases/enJuego.js';
 import { reglasVisibles } from '../../domain/clases/rasgos.js';
 import { equipoDe } from '../../domain/equipo/equipo.js';

@@ -1,6 +1,6 @@
 // Forma salvaje, familiares e invocaciones: perfiles de criatura que el personaje puede adoptar o convocar.
 import { esc, norm, uid } from '../../core/util.js';
-import { biblioteca } from '../../domain/conjuros/catalogo.js';
+import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/criaturas/monstruos.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
