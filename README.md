@@ -136,14 +136,18 @@ npm run build:windows  # versión de Windows en un solo HTML
 
 | Carpeta | Contenido |
 |---|---|
-| `web/src/domain` | Reglas del juego: clases, conjuros, combate, inventario… |
-| `web/src/ui`, `web/src/app` | Interfaz: pantallas, diálogos y acciones |
-| `web/src/core` | Estado y guardado de datos |
+| `web/src/domain` | Reglas del juego, por áreas: `reglas`, `clases`, `origen`, `personaje`, `combate`, `conjuros`, `equipo`, `criaturas`, `libros` |
+| `web/src/ui` | Interfaz: `pantallas`, `dialogs`, `selectores`, `componentes` y `animaciones` |
+| `web/src/app` | Casos de uso que unen reglas e interfaz (lanzar, descansar, importar un libro) |
+| `web/src/core` | Estado, guardado y utilidades |
+| `web/src/platform` | Android (Capacitor), almacenamiento y lectura de PDF |
 | `web/public/data` | Compendio de conjuros del SRD |
 | `android/` | Proyecto Android (Capacitor) |
-| `tests/` | Pruebas automáticas (`node --test`) |
+| `tests/` | Pruebas automáticas (`node --test`), con la misma estructura que `web/src/domain` |
 | `tools/` | Scripts para iconos, compendio y lectura de libros |
-| `docs/` | Notas técnicas y auditorías de reglas |
+| `docs/` | Arquitectura, notas técnicas y auditorías de reglas |
+
+La guía de [arquitectura](docs/arquitectura.md) explica las capas, qué puede depender de qué, los patrones que sigue el código y dónde va cada cosa nueva.
 
 **Ramas**
 
