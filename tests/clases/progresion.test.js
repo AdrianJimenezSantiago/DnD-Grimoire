@@ -2,11 +2,11 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compendioJson } from '../helpers/fixtures.js';
 import { perfil } from '../../web/src/domain/reglas/reglas2024.js';
-import { conjurosPendientes, anadirPendientes, levelDiff } from '../../web/src/domain/clases/progresion.js';
-import { blankChar } from '../../web/src/domain/personaje/modelo.js';
+import { conjurosPendientes, anadirPendientes, diferenciaNivel } from '../../web/src/domain/clases/progresion.js';
+import { personajeVacio } from '../../web/src/domain/personaje/modelo.js';
 
 const { conjuros } = compendioJson();
-const ch = (clase, subclase = '', nivel = 8, stats = {}) => blankChar({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
+const ch = (clase, subclase = '', nivel = 8, stats = {}) => personajeVacio({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
 
 describe('conjuros pendientes al subir de nivel', () => {
   test('añadir los conjuros pendientes al subir de nivel', () => {
@@ -19,9 +19,9 @@ describe('conjuros pendientes al subir de nivel', () => {
   });
 });
 
-describe('levelDiff', () => {
-  test('levelDiff describe lo que se gana', () => {
-    const a = blankChar({ clase: 'Mago', subclase: 'Adivino', nivel: 6 }), b = { ...a, nivel: 7 };
-    assert.match(levelDiff(perfil(a), perfil(b), a, b), /prepara 1 conjuro más.*espacios de nivel 4.*Recuperación arcana sube a 4/);
+describe('diferenciaNivel', () => {
+  test('diferenciaNivel describe lo que se gana', () => {
+    const a = personajeVacio({ clase: 'Mago', subclase: 'Adivino', nivel: 6 }), b = { ...a, nivel: 7 };
+    assert.match(diferenciaNivel(perfil(a), perfil(b), a, b), /prepara 1 conjuro más.*espacios de nivel 4.*Recuperación arcana sube a 4/);
   });
 });

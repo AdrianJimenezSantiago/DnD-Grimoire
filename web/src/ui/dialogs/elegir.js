@@ -3,7 +3,7 @@ import { esc, norm } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 
 let E = null;
 const dlg = () => $('#elegirDlg');
@@ -18,7 +18,7 @@ export function elegir({ titulo, sub = '', items, grupos = null, actual = '', li
     $('#elSub').textContent = sub;
     $('#elQ').value = ''; $('#elQ').placeholder = placeholder;
     pintarGrupos(); pintar();
-    openSheet(dlg());
+    abrirDialogo(dlg());
     const sel = dlg().querySelector('.el-card.on'); if (sel) setTimeout(() => sel.scrollIntoView({ block: 'center' }), 80);
     dlg().addEventListener('close', () => { if (!E?.hecho) E?.resolve(null); E = null; }, { once: true });
   }));
@@ -52,7 +52,7 @@ function pintar() {
   if (!lista.length && !(E.libre && q)) h += `<p class="el-vacio">${esc(E.vacio || 'Nada coincide con la búsqueda.')}</p>`;
   $('#elBody').innerHTML = h;
 }
-function fin(valor) { if (!E) return; E.hecho = true; const r = E.resolve; closeSheet(dlg()); r(valor); }
+function fin(valor) { if (!E) return; E.hecho = true; const r = E.resolve; cerrarDialogo(dlg()); r(valor); }
 
 export function init() {
   $('#elQ').addEventListener('input', e => { E.q = e.target.value; E.abierto = null; pintar(); });

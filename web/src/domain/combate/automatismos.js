@@ -2,7 +2,7 @@
 import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal, perfil as perfilDe, dotesDe } from '../reglas/reglas2024.js';
-import { reglas, recState, usosGastados } from '../clases/rasgos.js';
+import { reglas, estadoRecurso, usosGastados } from '../clases/rasgos.js';
 import { vidaDe, curar, ponerTemporales, pgActuales, pgMaximo, estadoVital, fijarPg } from './vida.js';
 import { DADO_ARTES } from '../equipo/equipo.js';
 import { nivelHabilidad } from '../reglas/habilidades.js';
@@ -23,7 +23,7 @@ const nivelClase = (ch, clase) => clasesDe(ch).find(c => c.clase === clase)?.niv
 const subDe = (ch, clase, re) => clasesDe(ch).find(c => c.clase === clase && re.test(norm(c.subclase || '')));
 const regla = (ch, id) => reglas(ch).find(r => r.id === id) || null;
 const libres = (ch, id) => { const r = regla(ch, id); return r ? r.max - usosGastados(ch, r) : 0; };
-const gastar = (ch, id, n = 1) => { const st = recState(ch, id); st.used = (st.used || 0) + n; };
+const gastar = (ch, id, n = 1) => { const st = estadoRecurso(ch, id); st.used = (st.used || 0) + n; };
 
 // Al tirar iniciativa. Cambia la ficha y devuelve lo que ha pasado, para contarlo.
 export function alTirarIniciativa(ch, tirar = tirarDado) {
@@ -31,7 +31,7 @@ export function alTirarIniciativa(ch, tirar = tirarDado) {
   // Furia persistente (bárbaro 15): recuperas todos los usos de Furia, una vez por descanso largo
   const furia = regla(ch, 'tpl:barbaro.furia');
   if (furia && usosGastados(ch, furia) > 0 && libres(ch, 'tpl:barbaro.persistente') > 0) {
-    recState(ch, furia.id).used = 0; gastar(ch, 'tpl:barbaro.persistente');
+    estadoRecurso(ch, furia.id).used = 0; gastar(ch, 'tpl:barbaro.persistente');
     out.push({ nombre: 'Furia persistente', texto: `Recuperas todos tus usos de Furia (${furia.max}).` });
   }
   // Metabolismo asombroso (monje 2): recuperas los puntos de concentración y te curas nivel + dado de artes marciales
@@ -39,27 +39,27 @@ export function alTirarIniciativa(ch, tirar = tirarDado) {
   let metabolismo = false;
   if (foco && usosGastados(ch, foco) > 0 && libres(ch, 'tpl:monje.metabolismo') > 0) {
     const d = +DADO_ARTES(monje).replace('1d', ''), t = tirar(d);
-    recState(ch, foco.id).used = 0; gastar(ch, 'tpl:monje.metabolismo'); metabolismo = true;
+    estadoRecurso(ch, foco.id).used = 0; gastar(ch, 'tpl:monje.metabolismo'); metabolismo = true;
     const ganado = estadoVital(ch) === 'muerto' ? 0 : curar(ch, monje + t);
     out.push({ nombre: 'Metabolismo asombroso', texto: `Recuperas tus ${foco.max} puntos de concentración y ${ganado} PG (${monje} + d${d}: ${t}).`, cura: ganado });
   }
   // Concentración perfecta (monje 15): si no usas Metabolismo asombroso, recuperas puntos hasta tener 4
   if (foco && monje >= 15 && !metabolismo && foco.max - usosGastados(ch, foco) < 4) {
-    recState(ch, foco.id).used = Math.max(0, foco.max - 4);
+    estadoRecurso(ch, foco.id).used = Math.max(0, foco.max - 4);
     out.push({ nombre: 'Concentración perfecta', texto: 'Recuperas puntos de concentración hasta tener 4.' });
   }
   // Inspiración superior (bardo 18): recuperas usos de Inspiración bárdica hasta tener 2
   const insp = regla(ch, 'tpl:bardo.inspiracion');
   if (insp && nivelClase(ch, 'Bardo') >= 18 && insp.max - usosGastados(ch, insp) < 2) {
-    recState(ch, insp.id).used = Math.max(0, insp.max - 2);
+    estadoRecurso(ch, insp.id).used = Math.max(0, insp.max - 2);
     out.push({ nombre: 'Inspiración superior', texto: 'Recuperas usos de Inspiración bárdica hasta tener 2.' });
   }
   // Archidruida (druida 20), Forma salvaje perenne: si no te quedan usos de Forma salvaje, recuperas uno
   const forma = regla(ch, 'tpl:druida.forma');
-  if (forma && nivelClase(ch, 'Druida') >= 20 && usosGastados(ch, forma) >= forma.max) { recState(ch, forma.id).used = forma.max - 1; out.push({ nombre: 'Archidruida', texto: 'Recuperas un uso de Forma salvaje.' }); }
+  if (forma && nivelClase(ch, 'Druida') >= 20 && usosGastados(ch, forma) >= forma.max) { estadoRecurso(ch, forma.id).used = forma.max - 1; out.push({ nombre: 'Archidruida', texto: 'Recuperas un uso de Forma salvaje.' }); }
   // Don del destino: se recupera al tirar iniciativa
   const destino = regla(ch, 'tpl:dote.destino');
-  if (destino && usosGastados(ch, destino) > 0) { recState(ch, destino.id).used = 0; out.push({ nombre: 'Don del destino', texto: 'Vuelves a tenerlo disponible.' }); }
+  if (destino && usosGastados(ch, destino) > 0) { estadoRecurso(ch, destino.id).used = 0; out.push({ nombre: 'Don del destino', texto: 'Vuelves a tenerlo disponible.' }); }
   return out;
 }
 
@@ -135,7 +135,7 @@ export function alGastarRecurso(ch, id) {
   // Recuperación mágica (hechicero 5): recuperas puntos de hechicería hasta la mitad de tu nivel
   if (id === 'tpl:hechicero.recuperacion') {
     const r = regla(ch, 'tpl:hechicero.puntos');
-    if (r) { const n = Math.min(usosGastados(ch, r), Math.floor(nivelClase(ch, 'Hechicero') / 2)); recState(ch, r.id).used = usosGastados(ch, r) - n; out.push(`Recuperas ${n} puntos de hechicería.`); }
+    if (r) { const n = Math.min(usosGastados(ch, r), Math.floor(nivelClase(ch, 'Hechicero') / 2)); estadoRecurso(ch, r.id).used = usosGastados(ch, r) - n; out.push(`Recuperas ${n} puntos de hechicería.`); }
   }
   // Ataque de aliento (dracónido): CD 8 + Con + competencia, 1d10 a 4d10 del tipo de su linaje
   if (id === 'tpl:especie.aliento') { const a = alientoDe(ch); out.push(`Salvación de Destreza CD ${a.cd}: ${a.dado}${a.tipo ? ` de ${a.tipo}` : ''}, mitad si la supera.`); }
@@ -186,7 +186,7 @@ export const rangoMuerte = ch => { const g = subDe(ch, 'Guerrero', /campeon/); r
 export function alLanzarConEspacio(ch, fuente = '') {
   const out = [], r = regla(ch, 'tpl:salvaje.mareas');
   if (r && usosGastados(ch, r) > 0 && (!fuente || /hechicer|drac|salvaje/i.test(norm(fuente)) || !/mago|clerigo|druida|bardo|brujo|paladin|explorador|dote/.test(norm(fuente)))) {
-    recState(ch, r.id).used = 0; out.push('Mareas del caos se restablece: tira en la tabla de sobrecarga de magia salvaje.');
+    estadoRecurso(ch, r.id).used = 0; out.push('Mareas del caos se restablece: tira en la tabla de sobrecarga de magia salvaje.');
   }
   return out;
 }

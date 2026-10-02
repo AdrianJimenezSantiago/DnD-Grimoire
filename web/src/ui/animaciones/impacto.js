@@ -1,7 +1,7 @@
 // Animación de impacto de las tiradas de daño y curación, más intensa cuanto más supera la media.
-import { burst, reducedMotion } from './fx.js';
+import { chispas, movimientoReducido } from './fx.js';
 import { mediaDist, maxDist } from '../../domain/reglas/dados.js';
-import { haptic } from '../../platform/native.js';
+import { vibrar } from '../../platform/native.js';
 
 // Animación de impacto cuando una tirada de daño o curación sale por encima de la media.
 // La forma depende del tipo de daño (y así del arma o de la escuela del conjuro).
@@ -40,8 +40,8 @@ function forma(clave) {
 export function fxImpacto(el, { clave = 'fuerza', nivel = '', cura = false, caja = null } = {}) {
   if (!el || !nivel) return;
   const k = cura ? 'curacion' : (COLOR[clave] ? clave : 'fuerza');
-  haptic(nivel === 'epico' ? 'heavy' : 'medium');
-  if (reducedMotion()) return;
+  vibrar(nivel === 'epico' ? 'heavy' : 'medium');
+  if (movimientoReducido()) return;
   const capa = document.createElement('div');
   capa.className = `ip-fx ip-${k} ip-${nivel}`; capa.setAttribute('aria-hidden', 'true'); capa.style.setProperty('--ip', COLOR[k]);
   const titulo = nivel === 'epico' ? LEMA[k] : TITULO[nivel][cura ? 1 : 0];
@@ -49,7 +49,7 @@ export function fxImpacto(el, { clave = 'fuerza', nivel = '', cura = false, caja
   el.style.position ||= 'relative'; el.appendChild(capa);
   const box = el.getBoundingClientRect(), x = box.left + box.width / 2, y = box.top + Math.min(box.height / 2, 70);
   const fuerza = { bueno: .5, fuerte: 1, epico: 1.8 }[nivel];
-  burst(x, y, cura ? { color: COLOR[k], n: 18 * fuerza, speed: 1.6, up: 3, life: 1300, size: 2, gravity: -.05 }
+  chispas(x, y, cura ? { color: COLOR[k], n: 18 * fuerza, speed: 1.6, up: 3, life: 1300, size: 2, gravity: -.05 }
     : { color: COLOR[k], n: 20 * fuerza, speed: 2.4 + 2.2 * fuerza, up: k === 'fuego' ? 2.6 : .8, life: 900 + 250 * fuerza, size: 2 + .4 * fuerza, gravity: k === 'fuego' || k === 'radiante' ? -.05 : .05 });
   if (nivel === 'epico' && caja) { caja.classList.remove('ip-sacude'); void caja.offsetWidth; caja.classList.add(cura ? 'ip-brilla' : 'ip-sacude'); setTimeout(() => caja.classList.remove('ip-sacude', 'ip-brilla'), 700); }
   setTimeout(() => capa.remove(), nivel === 'epico' ? 2400 : 2000);

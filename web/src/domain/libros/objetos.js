@@ -73,7 +73,7 @@ export function leerUsos(t, nombre = '') {
   return out.map(u => ({ nombre: u.titulo ? `${nombre}: ${u.titulo}` : nombre, recarga: u.recarga }));
 }
 
-export function parseObjetos(pages) {
+export function leerObjetos(pages) {
   const L = aplanar(pages);
   const cab = [];
   for (let i = 0; i < L.length; i++) {

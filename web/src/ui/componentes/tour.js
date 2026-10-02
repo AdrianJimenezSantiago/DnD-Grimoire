@@ -1,6 +1,6 @@
 // Tutorial guiado: resalta elementos de la pantalla paso a paso y recuerda si ya se ha visto.
 import { esc } from '../../core/util.js';
-import { storage } from '../../platform/native.js';
+import { almacen } from '../../platform/native.js';
 
 const PREF = 'grimorio-tour-';
 let capa = null, estado = null;
@@ -43,12 +43,12 @@ function colocar() {
   card.querySelector('.gold')?.focus({ preventScroll: true });
 }
 function ir(i) { const n = pasosVisibles().length; if (i < 0 || i >= n) { if (i >= n) cerrar(true); return; } estado.i = i; colocar(); }
-function cerrar(visto) { if (!estado) return; if (visto) storage.set(PREF + estado.id, '1'); const fin = estado.alTerminar; estado = null; capa?.classList.remove('on'); document.body.classList.remove('touring'); fin?.(); }
+function cerrar(visto) { if (!estado) return; if (visto) almacen.set(PREF + estado.id, '1'); const fin = estado.alTerminar; estado = null; capa?.classList.remove('on'); document.body.classList.remove('touring'); fin?.(); }
 export const enTour = () => !!estado;
 export const cerrarTour = () => cerrar(true);
 export async function tour(id, pasos, { forzar = false, alTerminar = null } = {}) {
   if (estado) return;
-  if (!forzar && (await storage.get(PREF + id)) === '1') { alTerminar?.(); return; }
+  if (!forzar && (await almacen.get(PREF + id)) === '1') { alTerminar?.(); return; }
   montar(); estado = { id, pasos, i: 0, alTerminar };
   if (!pasosVisibles().length) { estado = null; alTerminar?.(); return; }
   capa.classList.add('on'); document.body.classList.add('touring'); colocar();

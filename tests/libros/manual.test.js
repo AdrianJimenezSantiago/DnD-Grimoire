@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSpells, nombreBonito } from '../../web/src/domain/libros/manual.js';
+import { leerConjuros, nombreBonito } from '../../web/src/domain/libros/manual.js';
 
 const L = (x, y, s, h = 16) => ({ x, y, h, s });
 const page = { p: 1, cols: [[
@@ -17,9 +17,9 @@ const page = { p: 1, cols: [[
   L(60, 920, 'Texto del segundo conjuro.'),
 ], []] };
 
-describe('parseSpells', () => {
-  test('parseSpells separa cabecera, campos, párrafos y nivel superior', () => {
-    const [a, b] = parseSpells([page]);
+describe('leerConjuros', () => {
+  test('leerConjuros separa cabecera, campos, párrafos y nivel superior', () => {
+    const [a, b] = leerConjuros([page]);
     assert.equal(a.nombre, 'Chispa de prueba'); assert.equal(a.nivel, 1); assert.equal(a.escuela, 'Evocación');
     assert.deepEqual(a.clases, ['Hechicero', 'Mago']);
     assert.equal(a.tiempo, 'Acción'); assert.equal(a.ritual, true); assert.equal(a.conc, true);

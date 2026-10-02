@@ -31,7 +31,7 @@ export function nombreBonito(caps) {
 }
 export const claveNombre = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 
-export function parseSpells(pages) {
+export function leerConjuros(pages) {
   const L = [];
   for (const pg of pages) pg.cols.forEach(col => {
     const body = col.filter(l => !isFooter(l.s));

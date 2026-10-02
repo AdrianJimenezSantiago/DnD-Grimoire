@@ -1,13 +1,13 @@
 // Casos de uso del modo combate: entrar y salir, iniciativa, pasar de ronda, tiradas de ataque y daño con lo que se
 // añade al impactar, acciones comunes (Correr, Esquivar…) y daño o curación rápidos desde la vista de combate.
 import { esc, joinY, norm, numLibre } from '../core/util.js';
-import { ABIL_NAME, modOf, clasesDe } from '../domain/reglas/reglas2024.js';
-import { reglas, usosGastados, recState } from '../domain/clases/rasgos.js';
+import { NOMBRE_CAR, modOf, clasesDe } from '../domain/reglas/reglas2024.js';
+import { reglas, usosGastados, estadoRecurso } from '../domain/clases/rasgos.js';
 import { $ } from '../ui/componentes/dom.js';
-import { toast, undoBtn } from '../ui/componentes/toast.js';
-import { topSheet } from '../ui/componentes/dialog.js';
-import { pop, reducedMotion } from '../ui/animaciones/fx.js';
-import { haptic } from '../platform/native.js';
+import { toast, botonDeshacer } from '../ui/componentes/toast.js';
+import { dialogoSuperior } from '../ui/componentes/dialog.js';
+import { pop, movimientoReducido } from '../ui/animaciones/fx.js';
+import { vibrar } from '../platform/native.js';
 import { pedir } from '../ui/componentes/modal.js';
 import { danar, sanar } from '../ui/dialogs/vida.js';
 import { tirarPrueba, tirarDano } from '../ui/dialogs/dados.js';
@@ -36,10 +36,10 @@ export function alternarCombate(el) {
     S.editing = false;
     S.act(activo ? `Fin del combate tras ${ronda} ${ronda === 1 ? 'ronda' : 'rondas'}` : 'Empieza el combate', (db, x) => { if (activo) terminarCombate(x); else empezarCombate(x); });
     const el2 = activo ? $('#sheet') : $('#combate'), cls = activo ? 'fx-paz' : 'fx-entra';
-    if (!reducedMotion()) { el2.classList.add(cls); setTimeout(() => el2.classList.remove(cls), 1300); }
+    if (!movimientoReducido()) { el2.classList.add(cls); setTimeout(() => el2.classList.remove(cls), 1300); }
   }, { ronda });
-  haptic(activo ? 'light' : 'heavy');
-  if (!activo) setTimeout(() => { const x = S.cur(); if (x && combateDe(x).activo && combateDe(x).iniciativa == null && !topSheet()) tirarDesde('iniciativa'); }, reducedMotion() ? 200 : 1900);
+  vibrar(activo ? 'light' : 'heavy');
+  if (!activo) setTimeout(() => { const x = S.cur(); if (x && combateDe(x).activo && combateDe(x).iniciativa == null && !dialogoSuperior()) tirarDesde('iniciativa'); }, movimientoReducido() ? 200 : 1900);
 }
 export async function iniciativaManual() {
   const ch = S.cur(); if (!ch) return;
@@ -51,8 +51,8 @@ export async function iniciativaManual() {
   const antes = c.iniciativa;
   let auto = [];
   const h = S.act(`Iniciativa a mano: ${n}${antes != null ? ` (antes ${antes})` : ''}`, (db, x) => { combateDe(x).iniciativa = n; combateDe(x).iniManual = true; if (antes == null) auto = alTirarIniciativa(x); });
-  pop(document.querySelector('.cb-ini-v'), 'fx-pop'); haptic('light');
-  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.${textoAuto(auto)}`, [undoBtn(S, h)]);
+  pop(document.querySelector('.cb-ini-v'), 'fx-pop'); vibrar('light');
+  toast(`Iniciativa: <b>${n}</b>${antes != null ? ` (antes ${antes})` : ''}.${textoAuto(auto)}`, [botonDeshacer(S, h)]);
 }
 export function nuevoTurno() {
   const ch = S.cur(); if (!ch) return;
@@ -61,12 +61,12 @@ export function nuevoTurno() {
   const ronda = combateDe(ch).ronda + 1;
   let auto = [];
   const h = S.act(`Ronda ${ronda}`, (db, x) => { siguienteTurno(x); fuera = pasarRonda(x); auto = alEmpezarTurno(x); });
-  if (auto.length) { S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')); if (!fuera.length) toast(textoAuto(auto).trim(), [undoBtn(S, h)]); }
+  if (auto.length) { S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')); if (!fuera.length) toast(textoAuto(auto).trim(), [botonDeshacer(S, h)]); }
   if (fuera.length) {
     S.note(`Terminan: ${fuera.map(e => (e.finConc ? `concentración en ${e.nombre}` : e.nombre)).join(', ')}`);
     setTimeout(() => avisoFinEfectos(fuera, ronda, h), 380);
   }
-  pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); haptic('medium');
+  pop(document.querySelector('.cb-ronda'), 'fx-ronda'); pop(document.querySelector('.cb-eco'), 'fx-renueva'); vibrar('medium');
 }
 const textoAuto = auto => auto.map(a => ` <b>${esc(a.nombre)}</b>: ${esc(a.texto)}`).join('');
 function avisoFinEfectos(fuera, ronda, h) {
@@ -78,8 +78,8 @@ function avisoFinEfectos(fuera, ronda, h) {
     sub: `Empieza la ronda ${ronda}: ${fin ? `se agota la duración de ${fin.nombre} y dejas de concentrarte` : fuera.length === 1 ? 'se agota la duración de un efecto' : `se agota la duración de ${fuera.length} efectos`}.`,
     secciones: [{ titulo: 'Ya no te ayuda', ico: 'inspiracion', items: buenos.map(cierra) }, { titulo: 'Te libras de', ico: 'estados', items: malos.map(cierra) },
       { titulo: 'Sigue activo', ico: 'md_tiempo', items: [...(S.cur().play.conc ? [{ ico: 'esc_adi', titulo: `Concentración en ${S.cur().play.conc}`, texto: S.cur().play.concRondas != null ? `Quedan ${fmtRondas(S.cur().play.concRondas)}.` : 'Hasta que la termines o la pierdas.' }] : []), ...efectosDe(S.cur()).map(e => ({ ico: e.ico, titulo: e.nombre, texto: e.rondas != null ? `Quedan ${fmtRondas(e.rondas)}.` : 'Hasta que lo quites o descanses.' }))] }],
-    botones: [{ ...undoBtn(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
-  haptic('light');
+    botones: [{ ...botonDeshacer(S, h), label: 'Deshacer la ronda', cls: 'ghost' }] });
+  vibrar('light');
 }
 export function tirarDesde(clave) {
   const ch = S.cur(); if (!ch) return;
@@ -89,9 +89,9 @@ export function tirarDesde(clave) {
       if (auto.length) S.note(auto.map(a => `${a.nombre}: ${a.texto}`).join(' '));
       return `Guardada como tu iniciativa en este combate. Puedes cambiarla a mano con el lápiz junto a ella.${auto.length ? ` ${auto.map(a => `${a.nombre}: ${a.texto}`).join(' ')}` : ''}`; } });
   const [tipo, k] = clave.split(':');
-  if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${ABIL_NAME[k]}`, sub: 'Prueba de característica', bono: modOf(statsEfectivos(ch)[k]) + bonoPruebasObjetos(ch), tipo: 'prueba', ab: k });
-  if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${ABIL_NAME[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
-  if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${ABIL_NAME[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
+  if (tipo === 'car') return tirarPrueba({ titulo: `Prueba de ${NOMBRE_CAR[k]}`, sub: 'Prueba de característica', bono: modOf(statsEfectivos(ch)[k]) + bonoPruebasObjetos(ch), tipo: 'prueba', ab: k });
+  if (tipo === 'salv') return tirarPrueba({ titulo: `Salvación de ${NOMBRE_CAR[k]}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k });
+  if (tipo === 'hab') return tirarPrueba({ titulo: NOMBRE_HAB[k], sub: `Prueba de ${NOMBRE_CAR[abDe(k)]}`, bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k });
 }
 
 const arma = id => { const ch = S.cur(), o = armaCombate(ch, id); return o ? { o, a: ataqueArma(ch, o) } : null; };
@@ -103,7 +103,7 @@ const danoArma = async (x, critico = false, aviso = '') => {
     if (sel.length) {
       const txt = sel.map(o => o.grupo === 'maniobra' ? o.nombre : o.grupo === 'castigo' ? `Castigo divino (${o.nombre.toLowerCase()})` : o.titulo);
       const h = S.act(`${x.o.nombre}: ${txt.join(', ')}`, (db, c) => gastarAlImpactar(c, sel));
-      toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [undoBtn(S, h)]);
+      toast(`<b>${esc(joinY(txt))}</b>: gastado.`, [botonDeshacer(S, h)]);
       mas = sel.filter(o => o.dado).map(o => ({ fuente: o.grupo === 'maniobra' ? o.nombre : o.titulo, valor: o.dado }));
     }
   }
@@ -115,12 +115,12 @@ const precisionDe = ch => {
   // Golpe guiado (dominio de la guerra 3): al fallar, +10 a la tirada gastando Canalizar divinidad
   const guerra = clasesDe(ch).some(c => c.clase === 'Clérigo' && c.nivel >= 3 && /guerra/i.test(c.subclase || '')), cd = reglas(ch).find(x => x.id === 'tpl:clerigo.canalizar');
   const guiado = guerra && cd && cd.max - usosGastados(ch, cd) > 0 ? { nombre: 'Golpe guiado', fijo: 10, quedan: cd.max - usosGastados(ch, cd), texto: 'gasta Canalizar divinidad y suma +10 a la tirada',
-    fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { recState(c, cd.id).used = (recState(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [undoBtn(S, h)]); } } : null;
+    fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { estadoRecurso(c, cd.id).used = (estadoRecurso(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [botonDeshacer(S, h)]); } } : null;
   if (!maniobrasDe(ch).some(m => m.nombre === 'Ataque de precisión')) return guiado;
   const r = reglas(ch).find(x => x.id === 'tpl:maestro.supremacia'); if (!r) return null;
   const quedan = r.max - usosGastados(ch, r); if (quedan < 1) return null;
   return { dado: dadoSupremacia(clasesDe(ch).find(c => c.clase === 'Guerrero').nivel), quedan,
-    fn: () => { const h = S.act('Ataque de precisión: gasta un dado de supremacía', (db, c) => { recState(c, r.id).used = (recState(c, r.id).used || 0) + 1; }); toast('Ataque de precisión: dado de supremacía gastado.', [undoBtn(S, h)]); } };
+    fn: () => { const h = S.act('Ataque de precisión: gasta un dado de supremacía', (db, c) => { estadoRecurso(c, r.id).used = (estadoRecurso(c, r.id).used || 0) + 1; }); toast('Ataque de precisión: dado de supremacía gastado.', [botonDeshacer(S, h)]); } };
 };
 const tirarAtaque = (x, eco = '') => {
   const maestria = x.a.domina ? efectoMaestria(S.cur(), x.a.maestria, { mod: x.a.mod }) : null;
@@ -133,13 +133,13 @@ export const accionComun = (k, via, forzar = false) => {
   const ch = S.cur(), a = ACCION_COMUN[k], c = combateDe(ch); if (!ch || !a) return;
   if (c.hechas.some(h => h.k === k && h.via === via)) {
     const h = S.act(`Deshace ${a.nombre}`, (db, x) => { deshacerAccionComun(x, k, via); if (a.efecto) vidaDe(x).efectos = vidaDe(x).efectos.filter(e => e.k !== a.efecto); });
-    haptic('light'); toast(`<b>${esc(a.nombre)}</b> desmarcada: ${esc(VIA_TXT[via])} vuelve a estar libre.`, [undoBtn(S, h)]); return;
+    vibrar('light'); toast(`<b>${esc(a.nombre)}</b> desmarcada: ${esc(VIA_TXT[via])} vuelve a estar libre.`, [botonDeshacer(S, h)]); return;
   }
   if (c.turno[via] && !forzar) {
     toast(`Ya has gastado ${esc(VIA_TXT[via])} este turno.`, [{ label: 'Hacerlo igualmente', hl: true, fn: () => accionComun(k, via, true) }]); return;
   }
   const h = S.act(`${a.nombre}${via !== 'accion' ? ` (${via === 'adicional' ? 'acción adicional' : 'reacción'})` : ''}`, (db, x) => { hacerAccionComun(x, k, via); if (a.efecto) ponerEfecto(x, a.efecto); });
-  haptic('light');
+  vibrar('light');
   if (a.efecto) golpe('buff');
   const extra = [];
   if (k === 'oportunidad') {
@@ -147,7 +147,7 @@ export const accionComun = (k, via, forzar = false) => {
     if (o) setTimeout(() => tirarAtaque(arma(o.id), 'ataque de oportunidad · gasta tu reacción'), 200);
   } else if (a.tirar?.length === 1) setTimeout(() => tirarDesde(`hab:${a.tirar[0]}`), 250);
   else if (a.tirar) extra.push(...a.tirar.slice(0, 3).map((hk, i) => ({ label: NOMBRE_HAB[hk], hl: i === 0, fn: () => tirarDesde(`hab:${hk}`) })));
-  toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, undoBtn(S, h)]);
+  toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, botonDeshacer(S, h)]);
 };
 export const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numLibre(i?.value); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
   if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };

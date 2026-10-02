@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { dotesDe } from '../../web/src/domain/reglas/reglas2024.js';
 import { MATRIZ, PUNTOS, costeCompra, tirar4d6, repartoSugerido, caracteristicasTrasfondo, estadoBonos, bonosSugeridos, conBonos, repartoHabilidades, completarHabilidades, doteRepetida, esRepetible, versatilPendiente, mejorasHasta, fuentesExtra } from '../../web/src/domain/personaje/creacion.js';
 import { periciasDisponibles } from '../../web/src/domain/reglas/habilidades.js';
 
-const ch = (o = {}) => normChar(blankChar({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
+const ch = (o = {}) => normPersonaje(personajeVacio({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
 
 describe('características', () => {
   test('matriz estándar y compra de puntos', () => {
@@ -40,18 +40,18 @@ describe('características', () => {
 describe('dotes de origen', () => {
   test('sin trasfondo no hay dote de origen, aunque un libro importado tenga trasfondos sin nombre', () => {
     const lib = [{ nombre: '', dote: 'Alerta' }, { nombre: 'Guardia', dote: 'Alerta' }];
-    assert.deepEqual(dotesDe(blankChar(), lib), []);
-    assert.deepEqual(dotesDe(blankChar({ trasfondo: '  ' }), lib), []);
-    assert.equal(dotesDe(blankChar({ trasfondo: 'Guardia' }), lib)[0].nombre, 'Alerta');
-    assert.equal(dotesDe(blankChar({ trasfondo: 'Erudito' }))[0].nombre, 'Iniciado en la magia');
+    assert.deepEqual(dotesDe(personajeVacio(), lib), []);
+    assert.deepEqual(dotesDe(personajeVacio({ trasfondo: '  ' }), lib), []);
+    assert.equal(dotesDe(personajeVacio({ trasfondo: 'Guardia' }), lib)[0].nombre, 'Alerta');
+    assert.equal(dotesDe(personajeVacio({ trasfondo: 'Erudito' }))[0].nombre, 'Iniciado en la magia');
   });
 
   test('una dote que no es repetible no se puede elegir dos veces', () => {
-    const ch = blankChar({ trasfondo: 'Guardia' });
+    const ch = personajeVacio({ trasfondo: 'Guardia' });
     assert.ok(doteRepetida(ch, 'Alerta'));
     assert.ok(doteRepetida(ch, 'alerta'));
     assert.ok(!doteRepetida(ch, 'Afortunado'));
-    const mago = blankChar({ trasfondo: 'Erudito' });
+    const mago = personajeVacio({ trasfondo: 'Erudito' });
     assert.ok(esRepetible('Iniciado en la magia (clérigo)'));
     assert.ok(!doteRepetida(mago, 'Iniciado en la magia (clérigo)'));
     assert.ok(doteRepetida(mago, 'Iniciado en la magia (mago)'));
@@ -59,16 +59,16 @@ describe('dotes de origen', () => {
   });
 
   test('Humano pide una de origen y las mejoras según el nivel', () => {
-    assert.ok(versatilPendiente(blankChar({ especie: 'Humano' })));
-    assert.ok(!versatilPendiente(blankChar({ especie: 'Humano', dotes: ['Duro'] })));
-    assert.ok(!versatilPendiente(blankChar({ especie: 'Elfo' })));
-    assert.equal(mejorasHasta(blankChar({ clase: 'Guerrero', nivel: 8 })).asi, 3);
+    assert.ok(versatilPendiente(personajeVacio({ especie: 'Humano' })));
+    assert.ok(!versatilPendiente(personajeVacio({ especie: 'Humano', dotes: ['Duro'] })));
+    assert.ok(!versatilPendiente(personajeVacio({ especie: 'Elfo' })));
+    assert.equal(mejorasHasta(personajeVacio({ clase: 'Guerrero', nivel: 8 })).asi, 3);
   });
 });
 
 describe('habilidades y competencias', () => {
   test('trasfondo, clase, especie y lo que falta', () => {
-    const ch = blankChar({ clase: 'Mago', trasfondo: 'Guardia', especie: 'Humano', habilidades: { atletismo: 1, percepcion: 1, arcanos: 1 } });
+    const ch = personajeVacio({ clase: 'Mago', trasfondo: 'Guardia', especie: 'Humano', habilidades: { atletismo: 1, percepcion: 1, arcanos: 1 } });
     const r = repartoHabilidades(ch);
     assert.equal(r.fuente.atletismo, 'trasfondo');
     assert.equal(r.fuente.arcanos, 'clase');
@@ -77,9 +77,9 @@ describe('habilidades y competencias', () => {
     const hab = completarHabilidades(ch);
     const r2 = repartoHabilidades({ ...ch, habilidades: hab });
     assert.equal(r2.clase.faltan + r2.extra.faltan + r2.pericia.faltan, 0);
-    const picaro = blankChar({ clase: 'Pícaro', trasfondo: 'Criminal', habilidades: {} }), rp = repartoHabilidades({ ...picaro, habilidades: completarHabilidades(picaro) });
+    const picaro = personajeVacio({ clase: 'Pícaro', trasfondo: 'Criminal', habilidades: {} }), rp = repartoHabilidades({ ...picaro, habilidades: completarHabilidades(picaro) });
     assert.equal(rp.clase.faltan + rp.pericia.faltan + rp.faltanTrasfondo.length, 0);
-    assert.equal(repartoHabilidades(blankChar({ clase: 'Pícaro', nivel: 1, habilidades: {} })).pericia.faltan, 2);
+    assert.equal(repartoHabilidades(personajeVacio({ clase: 'Pícaro', nivel: 1, habilidades: {} })).pericia.faltan, 2);
   });
 
   test('dominio del conocimiento: pide dos habilidades con pericia y cuenta esas pericias', () => {
@@ -109,9 +109,9 @@ describe('habilidades y competencias', () => {
 
 describe('guardado', () => {
   test('la creación se guarda con el personaje', () => {
-    const c = normChar(blankChar({ creacion: { metodo: 'compra', base: { fue: 8, des: 14, con: 14, int: 15, sab: 10, car: 8 }, bonos: { int: 2, sab: 1, car: 5 }, tiradas: [] } }));
+    const c = normPersonaje(personajeVacio({ creacion: { metodo: 'compra', base: { fue: 8, des: 14, con: 14, int: 15, sab: 10, car: 8 }, bonos: { int: 2, sab: 1, car: 5 }, tiradas: [] } }));
     assert.equal(c.creacion.metodo, 'compra');
     assert.deepEqual(c.creacion.bonos, { int: 2, sab: 1 });
-    assert.equal(normChar(blankChar()).creacion, null);
+    assert.equal(normPersonaje(personajeVacio()).creacion, null);
   });
 });

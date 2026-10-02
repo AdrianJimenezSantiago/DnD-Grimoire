@@ -1,18 +1,18 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseObjetos, leerTipo, leerCargas, leerUsos, corregirNombre } from '../../web/src/domain/libros/objetos.js';
+import { leerObjetos, leerTipo, leerCargas, leerUsos, corregirNombre } from '../../web/src/domain/libros/objetos.js';
 
 const L = (x, y, s, h = 16, segs) => ({ x, y, h, s, segs: segs || [{ x, w: s.length * 7, s }], cells: segs ? segs.map(g => ({ x: g.x, s: g.s })) : [{ x, s }] });
 const pag = cols => [{ p: 1, cols }];
 
-describe('parseObjetos', () => {
+describe('leerObjetos', () => {
   test('tipo, rareza variable, sintonización y cargas', () => {
     const t = leerTipo('Arma (cualquier arma sencilla), infrecuente (+1), rara (+2) o muy rara (+3)');
     assert.equal(t.tipo, 'Arma'); assert.equal(t.rareza, 'Varía'); assert.deepEqual(t.rarezas, ['Infrecuente', 'Raro', 'Muy raro']);
     const v = leerTipo('Varita, rara (requiere sintonización por parte de un lanzador de conjuros)');
     assert.equal(v.rareza, 'Raro'); assert.ok(v.sintonia); assert.equal(leerTipo('POCIÓN DE PRUEBA Poción, rara'), null);
     assert.deepEqual(leerCargas('Tiene 7 cargas. Recupera 1d6 + 1 cargas empleadas cada día, al amanecer.'), { max: 7, recarga: '1d6+1', cuando: 'amanecer' });
-    const o = parseObjetos(pag([[L(60, 900, 'VARA DE PRUEBA', 20), L(60, 880, 'Vara, muy rara (requiere sintonización)'), L(60, 860, 'Esta vara inventada tiene 3 cargas y recupera 1d3 cargas gastadas al amanecer.'),
+    const o = leerObjetos(pag([[L(60, 900, 'VARA DE PRUEBA', 20), L(60, 880, 'Vara, muy rara (requiere sintonización)'), L(60, 860, 'Esta vara inventada tiene 3 cargas y recupera 1d3 cargas gastadas al amanecer.'),
       L(60, 820, 'OTRO OBJETO', 20), L(60, 800, 'Objeto maravilloso, común'), L(60, 780, 'Un objeto de prueba sin más.')], []]));
     assert.deepEqual(o.map(x => [x.nombre, x.rareza]), [['Vara de prueba', 'Muy raro'], ['Otro objeto', 'Común']]);
     assert.equal(o[0].cargas.max, 3);
@@ -43,7 +43,7 @@ describe('parseObjetos', () => {
   });
 
   test('títulos en versalitas mal leídas, a la izquierda del margen y con un pie de ilustración en medio', () => {
-    const o = parseObjetos(pag([[L(60, 900, 'TEXTO DE RELLENO', 14), L(60, 880, 'Un párrafo cualquiera que marca el margen.'), L(60, 860, 'Y otro más para el margen.'),
+    const o = leerObjetos(pag([[L(60, 900, 'TEXTO DE RELLENO', 14), L(60, 880, 'Un párrafo cualquiera que marca el margen.'), L(60, 860, 'Y otro más para el margen.'),
       L(60, 820, 'EscuDO ANIMADO', 21), L(60, 800, 'Armadura (escudo), muy rara (requiere sintonización)'), L(60, 780, 'Mientras lleves embrazado este escudo, puedes darle vida.'),
       L(60, 740, 'GORRO DE PRUEBA', 15), L(400, 730, 'GLoBo', 13), L(60, 720, 'Objeto maravilloso, infrecuente'), L(60, 700, 'Si estás bajo el agua y llevas este gorro, respiras.'),
       L(60, 660, 'VARA DEL PACTO', 20), L(60, 640, 'Vara, infrecuente (+1), rara (+2) o muy rara (+3)'), L(60, 620, '(requiere sintonización por parte de un brujo) Mientras sostienes esta vara, obtienes un bonificador.')], []]));

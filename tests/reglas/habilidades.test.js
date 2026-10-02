@@ -1,9 +1,9 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { bonoHabilidad, bonoSalvacion, iniciativa, percepcionPasiva, competenciasIniciales, velocidad, periciasDisponibles, tablaCaracteristicas } from '../../web/src/domain/reglas/habilidades.js';
 
-const pj = over => normChar(blankChar({ nivel: 5, stats: { fue: 8, des: 14, con: 12, int: 18, sab: 12, car: 10 }, ...over }));
+const pj = over => normPersonaje(personajeVacio({ nivel: 5, stats: { fue: 8, des: 14, con: 12, int: 18, sab: 12, car: 10 }, ...over }));
 
 describe('bonoHabilidad: pruebas de habilidad', () => {
   test('característica, competencia y pericia', () => {
@@ -37,12 +37,12 @@ describe('salvaciones e iniciativa', () => {
 
 describe('competencias y pericias', () => {
   test('datos antiguos: el trasfondo da sus habilidades', () => {
-    const ch = normChar({ nombre: 'X', clase: 'Mago', trasfondo: 'Erudito' });
+    const ch = normPersonaje({ nombre: 'X', clase: 'Mago', trasfondo: 'Erudito' });
     assert.deepEqual(ch.habilidades, { arcanos: 1, historia: 1 });
   });
 
   test('competencias iniciales: trasfondo y las de la clase según sus prioridades', () => {
-    const c = competenciasIniciales(blankChar({ clase: 'Pícaro', trasfondo: 'Criminal' }));
+    const c = competenciasIniciales(personajeVacio({ clase: 'Pícaro', trasfondo: 'Criminal' }));
     assert.equal(Object.keys(c).length, 6);
     assert.ok(c.juegomanos && c.sigilo);
   });

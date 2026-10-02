@@ -1,18 +1,18 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDotes, parseTrasfondos, parseSubclases, separarRasgos, completarSubclases, nombrarTrasfondos, corregirConTabla, frecuencias } from '../../web/src/domain/libros/contenido.js';
+import { leerDotes, leerTrasfondos, leerSubclases, separarRasgos, completarSubclases, nombrarTrasfondos, corregirConTabla, frecuencias } from '../../web/src/domain/libros/contenido.js';
 
 const L = (x, y, s, h = 16, segs) => ({ x, y, h, s, segs: segs || [{ x, w: s.length * 7, s }], cells: segs ? segs.map(g => ({ x: g.x, s: g.s })) : [{ x, s }] });
 const pag = cols => [{ p: 1, cols }];
 
 describe('dotes, trasfondos y subclases', () => {
   test('dotes, trasfondos y subclases', () => {
-    const d = parseDotes(pag([[L(60, 900, 'DOTE INVENTADA', 20), L(60, 880, 'Dote general (requisitos: nivel 4 o más)'), L(60, 860, 'Obtienes un beneficio de prueba bastante largo.')], []]));
+    const d = leerDotes(pag([[L(60, 900, 'DOTE INVENTADA', 20), L(60, 880, 'Dote general (requisitos: nivel 4 o más)'), L(60, 860, 'Obtienes un beneficio de prueba bastante largo.')], []]));
     assert.equal(d[0].cat, 'General'); assert.equal(d[0].req, 'nivel 4 o más');
-    const t = parseTrasfondos(pag([[L(60, 900, 'ARTESANO', 20), L(60, 880, 'Puntuaciones de característica: Fuerza, Destreza, Inteligencia'), L(60, 860, 'Dote: Fabricante (consulta el capítulo 5)'),
+    const t = leerTrasfondos(pag([[L(60, 900, 'ARTESANO', 20), L(60, 880, 'Puntuaciones de característica: Fuerza, Destreza, Inteligencia'), L(60, 860, 'Dote: Fabricante (consulta el capítulo 5)'),
       L(60, 840, 'Competencias en habilidades: Investigación y Persuasión'), L(60, 820, 'Equipo: 50 po'), L(60, 790, 'Texto del trasfondo inventado.')], []]));
     assert.equal(t[0].nombre, 'Artesano'); assert.equal(t[0].dote, 'Fabricante');
-    const s = parseSubclases(pag([[L(60, 900, 'CUSTODIO DE PRUEBA (MAGO)', 26), L(60, 880, 'Un lema breve.'), L(60, 870, 'Introducción de la subclase.'), L(60, 850, 'NIVEL 3: PRIMER RASGO', 20), L(60, 830, 'Texto del rasgo.'),
+    const s = leerSubclases(pag([[L(60, 900, 'CUSTODIO DE PRUEBA (MAGO)', 26), L(60, 880, 'Un lema breve.'), L(60, 870, 'Introducción de la subclase.'), L(60, 850, 'NIVEL 3: PRIMER RASGO', 20), L(60, 830, 'Texto del rasgo.'),
       L(60, 800, 'NIVEL 6: SEGUNDO RASGO', 20), L(60, 780, 'Más texto.')], []]));
     assert.equal(s[0].clase, 'Mago'); assert.deepEqual(s[0].rasgos.map(r => r.nivel), [3, 6]); assert.equal(s[0].lema, 'Un lema breve.');
   });
@@ -29,7 +29,7 @@ describe('dotes, trasfondos y subclases', () => {
   });
 });
 
-describe('parseSubclases', () => {
+describe('leerSubclases', () => {
   test('títulos de rasgo con «NIVEL» mal leído, pegados al texto o en mitad de línea', () => {
     const ls = separarRasgos([L(60, 900, 'NrIveEL 10: REPRESALIA Cuando recibas daño de una criatura'), L(60, 880, 'NIveL 6: Foco FANÁTICO Una vez por furia, si fallas'),
       L(60, 860, 'del espacio gastado. NrveL 10: EL TERCER OJO Puedes aumentar'), L(60, 840, 'tres espacios de nivel 1. Cuando recuperes espacios')].map(l => ({ ...l, margin: 60, hTip: 16 })));

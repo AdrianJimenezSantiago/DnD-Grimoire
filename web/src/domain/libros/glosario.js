@@ -14,7 +14,7 @@ export const sinCortes = t => String(t || '').replace(/(\p{Ll})- (\p{Ll})/gu, '$
   .replace(/\b([1-9])420\b/g, '$1d20')
   .replace(/(\bvelocidad(?: es| pasa a| queda en| de)?\s+)O\b/giu, '$10')
   .replace(/(^|[\s(])O(?=\s+(?:PG|puntos de golpe)\b)/gu, '$10');
-export function parseGlosario(pages) {
+export function leerGlosario(pages) {
   const L = [];
   for (const pg of pages) pg.cols.forEach(col => {
     const body = col.filter(l => !isFooter(l.s));

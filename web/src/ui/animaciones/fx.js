@@ -1,7 +1,7 @@
 // Efectos visuales cortos: chispas, destellos al lanzar conjuros y gastar espacios, pulsos y transiciones de vista.
 // Respetan «reducir movimiento».
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
-export const reducedMotion = () => mq.matches;
+export const movimientoReducido = () => mq.matches;
 
 let cv = null, ctx = null, parts = [], raf = 0, dpr = 1, vw = 0, vh = 0;
 function ensure() {
@@ -59,8 +59,8 @@ function hslOf(color) {
     h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
   return [h, s * 100, l * 100];
 }
-export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, spread = 1, life = 900, size = 2.2, gravity = -0.02 } = {}) {
-  if (reducedMotion()) return;
+export function chispas(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, spread = 1, life = 900, size = 2.2, gravity = -0.02 } = {}) {
+  if (movimientoReducido()) return;
   ensure(); if (document.querySelector('dialog[open]') || cv.matches?.(':popover-open')) alFrente(cv);
   const [h, s, l] = hslOf(color), S = Math.round(s), L = Math.round(l);
   for (let i = 0; i < n && parts.length < MAX_PARTS; i++) {
@@ -71,41 +71,41 @@ export function burst(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6, 
   if (!raf) raf = requestAnimationFrame(loop);
 }
 const center = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r]; };
-export function burstFrom(el, opts) { if (!el) return; const [x, y] = center(el); burst(x, y, opts); }
-export function castFx(row, color) {
-  if (!row || reducedMotion()) return;
+export function chispasDesde(el, opts) { if (!el) return; const [x, y] = center(el); chispas(x, y, opts); }
+export function fxLanzar(row, color) {
+  if (!row || movimientoReducido()) return;
   row.classList.remove('fx-cast'); void row.offsetWidth; row.classList.add('fx-cast');
   setTimeout(() => row.classList.remove('fx-cast'), 1400);
   const nm = row.querySelector('.nm'); if (!nm) return;
   const r = nm.getBoundingClientRect();
   document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'lanzar', x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, color } }));
-  for (let i = 0; i < 4; i++) setTimeout(() => burst(r.left + r.width * (0.15 + 0.7 * Math.random()), r.top + r.height / 2, { color, n: 9, speed: 2.2, up: 2.4, life: 1000, size: 1.8 }), i * 70);
+  for (let i = 0; i < 4; i++) setTimeout(() => chispas(r.left + r.width * (0.15 + 0.7 * Math.random()), r.top + r.height / 2, { color, n: 9, speed: 2.2, up: 2.4, life: 1000, size: 1.8 }), i * 70);
 }
-export function slotFx(level, index, kind) {
+export function fxEspacio(level, index, kind) {
   const btn = document.querySelector(`#sbar [data-slotbtn="${level}:${index}"]`) || document.querySelector(`[data-slotbtn="${level}:${index}"]`);
   if (!btn) return;
   btn.classList.add(kind === 'ignite' ? 'fx-ignite' : 'fx-snuff');
   setTimeout(() => btn.classList.remove('fx-ignite', 'fx-snuff'), 700);
-  if (kind !== 'ignite') burstFrom(btn, { color: '#9aa0b3', n: 8, speed: 0.8, up: 2.6, life: 900, size: 2.4, gravity: -0.03 });
-  else burstFrom(btn, { color: '#F4C567', n: 10, speed: 1.6, up: 1.2, life: 600, size: 1.6 });
+  if (kind !== 'ignite') chispasDesde(btn, { color: '#9aa0b3', n: 8, speed: 0.8, up: 2.6, life: 900, size: 2.4, gravity: -0.03 });
+  else chispasDesde(btn, { color: '#F4C567', n: 10, speed: 1.6, up: 1.2, life: 600, size: 1.6 });
 }
-export function dawn() {
-  if (reducedMotion()) return;
+export function amanecer() {
+  if (movimientoReducido()) return;
   const d = document.createElement('div'); d.className = 'dawn'; document.body.appendChild(d);
   document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'amanecer' } }));
   setTimeout(() => d.remove(), 1400);
   document.querySelectorAll('.slotbtn').forEach((b, i) => { b.style.setProperty('--i', i % 12); b.classList.add('fx-ignite'); setTimeout(() => b.classList.remove('fx-ignite'), 1300); });
 }
-export function ascend(el) {
-  if (!el || reducedMotion()) return;
+export function ascender(el) {
+  if (!el || movimientoReducido()) return;
   const [x, y, r] = center(el);
   document.dispatchEvent(new CustomEvent('grimorio:fx', { detail: { tipo: 'ascender', x, y } }));
-  burst(x, y, { n: 60, speed: 5.5, up: 1, life: 1400, size: 2.4, gravity: 0.02 });
-  for (let i = 0; i < 6; i++) setTimeout(() => burst(r.left + Math.random() * r.width, r.bottom, { n: 10, speed: 1.4, up: 3.4, life: 1500, size: 1.8 }), 120 + i * 90);
+  chispas(x, y, { n: 60, speed: 5.5, up: 1, life: 1400, size: 2.4, gravity: 0.02 });
+  for (let i = 0; i < 6; i++) setTimeout(() => chispas(r.left + Math.random() * r.width, r.bottom, { n: 10, speed: 1.4, up: 3.4, life: 1500, size: 1.8 }), 120 + i * 90);
 }
-export function pop(el, cls) { if (!el || reducedMotion()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-export function viewTransition(fn) {
-  if (reducedMotion() || !document.startViewTransition) { fn(); return; }
+export function pop(el, cls) { if (!el || movimientoReducido()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+export function transicionVista(fn) {
+  if (movimientoReducido() || !document.startViewTransition) { fn(); return; }
   document.startViewTransition(fn);
 }
-export const schoolColor = key => getComputedStyle(document.documentElement).getPropertyValue(`--sc-${key || 'adi'}`).trim() || '#E7B85F';
+export const colorEscuela = key => getComputedStyle(document.documentElement).getPropertyValue(`--sc-${key || 'adi'}`).trim() || '#E7B85F';

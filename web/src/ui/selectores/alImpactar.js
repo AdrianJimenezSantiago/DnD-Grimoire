@@ -1,6 +1,6 @@
 // Ventana «al impactar»: elige qué añadir al daño de un ataque (maniobras, Castigo divino, Ataque furtivo…).
 import { esc } from '../../core/util.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { gi } from '../componentes/tema.js';
 
 // Pregunta qué añadir al daño al impactar (maniobra, Castigo divino, Ataque furtivo…). Devuelve las opciones elegidas,
@@ -12,7 +12,7 @@ export function preguntarAlImpactar(ops, { arma = '' } = {}) {
   const grupos = [...new Set(ops.map(o => o.titulo))];
   return new Promise(resolve => {
     let hecho = false;
-    const fin = v => { if (hecho) return; hecho = true; closeSheet(d); resolve(v); };
+    const fin = v => { if (hecho) return; hecho = true; cerrarDialogo(d); resolve(v); };
     const pintar = () => {
       d.innerHTML = `<h2 id="aiTitle">${gi('ca')}¿Algo más al impactar?</h2><p class="md-text">${esc(arma)}: lo que elijas se suma al daño y se gasta de tus recursos.</p>
         ${grupos.map(g => { const xs = ops.filter(o => o.titulo === g);
@@ -31,6 +31,6 @@ export function preguntarAlImpactar(ops, { arma = '' } = {}) {
     };
     d.oncancel = e => { e.preventDefault(); fin(null); };
     d.addEventListener('close', () => fin(null), { once: true });
-    openSheet(d);
+    abrirDialogo(d);
   });
 }

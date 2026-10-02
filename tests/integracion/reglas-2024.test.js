@@ -2,9 +2,9 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recursoParaConjuro, recState, reglas } from '../../web/src/domain/clases/rasgos.js';
+import { recursoParaConjuro, estadoRecurso, reglas } from '../../web/src/domain/clases/rasgos.js';
 import { conjurosDeDote, dotesConConjuros, filtroEleccion } from '../../web/src/domain/origen/conjurosDote.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { perfil } from '../../web/src/domain/reglas/reglas2024.js';
 import { bonoSalvacion, salvacionesCompetentes, bonoHabilidad, velocidad, habilidadesTrasfondo, periciasDisponibles } from '../../web/src/domain/reglas/habilidades.js';
 import { pgMaximo, ponerEfecto, rondasDeDuracion } from '../../web/src/domain/combate/vida.js';
@@ -14,12 +14,12 @@ import { armadurasDe, competenteConArma } from '../../web/src/domain/reglas/comp
 import { faltaRequisito, aumentoDeDote, entrenamientoDe, extraTrasfondo, sinCortes } from '../../web/src/domain/origen/origen.js';
 import { estiloDe, estadoEstilo } from '../../web/src/domain/clases/estilos.js';
 import { caracteristicasTrasfondo, fuentesExtra } from '../../web/src/domain/personaje/creacion.js';
-import { setLibros } from '../../web/src/domain/libros/biblioteca.js';
+import { fijarLibros } from '../../web/src/domain/libros/biblioteca.js';
 import { analizarTiradas, dadosPara } from '../../web/src/domain/conjuros/tiradas.js';
 import { separarRasgos } from '../../web/src/domain/libros/contenido.js';
 
 const st = (v = 14, o = {}) => ({ fue: v, des: v, con: v, int: v, sab: v, car: v, ...o });
-const pj = o => normChar(blankChar({ stats: st(), ...o }));
+const pj = o => normPersonaje(personajeVacio({ stats: st(), ...o }));
 const nombres = ch => reglas(ch).map(r => `${r.nombre}:${r.max}`);
 const arma = (ch, n, equipar = false) => { const o = anadirComun(ch, structuredClone(PREDEFINIDOS.find(x => x.nombre === n))); if (equipar) alternarEquipado(ch, o.id); return o; };
 
@@ -56,7 +56,7 @@ describe('clases y subclases', () => {
     const guardian = pj({ clase: 'Druida', nivel: 1, ordenes: { 'Druida': 'Guardián' } });
     assert.ok(armadurasDe(guardian).has('media'));
     assert.equal(competenteConArma(guardian, PREDEFINIDOS.find(x => x.nombre === 'Espada larga')), true);
-    assert.deepEqual(normChar({ ordenes: { 'Clérigo': 'protector', 'Mago': 'Nada' } }).ordenes, { 'Clérigo': 'Protector' });
+    assert.deepEqual(normPersonaje({ ordenes: { 'Clérigo': 'protector', 'Mago': 'Nada' } }).ordenes, { 'Clérigo': 'Protector' });
   });
 
   test('armas: competencia por clase, Artes marciales, golpe sin armas y Furia', () => {
@@ -147,7 +147,7 @@ describe('dotes y trasfondos', () => {
   });
 
   test('trasfondos de otros libros: características, habilidades, herramienta y equipo con restos de OCR', () => {
-    setLibros([{ id: 'hf', titulo: 'Héroes de Faerûn', trasfondos: [{ clave: 'errante rashemi', nombre: 'Errante rashemí', caracteristicas: 'Fu erza, Constitución, Carisma', dote: 'Duro',
+    fijarLibros([{ id: 'hf', titulo: 'Héroes de Faerûn', trasfondos: [{ clave: 'errante rashemi', nombre: 'Errante rashemí', caracteristicas: 'Fu erza, Constitución, Carisma', dote: 'Duro',
       habilidades: 'Intim idación y Percepción', herramientas: 'herram ientas de ca rtógrafo',
       equipo: 'elige A o B: (A) herram ientas de cartógrafo, aceite (3 frascos), moch ila, petate, ropas de viaje, yesquero y 23 po, o (B) 50 po' }] }]);
     assert.deepEqual(caracteristicasTrasfondo('Errante rashemí', [{ nombre: 'Errante rashemí', caracteristicas: 'Fu erza, Constitución, 1nteligencia' }]), ['fue', 'con', 'int']);
@@ -156,7 +156,7 @@ describe('dotes y trasfondos', () => {
     assert.equal(x.herramienta, 'Herramientas de cartógrafo');
     assert.deepEqual(x.opciones[0], { k: 'A', objetos: ['Herramientas de cartógrafo', ['Aceite (frasco)', 3], 'Mochila', 'Saco de dormir', 'Ropa de viaje', 'Yesquero'], po: 23 });
     assert.equal(sinCortes('útiles para d isfrazarse, bo lsa'), 'útiles para disfrazarse, bolsa');
-    setLibros([]);
+    fijarLibros([]);
   });
 
   test('habilidades y pericias que dan dotes y subclases', () => {
@@ -186,7 +186,7 @@ describe('conjuros', () => {
   test('conjuros gratis por rasgo: Marca del cazador gasta Enemigo predilecto antes que un espacio', () => {
     const ex = pj({ clase: 'Explorador', nivel: 1 });
     assert.equal(recursoParaConjuro(ex, 'Marca del cazador').nombre, 'Enemigo predilecto');
-    recState(ex, 'tpl:explorador.enemigo').used = 2;
+    estadoRecurso(ex, 'tpl:explorador.enemigo').used = 2;
     assert.equal(recursoParaConjuro(ex, 'Marca del cazador'), null);
     assert.equal(recursoParaConjuro(pj({ clase: 'Paladín', nivel: 2 }), 'Castigo divino').nombre, 'Castigo de paladín');
     assert.equal(recursoParaConjuro(pj({ clase: 'Mago', nivel: 5 }), 'Bola de fuego'), null);

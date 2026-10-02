@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { normCombate, empezarCombate, combateDe, limiteEspacio, lanzarEnCombate, terminarCombate, siguienteTurno } from '../../web/src/domain/combate/combate.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 
-const guerrero = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
+const guerrero = over => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
 const st = o => ({ fue: 10, des: 10, con: 14, int: 10, sab: 10, car: 10, ...o });
-const pj = o => normChar(blankChar(o));
+const pj = o => normPersonaje(personajeVacio(o));
 
 describe('iniciativa', () => {
   test('la iniciativa escrita a mano se recuerda y se limpia al empezar otro', () => {

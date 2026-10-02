@@ -4,10 +4,10 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compendioJson } from '../helpers/fixtures.js';
 import { LINAJES, conjurosEspecie, RASGOS_ESPECIE } from '../../web/src/domain/origen/especies.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { CLASES, perfil } from '../../web/src/domain/reglas/reglas2024.js';
 import { SUBCLASES, conjurosAutomaticos, escalas, progresion } from '../../web/src/domain/clases/clases2024.js';
-import { reglas, recState, recuperarEnDescanso } from '../../web/src/domain/clases/rasgos.js';
+import { reglas, estadoRecurso, recuperarEnDescanso } from '../../web/src/domain/clases/rasgos.js';
 import { rasgosEnJuego } from '../../web/src/domain/clases/enJuego.js';
 import { opcionesAlImpactar, danoSiempre } from '../../web/src/domain/combate/alImpactar.js';
 import { alTirarIniciativa, alEmpezarTurno, alGastarRecurso, curacionDeRecurso } from '../../web/src/domain/combate/automatismos.js';
@@ -32,7 +32,7 @@ function ejercitar(ch) {
   // Gasta un uso de cada recurso y lo que dispara, recupera con descansos, y dispara iniciativa y turno
   for (const r of reglas(ch)) {
     if (r.tipo !== 'recurso') continue;
-    recState(ch, r.id).used = Math.min(r.max, 1); alGastarRecurso(ch, r.id); curacionDeRecurso(ch, r.id); canjesDe(ch, r.id);
+    estadoRecurso(ch, r.id).used = Math.min(r.max, 1); alGastarRecurso(ch, r.id); curacionDeRecurso(ch, r.id); canjesDe(ch, r.id);
     for (const t of ['corto', 'largo']) { const x = recuperarEnDescanso(r, 1, t); assert.ok(x.usados >= 0 && x.usados <= 1, `${r.nombre} ${t}`); }
   }
   alTirarIniciativa(ch); alEmpezarTurno(ch);
@@ -44,7 +44,7 @@ describe('todas las combinaciones', () => {
     for (const clase of Object.keys(CLASES)) {
       for (const sub of ['', ...(SUBCLASES[clase] || []).map(s => s.nombre)]) {
         for (let nivel = 1; nivel <= 20; nivel++) {
-          const ch = normChar(blankChar({ clase, subclase: nivel >= 3 ? sub : '', nivel, stats }));
+          const ch = normPersonaje(personajeVacio({ clase, subclase: nivel >= 3 ? sub : '', nivel, stats }));
           ejercitar(ch); n++;
           for (const c of conjurosAutomaticos(ch)) if (!nombres.has(c.nombre.toLowerCase())) faltan.add(`${clase}/${sub}: ${c.nombre}`);
         }
@@ -59,13 +59,13 @@ describe('todas las combinaciones', () => {
     for (const a of clases) for (const b of clases) {
       if (a === b) continue;
       const sa = SUBCLASES[a]?.[0]?.nombre || '', sb = SUBCLASES[b]?.[0]?.nombre || '';
-      ejercitar(normChar(blankChar({ clase: a, subclase: sa, nivel: 10, stats, multiclase: [{ clase: b, subclase: sb, nivel: 10 }] })));
+      ejercitar(normPersonaje(personajeVacio({ clase: a, subclase: sa, nivel: 10, stats, multiclase: [{ clase: b, subclase: sb, nivel: 10 }] })));
     }
   });
 
   test('los recursos de todas las subclases a nivel 20 tienen máximo positivo y recarga válida', () => {
     for (const clase of Object.keys(CLASES)) for (const s of SUBCLASES[clase] || []) {
-      const ch = normChar(blankChar({ clase, subclase: s.nombre, nivel: 20, stats }));
+      const ch = normPersonaje(personajeVacio({ clase, subclase: s.nombre, nivel: 20, stats }));
       for (const r of reglas(ch)) {
         if (r.tipo === 'al_lanzar') continue;
         assert.ok(r.max > 0, `${clase}/${s.nombre}: ${r.nombre} max ${r.max}`);
@@ -80,7 +80,7 @@ describe('todas las combinaciones', () => {
     for (const [k, especie] of Object.entries(especies)) {
       const d = LINAJES.find(x => x.especie === k && x.cambia === 'fija'), ops = d ? d.opciones.map(o => o.nombre) : [''];
       for (const op of ops) for (const nivel of [1, 3, 5, 11, 17, 20]) {
-        const ch = normChar(blankChar({ clase: 'Guerrero', nivel, stats, especie, opciones: op ? { [d.id]: op } : {} }));
+        const ch = normPersonaje(personajeVacio({ clase: 'Guerrero', nivel, stats, especie, opciones: op ? { [d.id]: op } : {} }));
         ejercitar(ch);
         for (const c of conjurosEspecie(ch, nivel)) assert.ok(nombres.has(c.nombre.toLowerCase()), `${especie} ${op}: ${c.nombre}`);
       }

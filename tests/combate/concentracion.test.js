@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { conObjetivos, empezarConc, objetivosNuevos, rasgosConObjetivo, terminarConc } from '../../web/src/domain/combate/concentracion.js';
-import { blankChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio } from '../../web/src/domain/personaje/modelo.js';
 
 describe('objetivos de concentración', () => {
   test('objetivos solo en conjuros sin área, y se olvidan al cambiar', () => {
@@ -18,9 +18,9 @@ describe('objetivos de concentración', () => {
   });
 
   test('rasgos con objetivo según la clase y el nivel', () => {
-    assert.deepEqual(rasgosConObjetivo(blankChar({ clase: 'Paladín', subclase: 'Juramento de venganza', nivel: 3 })), ['Voto de enemistad']);
-    assert.deepEqual(rasgosConObjetivo(blankChar({ clase: 'Monje', nivel: 4 })), []);
-    assert.deepEqual(rasgosConObjetivo(blankChar({ clase: 'Monje', nivel: 5 })), ['Golpe aturdidor']);
-    assert.ok(rasgosConObjetivo(blankChar({ clase: 'Bardo', nivel: 1 })).includes('Inspiración bárdica'));
+    assert.deepEqual(rasgosConObjetivo(personajeVacio({ clase: 'Paladín', subclase: 'Juramento de venganza', nivel: 3 })), ['Voto de enemistad']);
+    assert.deepEqual(rasgosConObjetivo(personajeVacio({ clase: 'Monje', nivel: 4 })), []);
+    assert.deepEqual(rasgosConObjetivo(personajeVacio({ clase: 'Monje', nivel: 5 })), ['Golpe aturdidor']);
+    assert.ok(rasgosConObjetivo(personajeVacio({ clase: 'Bardo', nivel: 1 })).includes('Inspiración bárdica'));
   });
 });

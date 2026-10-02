@@ -3,7 +3,7 @@ const num = s => parseFloat(String(s).replace(',', '.'));
 const ft = s => Math.round(num(s) * 0.3 * 10) / 10;
 export const CASILLA = 1.5;
 
-export function parseArea(texto = '', alcance = '') {
+export function leerArea(texto = '', alcance = '') {
   const t = `${alcance} ${texto}`;
   let m;
   const X = '(?:\\s+de\\s+[a-záéíóúñ]+){0,2}';

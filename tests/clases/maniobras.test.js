@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { cupoManiobras, cdManiobras, maniobrasDe, alternarManiobra, MANIOBRAS } from '../../web/src/domain/clases/maniobras.js';
 import { rasgosEnJuego } from '../../web/src/domain/clases/enJuego.js';
 import { reglas } from '../../web/src/domain/clases/rasgos.js';
 
-const ch = (o = {}) => normChar(blankChar({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
+const ch = (o = {}) => normPersonaje(personajeVacio({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
 
 describe('maniobras del Maestro del combate', () => {
   test('3/5/7/9 según el nivel de guerrero, CD con Fuerza o Destreza y en «En juego»', () => {
@@ -23,6 +23,6 @@ describe('maniobras del Maestro del combate', () => {
     assert.equal(ej.find(r => r.nombre === 'Parada').grupo, 'reaccion');
     assert.equal(ej.find(r => r.nombre === 'Ataque con finta').grupo, 'adicional');
     assert.ok(ej.find(r => r.nombre === 'Parada').recurso, 'enlaza con los dados de supremacía');
-    assert.deepEqual(normChar({ ...c, maniobras: ['Parada', 'Parada', ''] }).maniobras, ['Parada']);
+    assert.deepEqual(normPersonaje({ ...c, maniobras: ['Parada', 'Parada', ''] }).maniobras, ['Parada']);
   });
 });

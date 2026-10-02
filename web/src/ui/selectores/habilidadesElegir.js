@@ -2,7 +2,7 @@
 import { esc } from '../../core/util.js';
 import { HABILIDADES, NOMBRE_HAB } from '../../domain/reglas/habilidades.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 
 const TODAS = HABILIDADES.length;
 // Qué pide una fuente de competencias (dote Habilidoso, subclase, multiclase…)
@@ -49,7 +49,7 @@ export function preguntarHabilidades(fuentes, hab, { titulo = 'Elige tus habilid
   const d = dlg, sel = fuentes.map(() => []);
   return new Promise(resolve => {
     let hecho = false;
-    const fin = v => { if (hecho) return; hecho = true; closeSheet(d); resolve(v); };
+    const fin = v => { if (hecho) return; hecho = true; cerrarDialogo(d); resolve(v); };
     const base = i => fuentes.slice(0, i).reduce((h, f, j) => aplicarFuente(h, f, sel[j]), hab);
     const pintar = () => {
       d.innerHTML = `<h2 id="habTitle">${esc(titulo)}</h2>
@@ -65,7 +65,7 @@ export function preguntarHabilidades(fuentes, hab, { titulo = 'Elige tus habilid
     };
     d.oncancel = e => { e.preventDefault(); fin(null); };
     d.addEventListener('close', () => fin(null), { once: true });
-    openSheet(d);
+    abrirDialogo(d);
   });
 }
 
@@ -75,13 +75,13 @@ export function preguntarOpcion({ titulo, texto = '', opciones }) {
   const d = dlg;
   return new Promise(resolve => {
     let hecho = false;
-    const fin = v => { if (hecho) return; hecho = true; closeSheet(d); resolve(v); };
+    const fin = v => { if (hecho) return; hecho = true; cerrarDialogo(d); resolve(v); };
     d.innerHTML = `<h2 id="habTitle">${esc(titulo)}</h2>${texto ? `<p class="md-text">${esc(texto)}</p>` : ''}
       <div class="lv-estilos">${opciones.map((o, i) => `<button type="button" class="lv-estilo" data-hop="${i}"><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`).join('')}</div>
       <div class="md-btns" style="margin-top:14px"><button type="button" data-hfin="0">Más tarde</button></div>`;
     d.onclick = e => { const o = e.target.closest('[data-hop]'); if (o) return fin(opciones[+o.dataset.hop].nombre); if (e.target.closest('[data-hfin]')) fin(null); };
     d.oncancel = e => { e.preventDefault(); fin(null); };
     d.addEventListener('close', () => fin(null), { once: true });
-    openSheet(d);
+    abrirDialogo(d);
   });
 }

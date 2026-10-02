@@ -1,6 +1,6 @@
 // Canjes entre recursos: rasgos que se restablecen gastando un espacio u otro uso, y la Fuente de magia del hechicero.
 import { perfil } from '../reglas/reglas2024.js';
-import { reglas, recState, usosGastados } from './rasgos.js';
+import { reglas, estadoRecurso, usosGastados } from './rasgos.js';
 
 // Rasgos que «también puedes restablecer gastando…» (Manual del Jugador de 2024): un espacio de conjuro de cierto nivel,
 // un espacio de pacto, o usos de otro rasgo (Furia, Inspiración bárdica, puntos de hechicería…).
@@ -53,8 +53,8 @@ export function canjesDe(ch, id) {
   return espaciosLibres(ch, c.espacio || 1, c.pacto).map(e => ({ k: `esp:${e.L}`, texto: `Gastar un espacio ${e.pacto ? 'de pacto ' : ''}de nivel ${e.L}${c.porNivel ? ` (+${c.porNivel * e.L})` : ''}`, espacio: e.L, n: c.porNivel ? c.porNivel * e.L : 1 }));
 }
 export function aplicarCanje(ch, id, canje) {
-  const st = recState(ch, id); st.used = Math.max(0, (st.used || 0) - (canje.espacio ? canje.n || 1 : 1));
-  if (canje.rec2) { const s2 = recState(ch, canje.rec2); s2.used = (s2.used || 0) + canje.n; }
+  const st = estadoRecurso(ch, id); st.used = Math.max(0, (st.used || 0) - (canje.espacio ? canje.n || 1 : 1));
+  if (canje.rec2) { const s2 = estadoRecurso(ch, canje.rec2); s2.used = (s2.used || 0) + canje.n; }
   if (canje.espacio) { ch.play.used ||= {}; ch.play.used[canje.espacio] = (ch.play.used[canje.espacio] || 0) + 1; }
 }
 
@@ -68,10 +68,10 @@ export function fuenteDeMagia(ch) {
   return { aPuntos, crear, libres };
 }
 export function espacioAPuntos(ch, L) {
-  const r = regla(ch, 'tpl:hechicero.puntos'), st = recState(ch, r.id), gana = Math.min(L, usosGastados(ch, r));
+  const r = regla(ch, 'tpl:hechicero.puntos'), st = estadoRecurso(ch, r.id), gana = Math.min(L, usosGastados(ch, r));
   st.used = usosGastados(ch, r) - gana; ch.play.used[L] = (ch.play.used[L] || 0) + 1; return gana;
 }
 export function puntosAEspacio(ch, L) {
-  const r = regla(ch, 'tpl:hechicero.puntos'), st = recState(ch, r.id);
+  const r = regla(ch, 'tpl:hechicero.puntos'), st = estadoRecurso(ch, r.id);
   st.used = usosGastados(ch, r) + COSTE_ESPACIO[L]; ch.play.used[L] = Math.max(0, (ch.play.used[L] || 0) - 1); return COSTE_ESPACIO[L];
 }

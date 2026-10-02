@@ -1,8 +1,8 @@
 // Búsqueda global (Ctrl+K): conjuros, reglas, objetos, rasgos, inventario y diario en una sola lista.
 import { esc, norm } from '../../core/util.js';
-import { sgn, ABILS } from '../../domain/reglas/reglas2024.js';
+import { sgn, CARACTERISTICAS } from '../../domain/reglas/reglas2024.js';
 import { buscar } from '../../domain/presentacion/busqueda.js';
-import { allSpellItems } from '../../domain/conjuros/catalogo.js';
+import { itemsConjuros } from '../../domain/conjuros/catalogo.js';
 import { glosario } from '../../domain/libros/terminos.js';
 import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { rasgosEnJuego } from '../../domain/clases/enJuego.js';
@@ -13,20 +13,20 @@ import { HABILIDADES, bonoHabilidad, bonoSalvacion, iniciativa, penalizacionAgot
 import { ESTADOS } from '../../domain/combate/vida.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { openSpell, previewSpell } from './conjuro.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { abrirConjuro, verConjuro } from './conjuro.js';
 import { addToBook } from './buscador.js';
 import { abrirObjeto, abrirDote, abrirTrasfondo, abrirSubclase, abrirCriatura, abrirRasgoJuego, abrirTermino } from './biblioteca.js';
-import { openEquipo } from './equipo.js';
-import { openDiario } from './diario.js';
-import { openEstados } from './vida.js';
+import { abrirEquipo } from './equipo.js';
+import { abrirDiario } from './diario.js';
+import { abrirEstados } from './vida.js';
 import { tirarPrueba } from './dados.js';
 import { escuelaIco } from '../pantallas/combate.js';
 
 let S, RES = [], sel = 0, t = 0;
 const dlg = () => $('#buscarDlg');
 
-export function openBuscar() { $('#bsQ').value = ''; RES = []; pintar(); openSheet(dlg()); setTimeout(() => $('#bsQ').focus(), 60); }
+export function abrirBuscar() { $('#bsQ').value = ''; RES = []; pintar(); abrirDialogo(dlg()); setTimeout(() => $('#bsQ').focus(), 60); }
 
 function fuentes() {
   const ch = S.cur(), db = S.db, lib = biblioteca(), F = [];
@@ -34,21 +34,21 @@ function fuentes() {
   if (ch) {
     ch.book.forEach((e, bi) => { const s = db.catalog[e.sid]; if (s) enLibro.set(s.id, bi); });
     F.push({ clave: 'libro', titulo: `Libro de ${ch.nombre}`, ico: 'libro', peso: 20, items: [...enLibro].map(([sid, bi]) => { const s = db.catalog[sid];
-      return { nombre: s.es, texto: s.en, sub: `${s.level ? `Nivel ${s.level}` : 'Truco'} · ${s.escuela || ''}`, ico: escuelaIco(s.escuela) || 'libro', abrir: () => openSpell(bi) }; }) });
+      return { nombre: s.es, texto: s.en, sub: `${s.level ? `Nivel ${s.level}` : 'Truco'} · ${s.escuela || ''}`, ico: escuelaIco(s.escuela) || 'libro', abrir: () => abrirConjuro(bi) }; }) });
     const ag = penalizacionAgotamiento(ch);
     F.push({ clave: 'hab', titulo: 'Tiradas', ico: 'd20', peso: 12, items: [
       ...HABILIDADES.map(([k, n]) => ({ nombre: n, sub: `Prueba · tirar ${sgn(bonoHabilidad(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: n, sub: 'Prueba de característica', bono: bonoHabilidad(ch, k), tipo: 'prueba', hab: k }) })),
-      ...ABILS.map(([k, n]) => ({ nombre: `Salvación de ${n}`, sub: `Tirar ${sgn(bonoSalvacion(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: `Salvación de ${n}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k }) })),
+      ...CARACTERISTICAS.map(([k, n]) => ({ nombre: `Salvación de ${n}`, sub: `Tirar ${sgn(bonoSalvacion(ch, k) - ag)}`, ico: 'd20', abrir: () => tirarPrueba({ titulo: `Salvación de ${n}`, sub: 'Tirada de salvación', bono: bonoSalvacion(ch, k), tipo: 'salvacion', ab: k }) })),
       { nombre: 'Iniciativa', sub: `Tirar ${sgn(iniciativa(ch) - ag)}`, ico: 'iniciativa', abrir: () => tirarPrueba({ titulo: 'Iniciativa', sub: 'Prueba de Destreza', bono: iniciativa(ch), tipo: 'iniciativa' }) }] });
     F.push({ clave: 'rasgos', titulo: 'Rasgos de tu personaje', ico: 'dote', peso: 5, items: rasgosEnJuego(ch, lib, reglasVisibles(ch)).map(r => ({ nombre: r.nombre, texto: r.texto, sub: r.etiqueta, ico: 'dote', abrir: () => abrirRasgoJuego(r.clave) })) });
-    F.push({ clave: 'inv', titulo: 'Inventario', ico: 'cofre', peso: 4, items: equipoDe(ch).objetos.map(o => ({ nombre: o.nombre, texto: o.notas, sub: `${o.cantidad > 1 ? `${o.cantidad} × ` : ''}${o.equipado ? 'equipado' : o.guardado ? 'en el alijo' : 'en la mochila'}`, ico: 'cofre', abrir: () => openEquipo(o.id) })) });
+    F.push({ clave: 'inv', titulo: 'Inventario', ico: 'cofre', peso: 4, items: equipoDe(ch).objetos.map(o => ({ nombre: o.nombre, texto: o.notas, sub: `${o.cantidad > 1 ? `${o.cantidad} × ` : ''}${o.equipado ? 'equipado' : o.guardado ? 'en el alijo' : 'en la mochila'}`, ico: 'cofre', abrir: () => abrirEquipo(o.id) })) });
     F.push({ clave: 'diario', titulo: 'Diario', ico: 'glosario', peso: 2, items: diarioDe(ch).sesiones.flatMap(s => [
-      { nombre: s.titulo || `Sesión ${s.n}`, texto: s.texto, sub: `Sesión ${s.n}`, ico: 'glosario', abrir: () => openDiario(s.id) },
-      ...s.notas.map(n => ({ nombre: n.texto, sub: `Nota · sesión ${s.n}`, ico: 'glosario', abrir: () => openDiario(s.id) }))]) });
-    F.push({ clave: 'estados', titulo: 'Estados', ico: 'estados', peso: 3, items: ESTADOS.map(([, n, r]) => ({ nombre: n, texto: r, sub: r, ico: 'estados', abrir: () => openEstados() })) });
+      { nombre: s.titulo || `Sesión ${s.n}`, texto: s.texto, sub: `Sesión ${s.n}`, ico: 'glosario', abrir: () => abrirDiario(s.id) },
+      ...s.notas.map(n => ({ nombre: n.texto, sub: `Nota · sesión ${s.n}`, ico: 'glosario', abrir: () => abrirDiario(s.id) }))]) });
+    F.push({ clave: 'estados', titulo: 'Estados', ico: 'estados', peso: 3, items: ESTADOS.map(([, n, r]) => ({ nombre: n, texto: r, sub: r, ico: 'estados', abrir: () => abrirEstados() })) });
   }
-  F.push({ clave: 'conj', titulo: 'Conjuros del compendio', ico: 'libro', items: allSpellItems(db).filter(it => !(it.src === 'cat' && enLibro.has(it.s.id)))
-    .map(it => ({ nombre: it.es, texto: it.en, sub: `${it.l ? `Nivel ${it.l}` : 'Truco'} · ${it.esc || ''}`, ico: escuelaIco(it.esc) || 'libro', abrir: () => previewSpell(it, { onAdd: ch ? () => addToBook(it) : null }) })) });
+  F.push({ clave: 'conj', titulo: 'Conjuros del compendio', ico: 'libro', items: itemsConjuros(db).filter(it => !(it.src === 'cat' && enLibro.has(it.s.id)))
+    .map(it => ({ nombre: it.es, texto: it.en, sub: `${it.l ? `Nivel ${it.l}` : 'Truco'} · ${it.esc || ''}`, ico: escuelaIco(it.esc) || 'libro', abrir: () => verConjuro(it, { onAdd: ch ? () => addToBook(it) : null }) })) });
   F.push({ clave: 'reglas', titulo: 'Reglas', ico: 'glosario', items: glosario().map(e => ({ nombre: e.nombre, texto: e.texto.slice(0, 600), sub: e.cat || 'Regla', ico: 'glosario', abrir: () => abrirTermino(e.clave) })) });
   F.push({ clave: 'obj', titulo: 'Objetos mágicos', ico: 'o_maravilloso', items: lib.objetos.map(o => ({ nombre: o.nombre, sub: [o.tipo, o.rareza].filter(Boolean).join(' · '), ico: 'o_maravilloso', abrir: () => abrirObjeto(o.clave) })) });
   F.push({ clave: 'dotes', titulo: 'Dotes', ico: 'dote', items: lib.dotes.map(d => ({ nombre: d.nombre, sub: d.cat, ico: 'dote', abrir: () => abrirDote(d.clave) })) });
@@ -67,7 +67,7 @@ function pintar() {
     : `<div class="bs-vacio">${gi('buscar')}<p>Nada coincide con «${esc(q)}».</p></div>`;
 }
 const planos = () => RES.flatMap(g => g.items);
-function abrir(i) { const it = planos()[i]; if (!it) return; closeSheet(dlg()); setTimeout(() => it.abrir(), 200); }
+function abrir(i) { const it = planos()[i]; if (!it) return; cerrarDialogo(dlg()); setTimeout(() => it.abrir(), 200); }
 
 export function init(store) {
   S = store;
@@ -84,7 +84,7 @@ export function init(store) {
     if (((e.ctrlKey || e.metaKey) && k === 'k') || (k === '/' && !escribiendo && !document.querySelector('dialog[open]'))) {
       if (document.body.classList.contains('on-landing') && !S.db.chars.length) return;
       if (document.body.classList.contains('caido') && !document.body.classList.contains('on-landing')) return;
-      e.preventDefault(); if (!dlg().open) openBuscar();
+      e.preventDefault(); if (!dlg().open) abrirBuscar();
     }
   });
 }

@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DIR, abrir, archivoLibro, textoLibro, itemsDeTsv } from './comun.mjs';
-import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
+import { paginaAColumnas } from '../../web/src/domain/libros/manualLineas.js';
 
 const ejecutar = promisify(execFile), DPI = 300;
 export const huella = f => new Promise((ok, mal) => { const h = crypto.createHash('sha256'); fs.createReadStream(f).on('data', d => h.update(d)).on('end', () => ok(h.digest('hex'))).on('error', mal); });
@@ -32,7 +32,7 @@ for (const id of process.argv.slice(2)) {
       await ejecutar('pdftoppm', ['-f', String(p), '-l', String(p), '-r', String(DPI), '-png', '-singlefile', pdf, img]);
       await ejecutar('tesseract', [img + '.png', img, '-l', 'spa', '--psm', '3', '--dpi', String(DPI), 'tsv'], { env: { ...process.env, OMP_THREAD_LIMIT: '1' } });
       const items = itemsDeTsv(fs.readFileSync(img + '.tsv', 'utf8'), DPI, Math.round(vp.height * DPI / 72));
-      hecho[p] = pageToColumns(items, vp.width).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
+      hecho[p] = paginaAColumnas(items, vp.width).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
       fs.rmSync(img + '.png'); fs.rmSync(img + '.tsv');
       n++;
       if (Date.now() - guardado > 60000) { guardado = Date.now(); fs.mkdirSync(path.dirname(parcial), { recursive: true }); fs.writeFileSync(parcial, JSON.stringify({ sha256, paginas: hecho })); }

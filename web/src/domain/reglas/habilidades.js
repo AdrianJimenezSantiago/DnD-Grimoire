@@ -2,7 +2,7 @@
 import { norm } from '../../core/util.js';
 import { linajeActual } from '../origen/especies.js';
 import { statsEfectivos, statsPorObjeto, bonoSalvObjetos, bonoPruebasObjetos, bonoHabilidadObjetos, velocidadMinimaObjetos } from '../equipo/objetosEfecto.js';
-import { ABILS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
+import { CARACTERISTICAS, modOf, clasesDe, dotesDe, competencia, nivelTotal } from './reglas2024.js';
 import { CLASES_INFO } from '../clases/clases2024.js';
 import { biblioteca } from '../libros/biblioteca.js';
 import { ordenDe } from '../clases/ordenes.js';
@@ -80,7 +80,7 @@ const tieneDote = (ch, nombre) => dotesDe(ch).some(d => norm(d.nombre) === norm(
 const esBardo = ch => clasesDe(ch).some(c => c.clase === 'Bardo' && c.nivel >= 2);
 export const penalizacionAgotamiento = ch => 2 * Math.max(0, Math.min(6, parseInt(ch.vida?.agotamiento, 10) || 0));
 
-const KS = ABILS.map(([k]) => k), AB_DE_NOMBRE = Object.fromEntries(ABILS.map(([k, n]) => [norm(n), k]));
+const KS = CARACTERISTICAS.map(([k]) => k), AB_DE_NOMBRE = Object.fromEntries(CARACTERISTICAS.map(([k, n]) => [norm(n), k]));
 // Competencias en salvaciones: la primera clase, Mente escurridiza (pícaro 15), Superviviente disciplinado (monje 14) y la dote Resiliente
 export function salvacionesCompetentes(ch) {
   const out = new Set([...(CLASES_INFO[clasesDe(ch)[0].clase]?.salv || []), ...(ch.salvacionesExtra || [])]);
@@ -154,7 +154,7 @@ export const fmtMetros = m => `${String(Math.round(m * 10) / 10).replace('.', ',
 
 export function tablaCaracteristicas(ch) {
   const salv = salvacionesCompetentes(ch), st = statsEfectivos(ch), por = statsPorObjeto(ch);
-  return ABILS.map(([k, nombre]) => ({
+  return CARACTERISTICAS.map(([k, nombre]) => ({
     k, nombre, corto: AB_CORTA[k], valor: parseInt(st[k], 10) || 10, mod: modOf(st[k]), prueba: modOf(st[k]) + bonoPruebasObjetos(ch), objetos: por[k] || [], base: parseInt(ch.stats?.[k], 10) || 10,
     salvacion: { bono: bonoSalvacion(ch, k), competente: salv.has(k) },
     habilidades: HABILIDADES.filter(h => h[2] === k).map(([hk, hn]) => ({ k: hk, nombre: hn, nivel: nivelHabilidad(ch, hk), bono: bonoHabilidad(ch, hk) })),

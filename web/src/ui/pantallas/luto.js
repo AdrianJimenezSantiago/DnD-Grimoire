@@ -5,9 +5,9 @@ import { vidaDe, estadoVital, CAUSAS } from '../../domain/combate/vida.js';
 import { gi } from '../componentes/tema.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { runaSvg } from '../animaciones/magia.js';
-import { burst, ascend, reducedMotion } from '../animaciones/fx.js';
-import { closeSheet } from '../componentes/dialog.js';
-import { hideToast } from '../componentes/toast.js';
+import { chispas, ascender, movimientoReducido } from '../animaciones/fx.js';
+import { cerrarDialogo } from '../componentes/dialog.js';
+import { ocultarToast } from '../componentes/toast.js';
 
 export const estaMuerto = ch => !!ch && estadoVital(ch) === 'muerto';
 const PERMITIDOS = new Set(['home', 'more', 'chars', 'theme', 'backup', 'manual', 'biblioteca', 'glosario', 'about', 'tutorial', 'awake', 'reset', 'revivido', 'newchar', 'hist', 'print']);
@@ -44,15 +44,15 @@ function capa(cls, html) {
   const el = document.createElement('div'); el.className = cls; el.innerHTML = html; document.body.appendChild(el); return el;
 }
 function caer(ch) {
-  document.querySelectorAll('dialog[open]').forEach(d => closeSheet(d));
-  hideToast();
-  if (reducedMotion()) return;
+  document.querySelectorAll('dialog[open]').forEach(d => cerrarDialogo(d));
+  ocultarToast();
+  if (movimientoReducido()) return;
   document.body.classList.add('cayendo');
   const el = capa('caida-fx', `<div class="cf-velo"></div><div class="cf-centro">
       ${runaSvg({ n: 18, lados: 7, cls: 'cf-runa', semillaInicial: 66 })}<span class="cf-ico">${gi('muerte')}</span>
       <b class="cf-tit">Ha caído</b><span class="cf-nombre">${esc(ch.nombre || '')}</span></div><div class="cf-humo"></div>`);
   const r = el.querySelector('.cf-ico').getBoundingClientRect();
-  setTimeout(() => burst(r.left + r.width / 2, r.top + r.height / 2, { color: '#9aa0b3', n: 26, speed: 1.2, up: 3, life: 2200, size: 3, gravity: -0.035 }), 900);
+  setTimeout(() => chispas(r.left + r.width / 2, r.top + r.height / 2, { color: '#9aa0b3', n: 26, speed: 1.2, up: 3, life: 2200, size: 3, gravity: -0.035 }), 900);
   const fin = () => { el.classList.add('fuera'); setTimeout(() => { el.remove(); document.body.classList.remove('cayendo'); }, 700); };
   const t = setTimeout(fin, 3600);
   el.addEventListener('click', () => { clearTimeout(t); fin(); }, { once: true });
@@ -60,15 +60,15 @@ function caer(ch) {
 
 export function resucitar(origen, alRevivir) {
   const r = origen?.getBoundingClientRect?.(), x = r ? r.left + r.width / 2 : innerWidth / 2, y = r ? r.top + r.height / 2 : innerHeight / 2;
-  if (reducedMotion()) { alRevivir(); return; }
+  if (movimientoReducido()) { alRevivir(); return; }
   const el = capa('revive-fx', `<div class="rv-luz"></div>${runaSvg({ n: 22, lados: 6, cls: 'rv-runa', semillaInicial: 7 })}`);
   el.style.setProperty('--x', `${x}px`); el.style.setProperty('--y', `${y}px`);
-  burst(x, y, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 });
+  chispas(x, y, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 });
   const luto = document.querySelector('.luto'); luto?.style.setProperty('--rx', `${x}px`); luto?.style.setProperty('--ry', `${y}px`);
   document.body.classList.add('reviviendo');
   setTimeout(() => {
     alRevivir();
-    setTimeout(() => { const h = document.querySelector('#hero .hero-av'); if (h) ascend(h); }, 380);
+    setTimeout(() => { const h = document.querySelector('#hero .hero-av'); if (h) ascender(h); }, 380);
     const sheet = document.getElementById('sheet'); sheet.classList.add('fx-paz'); setTimeout(() => sheet.classList.remove('fx-paz'), 1300);
   }, 650);
   setTimeout(() => { el.remove(); document.body.classList.remove('reviviendo'); }, 2100);

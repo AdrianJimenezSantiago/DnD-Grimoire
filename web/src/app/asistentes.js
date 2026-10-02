@@ -6,7 +6,7 @@ const personajes = perezoso(() => import('../ui/dialogs/personajes.js'), m => m.
 const nivel = perezoso(() => import('../ui/dialogs/nivel.js'), m => m.init(S));
 
 export function configurar(store, opts = {}) { S = store; opciones = opts; }
-export const openChars = (...a) => personajes().then(m => m.openChars(...a));
-export const openCharForm = (...a) => personajes().then(m => m.openCharForm(...a));
-export const openLevelUp = (...a) => nivel().then(m => m.openLevelUp(...a));
+export const abrirPersonajes = (...a) => personajes().then(m => m.abrirPersonajes(...a));
+export const abrirCreacion = (...a) => personajes().then(m => m.abrirCreacion(...a));
+export const abrirSubirNivel = (...a) => nivel().then(m => m.abrirSubirNivel(...a));
 export const precargar = () => Promise.all([personajes(), nivel()]).catch(() => {});

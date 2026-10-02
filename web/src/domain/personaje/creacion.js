@@ -1,10 +1,10 @@
 // Creación de personaje: características (matriz, compra de puntos, 4d6), bonos del trasfondo, dotes y habilidades.
 import { norm } from '../../core/util.js';
-import { ABILS, TRASFONDOS_2024, clasesDe, dotesDe, nivelTotal } from '../reglas/reglas2024.js';
+import { CARACTERISTICAS, TRASFONDOS_2024, clasesDe, dotesDe, nivelTotal } from '../reglas/reglas2024.js';
 import { CLASES_INFO } from '../clases/clases2024.js';
 import { HABILIDADES, HAB_CLASE, habilidadesTrasfondo, periciasDisponibles } from '../reglas/habilidades.js';
 
-const KEYS = ABILS.map(([k]) => k);
+const KEYS = CARACTERISTICAS.map(([k]) => k);
 const TODAS = HABILIDADES.map(([k]) => k);
 
 // Puntuaciones de característica (Manual del Jugador 2024, capítulo 2)

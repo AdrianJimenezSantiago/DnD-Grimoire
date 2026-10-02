@@ -3,13 +3,13 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { normObjeto, PREDEFINIDOS } from '../../web/src/domain/equipo/equipo.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { modsTirada, inmunidadesEstado, REGLAS_ESTADO } from '../../web/src/domain/combate/efectos.js';
 import { ESTADOS, RESUMEN_ESTADO } from '../../web/src/domain/combate/vida.js';
 import { ACCION_COMUN } from '../../web/src/domain/combate/combate.js';
 import { ECONOMIA_INFO, PROPIEDADES, textoPropiedad, textoMaestria, salto } from '../../web/src/domain/reglas/referencia.js';
 
-const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
+const pj = o => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
 const conEstados = (...estados) => { const ch = pj(); ch.vida.estados = estados; return ch; };
 
 describe('armas: maestrías y propiedades', () => {

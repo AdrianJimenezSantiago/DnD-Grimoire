@@ -4,9 +4,9 @@ import { arma } from '../helpers/fixtures.js';
 import { normObjeto, normEquipo, anadirComun, alternarEquipado, cambiarCantidad, claseArmadura, ataqueArma, pesoTotal, capacidadCarga, valorMonedas, equipoDe, equipar, manos, dosArmasLigeras, requisitosArmadura, penalizacionArmadura, alternarGuardado, pesoGuardado, pagar, cobrar, juntarMonedas, enCobre, valorEnPo, precioVenta, venderObjeto, municionDe, curacionDe, alternarSintonia, anadirObjeto, quitarObjeto, rasgoDeCargas } from '../../web/src/domain/equipo/equipo.js';
 import { velocidad } from '../../web/src/domain/reglas/habilidades.js';
 import { modsTirada } from '../../web/src/domain/combate/efectos.js';
-import { normChar } from '../../web/src/domain/personaje/modelo.js';
+import { normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 
-const pj = (extra = {}) => normChar({ nombre: 'X', clase: 'Guerrero', nivel: 5, stats: { fue: 16, des: 14, con: 14, int: 10, sab: 12, car: 8 }, ...extra });
+const pj = (extra = {}) => normPersonaje({ nombre: 'X', clase: 'Guerrero', nivel: 5, stats: { fue: 16, des: 14, con: 14, int: 10, sab: 12, car: 8 }, ...extra });
 const basico = ({ expr, tipo, ataque, dano, estilos }) => ({ expr, tipo, ataque, dano, estilos });
 
 describe('objetos e inventario', () => {

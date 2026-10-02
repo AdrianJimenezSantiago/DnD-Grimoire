@@ -1,7 +1,7 @@
 // Historial de lo que ha hecho el personaje (lanzar, gastar, tirar) con deshacer varios pasos.
 import { esc } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
-import { openSheet } from '../componentes/dialog.js';
+import { abrirDialogo } from '../componentes/dialog.js';
 import { toast } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
 
@@ -20,7 +20,7 @@ function render() {
   });
   $('#histBody').innerHTML = h + '<p class="note" style="margin-top:14px">«Deshacer» devuelve la hoja a como estaba justo antes de esa acción, así que también deshace todo lo posterior. Solo se puede mientras la app sigue abierta.</p>';
 }
-export function openHistory() { render(); openSheet($('#histDlg')); }
+export function abrirHistorial() { render(); abrirDialogo($('#histDlg')); }
 export function init(store) {
   S = store;
   S.subscribe(() => { if ($('#histDlg').open) render(); });

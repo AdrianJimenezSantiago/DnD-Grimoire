@@ -1,9 +1,9 @@
 // Retrato del personaje: elegir una imagen y reencuadrarla.
 import { $ } from '../componentes/dom.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
-import { fileStore } from '../../platform/native.js';
+import { archivos } from '../../platform/native.js';
 
 const MINI = 320, MAXORIG = 1280;
 let S, E = null;
@@ -48,13 +48,13 @@ async function usarFuente(src, params) {
   E.z = params?.z || 1; E.cx = (params?.x ?? 0.5) * E.iw; E.cy = (params?.y ?? 0.5) * E.ih;
   estadoUi(); requestAnimationFrame(dibujar);
 }
-export async function openRetrato(id) {
+export async function abrirRetrato(id) {
   const ch = S.db.chars.find(c => c.id === id); if (!ch) return;
   E = { id, img: null, nueva: false, dataOrig: null };
   $('#retTitle').textContent = `Retrato de ${ch.nombre}`;
-  estadoUi(); openSheet(dlg());
+  estadoUi(); abrirDialogo(dlg());
   if (ch.retrato) {
-    const orig = await fileStore.get(archivo(id));
+    const orig = await archivos.get(archivo(id));
     await usarFuente(orig || ch.retrato.src, orig ? ch.retrato : { x: .5, y: .5, z: 1 });
   } else requestAnimationFrame(dibujar);
 }
@@ -71,16 +71,16 @@ async function guardar() {
   const ctx = c.getContext('2d'), s = base(lado) * E.z * k;
   ctx.drawImage(E.img, MINI / 2 - E.cx * s, MINI / 2 - E.cy * s, E.iw * s, E.ih * s);
   let src = c.toDataURL('image/webp', 0.86); if (!src.startsWith('data:image/webp')) src = c.toDataURL('image/jpeg', 0.86);
-  if (E.nueva) await fileStore.set(archivo(E.id), E.dataOrig);
+  if (E.nueva) await archivos.set(archivo(E.id), E.dataOrig);
   const retrato = { src, x: s0.cx / s0.iw, y: s0.cy / s0.ih, z: s0.z, v: Date.now() };
   const h = S.edit(db => { db.chars.find(c2 => c2.id === E.id).retrato = retrato; });
-  closeSheet(dlg()); toast('Retrato guardado.', [undoBtn(S, h)]);
+  cerrarDialogo(dlg()); toast('Retrato guardado.', [botonDeshacer(S, h)]);
 }
 async function quitar() {
   const ch = S.db.chars.find(c => c.id === E.id);
   if (!(await confirmar({ titulo: '¿Quitar el retrato?', texto: `${ch.nombre} volverá a mostrar el emblema de su clase.`, ok: 'Quitar', peligro: true }))) return;
   const h = S.edit(db => { db.chars.find(c2 => c2.id === E.id).retrato = null; });
-  closeSheet(dlg()); toast('Retrato quitado.', [undoBtn(S, h)]);
+  cerrarDialogo(dlg()); toast('Retrato quitado.', [botonDeshacer(S, h)]);
 }
 export function init(store) {
   S = store;

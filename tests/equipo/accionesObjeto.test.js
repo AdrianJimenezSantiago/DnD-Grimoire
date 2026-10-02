@@ -1,16 +1,16 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compendioJson } from '../helpers/fixtures.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { anadirObjeto, alternarSintonia, alternarGuardado } from '../../web/src/domain/equipo/equipo.js';
 import { ACCIONES, accionesDe, motivoAccion, usarAccion, opcionesEscala, espaciosRecuperables, recursoDe } from '../../web/src/domain/equipo/accionesObjeto.js';
-import { reglas, usosGastados, recState } from '../../web/src/domain/clases/rasgos.js';
+import { reglas, usosGastados, estadoRecurso } from '../../web/src/domain/clases/rasgos.js';
 import { perfil } from '../../web/src/domain/reglas/reglas2024.js';
 import { pgActuales, aplicarDano } from '../../web/src/domain/combate/vida.js';
-import { loadSrd, compendio } from '../../web/src/domain/conjuros/catalogo.js';
+import { cargarCompendio, compendio } from '../../web/src/domain/conjuros/catalogo.js';
 import { norm } from '../../web/src/core/util.js';
 
-const ch = (o = {}) => normChar(blankChar({ clase: 'Mago', nivel: 7, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
+const ch = (o = {}) => normPersonaje(personajeVacio({ clase: 'Mago', nivel: 7, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
 const lib = (nombre, tipo, extra = {}) => ({ clave: norm(nombre), nombre, tipo, rareza: 'Raro', texto: '', cargas: null, sintonia: false, ...extra });
 const accion = (o, re) => accionesDe(o).find(a => re.test(a.titulo));
 
@@ -56,7 +56,7 @@ describe('acciones de los objetos mágicos', () => {
     assert.equal(bola.coste, 3);
     usarAccion(c, f, bola);
     assert.equal(usosGastados(c, reglas(c).find(r => r.id === f.rasgo)), 3);
-    const muro = accion(f, /^Muro de fuego/); recState(c, f.rasgo).used = 8;
+    const muro = accion(f, /^Muro de fuego/); estadoRecurso(c, f.rasgo).used = 8;
     assert.match(motivoAccion(c, f, muro), /No le quedan 4 cargas/);
     const v = anadirObjeto(c, lib('Varita de bolas de fuego', 'Varita', { sintonia: true, cargas: { max: 7, recarga: '1d6+1', cuando: 'amanecer' } }));
     const b2 = accionesDe(v)[0];
@@ -78,7 +78,7 @@ describe('acciones de los objetos mágicos', () => {
   });
 
   test('todos los conjuros de la tabla existen en el compendio', async () => {
-    await loadSrd(Promise.resolve(compendioJson()));
+    await cargarCompendio(Promise.resolve(compendioJson()));
     const hay = new Set(compendio().map(x => norm(x.es))), faltan = new Set();
     for (const [, acs] of ACCIONES) for (const a of acs) if (a.tipo === 'conjuro' && !hay.has(norm(a.nombre))) faltan.add(a.nombre);
     assert.deepEqual([...faltan], []);

@@ -2,22 +2,22 @@
 import { esc, norm } from '../../core/util.js';
 import { bonosDeConjuro, trucoPotenteEvocador } from '../../domain/conjuros/bonosConjuro.js';
 import { perfil, sgn, nivelTotal, magiaPara } from '../../domain/reglas/reglas2024.js';
-import { manualFor, srdFor, tiradasConjuro } from '../../domain/conjuros/catalogo.js';
+import { textoManual, delCompendio, tiradasConjuro } from '../../domain/conjuros/catalogo.js';
 import { conObjetivos } from '../../domain/combate/concentracion.js';
 import { dadosPara } from '../../domain/conjuros/tiradas.js';
 import { parsear, resolver, distribucion, maxDist } from '../../domain/reglas/dados.js';
 import { modsTirada, resolverModo, fmtMod, efectoDeConjuro } from '../../domain/combate/efectos.js';
 import { esYo, curar, ponerTemporales, vidaDe } from '../../domain/combate/vida.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { golpe } from '../animaciones/golpes.js';
 import { botonYo } from '../componentes/avatar.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
-import { openSheet } from '../componentes/dialog.js';
-import { burst, reducedMotion } from '../animaciones/fx.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { chispas, movimientoReducido } from '../animaciones/fx.js';
 import { fxImpacto, nivelImpacto } from '../animaciones/impacto.js';
-import { haptic } from '../../platform/native.js';
+import { vibrar } from '../../platform/native.js';
 import { fmt, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../animaciones/dadosVista.js';
 import { md } from './conjuro.js';
 
@@ -52,15 +52,15 @@ const exprDe = (n, caras, bono) => (n ? `${n}d${caras}${bono ? sgn(bono) : ''}` 
 const idxDe = (lista, k) => Math.max(0, lista.findIndex(m => m[0] === k));
 
 // Conjuro lanzado desde un objeto (varita, bastón…): nivel fijo y, si el objeto la da, su CD o su bonificador de ataque
-export function openRollObjeto({ sid, nivel = null, cd = null, atk = null, fuente = '' }) {
+export function abrirTiradaObjeto({ sid, nivel = null, cd = null, atk = null, fuente = '' }) {
   const ch = S.cur(), s = S.db.catalog[sid]; if (!s) return;
   const mods = modsTirada(ch, { sobre: 'ataque' });
   R = { bi: -1, ext: { sid, cd, atk, fuente }, sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivel || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  pintarCtl(); pintarOut(); pintarRecientes(); openSheet(dlg());
+  pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
-export function openRoll(bi, nivelEspacio) {
+export function abrirTirada(bi, nivelEspacio) {
   const ch = S.cur(), s = S.db.catalog[ch.book[bi].sid], P = perfil(ch);
   const mods = modsTirada(ch, { sobre: 'ataque' });
   R = { bi, sid: ch.book[bi].sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivelEspacio || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
@@ -68,7 +68,7 @@ export function openRoll(bi, nivelEspacio) {
   if (s.level > 0 && !nivelEspacio) for (let L = s.level; L <= 9; L++) { const tot = P.slots?.[L] || 0; if (tot - Math.min(ch.play.used?.[L] || 0, tot) > 0) { R.nivel = L; break; } }
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  pintarCtl(); pintarOut(); pintarRecientes(); openSheet(dlg());
+  pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 
 // ---- Controles ----
@@ -79,8 +79,8 @@ function pintarCtl(tsAntes = R.ts) {
   $('#rlSub').textContent = R.ext ? `Lanzado desde ${R.ext.fuente}${s.level && R.nivel > s.level ? `, versión de nivel ${R.nivel}` : ''}`
     : s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   let h = '';
-  const x = srdFor(s);
-  if (ch.play.conc === s.es && conObjetivos(s, [manualFor(x)?.d, s.desc, x?.dEs, x?.d])) {
+  const x = delCompendio(s);
+  if (ch.play.conc === s.es && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d])) {
     h += `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
       <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`;
   }
@@ -195,7 +195,7 @@ function tirar(tipo, i, nuevo = true) {
   R.logTxt = x.texto;
   if (tipo === 'ataque') pintarCtl();
   pintarOut(true); pintarRecientes(x.nuevo);
-  if (x.nuevo) $('#rlOut')?.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
+  if (x.nuevo) $('#rlOut')?.scrollIntoView({ block: 'nearest', behavior: movimientoReducido() ? 'auto' : 'smooth' });
 }
 function recordar(x, reemplaza = false) {
   if (!RECIENTES.has(R.sid)) RECIENTES.set(R.sid, []);
@@ -266,14 +266,14 @@ FX_DANO.cortante = FX_DANO.perforante = FX_DANO.contundente;
 function asentar(el, x) {
   dlg().classList.remove('rodando');
   $('#rlVivo').textContent = `${x.total} ${x.lbl}${x.ts === 'varios' ? `; ${x.mitad} para quien supere` : ''}${x.crit && x.tipo === 'ataque' ? ', crítico' : x.pifia ? ', pifia' : ''}.`;
-  haptic(x.crit || x.pifia || (x.dist && x.total >= maxDist(x.dist)) ? 'heavy' : 'light');
-  if (reducedMotion()) return;
+  vibrar(x.crit || x.pifia || (x.dist && x.total >= maxDist(x.dist)) ? 'heavy' : 'light');
+  if (movimientoReducido()) return;
   if (x.tipo === 'ataque' && (x.crit || x.pifia)) { fxNatural(el, x.crit ? 20 : 1, $('#rlBody')); return; }
   if (!x.nuevo) return;
   if (x.tipo === 'dano') fxImpacto(el.querySelector('.dd-hero'), { clave: x.clave, cura: x.cura, nivel: nivelImpacto(x.total, x.dist), caja: $('#rlBody') });
   const [cx, cy] = centro(el.querySelector('.dd-sello')), max = x.dist && x.total >= maxDist(x.dist);
   for (const o of FX_DANO[x.clave] || [{ color: getComputedStyle(dlg()).getPropertyValue('--esc').trim() || '#E7B85F', n: 12, speed: 2, up: 1.2, life: 700, size: 1.7 }])
-    burst(cx, cy, { ...o, color: /^#/.test(o.color) ? o.color : '#E7B85F', n: Math.round(o.n * (max ? 1.8 : 1)) });
+    chispas(cx, cy, { ...o, color: /^#/.test(o.color) ? o.color : '#E7B85F', n: Math.round(o.n * (max ? 1.8 : 1)) });
   if (x.clave === 'trueno' || (x.clave === 'fuerza' && max)) { const b = $('#rlBody'); b.classList.remove('dd-sacude'); void b.offsetWidth; b.classList.add('dd-sacude'); setTimeout(() => b.classList.remove('dd-sacude'), 700); }
 }
 function pintarRecientes(recien = false) {
@@ -289,23 +289,23 @@ export function init(store) {
   on(body, 'click', '[data-roll]', (e, b) => { if (!b.disabled) tirar(b.dataset.roll, +b.dataset.i || 0); });
   on(body, 'click', '[data-modo]', (e, b) => {
     if (b.dataset.modo === R.modo) return;
-    R.modo = b.dataset.modo; R.modoAuto = false; sincSeg('.dd-modo[data-modo]', MODOS, R.modo, 'modo'); haptic('light');
+    R.modo = b.dataset.modo; R.modoAuto = false; sincSeg('.dd-modo[data-modo]', MODOS, R.modo, 'modo'); vibrar('light');
     if (R.res?.tipo === 'ataque') tirar('ataque', 0, false);
   });
   on(body, 'click', '[data-rlmod]', (e, b) => {
     const m = R.mods.find(x => x.id === b.dataset.rlmod); if (!m) return;
-    m.on = !m.on; b.classList.toggle('off', !m.on); b.setAttribute('aria-pressed', String(m.on)); haptic('light');
+    m.on = !m.on; b.classList.toggle('off', !m.on); b.setAttribute('aria-pressed', String(m.on)); vibrar('light');
     if (R.modoAuto) { R.modo = resolverModo(R.mods); sincSeg('.dd-modo[data-modo]', MODOS, R.modo, 'modo'); }
     if (R.res?.tipo === 'ataque') tirar('ataque', 0, false);
   });
   on(body, 'click', '[data-ts]', (e, b) => {
     if (b.dataset.ts === R.ts) return;
-    const antes = R.ts; R.ts = b.dataset.ts; haptic('light'); pintarCtl(antes);
+    const antes = R.ts; R.ts = b.dataset.ts; vibrar('light'); pintarCtl(antes);
     requestAnimationFrame(() => sincSeg('.cj-ts', TS, R.ts, 'ts'));
     if (R.res?.tipo === 'dano' && R.res.ts !== undefined && dadosActuales(datos())[R.res.i]?.via === 'salvacion') reajustar();
   });
-  on(body, 'click', '[data-rlnivel]', (e, b) => { const L = +b.dataset.rlnivel; if (L === R.nivel) return; R.nivel = L; haptic('light'); pintarCtl(); reajustar(); });
-  const anotar = inp => { const t = inp.value; inp.value = ''; if (!anadirObjetivos(S, 'conc', t)) return; pintarCtl(); haptic('light'); $('#rlObj')?.focus(); };
+  on(body, 'click', '[data-rlnivel]', (e, b) => { const L = +b.dataset.rlnivel; if (L === R.nivel) return; R.nivel = L; vibrar('light'); pintarCtl(); reajustar(); });
+  const anotar = inp => { const t = inp.value; inp.value = ''; if (!anadirObjetivos(S, 'conc', t)) return; pintarCtl(); vibrar('light'); $('#rlObj')?.focus(); };
   body.addEventListener('keydown', e => { if (e.target.id === 'rlObj' && e.key === 'Enter') { e.preventDefault(); anotar(e.target); } });
   body.addEventListener('focusout', e => { if (e.target.id === 'rlObj' && e.target.value.trim()) anotar(e.target); });
   on(body, 'click', '[data-rlobjdel]', (e, b) => { quitarObjetivo(S, 'conc', +b.dataset.rlobjdel); pintarCtl(); });
@@ -313,18 +313,18 @@ export function init(store) {
   on(body, 'click', '[data-rlsanador]', (e, b) => {
     const x = R.res; if (!x?.sanador) return; let n = 0;
     const h = S.act(`Sanador bendito: ${x.sanador} PG`, (db, c) => { n = curar(c, x.sanador); });
-    b.disabled = true; golpe('cura', n); toast(`Sanador bendito: recuperas ${n} PG.`, [undoBtn(S, h)]);
+    b.disabled = true; golpe('cura', n); toast(`Sanador bendito: recuperas ${n} PG.`, [botonDeshacer(S, h)]);
   });
   // Curación de un conjuro sobre ti
   on(body, 'click', '[data-rlcurarme]', (e, b) => {
     const x = R.res; if (!x?.cura) return; let n = 0;
     const h = S.act(`${S.db.catalog[R.sid]?.es || 'Conjuro'}: ${x.temp ? `${x.total} PG temporales` : `${x.total} PG`} sobre ti`, (db, c) => { n = x.temp ? ponerTemporales(c, x.total) : curar(c, x.total); });
     b.disabled = true; golpe(x.temp ? 'temp' : 'cura', n);
-    toast(x.temp ? `Tienes ${vidaDe(S.cur()).temp} PG temporales.` : `Recuperas ${n} PG.`, [undoBtn(S, h)]);
+    toast(x.temp ? `Tienes ${vidaDe(S.cur()).temp} PG temporales.` : `Recuperas ${n} PG.`, [botonDeshacer(S, h)]);
   });
   body.addEventListener('change', e => {
     if (e.target.id !== 'rlCrit') return;
-    R.critico = e.target.checked; haptic('light'); pintarCtl();
+    R.critico = e.target.checked; vibrar('light'); pintarCtl();
     if (R.res?.tipo === 'dano' && dadosActuales(datos())[R.res.i]?.via === 'ataque') reajustar();
   });
 }

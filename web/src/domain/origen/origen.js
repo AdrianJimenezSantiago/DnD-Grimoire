@@ -1,6 +1,6 @@
 // Trasfondos y dotes de origen: herramientas, idiomas, equipo inicial, requisitos y aumentos de característica.
 import { norm } from '../../core/util.js';
-import { ABILS, CLASES, clasesDe, dotesDe, nivelTotal, perfil } from '../reglas/reglas2024.js';
+import { CARACTERISTICAS, CLASES, clasesDe, dotesDe, nivelTotal, perfil } from '../reglas/reglas2024.js';
 import { PREDEFINIDOS } from '../equipo/equipo.js';
 import { armadurasDe, marcialesDe } from '../reglas/competencias.js';
 import { biblioteca } from '../libros/biblioteca.js';
@@ -180,12 +180,12 @@ export function faltaRequisito(req, ch) {
 }
 
 // Aumento de característica que da una dote («Aumenta tu Fuerza o Destreza en 1…»)
-const NOM = Object.fromEntries(ABILS.map(([k, n]) => [norm(n), k]));
+const NOM = Object.fromEntries(CARACTERISTICAS.map(([k, n]) => [norm(n), k]));
 export function aumentoDeDote(texto) {
   const t = norm(texto || '').replace(/\b1nteligencia/g, 'inteligencia').replace(/\ben\s*[t\\|l!i]\s*[.,]?\s*(?=h?asta)/, 'en 1, '), m = /aumenta (?:en 1 )?(?:tu |una |la )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);
   if (!m) return null;
-  if (/^caracteristica$/.test(m[1].trim()) && /elige una caracteristica/.test(t)) return ABILS.map(([k]) => k);
-  if (/de tu eleccion|una caracteristica|cualquier/.test(m[1])) return ABILS.map(([k]) => k);
+  if (/^caracteristica$/.test(m[1].trim()) && /elige una caracteristica/.test(t)) return CARACTERISTICAS.map(([k]) => k);
+  if (/de tu eleccion|una caracteristica|cualquier/.test(m[1])) return CARACTERISTICAS.map(([k]) => k);
   const ks = Object.entries(NOM).filter(([n]) => m[1].includes(n)).map(([, k]) => k);
   return ks.length ? ks : null;
 }

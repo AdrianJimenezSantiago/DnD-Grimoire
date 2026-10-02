@@ -2,16 +2,16 @@
 import { esc, norm } from '../../core/util.js';
 import { accionesDe, motivoAccion, opcionesEscala, usarAccion, espaciosRecuperables, recursoDe, libresDe } from '../../domain/equipo/accionesObjeto.js';
 import { equipoDe } from '../../domain/equipo/equipo.js';
-import { compendio, importSrd, tiradasConjuro } from '../../domain/conjuros/catalogo.js';
+import { compendio, importarDelCompendio, tiradasConjuro } from '../../domain/conjuros/catalogo.js';
 import { efectoDeConjuro, lanzadorTira, fmtRondas } from '../../domain/combate/efectos.js';
 import { cambiarConc, rondasDeDuracion, ponerEfecto } from '../../domain/combate/vida.js';
 import { usosGastados } from '../../domain/clases/rasgos.js';
 import { elegir } from '../dialogs/elegir.js';
-import { openRollObjeto } from '../dialogs/tiradas.js';
-import { previewSpell } from '../dialogs/conjuro.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirTiradaObjeto } from '../dialogs/tiradas.js';
+import { verConjuro } from '../dialogs/conjuro.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { golpe } from '../animaciones/golpes.js';
-import { haptic } from '../../platform/native.js';
+import { vibrar } from '../../platform/native.js';
 import { registrarGastoObjeto } from '../../app/acciones.js';
 
 const buscar = (ch, id) => equipoDe(ch).objetos.find(o => o.id === id) || null;
@@ -51,10 +51,10 @@ export async function accionObjeto(S, oid, aid) {
   let r = null, sid = null, fuera = [];
   const h = S.act(`${o0.nombre}: ${titulo}`, (db, c) => {
     r = usarAccion(c, buscar(c, oid), a, { cargas: op.cargas, L }); if (!r.ok) return;
-    if (x) { sid = importSrd(db, x); const s = db.catalog[sid]; if (s.conc) fuera = cambiarConc(c, s.es, rondasDeDuracion(s.duracion)); }
+    if (x) { sid = importarDelCompendio(db, x); const s = db.catalog[sid]; if (s.conc) fuera = cambiarConc(c, s.es, rondasDeDuracion(s.duracion)); }
   });
   if (!r?.ok) { S.undo(h); toast(esc(r?.motivo || 'No se puede usar ahora.')); return; }
-  haptic();
+  vibrar();
   const ch = S.cur(), rr = r.recurso && ch.rasgos.find(z => z.id === r.recurso.id);
   const quedan = rr ? (a.uso === 'cargas' ? ` Quedan ${pl(r.recurso.max - usosGastados(ch, r.recurso), 'carga')}.` : '') : '';
   const partes = [], botones = [];
@@ -67,12 +67,12 @@ export async function accionObjeto(S, oid, aid) {
     if (fuera.length) partes.push(`Terminan sobre ti: ${esc(fuera.map(e => e.nombre).join(', '))}.`);
     if (!x) partes.push('El conjuro no está en el compendio: consulta su texto en el libro.');
     const s = sid && S.db.catalog[sid], ef = s && efectoDeConjuro(s.es);
-    if (ef?.bueno) botones.push({ label: 'Me lo aplico', hl: true, fn: () => { const h2 = S.act(`${ef.nombre} sobre ti`, (db, c) => { ponerEfecto(c, ef.k, { conc: s.conc && c.play.conc === s.es ? s.es : '' }); }); golpe('buff'); toast(`<b>${esc(ef.nombre)}</b> sobre ti: ${esc(ef.texto)}${ef.dur ? ` Dura ${esc(fmtRondas(ef.dur))}.` : ''}`, [undoBtn(S, h2)]); } });
-    if (x) botones.push({ label: 'Ver conjuro', fn: () => previewSpell(x) });
-    if (s && lanzadorTira(s.es, tiradasConjuro(s))) setTimeout(() => openRollObjeto({ sid, nivel, cd: a.cd ?? null, atk: a.atk ?? null, fuente: o0.nombre }), 350);
+    if (ef?.bueno) botones.push({ label: 'Me lo aplico', hl: true, fn: () => { const h2 = S.act(`${ef.nombre} sobre ti`, (db, c) => { ponerEfecto(c, ef.k, { conc: s.conc && c.play.conc === s.es ? s.es : '' }); }); golpe('buff'); toast(`<b>${esc(ef.nombre)}</b> sobre ti: ${esc(ef.texto)}${ef.dur ? ` Dura ${esc(fmtRondas(ef.dur))}.` : ''}`, [botonDeshacer(S, h2)]); } });
+    if (x) botones.push({ label: 'Ver conjuro', fn: () => verConjuro(x) });
+    if (s && lanzadorTira(s.es, tiradasConjuro(s))) setTimeout(() => abrirTiradaObjeto({ sid, nivel, cd: a.cd ?? null, atk: a.atk ?? null, fuente: o0.nombre }), 350);
   }
   if (a.nota) partes.push(`<span class="tnote">${esc(a.nota)}</span>`);
-  toast(`<b>${esc(o0.nombre)}</b>: ${partes.join(' ')}${quedan}`, [...botones, undoBtn(S, h)]);
+  toast(`<b>${esc(o0.nombre)}</b>: ${partes.join(' ')}${quedan}`, [...botones, botonDeshacer(S, h)]);
 }
 
 // Gastar el contador de un objeto desde la hoja: si el objeto tiene acciones, se elige cuál (o solo gastar)

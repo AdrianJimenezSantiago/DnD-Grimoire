@@ -1,6 +1,6 @@
 // Concentración: objetivos del conjuro concentrado y rasgos que también fijan un objetivo.
 import { norm, uid } from '../../core/util.js';
-import { parseArea } from './area.js';
+import { leerArea } from './area.js';
 import { progresion } from '../clases/clases2024.js';
 
 export const RASGOS_CON_OBJETIVO = {
@@ -14,7 +14,7 @@ export const RASGOS_CON_OBJETIVO = {
   'Magia mental': 'Afectado por tu conjuro de adivinación.',
 };
 
-export const conObjetivos = (s, textos = []) => !!s?.conc && !parseArea(textos.filter(Boolean).join(' '), s.alcance || '');
+export const conObjetivos = (s, textos = []) => !!s?.conc && !leerArea(textos.filter(Boolean).join(' '), s.alcance || '');
 
 export function empezarConc(play, nombre) {
   if (play.conc !== nombre) play.concObj = [];

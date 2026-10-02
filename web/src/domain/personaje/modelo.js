@@ -12,9 +12,9 @@ import { normOrdenes } from '../clases/ordenes.js';
 import { normVariantes } from '../clases/variantes.js';
 import { normOpciones } from '../clases/opcionesRasgo.js';
 
-export const SCHEMA = 2;
-export const CAT_FIELDS = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
-export const REL_FIELDS = ['fuente', 'gratis'];
+export const ESQUEMA = 2;
+export const CAMPOS_CATALOGO = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
+export const CAMPOS_LIBRO = ['fuente', 'gratis'];
 export const THEO = {
   nombre: 'Theo', especie: 'Humano', trasfondo: 'Erudito', clase: 'Mago', subclase: 'Adivino', nivel: 6,
   stats: { fue: 8, des: 14, con: 15, int: 18, sab: 12, car: 8 },
@@ -24,9 +24,9 @@ export const THEO = {
 const STATS0 = { fue: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 };
 const PLAY0 = () => ({ used: {}, conc: '', concObj: [], concRondas: null, efectos: [], rec: {}, log: [], onlyPrep: false });
 
-export const spellKey = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
+export const claveConjuro = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
 
-export function blankChar(over = {}) {
+export function personajeVacio(over = {}) {
   return {
     id: uid('c'), nombre: '', especie: '', trasfondo: '', clase: 'Mago', subclase: '', nivel: 1,
     stats: { ...STATS0 }, aptitud: '', extraCD: 0, extraAtaque: 0,
@@ -38,9 +38,9 @@ export function blankChar(over = {}) {
   };
 }
 
-export function normChar(c) {
+export function normPersonaje(c) {
   const sinOcultos = !Array.isArray(c?.rasgosOcultos), sinHabilidades = !c?.habilidades || typeof c.habilidades !== 'object';
-  c = { ...blankChar(), ...c };
+  c = { ...personajeVacio(), ...c };
   c.stats = { ...STATS0, ...(c.stats || {}) };
   c.play = { ...PLAY0(), ...(c.play || {}) };
   c.play.used ||= {}; c.play.rec ||= {};
@@ -91,36 +91,36 @@ function normCreacion(x) {
     tiradas: (Array.isArray(x.tiradas) ? x.tiradas : []).slice(0, 6).map(t => n(t, 3, 18, 10)) };
 }
 
-export function normDb(d) {
-  d.schema = SCHEMA; d.catalog ||= {};
-  Object.values(d.catalog).forEach(s => { CAT_FIELDS.forEach(f => { if (s[f] == null) s[f] = ''; }); limpiarConjuro(s); });
+export function normBd(d) {
+  d.schema = ESQUEMA; d.catalog ||= {};
+  Object.values(d.catalog).forEach(s => { CAMPOS_CATALOGO.forEach(f => { if (s[f] == null) s[f] = ''; }); limpiarConjuro(s); });
   Object.values(d.catalog).forEach(s => {
     if (s.es === 'Guía' && s.en === 'True Strike') { s.en = 'Guidance'; s.srd = 'srd-2024_guidance'; }
     else if (s.es === 'Impacto certero' && s.en === 'Guidance') { s.en = 'True Strike'; s.srd = 'srd-2024_true-strike'; }
   });
-  d.chars = (d.chars || []).map(normChar);
+  d.chars = (d.chars || []).map(normPersonaje);
   d.chars.forEach(c => c.book.forEach(e => { e.gratis = usoGratis(e.gratis); if (!e.gratis) e.used = false; }));
   d.chars.forEach(c => { c.book = c.book.filter(e => d.catalog[e.sid]); });
   if (!d.chars.some(c => c.id === d.activeId)) d.activeId = d.chars[0]?.id ?? null;
   return d;
 }
 
-export function upsertSpell(d, s) {
-  const k = spellKey(s);
-  const hit = Object.values(d.catalog).find(x => spellKey(x) === k);
+export function guardarConjuro(d, s) {
+  const k = claveConjuro(s);
+  const hit = Object.values(d.catalog).find(x => claveConjuro(x) === k);
   if (hit) return hit.id;
   const id = uid('s');
   d.catalog[id] = { id, level: s.level, ritual: !!s.ritual, conc: !!s.conc };
-  CAT_FIELDS.forEach(f => { d.catalog[id][f] = s[f] || ''; });
+  CAMPOS_CATALOGO.forEach(f => { d.catalog[id][f] = s[f] || ''; });
   return id;
 }
 
-export function charFromV1(d, v1) {
+export function personajeDeV1(d, v1) {
   const m = v1.meta || {};
   const nivel = parseInt((String(m.sub || '').match(/nivel\s+(\d+)/i) || [])[1], 10) || THEO.nivel;
-  const ch = blankChar({ ...THEO, nombre: (m.nombre || THEO.nombre).trim(), nivel });
+  const ch = personajeVacio({ ...THEO, nombre: (m.nombre || THEO.nombre).trim(), nivel });
   (v1.levels || []).forEach(l => (l.spells || []).forEach(s => {
-    const sid = upsertSpell(d, { ...s, level: l.level });
+    const sid = guardarConjuro(d, { ...s, level: l.level });
     ch.book.push({ sid, prep: !!s.prep, always: !!s.always || (l.level === 0 && /iniciado|dote|especie/i.test(s.fuente || '')),
       fuente: s.fuente || '', gratis: s.gratis || '', used: !!s.used });
   }));
@@ -132,32 +132,32 @@ export function charFromV1(d, v1) {
   const cd = parseInt(m.cd, 10), at = parseInt(String(m.ataque || '').replace('+', ''), 10);
   if (!isNaN(cd) && P.cd != null && cd !== P.cd) ch.extraCD = cd - P.cd;
   if (!isNaN(at) && P.atk != null && at !== P.atk) ch.extraAtaque = at - P.atk;
-  return normChar(ch);
+  return normPersonaje(ch);
 }
 
 export function importarPersonaje(db, paquete) {
   const mapa = {};
-  for (const [sid, x] of Object.entries(paquete.conjuros || {})) if (x) mapa[sid] = upsertSpell(db, x);
-  const c = normChar({ ...clone(paquete.personaje), id: uid('c'), prueba: false });
+  for (const [sid, x] of Object.entries(paquete.conjuros || {})) if (x) mapa[sid] = guardarConjuro(db, x);
+  const c = normPersonaje({ ...clone(paquete.personaje), id: uid('c'), prueba: false });
   c.book = c.book.filter(e => mapa[e.sid]).map(e => ({ ...e, sid: mapa[e.sid] }));
   if (db.chars.some(x => x.nombre === c.nombre)) c.nombre += ' (importado)';
   db.chars.push(c); db.activeId = c.id;
   return c;
 }
 
-export const emptyDb = () => ({ schema: SCHEMA, catalog: {}, chars: [], activeId: null });
-export function seedDb() {
-  const d = { schema: SCHEMA, catalog: {}, chars: [] };
-  const ch = charFromV1(d, HOJA_THEO);
+export const bdVacia = () => ({ schema: ESQUEMA, catalog: {}, chars: [], activeId: null });
+export function bdDeEjemplo() {
+  const d = { schema: ESQUEMA, catalog: {}, chars: [] };
+  const ch = personajeDeV1(d, HOJA_THEO);
   d.chars.push(ch); d.activeId = ch.id;
-  return normDb(d);
+  return normBd(d);
 }
 
-export function fromStored(rawV2, rawV1) {
-  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === SCHEMA) return { db: normDb(d), migrated: false }; } } catch {}
+export function cargarGuardado(rawV2, rawV1) {
+  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === ESQUEMA) return { db: normBd(d), migrated: false }; } } catch {}
   try {
     if (rawV1) { const v1 = JSON.parse(rawV1);
-      if (v1?.levels) { const d = { schema: SCHEMA, catalog: {}, chars: [] }; const ch = charFromV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normDb(d), migrated: true }; } }
+      if (v1?.levels) { const d = { schema: ESQUEMA, catalog: {}, chars: [] }; const ch = personajeDeV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normBd(d), migrated: true }; } }
   } catch {}
-  return { db: emptyDb(), migrated: false };
+  return { db: bdVacia(), migrated: false };
 }

@@ -2,17 +2,17 @@
 import { campoElegible, ponerValor, elegirDote } from '../selectores/elecciones.js';
 import { clone, esc, joinY, norm } from '../../core/util.js';
 import { NOMBRE_HAB as HAB_NOMBRE, periciasDisponibles } from '../../domain/reglas/habilidades.js';
-import { ABILS, ABIL_NAME, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas/reglas2024.js';
-import { anadirPendientes, conjurosPendientes, esMejora, featuresAt, levelDiff, savantSchool } from '../../domain/clases/progresion.js';
-import { allSpellItems, compendio, itemMeta, itemToSid, listFilter } from '../../domain/conjuros/catalogo.js';
+import { CARACTERISTICAS, NOMBRE_CAR, CLASES, perfil, sgn, clasesDe, vistaClase, nivelTotal, REQ_MULTICLASE } from '../../domain/reglas/reglas2024.js';
+import { anadirPendientes, conjurosPendientes, esMejora, rasgosEn, diferenciaNivel, escuelaErudito } from '../../domain/clases/progresion.js';
+import { itemsConjuros, compendio, metaItem, idDeItem, filtroLista } from '../../domain/conjuros/catalogo.js';
 import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { nivelCambia } from '../../domain/clases/intercambios.js';
 import { $, on } from '../componentes/dom.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
-import { ascend } from '../animaciones/fx.js';
-import { haptic } from '../../platform/native.js';
-import { previewSpell, mdPlano } from './conjuro.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
+import { ascender } from '../animaciones/fx.js';
+import { vibrar } from '../../platform/native.js';
+import { verConjuro, mdPlano } from './conjuro.js';
 import { tarjetasSubclase, campoClase, initSubclases } from '../selectores/subclases.js';
 import { gi } from '../componentes/tema.js';
 import { aumentoDeDote, faltaRequisito } from '../../domain/origen/origen.js';
@@ -41,7 +41,7 @@ const aumentosDote = n => { const x = doteLib(n); return (x && aumentoDeDote(x.t
 // Tope de la característica que sube una dote: 30 en los dones épicos, 20 en el resto
 const topeDote = n => { const x = doteLib(n); return (x ? x.cat === 'Don épico' || /m[aá]ximo de 30/i.test(x.texto) : /^don /i.test(String(n || '').trim())) ? 30 : 20; };
 // Dotes cuya característica elegida cambia algo más (Resiliente da la salvación): se guardan con ella entre paréntesis
-const conDetalle = (n, k) => /^resiliente$/i.test(norm(n)) && k ? `${n} (${ABIL_NAME[k]})` : n;
+const conDetalle = (n, k) => /^resiliente$/i.test(norm(n)) && k ? `${n} (${NOMBRE_CAR[k]})` : n;
 // Nivel 20: Campeón primordial (bárbaro) y Cuerpo y mente (monje) suben dos características en 4, hasta 25
 const CUMBRE = { 'Bárbaro': ['fue', 'con'], 'Monje': ['des', 'sab'] };
 function draft(conDote = true) {
@@ -112,7 +112,7 @@ function plan() {
   { const hab = habTras(); LV.perSel = LV.perSel.filter(k => hab[k] === 1).slice(0, LV.nPer); }
   if (LV.fuentes.length || LV.nPer) steps.push('habilidades');
   const alt = esAlternativa(LV.estilo?.nuevo || '');
-  const vista = vistaClase(d, { clase: o.clase, subclase: LV.subclase, nivel: to }), sch = savantSchool(vista);
+  const vista = vistaClase(d, { clase: o.clase, subclase: LV.subclase, nivel: to }), sch = escuelaErudito(vista);
   Object.assign(LV, { A, B, d, sch,
     o, vista, lista: listaDe(o.clase, LV.subclase),
     nLibro: o.clase === 'Mago' ? (to === 1 ? 6 : 2) : 0,
@@ -134,11 +134,11 @@ function plan() {
   LV.steps = steps;
   LV.estTrucos = LV.estTrucos.slice(0, LV.nEstTrucos); LV.libro = LV.libro.slice(0, LV.nLibro); LV.savant = LV.savant.slice(0, LV.nSavant); LV.prep = LV.prep.slice(0, LV.nPrep); LV.trucos = LV.trucos.slice(0, LV.nTrucos);
 }
-export function openLevelUp() {
+export function abrirSubirNivel() {
   const ch = S.cur(); if (!ch || nivelTotal(ch) >= 20) return;
   LV = { orden: '', id: ch.id, i: 0, elegirClase: (ch.multiclase || []).length > 0, libro: [], savant: [], prep: [], trucos: [], estTrucos: [], estilo: { nuevo: '', quitar: '' }, q: {}, habSel: {}, perSel: [], variante: '', man: null };
   elegirClase(ch.clase);
-  render(); openSheet(dlg());
+  render(); abrirDialogo(dlg());
 }
 function elegirClase(clase) {
   LV.clase = clase; const o = objetivo();
@@ -147,18 +147,18 @@ function elegirClase(clase) {
 function chooser(key, n, filterFn, hint) {
   const chosen = LV[key] ||= [], others = new Set(['libro', 'savant', 'prep', 'trucos', 'estTrucos', ...Object.keys(LV).filter(k => k.startsWith('dc:'))].filter(k => k !== key).flatMap(k => LV[k] || []));
   const have = new Set(char().book.map(e => 'c:' + e.sid)), q = norm(LV.q[key] || '');
-  const items = allSpellItems(S.db).filter(it => !have.has(it.id) && !others.has(it.id) && filterFn(it) && (!q || norm(it.es).includes(q) || norm(it.en).includes(q)))
+  const items = itemsConjuros(S.db).filter(it => !have.has(it.id) && !others.has(it.id) && filterFn(it) && (!q || norm(it.es).includes(q) || norm(it.en).includes(q)))
     .sort((a, b) => (chosen.includes(b.id) - chosen.includes(a.id)) || b.l - a.l || a.es.localeCompare(b.es, 'es'));
   const full = chosen.length >= n;
   return `<div class="chooser"><div class="ch-head"><span>${hint}</span><b class="ch-count ${full ? 'ok' : ''}">${chosen.length} de ${n}</b></div>
     <input type="search" data-chq="${key}" placeholder="Buscar" value="${esc(LV.q[key] || '')}" aria-label="Buscar conjuro">
     <div>${items.length ? items.map(it => { const onx = chosen.includes(it.id);
       return `<div class="pitem ${onx ? 'on' : ''}"><label class="pmain"><input type="checkbox" data-chk="${key}" value="${esc(it.id)}" ${onx ? 'checked' : ''} ${!onx && full ? 'disabled' : ''}>
-        <span class="pl">${it.l}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${itemMeta(it)}</span></span></label>
+        <span class="pl">${it.l}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${metaItem(it)}</span></span></label>
         <button type="button" class="pview" data-lvview="${esc(it.id)}">Ver</button></div>`; }).join('')
       : '<p class="pempty">No hay conjuros que encajen. Si falta alguno de otro manual, créalo después con «Añadir conjuro».</p>'}</div></div>`;
 }
-function names(key) { const all = allSpellItems(S.db); return (LV[key] || []).map(id => all.find(i => i.id === id)?.es).filter(Boolean); }
+function names(key) { const all = itemsConjuros(S.db); return (LV[key] || []).map(id => all.find(i => i.id === id)?.es).filter(Boolean); }
 function render() {
   plan();
   const ch = char(), step = LV.steps[LV.i], { A, B, d, to } = { ...LV, to: LV.to };
@@ -169,7 +169,7 @@ function render() {
   let h = '';
   if (step === 'clase') {
     const mias = clasesDe(ch), nuevas = Object.keys(CLASES).filter(k => !mias.some(c => c.clase === k));
-    const req = k => (REQ_MULTICLASE[k] || []).filter(alts => !alts.some(a => (ch.stats[a] || 0) >= 13)).map(alts => alts.map(a => ABIL_NAME[a]).join(' o ') + ' 13');
+    const req = k => (REQ_MULTICLASE[k] || []).filter(alts => !alts.some(a => (ch.stats[a] || 0) >= 13)).map(alts => alts.map(a => NOMBRE_CAR[a]).join(' o ') + ' 13');
     h = `<p class="note">Subes un nivel de personaje en una de tus clases o empiezas una nueva (multiclase). Los rasgos, recursos y conjuros de cada clase van a su propio nivel.</p>
       <div class="opts">${mias.map(c => `<button type="button" data-lvclase="${esc(c.clase)}" aria-pressed="${LV.clase === c.clase}">${esc(c.clase)} ${c.nivel} → ${c.nivel + 1}${c.subclase ? `<small>${esc(c.subclase)}</small>` : ''}</button>`).join('')}</div>
       <div class="f wide" style="margin-top:14px"><span>O empieza una clase nueva</span>${campoClase('id="lvNueva" aria-label="Clase nueva"', nuevas.includes(LV.clase) ? LV.clase : '', nuevas, 'Elige una clase')}
@@ -178,7 +178,7 @@ function render() {
         <button type="button" class="ghost" data-verclase="${esc(LV.clase)}">${gi('libro')}Ver qué aprende ${esc(LV.clase)}</button>` : ''}`;
   }
   if (step === 'resumen') {
-    const feats = featuresAt(LV.vista, { subclase: LV.subclase }, to), diff = levelDiff(A, B, ch, d), auto = conjurosPendientes(S.db, d, compendio()).map(c => c.x.es);
+    const feats = rasgosEn(LV.vista, { subclase: LV.subclase }, to), diff = diferenciaNivel(A, B, ch, d), auto = conjurosPendientes(S.db, d, compendio()).map(c => c.x.es);
     h = `<div class="lv-big" aria-hidden="true"><span>${total}</span><i>→</i><b>${total + 1}</b></div><div class="fsum"><p><b>${esc(o.clase)}, nivel ${to}${multi ? ` (nivel de personaje ${total + 1})` : ''}.</b> Competencia ${sgn(B.pb)}${B.pb > A.pb ? ' (sube)' : ''}.</p>
       ${diff ? `<p>${esc(diff.replace(/^Al subir de nivel gana: /, 'Ganas: '))}</p>` : '<p>Sin cambios en espacios, preparados ni trucos.</p>'}
       ${feats.length ? `<p>Rasgos de este nivel: ${esc(joinY(feats))}.</p>` : ''}
@@ -199,7 +199,7 @@ function render() {
       <label class="f wide" style="margin-top:14px">Subclase<input id="lvSubIn" value="${esc(LV.subclase)}" autocomplete="off"></label>`;
   }
   if (step === 'mejora') {
-    const a = LV.asi, sel = (id, v, skip) => `<select id="${id}"><option value="">Elige</option>${ABILS.filter(([k]) => k !== skip).map(([k, n]) => `<option value="${k}" ${v === k ? 'selected' : ''} ${ch.stats[k] >= 20 ? 'disabled' : ''}>${n} (${ch.stats[k]})</option>`).join('')}</select>`;
+    const a = LV.asi, sel = (id, v, skip) => `<select id="${id}"><option value="">Elige</option>${CARACTERISTICAS.filter(([k]) => k !== skip).map(([k, n]) => `<option value="${k}" ${v === k ? 'selected' : ''} ${ch.stats[k] >= 20 ? 'disabled' : ''}>${n} (${ch.stats[k]})</option>`).join('')}</select>`;
     h = `<p class="note">${to === 19 ? 'A nivel 19 ganas un Don épico (una dote especial). ' : ''}La mejora de característica es una dote: +2 a una o +1 a dos, sin pasar de 20. También puedes elegir otra dote.</p>
       <div class="radios">
         <label class="chk-line"><input type="radio" name="lvasi" value="dos" ${a.modo === 'dos' ? 'checked' : ''}> +2 a una característica</label>${a.modo === 'dos' ? `<div class="frow">${sel('lvA', a.a)}</div>` : ''}
@@ -207,9 +207,9 @@ function render() {
         <label class="chk-line"><input type="radio" name="lvasi" value="dote" ${a.modo === 'dote' ? 'checked' : ''}> ${to === 19 ? 'Don épico u otra dote' : 'Otra dote'}</label>
         ${a.modo === 'dote' ? `<div class="f wide"><span>Dote</span>${campoElegible('id="lvDote" aria-label="Nombre de la dote"', a.dote, 'dote', 'dote', 'Por ejemplo, Iniciado en la magia')}${(() => {
           if (!a.dote) return ''; const ops = aumentosDote(a.dote), x = doteLib(a.dote), falta = x ? faltaRequisito(x.req, draft()) : '';
-          const tope = topeDote(a.dote), lista = (ops || ABILS.map(([k]) => k)).map(k => `<option value="${k}" ${a.c === k ? 'selected' : ''} ${ch.stats[k] >= tope ? 'disabled' : ''}>${ABIL_NAME[k]} (${ch.stats[k]} → ${Math.min(tope, ch.stats[k] + 1)})</option>`).join('');
+          const tope = topeDote(a.dote), lista = (ops || CARACTERISTICAS.map(([k]) => k)).map(k => `<option value="${k}" ${a.c === k ? 'selected' : ''} ${ch.stats[k] >= tope ? 'disabled' : ''}>${NOMBRE_CAR[k]} (${ch.stats[k]} → ${Math.min(tope, ch.stats[k] + 1)})</option>`).join('');
           return `${falta ? `<p class="note warn-txt">${esc(falta)}</p>` : ''}<label class="f lv-aum">${ops ? `${esc(x.nombre)} sube en 1 una característica. ¿Cuál?` : 'Si la dote sube una característica, elige cuál (+1)'}<select id="lvC"><option value="">${ops ? 'Elige' : 'Ninguna'}</option>${lista}</select></label>`; })()}<span class="hint">Aparecerá en «En juego». Si da conjuros o cambia características, añádelos luego en la ficha y en la hoja.</span></div>` : ''}
-      </div>${B.apKey && B.mod !== A.mod ? `<div class="fsum" style="margin-top:14px">Tu ${ABIL_NAME[B.apKey]} pasa a ${sgn(B.mod)}: CD ${B.cd} y ataque ${sgn(B.atk)}.</div>` : ''}`;
+      </div>${B.apKey && B.mod !== A.mod ? `<div class="fsum" style="margin-top:14px">Tu ${NOMBRE_CAR[B.apKey]} pasa a ${sgn(B.mod)}: CD ${B.cd} y ataque ${sgn(B.atk)}.</div>` : ''}`;
   }
   if (step === 'estilo') {
     const e = LV.estilo, ops = opcionesEstilo(ch, biblioteca().dotes, o.clase), cambia = !LV.estiloGana;
@@ -243,25 +243,25 @@ function render() {
     h = dc.elegir.map(e => chooser(`dc:${e.k}`, e.n, filtroEleccion(e), `${esc(dc.fuente)}: ${e.nivel ? `${e.n === 1 ? 'un conjuro' : `${e.n} conjuros`} de nivel ${e.nivel}${e.escuelas ? ` de ${e.escuelas.join(' o ').toLowerCase()}` : e.lista ? ` de ${e.lista.toLowerCase()}` : ''}` : `${e.n} trucos de ${(e.lista || '').toLowerCase()}`}. Siempre preparados; el de nivel 1 lo lanzas una vez sin espacio por descanso largo.`)).join('')
       + (dc.fijos.length ? `<p class="note">Además tienes siempre preparado: ${esc(joinY(dc.fijos))}.</p>` : '');
   }
-  if (step === 'estiloTrucos') h = chooser('estTrucos', LV.nEstTrucos, it => it.l === 0 && listFilter(it, LV.estLista), `${esc(LV.estilo.nuevo)}: aprendes dos trucos de ${LV.estLista.toLowerCase()}. Cuentan como conjuros de ${o.clase.toLowerCase()} y no ocupan preparados.`);
+  if (step === 'estiloTrucos') h = chooser('estTrucos', LV.nEstTrucos, it => it.l === 0 && filtroLista(it, LV.estLista), `${esc(LV.estilo.nuevo)}: aprendes dos trucos de ${LV.estLista.toLowerCase()}. Cuentan como conjuros de ${o.clase.toLowerCase()} y no ocupan preparados.`);
   const escL = LV.sch.toLowerCase();
-  if (step === 'experto') h = chooser('savant', LV.nSavant, it => it.l > 0 && (LV.savantExact ? it.l === LV.savantMax : it.l <= LV.savantMax) && it.esc === LV.sch && listFilter(it, 'Mago'),
+  if (step === 'experto') h = chooser('savant', LV.nSavant, it => it.l > 0 && (LV.savantExact ? it.l === LV.savantMax : it.l <= LV.savantMax) && it.esc === LV.sch && filtroLista(it, 'Mago'),
     to === 3 ? `Experto en ${escL}: 2 conjuros de mago de ${escL}, de nivel 2 o inferior, gratis.` : `Experto en ${escL}: acabas de acceder a espacios de nivel ${LV.savantMax}; añade gratis un conjuro de ${escL} de ese nivel.`);
-  if (step === 'libro') h = chooser('libro', LV.nLibro, it => it.l > 0 && it.l <= B.maxSlot && listFilter(it, 'Mago'), (to === 1 ? `Tu libro de conjuros empieza con 6 conjuros de mago de nivel 1.` : `Cada nivel de mago añade 2 conjuros de mago al libro, de nivel ${B.maxSlot} o inferior.`));
+  if (step === 'libro') h = chooser('libro', LV.nLibro, it => it.l > 0 && it.l <= B.maxSlot && filtroLista(it, 'Mago'), (to === 1 ? `Tu libro de conjuros empieza con 6 conjuros de mago de nivel 1.` : `Cada nivel de mago añade 2 conjuros de mago al libro, de nivel ${B.maxSlot} o inferior.`));
   const lista = LV.lista || B.lista;
-  if (step === 'preparados') h = chooser('prep', LV.nPrep, it => it.l > 0 && it.l <= B.maxSlot && listFilter(it, lista), `Ahora preparas ${B.maxPrep} conjuros (antes ${A.maxPrep}). Elige los nuevos de la lista de ${lista.toLowerCase()}, de nivel ${B.maxSlot} o inferior. Es opcional.`);
-  if (step === 'trucos') h = chooser('trucos', LV.nTrucos, it => it.l === 0 && listFilter(it, lista), `Aprendes ${LV.nTrucos === 1 ? 'un truco nuevo' : LV.nTrucos + ' trucos nuevos'} de la lista de ${(lista || o.clase).toLowerCase()}.`);
+  if (step === 'preparados') h = chooser('prep', LV.nPrep, it => it.l > 0 && it.l <= B.maxSlot && filtroLista(it, lista), `Ahora preparas ${B.maxPrep} conjuros (antes ${A.maxPrep}). Elige los nuevos de la lista de ${lista.toLowerCase()}, de nivel ${B.maxSlot} o inferior. Es opcional.`);
+  if (step === 'trucos') h = chooser('trucos', LV.nTrucos, it => it.l === 0 && filtroLista(it, lista), `Aprendes ${LV.nTrucos === 1 ? 'un truco nuevo' : LV.nTrucos + ' trucos nuevos'} de la lista de ${(lista || o.clase).toLowerCase()}.`);
   if (step === 'confirmar') {
     const L = [multi ? `${o.clase} ${o.nivel} → ${to} (nivel de personaje ${total + 1}).` : `Nivel ${ch.nivel} → ${to}.`];
     if (LV.subclase !== (o.subclase || '')) L.push(`Subclase: ${LV.subclase || 'ninguna'}.`);
     if (LV.steps.includes('mejora')) {
       const a = LV.asi;
-      if (a.modo === 'dote') L.push(a.dote ? `Dote: ${a.dote}${a.c ? ` (${ABIL_NAME[a.c]} ${ch.stats[a.c]} → ${d.stats[a.c]})` : ''}.` : 'Dote sin nombre: puedes anotarla después en la ficha.');
-      else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} ${ch.stats[k]} → ${d.stats[k]}`); L.push(bits.length ? `Mejora de característica: ${bits.join(', ')}.` : 'Mejora de característica sin elegir.'); }
+      if (a.modo === 'dote') L.push(a.dote ? `Dote: ${a.dote}${a.c ? ` (${NOMBRE_CAR[a.c]} ${ch.stats[a.c]} → ${d.stats[a.c]})` : ''}.` : 'Dote sin nombre: puedes anotarla después en la ficha.');
+      else { const bits = CARACTERISTICAS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} ${ch.stats[k]} → ${d.stats[k]}`); L.push(bits.length ? `Mejora de característica: ${bits.join(', ')}.` : 'Mejora de característica sin elegir.'); }
     }
     if (LV.steps.includes('maestria')) L.push(`Maestría con armas: ${LV.maes.length ? LV.maes.join(', ') : 'sin elegir'}.`);
     if (LV.orden) L.push(`${ORDENES[o.clase].rasgo}: ${LV.orden}.`);
-    if (to === 20 && CUMBRE[o.clase]) L.push(`${o.clase === 'Bárbaro' ? 'Campeón primordial' : 'Cuerpo y mente'}: ${CUMBRE[o.clase].map(k => `${ABIL_NAME[k]} ${ch.stats[k]} → ${d.stats[k]}`).join(', ')}.`);
+    if (to === 20 && CUMBRE[o.clase]) L.push(`${o.clase === 'Bárbaro' ? 'Campeón primordial' : 'Cuerpo y mente'}: ${CUMBRE[o.clase].map(k => `${NOMBRE_CAR[k]} ${ch.stats[k]} → ${d.stats[k]}`).join(', ')}.`);
     if (LV.variante && LV.steps.includes('variante')) L.push(`${VARIANTES[o.clase].rasgo}: ${LV.variante}.`);
     if (LV.steps.includes('maniobras')) L.push(`Maniobras: ${LV.man.length ? LV.man.join(', ') : 'sin elegir'}.`);
     if (LV.steps.includes('habilidades')) { const nuevas = nuevasHabilidades(); if (nuevas) L.push(nuevas); }
@@ -302,12 +302,12 @@ function apply() {
   if (LV.subclase !== (o.subclase || '')) notes.push(`subclase ${LV.subclase}`);
   if (LV.estilo.nuevo) notes.push(`estilo de combate ${LV.estilo.quitar ? `${LV.estilo.quitar} → ` : ''}${LV.estilo.nuevo}`);
   if (LV.steps.includes('mejora')) {
-    if (LV.asi.modo === 'dote') { if (LV.asi.dote) notes.push(`dote ${LV.asi.dote}${LV.asi.c ? ` (+1 ${ABIL_NAME[LV.asi.c]})` : ''}`); }
-    else { const bits = ABILS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} +${d.stats[k] - ch.stats[k]}`); if (bits.length) notes.push(`mejora de característica (${bits.join(', ')})`); }
+    if (LV.asi.modo === 'dote') { if (LV.asi.dote) notes.push(`dote ${LV.asi.dote}${LV.asi.c ? ` (+1 ${NOMBRE_CAR[LV.asi.c]})` : ''}`); }
+    else { const bits = CARACTERISTICAS.filter(([k]) => d.stats[k] !== ch.stats[k]).map(([k, n]) => `${n} +${d.stats[k] - ch.stats[k]}`); if (bits.length) notes.push(`mejora de característica (${bits.join(', ')})`); }
   }
-  const B = perfil(d), all = allSpellItems(S.db), picks = { libro: LV.libro, savant: LV.savant, prep: LV.prep, trucos: LV.trucos }, sch = LV.sch;
+  const B = perfil(d), all = itemsConjuros(S.db), picks = { libro: LV.libro, savant: LV.savant, prep: LV.prep, trucos: LV.trucos }, sch = LV.sch;
   const h = S.act(`Sube a nivel ${total}${notes.length ? ': ' + notes.join('; ') : ''}`, (db, c) => {
-    const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
+    const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = idDeItem(db, it);
       if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, ...rel }); });
     add(LV.estTrucos, { fuente: LV.estilo.nuevo, always: true, prep: true });
     if (LV.doteConj) { const dc = LV.doteConj;
@@ -333,9 +333,9 @@ function apply() {
     if (auto.length) notes.push(`siempre preparados ${auto.join(', ')}`);
     if (notes.length) c.notas = `${(c.notas || '').trim()}\nNivel ${total}: ${notes.join('; ')}.`.trim();
   });
-  closeSheet(dlg()); window.scrollTo({ top: 0, behavior: 'smooth' });
-  setTimeout(() => { ascend($('#hero h1')); haptic('heavy'); }, 260);
-  toast(`<b>${esc(ch.nombre)}</b> ya es nivel ${total}${o.principal ? '' : ` (${esc(o.clase)} ${to})`}.`, [undoBtn(S, h)]);
+  cerrarDialogo(dlg()); window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => { ascender($('#hero h1')); vibrar('heavy'); }, 260);
+  toast(`<b>${esc(ch.nombre)}</b> ya es nivel ${total}${o.principal ? '' : ` (${esc(o.clase)} ${to})`}.`, [botonDeshacer(S, h)]);
 }
 
 export function init(store) {
@@ -357,23 +357,23 @@ export function init(store) {
     if (t.id === 'lvC') { LV.asi.c = t.value; return render(); }
     if (t.id === 'lvDote') { LV.asi.dote = t.value.trim(); const ops = aumentosDote(LV.asi.dote); LV.asi.c = ops?.length === 1 ? ops[0] : ''; return render(); }
     if (t.dataset.chk) { const k = t.dataset.chk; LV[k] ||= []; LV[k] = t.checked ? [...new Set([...LV[k], t.value])] : LV[k].filter(x => x !== t.value);
-      const y = body.scrollTop; render(); body.scrollTop = y; haptic(); }
+      const y = body.scrollTop; render(); body.scrollTop = y; vibrar(); }
   });
-  on(body, 'click', '[data-lvmaes]', (ev, b) => { LV.maes = alternarMaes(LV.maes, b.dataset.lvmaes, LV.cupoMaes); const y = body.scrollTop; render(); body.scrollTop = y; haptic(); });
-  on(body, 'click', '[data-lvestilo]', (ev, b) => { LV.estilo.nuevo = LV.estilo.nuevo === b.dataset.lvestilo ? '' : b.dataset.lvestilo; LV.estTrucos = []; const y = body.scrollTop; render(); body.scrollTop = y; haptic(); });
+  on(body, 'click', '[data-lvmaes]', (ev, b) => { LV.maes = alternarMaes(LV.maes, b.dataset.lvmaes, LV.cupoMaes); const y = body.scrollTop; render(); body.scrollTop = y; vibrar(); });
+  on(body, 'click', '[data-lvestilo]', (ev, b) => { LV.estilo.nuevo = LV.estilo.nuevo === b.dataset.lvestilo ? '' : b.dataset.lvestilo; LV.estTrucos = []; const y = body.scrollTop; render(); body.scrollTop = y; vibrar(); });
   on(body, 'click', '[data-lvquitar]', (ev, b) => { LV.estilo = { nuevo: '', quitar: b.dataset.lvquitar }; LV.estTrucos = []; render(); });
   on(body, 'click', '[data-lvclase]', (ev, b) => { elegirClase(b.dataset.lvclase); render(); });
-  const repinta = () => { const y = body.scrollTop; render(); body.scrollTop = y; haptic(); };
+  const repinta = () => { const y = body.scrollTop; render(); body.scrollTop = y; vibrar(); };
   on(body, 'click', '[data-lvhab]', (ev, b) => { const f = LV.fuentes.find(x => x.clave === b.dataset.lvhf); if (!f) return; LV.habSel[f.clave] = alternarHab(LV.habSel[f.clave] || [], b.dataset.lvhab, f.n); repinta(); });
   on(body, 'click', '[data-lvper]', (ev, b) => { LV.perSel = alternarHab(LV.perSel, b.dataset.lvper, LV.nPer); repinta(); });
   on(body, 'click', '[data-lvvar]', (ev, b) => { LV.variante = b.dataset.lvvar; repinta(); });
   on(body, 'click', '[data-lvman]', (ev, b) => { LV.man = alternarManiobra(LV.man, b.dataset.lvman, LV.cupoMan); repinta(); });
-  on(body, 'click', '[data-lvorden]', (ev, b) => { LV.orden = b.dataset.lvorden; render(); haptic(); });
+  on(body, 'click', '[data-lvorden]', (ev, b) => { LV.orden = b.dataset.lvorden; render(); vibrar(); });
   on(body, 'click', '[data-lvmulti]', () => { LV.elegirClase = true; LV.i = 0; render(); body.scrollTop = 0; });
   body.addEventListener('change', ev => { if (ev.target.id === 'lvNueva' && ev.target.value) { elegirClase(ev.target.value); render(); } });
   on(body, 'click', '[data-lvsub],[data-lvview]', (ev, b) => {
     if (b.dataset.lvsub) { LV.subclase = b.dataset.lvsub; return render(); }
-    const it = allSpellItems(S.db).find(x => x.id === b.dataset.lvview); if (it) previewSpell(it);
+    const it = itemsConjuros(S.db).find(x => x.id === b.dataset.lvview); if (it) verConjuro(it);
   });
   $('#lvNext').addEventListener('click', () => {
     const step = LV.steps[LV.i];

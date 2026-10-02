@@ -14,7 +14,7 @@ const nombreDe = s => tituloBonito(s, PROPIOS);
 const CAT_DOTE = /^Dot\W?e\s+(de origen|genera[l\/1I|]|de estilo de combate|de don [ée]pico)(?![\p{L}])\s*(.*)$/iu;
 export const CATS_DOTE = { 'de origen': 'Origen', general: 'General', 'de estilo de combate': 'Estilo de combate', 'de don épico': 'Don épico', 'de don epico': 'Don épico' };
 const RESTO_CAT = /^(General|Origen|Estilo de combate|Don [ée]pico)(\s+|$)/;
-export function parseDotes(pages) {
+export function leerDotes(pages) {
   const L = aplanar(pages).map(l => (RESTO_CAT.test(l.s) && (l.segs || []).length > 1 && RESTO_CAT.test(l.segs[0].s.trim()) && l.segs[0].s.trim().length < 20
     ? { ...l, s: l.segs.slice(1).map(g => g.s).join(' ').trim(), x: l.segs[1].x, segs: l.segs.slice(1) } : l)).filter(l => !/^(General|Origen|Estilo de combate|Don [ée]pico)$/.test(l.s.trim())), cab = [];
   for (let i = 1; i < L.length; i++) {
@@ -96,10 +96,10 @@ export function nombrarTrasfondos(lista, nombres) {
     usados.add(pts[0].n); return { ...t, nombre: pts[0].n, clave: claveNombre(pts[0].n), revisar: false };
   });
 }
-export function parseTrasfondos(pages) {
-  return leerTrasfondos(pages).map(t => { const n = FIRMAS[firma(t)]; return n ? { ...t, nombre: n, clave: claveNombre(n), revisar: false } : t; });
+export function leerTrasfondos(pages) {
+  return leerTrasfondosBrutos(pages).map(t => { const n = FIRMAS[firma(t)]; return n ? { ...t, nombre: n, clave: claveNombre(n), revisar: false } : t; });
 }
-function leerTrasfondos(pages) {
+function leerTrasfondosBrutos(pages) {
   const L = aplanar(pages).map(l => ({ ...l, s: l.s.replace(/^[|>\s]+/, '') })), cab = [];
   const esCampo = s => CAMPOS_T.some(([, re]) => re.test(s));
   for (let i = 0; i < L.length; i++) {
@@ -185,7 +185,7 @@ export function separarRasgos(L) {
   }
   return out;
 }
-export function parseSubclases(pages, extras = []) {
+export function leerSubclases(pages, extras = []) {
   const L = separarRasgos(aplanar(pages));
   const conocidas = new Map();
   for (const [clase, v] of Object.entries(CLASES)) for (const s of v.subs || []) conocidas.set(claveNombre(s), { clase, nombre: s });
@@ -268,7 +268,7 @@ export function completarSubclases(lista) {
 
 const NO_ATRIBUTO = /^(elige|puedes|tienes|obtienes|cuando|si|tu|tus|la|el|los|las|como|al|una|un|mientras|esta|este|ademas|tambien|para|siempre)\b|\b(tienes|puedes|eres|es|son|esta)\b/;
 const OFRECE_OPCIONES = /(una de las (siguientes )?opciones|elige una de las siguientes|las opciones que aparecen)/i;
-export function parseEspecies(pages) {
+export function leerEspecies(pages) {
   const L = aplanar(pages), out = [];
   for (let i = 0; i < L.length; i++) {
     const m = /^ATRIBUTOS DE (?:LOS|LAS) (.+)$/i.exec(L[i].s.replace(/[|>\s]+$/, '').trim()); if (!m || !esMayus(L[i].s)) continue;
@@ -294,7 +294,7 @@ export function parseEspecies(pages) {
   return out;
 }
 
-export function parseRasgosClase(pages) {
+export function leerRasgosClase(pages) {
   const L = separarRasgos(aplanar(pages)), out = [];
   const inicio = new RegExp(`^RASGOS DE CLASE DE (${CLASE_RE})$`, 'i');
   for (let i = 0; i < L.length; i++) {
@@ -320,7 +320,7 @@ export function parseRasgosClase(pages) {
   return out;
 }
 
-export function parseSecciones(pages, cat) {
+export function leerSecciones(pages, cat) {
   const L = aplanar(pages);
   const grande = l => esMayus(l.s) && l.h >= (l.hTip || 16) * 1.55 && letras(l.s).length >= 4 && l.s.length < 50 && !/^CAP[ÍI]TULO/.test(l.s);
   const cab = [];

@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { aBestiario, arreglarDadosCon, arreglarDadosTexto, formasPosibles, leerCaracteristicas, limiteFormaSalvaje, parseCriaturas, vdNumero } from '../../web/src/domain/criaturas/monstruos.js';
+import { aBestiario, arreglarDadosCon, arreglarDadosTexto, formasPosibles, leerCaracteristicas, limiteFormaSalvaje, leerCriaturas, vdNumero } from '../../web/src/domain/criaturas/monstruos.js';
 
 const linea = (s, y, x = 50, h = 10) => ({ s, x, y, h });
 const pagina = (lineas, p = 1) => ({ p, cols: [lineas.map((s, i) => (typeof s === 'string' ? linea(s, 900 - i * 16) : s)), []] });
@@ -33,9 +33,9 @@ const TROL = pagina([
   'Rugido. El trol ruge.',
 ]);
 
-describe('parseCriaturas', () => {
+describe('leerCriaturas', () => {
   test('un perfil leído con OCR, corregido por coherencia', () => {
-    const [c] = parseCriaturas([TROL]);
+    const [c] = leerCriaturas([TROL]);
     assert.equal(c.nombre, 'Trol del vado'); assert.equal(c.tipoBase, 'Gigante'); assert.equal(c.tamano, 'Grande'); assert.equal(c.alineamiento, 'caótico neutral');
     assert.equal(c.ca, 15); assert.equal(c.ini, 1);
     assert.equal(c.pg, '84 (8d10 + 40)');
@@ -52,7 +52,7 @@ describe('parseCriaturas', () => {
   });
 
   test('al bestiario van tipo, CA, PG, daños, estados y salvaciones', () => {
-    const [c] = parseCriaturas([TROL]), b = aBestiario({ ...c, salv: { con: 8 } });
+    const [c] = leerCriaturas([TROL]), b = aBestiario({ ...c, salv: { con: 8 } });
     assert.equal(b.tipo, 'Gigante'); assert.equal(b.ca, '15'); assert.equal(b.pg, '84');
     assert.equal(b.danos.fuego, 'vul'); assert.deepEqual(b.estados, ['asustado', 'envenenado']);
     assert.equal(b.salv.con, 'fuerte'); assert.equal(b.salv.int, 'debil');
@@ -70,13 +70,13 @@ describe('parseCriaturas', () => {
 
   test('nombres con restos de OCR o ilegibles se recuperan', () => {
     const bloque = (cab, rasgo) => [...cab, 'CA: 13 Iniciativa: +3 (13)', 'PG: 13 (3d8)', 'Velocidad: 12 m', 'VD: 1 (200 PX; BC +2)', 'ATRIBUTOS', rasgo];
-    const [t] = parseCriaturas([pagina(bloque(['TIGRE.', 'Bestia Grande, sin alineamiento'], 'Olfato agudo. Ventaja en las pruebas.'))]);
+    const [t] = leerCriaturas([pagina(bloque(['TIGRE.', 'Bestia Grande, sin alineamiento'], 'Olfato agudo. Ventaja en las pruebas.'))]);
     assert.equal(t.nombre, 'Tigre');
-    const [j] = parseCriaturas([pagina(bloque(['Fl JABALÍ', 'Bestia Mediana, sin alineamiento'], 'Carga. Si se mueve 6 m.'))]);
+    const [j] = leerCriaturas([pagina(bloque(['Fl JABALÍ', 'Bestia Mediana, sin alineamiento'], 'Carga. Si se mueve 6 m.'))]);
     assert.equal(j.nombre, 'Jabalí');
-    const [l] = parseCriaturas([pagina(bloque(['ll', 'll Bestia Mediana, sin alineamiento'], 'Atacar en manada. El lobo tiene ventaja en las tiradas de ataque.'))]);
+    const [l] = leerCriaturas([pagina(bloque(['ll', 'll Bestia Mediana, sin alineamiento'], 'Atacar en manada. El lobo tiene ventaja en las tiradas de ataque.'))]);
     assert.equal(l.nombre, 'Lobo'); assert.ok(l.revisar.includes('nombre deducido del texto'));
-    assert.equal(parseCriaturas([pagina(bloque(['ll', 'Bestia Mediana, sin alineamiento'], 'Mordisco. Si el objetivo es una criatura Mediana, la criatura tiene el estado de derribada.'))]).length, 0);
+    assert.equal(leerCriaturas([pagina(bloque(['ll', 'Bestia Mediana, sin alineamiento'], 'Mordisco. Si el objetivo es una criatura Mediana, la criatura tiene el estado de derribada.'))]).length, 0);
   });
 });
 

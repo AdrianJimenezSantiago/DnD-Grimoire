@@ -1,7 +1,7 @@
 // Piezas visuales compartidas por las ventanas de tiradas: dados poliédricos, sello del total,
 // histograma de probabilidades y animación de dados que ruedan hasta posarse.
 import { probMenor, probAlMenos, mediaDist, maxDist } from '../../domain/reglas/dados.js';
-import { burst, reducedMotion } from './fx.js';
+import { chispas, movimientoReducido } from './fx.js';
 
 export const fmt = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
 export const pct = x => { const n = x * 100; return `${n > 0 && n < 1 ? '<1' : n > 99 && n < 100 ? '>99' : Math.round(n)} %`; };
@@ -66,7 +66,7 @@ export function probHtml(d, t, { cd = null, r = 1 } = {}) {
 // Los dados nuevos ruedan y muestran caras al azar hasta posarse; el total se sella al final.
 // vivo(): false si otra tirada ha sustituido a esta. fin(): se llama una vez posado todo.
 export function rodar(el, { total, antes = null, lo = 1, hi = 20, nuevo = true, vivo = () => true, fin }) {
-  if (reducedMotion()) { sellar(el, total, false); fin?.(); return; }
+  if (movimientoReducido()) { sellar(el, total, false); fin?.(); return; }
   const dados = [...el.querySelectorAll('.dd.rueda')], num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
   const paso = dados.length ? Math.min(70, 480 / dados.length) : 0, dur = nuevo ? 460 : 320;
   dados.forEach((d, i) => d.style.setProperty('--d', `${Math.round(i * paso)}ms`));
@@ -98,14 +98,14 @@ export function sellar(el, total, anim) {
 }
 export function centro(el) { const s = el?.getBoundingClientRect(); return s ? [s.left + s.width / 2, s.top + s.height / 2] : [0, 0]; }
 export function fxNatural(el, n, sacudir) {
-  if (reducedMotion()) return;
+  if (movimientoReducido()) return;
   const [cx, cy] = centro(el.querySelector('.dd-sello'));
   if (n === 20) {
-    burst(cx, cy, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 });
-    setTimeout(() => burst(cx, cy, { color: '#FFF3C8', n: 30, speed: 3, up: 2.5, life: 1200, size: 1.8, gravity: -0.03 }), 240);
+    chispas(cx, cy, { color: '#F4D27A', n: 70, speed: 5.5, up: 1.4, life: 1500, size: 2.6, gravity: 0.01 });
+    setTimeout(() => chispas(cx, cy, { color: '#FFF3C8', n: 30, speed: 3, up: 2.5, life: 1200, size: 1.8, gravity: -0.03 }), 240);
   } else {
-    burst(cx, cy, { color: '#FF5A45', n: 26, speed: 3.2, up: -0.4, life: 1100, size: 2.4, gravity: 0.14 });
-    burst(cx, cy, { color: '#6b6f7d', n: 18, speed: 2.4, up: 0.4, life: 1300, size: 3, gravity: 0.18 });
+    chispas(cx, cy, { color: '#FF5A45', n: 26, speed: 3.2, up: -0.4, life: 1100, size: 2.4, gravity: 0.14 });
+    chispas(cx, cy, { color: '#6b6f7d', n: 18, speed: 2.4, up: 0.4, life: 1300, size: 3, gravity: 0.18 });
     if (sacudir) { sacudir.classList.remove('dd-sacude'); void sacudir.offsetWidth; sacudir.classList.add('dd-sacude'); setTimeout(() => sacudir.classList.remove('dd-sacude'), 700); }
   }
 }

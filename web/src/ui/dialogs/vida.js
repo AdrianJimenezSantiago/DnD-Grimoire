@@ -13,10 +13,10 @@ import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { avatarHtml } from '../componentes/avatar.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
-import { burstFrom } from '../animaciones/fx.js';
-import { haptic } from '../../platform/native.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
+import { chispasDesde } from '../animaciones/fx.js';
+import { vibrar } from '../../platform/native.js';
 import { tirarPrueba, tirarDano } from './dados.js';
 import { abrirTermino } from './biblioteca.js';
 import { pctVida, tonoVida, pipsMuerte, vigiliaHtml } from '../pantallas/vitales.js';
@@ -29,7 +29,7 @@ const dlg = () => $('#vidaDlg'), edlg = () => $('#estadosDlg');
 const ch = () => S.cur();
 
 let enDescanso = false;
-export function openVida(foco, { descanso = false } = {}) { enDescanso = descanso; render(); openSheet(dlg()); dlg().addEventListener('close', () => { enDescanso = false; }, { once: true }); if (foco !== false) setTimeout(() => $('#vdCant')?.focus({ preventScroll: true }), 280); }
+export function abrirVida(foco, { descanso = false } = {}) { enDescanso = descanso; render(); abrirDialogo(dlg()); dlg().addEventListener('close', () => { enDescanso = false; }, { once: true }); if (foco !== false) setTimeout(() => $('#vdCant')?.focus({ preventScroll: true }), 280); }
 
 function render() {
   const c = ch(); if (!c) return;
@@ -60,7 +60,7 @@ function render() {
 export function danar(S2, n, critico = false) {
   const c = S2.cur(), desde = pgActuales(c); let r;
   const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) soltarConc(x); });
-  const c2 = S2.cur(), acts = [undoBtn(S2, h)], res = resistenciasDe(c2);
+  const c2 = S2.cur(), acts = [botonDeshacer(S2, h)], res = resistenciasDe(c2);
   // Resistencias: si el daño es de uno de esos tipos, rehace el golpe con la mitad
   // Reacciones que reducen el daño: Esquiva asombrosa, Desviar ataques, Salvaguarda arcana, Parada
   for (const op of reaccionesDano(c2)) if (n > 0) acts.push({ label: op.label, fn: () => { S2.undo(h); let n2 = n; S2.act(op.label, (db, x) => { n2 = op.aplica(x, n); }); danar(S2, n2, critico);
@@ -69,8 +69,8 @@ export function danar(S2, n, critico = false) {
   // Aguante incansable (orco): en vez de caer a 0 PG te quedas a 1 (sin perder la concentración: tiras la salvación)
   if (r.cayo && !r.muerte) for (const op of alCaerA0(c2)) acts.unshift({ label: op.label, hl: true, fn: () => {
     S2.undo(h); let r2 = null; const h2 = S2.act(op.label, (db, x) => { r2 = aplicarDano(x, n, { critico }); op.aplica(x); });
-    golpeFx('cura', 1, { desde: 0, hasta: 1 }); haptic('medium');
-    toast(`<b>${n}</b> de daño, pero te quedas a <b>1 PG</b> (Aguante incansable).${r2?.concentracion ? ` Concentración en <b>${esc(r2.concentracion.conjuro)}</b>: salvación de Constitución CD <b>${r2.concentracion.cd}</b>.` : ''}`, [undoBtn(S2, h2)]);
+    golpeFx('cura', 1, { desde: 0, hasta: 1 }); vibrar('medium');
+    toast(`<b>${n}</b> de daño, pero te quedas a <b>1 PG</b> (Aguante incansable).${r2?.concentracion ? ` Concentración en <b>${esc(r2.concentracion.conjuro)}</b>: salvación de Constitución CD <b>${r2.concentracion.cd}</b>.` : ''}`, [botonDeshacer(S2, h2)]);
     if (r2?.concentracion) setTimeout(() => tirarConcentracion(S2, n), 450); } });
   const red = reduccionArmaduraPesada(c2);
   if (red && n > 0) acts.push({ label: `Maestro en armaduras pesadas: −${red}`, fn: () => { S2.undo(h); danar(S2, Math.max(0, n - red), critico); } });
@@ -86,7 +86,7 @@ export function danar(S2, n, critico = false) {
     acts.splice(1, 0, { label: 'La pierdo', fn: () => S2.act(`Pierde la concentración en ${conj}`, (db, x) => { soltarConc(x); }) });
     setTimeout(() => { if (S2.cur()?.play.conc === conj) tirarConcentracion(S2, n); }, 450);
   }
-  haptic(r.cayo || r.muerte ? 'heavy' : 'medium');
+  vibrar(r.cayo || r.muerte ? 'heavy' : 'medium');
   golpeFx('dano', n, { desde, hasta: pgActuales(S2.cur()), cae: r.cayo || r.muerte });
   toast(msg, acts);
   return r;
@@ -108,25 +108,25 @@ export async function pedirConcentracion(S2) {
 }
 export function sanar(S2, n) {
   const desde = pgActuales(S2.cur()); let g = 0; const h = S2.act(`Recupera ${n} PG`, (db, x) => { g = curar(x, n); });
-  golpeFx('cura', g || n, { desde, hasta: pgActuales(S2.cur()) }); haptic('light');
-  toast(g ? `Recupera <b>${g}</b> PG. Tiene <b>${pgActuales(S2.cur())}</b>.` : 'Ya estaba al máximo.', [undoBtn(S2, h)]);
+  golpeFx('cura', g || n, { desde, hasta: pgActuales(S2.cur()) }); vibrar('light');
+  toast(g ? `Recupera <b>${g}</b> PG. Tiene <b>${pgActuales(S2.cur())}</b>.` : 'Ya estaba al máximo.', [botonDeshacer(S2, h)]);
 }
 export function temporales(S2, n) {
   let g = 0; const h = S2.act(`${n} PG temporales`, (db, x) => { g = ponerTemporales(x, n); });
-  golpeFx('temp', vidaDe(S2.cur()).temp); haptic('light');
-  toast(g ? `<b>${vidaDe(S2.cur()).temp}</b> PG temporales.` : `Ya tenía ${vidaDe(S2.cur()).temp} temporales o más: no se suman.`, [undoBtn(S2, h)]);
+  golpeFx('temp', vidaDe(S2.cur()).temp); vibrar('light');
+  toast(g ? `<b>${vidaDe(S2.cur()).temp}</b> PG temporales.` : `Ya tenía ${vidaDe(S2.cur()).temp} temporales o más: no se suman.`, [botonDeshacer(S2, h)]);
 }
 function golpeFx(tipo, n = null, opts = {}) { golpe(tipo, n, { max: pgMaximo(S.cur()), ...opts }); }
 export function tirarSalvacionMuerte(S2) {
   tirarPrueba({ titulo: 'Salvación contra muerte', sub: 'd20 sin modificadores', bono: 0, tipo: 'muerte', critMin: rangoMuerte(S2.cur()),
     alTirar: (nat, total = nat) => { let r; S2.act(`Salvación contra muerte: ${total}${total !== nat ? ` (d20 ${nat})` : ''}`, (db, x) => { r = salvacionMuerte(x, nat >= rangoMuerte(x) ? 20 : nat, total); });
-      if (r === 'revive') { burstFrom($('#daOut'), { n: 50, speed: 5 }); return '<b class="ok">¡Recupera 1 PG y despierta!</b>'; }
+      if (r === 'revive') { chispasDesde($('#daOut'), { n: 50, speed: 5 }); return '<b class="ok">¡Recupera 1 PG y despierta!</b>'; }
       return { muere: '<b class="ko">Tercer fallo: muere.</b>', estable: '<b class="ok">Tercer éxito: queda estable.</b>', exito: 'Un éxito más.', fallo: nat === 1 ? 'Dos fallos.' : 'Un fallo más.' }[r] + ` ${pipsMuerte(S2.cur())}`; } });
 }
 
-export function estabilizar(S2) { S2.act('Estabilizado a 0 PG', (db, x) => { const v = vidaDe(x); v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; }); haptic('light'); }
+export function estabilizar(S2) { S2.act('Estabilizado a 0 PG', (db, x) => { const v = vidaDe(x); v.estable = true; v.muerte = { exitos: 0, fallos: 0 }; }); vibrar('light'); }
 export function revivir(S2) { S2.act('Vuelve a la vida con 1 PG', (db, x) => { revivirDom(x); }); }
-export function openEstados() { Q = ''; $('#esQ').value = ''; renderEstados(); openSheet(edlg()); }
+export function abrirEstados() { Q = ''; $('#esQ').value = ''; renderEstados(); abrirDialogo(edlg()); }
 let Q = '';
 const marca = (texto, q) => { const t = String(texto || ''); if (!q) return esc(t); const i = norm(t).indexOf(q); return i < 0 ? esc(t) : `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + q.length))}</mark>${esc(t.slice(i + q.length))}`; };
 function renderEstados() {
@@ -160,19 +160,19 @@ function renderEstados() {
 }
 export async function alternarEfecto(S2, k) {
   const c = S2.cur(), v = vidaDe(c), ya = v.efectos.find(x => x.k === k), e = EFECTO[k];
-  if (ya) { S2.act(`Termina ${e.nombre}`, (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.k !== k); if (e.maxPg) quitarMax(x, ya.id); }); haptic('light'); return; }
+  if (ya) { S2.act(`Termina ${e.nombre}`, (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.k !== k); if (e.maxPg) quitarMax(x, ya.id); }); vibrar('light'); return; }
   let n = 0;
   if (e.maxPg) { const r2 = await pedir({ titulo: e.nombre, texto: '¿Cuánto aumentan tus PG máximos? 5 con un espacio de nivel 2, y 5 más por cada nivel por encima.', valor: String(e.maxPg), tipo: 'number', min: 1, ok: 'Aplicar' }); n = parseInt(r2, 10); if (!(n > 0)) return; }
   S2.act(`Efecto: ${e.nombre}`, (db, x) => { ponerEfecto(x, k, { n }); });
   if (n) golpeFx('max', n); else golpeFx(e.bueno ? 'buff' : 'debuff');
-  haptic('light');
+  vibrar('light');
 }
 export function alternarEstado(S2, k) {
   const on = vidaDe(S2.cur()).estados.includes(k);
   const conj = !on && ESTADOS_INCAP.includes(k) ? S2.cur().play.conc : '';
   S2.act(`${on ? 'Deja de estar' : 'Queda'} ${NOMBRE_ESTADO[k].toLowerCase()}`, (db, x) => { const v = vidaDe(x); v.estados = on ? v.estados.filter(e => e !== k) : [...v.estados, k]; if (conj) soltarConc(x); });
   if (conj) toast(`${esc(NOMBRE_ESTADO[k])}: pierdes la concentración en <b>${esc(conj)}</b>.`);
-  haptic('light');
+  vibrar('light');
 }
 
 export function init(store) {
@@ -188,17 +188,17 @@ export function init(store) {
       const desde = pgActuales(S.cur()); S.act(`PG máximos +${n} (${nom})`, (db, x) => { aumentarMax(x, { nombre: nom, n }); }); render(); golpeFx('max', n, { desde, hasta: pgActuales(S.cur()) }); }
     if (['dano', 'curar', 'temp'].includes(a) && $('#vdCant')) { $('#vdCant').value = ''; $('#vdCant').focus({ preventScroll: true }); }
   });
-  on(body, 'click', '[data-vdmxq]', (e, b) => { const id = b.dataset.vdmxq; let m; const h = S.act('Termina un aumento de PG máximos', (db, x) => { m = quitarMax(x, id); x.vida.efectos = x.vida.efectos.filter(e2 => e2.id !== id); }); render(); if (m) toast(`${esc(m.nombre)} termina: tu máximo vuelve a ${pgMaximo(S.cur())}.`, [undoBtn(S, h)]); });
+  on(body, 'click', '[data-vdmxq]', (e, b) => { const id = b.dataset.vdmxq; let m; const h = S.act('Termina un aumento de PG máximos', (db, x) => { m = quitarMax(x, id); x.vida.efectos = x.vida.efectos.filter(e2 => e2.id !== id); }); render(); if (m) toast(`${esc(m.nombre)} termina: tu máximo vuelve a ${pgMaximo(S.cur())}.`, [botonDeshacer(S, h)]); });
   on(body, 'click', '[data-vddg]', (e, b) => {
     const dado = b.dataset.vddg, caras = parseInt(dado.slice(1), 10), t = rngCripto(caras); let g;
     const h = S.act(`Gasta un dado de golpe (${dado}): ${t}`, (db, x) => { g = gastarDadoGolpe(x, dado, t); });
-    if (!g) return; render(); golpeFx('cura', g.ganado, { desde: pgActuales(S.cur()) - g.ganado, hasta: pgActuales(S.cur()) }); haptic('light');
-    toast(`Dado de golpe ${dado}: <b>${t}</b> ${sgn(modOf(statsEfectivos(S.cur()).con))} = recupera <b>${g.ganado}</b> PG.`, [undoBtn(S, h)]);
+    if (!g) return; render(); golpeFx('cura', g.ganado, { desde: pgActuales(S.cur()) - g.ganado, hasta: pgActuales(S.cur()) }); vibrar('light');
+    toast(`Dado de golpe ${dado}: <b>${t}</b> ${sgn(modOf(statsEfectivos(S.cur()).con))} = recupera <b>${g.ganado}</b> PG.`, [botonDeshacer(S, h)]);
   });
   on(document, 'click', '[data-pip]', (e, b) => {
     const [tipo, i] = b.dataset.pip.split('|'), k = tipo === 'exito' ? 'exitos' : 'fallos';
     S.act(`Salvaciones contra muerte: ${tipo === 'exito' ? 'éxitos' : 'fallos'}`, (db, x) => { const v = vidaDe(x), m = v.muerte; m[k] = m[k] === +i + 1 ? +i : +i + 1; v.estable = m.exitos >= 3 && m.fallos < 3; if (m.fallos >= 3) marcarCaida(x, 'salvaciones'); });
-    haptic('light');
+    vibrar('light');
   });
   body.addEventListener('keydown', e => { if (['vdMxN', 'vdMxNom'].includes(e.target.id) && e.key === 'Enter') { e.preventDefault(); body.querySelector('[data-vd=mxadd]')?.click(); return; } if (e.target.id === 'vdCant' && e.key === 'Enter') { e.preventDefault(); const n = cant(); if (n) { danar(S, n); render(); e.target.value = ''; } } });
   S.subscribe(() => { if (dlg().open) { const f = document.activeElement?.id === 'vdCant', val = $('#vdCant')?.value; render(); if (f) { $('#vdCant').value = val; $('#vdCant').focus({ preventScroll: true }); } } if (edlg().open) renderEstados(); });
@@ -214,6 +214,6 @@ export function init(store) {
     S.act(`Efecto: ${nom}`, (db, x) => { const vv = vidaDe(x); vv.efectos = normEfectos([...vv.efectos, { nombre: nom, propio, rondas: parseInt(val('#efRd'), 10) || null }]); }); golpeFx('buff');
   });
   on(eb, 'click', '[data-esregla]', (e, b) => abrirTermino(b.dataset.esregla));
-  on(eb, 'click', '[data-es="inspiracion"]', () => { const v = vidaDe(S.cur()); S.act(v.inspiracion ? 'Gasta la inspiración heroica' : 'Gana inspiración heroica', (db, x) => { vidaDe(x).inspiracion = !vidaDe(x).inspiracion; }); haptic('light'); });
+  on(eb, 'click', '[data-es="inspiracion"]', () => { const v = vidaDe(S.cur()); S.act(v.inspiracion ? 'Gasta la inspiración heroica' : 'Gana inspiración heroica', (db, x) => { vidaDe(x).inspiracion = !vidaDe(x).inspiracion; }); vibrar('light'); });
   on(eb, 'click', '[data-esago]', (e, b) => { const d = +b.dataset.esago; S.act(`Agotamiento ${d > 0 ? '+1' : '−1'}`, (db, x) => { const v = vidaDe(x); v.agotamiento = Math.max(0, Math.min(6, v.agotamiento + d)); if (v.agotamiento >= 6) marcarCaida(x, 'agotamiento'); }); });
 }

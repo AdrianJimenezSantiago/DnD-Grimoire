@@ -5,7 +5,7 @@ import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/criatu
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet } from '../componentes/dialog.js';
+import { abrirDialogo } from '../componentes/dialog.js';
 import { toast } from '../componentes/toast.js';
 import { abrirCriatura } from './biblioteca.js';
 
@@ -14,10 +14,10 @@ const dlg = () => $('#formasDlg');
 const VDS = [0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 const TIT = { salvaje: 'Forma salvaje', polimorfar: 'Polimorfar', verdadero: 'Polimorfar verdadero' };
 
-export function openFormas(modo = 'salvaje') {
+export function abrirFormas(modo = 'salvaje') {
   const ch = S.cur(); if (!ch) return;
   F = { modo, q: '', abrirMano: false, solo: modo === 'salvaje' && (ch.formas || []).length > 0, vd: modo === 'salvaje' ? limiteFormaSalvaje(ch).vd : Math.min(20, parseInt(ch.nivel, 10) || 1) };
-  pintar(); openSheet(dlg());
+  pintar(); abrirDialogo(dlg());
 }
 const mano = ch => ch.formasMano || [];
 const numConocidas = ch => (ch.formas || []).length + mano(ch).length;

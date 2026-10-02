@@ -1,5 +1,5 @@
 // Adornos mágicos de la interfaz: runas y sellos en SVG, ondas al tocar botones y portales al abrir diálogos.
-import { reducedMotion, burst } from './fx.js';
+import { movimientoReducido, chispas } from './fx.js';
 
 const RUNAS = [
   'M0 0v14M0 3l7-3M0 7l7-3', 'M5 0v14M0 4l5 3 5-3', 'M0 0v14M10 0v14M0 7h10', 'M0 0l5 7-5 7M5 7h5',
@@ -26,7 +26,7 @@ export function runaSvg({ n = 16, lados = 6, cls = '', semillaInicial = 7 } = {}
 }
 
 export function sello(x, y, { color = 'var(--gold)', size = 160, dur = 900, lados = 6, giro = 40 } = {}) {
-  if (reducedMotion()) return;
+  if (movimientoReducido()) return;
   const el = document.createElement('div');
   el.className = 'sello-fx'; el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;color:${color}`;
   el.innerHTML = runaSvg({ lados, semillaInicial: (Math.random() * 1000) | 0 });
@@ -52,7 +52,7 @@ function pintarOnda(b, x, y) {
 // Con el dedo, la onda espera un instante: si el gesto resulta ser un desplazamiento no se crea nada y el scroll
 // arranca sin tocar el DOM ni medir. Si es un toque, aparece igual (al soltar o a los 70 ms, lo que llegue antes).
 function onda(e) {
-  if (reducedMotion() || e.button > 0) return;
+  if (movimientoReducido() || e.button > 0) return;
   const b = e.target.closest('button, .castzone, .ses, [role="button"]');
   if (!b || b.disabled || b.matches(SIN_ONDA)) return;
   const x = e.clientX, y = e.clientY, id = e.pointerId;
@@ -68,7 +68,7 @@ function onda(e) {
 }
 
 function inclinar(e) {
-  if (e.pointerType !== 'mouse' || reducedMotion()) return;
+  if (e.pointerType !== 'mouse' || movimientoReducido()) return;
   const c = e.target.closest?.('.lcard'); if (!c) return;
   const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   c.style.setProperty('--rx', `${(0.5 - y) * 8}deg`); c.style.setProperty('--ry', `${(x - 0.5) * 10}deg`);
@@ -83,17 +83,17 @@ export function portalDesde(x, y) {
 }
 
 export function marcarNota(id, efecto) {
-  if (reducedMotion()) return;
+  if (movimientoReducido()) return;
   requestAnimationFrame(() => document.querySelectorAll(`[data-nt="${CSS.escape(id)}"]`).forEach(li => {
     li.classList.add(`fx-${efecto}`); setTimeout(() => li.classList.remove(`fx-${efecto}`), 1100);
-    if (efecto === 'nueva') { const ic = li.querySelector('.nt-ico'); if (ic) { const r = ic.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { color: tinta(), n: 14, speed: 1.8, up: .6, life: 700, size: 1.6, gravity: .05 }); } }
+    if (efecto === 'nueva') { const ic = li.querySelector('.nt-ico'); if (ic) { const r = ic.getBoundingClientRect(); chispas(r.left + r.width / 2, r.top + r.height / 2, { color: tinta(), n: 14, speed: 1.8, up: .6, life: 700, size: 1.6, gravity: .05 }); } }
   }));
 }
 export function quemar(li) {
-  if (!li || reducedMotion()) return Promise.resolve();
+  if (!li || movimientoReducido()) return Promise.resolve();
   li.classList.add('fx-arde');
   const r = li.getBoundingClientRect();
-  for (let i = 0; i < 5; i++) setTimeout(() => burst(r.left + r.width * (i / 5 + .1), r.top + r.height / 2, { color: '#FF8A3D', n: 8, speed: 1.4, up: 2.2, life: 800, size: 1.8, gravity: -.04 }), i * 50);
+  for (let i = 0; i < 5; i++) setTimeout(() => chispas(r.left + r.width * (i / 5 + .1), r.top + r.height / 2, { color: '#FF8A3D', n: 8, speed: 1.4, up: 2.2, life: 800, size: 1.8, gravity: -.04 }), i * 50);
   return new Promise(res => setTimeout(res, 420));
 }
 export function acentoHex(l = 64) {

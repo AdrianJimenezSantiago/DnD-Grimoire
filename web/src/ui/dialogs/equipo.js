@@ -16,14 +16,14 @@ import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { avatarHtml } from '../componentes/avatar.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { pedir } from '../componentes/modal.js';
-import { burstFrom, reducedMotion } from '../animaciones/fx.js';
+import { chispasDesde, movimientoReducido } from '../animaciones/fx.js';
 import { golpe } from '../animaciones/golpes.js';
-import { haptic } from '../../platform/native.js';
-import { stepResource } from '../../app/acciones.js';
-import { RAR_K, TIPO_I, abrirObjeto, openBiblioteca } from './biblioteca.js';
+import { vibrar } from '../../platform/native.js';
+import { pasoRecurso } from '../../app/acciones.js';
+import { RAR_K, TIPO_I, abrirObjeto, abrirBiblioteca } from './biblioteca.js';
 
 let S;
 const PREF_VISTA = 'grimorio-inv-vista';
@@ -372,19 +372,19 @@ function pintarInspector(ch = S.cur()) {
 }
 // Los efectos se lanzan tras repintar, sobre el elemento nuevo
 function efectoPendiente() {
-  const fx = V.fx; V.fx = null; if (!fx || reducedMotion()) return;
+  const fx = V.fx; V.fx = null; if (!fx || movimientoReducido()) return;
   requestAnimationFrame(() => {
     for (const { sel, cls, chispas = true, color } of [].concat(fx)) {
       const el = dlg().querySelector(sel); if (!el) continue;
       el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
       setTimeout(() => el.classList.remove(cls), 1100);
-      if (chispas) burstFrom(el, { color: color || hexDe(el, getComputedStyle(el).getPropertyValue('--rar').trim() || 'var(--gold)'), n: 26, speed: 3, up: 1.4, life: 850, size: 2 });
+      if (chispas) chispasDesde(el, { color: color || hexDe(el, getComputedStyle(el).getPropertyValue('--rar').trim() || 'var(--gold)'), n: 26, speed: 3, up: 1.4, life: 850, size: 2 });
     }
   });
 }
-export function openEquipo(sel = null) {
-  if (!S.cur()) return; V.form = null; V.sel = sel; V.hueco = null; render(); openSheet(dlg());
-  const b = $('#eqBody'); if (reducedMotion()) return;
+export function abrirEquipo(sel = null) {
+  if (!S.cur()) return; V.form = null; V.sel = sel; V.hueco = null; render(); abrirDialogo(dlg());
+  const b = $('#eqBody'); if (movimientoReducido()) return;
   b.classList.add('fx-abre'); clearTimeout(b.__fxT); b.__fxT = setTimeout(() => b.classList.remove('fx-abre'), 900);
 }
 
@@ -395,29 +395,29 @@ function soltarAviso(r) {
 }
 function equiparYa(id, mano = '') {
   let r; const h = S.edit((db, ch) => { r = equipar(ch, id, mano); }); if (!r) return;
-  haptic(); V.sel = null; V.hueco = null;
+  vibrar(); V.sel = null; V.hueco = null;
   const k = r.o.armadura && !esEscudo(r.o) ? 'armadura' : r.o.mano === 'ambas' ? 'principal' : r.o.mano;
   V.fx = [{ sel: `.inv-hueco.h-${k}`, cls: 'fx-forja' }, ...r.quitados.map(o => ({ sel: `[data-oid="${o.id}"]`, cls: 'fx-vuelve', chispas: false }))];
   repintar();
-  toast(`<b>${esc(r.o.nombre)}</b>: ${esc(r.o.armadura && !esEscudo(r.o) ? 'puesta' : donde(r.o).toLowerCase())}.${soltarAviso(r)}`, [undoBtn(S, h)]);
+  toast(`<b>${esc(r.o.nombre)}</b>: ${esc(r.o.armadura && !esEscudo(r.o) ? 'puesta' : donde(r.o).toLowerCase())}.${soltarAviso(r)}`, [botonDeshacer(S, h)]);
 }
 function sintonizarYa(id) {
   const motivo = motivoSintonia(S.cur(), id);
   if (motivo) { toast(`${esc(motivo)}${/Ya hay/.test(motivo) ? ' (sintonizar lleva un descanso corto)' : ''}`); return; }
   let o; const h = S.edit((db, ch) => { alternarSintonia(ch, id); o = buscar(ch, id); });
-  haptic(); V.hueco = null;
+  vibrar(); V.hueco = null;
   if (o.sintonizado) { V.sel = null; V.fx = { sel: `.inv-gema[data-hid="${o.id}"]`, cls: 'fx-sinto' }; }
   repintar();
-  toast(`<b>${esc(o.nombre)}</b> ${o.sintonizado ? 'sintonizado' : 'ya no está sintonizado'}.`, [undoBtn(S, h)]);
+  toast(`<b>${esc(o.nombre)}</b> ${o.sintonizado ? 'sintonizado' : 'ya no está sintonizado'}.`, [botonDeshacer(S, h)]);
 }
 function usarYa(id) {
   const ch0 = S.cur(), o0 = buscar(ch0, id), uso = usoDe(o0); if (!uso || (uso.accion !== 'leer' && !o0?.cantidad)) return;
   const el = dlg().querySelector(`[data-oid="${id}"]`) || dlg().querySelector('.inv-insp');
   let r; const h = S.act(`${uso.accion === 'leer' ? 'Lee' : uso.accion === 'beber' ? 'Bebe' : 'Usa'} ${o0.nombre}`, (db, ch) => { r = usarObjeto(ch, id); });
   if (!r) return;
-  haptic('light');
+  vibrar('light');
   if (r.curado || r.tirada && !r.dano) golpe('cura', r.curado);
-  if (el && !reducedMotion()) burstFrom(el, r.curado ? { color: '#E2566A', n: 34, speed: 3.4, up: 2.4, life: 1000 } : { color: '#7FD1A8', n: 18, speed: 2.4, up: 2, life: 800 });
+  if (el && !movimientoReducido()) chispasDesde(el, r.curado ? { color: '#E2566A', n: 34, speed: 3.4, up: 2.4, life: 1000 } : { color: '#7FD1A8', n: 18, speed: 2.4, up: 2, life: 800 });
   repintar();
   const partes = [];
   if (r.tirada && !r.dano) partes.push(`${esc(curacionDe(o0))} (${esc(r.tirada.detalle)}) = <b>${r.tirada.total}</b>. ${r.curado ? `Recuperas <b>${r.curado}</b> PG.` : 'Ya estabas al máximo.'}`);
@@ -426,7 +426,7 @@ function usarYa(id) {
   if (r.texto) partes.push(esc(r.texto));
   if (r.quitados.length) partes.push(`Ya no estás ${esc(r.quitados.join(', '))}.`);
   if (uso.accion === 'usar' && !partes.length) partes.push(r.o.cantidad ? `Quedan ${r.o.cantidad}.` : 'Se ha acabado.');
-  toast(`${uso.accion === 'leer' ? 'Lees' : uso.accion === 'beber' ? 'Bebes' : 'Usas'} <b>${esc(o0.nombre)}</b>. ${partes.join(' ')}`, [undoBtn(S, h)]);
+  toast(`${uso.accion === 'leer' ? 'Lees' : uso.accion === 'beber' ? 'Bebes' : 'Usas'} <b>${esc(o0.nombre)}</b>. ${partes.join(' ')}`, [botonDeshacer(S, h)]);
 }
 async function venderYa(id) {
   const o0 = buscar(S.cur(), id); if (!o0) return;
@@ -437,24 +437,24 @@ async function venderYa(id) {
   }
   const el = dlg().querySelector('.inv-insp') || dlg().querySelector(`[data-oid="${id}"]`);
   let r; const h = S.act(`Vende ${n > 1 ? `${n} × ` : ''}${o0.nombre}`, (db, ch) => { r = venderObjeto(ch, id, n); });
-  if (el && !reducedMotion()) burstFrom(el, { color: '#F0C060', n: 30, speed: 3.2, up: 2.2, life: 950 });
-  haptic(); if (!buscar(S.cur(), id)) V.sel = null;
+  if (el && !movimientoReducido()) chispasDesde(el, { color: '#F0C060', n: 30, speed: 3.2, up: 2.2, life: 950 });
+  vibrar(); if (!buscar(S.cur(), id)) V.sel = null;
   V.fx = { sel: '.inv-mon', cls: 'fx-tintineo', chispas: false };
-  repintar(); toast(`Vendes ${n > 1 ? `${n} × ` : ''}<b>${esc(o0.nombre)}</b> por <b>${po(r.precio)}</b>.`, [undoBtn(S, h)]);
+  repintar(); toast(`Vendes ${n > 1 ? `${n} × ` : ''}<b>${esc(o0.nombre)}</b> por <b>${po(r.precio)}</b>.`, [botonDeshacer(S, h)]);
 }
 async function monedasYa(que) {
   if (que === 'juntar') {
     let n = 0; const h = S.edit((db, ch) => { n = juntarMonedas(ch); });
     V.fx = { sel: '.inv-monedero', cls: 'fx-tintineo', chispas: false }; repintar();
-    return toast(n ? `Monedas juntadas: <b>${n}</b> menos en la bolsa.` : 'Ya estaban juntas.', n ? [undoBtn(S, h)] : []);
+    return toast(n ? `Monedas juntadas: <b>${n}</b> menos en la bolsa.` : 'Ya estaban juntas.', n ? [botonDeshacer(S, h)] : []);
   }
   const v = await pedir({ titulo: que === 'pagar' ? 'Pagar' : 'Cobrar', texto: que === 'pagar' ? `¿Cuánto pagas, en piezas de oro? Tienes ${po(valorMonedas(S.cur()))}. Puedes escribir decimales: 0,5 son 5 pp.` : '¿Cuánto recibes, en piezas de oro? Entra como oro, plata y cobre.', tipo: 'text', ok: que === 'pagar' ? 'Pagar' : 'Cobrar' });
   const x = parseFloat(String(v ?? '').replace(',', '.')); if (!(x > 0)) return;
   if (que === 'pagar' && enCobre(S.cur()) < Math.round(x * 100)) return toast(`No te llega: tienes ${po(valorMonedas(S.cur()))}.`);
   let r; const h = S.act(`${que === 'pagar' ? 'Paga' : 'Cobra'} ${po(x)}`, (db, ch) => { r = que === 'pagar' ? pagar(ch, x) : cobrar(ch, x); });
   if (!r) return;
-  haptic(); V.fx = { sel: '.inv-mon', cls: 'fx-tintineo', color: '#F0C060' };
-  repintar(); toast(que === 'pagar' ? `Pagas <b>${po(x)}</b>${r.cambio ? ` y te devuelven ${po(r.cambio)}` : ''}. Te quedan ${po(valorMonedas(S.cur()))}.` : `Cobras <b>${po(x)}</b>. Tienes ${po(valorMonedas(S.cur()))}.`, [undoBtn(S, h)]);
+  vibrar(); V.fx = { sel: '.inv-mon', cls: 'fx-tintineo', color: '#F0C060' };
+  repintar(); toast(que === 'pagar' ? `Pagas <b>${po(x)}</b>${r.cambio ? ` y te devuelven ${po(r.cambio)}` : ''}. Te quedan ${po(valorMonedas(S.cur()))}.` : `Cobras <b>${po(x)}</b>. Tienes ${po(valorMonedas(S.cur()))}.`, [botonDeshacer(S, h)]);
 }
 let repintar = () => {};
 
@@ -464,7 +464,7 @@ export function init(store) {
   const capa = document.createElement('div'); capa.id = 'eqInsp'; capa.className = 'inv-capa'; d.append(capa);
   repintar = () => { const b = $('#eqBody'), y = b.scrollTop; render(); b.scrollTop = y; };
   const cerrarInsp = () => { V.sel = null; V.hueco = null; pintarInspector(); };
-  on(d, 'click', '[data-eq="bib"]', () => openBiblioteca('objetos'));
+  on(d, 'click', '[data-eq="bib"]', () => abrirBiblioteca('objetos'));
   on(d, 'click', '[data-eqver]', (e, b) => abrirObjeto(b.dataset.eqver));
   on(d, 'click', '[data-invcat]', (e, b) => { V.cat = b.dataset.invcat; repintar(); });
   on(d, 'click', '[data-vista]', (e, b) => { V.vista = b.dataset.vista; try { localStorage.setItem(PREF_VISTA, V.vista); } catch { /* sin almacenamiento */ } repintar(); });
@@ -476,22 +476,22 @@ export function init(store) {
     if (a === 'cerrar') return cerrarInsp();
     if (a === 'vaciar') {
       const ch = S.cur(), x = V.hueco === 'armadura' ? armaduraPuesta(ch) : manos(ch)[V.hueco]; if (!x) return;
-      const h = S.edit((db, c) => desequipar(c, x.id)); V.hueco = null; haptic(); V.fx = { sel: `[data-oid="${x.id}"]`, cls: 'fx-vuelve', chispas: false };
-      repintar(); return toast(`<b>${esc(x.nombre)}</b> vuelve a la mochila.`, [undoBtn(S, h)]);
+      const h = S.edit((db, c) => desequipar(c, x.id)); V.hueco = null; vibrar(); V.fx = { sel: `[data-oid="${x.id}"]`, cls: 'fx-vuelve', chispas: false };
+      repintar(); return toast(`<b>${esc(x.nombre)}</b> vuelve a la mochila.`, [botonDeshacer(S, h)]);
     }
     if (a === 'equipar') return equiparYa(id, b.dataset.mano || '');
-    if (a === 'desequipar') { let o; const h = S.edit((db, ch) => { o = desequipar(ch, id); }); haptic(); V.sel = null; V.fx = { sel: `[data-oid="${id}"]`, cls: 'fx-vuelve', chispas: false }; repintar(); return toast(`<b>${esc(o.nombre)}</b> vuelve a la mochila.`, [undoBtn(S, h)]); }
+    if (a === 'desequipar') { let o; const h = S.edit((db, ch) => { o = desequipar(ch, id); }); vibrar(); V.sel = null; V.fx = { sel: `[data-oid="${id}"]`, cls: 'fx-vuelve', chispas: false }; repintar(); return toast(`<b>${esc(o.nombre)}</b> vuelve a la mochila.`, [botonDeshacer(S, h)]); }
     if (a === 'sintonia') return sintonizarYa(id);
     if (a === 'usar') return usarYa(id);
     if (a === 'vender') return venderYa(id);
     if (a === 'accion') { Promise.resolve(accionObjeto(S, id, b.dataset.acc)).then(() => repintar()); return; }
-    if (a === 'usodia') { Promise.resolve(stepResource(S, b.dataset.rid, +b.dataset.d)).then(() => repintar()); return; }
-    if (a === 'carga') { const o = buscar(S.cur(), id); if (o?.rasgo) Promise.resolve(stepResource(S, o.rasgo, +b.dataset.d)).then(() => repintar()); return; }
-    if (a === 'disparo') { const mu = municionDe(S.cur(), buscar(S.cur(), id)); if (!mu) return; let x; const h = S.edit((db, ch) => { x = cambiarCantidad(ch, mu.id, -1); }); haptic('light'); repintar(); return toast(`<b>${esc(x.nombre)}</b>: quedan ${x.cantidad}.`, [undoBtn(S, h)]); }
+    if (a === 'usodia') { Promise.resolve(pasoRecurso(S, b.dataset.rid, +b.dataset.d)).then(() => repintar()); return; }
+    if (a === 'carga') { const o = buscar(S.cur(), id); if (o?.rasgo) Promise.resolve(pasoRecurso(S, o.rasgo, +b.dataset.d)).then(() => repintar()); return; }
+    if (a === 'disparo') { const mu = municionDe(S.cur(), buscar(S.cur(), id)); if (!mu) return; let x; const h = S.edit((db, ch) => { x = cambiarCantidad(ch, mu.id, -1); }); vibrar('light'); repintar(); return toast(`<b>${esc(x.nombre)}</b>: quedan ${x.cantidad}.`, [botonDeshacer(S, h)]); }
     if (a === 'alijo') {
-      let o; const h = S.edit((db, ch) => { o = alternarGuardado(ch, id); }); haptic();
+      let o; const h = S.edit((db, ch) => { o = alternarGuardado(ch, id); }); vibrar();
       V.fx = { sel: `[data-oid="${id}"]`, cls: 'fx-vuelve', chispas: false }; V.sel = null;
-      repintar(); return toast(`<b>${esc(o.nombre)}</b> ${o.guardado ? 'se queda en el alijo: ya no pesa' : 'vuelve a la mochila'}.`, [undoBtn(S, h)]);
+      repintar(); return toast(`<b>${esc(o.nombre)}</b> ${o.guardado ? 'se queda en el alijo: ya no pesa' : 'vuelve a la mochila'}.`, [botonDeshacer(S, h)]);
     }
   });
   on(d, 'click', '[data-inv]', (e, b) => {
@@ -505,20 +505,20 @@ export function init(store) {
       const id = V.form.id; let nuevo;
       const h = S.edit((db, ch) => { const eq = equipoDe(ch);
         if (id) { const i = eq.objetos.findIndex(x => x.id === id); if (i >= 0) eq.objetos[i] = normObjeto({ ...eq.objetos[i], ...o, id }); } else nuevo = anadirComun(ch, o); });
-      V.form = null; haptic(); if (nuevo) V.fx = { sel: `[data-oid="${nuevo.id}"]`, cls: 'fx-nuevo' };
+      V.form = null; vibrar(); if (nuevo) V.fx = { sel: `[data-oid="${nuevo.id}"]`, cls: 'fx-nuevo' };
       repintar();
-      toast(`<b>${esc(o.nombre)}</b> ${id ? 'guardado' : 'añadido al inventario'}.`, [undoBtn(S, h)]);
+      toast(`<b>${esc(o.nombre)}</b> ${id ? 'guardado' : 'añadido al inventario'}.`, [botonDeshacer(S, h)]);
     }
   });
   on(d, 'click', '[data-invedit]', (e, b) => { const o = buscar(S.cur(), b.dataset.invedit); if (!o) return;
     V.sel = null; V.hueco = null; V.form = { id: o.id, o: JSON.parse(JSON.stringify(o)) }; render(); $('#eqBody').scrollTop = $('.inv-form')?.offsetTop - 12 || 0; $('#ivNom')?.focus({ preventScroll: true }); });
-  on(d, 'click', '[data-inveq]', (e, b) => { const o = buscar(S.cur(), b.dataset.inveq); if (!o) return; if (o.equipado) { S.edit((db, ch) => desequipar(ch, o.id)); haptic(); repintar(); } else equiparYa(o.id); });
+  on(d, 'click', '[data-inveq]', (e, b) => { const o = buscar(S.cur(), b.dataset.inveq); if (!o) return; if (o.equipado) { S.edit((db, ch) => desequipar(ch, o.id)); vibrar(); repintar(); } else equiparYa(o.id); });
   on(d, 'click', '[data-invcant]', (e, b) => { const [id, n] = b.dataset.invcant.split('|'); S.edit((db, ch) => cambiarCantidad(ch, id, +n)); repintar(); });
   on(d, 'click', '[data-invusar]', (e, b) => usarYa(b.dataset.invusar));
   on(d, 'click', '[data-eqsin]', (e, b) => sintonizarYa(b.dataset.eqsin));
   on(d, 'click', '[data-eqdel]', (e, b) => {
     let o; const h = S.edit((db, ch) => { o = quitarObjeto(ch, b.dataset.eqdel); });
-    V.sel = null; repintar(); toast(`<b>${esc(o?.nombre || 'Objeto')}</b> quitado.`, [undoBtn(S, h)]);
+    V.sel = null; repintar(); toast(`<b>${esc(o?.nombre || 'Objeto')}</b> quitado.`, [botonDeshacer(S, h)]);
   });
   on(d, 'click', '[data-elegir="objeto"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirObjetoComun(); if (v != null) ponerValor(inp, v); });
   // Arrastrar de la mochila al maniquí (con ratón)

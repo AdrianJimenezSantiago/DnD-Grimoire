@@ -1,22 +1,22 @@
 // Asistente de creación y edición de personaje, por pasos en el orden del Manual del Jugador: clase, origen,
 // características, competencias, dotes, conjuros y equipo. Se carga aparte, con la gestión de personajes (app/asistentes.js).
 import { clamp, clone, esc, joinY, norm } from '../../core/util.js';
-import { ABILS, ABIL_NAME, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase, nivelTotal } from '../../domain/reglas/reglas2024.js';
+import { CARACTERISTICAS, NOMBRE_CAR, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase, nivelTotal } from '../../domain/reglas/reglas2024.js';
 import { reglas } from '../../domain/clases/rasgos.js';
-import { levelDiff, conjurosPendientes, anadirPendientes } from '../../domain/clases/progresion.js';
-import { blankChar, normChar, THEO } from '../../domain/personaje/modelo.js';
+import { diferenciaNivel, conjurosPendientes, anadirPendientes } from '../../domain/clases/progresion.js';
+import { personajeVacio, normPersonaje, THEO } from '../../domain/personaje/modelo.js';
 import { $, on } from '../componentes/dom.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
-import { reducedMotion, burstFrom, pop } from '../animaciones/fx.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
+import { movimientoReducido, chispasDesde, pop } from '../animaciones/fx.js';
 import { confirmar } from '../componentes/modal.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { temaDe, gi } from '../componentes/tema.js';
 import { paleta } from '../../domain/presentacion/paleta.js';
-import { allSpellItems, itemToSid, itemMeta, listFilter, compendio } from '../../domain/conjuros/catalogo.js';
+import { itemsConjuros, idDeItem, metaItem, filtroLista, compendio } from '../../domain/conjuros/catalogo.js';
 import { subclasesDe, biblioteca } from '../../domain/libros/biblioteca.js';
-import { openRetrato } from './retrato.js';
+import { abrirRetrato } from './retrato.js';
 import { campoSubclase, campoClase, initSubclases, lineaClase } from '../selectores/subclases.js';
 import { pgMaximoCalculado } from '../../domain/combate/vida.js';
 import { campoElegible, ponerValor, elegirDote, elegirEspecie, elegirTrasfondo, elegirEstilo, ESPECIE_BASE } from '../selectores/elecciones.js';
@@ -25,7 +25,7 @@ import { CLASES_INFO, TEMAS } from '../../domain/clases/clases2024.js';
 import { METODOS, COSTE, PUNTOS, costeCompra, tirarSeis, prioridad, repartoSugerido, caracteristicasTrasfondo, limpiarBonos, estadoBonos, bonosSugeridos, conBonos, repartoHabilidades, completarHabilidades, doteRepetida, mejorasHasta, versatilPendiente, fuentesExtra } from '../../domain/personaje/creacion.js';
 import { LISTAS_HERRAMIENTA, IDIOMAS, IDIOMAS_RAROS, extraTrasfondo, extraClase, eleccionesHerramienta, herramientasDe, equipoInicial, tirarOro, datosObjeto, entrenamientoDe } from '../../domain/origen/origen.js';
 import { anadirComun, equipoDe } from '../../domain/equipo/equipo.js';
-import { previewSpell } from './conjuro.js';
+import { verConjuro } from './conjuro.js';
 import { estadoEstilo, trucosAlternativa, estiloDe, esAlternativa } from '../../domain/clases/estilos.js';
 import { ORDENES, ordenesPendientes } from '../../domain/clases/ordenes.js';
 import { dotesConConjuros, filtroEleccion } from '../../domain/origen/conjurosDote.js';
@@ -49,7 +49,7 @@ const lib = () => biblioteca();
 
 function cargarCar(c) {
   const cr = c.creacion;
-  if (cr && ABILS.every(([k]) => conBonos(cr.base, cr.bonos)[k] === c.stats[k]))
+  if (cr && CARACTERISTICAS.every(([k]) => conBonos(cr.base, cr.bonos)[k] === c.stats[k]))
     return { metodo: cr.metodo, base: { ...cr.base }, bonos: { ...cr.bonos }, tiradas: [...cr.tiradas], dados: null, modo: Object.values(cr.bonos).includes(2) || !Object.keys(cr.bonos).length ? '21' : '111', sel: null, auto: false };
   if (!formId) return { metodo: 'matriz', base: repartoSugerido(c.clase), bonos: {}, tiradas: [], dados: null, modo: '21', sel: null, auto: true };
   return { metodo: 'libre', base: { ...c.stats }, bonos: {}, tiradas: [], dados: null, modo: '21', sel: null, auto: false, heredado: true };
@@ -57,9 +57,9 @@ function cargarCar(c) {
 const permitidas = d => caracteristicasTrasfondo(d.trasfondo, lib().trasfondos);
 const hex = (h, s, l) => { s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); }; return `#${f(0)}${f(8)}${f(4)}`; };
 
-export function openCharForm(id, { clase = '' } = {}) {
+export function abrirCreacion(id, { clase = '' } = {}) {
   formId = id || null; conjAbierto = false; CREANDO = !id; PASO = 0; VISTOS = new Set([0]); TEMA = '';
-  const c = id ? S.db.chars.find(x => x.id === id) : blankChar({ campana: S.cur()?.campana || THEO.campana });
+  const c = id ? S.db.chars.find(x => x.id === id) : personajeVacio({ campana: S.cur()?.campana || THEO.campana });
   $('#charTitle').textContent = id ? `Editar a ${c.nombre || 'personaje'}` : 'Nuevo personaje';
   $('#charErr').textContent = '';
   const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(L => `<label class="f">Nv. ${L}<input type="number" inputmode="numeric" min="0" max="9" id="f_e${L}" value="${(c.espacios || {})[L] || ''}" placeholder="0"></label>`).join('');
@@ -115,14 +115,14 @@ export function openCharForm(id, { clase = '' } = {}) {
   pintarMulticlase(); irA(0, true);
   sync(true); FVISTAS = new Set(fuentesConClave(readForm()).map(f => f.clave)); VVISTAS = new Set(CREANDO ? [] : variantesPendientes(readForm()));
   if (!id && CLASES[clase]) cambiarClase(clase);
-  openSheet(charDlg());
+  abrirDialogo(charDlg());
 }
 
 function irA(i, primera = false) {
   const antes = PASO; PASO = clamp(i, 0, PASOS.length - 1); VISTOS.add(PASO);
   document.querySelectorAll('#charForm .cc-paso').forEach((p, k) => {
     p.hidden = k !== PASO;
-    if (k === PASO && !primera && !reducedMotion()) { p.classList.remove('fx-der', 'fx-izq'); void p.offsetWidth; p.classList.add(PASO >= antes ? 'fx-der' : 'fx-izq'); }
+    if (k === PASO && !primera && !movimientoReducido()) { p.classList.remove('fx-der', 'fx-izq'); void p.offsetWidth; p.classList.add(PASO >= antes ? 'fx-der' : 'fx-izq'); }
   });
   if (!primera) { $('#charForm').scrollTo?.({ top: 0 }); pintarPasos(readForm()); }
   if (PASOS[PASO][0] === 'origen' && CREANDO && !$('#f_nombre').value) requestAnimationFrame(() => { if (!charDlg().querySelector('.cc-paso:not([hidden]) :is(input, textarea):focus')) $('#f_nombre')?.focus(); });
@@ -214,14 +214,14 @@ function pintarOrigenExtra(d) {
   $('#f_origenExtra').innerHTML = h;
 }
 function chooser(key, n, filtro, titulo) {
-  const all = allSpellItems(S.db), sel = CONJ[key] ||= [], otros = new Set(Object.entries(CONJ).filter(([k]) => k !== key).flatMap(([, v]) => v)), q = norm(CQ[key] || ''), lleno = sel.length >= n;
+  const all = itemsConjuros(S.db), sel = CONJ[key] ||= [], otros = new Set(Object.entries(CONJ).filter(([k]) => k !== key).flatMap(([, v]) => v)), q = norm(CQ[key] || ''), lleno = sel.length >= n;
   const items = all.filter(it => !otros.has(it.id) && filtro(it) && (!q || norm(it.es).includes(q) || norm(it.en || '').includes(q)))
     .sort((a, b) => (sel.includes(b.id) - sel.includes(a.id)) || a.l - b.l || a.es.localeCompare(b.es, 'es'));
   return `<section class="fsec cc-conj"><div class="ch-head"><h3>${titulo}</h3><b class="ch-count ${lleno ? 'ok' : ''}">${sel.length} de ${n}</b></div>
     <input type="search" data-ccq="${key}" placeholder="Buscar" value="${esc(CQ[key] || '')}" aria-label="Buscar conjuro">
     <div class="cc-lista">${items.length ? items.map(it => { const on = sel.includes(it.id);
       return `<div class="pitem ${on ? 'on' : ''}"><label class="pmain"><input type="checkbox" data-ccchk="${key}" value="${esc(it.id)}" ${on ? 'checked' : ''} ${!on && lleno ? 'disabled' : ''}>
-        <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${itemMeta(it)}</span></span></label>
+        <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${metaItem(it)}</span></span></label>
         <button type="button" class="pview" data-ccver="${esc(it.id)}">Ver</button></div>`; }).join('') : '<p class="pempty">No hay conjuros que encajen.</p>'}</div></section>`;
 }
 // Conjuros de las dotes (Iniciado en la magia, Influencia feérica…): los fijos se añaden solos y el resto se eligen aquí
@@ -238,13 +238,13 @@ function pintarConj(d) {
   if (!CREANDO) { $('#f_conj').innerHTML = `<div class="cc-aviso">Tus conjuros se gestionan en el libro de la hoja, con «Editar conjuros». ${P.c ? `Preparas ${P.maxPrep} y sabes ${P.maxCant} trucos.` : ''}</div>`; return; }
   if (!P.c) { $('#f_conj').innerHTML = `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>${conjurosDotesHtml(d)}`; return; }
   const lista = P.lista;
-  let h = `<div class="cc-aviso ok">Lanzas conjuros de ${esc(lista.toLowerCase())} con ${esc(ABIL_NAME[P.apKey])}: CD ${P.cd}, ataque ${sgn(P.atk)}. Espacios hasta nivel ${P.maxSlot}.</div>`;
-  if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && listFilter(it, lista), `Trucos (${c.trucos})`);
-  if (c.libro) h += chooser('libro', c.libro, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, 'Mago'), `Libro de conjuros (${c.libro})`)
+  let h = `<div class="cc-aviso ok">Lanzas conjuros de ${esc(lista.toLowerCase())} con ${esc(NOMBRE_CAR[P.apKey])}: CD ${P.cd}, ataque ${sgn(P.atk)}. Espacios hasta nivel ${P.maxSlot}.</div>`;
+  if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && filtroLista(it, lista), `Trucos (${c.trucos})`);
+  if (c.libro) h += chooser('libro', c.libro, it => it.l > 0 && it.l <= P.maxSlot && filtroLista(it, 'Mago'), `Libro de conjuros (${c.libro})`)
     + `<p class="hint">De ellos preparas ${P.maxPrep}: los primeros que elijas quedan preparados, y los cambias en la hoja tras un descanso largo.</p>`;
-  for (const a of trucosAlternativa(d)) h += chooser('estilo', c.estilo, it => it.l === 0 && listFilter(it, a.lista), `Trucos de ${a.nombre} (${c.estilo})`)
+  for (const a of trucosAlternativa(d)) h += chooser('estilo', c.estilo, it => it.l === 0 && filtroLista(it, a.lista), `Trucos de ${a.nombre} (${c.estilo})`)
     + `<p class="hint">Cuentan como conjuros de ${esc(d.clase.toLowerCase())} y no ocupan preparados.</p>`;
-  if (c.prep) h += chooser('prep', c.prep, it => it.l > 0 && it.l <= P.maxSlot && listFilter(it, lista), `Conjuros preparados (${c.prep})`);
+  if (c.prep) h += chooser('prep', c.prep, it => it.l > 0 && it.l <= P.maxSlot && filtroLista(it, lista), `Conjuros preparados (${c.prep})`);
   const auto = conjurosPendientes(S.db, d, compendio()).map(x => x.x.es);
   if (auto.length) h += `<p class="hint">Siempre preparados por tu clase o subclase: ${esc(joinY(auto))}.</p>`;
   h += conjurosDotesHtml(d);
@@ -282,7 +282,7 @@ function pintarOrigen(d) {
   $('#i_especie').innerHTML = d.especie ? (rasgos ? `<p>${esc(rasgos)}</p>` : '<p>Especie propia: anota sus rasgos en Detalles.</p>') + '<p class="cc-nota">En 2024 la especie no suma a las características: los aumentos vienen del trasfondo.</p>' : '';
   const perm = permitidas(d), tras = habilidadesTrasfondo(d), dote = dotesDe({ ...d, dotes: [] }, lib().trasfondos)[0];
   $('#i_trasfondo').innerHTML = d.trasfondo ? `<dl class="cc-dl">
-    <div><dt>Características</dt><dd>${perm.length ? esc(perm.map(k => ABIL_NAME[k]).join(', ')) : 'Tres a tu elección'}</dd></div>
+    <div><dt>Características</dt><dd>${perm.length ? esc(perm.map(k => NOMBRE_CAR[k]).join(', ')) : 'Tres a tu elección'}</dd></div>
     <div><dt>Dote de origen</dt><dd>${dote ? esc(dote.detalle ? `${dote.nombre} (${dote.detalle})` : dote.nombre) : 'Anótala en Dotes'}</dd></div>
     <div><dt>Habilidades</dt><dd>${tras.length ? esc(joinY(tras.map(k => NOMBRE_HAB[k]))) : 'Márcalas en Competencias'}</dd></div>
     ${(x => x ? `<div><dt>Herramienta</dt><dd>${esc(typeof x.herramienta === 'string' ? x.herramienta : `${LISTAS_HERRAMIENTA[x.herramienta.elige][0]} (elígelo abajo)`)}</dd></div>` : '')(extraTrasfondo(d.trasfondo))}</dl>` : '';
@@ -297,7 +297,7 @@ function pintarCar(d) {
   if (CAR.metodo === 'tiradas') h += `<div class="cc-tiradas">${CAR.dados ? CAR.dados.map((t, i) => `<span class="cc-tirada" style="--i:${i}">${t.dados.map((v, j) => `<i class="${j === t.quitado ? 'fuera' : ''}">${v}</i>`).join('')}<b>${t.total}</b></span>`).join('') : CAR.tiradas.map((t, i) => `<span class="cc-tirada" style="--i:${i}"><b>${t}</b></span>`).join('')}
     <button type="button" class="${sinTirar ? 'primary' : 'ghost'} cc-tirar" data-cctirar>${gi('dados')}${sinTirar ? 'Tirar 4d6 seis veces' : 'Volver a tirar'}</button></div>`;
   if (CAR.metodo === 'compra') h += `<div class="cc-puntos ${resta < 0 ? 'mal' : resta === 0 ? 'ok' : ''}"><span>${resta < 0 ? `Te pasas en <b>${-resta}</b>` : `Quedan <b>${resta}</b> de ${PUNTOS}`} puntos</span><i style="--p:${clamp((PUNTOS - resta) / PUNTOS, 0, 1)}"></i></div>`;
-  h += `<div class="cc-abil">${ABILS.map(([k, n]) => {
+  h += `<div class="cc-abil">${CARACTERISTICAS.map(([k, n]) => {
     const b = CAR.base[k], mod = modOf(fin[k]);
     const val = CAR.metodo === 'compra' ? `<div class="cc-pm"><button type="button" data-pm="${k}|-1" aria-label="Bajar ${n}" ${b <= 8 ? 'disabled' : ''}>−</button><b>${b}</b><button type="button" data-pm="${k}|1" aria-label="Subir ${n}" ${b >= 15 || (COSTE[b + 1] - COSTE[b]) > resta ? 'disabled' : ''}>+</button></div><small class="cc-coste">coste ${COSTE[b] ?? '—'}</small>`
       : CAR.metodo === 'libre' ? `<input type="number" inputmode="numeric" min="1" max="30" data-libre="${k}" value="${b}" aria-label="${n}">`
@@ -308,9 +308,9 @@ function pintarCar(d) {
   if (cambia && !sinTirar) h += `<p class="hint">Toca dos características para intercambiar sus valores. <button type="button" class="linkish" data-ordenar>Ordenar según ${esc(d.clase)}</button></p>`;
   if (!d.trasfondo) h += `<div class="cc-bonos"><h4>Aumentos del trasfondo</h4><p class="hint">Elige un trasfondo en <button type="button" class="linkish" data-irpaso="1">Origen</button> para repartir +2 y +1, o +1 a tres características.</p></div>`;
   else {
-    const opts = perm.length ? perm : ABILS.map(([k]) => k), st = estadoBonos(CAR.bonos, perm), dos = Object.keys(bonos).find(k => bonos[k] === 2);
+    const opts = perm.length ? perm : CARACTERISTICAS.map(([k]) => k), st = estadoBonos(CAR.bonos, perm), dos = Object.keys(bonos).find(k => bonos[k] === 2);
     const fila = (valor, sel, extra = '') => opts.map(k => `<button type="button" class="cc-pill ${sel(k) ? 'on' : ''}" data-bono="${k}|${valor}" aria-pressed="${sel(k)}" ${extra && extra(k) ? 'disabled' : ''}>${AB_CORTA[k]}${fin[k] >= 20 && sel(k) ? ' (máx.)' : ''}</button>`).join('');
-    h += `<div class="cc-bonos ${st.completo ? 'ok' : CAR.heredado ? '' : 'falta'}"><h4>Aumentos de ${esc(d.trasfondo)}${perm.length ? `: ${esc(perm.map(k => ABIL_NAME[k]).join(', '))}` : ''}</h4>
+    h += `<div class="cc-bonos ${st.completo ? 'ok' : CAR.heredado ? '' : 'falta'}"><h4>Aumentos de ${esc(d.trasfondo)}${perm.length ? `: ${esc(perm.map(k => NOMBRE_CAR[k]).join(', '))}` : ''}</h4>
       <div class="seg sm" role="radiogroup" aria-label="Reparto"><button type="button" role="radio" aria-checked="${CAR.modo === '21'}" data-ccmodo="21">+2 y +1</button><button type="button" role="radio" aria-checked="${CAR.modo === '111'}" data-ccmodo="111">+1, +1 y +1</button></div>
       ${CAR.modo === '21' ? `<div class="cc-fila"><span>+2</span>${fila(2, k => bonos[k] === 2)}</div><div class="cc-fila"><span>+1</span>${fila(1, k => bonos[k] === 1, k => k === dos)}</div>`
         : `<div class="cc-fila"><span>+1</span>${fila(1, k => bonos[k] === 1)}</div>`}
@@ -329,7 +329,7 @@ function pintarComp(draft) {
     const etq = nv === 2 ? `pericia · ${ETQ[f] || ''}` : f ? ETQ[f] : enLista ? `de ${draft.clase}` : '';
     return `<button type="button" class="comp-h n${nv} ${f ? 'src-' + f : ''} ${elegible ? 'elegible' : ''}" data-hab="${k}" aria-label="${esc(n)}: ${['sin competencia', 'competencia', 'pericia'][nv]}${f === 'trasfondo' ? ', de tu trasfondo' : ''}"><i class="cr-m n${nv}" aria-hidden="true"></i><span>${esc(n)}${etq ? `<small>${esc(etq)}</small>` : ''}</span><b>${sgn(bonoHabilidad(draft, k))}</b></button>`;
   };
-  $('#f_comp').innerHTML = ABILS.map(([ab, nombre]) => {
+  $('#f_comp').innerHTML = CARACTERISTICAS.map(([ab, nombre]) => {
     const on = comp.has(ab), salv = base.has(ab) ? `<span class="comp-s fija" title="De tu clase">Salvación</span>`
       : `<button type="button" class="comp-s ${on ? 'on' : ''}" data-salv="${ab}" aria-pressed="${on}" title="Competencia extra (dote o rasgo)">Salvación</button>`;
     const habs = HABILIDADES.filter(h => h[2] === ab);
@@ -376,13 +376,13 @@ function pintarHero(d, first) {
   for (const [k, v] of Object.entries({ '--h': t.h, '--s': t.s + '%', ...paleta(t) })) dlg.style.setProperty('--cc' + k.slice(1), v);
   if (clave === TEMA) return;
   const sello = $('#charSello'); sello.innerHTML = `<span class="cc-anillo" aria-hidden="true"></span><span class="cc-anillo b" aria-hidden="true"></span>${gi(t.icono)}`;
-  if (!first && TEMA && !reducedMotion()) { sello.classList.remove('fx-sello'); void sello.offsetWidth; sello.classList.add('fx-sello');
-    requestAnimationFrame(() => burstFrom(sello, { color: hex(t.h, Math.min(90, t.s + 10), 62), n: 26, speed: 2.6, up: 1.2, life: 900, size: 2 })); }
+  if (!first && TEMA && !movimientoReducido()) { sello.classList.remove('fx-sello'); void sello.offsetWidth; sello.classList.add('fx-sello');
+    requestAnimationFrame(() => chispasDesde(sello, { color: hex(t.h, Math.min(90, t.s + 10), 62), n: 26, speed: 2.6, up: 1.2, life: 900, size: 2 })); }
   TEMA = clave;
 }
 
 function readForm() {
-  const base = formId ? clone(S.db.chars.find(x => x.id === formId)) : blankChar();
+  const base = formId ? clone(S.db.chars.find(x => x.id === formId)) : personajeVacio();
   const v = id => $(id).value.trim();
   Object.assign(base, { nombre: v('#f_nombre'), especie: v('#f_especie'), trasfondo: v('#f_trasfondo'), clase: v('#f_clase'), subclase: (parseInt(v('#f_nivel'), 10) || 1) >= 3 ? v('#f_subclase') : '',
     nivel: clamp(parseInt(v('#f_nivel'), 10) || 1, 1, 20), aptitud: v('#f_aptitud'), extraCD: parseInt(v('#f_extraCD'), 10) || 0, extraAtaque: parseInt(v('#f_extraAtaque'), 10) || 0,
@@ -424,7 +424,7 @@ function sync(first, { sinCar = false } = {}) {
   const clase = $('#f_clase').value, cls = CLASES[clase] || {};
   const sel = $('#f_aptitud'), keep = first ? (formId ? (S.db.chars.find(x => x.id === formId).aptitud || '') : '') : sel.value;
   const draft0 = readForm(), P0 = perfil({ ...draft0, aptitud: '' }), autoAp = P0.c ? P0.c.ap : '';
-  sel.innerHTML = `<option value="">${autoAp ? `Según la clase (${ABIL_NAME[autoAp]})` : 'Ninguna'}</option>` + ['int', 'sab', 'car'].map(k => `<option value="${k}">${ABIL_NAME[k]}</option>`).join('');
+  sel.innerHTML = `<option value="">${autoAp ? `Según la clase (${NOMBRE_CAR[autoAp]})` : 'Ninguna'}</option>` + ['int', 'sab', 'car'].map(k => `<option value="${k}">${NOMBRE_CAR[k]}</option>`).join('');
   sel.value = keep;
   const draft = readForm(), P = perfil(draft);
   const sinSub = draft.nivel < 3; $('#f_subWrap').hidden = sinSub; $('#f_subLock').hidden = !sinSub;
@@ -439,8 +439,8 @@ function sync(first, { sinCar = false } = {}) {
   const req = requisitosMulticlase(draft);
   $('#h_mc').textContent = MC.length ? `Nivel de personaje ${total}: ${cs.map(c => `${c.clase} ${c.nivel}`).join(', ')}.${exceso ? ' El total no puede pasar de 20.' : ''}${req.length ? ` Para esta multiclase el manual pide ${req.map(r => `${r.falta} (${r.clase})`).join(', ')}.` : ''}` : '';
   $('#h_mc').classList.toggle('warn', exceso || req.length > 0);
-  const L = [`Competencia ${sgn(P.pb)}.${P.apKey ? ` ${ABIL_NAME[P.apKey]} ${sgn(P.mod)}: CD ${P.cd}, ataque de conjuro ${sgn(P.atk)}.` : ''}`];
-  L.push(`Características: ${ABILS.map(([k]) => `${AB_CORTA[k]} ${draft.stats[k]}`).join(', ')}.`);
+  const L = [`Competencia ${sgn(P.pb)}.${P.apKey ? ` ${NOMBRE_CAR[P.apKey]} ${sgn(P.mod)}: CD ${P.cd}, ataque de conjuro ${sgn(P.atk)}.` : ''}`];
+  L.push(`Características: ${CARACTERISTICAS.map(([k]) => `${AB_CORTA[k]} ${draft.stats[k]}`).join(', ')}.`);
   if (P.c || draft.espaciosManuales) L.push(slotText(P));
   if (P.c) L.push(`Prepara ${P.maxPrep} ${P.maxPrep === 1 ? 'conjuro' : 'conjuros'} de nivel 1+${P.c.cant ? ` y sabe ${P.maxCant} trucos` : ''}.`);
   const ras = reglas(draft).map(r => r.nombre); if (P.ritualLibro) ras.unshift('Adepto en rituales');
@@ -450,11 +450,11 @@ function sync(first, { sinCar = false } = {}) {
     notes.push(cls.subCast ? `Un ${clase.toLowerCase()} lanza conjuros como ${cls.subCast.nombre}, desde nivel ${cls.subCast.desde}.` : `${clase} no lanza conjuros por su clase.`);
     notes.push('Puedes añadir conjuros de dotes o de especie: se marcan como siempre preparados.');
   }
-  if (formId) { const oc = S.db.chars.find(x => x.id === formId), diff = levelDiff(perfil(oc), P, oc, draft); if (diff) notes.push(diff); }
+  if (formId) { const oc = S.db.chars.find(x => x.id === formId), diff = diferenciaNivel(perfil(oc), P, oc, draft); if (diff) notes.push(diff); }
   $('#f_sum').innerHTML = L.map(t => `<p>${esc(t)}</p>`).join('') + notes.map(t => `<p class="note">${esc(t)}</p>`).join('');
   pintarClases(draft); pintarOrigen(draft); pintarClaseExtra(draft); pintarOrigenExtra(draft); pintarComp(draft); pintarDotes(draft); pintarConj(draft); pintarPasos(draft); pintarHero(draft, first);
   if (!sinCar) pintarCar(draft);
-  else ABILS.forEach(([k]) => { const t = $('#t_' + k), m = $('#m_' + k); if (t) t.textContent = draft.stats[k]; if (m) m.textContent = sgn(modOf(draft.stats[k])); });
+  else CARACTERISTICAS.forEach(([k]) => { const t = $('#t_' + k), m = $('#m_' + k); if (t) t.textContent = draft.stats[k]; if (m) m.textContent = sgn(modOf(draft.stats[k])); });
   $('#f_pgmax').placeholder = String(pgMaximoCalculado({ ...draft, vida: { ...draft.vida, maxManual: null } }));
   $('#h_pgmax').textContent = `Vacío: la media de cada nivel con tu Constitución (${pgMaximoCalculado(draft)}). Escribe otro si tiras los PG al subir de nivel.`;
   if (attr && !charDlg().contains(a)) charDlg().querySelector(`[${attr}="${CSS.escape(val)}"]`)?.focus({ preventScroll: true });
@@ -484,17 +484,17 @@ async function save() {
   if (draft.nivel + (draft.multiclase || []).reduce((n, m) => n + (parseInt(m.nivel, 10) || 1), 0) > 20) { irA(0); $('#charErr').textContent = 'El nivel de personaje (la suma de las clases) no puede pasar de 20.'; return; }
   if (formId) {
     const oc = clone(S.db.chars.find(x => x.id === formId));
-    const h = S.edit(db => { const i = db.chars.findIndex(x => x.id === formId); db.chars[i] = normChar(draft); });
-    const nc = S.db.chars.find(x => x.id === formId), diff = levelDiff(perfil(oc), perfil(nc), oc, nc);
-    closeSheet(charDlg());
-    toast(`${esc(draft.nombre)} actualizado.${diff ? ' ' + esc(diff) : ''}`, [undoBtn(S, h)]);
+    const h = S.edit(db => { const i = db.chars.findIndex(x => x.id === formId); db.chars[i] = normPersonaje(draft); });
+    const nc = S.db.chars.find(x => x.id === formId), diff = diferenciaNivel(perfil(oc), perfil(nc), oc, nc);
+    cerrarDialogo(charDlg());
+    toast(`${esc(draft.nombre)} actualizado.${diff ? ' ' + esc(diff) : ''}`, [botonDeshacer(S, h)]);
   } else {
     const faltan = Object.values(pendientes(draft)).flat();
     if (faltan.length && !(await confirmar({ titulo: 'Quedan cosas por elegir', texto: `${faltan.join(' ')} Puedes crearlo igualmente y completarlo luego desde «Editar».`, ok: 'Crear igualmente', cancelar: 'Seguir eligiendo' }))) return;
-    const c = normChar(draft), all = allSpellItems(S.db), P = perfil(c), dotesC = dotesConConjuros(c, lib().trasfondos);
+    const c = normPersonaje(draft), all = itemsConjuros(S.db), P = perfil(c), dotesC = dotesConConjuros(c, lib().trasfondos);
     const { items, po } = equipoInicial(c, { claseOpcion: EQ.clase, trasfondoOpcion: EQ.trasfondo, elecciones: ELEC, oroTirado: EQ.oro?.total });
     const h = S.edit(db => {
-      const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = itemToSid(db, it);
+      const add = (ids, rel) => ids.forEach(id => { const it = all.find(x => x.id === id); if (!it) return; const sid = idDeItem(db, it);
         if (!c.book.some(e => e.sid === sid)) c.book.push({ sid, prep: false, always: false, gratis: '', used: false, fuente: P.listaNombre || c.clase, ...rel }); });
       add(CONJ.trucos, {}); add(CONJ.libro.slice(0, P.maxPrep), { fuente: 'Libro', prep: true }); add(CONJ.libro.slice(P.maxPrep), { fuente: 'Libro' }); add(CONJ.prep, { prep: true });
       add(CONJ.estilo, { fuente: trucosAlternativa(c)[0]?.nombre || 'Estilo de combate', always: true, prep: true });
@@ -508,9 +508,9 @@ async function save() {
       db.chars.push(c); db.activeId = c.id;
     });
     document.dispatchEvent(new CustomEvent('grimorio:creado'));
-    closeSheet(charDlg());
+    cerrarDialogo(charDlg());
     window.scrollTo({ top: 0 });
-    toast(`Grimorio de ${esc(c.nombre)} creado.`, [{ label: 'Añadir conjuros', hl: true, fn: () => onCreated?.() }, undoBtn(S, h)]);
+    toast(`Grimorio de ${esc(c.nombre)} creado.`, [{ label: 'Añadir conjuros', hl: true, fn: () => onCreated?.() }, botonDeshacer(S, h)]);
   }
 }
 
@@ -521,13 +521,13 @@ function cambiarClase(nueva) {
   $('#f_clase').value = nueva; MC = MC.filter(m => m.clase !== nueva); pintarMulticlase();
   CONJ = { trucos: [], prep: [], libro: [], estilo: [] }; for (const k of Object.keys(ELEC)) if (k !== 't') delete ELEC[k]; EQ.clase = 'A'; EQ.oro = null; if (CREANDO) MAES = [];
   const v = $('#f_subclase').value, vale = subclasesDe(nueva).includes(v); $('#f_subWrap').innerHTML = campoSubclase(nueva, vale ? v : '', 'id="f_subclase" aria-label="Subclase"');
-  if (CAR.auto && CAR.metodo !== 'libre' && !(CAR.metodo === 'tiradas' && !CAR.tiradas.length)) CAR.base = repartoSugerido(nueva, ABILS.map(([k]) => CAR.base[k]));
+  if (CAR.auto && CAR.metodo !== 'libre' && !(CAR.metodo === 'tiradas' && !CAR.tiradas.length)) CAR.base = repartoSugerido(nueva, CARACTERISTICAS.map(([k]) => CAR.base[k]));
   sync(false);
 }
 function tirar() {
   CAR.dados = tirarSeis(); CAR.tiradas = CAR.dados.map(t => t.total); CAR.base = repartoSugerido(readForm().clase, CAR.tiradas); CAR.auto = true; CAR.sel = null;
   sync(false);
-  const t = $('#f_car .cc-tirar'); if (t) burstFrom(t, { color: hex(temaDe(readForm()).h, 70, 62), n: 18, speed: 2.2, up: 1.4, life: 800, size: 1.8 });
+  const t = $('#f_car .cc-tirar'); if (t) chispasDesde(t, { color: hex(temaDe(readForm()).h, 70, 62), n: 18, speed: 2.2, up: 1.4, life: 800, size: 1.8 });
 }
 function cambiarMetodo(m) {
   if (m === CAR.metodo) return;
@@ -578,7 +578,7 @@ export function initCreacion(store, { onNewCharacterAddSpells }) {
     }
     sync(false);
   });
-  on(form, 'click', '[data-retrato]', () => openRetrato(formId));
+  on(form, 'click', '[data-retrato]', () => abrirRetrato(formId));
   on(form, 'click', '[data-herr]', (e, b) => { const [id, v] = b.dataset.herr.split('|'), el = eleccionesHerramienta(readForm()).find(x => x.id === id); if (!el) return;
     const cur = ELEC[id] || []; ELEC[id] = cur.includes(v) ? cur.filter(x => x !== v) : el.n === 1 ? [v] : cur.length < el.n ? [...cur, v] : cur; sync(false); });
   on(form, 'click', '[data-man]', (e, b) => { MAN = alternarManiobra(MAN, b.dataset.man, cupoManiobras(readForm())); sync(false); });
@@ -592,12 +592,12 @@ export function initCreacion(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '[data-idioma]', (e, b) => { const v = b.dataset.idioma; IDI = IDI.includes(v) ? IDI.filter(x => x !== v) : [...IDI, v]; sync(false); });
   on(form, 'click', '[data-eqclase]', (e, b) => { EQ.clase = b.dataset.eqclase; sync(false); });
   on(form, 'click', '[data-eqtras]', (e, b) => { EQ.trasfondo = b.dataset.eqtras; sync(false); });
-  on(form, 'click', '[data-tiraroro]', (e, b) => { EQ.oro = tirarOro(readForm().clase); sync(false); burstFrom(form.querySelector('[data-tiraroro]'), { color: '#F4C567', n: 20, speed: 2.4, up: 1.6, life: 800, size: 1.8 }); });
-  on(form, 'click', '[data-ccver]', (e, b) => { const it = allSpellItems(S.db).find(x => x.id === b.dataset.ccver); if (it) previewSpell(it); });
+  on(form, 'click', '[data-tiraroro]', (e, b) => { EQ.oro = tirarOro(readForm().clase); sync(false); chispasDesde(form.querySelector('[data-tiraroro]'), { color: '#F4C567', n: 20, speed: 2.4, up: 1.6, life: 800, size: 1.8 }); });
+  on(form, 'click', '[data-ccver]', (e, b) => { const it = itemsConjuros(S.db).find(x => x.id === b.dataset.ccver); if (it) verConjuro(it); });
   on(form, 'click', '[data-clase]', (e, b) => cambiarClase(b.dataset.clase));
   on(form, 'click', '[data-metodo]', (e, b) => cambiarMetodo(b.dataset.metodo));
   on(form, 'click', '[data-cctirar]', tirar);
-  on(form, 'click', '[data-ordenar]', () => { CAR.base = repartoSugerido(readForm().clase, ABILS.map(([k]) => CAR.base[k])); CAR.auto = true; CAR.sel = null; sync(false); });
+  on(form, 'click', '[data-ordenar]', () => { CAR.base = repartoSugerido(readForm().clase, CARACTERISTICAS.map(([k]) => CAR.base[k])); CAR.auto = true; CAR.sel = null; sync(false); });
   on(form, 'click', '[data-swap]', (e, b) => {
     const k = b.dataset.swap;
     if (!CAR.sel || CAR.sel === k) { CAR.sel = CAR.sel === k ? null : k; return sync(false); }

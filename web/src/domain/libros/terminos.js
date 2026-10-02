@@ -3,7 +3,7 @@
 import { formasDeEstado, sinCortes } from './glosario.js';
 
 let GLOS = null, RE_EST = null;
-export function setGlosario(lista) {
+export function fijarGlosario(lista) {
   GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, { ...e, texto: sinCortes(e.texto) }])) : null; RE_EST = null;
 }
 export const glosario = () => (GLOS ? [...GLOS.values()] : []);

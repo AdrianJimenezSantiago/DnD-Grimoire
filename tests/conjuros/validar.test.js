@@ -2,8 +2,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compendioJson } from '../helpers/fixtures.js';
 import { alcance, campo, componentes, duracion, escuelaOficial, material, usoGratis } from '../../web/src/domain/conjuros/validar.js';
-import { blankChar, normDb } from '../../web/src/domain/personaje/modelo.js';
-import { SCHOOLS } from '../../web/src/domain/reglas/reglas2024.js';
+import { personajeVacio, normBd } from '../../web/src/domain/personaje/modelo.js';
+import { ESCUELAS } from '../../web/src/domain/reglas/reglas2024.js';
 
 const { conjuros } = compendioJson();
 
@@ -23,12 +23,12 @@ describe('limpiarConjuro y campos', () => {
     assert.equal(campo('comp', '').valor, null); assert.match(campo('comp', '').aviso, /al menos un componente/);
     assert.equal(escuelaOficial('Ilusión'), 'Ilusionismo'); assert.equal(escuelaOficial('evoc.'), 'Evocación'); assert.equal(escuelaOficial('xyz'), '');
     assert.equal(campo('escuela', 'patata').valor, null);
-    for (const x of conjuros) { assert.ok(SCHOOLS.includes(x.esc), x.es); assert.ok(componentes(x.co), x.es); }
+    for (const x of conjuros) { assert.ok(ESCUELAS.includes(x.esc), x.es); assert.ok(componentes(x.co), x.es); }
   });
 
   test('los datos guardados se corrigen al cargar', () => {
-    const ch = blankChar({ id: 'c1', book: [{ sid: 's1', gratis: '0', used: true }] });
-    const db = normDb({ catalog: { s1: { id: 's1', es: 'Guía', en: 'True Strike', level: 0, escuela: 'Ilusión', alcance: '0 m', duracion: '', comp: 'v s' } }, chars: [ch] });
+    const ch = personajeVacio({ id: 'c1', book: [{ sid: 's1', gratis: '0', used: true }] });
+    const db = normBd({ catalog: { s1: { id: 's1', es: 'Guía', en: 'True Strike', level: 0, escuela: 'Ilusión', alcance: '0 m', duracion: '', comp: 'v s' } }, chars: [ch] });
     const s = db.catalog.s1, e = db.chars[0].book[0];
     assert.equal(s.escuela, 'Ilusionismo'); assert.equal(s.alcance, 'Toque'); assert.equal(s.comp, 'V S');
     assert.equal(s.en, 'Guidance'); assert.equal(s.srd, 'srd-2024_guidance');

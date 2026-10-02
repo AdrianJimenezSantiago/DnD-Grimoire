@@ -1,16 +1,16 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { perfil, clasesDe, nivelTotal, requisitosMulticlase, dotesDe } from '../../web/src/domain/reglas/reglas2024.js';
-import { blankChar, seedDb, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, bdDeEjemplo, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { reglas } from '../../web/src/domain/clases/rasgos.js';
 import { limiteFormaSalvaje } from '../../web/src/domain/criaturas/monstruos.js';
 
-const pj = o => blankChar(o);
+const pj = o => personajeVacio(o);
 const pjMulticlase = (clase, nivel, multiclase = [], extra = {}) => ({ clase, subclase: '', nivel, multiclase, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14 }, play: { rec: {} }, rasgos: [], ...extra });
 
 describe('perfil: lanzadores, CD y espacios', () => {
   test('Theo (mago 6, INT 18): CD 15, ataque +7, espacios 4/3/3, 10 preparados, 4 trucos', () => {
-    const theo = seedDb().chars[0], P = perfil(theo);
+    const theo = bdDeEjemplo().chars[0], P = perfil(theo);
     assert.equal(P.cd, 15); assert.equal(P.atk, 7);
     assert.deepEqual(P.slots, { 1: 4, 2: 3, 3: 3 });
     assert.equal(P.maxPrep, 10); assert.equal(P.maxCant, 4);
@@ -64,7 +64,7 @@ describe('multiclase', () => {
   test('requisitos, modelo y nivel de druida para Forma salvaje', () => {
     const ch = pjMulticlase('Bárbaro', 5, [{ clase: 'Mago', nivel: 1 }], { stats: { fue: 15, des: 12, con: 14, int: 10, sab: 10, car: 8 } });
     assert.deepEqual(requisitosMulticlase(ch), [{ clase: 'Mago', falta: 'Inteligencia 13' }]);
-    const c = normChar({ nombre: 'X', clase: 'Druida', nivel: 4, multiclase: [{ clase: 'Druida', nivel: 2 }, { clase: 'Monje', nivel: 40 }, { clase: 'Monje', nivel: 1 }, null], dotes: ['Alerta', ' Alerta ', '', 'Duro'] });
+    const c = normPersonaje({ nombre: 'X', clase: 'Druida', nivel: 4, multiclase: [{ clase: 'Druida', nivel: 2 }, { clase: 'Monje', nivel: 40 }, { clase: 'Monje', nivel: 1 }, null], dotes: ['Alerta', ' Alerta ', '', 'Duro'] });
     assert.deepEqual(c.multiclase, [{ clase: 'Monje', subclase: '', nivel: 19 }]); assert.deepEqual(c.dotes, ['Alerta', 'Duro']);
     assert.equal(limiteFormaSalvaje(pjMulticlase('Monje', 10, [{ clase: 'Druida', nivel: 4 }])).vd, 0.5);
   });

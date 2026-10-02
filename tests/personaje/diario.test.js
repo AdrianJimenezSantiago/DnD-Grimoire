@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { nuevaSesion, nuevaNota, paraRecordar, buscarDiario } from '../../web/src/domain/personaje/diario.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 
 describe('diario de campaña', () => {
   test('sesiones numeradas, notas y «para recordar»', () => {
-    const c = normChar(blankChar({ nombre: 'Ana' }));
+    const c = normPersonaje(personajeVacio({ nombre: 'Ana' }));
     const s1 = nuevaSesion(c), s2 = nuevaSesion(c);
     assert.deepEqual([s1.n, s2.n], [1, 2]); assert.equal(c.diario.sesiones[0], s2);
     s1.notas.push(nuevaNota('pendiente', 'Preguntar por el sello'), nuevaNota('nombre', 'Maese Orrin'));

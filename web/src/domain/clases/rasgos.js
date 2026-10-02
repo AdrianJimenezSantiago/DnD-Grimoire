@@ -196,7 +196,7 @@ function dadosPsionicos(L) {
   return { max: n, nota: `Dado: ${d}.` };
 }
 
-export function maxFrom(ch, r) {
+export function maxDe(ch, r) {
   const L = nivelDe(ch), n = parseInt(r.maxN, 10);
   switch (r.maxBase) {
     case 'nivel': return L;
@@ -260,30 +260,30 @@ export function reglas(ch, todas = false) {
   const list = [
     ...[...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))), ...plantillasOrigen(ch)].map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
     // Las cargas y usos de un objeto mágico solo se ven mientras se puede usar: encima, y sintonizado si lo pide
-    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off || (!!r.objetoId && !objetoDisponible((ch.equipo?.objetos || []).find(o => o.id === r.objetoId))), max: maxFrom(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
+    ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off || (!!r.objetoId && !objetoDisponible((ch.equipo?.objetos || []).find(o => o.id === r.objetoId))), max: maxDe(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.sustituida);
 }
 export const reglasVisibles = ch => reglas(ch).filter(r => !r.oculto);
 
-export function castTriggerDesc(r) {
+export function descDisparoLanzar(r) {
   const cond = `Al lanzar ${r.escuela ? `un conjuro de ${r.escuela.toLowerCase()}` : 'un conjuro'}${r.espacioMin ? ` con un espacio de nivel ${r.espacioMin} o superior` : ''}`;
   const ef = r.efecto === 'recuperar' ? `recuperas un espacio gastado de nivel inferior al usado (máx. ${r.efectoN || 5})` : (r.texto || 'aviso sin texto');
   return `${cond}: ${ef}.`;
 }
-export function ruleSummary(r) {
+export function resumenRegla(r) {
   const nota = r.nota ? ' ' + r.nota : '';
   switch (r.tipo) {
     case 'recurso': return `${r.max} ${r.max === 1 ? 'uso' : 'usos'}; ${etiquetaRecarga(r, true)}.${nota}`;
     case 'dados': return `${r.max}${r.dado || 'd20'} anotados tras un descanso largo.${nota}`;
     case 'recuperar': return `Hasta ${r.max} niveles de espacios (ninguno de nivel ${(r.nivMax || 5) + 1}+), una vez por descanso largo.${nota}`;
-    case 'al_lanzar': return castTriggerDesc(r);
+    case 'al_lanzar': return descDisparoLanzar(r);
     default: return '';
   }
 }
-export const schoolMatch = (s, escuela) => !escuela || norm(s.escuela || '').slice(0, 5) === norm(escuela).slice(0, 5);
-export const castSchools = ch => reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.escuela).map(r => norm(r.escuela).slice(0, 5));
-export const hasShortRest = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.espaciosManuales)
+export const coincideEscuela = (s, escuela) => !escuela || norm(s.escuela || '').slice(0, 5) === norm(escuela).slice(0, 5);
+export const escuelasAlLanzar = ch => reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.escuela).map(r => norm(r.escuela).slice(0, 5));
+export const tieneDescansoCorto = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.espaciosManuales)
   || reglas(ch).some(r => (r.tipo === 'recurso' && ['corto', 'corto1'].includes(r.recarga)) || (r.recarga === 'dado' && r.recMomento === 'corto') || r.tipo === 'recuperar');
 
 // Conjuros que un rasgo o una dote deja lanzar sin gastar espacio: al tocarlos se gasta ese uso antes que un espacio
@@ -305,8 +305,8 @@ export function recursoParaConjuro(ch, nombre, fuente = '') {
   const ids = [...porFuente, ...(RECURSO_DE_CONJURO[norm(nombre)] || [])]; if (!ids.length) return null;
   return reglas(ch).find(r => ids.includes(r.id) && r.tipo === 'recurso' && usosGastados(ch, r) < r.max) || null;
 }
-export function recState(ch, id) {
+export function estadoRecurso(ch, id) {
   ch.play.rec = ch.play.rec || {};
   return (ch.play.rec[id] = ch.play.rec[id] || { used: 0, dice: [] });
 }
-export const usosGastados = (ch, r) => clamp(recState(ch, r.id).used || 0, 0, r.max);
+export const usosGastados = (ch, r) => clamp(estadoRecurso(ch, r.id).used || 0, 0, r.max);

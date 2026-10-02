@@ -2,7 +2,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { anadirObjeto, quitarObjeto, alternarSintonia, alternarGuardado, motivoSintonia, equipar, claseArmadura, ataqueArma, armaCombate, golpeSinArmas, municionDe, anadirComun } from '../../web/src/domain/equipo/equipo.js';
 import { pasosVariante, concretar } from '../../web/src/domain/equipo/variantesObjeto.js';
 import { efectoDe, statsEfectivos, objetoActivo } from '../../web/src/domain/equipo/objetosEfecto.js';
@@ -13,7 +13,7 @@ import { bonoHabilidad, velocidad } from '../../web/src/domain/reglas/habilidade
 import { perfil } from '../../web/src/domain/reglas/reglas2024.js';
 import { pgActuales, pgMaximo, vidaDe, aplicarDano } from '../../web/src/domain/combate/vida.js';
 
-const ch = (o = {}) => normChar(blankChar({ clase: 'Mago', nivel: 5, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
+const ch = (o = {}) => normPersonaje(personajeVacio({ clase: 'Mago', nivel: 5, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
 const uno = () => 1;
 // Objeto como llega de la biblioteca
 const lib = (nombre, tipo, extra = {}) => ({ clave: nombre.toLowerCase(), nombre, tipo, rareza: 'Raro', subtipo: '', linea: '', texto: '', cargas: null, sintonia: false, ...extra });

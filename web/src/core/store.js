@@ -11,7 +11,7 @@ const MAX_HIST = 60, MAX_LOG = 120;
 const instantanea = (db, ch) => (ch ? { ...db, chars: db.chars.map(c => (c === ch ? clone(c) : c)), catalog: { ...db.catalog } } : clone(db));
 const enReposo = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 1000 }) : fn());
 
-export function createStore({ storage, key, db }) {
+export function crearEstado({ almacen, clave, db }) {
   const listeners = new Set();
   const hist = [];
   let timer = null, dirty = false;
@@ -23,7 +23,7 @@ export function createStore({ storage, key, db }) {
     emit(reason) { listeners.forEach(fn => fn(S, reason)); },
 
     save() { dirty = true; clearTimeout(timer); timer = setTimeout(() => enReposo(S.flush), 200); },
-    flush() { clearTimeout(timer); if (!dirty) return; dirty = false; return storage.set(key, JSON.stringify(S.db)); },
+    flush() { clearTimeout(timer); if (!dirty) return; dirty = false; return almacen.set(clave, JSON.stringify(S.db)); },
 
     act(text, fn) {
       const ch = S.cur(), before = instantanea(S.db, ch), id = uid('h');

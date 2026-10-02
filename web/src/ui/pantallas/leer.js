@@ -11,7 +11,7 @@ import { ataquesPorAccion } from '../../domain/combate/maestria.js';
 import { statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
 import { ECONOMIA_INFO, textoPropiedad, textoMaestria, salto } from '../../domain/reglas/referencia.js';
 import { ficha, abrirTermino, abrirRasgoJuego, abrirResumenRegla } from '../dialogs/biblioteca.js';
-import { openSpell, md, rico } from '../dialogs/conjuro.js';
+import { abrirConjuro, md, rico } from '../dialogs/conjuro.js';
 import { gi } from '../componentes/tema.js';
 
 let S = null;
@@ -72,7 +72,7 @@ function vel() {
 }
 function conc() {
   const ch = S.cur(), bi = ch.book.findIndex(e => S.db.catalog[e.sid]?.es === ch.play.conc);
-  if (bi >= 0) openSpell(bi);
+  if (bi >= 0) abrirConjuro(bi);
 }
 
 // Acciones de combate: la regla del manual importado si la hay; si no, el resumen de la app
@@ -88,7 +88,7 @@ function accionComun(k) {
 export function leer(clave) {
   if (!S?.cur()) return false;
   const [tipo, ...r] = clave.split(':'), v = r.join(':');
-  if (tipo === 'conj') openSpell(+v);
+  if (tipo === 'conj') abrirConjuro(+v);
   else if (tipo === 'arma') arma(v);
   else if (tipo === 'rasgo') abrirRasgoJuego(v);
   else if (tipo === 'estado') estado(v);

@@ -1,8 +1,8 @@
 // Hoja de personaje: cabecera, estadísticas, barra de espacios, libro de conjuros y rasgos «En juego».
-// renderSheet() y renderBar() repintan la hoja entera a partir del estado.
+// pintarHoja() y pintarBarra() repintan la hoja entera a partir del estado.
 import { esc, norm } from '../../core/util.js';
-import { ABIL_NAME, perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
-import { castSchools, castTriggerDesc, reglasVisibles, recState, etiquetaRecarga, schoolMatch, usosGastados } from '../../domain/clases/rasgos.js';
+import { NOMBRE_CAR, perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
+import { escuelasAlLanzar, descDisparoLanzar, reglasVisibles, estadoRecurso, etiquetaRecarga, coincideEscuela, usosGastados } from '../../domain/clases/rasgos.js';
 import { $, patch, patchKeyed } from '../componentes/dom.js';
 import { icon, ASTROLABE } from '../componentes/icons.js';
 import { pop } from '../animaciones/fx.js';
@@ -23,13 +23,13 @@ import { combateDe } from '../../domain/combate/combate.js';
 import { vidaDe, esYo } from '../../domain/combate/vida.js';
 import { percepcionPasiva } from '../../domain/reglas/habilidades.js';
 import { actualizarLuto, memorialHtml } from './luto.js';
-import { slotsOf, freeOf, firstFreeFrom, isPrepared, prepCount, cantCount, conConjuros, schoolKey } from '../../domain/conjuros/espacios.js';
+import { espaciosDe, espaciosLibres, primerLibreDesde, estaPreparado, numPreparados, numTrucos, conConjuros, claveEscuela } from '../../domain/conjuros/espacios.js';
 import { origenLinea } from '../../domain/personaje/descripcion.js';
 
 const lemaHtml = t => esc(t).replace(/_(.+?)_/g, '<span class="u">$1</span>');
 
 function candles(ch, P, L) {
-  const s = slotsOf(P, L), free = freeOf(ch, P, L); let h = '';
+  const s = espaciosDe(P, L), free = espaciosLibres(ch, P, L); let h = '';
   for (let i = 0; i < s; i++) {
     const spent = i >= free;
     h += `<button type="button" class="slotbtn ${spent ? 'spent' : ''}" style="--i:${i}" data-slotbtn="${L}:${i}" aria-label="Espacio de nivel ${L}: ${spent ? 'gastado, toca para recuperarlo' : 'libre, toca para gastarlo'}"><span class="orb"></span></button>`;
@@ -42,7 +42,7 @@ const inspHtml = ch => { const on = !!vidaDe(ch).inspiracion;
   return `<button type="button" class="hero-insp ${on ? 'on' : ''}" data-cmd="inspiracion" aria-pressed="${on}" title="${on ? 'Tienes inspiración heroica: gástala para repetir un d20' : 'Sin inspiración heroica: toca para marcarla'}" aria-label="Inspiración heroica: ${on ? 'la tienes' : 'no la tienes'}">
     <svg class="hi-marco" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L38 20 L20 38 L2 20 Z"/><path class="hi-in" d="M20 7 L33 20 L20 33 L7 20 Z"/></svg>${gi('inspiracion', 'hi-ico')}<i class="hi-chispa" aria-hidden="true"></i></button>`; };
 function heroHtml(ch, P) {
-  const mods = `Competencia ${sgn(P.pb)}${P.apKey ? ` · ${ABIL_NAME[P.apKey]} ${sgn(P.mod)} para conjuros` : ''} · Percepción pasiva ${percepcionPasiva(ch)}`;
+  const mods = `Competencia ${sgn(P.pb)}${P.apKey ? ` · ${NOMBRE_CAR[P.apKey]} ${sgn(P.mod)} para conjuros` : ''} · Percepción pasiva ${percepcionPasiva(ch)}`;
   const t = temaDe(ch);
   return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
     <div class="hero-id"><span class="hero-retrato"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
@@ -61,7 +61,7 @@ function heroHtml(ch, P) {
     </div>`;
 }
 function statsHtml(db, ch, P) {
-  const pc = prepCount(db, ch), cc = cantCount(db, ch);
+  const pc = numPreparados(db, ch), cc = numTrucos(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
   if (!P.c) {
     // Sin clase lanzadora: la CD y el ataque de los conjuros de especie (linaje élfico o gnomo, legado infernal)
@@ -89,7 +89,7 @@ function recursoHtml(ch, r) {
   return `<div class="res rr ${left === 0 ? 'empty-res' : ''}" data-resid="${esc(r.id)}"><strong>${esc(r.nombre)}</strong>${ctl}${formas}<span class="rnote">${esc(etiquetaRecarga(r))}${r.nota ? '. ' + esc(r.nota) : ''}</span></div>`;
 }
 function dadosHtml(ch, r) {
-  const st = recState(ch, r.id), sides = parseInt(String(r.dado || 'd20').slice(1), 10) || 20; let h = '';
+  const st = estadoRecurso(ch, r.id), sides = parseInt(String(r.dado || 'd20').slice(1), 10) || 20; let h = '';
   for (let i = 0; i < r.max; i++) {
     const d = (st.dice || [])[i] || { v: '', used: false };
     h += `<span class="pdie ${d.used ? 'used' : ''}"><input type="text" inputmode="numeric" maxlength="${String(sides).length}" placeholder="${esc(r.dado || 'd20')}" data-dv="${r.id}|${i}|${sides}" value="${esc(d.v)}" ${d.used ? 'readonly' : ''} aria-label="${esc(r.nombre)}: dado ${i + 1}">`
@@ -98,7 +98,7 @@ function dadosHtml(ch, r) {
   return `<div class="res pres"><strong>${esc(r.nombre)}</strong>${h}<span class="rnote">Anota ${r.max}${esc(r.dado || 'd20')} al terminar un descanso largo. ${esc(r.nota || '')} Marca la casilla al usar uno.</span></div>`;
 }
 function recuperarHtml(ch, r) {
-  const st = recState(ch, r.id);
+  const st = estadoRecurso(ch, r.id);
   return `<div class="res rr"><strong>${esc(r.nombre)}</strong><button type="button" class="ruse ${st.used ? 'on' : ''}" data-recuse="${r.id}" aria-pressed="${!!st.used}">${st.used ? 'Usada hoy' : 'Usar'}</button>
     <span class="rnote">Hasta ${r.max} niveles de espacios (ninguno de nivel ${(r.nivMax || 5) + 1}+). ${esc(r.nota || '')}</span></div>`;
 }
@@ -107,13 +107,13 @@ function alLanzarHtml(db, ch, r) {
   if (r.escuela) {
     const items = [];
     ch.book.forEach(e => {
-      const s = db.catalog[e.sid]; if (!s || s.level < 1 || !schoolMatch(s, r.escuela)) return;
+      const s = db.catalog[e.sid]; if (!s || s.level < 1 || !coincideEscuela(s, r.escuela)) return;
       const notes = []; if (r.espacioMin && s.level < r.espacioMin) notes.push(`solo con espacio de nivel ${r.espacioMin}+`); if (r.soloEspacio && s.ritual) notes.push('no como ritual');
       items.push(`<li><span class="aa-lv">${s.level}</span><span><span class="aa-nm">${esc(s.es)}</span>${notes.length ? `<span class="aa-note">${notes.join(', ')}</span>` : ''}</span></li>`);
     });
     list = items.length ? `<ul class="aa-list">${items.join('')}</ul>` : `<div class="aa-note">Aún no hay conjuros de ${esc(r.escuela.toLowerCase())} de nivel 1 o superior en el libro.</div>`;
   }
-  return `<div class="res wide"><strong>${esc(r.nombre)}</strong><span class="rnote" style="font-size:var(--fs-s);color:var(--ink)">${esc(castTriggerDesc(r))}</span><div style="flex-basis:100%">${list}</div></div>`;
+  return `<div class="res wide"><strong>${esc(r.nombre)}</strong><span class="rnote" style="font-size:var(--fs-s);color:var(--ink)">${esc(descDisparoLanzar(r))}</span><div style="flex-basis:100%">${list}</div></div>`;
 }
 function resourcesHtml(db, ch, P) {
   let h = '';
@@ -186,15 +186,15 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
     : (editing ? `<span class="free-use">${ce('', `${k} data-k="gratis"`, editing)} <small style="font-weight:400;color:var(--ink-2)">uso gratis (p. ej. 1/DL)</small></span>` : '');
   const trig = L > 0 && schools.includes(norm(s.escuela || '').slice(0, 5));
   const tir = tiradasConjuro(s), dmg = tir ? [...new Set([...tir.danos.map(x => x.tipo), ...(tir.curacion ? ['curación'] : [])])].slice(0, 2) : [];
-  const castable = L === 0 || (e.gratis && !e.used) || (s.ritual && (isPrepared(e) || P.ritualLibro)) || firstFreeFrom(ch, P, L) > 0;
-  const ritualOnly = ch.play.onlyPrep && L > 0 && !isPrepared(e) && s.ritual && P.ritualLibro;
+  const castable = L === 0 || (e.gratis && !e.used) || (s.ritual && (estaPreparado(e) || P.ritualLibro)) || primerLibreDesde(ch, P, L) > 0;
+  const ritualOnly = ch.play.onlyPrep && L > 0 && !estaPreparado(e) && s.ritual && P.ritualLibro;
   const lvlSel = editing ? `<label>nivel <select data-lvl="${bi}">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}" ${n === L ? 'selected' : ''}>${n === 0 ? 'truco' : n}</option>`).join('')}</select></label>` : '';
   const cell = (cls, v, key) => `<span class="${cls}">${editing || v ? ce(v, `${k} data-k="${key}"`, editing) : ''}</span>`;
   const escuela = editing ? `<span class="c-school ${trig ? 'trig' : ''}"><button type="button" class="sch-pick" data-schoolpick="${bi}" aria-haspopup="menu"><i class="sch-dot" aria-hidden="true"></i>${esc(s.escuela || 'Escuela')}${icon('chevron')}</button></span>`
     : `<span class="c-school ${trig ? 'trig' : ''}">${s.escuela ? `${gi(escuelaIco(s.escuela) || 'libro', 'sch-ico')}<span>${esc(s.escuela)}</span>` : ''}</span>`;
   const comps = editing ? `<span class="c-comp comp-pick" role="group" aria-label="Componentes">${[['V', 'Verbal'], ['S', 'Somático'], ['M', 'Material']].map(([c, t]) => `<button type="button" data-comp="${bi}|${c}" aria-pressed="${(s.comp || '').split(' ').includes(c)}" title="${t}">${c}</button>`).join('')}</span>`
     : cell('c-comp', s.comp, 'comp');
-  return `<div class="spell ${castable ? '' : 'dim'}" id="sp-${bi}" data-sc="${schoolKey(s.escuela)}">
+  return `<div class="spell ${castable ? '' : 'dim'}" id="sp-${bi}" data-sc="${claveEscuela(s.escuela)}">
     <div class="c-prep">${prep}</div>
     <div class="c-name"><div class="castzone" data-cast="${bi}" ${editing ? '' : 'role="button" tabindex="0"'} aria-label="${editing ? '' : 'Lanzar ' + esc(s.es)}">
       <span class="nm ${e.gratis ? (e.used ? 'spentfree' : 'free') : ''}">${ce(s.es, `${k} data-k="es"`, editing)}</span><span class="badges">
@@ -209,10 +209,10 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
 function levelHtml(db, ch, P, L, rows, schools, editing) {
   let slot;
   if (L === 0) slot = 'A voluntad';
-  else if (slotsOf(P, L)) slot = `<span class="lbl">${P.pact && L === P.pact.level ? 'Pacto' : ''}</span>${candles(ch, P, L)}`;
+  else if (espaciosDe(P, L)) slot = `<span class="lbl">${P.pact && L === P.pact.level ? 'Pacto' : ''}</span>${candles(ch, P, L)}`;
   else if (P.pact && L < P.pact.level) slot = `Con espacios de pacto (nivel ${P.pact.level})`;
   else slot = 'Sin espacios de este nivel';
-  const vis = rows.filter(({ e, s }) => editing || !ch.play.onlyPrep || L === 0 || isPrepared(e) || (s.ritual && P.ritualLibro));
+  const vis = rows.filter(({ e, s }) => editing || !ch.play.onlyPrep || L === 0 || estaPreparado(e) || (s.ritual && P.ritualLibro));
   const body = vis.map(({ e, s, bi }) => rowHtml(db, ch, P, e, s, bi, schools, editing)).join('')
     || `<div class="empty-row">${rows.length ? 'Nada preparado de este nivel.' : 'Aún no hay conjuros de este nivel. Añádelos con «Añadir».'}</div>`;
   return `<div class="lvl-head"><span class="lvl-num">${L}</span><span class="lvl-title">${L === 0 ? 'Trucos' : 'Nivel ' + L}</span>
@@ -221,7 +221,7 @@ function levelHtml(db, ch, P, L, rows, schools, editing) {
 }
 
 let lastChar = null;
-export function renderBar(S) {
+export function pintarBarra(S) {
   const ch = S.cur();
   const dockLbl = (id, ic, t) => patch($(id), `${icon(ic)}<span>${t}</span>`);
   const deskLbl = (id, ic, t) => { patch($(id), `${icon(ic)}${t}`); $(id).title = t; $(id).setAttribute('aria-label', t); };
@@ -273,7 +273,7 @@ function medirBarra() {
   });
 }
 
-export function renderSheet(S) {
+export function pintarHoja(S) {
   const db = S.db, ch = S.cur(), editing = S.editing;
   document.body.classList.toggle('editing', editing);
   if (!ch) {
@@ -283,7 +283,7 @@ export function renderSheet(S) {
     return;
   }
   aplicarTema(ch);
-  const P = perfil(ch), schools = castSchools(ch);
+  const P = perfil(ch), schools = escuelasAlLanzar(ch);
   const heroChanged = patch($('#hero'), heroHtml(ch, P));
   if (lastChar !== ch.id) {
     lastChar = ch.id; pop($('#hero'), 'fx-enter');

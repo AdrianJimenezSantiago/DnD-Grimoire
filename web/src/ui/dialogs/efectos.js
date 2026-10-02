@@ -4,9 +4,9 @@ import { EFECTOS, efectosDe, fmtRondas, fmtMod } from '../../domain/combate/efec
 import { vidaDe, quitarMax, ESTADOS } from '../../domain/combate/vida.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
-import { haptic } from '../../platform/native.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
+import { vibrar } from '../../platform/native.js';
 import { alternarEfecto, alternarEstado } from './vida.js';
 
 let S, TAB = 'bueno', Q = '';
@@ -40,7 +40,7 @@ function etiquetas(e) {
   return [...new Set(t.filter(Boolean))];
 }
 
-export function openEfectos(tab = 'bueno') { TAB = tab; Q = ''; $('#efxQ').value = ''; render(); openSheet(dlg()); }
+export function abrirEfectos(tab = 'bueno') { TAB = tab; Q = ''; $('#efxQ').value = ''; render(); abrirDialogo(dlg()); }
 
 function render() {
   const ch = S.cur(); if (!ch) return;
@@ -87,13 +87,13 @@ export function init(store) {
   S = store;
   const body = $('#efxBody');
   $('#efxQ').addEventListener('input', e => { Q = e.target.value; render(); body.scrollTop = 0; });
-  on($('#efxTabs'), 'click', '[data-eftab]', (e, b) => { if (TAB === b.dataset.eftab) return; TAB = b.dataset.eftab; render(); body.scrollTop = 0; haptic('light'); });
+  on($('#efxTabs'), 'click', '[data-eftab]', (e, b) => { if (TAB === b.dataset.eftab) return; TAB = b.dataset.eftab; render(); body.scrollTop = 0; vibrar('light'); });
   on(body, 'click', '[data-efk]', (e, b) => alternarEfecto(S, b.dataset.efk));
   on(body, 'click', '[data-efest]', (e, b) => alternarEstado(S, b.dataset.efest));
   on(body, 'click', '[data-efquita]', (e, b) => {
     const id = b.dataset.efquita, x = vidaDe(S.cur()).efectos.find(y => y.id === id); if (!x) return;
     const h = S.act(`Termina ${x.nombre}`, (db, c) => { const vv = vidaDe(c); quitarMax(c, id); vv.efectos = vv.efectos.filter(y => y.id !== id); });
-    haptic('light'); toast(`<b>${esc(x.nombre)}</b> ya no te afecta.`, [undoBtn(S, h)]);
+    vibrar('light'); toast(`<b>${esc(x.nombre)}</b> ya no te afecta.`, [botonDeshacer(S, h)]);
   });
   S.subscribe(() => { if (dlg().open) render(); });
 }

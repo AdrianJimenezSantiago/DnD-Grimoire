@@ -5,9 +5,9 @@ import { statsEfectivos, bonoMagiaObjetos } from '../equipo/objetosEfecto.js';
 import { ordenDe } from '../clases/ordenes.js';
 import { aptitudEspecie, FUENTES_APTITUD } from '../origen/especies.js';
 
-export const ABILS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
-export const ABIL_NAME = Object.fromEntries(ABILS);
-export const SCHOOLS = ['Abjuración', 'Adivinación', 'Conjuración', 'Encantamiento', 'Evocación', 'Ilusionismo', 'Nigromancia', 'Transmutación'];
+export const CARACTERISTICAS = [['fue', 'Fuerza'], ['des', 'Destreza'], ['con', 'Constitución'], ['int', 'Inteligencia'], ['sab', 'Sabiduría'], ['car', 'Carisma']];
+export const NOMBRE_CAR = Object.fromEntries(CARACTERISTICAS);
+export const ESCUELAS = ['Abjuración', 'Adivinación', 'Conjuración', 'Encantamiento', 'Evocación', 'Ilusionismo', 'Nigromancia', 'Transmutación'];
 export const modOf = v => Math.floor(((parseInt(v, 10) || 10) - 10) / 2);
 export const sgn = n => (n >= 0 ? '+' : '') + n;
 export const nivelDe = ch => clamp(parseInt(ch.nivel, 10) || 1, 1, 20);

@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { blankChar, normChar } from '../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../web/src/domain/personaje/modelo.js';
 import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../web/src/domain/equipo/equipo.js';
 import { pasosVariante, concretar } from '../web/src/domain/equipo/variantesObjeto.js';
 import { efectoDe, describirEfecto } from '../web/src/domain/equipo/objetosEfecto.js';
@@ -53,7 +53,7 @@ const objetos = (await objetosDelLibro()).sort((a, b) => a.nombre.localeCompare(
 const filas = [], cuenta = { A: 0, P: 0, T: 0 };
 for (const o of objetos) {
   const pasos = pasosVariante(o), eleccion = Object.fromEntries(pasos.map(p => [p.id, p.opciones[0].valor]));
-  const x = concretar(o, eleccion), c = normChar(blankChar({ clase: 'Mago', nivel: 5 })), e = anadirObjeto(c, x, () => 1);
+  const x = concretar(o, eleccion), c = normPersonaje(personajeVacio({ clase: 'Mago', nivel: 5 })), e = anadirObjeto(c, x, () => 1);
   if (e.sintonia) alternarSintonia(c, e.id);
   if (e.arma || e.armadura) equipar(c, e.id);
   // Lo que cambia en la hoja: efecto por nombre (de cualquier variante), ataque o CA, uso al beber o leer

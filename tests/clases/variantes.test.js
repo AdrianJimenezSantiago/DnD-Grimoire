@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { varianteDe, variantesPendientes, golpeExtra, trucoPotente } from '../../web/src/domain/clases/variantes.js';
 import { escalas } from '../../web/src/domain/clases/clases2024.js';
 import { ataqueArma, golpeSinArmas } from '../../web/src/domain/equipo/equipo.js';
 
-const ch = (o = {}) => normChar(blankChar({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
+const ch = (o = {}) => normPersonaje(personajeVacio({ stats: { fue: 16, des: 14, con: 14, int: 10, sab: 16, car: 10 }, ...o }));
 
 describe('variantes de rasgo', () => {
   test('Golpes benditos: la variante se elige y cambia el daño de armas o de trucos', () => {
@@ -23,7 +23,7 @@ describe('variantes de rasgo', () => {
     assert.equal(trucoPotente(pot, 'Iniciado en la magia'), null, 'un truco de dote no es de clérigo');
     assert.equal(golpeExtra(pot).length, 0);
     assert.match(escalas(pot).find(e => e.nombre === 'Golpes benditos').valor, /\+3 a trucos/);
-    assert.deepEqual(normChar({ ...pot, variantes: { 'Clérigo': 'Inventada' } }).variantes, {});
+    assert.deepEqual(normPersonaje({ ...pot, variantes: { 'Clérigo': 'Inventada' } }).variantes, {});
   });
 
   test('Furia elemental del druida: Golpe primigenio o Lanzamiento potente', () => {

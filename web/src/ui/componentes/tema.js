@@ -1,7 +1,7 @@
 // Tema visual de cada personaje (color y emblema de su clase y subclase) y el helper gi() para pintar iconos.
 import { GI } from './gameIcons.js';
 import { TEMAS, subclaseDe } from '../../domain/clases/clases2024.js';
-import { setEscena } from '../animaciones/fondo.js';
+import { fijarEscena } from '../animaciones/fondo.js';
 import { paleta } from '../../domain/presentacion/paleta.js';
 
 const CLASE = TEMAS.clase;
@@ -19,7 +19,7 @@ export function aplicarTema(ch) {
   const t = document.body.classList.contains('on-landing') ? PORTADA : temaDe(ch), r = document.documentElement.style;
   if (r.getPropertyValue('--acc-h') !== String(t.h) || r.getPropertyValue('--acc-s') !== t.s + '%') { r.setProperty('--acc-h', t.h); r.setProperty('--acc-s', t.s + '%'); }
   for (const [k, v] of Object.entries(paleta(t, t === DEFECTO))) if (r.getPropertyValue(k) !== v) r.setProperty(k, v);
-  setEscena(t);
+  fijarEscena(t);
   return t;
 }
 export const gi = (nombre, cls = '') => (GI[nombre] ? `<svg class="gi ${cls}" viewBox="0 0 512 512" aria-hidden="true">${GI[nombre]}</svg>` : '');

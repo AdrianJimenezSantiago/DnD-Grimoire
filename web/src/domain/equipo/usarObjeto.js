@@ -4,7 +4,7 @@ import { equipoDe, curacionDe, cambiarCantidad } from './equipo.js';
 import { vidaDe, curar, ponerTemporales, ponerEfecto, aplicarDano } from '../combate/vida.js';
 import { resistenciasDe } from '../combate/efectos.js';
 import { tirarExpr } from '../combate/automatismos.js';
-import { ABIL_NAME } from '../reglas/reglas2024.js';
+import { NOMBRE_CAR } from '../reglas/reglas2024.js';
 
 // Qué pasa al beber cada poción de la Guía del Dungeon Master de 2024 (las que la hoja puede aplicar)
 const GIGANTE = [[/colinas/, 21], [/escarcha|piedra/, 23], [/fuego/, 25], [/nubes/, 27], [/tormentas/, 29]];
@@ -38,7 +38,7 @@ export const efectoAlUsar = o => (curacionDe(o) ? `cura ${curacionDe(o)}${pocion
 export function usoDe(o) {
   if (!o || o.guardado) return null;
   const k = libroDe(o);
-  if (k) return o.gastado ? null : { accion: 'leer', etiqueta: `Leer (+2 ${ABIL_NAME[k]})` };
+  if (k) return o.gastado ? null : { accion: 'leer', etiqueta: `Leer (+2 ${NOMBRE_CAR[k]})` };
   if (curacionDe(o)) return { accion: 'beber', etiqueta: /^ung/.test(norm(o.nombre)) ? `Aplicar (${curacionDe(o)})` : `Beber (${curacionDe(o)})` };
   if (o.cat === 'consumible' && /^(pocion|elixir|filtro|aceite)/.test(norm(o.nombre))) return { accion: 'beber', etiqueta: /^aceite/.test(norm(o.nombre)) ? 'Usar' : 'Beber' };
   if (o.cat === 'consumible' || o.cat === 'comida') return { accion: 'usar', etiqueta: 'Usar uno' };
@@ -56,7 +56,7 @@ export function usarObjeto(ch, id, tirar) {
     ch.stats = { ...(ch.stats || {}), [k]: Math.min(30, antes + 2) };
     o.gastado = true; o.notas = [o.notas, 'Leído: pierde su magia durante un siglo.'].filter(Boolean).join(' ');
     out.stat = { k, antes, despues: ch.stats[k] };
-    out.texto = `${ABIL_NAME[k]} ${antes} → ${ch.stats[k]} (máximo 30).`;
+    out.texto = `${NOMBRE_CAR[k]} ${antes} → ${ch.stats[k]} (máximo 30).`;
     return out;
   }
   cambiarCantidad(ch, id, -1);

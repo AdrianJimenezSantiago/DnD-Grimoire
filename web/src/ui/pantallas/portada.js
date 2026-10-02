@@ -8,12 +8,12 @@ import { icon } from '../componentes/icons.js';
 import { claseLinea } from '../../domain/personaje/descripcion.js';
 import { estadoVital } from '../../domain/combate/vida.js';
 import { avatarHtml } from '../componentes/avatar.js';
-import { viewTransition, reducedMotion } from '../animaciones/fx.js';
+import { transicionVista, movimientoReducido } from '../animaciones/fx.js';
 import { runaSvg, portalDesde, selloEn } from '../animaciones/magia.js';
 import { nexo } from '../animaciones/fondo.js';
 
 let S, cbs, verPruebas = false;
-export const landingVisible = () => document.body.classList.contains('on-landing');
+export const portadaVisible = () => document.body.classList.contains('on-landing');
 
 // La rueda de clases ordenada por tono (empieza en el dorado del clérigo, el color de la marca): recorrerla es dar la vuelta al círculo cromático
 const RUEDA = Object.entries(TEMAS.clase).map(([nombre, [h, s, icono]]) => ({ nombre, h, s, icono })).sort((a, b) => a.h - b.h);
@@ -53,7 +53,7 @@ function marcar(i) {
 }
 function latir() {
   clearInterval(timer); timer = 0;
-  if (reducedMotion() || !landingVisible()) return;
+  if (movimientoReducido() || !portadaVisible()) return;
   timer = setInterval(() => { if (!document.hidden && !fijo) marcar(activo + 1); }, PASO);
 }
 function centrar() {
@@ -115,7 +115,7 @@ function render() {
   if (nuevo) aplicarTinte();
   requestAnimationFrame(centrar); setTimeout(centrar, 700);
 }
-export function showLanding() {
+export function mostrarPortada() {
   document.body.classList.add('on-landing'); $('#landing').hidden = false;
   render(); aplicarTema(null); nexo({ tonos: TONOS });
   $('#landing').scrollTop = 0; fijo = null; marcar(activo);
@@ -123,7 +123,7 @@ export function showLanding() {
   latir();
   cbs.onShow?.();
 }
-export function hideLanding() {
+export function ocultarPortada() {
   clearInterval(timer); timer = 0;
   document.body.classList.remove('on-landing'); $('#landing').hidden = true;
   aplicarTema(S.cur()); S.emit('ui');
@@ -131,14 +131,14 @@ export function hideLanding() {
 export function init(store, callbacks) {
   S = store; cbs = callbacks; verPruebas = !!callbacks.pruebasAuto;
   const L = $('#landing');
-  S.subscribe(() => { if (landingVisible()) render(); });
+  S.subscribe(() => { if (portadaVisible()) render(); });
   on(L, 'click', '[data-lopen]', (e, b) => {
     const r = b.getBoundingClientRect();
     selloEn(b.querySelector('.lc-emb, .lc-av'), { size: 150, dur: 700 });
     portalDesde(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
     setTimeout(() => abrir(b), 120);
   });
-  const abrir = b => viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = b.dataset.lopen; }); hideLanding(); window.scrollTo({ top: 0 }); cbs.onOpen?.(); });
+  const abrir = b => transicionVista(() => { S.editing = false; S.edit(db => { db.activeId = b.dataset.lopen; }); ocultarPortada(); window.scrollTo({ top: 0 }); cbs.onOpen?.(); });
   on(L, 'click', '[data-lclase]', (e, b) => {
     selloEn(b, { size: 120, dur: 650 });
     setTimeout(() => cbs.cmd('nuevo', b.dataset.lclase), 90);
@@ -164,6 +164,6 @@ export function init(store, callbacks) {
   L.addEventListener('pointerout', e => e.pointerType === 'mouse' && soltar(e));
   L.addEventListener('focusin', mirar); L.addEventListener('focusout', soltar);
   L.addEventListener('scroll', centrar, { passive: true });
-  addEventListener('resize', () => landingVisible() && requestAnimationFrame(centrar));
+  addEventListener('resize', () => portadaVisible() && requestAnimationFrame(centrar));
   try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', latir); } catch {}
 }

@@ -2,7 +2,7 @@
 import { esc } from '../../core/util.js';
 import { gi } from './tema.js';
 import { runaSvg } from '../animaciones/magia.js';
-import { openSheet, closeSheet } from './dialog.js';
+import { abrirDialogo, cerrarDialogo } from './dialog.js';
 
 let dlg = null;
 const EMBLEMA = { info: 'glosario', reset: 'md_borrar', book: 'libro', hourglass: 'md_tiempo', save: 'md_guardar', quill: 'md_pluma' };
@@ -17,7 +17,7 @@ function abrir({ titulo, texto, icono = 'info', peligro = false, campo = null, b
   const d = ensure();
   return new Promise(resolve => {
     let hecho = false;
-    const fin = v => { if (hecho) return; hecho = true; closeSheet(d); resolve(v); };
+    const fin = v => { if (hecho) return; hecho = true; cerrarDialogo(d); resolve(v); };
     d.classList.toggle('danger', peligro);
     d.innerHTML = `<div class="md-icon">${runaSvg({ n: 14, lados: peligro ? 5 : 6, cls: 'md-runa', semillaInicial: titulo.length * 7 })}${gi(EMBLEMA[icono] || 'glosario')}</div><h2 id="mdTitle">${esc(titulo)}</h2>
       ${texto ? `<p class="md-text">${esc(texto)}</p>` : ''}
@@ -26,7 +26,7 @@ function abrir({ titulo, texto, icono = 'info', peligro = false, campo = null, b
     d.onclick = e => { const b = e.target.closest('[data-i]'); if (b) fin(botones[+b.dataset.i].valor(d)); else if (e.target === d) fin(botones[0].valor(null)); };
     d.oncancel = e => { e.preventDefault(); fin(botones[0].valor(null)); };
     d.addEventListener('close', () => fin(botones[0].valor(null)), { once: true });
-    openSheet(d);
+    abrirDialogo(d);
     const inp = d.querySelector('#mdInput');
     if (inp) { setTimeout(() => { inp.focus(); inp.select(); }, 60); inp.onkeydown = e => { if (e.key === 'Enter') fin(botones[botones.length - 1].valor(d)); }; }
     else d.querySelector('.md-btns button:last-child')?.focus();

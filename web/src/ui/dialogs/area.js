@@ -1,17 +1,17 @@
 // Diálogo de área de efecto: dibuja la plantilla de un conjuro sobre una cuadrícula y cuenta las casillas.
 import { esc } from '../../core/util.js';
-import { parseArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/combate/area.js';
+import { leerArea, celdasArea, describir, alcanceMetros, casillas, CASILLA } from '../../domain/combate/area.js';
 import { $, on } from '../componentes/dom.js';
-import { openSheet } from '../componentes/dialog.js';
+import { abrirDialogo } from '../componentes/dialog.js';
 import { avatarHtml } from '../componentes/avatar.js';
 
 let S, A = null;
 const dlg = () => $('#areaDlg');
 
-export function openArea(s, textos) {
-  const area = parseArea(textos.join(' '), s.alcance); if (!area) return;
+export function abrirArea(s, textos) {
+  const area = leerArea(textos.join(' '), s.alcance); if (!area) return;
   A = { s, area, alcance: alcanceMetros(s.alcance), dir: 0, zoom: 1, conAlcance: false };
-  render(); openSheet(dlg());
+  render(); abrirDialogo(dlg());
 }
 function render() {
   const { s, area } = A, ch = S.cur();

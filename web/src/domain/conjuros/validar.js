@@ -1,13 +1,13 @@
 // Validación de los campos de un conjuro (escuela, alcance, duración, componentes) al guardarlo o cargarlo.
 import { norm } from '../../core/util.js';
-import { SCHOOLS } from '../reglas/reglas2024.js';
+import { ESCUELAS } from '../reglas/reglas2024.js';
 
 const CERO = /^(0+([.,]0+)?\s*(m|metros?|pies|ft|km)?|nada|ninguno|ninguna|no|-+|—|–)$/i;
 const limpio = v => String(v ?? '').replace(/\s*[|*]+\s*/g, ' ').replace(/\s+/g, ' ').trim();
 
 export function escuelaOficial(v) {
   const k = norm(v).replace(/[^a-z]/g, '').slice(0, 3); if (!k) return '';
-  return SCHOOLS.find(s => norm(s).startsWith(k)) || '';
+  return ESCUELAS.find(s => norm(s).startsWith(k)) || '';
 }
 
 export function usoGratis(v) {

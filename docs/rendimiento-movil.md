@@ -64,8 +64,8 @@ Cada 4,2 s la rueda cambia de tono con una transición de 1,6 s sobre variables 
 - El tono de destino se aplica solo a los bloques que no tienen paleta propia (cabecera, títulos, acciones, pie y un nuevo `.l-cielo` para el degradado de fondo), no al contenedor. Las tarjetas de personaje, que ya tienen su propio color, no se tocan.
 - En móvil la transición avanza en 12 saltos muy cortos (`steps(12, jump-none)`). Entre salto y salto el valor no cambia y el navegador no recalcula nada. De 56 recálculos por transición se pasa a 12.
 
-### 7. Layout forzado en cada acción (`ui/pantallas/sheet.js`)
-`renderBar` medía la barra (`scrollWidth`, `getBoundingClientRect`) a mitad del render, lo que forzaba un cálculo de estilos y de layout extra, y reescribía `--appbar-h` en `:root` en cada acción aunque no hubiera cambiado. Tocar una variable de `:root` invalida los estilos de todo el documento.
+### 7. Layout forzado en cada acción (`ui/pantallas/hoja.js`)
+`pintarBarra` (entonces `renderBar`) medía la barra (`scrollWidth`, `getBoundingClientRect`) a mitad del render, lo que forzaba un cálculo de estilos y de layout extra, y reescribía `--appbar-h` en `:root` en cada acción aunque no hubiera cambiado. Tocar una variable de `:root` invalida los estilos de todo el documento.
 - La medida va al siguiente fotograma, agrupada, y además con un `ResizeObserver` sobre la barra.
 - `--appbar-h` solo se escribe si cambia.
 

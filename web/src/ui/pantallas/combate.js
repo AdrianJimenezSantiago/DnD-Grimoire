@@ -2,13 +2,13 @@
 import { ataquesPorAccion } from '../../domain/combate/maestria.js';
 import { esc, norm } from '../../core/util.js';
 import { perfil, sgn, magiaPara, nivelTotal } from '../../domain/reglas/reglas2024.js';
-import { reglas, reglasVisibles, usosGastados, schoolMatch } from '../../domain/clases/rasgos.js';
+import { reglas, reglasVisibles, usosGastados, coincideEscuela } from '../../domain/clases/rasgos.js';
 import { rasgosEnJuego } from '../../domain/clases/enJuego.js';
 import { tiradasConjuro } from '../../domain/conjuros/catalogo.js';
 import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { dadosPara } from '../../domain/conjuros/tiradas.js';
 import { trucoPotente } from '../../domain/clases/variantes.js';
-import { slotsOf, freeOf, firstFreeFrom } from '../../domain/conjuros/espacios.js';
+import { espaciosDe, espaciosLibres, primerLibreDesde } from '../../domain/conjuros/espacios.js';
 import { armasCombate, ataqueArma } from '../../domain/equipo/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo, ACCIONES_COMUNES, ACCION_COMUN, accionesAdicionales } from '../../domain/combate/combate.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../../domain/reglas/habilidades.js';
@@ -16,7 +16,7 @@ import { pgActuales, pgMaximo, estadoVital, vidaDe, NOMBRE_ESTADO } from '../../
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { runaSvg } from '../animaciones/magia.js';
-import { burst, reducedMotion } from '../animaciones/fx.js';
+import { chispas, movimientoReducido } from '../animaciones/fx.js';
 import { estadosHtml, vigiliaHtml, placaCa, placaVel, pruebasCombateHtml, pctVida, tonoVida, pipsMuerte } from './vitales.js';
 import { modsTirada, resolverModo, resumenMods, incapacitado, fmtMod, fmtRondas, lanzadorTira, efectosDe } from '../../domain/combate/efectos.js';
 
@@ -40,8 +40,8 @@ function datosConjuro(ch, P, s, Pm, fuente = '') {
   return { clave, dano, cura: !!r.curacion && !r.danos.length, mitad: r.mitad };
 }
 function pipsEspacio(ch, P, L) {
-  const tot = slotsOf(P, L); if (!tot) return '';
-  const libres = freeOf(ch, P, L);
+  const tot = espaciosDe(P, L); if (!tot) return '';
+  const libres = espaciosLibres(ch, P, L);
   return `<span class="cb-pips" title="${libres} de ${tot} espacios de nivel ${L} libres">${Array.from({ length: tot }, (_, i) => `<i class="${i < libres ? 'on' : ''}"></i>`).join('')}</span>`;
 }
 
@@ -78,8 +78,8 @@ function acciones(ch, db) {
   const recupera = reglas(ch).filter(r => r.tipo === 'al_lanzar' && r.efecto === 'recuperar');
   for (const { e, bi, s, g } of conj) {
     const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm, e.fuente);
-    const rec = s.level > 0 && recupera.find(r => schoolMatch(s, r.escuela));
-    const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !firstFreeFrom(ch, P, s.level);
+    const rec = s.level > 0 && recupera.find(r => coincideEscuela(s, r.escuela));
+    const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !primerLibreDesde(ch, P, s.level);
     // Un espacio por turno: tras gastarlo en tu turno, los conjuros de nivel solo valen gratis o como reacción en otro turno
     const turnoGastado = !sinEsp && s.level > 0 && !gratis && !!combateDe(ch).espacio && g !== 'reaccion';
     const flags = [s.conc ? '<i class="hz-f conc" title="Concentración">C</i>' : '', s.ritual ? '<i class="hz-f rit" title="Ritual">R</i>' : '', gratis ? '<i class="hz-f gratis" title="Uso gratis disponible">gratis</i>' : '',
@@ -176,7 +176,7 @@ export function combateHtml(ch, db) {
 }
 
 export function transicion(tipo, origen, alCubrir, { ronda = 1 } = {}) {
-  if (reducedMotion()) { alCubrir(); return; }
+  if (movimientoReducido()) { alCubrir(); return; }
   const r = origen?.getBoundingClientRect?.(), x = r ? r.left + r.width / 2 : innerWidth / 2, y = r ? r.top + r.height / 2 : innerHeight - 60;
   const entrar = tipo === 'entrar';
   const velo = document.createElement('div');
@@ -187,8 +187,8 @@ export function transicion(tipo, origen, alCubrir, { ronda = 1 } = {}) {
       <b>${entrar ? '¡A las armas!' : 'Fin del combate'}</b><small>${entrar ? 'Ronda 1 · tira iniciativa' : `${ronda} ${ronda === 1 ? 'ronda' : 'rondas'}`}</small></div>`;
   document.body.appendChild(velo);
   document.body.classList.add('en-transicion');
-  if (entrar) burst(x, y, { color: '#FF7A3D', n: 34, speed: 4.2, up: 2, life: 1100, size: 2.4, gravity: -0.03 });
-  else burst(x, y, { color: '#E7C98A', n: 22, speed: 2.4, up: 2.6, life: 1300, size: 2, gravity: -0.02 });
+  if (entrar) chispas(x, y, { color: '#FF7A3D', n: 34, speed: 4.2, up: 2, life: 1100, size: 2.4, gravity: -0.03 });
+  else chispas(x, y, { color: '#E7C98A', n: 22, speed: 2.4, up: 2.6, life: 1300, size: 2, gravity: -0.02 });
   setTimeout(() => { alCubrir(); window.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' }); velo.classList.add('revela'); }, 560);
   setTimeout(() => { velo.remove(); document.body.classList.remove('en-transicion'); }, 1750);
 }

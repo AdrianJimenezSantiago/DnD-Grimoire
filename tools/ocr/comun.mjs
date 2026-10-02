@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
+import { paginaAColumnas } from '../../web/src/domain/libros/manualLineas.js';
 
 export const RAIZ = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));
 export const DIR = path.join(RAIZ, 'tools/ocr');
@@ -25,12 +25,12 @@ export function archivoLibro(id) {
 
 export const abrir = id => pdfjs.getDocument({ url: archivoLibro(id), disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise;
 
-// Texto de una página tal y como lo ve la app: líneas de cada columna (pageToColumns), columnas separadas por una línea en blanco
+// Texto de una página tal y como lo ve la app: líneas de cada columna (paginaAColumnas), columnas separadas por una línea en blanco
 export async function textoPagina(doc, p) {
   const page = await doc.getPage(p), tc = await page.getTextContent(), w = page.getViewport({ scale: 1 }).width;
   page.cleanup();
   const items = tc.items.filter(i => i.str).map(i => ({ str: i.str, transform: i.transform, width: i.width, height: i.height }));
-  return pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
+  return paginaAColumnas(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
 }
 
 export const leerPaginas = () => JSON.parse(fs.readFileSync(path.join(DIR, 'paginas.json'), 'utf8')).paginas;
@@ -49,7 +49,7 @@ export async function textoLibro(id) {
 }
 
 // Elementos de texto (como los de pdf.js) a partir de la salida TSV de Tesseract: las palabras de cada línea se agrupan en
-// frases y solo se cortan en huecos grandes (celdas de tabla), para que pageToColumns vea lo mismo que con un PDF normal
+// frases y solo se cortan en huecos grandes (celdas de tabla), para que paginaAColumnas vea lo mismo que con un PDF normal
 export function itemsDeTsv(tsv, dpi, altoPx) {
   const k = 72 / dpi, lineas = new Map();
   for (const fila of tsv.split('\n').slice(1)) {

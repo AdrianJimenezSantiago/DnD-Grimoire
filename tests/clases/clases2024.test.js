@@ -3,16 +3,16 @@ import assert from 'node:assert/strict';
 import { compendioJson, leerFuente } from '../helpers/fixtures.js';
 import { CLASES } from '../../web/src/domain/reglas/reglas2024.js';
 import { CLASES_INFO, SUBCLASES, TEMAS, conjurosAutomaticos, escalas, progresion, rasgosEnNivel, subclaseDe } from '../../web/src/domain/clases/clases2024.js';
-import { featuresAt } from '../../web/src/domain/clases/progresion.js';
+import { rasgosEn } from '../../web/src/domain/clases/progresion.js';
 import { reglas } from '../../web/src/domain/clases/rasgos.js';
-import { blankChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio } from '../../web/src/domain/personaje/modelo.js';
 import { combinaciones } from '../../web/src/domain/personaje/pruebas.js';
 import { GI as ICONOS } from '../../web/src/ui/componentes/gameIcons.js';
 
 const { conjuros } = compendioJson();
 const GI = JSON.stringify(ICONOS);
 const ESCENAS = leerFuente('web/src/ui/animaciones/fondo.js');
-const ch = (clase, subclase = '', nivel = 8, stats = {}) => blankChar({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
+const ch = (clase, subclase = '', nivel = 8, stats = {}) => personajeVacio({ clase, subclase, nivel, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14, ...stats } });
 
 describe('progresion: rasgos por nivel', () => {
   test('las 12 clases tienen progresión de 1 a 20, con subclase a nivel 3 y don épico a 19', () => {
@@ -47,8 +47,8 @@ describe('progresion: rasgos por nivel', () => {
     assert.deepEqual(rasgosEnNivel(ch('Mago', 'Adivino'), 3), ['Subclase de mago', 'Experto en adivinación', 'Presagio']);
     assert.deepEqual(rasgosEnNivel(ch('Mago', ''), 6), ['Rasgo de subclase']);
     assert.deepEqual(rasgosEnNivel(ch('Monje', 'Guerrero de la sombra'), 6), ['Golpes potenciados', 'Paso entre sombras']);
-    assert.deepEqual(featuresAt(ch('Paladín', '', 2), { subclase: 'Juramento de venganza' }, 3), ['Canalizar divinidad', 'Subclase', 'Conjuros del juramento de venganza', 'Voto de enemistad']);
-    assert.deepEqual(featuresAt(ch('Guerrero', 'Campeón', 5), {}, 6), ['Mejora de característica']);
+    assert.deepEqual(rasgosEn(ch('Paladín', '', 2), { subclase: 'Juramento de venganza' }, 3), ['Canalizar divinidad', 'Subclase', 'Conjuros del juramento de venganza', 'Voto de enemistad']);
+    assert.deepEqual(rasgosEn(ch('Guerrero', 'Campeón', 5), {}, 6), ['Mejora de característica']);
     const p = progresion(ch('Pícaro', 'Asesino', 9));
     assert.deepEqual(p.filter(r => r.origen === 'subclase').map(r => r.nombre), ['Asesinar', 'Herramientas de asesino', 'Pericia en infiltrarse']);
     assert.equal(p.filter(r => r.nombre === 'Pericia').length, 2);

@@ -18,18 +18,18 @@ import { accionesAdicionales } from '../../web/src/domain/combate/combate.js';
 import { cupoMaestrias } from '../../web/src/domain/combate/maestria.js';
 import { gastarDadoGolpe, vidaDe, aplicarDano, pgActuales, pgMaximo, ponerEfecto } from '../../web/src/domain/combate/vida.js';
 import { dotesConConjuros } from '../../web/src/domain/origen/conjurosDote.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { conjurosAutomaticos, escalas } from '../../web/src/domain/clases/clases2024.js';
 import { opcionesDe, opcionesPendientes, opcionesCambiables, normOpciones } from '../../web/src/domain/clases/opcionesRasgo.js';
 import { opcionesIntercambio } from '../../web/src/domain/clases/intercambios.js';
-import { reglas, recState } from '../../web/src/domain/clases/rasgos.js';
+import { reglas, estadoRecurso } from '../../web/src/domain/clases/rasgos.js';
 import { opcionesAlImpactar, danoSiempre, gastarAlImpactar } from '../../web/src/domain/combate/alImpactar.js';
 import { rasgosEnJuego } from '../../web/src/domain/clases/enJuego.js';
 import { sobrantesAutomaticos } from '../../web/src/domain/clases/progresion.js';
 import { perfil, magiaPara } from '../../web/src/domain/reglas/reglas2024.js';
 
 const stats = { fue: 16, des: 16, con: 14, int: 12, sab: 14, car: 14 };
-const ch = o => normChar(blankChar({ stats, ...o }));
+const ch = o => normPersonaje(personajeVacio({ stats, ...o }));
 const seis = () => 6;
 
 describe('druida: Círculo de la tierra', () => {
@@ -75,35 +75,35 @@ describe('opciones de rasgo', () => {
 describe('al tirar iniciativa y al empezar el turno', () => {
   test('iniciativa: Metabolismo asombroso recupera concentración y cura nivel + dado de artes marciales', () => {
     const m = ch({ clase: 'Monje', nivel: 6 });
-    recState(m, 'tpl:monje.concentracion').used = 4; aplicarDano(m, 20);
+    estadoRecurso(m, 'tpl:monje.concentracion').used = 4; aplicarDano(m, 20);
     const antes = pgActuales(m), out = alTirarIniciativa(m, seis);
     assert.equal(out[0].nombre, 'Metabolismo asombroso');
-    assert.equal(recState(m, 'tpl:monje.concentracion').used, 0);
+    assert.equal(estadoRecurso(m, 'tpl:monje.concentracion').used, 0);
     assert.equal(pgActuales(m), antes + 6 + 6);
-    assert.equal(recState(m, 'tpl:monje.metabolismo').used, 1);
-    recState(m, 'tpl:monje.concentracion').used = 2;
+    assert.equal(estadoRecurso(m, 'tpl:monje.metabolismo').used, 1);
+    estadoRecurso(m, 'tpl:monje.concentracion').used = 2;
     assert.deepEqual(alTirarIniciativa(m, seis), [], 'solo una vez por descanso largo');
   });
 
   test('iniciativa: Concentración perfecta (monje 15) sube a 4 puntos si no usas Metabolismo', () => {
     const m = ch({ clase: 'Monje', nivel: 15 });
-    recState(m, 'tpl:monje.metabolismo').used = 1; recState(m, 'tpl:monje.concentracion').used = 14;
+    estadoRecurso(m, 'tpl:monje.metabolismo').used = 1; estadoRecurso(m, 'tpl:monje.concentracion').used = 14;
     alTirarIniciativa(m);
-    assert.equal(15 - recState(m, 'tpl:monje.concentracion').used, 4);
+    assert.equal(15 - estadoRecurso(m, 'tpl:monje.concentracion').used, 4);
   });
 
   test('iniciativa: Furia persistente (bárbaro 15) e Inspiración superior (bardo 18)', () => {
     const b = ch({ clase: 'Bárbaro', nivel: 15 });
     assert.ok(reglas(b).some(r => r.id === 'tpl:barbaro.persistente'));
-    recState(b, 'tpl:barbaro.furia').used = 3;
+    estadoRecurso(b, 'tpl:barbaro.furia').used = 3;
     assert.equal(alTirarIniciativa(b)[0].nombre, 'Furia persistente');
-    assert.equal(recState(b, 'tpl:barbaro.furia').used, 0);
-    recState(b, 'tpl:barbaro.furia').used = 1;
+    assert.equal(estadoRecurso(b, 'tpl:barbaro.furia').used, 0);
+    estadoRecurso(b, 'tpl:barbaro.furia').used = 1;
     assert.deepEqual(alTirarIniciativa(b), []);
     const bardo = ch({ clase: 'Bardo', nivel: 18, stats: { ...stats, car: 20 } });
-    recState(bardo, 'tpl:bardo.inspiracion').used = 5;
+    estadoRecurso(bardo, 'tpl:bardo.inspiracion').used = 5;
     alTirarIniciativa(bardo);
-    assert.equal(recState(bardo, 'tpl:bardo.inspiracion').used, 3);
+    assert.equal(estadoRecurso(bardo, 'tpl:bardo.inspiracion').used, 3);
   });
 
   test('inicio de turno: Guerrero heroico da inspiración y Superviviente cura si estás maltrecho', () => {
@@ -137,41 +137,41 @@ describe('usos, curación y canjes', () => {
   test('canjes: recuperar usos gastando espacios, Furia o puntos de hechicería', () => {
     const b = ch({ clase: 'Bárbaro', subclase: 'Senda del berserker', nivel: 14 });
     assert.deepEqual(canjesDe(b, 'tpl:berserker.presencia'), [], 'sin gastar no hay nada que recuperar');
-    recState(b, 'tpl:berserker.presencia').used = 1;
+    estadoRecurso(b, 'tpl:berserker.presencia').used = 1;
     const c = canjesDe(b, 'tpl:berserker.presencia')[0]; assert.equal(c.rec2, 'tpl:barbaro.furia');
     aplicarCanje(b, 'tpl:berserker.presencia', c);
-    assert.equal(recState(b, 'tpl:berserker.presencia').used, 0); assert.equal(recState(b, 'tpl:barbaro.furia').used, 1);
-    const bardo = ch({ clase: 'Bardo', nivel: 5 }); recState(bardo, 'tpl:bardo.inspiracion').used = 1;
+    assert.equal(estadoRecurso(b, 'tpl:berserker.presencia').used, 0); assert.equal(estadoRecurso(b, 'tpl:barbaro.furia').used, 1);
+    const bardo = ch({ clase: 'Bardo', nivel: 5 }); estadoRecurso(bardo, 'tpl:bardo.inspiracion').used = 1;
     assert.deepEqual(canjesDe(bardo, 'tpl:bardo.inspiracion').map(x => x.espacio), [1, 2, 3]);
-    const bardo4 = ch({ clase: 'Bardo', nivel: 4 }); recState(bardo4, 'tpl:bardo.inspiracion').used = 1;
+    const bardo4 = ch({ clase: 'Bardo', nivel: 4 }); estadoRecurso(bardo4, 'tpl:bardo.inspiracion').used = 1;
     assert.deepEqual(canjesDe(bardo4, 'tpl:bardo.inspiracion'), [], 'Fuente de inspiración es de nivel 5');
-    const d = ch({ clase: 'Druida', nivel: 5 }); recState(d, 'tpl:druida.forma').used = 1;
+    const d = ch({ clase: 'Druida', nivel: 5 }); estadoRecurso(d, 'tpl:druida.forma').used = 1;
     assert.deepEqual(canjesDe(d, 'tpl:druida.forma'), [], 'Resurgimiento salvaje solo sin usos');
-    recState(d, 'tpl:druida.forma').used = 2; assert.ok(canjesDe(d, 'tpl:druida.forma').length);
-    const h = ch({ clase: 'Hechicero', nivel: 5 }); recState(h, 'tpl:hechicero.puntos').used = 4;
+    estadoRecurso(d, 'tpl:druida.forma').used = 2; assert.ok(canjesDe(d, 'tpl:druida.forma').length);
+    const h = ch({ clase: 'Hechicero', nivel: 5 }); estadoRecurso(h, 'tpl:hechicero.puntos').used = 4;
     assert.deepEqual(fuenteDeMagia(h).crear, [], 'solo recupera espacios gastados');
-    assert.equal(espacioAPuntos(h, 3), 3); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 1); assert.equal(h.play.used[3], 1);
+    assert.equal(espacioAPuntos(h, 3), 3); assert.equal(estadoRecurso(h, 'tpl:hechicero.puntos').used, 1); assert.equal(h.play.used[3], 1);
     assert.deepEqual(fuenteDeMagia(h).crear, [], 'crear uno de nivel 3 cuesta 5 y quedan 4');
-    recState(h, 'tpl:hechicero.puntos').used = 0;
+    estadoRecurso(h, 'tpl:hechicero.puntos').used = 0;
     assert.deepEqual(fuenteDeMagia(h).crear.map(x => [x.L, x.coste]), [[3, 5]]);
-    assert.equal(puntosAEspacio(h, 3), 5); assert.equal(h.play.used[3], 0); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 5);
+    assert.equal(puntosAEspacio(h, 3), 5); assert.equal(h.play.used[3], 0); assert.equal(estadoRecurso(h, 'tpl:hechicero.puntos').used, 5);
   });
 
   test('lanzadores: Astucia mágica, Recuperación mágica y Forma salvaje al gastarse', () => {
     const b = ch({ clase: 'Brujo', nivel: 11 }); b.play.used = { 5: 3 };
     assert.match(alGastarRecurso(b, 'tpl:brujo.astucia')[0], /Recuperas 2 espacios/); assert.equal(b.play.used[5], 1);
     const b20 = ch({ clase: 'Brujo', nivel: 20 }); b20.play.used = { 5: 4 }; alGastarRecurso(b20, 'tpl:brujo.astucia'); assert.equal(b20.play.used[5], 0);
-    const h = ch({ clase: 'Hechicero', nivel: 9 }); recState(h, 'tpl:hechicero.puntos').used = 9;
-    alGastarRecurso(h, 'tpl:hechicero.recuperacion'); assert.equal(recState(h, 'tpl:hechicero.puntos').used, 5);
+    const h = ch({ clase: 'Hechicero', nivel: 9 }); estadoRecurso(h, 'tpl:hechicero.puntos').used = 9;
+    alGastarRecurso(h, 'tpl:hechicero.recuperacion'); assert.equal(estadoRecurso(h, 'tpl:hechicero.puntos').used, 5);
     const d = ch({ clase: 'Druida', subclase: 'Círculo de la luna', nivel: 4 }); alGastarRecurso(d, 'tpl:druida.forma');
     assert.equal(vidaDe(d).temp, 12);
     const d2 = ch({ clase: 'Druida', nivel: 4 }); alGastarRecurso(d2, 'tpl:druida.forma'); assert.equal(vidaDe(d2).temp, 4);
   });
 
   test('lanzadores: Archidruida recupera Forma salvaje al tirar iniciativa si no quedan', () => {
-    const d = ch({ clase: 'Druida', nivel: 20 }); recState(d, 'tpl:druida.forma').used = 4;
+    const d = ch({ clase: 'Druida', nivel: 20 }); estadoRecurso(d, 'tpl:druida.forma').used = 4;
     assert.equal(alTirarIniciativa(d).find(x => x.nombre === 'Archidruida').nombre, 'Archidruida');
-    assert.equal(recState(d, 'tpl:druida.forma').used, 3);
+    assert.equal(estadoRecurso(d, 'tpl:druida.forma').used, 3);
   });
 
   test('lanzadores: Hechicería innata sube 1 la CD de hechicero', () => {
@@ -211,7 +211,7 @@ describe('ataques y daño', () => {
     assert.equal(ops.find(o => o.k === 'afliccion').dado, '1d8+2');
     assert.ok(!opcionesAlImpactar(m, arma('Espada larga')).some(o => o.k === 'aturdidor'), 'la espada larga no es arma de monje');
     gastarAlImpactar(m, [at]);
-    assert.equal(recState(m, 'tpl:monje.concentracion').used, 1);
+    assert.equal(estadoRecurso(m, 'tpl:monje.concentracion').used, 1);
   });
 
   test('Golpe psiónico, Golpe pavoroso, Golpes pavorosos y conjuros de concentración que suman daño', () => {
@@ -234,7 +234,7 @@ describe('ataques y daño', () => {
     const m = ch({ clase: 'Monje', nivel: 3 });
     assert.equal(reaccionesDano(m, () => 4).find(r => r.k === 'desviar').aplica(m, 12), 12 - (4 + 3 + 3));
     const a = ch({ clase: 'Mago', subclase: 'Abjurador', nivel: 3 }); const w = reaccionesDano(a).find(r => r.k === 'salvaguarda');
-    assert.equal(w.aplica(a, 20), 20 - (6 + 1)); assert.equal(recState(a, 'tpl:abjurador.salvaguarda').used, 7);
+    assert.equal(w.aplica(a, 20), 20 - (6 + 1)); assert.equal(estadoRecurso(a, 'tpl:abjurador.salvaguarda').used, 7);
     const e = ch({ clase: 'Explorador', nivel: 17 }); e.play.conc = 'Marca del cazador';
     assert.ok(modsTirada(e, { sobre: 'ataque' }).some(x => x.fuente === 'Cazador preciso'));
   });
@@ -406,8 +406,8 @@ describe('libros: Manual y Faerûn', () => {
     assert.ok(!ataqueArma(m, arma('Espada larga')).estilos.some(e => /victoria/i.test(e)));
     const b = ch({ clase: 'Bardo', subclase: 'Colegio de la danza', nivel: 5 });
     assert.equal(golpeSinArmas(b).arma.dano, '1d8'); assert.match(ataqueArma(b, golpeSinArmas(b)).dano, /^1d8 \+ 3/);
-    const s = ch({ clase: 'Hechicero', subclase: 'Hechicería de magia salvaje', nivel: 3 }); recState(s, 'tpl:salvaje.mareas').used = 1;
-    assert.equal(alLanzarConEspacio(s, 'Hechicero').length, 1); assert.equal(recState(s, 'tpl:salvaje.mareas').used, 0);
+    const s = ch({ clase: 'Hechicero', subclase: 'Hechicería de magia salvaje', nivel: 3 }); estadoRecurso(s, 'tpl:salvaje.mareas').used = 1;
+    assert.equal(alLanzarConEspacio(s, 'Hechicero').length, 1); assert.equal(estadoRecurso(s, 'tpl:salvaje.mareas').used, 0);
     assert.equal(rangoMuerte(ch({ clase: 'Guerrero', subclase: 'Campeón', nivel: 18 })), 18);
   });
 

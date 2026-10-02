@@ -1,5 +1,5 @@
 // Reconstruye las líneas y columnas de una página del PDF a partir de los trozos de texto con posición.
-export function gutterOf(items, pageWidth) {
+export function margenDe(items, pageWidth) {
   const count = new Map();
   for (const it of items) {
     if (!it.str || !it.str.trim()) continue;
@@ -12,8 +12,8 @@ export function gutterOf(items, pageWidth) {
   const at = Math.min(...[...count.keys()].filter(x => win(x) >= Math.max(6, best * 0.2)));
   return at - 8;
 }
-export function pageToColumns(items, pageWidth) {
-  const mid = gutterOf(items, pageWidth);
+export function paginaAColumnas(items, pageWidth) {
+  const mid = margenDe(items, pageWidth);
   const cols = [[], []];
   for (const it of items) {
     if (!it.str) continue;

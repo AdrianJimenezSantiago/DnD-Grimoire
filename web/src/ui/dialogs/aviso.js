@@ -3,7 +3,7 @@ import { esc } from '../../core/util.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { runaSvg } from '../animaciones/magia.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 
 let acciones = [];
 const dlg = () => $('#avisoDlg');
@@ -21,9 +21,9 @@ export function avisar({ ico = 'vela', tono = 'oro', titulo, sub = '', secciones
   $('#avBody').innerHTML = secciones.filter(s => s.items?.length || s.html || s.nota).map(s => `<section class="av-sec ${s.cls || ''}">${s.titulo ? `<h3>${s.ico ? gi(s.ico) : ''}${esc(s.titulo)}</h3>` : ''}
     ${s.nota ? `<p class="av-nota">${esc(s.nota)}</p>` : ''}${s.items?.length ? `<ul class="av-lista">${s.items.map(item).join('')}</ul>` : ''}${s.html || ''}</section>`).join('');
   $('#avFoot').innerHTML = `${botones.map((b, k) => `<button type="button" data-avb="${k}" class="${b.cls || ''}">${esc(b.label)}</button>`).join('')}<span class="spacer"></span><button type="button" class="gold" data-close>${esc(botones.cierre || 'Entendido')}</button>`;
-  openSheet(d);
+  abrirDialogo(d);
 }
 
 export function init() {
-  on($('#avFoot'), 'click', '[data-avb]', (e, b) => { const a = acciones[+b.dataset.avb]; if (!a) return; if (!a.quedarse) closeSheet(dlg()); a.fn?.(); });
+  on($('#avFoot'), 'click', '[data-avb]', (e, b) => { const a = acciones[+b.dataset.avb]; if (!a) return; if (!a.quedarse) cerrarDialogo(dlg()); a.fn?.(); });
 }

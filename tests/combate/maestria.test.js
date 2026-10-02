@@ -1,13 +1,13 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { arma } from '../helpers/fixtures.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { esSencilla } from '../../web/src/domain/reglas/competencias.js';
 import { cupoMaestrias, armaElegible, efectoMaestria, ataquesPorAccion, cupoEn } from '../../web/src/domain/combate/maestria.js';
 import { registrarAtaque, siguienteTurno, empezarCombate } from '../../web/src/domain/combate/combate.js';
 import { ataqueArma, anadirComun } from '../../web/src/domain/equipo/equipo.js';
 
-const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
+const pj = o => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
 
 describe('armaElegible', () => {
   test('el pícaro domina cualquier arma sencilla, aunque no sea sutil ni ligera (Manual del Jugador 2024)', () => {

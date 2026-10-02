@@ -1,12 +1,12 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { arma } from '../helpers/fixtures.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { estadoEstilo, estiloDe, opcionesEstilo, trucosAlternativa } from '../../web/src/domain/clases/estilos.js';
 import { anadirComun, claseArmadura, ataqueArma } from '../../web/src/domain/equipo/equipo.js';
 import { opcionesIntercambio } from '../../web/src/domain/clases/intercambios.js';
 
-const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
+const pj = o => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
 
 describe('estilos de combate', () => {
   test('estilo de combate: cuándo toca elegirlo', () => {

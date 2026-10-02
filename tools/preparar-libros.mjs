@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { analizarLibro } from '../web/src/domain/libros/libroCompleto.js';
-import { loadSrd } from '../web/src/domain/conjuros/catalogo.js';
+import { cargarCompendio } from '../web/src/domain/conjuros/catalogo.js';
 import { componerLibro, aceptarPropuestas, hayContenido } from '../web/src/domain/libros/componerLibro.js';
 
 const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -44,7 +44,7 @@ for (const f of fs.existsSync(dirLecturas) ? fs.readdirSync(dirLecturas).filter(
 
 const vocabulario = JSON.parse(fs.readFileSync(path.join(RAIZ, 'web/public/data/vocabulario.json'), 'utf8'));
 const compendio = JSON.parse(fs.readFileSync(path.join(RAIZ, 'web/public/data/compendio.json'), 'utf8'));
-if (!(await loadSrd(Promise.resolve(compendio)))) throw new Error('No se pudo cargar el compendio');
+if (!(await cargarCompendio(Promise.resolve(compendio)))) throw new Error('No se pudo cargar el compendio');
 fs.mkdirSync(destino, { recursive: true });
 const indice = [];
 for (const nombre of fs.readdirSync(origen).filter(f => /\.pdf$/i.test(f)).sort()) {

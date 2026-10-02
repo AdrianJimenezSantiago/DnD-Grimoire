@@ -1,6 +1,6 @@
 // Lo que se puede hacer con un objeto mágico (recuperar espacios, lanzar conjuros, curar) y lo que gasta.
 import { norm, uid } from '../../core/util.js';
-import { recState, usosGastados, reglas } from '../clases/rasgos.js';
+import { estadoRecurso, usosGastados, reglas } from '../clases/rasgos.js';
 import { perfil } from '../reglas/reglas2024.js';
 import { curar } from '../combate/vida.js';
 import { tirarExpr } from '../combate/automatismos.js';
@@ -138,7 +138,7 @@ export function opcionesEscala(a) {
 export function usarAccion(ch, o, a, { cargas = a.coste, L = null, tirar } = {}) {
   const motivo = motivoAccion(ch, o, a, cargas); if (motivo) return { ok: false, motivo };
   const r = recursoDe(ch, o, a, true);
-  if (r) { const st = recState(ch, r.id); st.used = (st.used || 0) + (a.uso === 'cargas' ? cargas : 1); }
+  if (r) { const st = estadoRecurso(ch, r.id); st.used = (st.used || 0) + (a.uso === 'cargas' ? cargas : 1); }
   const out = { ok: true, recurso: r, gastadas: r ? (a.uso === 'cargas' ? cargas : 1) : 0 };
   if (a.tipo === 'recuperar') {
     const opciones = espaciosRecuperables(ch, a.nivMax), nivel = opciones.some(([x]) => x === L) ? L : opciones[opciones.length - 1][0];

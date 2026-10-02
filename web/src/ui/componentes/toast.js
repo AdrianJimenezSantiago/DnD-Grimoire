@@ -7,12 +7,12 @@ export function toast(msg, actions = []) {
   const acts = $('#toastActs'); acts.innerHTML = '';
   actions.filter(Boolean).forEach(a => {
     const b = document.createElement('button'); b.type = 'button'; b.textContent = a.label; if (a.hl) b.className = 'hl';
-    b.addEventListener('click', () => { hideToast(); a.fn(); }); acts.appendChild(b);
+    b.addEventListener('click', () => { ocultarToast(); a.fn(); }); acts.appendChild(b);
   });
   box.classList.add('show');
-  clearTimeout(timer); timer = setTimeout(hideToast, actions.length ? 7000 : 3200);
+  clearTimeout(timer); timer = setTimeout(ocultarToast, actions.length ? 7000 : 3200);
 }
-export const hideToast = () => $('#toast').classList.remove('show');
-export const toastOpen = () => $('#toast').classList.contains('show');
+export const ocultarToast = () => $('#toast').classList.remove('show');
+export const toastAbierto = () => $('#toast').classList.contains('show');
 // Botón «Deshacer» para un aviso: h es lo que devuelven S.act, S.edit o S.replace.
-export const undoBtn = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });
+export const botonDeshacer = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });

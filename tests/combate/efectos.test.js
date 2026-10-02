@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { resumenTirada, modsTirada, resolverModo, falloAutomatico, caEfectiva, velocidadEfectiva, incapacitado, danoArmaExtra, lanzadorTira, soloSobreTi, efectoDeConjuro, EFECTOS, fmtRondas } from '../../web/src/domain/combate/efectos.js';
 import { combateDe, empezarCombate, hacerAccionComun, deshacerAccionComun, siguienteTurno, accionesAdicionales } from '../../web/src/domain/combate/combate.js';
 import { ponerEfecto, pasarRonda, pgMaximo, pgActuales, aumentarMax, quitarMax, aplicarDano, descansoLargoVida, esYo, sincronizarYo, cambiarConc } from '../../web/src/domain/combate/vida.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 
-const pj = vida => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, vida }));
+const pj = vida => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, vida }));
 const claseBase = ch => { const c = { ...ch, vida: { ...ch.vida, efectos: [] } }; return caEfectiva(c).ca; };
-const guerrero = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
+const guerrero = over => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
 
 describe('estados', () => {
   test('desventaja, ventaja y fallo automático donde toca', () => {

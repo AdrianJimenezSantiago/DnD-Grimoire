@@ -44,7 +44,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `conjuros/` | Catálogo y compendio, espacios de conjuro, análisis de tiradas de cada conjuro, validación | `catalogo.js`, `espacios.js` |
 | `equipo/` | Inventario, armas y armaduras, monedas y carga, objetos mágicos (efectos, variantes, acciones, consumibles) | `equipo.js` |
 | `criaturas/` | Bestiario de la campaña, perfiles para invocar o transformarse y lector de perfiles de los libros | `bestiario.js` |
-| `libros/` | Importación de PDF (corrección del OCR, columnas, tablas y un lector por tipo de contenido) y lo ya importado: libros cargados y glosario | `libroCompleto.js` (`analizarLibro`), `biblioteca.js` (`setLibros`), `terminos.js` |
+| `libros/` | Importación de PDF (corrección del OCR, columnas, tablas y un lector por tipo de contenido) y lo ya importado: libros cargados y glosario | `libroCompleto.js` (`analizarLibro`), `biblioteca.js` (`fijarLibros`), `terminos.js` |
 | `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, paleta de colores | — |
 
 ### `web/src/ui/` — interfaz
@@ -52,7 +52,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | Carpeta | Contenido |
 |---|---|
 | `componentes/` | Piezas base reutilizables: DOM (`$`, `on`, `patch`), apertura de diálogos, modales, avisos (`toast`), iconos, tema por clase, tutorial |
-| `pantallas/` | Lo que está siempre en pantalla: portada (`landing`), hoja (`sheet`, `vitales`), modo combate, fichas de lectura rápida y pantalla de luto |
+| `pantallas/` | Lo que está siempre en pantalla: portada (`portada`), hoja (`hoja`, `vitales`), modo combate, fichas de lectura rápida y pantalla de luto |
 | `dialogs/` | Un módulo por diálogo de la app (conjuro, inventario, vida, dados, biblioteca, subir de nivel…) |
 | `selectores/` | Piezas de elección que usan varios diálogos: subclase, especie, dote, habilidades, maestrías, maniobras, «al impactar» |
 | `animaciones/` | Efectos visuales: fondo animado (con su Worker), chispas, runas, golpes, impactos y dados que ruedan |
@@ -83,7 +83,7 @@ Hay un único store, `S`, que se pasa a cada pieza al arrancar.
 ```js
 const h = S.act('Lanza Bola de fuego', (db, ch) => { ch.play.used[3]++; }); // acción de juego: va al historial y se puede deshacer
 S.edit((db, ch) => { ch.nombre = 'Theo'; });                                // edición de la hoja
-toast('Hecho.', [undoBtn(S, h)]);                                             // aviso con «Deshacer»
+toast('Hecho.', [botonDeshacer(S, h)]);                                       // aviso con «Deshacer»
 ```
 
 Cada cambio emite un evento; `main.js` vuelve a pintar la hoja y cada diálogo abierto se repinta con `S.subscribe`.
@@ -93,9 +93,9 @@ Cada cambio emite un evento; `main.js` vuelve a pintar la hoja y cada diálogo a
 Todos siguen la misma forma:
 
 ```js
-let S;                                     // el store, guardado en init
-export function openHistory() { render(); openSheet($('#histDlg')); }
-export function init(store) {              // main.js lo llama una vez al arrancar
+let S;                                       // el store, guardado en init
+export function abrirHistorial() { render(); abrirDialogo($('#histDlg')); }
+export function init(store) {                // main.js lo llama una vez al arrancar
   S = store;
   S.subscribe(() => { if ($('#histDlg').open) render(); });
   on($('#histBody'), 'click', '[data-hundo]', …);
@@ -111,7 +111,8 @@ Los módulos pesados que no hacen falta al abrir la app (asistentes de personaje
 ### Nombres
 
 - Archivos y funciones nuevas en castellano y en `camelCase` (`aplicarDano`, `libroCompleto.js`); constantes de datos en `MAYUSCULAS`.
-- Quedan nombres antiguos en inglés (`openSpell`, `renderSheet`, `slotsOf`…) que se mantienen para no romper nada; no hace falta traducirlos, pero el código nuevo va en castellano.
+- Los verbos de las funciones también en castellano y siempre los mismos: `abrir…` para diálogos, `pintar…` para HTML, `fijar…` para guardar un estado del módulo, `leer…` para los lectores de libros, `norm…` para normalizar datos guardados.
+- Siguen en inglés, a propósito: los métodos del store (`S.act`, `S.edit`, `S.undo`…), las ayudas del DOM (`$`, `on`, `patch`), `toast` y los **campos de los datos guardados** (`ch.book`, `play.used`, `level`…). Cambiar esos campos obligaría a migrar los personajes guardados en cada dispositivo.
 - Un archivo de `ui/` puede llamarse igual que uno de `domain/` cuando es su interfaz (`domain/combate/alImpactar.js` y `ui/selectores/alImpactar.js`).
 
 ## Pruebas
@@ -132,7 +133,7 @@ node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contie
 | `tests/arquitectura/` | Las reglas de dependencia entre capas y que todo lo importado exista |
 | `tests/helpers/fixtures.js` | Utilidades comunes: leer el compendio, copiar un arma predefinida, leer un archivo del repositorio |
 
-Dentro de cada archivo, cada `describe` agrupa las pruebas de una función o de una regla (`describe('salvaciones contra muerte', …)`), y el título de cada `test` dice qué comportamiento comprueba. Los personajes de ejemplo se crean con `normChar(blankChar({ … }))` en un auxiliar al principio del archivo.
+Dentro de cada archivo, cada `describe` agrupa las pruebas de una función o de una regla (`describe('salvaciones contra muerte', …)`), y el título de cada `test` dice qué comportamiento comprueba. Los personajes de ejemplo se crean con `normPersonaje(personajeVacio({ … }))` en un auxiliar al principio del archivo.
 
 ## Cómo añadir…
 

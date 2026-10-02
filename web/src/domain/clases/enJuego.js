@@ -170,9 +170,9 @@ const AB_N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Intel
 
 export function resumenClase(clase, lib = {}) {
   const info = CLASES_INFO[clase]; if (!info) return null;
-  const cast = CLASES[clase]?.cast, subCast = CLASES[clase]?.subCast;
+  const lanzar = CLASES[clase]?.cast, subCast = CLASES[clase]?.subCast;
   const datos = [['Dado de golpe', `d${info.dg}`], ['Salvaciones', info.salv.map(k => AB_N[k]).join(' y ')], ['Característica principal', AB_N[info.prio[0]]],
-    ['Conjuros', cast ? `${CAST_TXT[cast.tipo]} (${AB_N[cast.ap]})` : subCast ? `Solo ${subCast.nombre} (${AB_N[subCast.ap]}, desde nivel ${subCast.desde})` : 'No lanza por su clase']];
+    ['Conjuros', lanzar ? `${CAST_TXT[lanzar.tipo]} (${AB_N[lanzar.ap]})` : subCast ? `Solo ${subCast.nombre} (${AB_N[subCast.ap]}, desde nivel ${subCast.desde})` : 'No lanza por su clase']];
   const niveles = [];
   for (let L = 1; L <= 20; L++) {
     const rasgos = (info.rasgos[L] || []).map(nombre => {

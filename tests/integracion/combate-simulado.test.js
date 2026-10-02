@@ -2,9 +2,9 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { perfil } from '../../web/src/domain/reglas/reglas2024.js';
-import { reglas, recState, recuperarEnDescanso, usosGastados } from '../../web/src/domain/clases/rasgos.js';
+import { reglas, estadoRecurso, recuperarEnDescanso, usosGastados } from '../../web/src/domain/clases/rasgos.js';
 import { empezarCombate, registrarAtaque, siguienteTurno, combateDe } from '../../web/src/domain/combate/combate.js';
 import { ataquesPorAccion } from '../../web/src/domain/combate/maestria.js';
 import { PREDEFINIDOS, anadirComun, alternarEquipado, ataqueArma } from '../../web/src/domain/equipo/equipo.js';
@@ -13,10 +13,10 @@ import { caEfectiva, modsTirada, resolverModo } from '../../web/src/domain/comba
 import { bonoSalvacion } from '../../web/src/domain/reglas/habilidades.js';
 
 const st = o => ({ fue: 10, des: 10, con: 14, int: 10, sab: 10, car: 10, ...o });
-const pj = o => normChar(blankChar(o));
+const pj = o => normPersonaje(personajeVacio(o));
 const equipar = (ch, n) => { const o = anadirComun(ch, structuredClone(PREDEFINIDOS.find(x => x.nombre === n))); alternarEquipado(ch, o.id); return o; };
-const usar = (ch, id, n = 1) => { recState(ch, id).used = (recState(ch, id).used || 0) + n; };
-const descansoCorto = ch => reglas(ch).forEach(r => { if (r.tipo === 'recurso') recState(ch, r.id).used = recuperarEnDescanso(r, usosGastados(ch, r), 'corto').usados; });
+const usar = (ch, id, n = 1) => { estadoRecurso(ch, id).used = (estadoRecurso(ch, id).used || 0) + n; };
+const descansoCorto = ch => reglas(ch).forEach(r => { if (r.tipo === 'recurso') estadoRecurso(ch, r.id).used = recuperarEnDescanso(r, usosGastados(ch, r), 'corto').usados; });
 
 describe('combate simulado', () => {
   test('guerrero, bárbaro, maga y clérigo durante tres rondas y los descansos', () => {

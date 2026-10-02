@@ -91,7 +91,7 @@ function repartir(txt) {
   return { danos: DANOS.filter(d => partes.some(p => p.startsWith(norm(d).slice(0, 5)))), estados: ESTADOS.filter(e => partes.some(p => p.startsWith(norm(e).slice(0, 6)))) };
 }
 
-export function parseCriaturas(pages) {
+export function leerCriaturas(pages) {
   // «barra»: la línea empieza con el borde del recuadro del perfil (se mira en el texto antes de corregir el OCR)
   const L = aplanar(pages).map(l => ({ ...l, barra: /^\s*[^\p{L}\d¿(+\-−–\s]/u.test(l.raw ?? l.s), s: limpiaIni(l.s) })).filter(l => l.s);
   const inicios = [];

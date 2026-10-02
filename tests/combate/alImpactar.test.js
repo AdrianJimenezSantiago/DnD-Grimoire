@@ -1,13 +1,13 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { arma } from '../helpers/fixtures.js';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { opcionesAlImpactar, gastarAlImpactar } from '../../web/src/domain/combate/alImpactar.js';
 import { golpeSinArmas } from '../../web/src/domain/equipo/equipo.js';
 import { empezarCombate, siguienteTurno, combateDe } from '../../web/src/domain/combate/combate.js';
 
 const stats = { fue: 16, des: 14, con: 14, int: 10, sab: 12, car: 16 };
-const ch = o => normChar(blankChar({ stats, ...o }));
+const ch = o => normPersonaje(personajeVacio({ stats, ...o }));
 
 describe('opcionesAlImpactar', () => {
   test('paladín: Castigo divino con uso gratis y con cada espacio libre, solo cuerpo a cuerpo', () => {

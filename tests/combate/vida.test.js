@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { pgMaximo, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, descansoLargoVida, cdConcentracion, pgMaximoCalculado, revivir, ponerEfecto, pasarRonda, soltarConc, cambiarConc, rondasDeDuracion } from '../../web/src/domain/combate/vida.js';
 import { efectosDe } from '../../web/src/domain/combate/efectos.js';
 
-const pj = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14 }, ...over }));
-const guerrero = over => normChar(blankChar({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
+const pj = over => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 3, stats: { con: 14 }, ...over }));
+const guerrero = over => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 3, stats: { con: 14, des: 14 }, ...over }));
 
 describe('puntos de golpe', () => {
   test('PG máximos: primer nivel completo, después la media, dotes y especie', () => {

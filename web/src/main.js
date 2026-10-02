@@ -27,16 +27,16 @@ import './styles/inventario.css';
 import './styles/impacto.css';
 import './styles/movil.css';
 
-import { createStore } from './core/store.js';
-import { fromStored } from './domain/personaje/modelo.js';
-import { compendio, linkCatalog, loadSrd } from './domain/conjuros/catalogo.js';
+import { crearEstado } from './core/store.js';
+import { cargarGuardado } from './domain/personaje/modelo.js';
+import { compendio, enlazarCatalogo, cargarCompendio } from './domain/conjuros/catalogo.js';
 import { libros } from './domain/libros/biblioteca.js';
 import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
-import { toast, undoBtn } from './ui/componentes/toast.js';
+import { toast, botonDeshacer } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';
 import { confirmar } from './ui/componentes/modal.js';
-import { storage, setBars, onAppEvents } from './platform/native.js';
-import { renderBar, renderSheet } from './ui/pantallas/sheet.js';
+import { almacen, fijarBarras, alEventosApp } from './platform/native.js';
+import { pintarBarra, pintarHoja } from './ui/pantallas/hoja.js';
 import * as eventos from './app/eventos.js';
 import * as asistentes from './app/asistentes.js';
 import * as buscador from './ui/dialogs/buscador.js';
@@ -47,7 +47,7 @@ import * as copia from './ui/dialogs/copia.js';
 import * as manual from './ui/dialogs/manual.js';
 import * as tiradas from './ui/dialogs/tiradas.js';
 import * as glos from './ui/dialogs/glosario.js';
-import * as landing from './ui/pantallas/landing.js';
+import * as portada from './ui/pantallas/portada.js';
 import * as retrato from './ui/dialogs/retrato.js';
 import * as trasfondo from './ui/dialogs/trasfondo.js';
 import * as diario from './ui/dialogs/diario.js';
@@ -71,19 +71,19 @@ const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRU
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
 async function boot() {
-  const theme = await storage.get(PREF + '-tema');
-  storage.remove(PREF + '-theme');
+  const theme = await almacen.get(PREF + '-tema');
+  almacen.remove(PREF + '-theme');
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
-  setBars(eventos.isDark());
+  fijarBarras(eventos.esOscuro());
   initFondo(); initMagia();
 
-  const [v2, v1] = await Promise.all([storage.get(KEY), storage.get(KEY_V1)]);
-  const { db, migrated } = fromStored(v2, v1);
-  const S = createStore({ storage, key: KEY, db });
-  S.subscribe(() => { renderBar(S); renderSheet(S); });
+  const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
+  const { db, migrated } = cargarGuardado(v2, v1);
+  const S = crearEstado({ almacen, clave: KEY, db });
+  S.subscribe(() => { pintarBarra(S); pintarHoja(S); });
 
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
-  asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.openPicker(''); } });
+  asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.abrirBuscador(''); } });
   buscador.init(S, { startEditing });
   conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
   const app = await eventos.init(S);
@@ -119,8 +119,8 @@ async function boot() {
   let listos; const librosListos = new Promise(r => { listos = r; });
   const ofrecerLibros = async () => {
     await librosListos;
-    if (libros().length || (await storage.get(OFRECIDO)) === '1') return;
-    await storage.set(OFRECIDO, '1');
+    if (libros().length || (await almacen.get(OFRECIDO)) === '1') return;
+    await almacen.set(OFRECIDO, '1');
     const si = await confirmar({ titulo: '¿Importamos tus libros ahora?', icono: 'book', ok: 'Importar libros', cancelar: 'Más tarde',
       texto: 'La app rellena descripciones de conjuros, reglas, objetos mágicos, dotes, trasfondos, subclases y perfiles de criaturas con tus PDF: Manual del Jugador, Guía del DM y expansiones. Se leen en este dispositivo y no salen de él. Puedes hacerlo luego desde Libros y manuales.' });
     if (si) app.run('manual');
@@ -128,41 +128,41 @@ async function boot() {
   const tourHoja = forzar => setTimeout(() => tour('hoja', TOUR_HOJA, { forzar }), 450);
   const regenerarPruebas = () => {
     const habia = hayPruebas(S.db); let r; const h = S.edit(db => { r = sembrarPruebas(db, compendio()); });
-    toast(r.creados ? `${r.creados} personajes de prueba ${habia ? 'regenerados' : 'creados'} a nivel 8.` : 'El compendio aún no ha cargado; inténtalo en un momento.', r.creados ? [undoBtn(S, h)] : []);
+    toast(r.creados ? `${r.creados} personajes de prueba ${habia ? 'regenerados' : 'creados'} a nivel 8.` : 'El compendio aún no ha cargado; inténtalo en un momento.', r.creados ? [botonDeshacer(S, h)] : []);
   };
   const quitarPruebas = () => {
     const n = S.db.chars.filter(c => c.prueba).length; if (!n) return;
     const h = S.edit(db => { db.chars = db.chars.filter(c => !c.prueba); if (!db.chars.some(c => c.id === db.activeId)) db.activeId = db.chars[0]?.id ?? null; });
-    toast(`${n} personajes de prueba quitados. Tus personajes no se tocan.`, [undoBtn(S, h)]);
+    toast(`${n} personajes de prueba quitados. Tus personajes no se tocan.`, [botonDeshacer(S, h)]);
   };
-  landing.init(S, {
+  portada.init(S, {
     pruebasAuto: PRUEBAS,
-    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.openCharForm(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.abrirCreacion(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
   app.COMMANDS._tutorial = () => (document.body.classList.contains('on-landing') ? tour('inicio', TOUR_INICIO, { forzar: true }) : tourHoja(true));
-  document.addEventListener('grimorio:creado', () => { if (landing.landingVisible()) landing.hideLanding(); tourHoja(false); });
-  document.addEventListener('grimorio:abierto', () => { if (landing.landingVisible()) landing.hideLanding(); });
+  document.addEventListener('grimorio:creado', () => { if (portada.portadaVisible()) portada.ocultarPortada(); tourHoja(false); });
+  document.addEventListener('grimorio:abierto', () => { if (portada.portadaVisible()) portada.ocultarPortada(); });
 
   S.emit('boot');
-  landing.showLanding();
+  portada.mostrarPortada();
   if (migrated) S.save();
   document.documentElement.classList.add('ready');
 
-  onAppEvents({ back: app.back, pause: () => S.flush(), resume: app.resume });
+  alEventosApp({ back: app.back, pause: () => S.flush(), resume: app.resume });
   addEventListener('pagehide', () => S.flush());
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') S.flush(); });
 
   idle(async () => {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
-    const ok = await loadSrd(fuente);
+    const ok = await cargarCompendio(fuente);
     await manual.cargarLibros();
     const incluidos = ok ? await manual.aplicarIncluidos() : [];
     listos();
     if (incluidos.length) toast(`Libros listos: <b>${incluidos.map(l => esc(l.titulo)).join('</b>, <b>')}</b>.`, [{ label: 'Abrir biblioteca', fn: () => app.run('biblioteca') }]);
     if (ok && PRUEBAS && !hayPruebas(S.db) && sembrarPruebas(S.db, compendio()).creados) S.save();
-    if (ok && linkCatalog(S.db)) S.save();
+    if (ok && enlazarCatalogo(S.db)) S.save();
     S.emit('srd');
     idle(asistentes.precargar);
   });

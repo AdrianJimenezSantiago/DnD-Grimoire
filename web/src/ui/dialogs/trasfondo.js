@@ -4,8 +4,8 @@ import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/personaje/historia.js';
 import { $, on } from '../componentes/dom.js';
 import { avatarHtml } from '../componentes/avatar.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
 import { mdDoc } from '../componentes/mdDoc.js';
 
@@ -35,7 +35,7 @@ function render() {
   }
   $('#trFoot').innerHTML = `${md ? '<button type="button" class="warn" data-tr="borrar">Borrar</button>' : ''}<button type="button" data-tr="importar">Importar</button>${md ? '<button type="button" data-tr="editar">Editar</button>' : ''}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
 }
-export function openTrasfondo() { if (!ch()) return; V = { editando: false, q: '' }; $('#trQ').value = ''; render(); openSheet(dlg()); }
+export function abrirTrasfondo() { if (!ch()) return; V = { editando: false, q: '' }; $('#trQ').value = ''; render(); abrirDialogo(dlg()); }
 
 async function importar(file) {
   if (!file) return;
@@ -55,7 +55,7 @@ async function importar(file) {
   if (c.historia && !(await confirmar({ titulo: '¿Sustituir la historia?', texto: `${c.nombre} ya tiene una historia. La importada ocupará su lugar; podrás deshacerlo justo después.`, ok: 'Sustituir' }))) return;
   const h = S.edit((db, cc) => { cc.historia = md; });
   V.editando = false; render();
-  toast(`Historia importada: ${capitulos(md).filter(x => x.nivel <= 2).length} capítulos. Revísala con «Editar» si algo no ha quedado bien.`, [undoBtn(S, h)]);
+  toast(`Historia importada: ${capitulos(md).filter(x => x.nivel <= 2).length} capítulos. Revísala con «Editar» si algo no ha quedado bien.`, [botonDeshacer(S, h)]);
 }
 export function init(store) {
   S = store;
@@ -63,10 +63,10 @@ export function init(store) {
     const a = b.dataset.tr;
     if (a === 'editar') { V.editando = true; render(); setTimeout(() => $('#trTxt')?.focus(), 60); }
     if (a === 'cancelar') { V.editando = false; render(); }
-    if (a === 'guardar') { const txt = $('#trTxt').value; const h = S.edit((db, c) => { c.historia = txt.trim(); }); V.editando = false; render(); toast('Historia guardada.', [undoBtn(S, h)]); }
+    if (a === 'guardar') { const txt = $('#trTxt').value; const h = S.edit((db, c) => { c.historia = txt.trim(); }); V.editando = false; render(); toast('Historia guardada.', [botonDeshacer(S, h)]); }
     if (a === 'importar') $('#trFile').click();
     if (a === 'borrar') { if (!(await confirmar({ titulo: '¿Borrar la historia?', texto: 'Se quita el texto de este personaje. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
-      const h = S.edit((db, c) => { c.historia = ''; }); render(); toast('Historia borrada.', [undoBtn(S, h)]); }
+      const h = S.edit((db, c) => { c.historia = ''; }); render(); toast('Historia borrada.', [botonDeshacer(S, h)]); }
   });
   on($('#trToc'), 'click', '[data-toc]', (e, b) => $('#doc-' + b.dataset.toc)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   $('#trQ').addEventListener('input', e => { V.q = e.target.value; render(); $('#trBody mark')?.scrollIntoView({ block: 'center' }); });

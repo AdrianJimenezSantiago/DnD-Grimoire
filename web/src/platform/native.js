@@ -2,30 +2,30 @@
 // y las alternativas del navegador en la web y en Windows. Ningún otro módulo importa Capacitor.
 import { Capacitor, SystemBars } from '@capacitor/core';
 
-export const NATIVE = Capacitor.isNativePlatform();
+export const NATIVO = Capacitor.isNativePlatform();
 
-export const storage = {
+export const almacen = {
   async get(k) {
-    if (NATIVE) { const { Preferences } = await import('@capacitor/preferences'); return (await Preferences.get({ key: k })).value; }
+    if (NATIVO) { const { Preferences } = await import('@capacitor/preferences'); return (await Preferences.get({ key: k })).value; }
     try { return localStorage.getItem(k); } catch { return null; }
   },
   async set(k, v) {
-    if (NATIVE) { const { Preferences } = await import('@capacitor/preferences'); return Preferences.set({ key: k, value: v }); }
+    if (NATIVO) { const { Preferences } = await import('@capacitor/preferences'); return Preferences.set({ key: k, value: v }); }
     try { localStorage.setItem(k, v); } catch {}
   },
   async remove(k) {
-    if (NATIVE) { const { Preferences } = await import('@capacitor/preferences'); return Preferences.remove({ key: k }); }
+    if (NATIVO) { const { Preferences } = await import('@capacitor/preferences'); return Preferences.remove({ key: k }); }
     try { localStorage.removeItem(k); } catch {}
   },
 };
 
-export function haptic(kind = 'light') {
-  if (NATIVE) { import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => Haptics.impact({ style: kind === 'heavy' ? ImpactStyle.Heavy : kind === 'medium' ? ImpactStyle.Medium : ImpactStyle.Light })).catch(() => {}); return; }
+export function vibrar(kind = 'light') {
+  if (NATIVO) { import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => Haptics.impact({ style: kind === 'heavy' ? ImpactStyle.Heavy : kind === 'medium' ? ImpactStyle.Medium : ImpactStyle.Light })).catch(() => {}); return; }
   try { navigator.vibrate?.(kind === 'heavy' ? 24 : 12); } catch {}
 }
 
-export async function shareJson(name, json) {
-  if (NATIVE) {
+export async function compartirJson(name, json) {
+  if (NATIVO) {
     const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');
     const w = await Filesystem.writeFile({ path: name, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 });
@@ -37,39 +37,39 @@ export async function shareJson(name, json) {
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 
-export async function keepAwake(on) {
-  if (!NATIVE) return;
+export async function mantenerDespierta(on) {
+  if (!NATIVO) return;
   try { const { KeepAwake } = await import('@capacitor-community/keep-awake'); await (on ? KeepAwake.keepAwake() : KeepAwake.allowSleep()); } catch {}
 }
 
-export function setBars(dark) {
+export function fijarBarras(dark) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0B0D14' : '#E9ECF2');
-  if (NATIVE) SystemBars.setStyle({ style: dark ? 'DARK' : 'LIGHT' }).catch(() => {});
+  if (NATIVO) SystemBars.setStyle({ style: dark ? 'DARK' : 'LIGHT' }).catch(() => {});
 }
 
-export async function onAppEvents({ back, pause, resume }) {
-  if (!NATIVE) return;
+export async function alEventosApp({ back, pause, resume }) {
+  if (!NATIVO) return;
   const { App } = await import('@capacitor/app');
   App.addListener('backButton', back);
   App.addListener('pause', pause);
   App.addListener('resume', resume);
 }
-export async function minimize() { if (NATIVE) { const { App } = await import('@capacitor/app'); App.minimizeApp(); } }
+export async function minimizar() { if (NATIVO) { const { App } = await import('@capacitor/app'); App.minimizeApp(); } }
 
-export const fileStore = {
+export const archivos = {
   async get(name) {
-    if (NATIVE) {
+    if (NATIVO) {
       const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
       try { return (await Filesystem.readFile({ path: name, directory: Directory.Data, encoding: Encoding.UTF8 })).data; } catch { return null; }
     }
     try { return localStorage.getItem('file:' + name); } catch { return null; }
   },
   async set(name, text) {
-    if (NATIVE) { const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem'); return Filesystem.writeFile({ path: name, data: text, directory: Directory.Data, encoding: Encoding.UTF8 }); }
+    if (NATIVO) { const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem'); return Filesystem.writeFile({ path: name, data: text, directory: Directory.Data, encoding: Encoding.UTF8 }); }
     localStorage.setItem('file:' + name, text);
   },
   async remove(name) {
-    if (NATIVE) { const { Filesystem, Directory } = await import('@capacitor/filesystem'); try { await Filesystem.deleteFile({ path: name, directory: Directory.Data }); } catch {} return; }
+    if (NATIVO) { const { Filesystem, Directory } = await import('@capacitor/filesystem'); try { await Filesystem.deleteFile({ path: name, directory: Directory.Data }); } catch {} return; }
     try { localStorage.removeItem('file:' + name); } catch {}
   },
 };

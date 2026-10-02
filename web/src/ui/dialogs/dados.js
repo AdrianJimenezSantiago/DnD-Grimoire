@@ -10,10 +10,10 @@ import { modsTirada, resolverModo, falloAutomatico, fmtMod } from '../../domain/
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet } from '../componentes/dialog.js';
-import { burst, reducedMotion } from '../animaciones/fx.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { chispas, movimientoReducido } from '../animaciones/fx.js';
 import { fxImpacto, nivelImpacto } from '../animaciones/impacto.js';
-import { haptic } from '../../platform/native.js';
+import { vibrar } from '../../platform/native.js';
 
 let S, V = null, SEQ = 0, TOKEN = 0, agitar = null;
 const CRONICA = new Map(), MAX_CRONICA = 30, VISIBLES = 5;
@@ -25,7 +25,7 @@ const dlg = () => $('#dadosDlg');
 const cronica = () => { const k = S.cur()?.id ?? '_'; if (!CRONICA.has(k)) CRONICA.set(k, []); return CRONICA.get(k); };
 
 // ---- Entradas ----
-export function openDados() {
+export function abrirDados() {
   V = { tipo: 'libre', expr: V?.tipo === 'libre' ? V.expr : '1d20', modo: 'normal', critico: false, res: null };
   montar(); abrir();
 }
@@ -46,7 +46,7 @@ export function tirarDano({ titulo, sub = '', expr, critico = false, extras = []
   V = { tipo: 'dano', titulo, sub, expr, critico, clave, aviso, res: null, mods: extras.map((x, i) => ({ id: 'e' + i, fuente: x.fuente, efecto: 'dado', valor: x.valor, on: true })) };
   montar(); abrir(); lanzar();
 }
-function abrir() { openSheet(dlg()); armarAgitar(); }
+function abrir() { abrirDialogo(dlg()); armarAgitar(); }
 
 const esD20 = () => D20.includes(V.tipo);
 const exprActual = () => (esD20() ? `1d20${V.bono ? sgn(V.bono) : ''}` : V.expr);
@@ -59,7 +59,7 @@ function montar() {
   $('#daSub').textContent = libre ? 'Toca los dados para sumarlos, o escribe la tirada.' : V.sub;
   const pie = dlg().querySelector('[data-cmd="dadoslibres"]'); if (pie) pie.hidden = libre;
   body.innerHTML = `<div id="daCtl"></div><div class="dd-out" id="daOut"></div><p class="visually-hidden" id="daVivo" aria-live="polite"></p><section class="dd-cron" id="daHist" aria-label="Crónica de tiradas"></section>`;
-  if (dlg().open && !reducedMotion()) { body.classList.remove('dd-cambia'); void body.offsetWidth; body.classList.add('dd-cambia'); }
+  if (dlg().open && !movimientoReducido()) { body.classList.remove('dd-cambia'); void body.offsetWidth; body.classList.add('dd-cambia'); }
   pintarCtl(); pintarOut(); pintarHist();
 }
 
@@ -227,14 +227,14 @@ function asentar(el, x, anim) {
   dlg().classList.remove('rodando');
   $('#daVivo').textContent = `${x.total}${x.lbl ? ` ${x.lbl}` : ''}${x.cd != null && !x.falla ? `, CD ${x.cd} ${x.total >= x.cd ? 'superada' : 'fallada'}` : ''}${x.crit ? ', 20 natural' : x.pifia ? ', 1 natural' : ''}.`;
   if (!anim) return;
-  haptic(x.crit || x.pifia ? 'heavy' : 'light');
-  if (reducedMotion()) return;
+  vibrar(x.crit || x.pifia ? 'heavy' : 'light');
+  if (movimientoReducido()) return;
   if (x.crit || x.pifia) { fxNatural(el, x.crit ? 20 : 1, $('#daBody')); return; }
   if (!x.nuevo) return;
   if (V.tipo === 'dano') fxImpacto(el.querySelector('.dd-hero'), { clave: V.clave || claveDe(V.sub), cura: /curaci/i.test(V.sub || ''), nivel: nivelImpacto(x.total, x.dist), caja: $('#daBody') });
   const [cx, cy] = centro(el.querySelector('.dd-sello')), max = x.dist && x.total >= maxDist(x.dist);
   const col = x.estado === 'exito' ? '#6ECB9D' : x.estado === 'fallo' ? '#F2826F' : getComputedStyle(el).getPropertyValue('--gold').trim();
-  burst(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
+  chispas(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
 }
 
 // ---- Crónica ----
@@ -275,7 +275,7 @@ function tirarBoton() {
   lanzar(true);
 }
 function volar(desde, hasta) {
-  if (reducedMotion() || !desde || !hasta || !desde.animate) return;
+  if (movimientoReducido() || !desde || !hasta || !desde.animate) return;
   const a = desde.getBoundingClientRect(), b = hasta.getBoundingClientRect(), g = desde.querySelector('svg').cloneNode(true);
   const r = dlg().getBoundingClientRect();
   g.classList.add('dd-vuela'); Object.assign(g.style, { left: `${a.left - r.left + a.width / 2 - 14}px`, top: `${a.top - r.top + a.height / 2 - 14}px` });
@@ -291,7 +291,7 @@ export function init(store) {
   on(body, 'click', '[data-datirar]', () => tirarBoton());
   on(body, 'click', '[data-damodt]', (e, b) => {
     const m = V.mods.find(x => x.id === b.dataset.damodt); if (!m) return;
-    const fallaAntes = !!falloAutomatico(V.mods); m.on = !m.on; haptic('light');
+    const fallaAntes = !!falloAutomatico(V.mods); m.on = !m.on; vibrar('light');
     if (V.modoAuto) V.modo = resolverModo(V.mods);
     if (fallaAntes !== !!falloAutomatico(V.mods)) pintarCtl();
     else { b.classList.toggle('off', !m.on); b.setAttribute('aria-pressed', String(m.on)); sincModo(); }
@@ -299,20 +299,20 @@ export function init(store) {
   });
   on(body, 'click', '[data-damodo]', (e, b) => {
     if (b.dataset.damodo === V.modo) return;
-    V.modo = b.dataset.damodo; V.modoAuto = false; sincModo(); haptic('light');
+    V.modo = b.dataset.damodo; V.modoAuto = false; sincModo(); vibrar('light');
     if (V.tipo === 'libre') V.expr = $('#daExpr').value.trim() || V.expr;
     if (V.res && !fijo() && (V.tipo !== 'libre' || !V.res.viejo)) lanzar(false); else actualizarBoton();
   });
   on(body, 'click', '[data-dacara]', (e, b) => {
     const c = +b.dataset.dacara, p = parsear($('#daExpr').value) || { grupos: [], bono: 0 }, g = p.grupos.find(x => x.caras === c && x.signo > 0 && !x.keep);
     if (g) g.n = Math.min(100, g.n + 1); else p.grupos.push({ n: 1, caras: c, signo: 1 });
-    V.expr = texto(p).replace(/−/g, '-'); caducar(); sincLibre(); haptic('light');
+    V.expr = texto(p).replace(/−/g, '-'); caducar(); sincLibre(); vibrar('light');
     b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso'); volar(b, $('#daExpr'));
   });
   on(body, 'click', '[data-daquita]', (e, b) => {
     const p = parsear($('#daExpr').value); if (!p) return; const g = p.grupos[+b.dataset.daquita]; if (!g) return;
     if (g.n > 1 && !(g.keep && g.keep.n >= g.n - 1)) g.n--; else if (g.n > 1) { g.n--; delete g.keep; } else p.grupos.splice(+b.dataset.daquita, 1);
-    V.expr = texto(p).replace(/−/g, '-'); caducar(); sincLibre(); haptic('light');
+    V.expr = texto(p).replace(/−/g, '-'); caducar(); sincLibre(); vibrar('light');
   });
   on(body, 'click', '[data-daexpr]', (e, b) => { V.expr = b.dataset.daexpr; caducar(); sincLibre(); lanzar(true); });
   on(body, 'click', '[data-damod]', (e, b) => { const p = parsear($('#daExpr').value) || { grupos: [], bono: 0 }; p.bono += +b.dataset.damod; V.expr = texto(p).replace(/−/g, '-') || '0'; caducar(); sincLibre(); });
@@ -331,11 +331,11 @@ export function init(store) {
     const caras = parseInt(String(pr.dado || '').slice(1), 10) || 8, r = pr.fijo ?? rngCripto(caras); pr.fn();
     V.res.precision = r; V.res.total += r; V.res.decidido = false;
     V.res.aviso = `<b>${gi('dados')}${esc(pr.nombre || 'Ataque de precisión')}: +${r}</b><span>${pr.fijo ? '' : `1${esc(pr.dado)} de supremacía. `}La tirada queda en ${V.res.total}: ¿impacta ahora?</span>`;
-    haptic('medium'); pintarOut();
+    vibrar('medium'); pintarOut();
   });
   on(body, 'click', '[data-daimpacta]', () => {
     const m = V.impacto?.maestria, aviso = avisoMaes(m, m?.alImpactar || m?.siempre), c = !!V.res?.crit;
-    haptic('medium'); V.impacto?.alImpactar?.();
+    vibrar('medium'); V.impacto?.alImpactar?.();
     if (V.siguiente) return V.siguiente.fn(c, aviso);
     V.res.decidido = true; V.res.aviso = aviso || 'Impacto.'; pintarOut();
   });
@@ -348,7 +348,7 @@ export function init(store) {
   });
   body.addEventListener('input', e => { if (e.target.id !== 'daExpr') return; V.expr = e.target.value; caducar(); sincLibre(false); });
   body.addEventListener('keydown', e => { if (e.target.id === 'daExpr' && e.key === 'Enter') { e.preventDefault(); V.expr = e.target.value.trim(); lanzar(true); } });
-  body.addEventListener('change', e => { if (e.target.id !== 'daCrit') return; V.critico = e.target.checked; haptic('light'); if (V.res && V.tipo === 'dano') lanzar(false); else actualizarBoton(); });
+  body.addEventListener('change', e => { if (e.target.id !== 'daCrit') return; V.critico = e.target.checked; vibrar('light'); if (V.res && V.tipo === 'dano') lanzar(false); else actualizarBoton(); });
   d.addEventListener('keydown', e => {
     if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) { e.preventDefault(); tirarBoton(); }
   });

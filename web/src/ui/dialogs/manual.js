@@ -1,19 +1,19 @@
 // Libros y manuales: importar PDF, ver los libros cargados y aplicar los que vienen incluidos con la app.
 import { esc } from '../../core/util.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
-import { oficializar, manualCount } from '../../domain/conjuros/catalogo.js';
+import { oficializar, numTextosManual } from '../../domain/conjuros/catalogo.js';
 import { glosario } from '../../domain/libros/terminos.js';
-import { libros, setLibros } from '../../domain/libros/biblioteca.js';
+import { libros, fijarLibros } from '../../domain/libros/biblioteca.js';
 import { componerLibro, aceptarPropuestas, hayContenido } from '../../domain/libros/componerLibro.js';
 import { CLASES_ES } from '../../domain/libros/libros.js';
 import { claveNombre } from '../../domain/libros/manual.js';
 import { $, on } from '../componentes/dom.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
-import { fileStore } from '../../platform/native.js';
+import { archivos } from '../../platform/native.js';
 import { gi } from '../componentes/tema.js';
-import { openBiblioteca } from './biblioteca.js';
+import { abrirBiblioteca } from './biblioteca.js';
 
 const pl = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 const INDICE = 'libros.json', archivo = id => `libro-${id}.json`;
@@ -21,29 +21,29 @@ let S, pendiente = null;
 const dlg = () => $('#manualDlg');
 
 async function guardarTodo(lista) {
-  await fileStore.set(INDICE, JSON.stringify(lista.map(l => ({ id: l.id, titulo: l.titulo, fecha: l.fecha }))));
+  await archivos.set(INDICE, JSON.stringify(lista.map(l => ({ id: l.id, titulo: l.titulo, fecha: l.fecha }))));
 }
 export async function cargarLibros() {
   let lista = [];
   try {
-    const idx = JSON.parse((await fileStore.get(INDICE)) || 'null');
-    if (idx) for (const l of idx) { const raw = await fileStore.get(archivo(l.id)); if (raw) lista.push(JSON.parse(raw)); }
+    const idx = JSON.parse((await archivos.get(INDICE)) || 'null');
+    if (idx) for (const l of idx) { const raw = await archivos.get(archivo(l.id)); if (raw) lista.push(JSON.parse(raw)); }
     else {
-      const viejo = await fileStore.get('manual-conjuros.json');
+      const viejo = await archivos.get('manual-conjuros.json');
       if (viejo) {
         const lb = { id: 'manual-del-jugador-2024', titulo: 'Manual del Jugador (2024)', fecha: Date.now(), textos: JSON.parse(viejo), nuevos: [],
-          glosario: JSON.parse((await fileStore.get('manual-glosario.json')) || '[]'), subclases: [] };
-        await fileStore.set(archivo(lb.id), JSON.stringify(lb)); lista = [lb]; await guardarTodo(lista);
-        await fileStore.remove('manual-conjuros.json'); await fileStore.remove('manual-glosario.json');
+          glosario: JSON.parse((await archivos.get('manual-glosario.json')) || '[]'), subclases: [] };
+        await archivos.set(archivo(lb.id), JSON.stringify(lb)); lista = [lb]; await guardarTodo(lista);
+        await archivos.remove('manual-conjuros.json'); await archivos.remove('manual-glosario.json');
       }
     }
   } catch (e) { console.warn('No se pudieron cargar los libros', e); }
-  setLibros(lista);
+  fijarLibros(lista);
   return lista.length > 0;
 }
 
 const QUITADOS = 'libros-incluidos-quitados.json';
-const quitados = async () => { try { return JSON.parse((await fileStore.get(QUITADOS)) || '[]'); } catch { return []; } };
+const quitados = async () => { try { return JSON.parse((await archivos.get(QUITADOS)) || '[]'); } catch { return []; } };
 export async function aplicarIncluidos() {
   let idx;
   try { const r = await fetch('libros/indice.json', { cache: 'no-cache' }); if (!r.ok) return []; idx = await r.json(); } catch { return []; }
@@ -56,8 +56,8 @@ export async function aplicarIncluidos() {
   }
   if (!nuevos.length) return [];
   const ids = new Set(nuevos.map(l => l.id)), lista = L.filter(l => !ids.has(l.id)).concat(nuevos);
-  for (const lb of nuevos) await fileStore.set(archivo(lb.id), JSON.stringify(lb));
-  await guardarTodo(lista); setLibros(lista); S?.emit('manual');
+  for (const lb of nuevos) await archivos.set(archivo(lb.id), JSON.stringify(lb));
+  await guardarTodo(lista); fijarLibros(lista); S?.emit('manual');
   return nuevos;
 }
 
@@ -78,16 +78,16 @@ function lista() {
     : '<p class="note">Aún no has importado ningún libro en este dispositivo.</p>';
   $('#mnBorrar').hidden = true;
 }
-export function openManual() {
-  pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); openSheet(dlg());
+export function abrirManual() {
+  pendiente = null; $('#mnProg').hidden = true; $('#mnRes').innerHTML = ''; lista(); abrirDialogo(dlg());
   import('../../app/importarManual.js').catch(() => {});
 }
 
 async function guardarLibro(lb) {
-  const q = await quitados(); if (q.includes(lb.id)) await fileStore.set(QUITADOS, JSON.stringify(q.filter(x => x !== lb.id)));
+  const q = await quitados(); if (q.includes(lb.id)) await archivos.set(QUITADOS, JSON.stringify(q.filter(x => x !== lb.id)));
   const L = libros().filter(l => l.id !== lb.id).concat(lb);
-  await fileStore.set(archivo(lb.id), JSON.stringify(lb)); await guardarTodo(L);
-  setLibros(L);
+  await archivos.set(archivo(lb.id), JSON.stringify(lb)); await guardarTodo(L);
+  fijarLibros(L);
   let cambios = [], h = null;
   if ($('#mnOficial').checked) h = S.edit(db => { cambios = oficializar(db); }); else S.emit('manual');
   const tx = Object.keys(lb.textos).length;
@@ -96,7 +96,7 @@ async function guardarLibro(lb) {
     ${resumenBiblioteca(lb)}
     ${lb.subclases.length ? `<p>Subclases añadidas a las sugerencias: ${lb.subclases.map(s => `${esc(s.nombre)} (${esc(s.clase)})`).join(', ')}.</p>` : ''}
     ${cambios.length ? `<p>Nombres actualizados en tu catálogo (${cambios.length}): ${cambios.map(([a, b]) => `${esc(a)} → <b>${esc(b)}</b>`).join(', ')}.</p>` : ''}</div>`;
-  lista(); toast(`<b>${esc(lb.titulo)}</b> importado.`, [{ label: 'Abrir biblioteca', fn: () => openBiblioteca() }, ...(h ? [{ label: 'Deshacer nombres', fn: () => S.undo(h) }] : [])]);
+  lista(); toast(`<b>${esc(lb.titulo)}</b> importado.`, [{ label: 'Abrir biblioteca', fn: () => abrirBiblioteca() }, ...(h ? [{ label: 'Deshacer nombres', fn: () => S.undo(h) }] : [])]);
 }
 function resumenBiblioteca(lb) {
   const b = [(lb.objetos || []).length && pl(lb.objetos.length, 'objeto mágico', 'objetos mágicos'), (lb.dotes || []).length && pl(lb.dotes.length, 'dote', 'dotes'),
@@ -163,13 +163,13 @@ export function init(store) {
   on(dlg(), 'click', '[data-quitar]', async (e, b) => {
     const lb = libros().find(l => l.id === b.dataset.quitar); if (!lb) return;
     if (!(await confirmar({ titulo: `¿Quitar «${lb.titulo}»?`, texto: 'Se borran de este dispositivo sus descripciones, glosario, subclases y conjuros nuevos. Los conjuros que ya tengas en tu libro siguen ahí.', ok: 'Quitar', peligro: true }))) return;
-    const L = libros().filter(l => l.id !== lb.id); await fileStore.remove(archivo(lb.id)); await guardarTodo(L); setLibros(L);
-    if (lb.incluido) await fileStore.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));
+    const L = libros().filter(l => l.id !== lb.id); await archivos.remove(archivo(lb.id)); await guardarTodo(L); fijarLibros(L);
+    if (lb.incluido) await archivos.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));
     lista(); S.emit('manual'); toast(`«${lb.titulo}» quitado.`);
   });
   $('#mnSoloNombres').addEventListener('click', () => {
     let cambios = []; const h = S.edit(db => { cambios = oficializar(db); });
-    toast(cambios.length ? `${cambios.length} conjuros con su nombre oficial.` : 'Tus conjuros ya tenían los nombres oficiales.', cambios.length ? [undoBtn(S, h)] : []);
+    toast(cambios.length ? `${cambios.length} conjuros con su nombre oficial.` : 'Tus conjuros ya tenían los nombres oficiales.', cambios.length ? [botonDeshacer(S, h)] : []);
   });
 }
-export { manualCount, glosario };
+export { numTextosManual, glosario };

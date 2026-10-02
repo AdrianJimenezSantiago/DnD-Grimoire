@@ -2,8 +2,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compendioJson } from '../helpers/fixtures.js';
 import { detectarSubclases, idLibro } from '../../web/src/domain/libros/libros.js';
-import { loadSrd, emparejarLibro, allSpellItems, manualFor, srdFor, compendio } from '../../web/src/domain/conjuros/catalogo.js';
-import { setLibros, subclasesDe } from '../../web/src/domain/libros/biblioteca.js';
+import { cargarCompendio, emparejarLibro, itemsConjuros, textoManual, delCompendio, compendio } from '../../web/src/domain/conjuros/catalogo.js';
+import { fijarLibros, subclasesDe } from '../../web/src/domain/libros/biblioteca.js';
 
 const L = (s, h = 16) => ({ x: 60, y: 0, h, s });
 
@@ -18,7 +18,7 @@ describe('detectarSubclases', () => {
 
 describe('libros importados en el catálogo', () => {
   test('conjuros nuevos entran en el compendio y las subclases en las sugerencias', async () => {
-    await loadSrd(compendioJson());
+    await cargarCompendio(compendioJson());
     const base = compendio().length;
     const spells = [
       { nombre: 'Escudo', nivel: 1, escuela: 'Abjuración', clases: ['Mago'], tiempo: 'Reacción', ritual: false, alcance: 'Lanzador', comp: 'V S', material: '', duracion: '1 asalto', conc: false, desc: 'Texto de Escudo.', sup: '' },
@@ -26,12 +26,12 @@ describe('libros importados en el catálogo', () => {
     ];
     const { textos, nuevos } = emparejarLibro(spells, 'expansion', 'Expansión de prueba');
     assert.equal(nuevos.length, 1); assert.equal(Object.keys(textos).length, 2);
-    setLibros([{ id: 'expansion', titulo: 'Expansión de prueba', textos, nuevos, glosario: [], subclases: [{ clase: 'Mago', nombre: 'Cronurgo' }] }]);
+    fijarLibros([{ id: 'expansion', titulo: 'Expansión de prueba', textos, nuevos, glosario: [], subclases: [{ clase: 'Mago', nombre: 'Cronurgo' }] }]);
     assert.equal(compendio().length, base + 1);
-    const rayo = allSpellItems({ catalog: {} }).find(it => it.es === 'Rayo de marea');
-    assert.ok(rayo); assert.equal(rayo.x.fuente, 'Expansión de prueba'); assert.equal(manualFor(rayo.x).d, 'Sufre 3d8 de daño de frío.');
+    const rayo = itemsConjuros({ catalog: {} }).find(it => it.es === 'Rayo de marea');
+    assert.ok(rayo); assert.equal(rayo.x.fuente, 'Expansión de prueba'); assert.equal(textoManual(rayo.x).d, 'Sufre 3d8 de daño de frío.');
     assert.ok(subclasesDe('Mago').includes('Cronurgo')); assert.ok(subclasesDe('Mago').includes('Adivino'));
-    assert.equal(manualFor(srdFor({ en: 'Shield', level: 1 })).d, 'Texto de Escudo.');
-    setLibros([]); assert.equal(compendio().length, base);
+    assert.equal(textoManual(delCompendio({ en: 'Shield', level: 1 })).d, 'Texto de Escudo.');
+    fijarLibros([]); assert.equal(compendio().length, base);
   });
 });

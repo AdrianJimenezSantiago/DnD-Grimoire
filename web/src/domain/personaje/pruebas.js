@@ -3,9 +3,9 @@ import { competenciasIniciales, periciasDisponibles, abDe } from '../reglas/habi
 import { norm, uid } from '../../core/util.js';
 import { CLASES, ESPECIES, TRASFONDOS_2024, competencia, perfil } from '../reglas/reglas2024.js';
 import { CLASES_INFO, SUBCLASES, conjurosAutomaticos, progresion, subclaseDe } from '../clases/clases2024.js';
-import { ASI_LVLS } from '../clases/progresion.js';
-import { blankChar, normChar } from './modelo.js';
-import { importSrd } from '../conjuros/catalogo.js';
+import { NIVELES_MEJORA } from '../clases/progresion.js';
+import { personajeVacio, normPersonaje } from './modelo.js';
+import { importarDelCompendio } from '../conjuros/catalogo.js';
 import { anadirObjeto, anadirComun, alternarEquipado, equipoDe, PREDEFINIDOS } from '../equipo/equipo.js';
 import { nuevaNota } from './diario.js';
 import { claveNombre } from '../libros/manual.js';
@@ -67,7 +67,7 @@ export function statsPrueba(prio, trasfondo, clase, nivel) {
   const [tr] = TRASFONDOS_2024[trasfondo] || [[prio[0], prio[1]]];
   const t1 = tr.includes(prio[0]) ? prio[0] : tr[0], t2 = tr.find(k => k !== t1 && k === prio[1]) || tr.find(k => k !== t1);
   st[t1] += 2; st[t2] += 1;
-  const notas = [], asis = (ASI_LVLS[clase] || ASI_LVLS._).filter(L => L <= nivel);
+  const notas = [], asis = (NIVELES_MEJORA[clase] || NIVELES_MEJORA._).filter(L => L <= nivel);
   for (const L of asis) {
     const sube = {}; let pts = 2;
     for (const k of prio) { while (pts && st[k] < 20) { st[k]++; sube[k] = (sube[k] || 0) + 1; pts--; } if (!pts) break; }
@@ -89,7 +89,7 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   const info = CLASES_INFO[clase], prio = sc.prio || info.prio;
   const trasfondo = trasfondoPara(prio, i), especie = ESPECIES[i % ESPECIES.length];
   const { stats, notas: notasAsi, trasfondoTxt } = statsPrueba(prio, trasfondo, clase, nivel);
-  const ch = blankChar({
+  const ch = personajeVacio({
     nombre: NOMBRES[i % NOMBRES.length], clase, subclase: sc.nombre, nivel, especie, trasfondo, stats, prueba: true,
     lema: `Personaje de prueba generado automáticamente (${sc.libro}).`, campana: 'Pruebas de la rama development',
   });
@@ -103,7 +103,7 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
   const book = ch.book, enLibro = new Set(), claves = new Set();
   const add = (x, rel) => {
     if (!x) return false;
-    if (claves.has(x.k)) return false; const sid = importSrd(db, x); if (enLibro.has(sid)) return false; enLibro.add(sid); claves.add(x.k);
+    if (claves.has(x.k)) return false; const sid = importarDelCompendio(db, x); if (enLibro.has(sid)) return false; enLibro.add(sid); claves.add(x.k);
     book.push({ sid, prep: false, always: false, fuente: '', gratis: '', used: false, ...rel }); return true;
   };
   const porNombre = (nombre, rel, nivelConj) => { const x = buscar(nombre, nivelConj); if (!x) { faltan.push(nombre); return false; } return add(x, rel); };
@@ -170,7 +170,7 @@ export function personajePrueba(db, compendio, clase, sc, i = 0, nivel = NIVEL_P
     conjuros: {}, tacticas: 'Regenera salvo con fuego o ácido.', notas: 'Aparece de noche.', sesiones: [ch.diario.sesiones[0].id], creada: Date.now() };
   ch.bestiario.criaturas.push(cr);
   ch.historia = `## Origen\n\n${ch.nombre} es ${especie.toLowerCase()} de trasfondo ${trasfondo.toLowerCase()}.\n\n### Rasgos hasta nivel ${nivel}\n\n${progresion(ch).map(r => `${r.nivel}. ${r.nombre}`).join(' · ')}\n\n---\n\n> Personaje generado para probar la app.`;
-  return { ch: normChar(ch), faltan };
+  return { ch: normPersonaje(ch), faltan };
 }
 
 const KIT = {

@@ -9,7 +9,7 @@
 // WER: lo mismo contando palabras. Los saltos de línea cuentan como un espacio.
 import fs from 'node:fs';
 import path from 'node:path';
-import { pageToColumns } from '../../web/src/domain/libros/manualLineas.js';
+import { paginaAColumnas } from '../../web/src/domain/libros/manualLineas.js';
 import { DIR, abrir, textoPagina, textoLibro, leerPaginas, nombreRef } from './comun.mjs';
 
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
@@ -26,7 +26,7 @@ if (conCorrector) {
   if (conFusion) { const { fusionar } = await import('../../web/src/domain/libros/fusion.js'); globalThis.__fusionar = (l, o) => fusionar(l, o, voc); }
 }
 const textoMotor = (m, pg) => { const { w, items } = JSON.parse(fs.readFileSync(path.join(DIR, '.cache/motores', m, nombreRef(pg).replace(/\.txt$/, '.json')), 'utf8'));
-  return pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n'); };
+  return paginaAColumnas(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n'); };
 const normal = t => corregir(t.split('\n')).join(' ').replace(/\s+/g, ' ').trim();
 
 function distancia(a, b) {

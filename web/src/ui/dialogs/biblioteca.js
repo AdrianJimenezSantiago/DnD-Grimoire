@@ -12,14 +12,14 @@ import { elegir } from './elegir.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { bloqueHtml, md, rico } from './conjuro.js';
 import { TIPOS_BASE, aBestiario, vdTexto } from '../../domain/criaturas/monstruos.js';
 import { bestiarioDe, nuevaCriatura } from '../../domain/criaturas/bestiario.js';
 import { rasgosEnJuego, GRUPOS, resumenClase, resumenSubclase } from '../../domain/clases/enJuego.js';
 import { TEMAS } from '../../domain/clases/clases2024.js';
-import { reglasVisibles, reglas, usosGastados, recState } from '../../domain/clases/rasgos.js';
+import { reglasVisibles, reglas, usosGastados, estadoRecurso } from '../../domain/clases/rasgos.js';
 import { EFECTO, EFECTO_DE_RASGO, REGLAS_ESTADO, inmunidadesEstado } from '../../domain/combate/efectos.js';
 import { ponerEfecto, NOMBRE_ESTADO, RESUMEN_ESTADO, vidaDe } from '../../domain/combate/vida.js';
 import { canjesDe, aplicarCanje, fuenteDeMagia, espacioAPuntos, puntosAEspacio } from '../../domain/clases/canjes.js';
@@ -189,10 +189,10 @@ function pintar() {
   $('#bibTabs').innerHTML = TABS.map(([k, t, ico]) => `<button type="button" role="tab" aria-selected="${V.tab === k}" data-tab="${k}">${gi(ico)}<span>${t}</span></button>`).join('');
   herramientas(); cuerpo(); $('#bibBody').scrollTop = 0;
 }
-export function openBiblioteca(tab) {
+export function abrirBiblioteca(tab) {
   if (tab) V.tab = tab;
   if (!V.clase && S.cur()) V.clase = '';
-  pintar(); openSheet(dlg());
+  pintar(); abrirDialogo(dlg());
 }
 
 let FICHA = null;
@@ -214,7 +214,7 @@ export function ficha({ titulo, sub = '', cuerpo: h, pie = '', ico = '', clase =
   $('#fiSub').innerHTML = sub; $('#fiBody').innerHTML = h;
   const volver = PILA.length ? `<button type="button" class="fi-volver" data-fivolver title="Volver a ${esc(PILA[PILA.length - 1].nombre)}">${icon('chevron')}<span>${esc(PILA[PILA.length - 1].nombre)}</span></button>` : '';
   $('#fiFoot').innerHTML = `${volver}${pie}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
-  openSheet(d); $('#fiBody').scrollTop = 0;
+  abrirDialogo(d); $('#fiBody').scrollTop = 0;
 }
 const fuente = f => (f ? `<p class="fi-src">${gi('libro')}${esc(f)} · importado de tu PDF</p>` : '');
 export function abrirObjeto(clave) {
@@ -407,7 +407,7 @@ export function init(store) {
   on($('#fichaDlg'), 'click', '[data-ejvar]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [clase, v] = b.dataset.ejvar.split('|');
     const h = S.act(`${clase}: variante ${v}`, (db, ch) => { ch.variantes = { ...(ch.variantes || {}), [clase]: v }; });
-    abrirRasgoJuego(k); toast(`Ahora usas <b>${esc(v)}</b>.`, [undoBtn(S, h)]);
+    abrirRasgoJuego(k); toast(`Ahora usas <b>${esc(v)}</b>.`, [botonDeshacer(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejopc]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [id, v] = b.dataset.ejopc.split('|');
@@ -418,23 +418,23 @@ export function init(store) {
       if (id === 'tierra.terreno' || id === 'vastago.lealtad' || /^especie\./.test(id)) { fuera = quitarSobrantes(db, ch); dentro = anadirPendientes(db, ch, conjurosPendientes(db, ch, compendio())); }
     });
     abrirRasgoJuego(k);
-    toast(`Ahora: <b>${esc(v)}</b>.${dentro.length ? ` Siempre preparados: ${esc(dentro.join(', '))}.` : ''}${fuera.length ? ` Dejan de estarlo: ${esc(fuera.join(', '))}.` : ''}`, [undoBtn(S, h)]);
+    toast(`Ahora: <b>${esc(v)}</b>.${dentro.length ? ` Siempre preparados: ${esc(dentro.join(', '))}.` : ''}${fuera.length ? ` Dejan de estarlo: ${esc(fuera.join(', '))}.` : ''}`, [botonDeshacer(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejefecto]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, a = EFECTO_DE_RASGO[b.dataset.ejefecto]; if (!a) return;
-    const h = S.act(`Activa ${EFECTO[a.k].nombre}`, (db, ch) => { if (a.gasta) { const st = recState(ch, a.gasta); st.used = (st.used || 0) + (a.n || 1); } ponerEfecto(ch, a.k); });
-    abrirRasgoJuego(k); toast(`<b>${esc(EFECTO[a.k].nombre)}</b> activo: ${esc(EFECTO[a.k].texto)}`, [undoBtn(S, h)]);
+    const h = S.act(`Activa ${EFECTO[a.k].nombre}`, (db, ch) => { if (a.gasta) { const st = estadoRecurso(ch, a.gasta); st.used = (st.used || 0) + (a.n || 1); } ponerEfecto(ch, a.k); });
+    abrirRasgoJuego(k); toast(`<b>${esc(EFECTO[a.k].nombre)}</b> activo: ${esc(EFECTO[a.k].texto)}`, [botonDeshacer(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejcanje]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, ch = S.cur();
     const r = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).find(x => x.clave === k), c = r?.recurso && canjesDe(ch, r.recurso.id).find(x => x.k === b.dataset.ejcanje); if (!c) return;
     const h = S.act(`${r.recurso.nombre}: recupera 1 (${c.texto.toLowerCase()})`, (db, x) => aplicarCanje(x, r.recurso.id, c));
-    abrirRasgoJuego(k); toast(`<b>${esc(r.recurso.nombre)}</b>: recuperas un uso.`, [undoBtn(S, h)]);
+    abrirRasgoJuego(k); toast(`<b>${esc(r.recurso.nombre)}</b>: recuperas un uso.`, [botonDeshacer(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejfm]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, [t, L] = b.dataset.ejfm.split(':'); let n = 0;
     const h = S.act(t === 'p' ? `Fuente de magia: espacio de nivel ${L} a puntos` : `Fuente de magia: crea un espacio de nivel ${L}`, (db, x) => { n = t === 'p' ? espacioAPuntos(x, +L) : puntosAEspacio(x, +L); });
-    abrirRasgoJuego(k); toast(t === 'p' ? `Ganas <b>${n}</b> puntos de hechicería.` : `Gastas <b>${n}</b> puntos: tienes un espacio de nivel ${L} más.`, [undoBtn(S, h)]);
+    abrirRasgoJuego(k); toast(t === 'p' ? `Ganas <b>${n}</b> puntos de hechicería.` : `Gastas <b>${n}</b> puntos: tienes un espacio de nivel ${L} más.`, [botonDeshacer(S, h)]);
   });
   on($('#fichaDlg'), 'click', '[data-ejgrupo]', (e, b) => {
     if (FICHA?.tipo !== 'rasgo') return; const k = FICHA.clave, g = b.dataset.ejgrupo;
@@ -445,7 +445,7 @@ export function init(store) {
     if (b.dataset.fi === 'bestiario' && FICHA?.tipo === 'cria') {
       const c = FICHA.c;
       const h = S.edit((db, ch) => { Object.assign(nuevaCriatura(ch, c.nombre), aBestiario(c)); });
-      toast(`<b>${esc(c.nombre)}</b> en el bestiario de ${esc(S.cur().nombre)}, con sus daños, estados y salvaciones.`, [undoBtn(S, h)]);
+      toast(`<b>${esc(c.nombre)}</b> en el bestiario de ${esc(S.cur().nombre)}, con sus daños, estados y salvaciones.`, [botonDeshacer(S, h)]);
       return abrirCriatura(c.clave);
     }
     if (b.dataset.fi !== 'anadir' || FICHA?.tipo !== 'obj') return;
@@ -460,8 +460,8 @@ export function init(store) {
     const o = concretar(o0, eleccion); let nuevo;
     const h = S.edit((db, ch) => { nuevo = anadirObjeto(ch, o); });
     const extra = [nuevo.rasgo ? 'Sus cargas ya están en la hoja.' : '', nuevo.usos?.length ? 'Sus usos diarios, también.' : ''].filter(Boolean).join(' ');
-    toast(`<b>${esc(nuevo.nombre)}</b> añadido a ${esc(S.cur().nombre)}.${extra ? ` ${extra}` : ''}`, [undoBtn(S, h)]);
+    toast(`<b>${esc(nuevo.nombre)}</b> añadido a ${esc(S.cur().nombre)}.${extra ? ` ${extra}` : ''}`, [botonDeshacer(S, h)]);
     abrirObjeto(o.clave); if (dlg().open) cuerpo();
   });
-  d.addEventListener('close', () => { if ($('#fichaDlg').open) closeSheet($('#fichaDlg')); });
+  d.addEventListener('close', () => { if ($('#fichaDlg').open) cerrarDialogo($('#fichaDlg')); });
 }

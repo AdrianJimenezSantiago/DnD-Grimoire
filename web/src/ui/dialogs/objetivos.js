@@ -2,24 +2,24 @@
 import { esc } from '../../core/util.js';
 import { efectoDeConjuro, fmtRondas } from '../../domain/combate/efectos.js';
 import { esYo, listaObjetivos } from '../../domain/combate/vida.js';
-import { schoolKey } from '../../domain/conjuros/espacios.js';
+import { claveEscuela } from '../../domain/conjuros/espacios.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { avatarHtml } from '../componentes/avatar.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo, claveObjetivos } from '../../app/acciones.js';
 
 let S, O = null;
 const dlg = () => $('#objDlg');
 
-export function openObjetivos({ clave, conjuro, L }) {
-  O = { clave, conjuro, L }; render(); openSheet(dlg());
+export function abrirObjetivos({ clave, conjuro, L }) {
+  O = { clave, conjuro, L }; render(); abrirDialogo(dlg());
 }
 function render() {
   const ch = S.cur(); if (!ch || !O) return;
   const ef = efectoDeConjuro(O.conjuro), s = Object.values(S.db.catalog).find(x => x.es === O.conjuro);
   const lista = O.clave ? listaObjetivos(ch.play, O.clave) || [] : [], yo = lista.some(o => esYo(ch, o)), nombre = ch.nombre || 'Tu personaje';
-  dlg().style.setProperty('--esc', s?.escuela ? `var(--sc-${schoolKey(s.escuela) || 'none'})` : 'var(--gold)');
+  dlg().style.setProperty('--esc', s?.escuela ? `var(--sc-${claveEscuela(s.escuela) || 'none'})` : 'var(--gold)');
   $('#objTitle').textContent = '¿Sobre quién?';
   $('#objSub').innerHTML = `<b>${esc(O.conjuro)}</b>${ef ? ` · ${esc(ef.texto)}` : ''}`;
   const otros = lista.map((o, i) => [o, i]).filter(([o]) => !esYo(ch, o));
@@ -47,7 +47,7 @@ export function init(store) {
   S.subscribe(() => {
     if (!dlg().open || !O) return;
     // Si se pierde la concentración mientras está abierto, ya no hay objetivos que marcar
-    if (O.clave === 'conc' && S.cur()?.play.conc !== O.conjuro) return closeSheet(dlg());
+    if (O.clave === 'conc' && S.cur()?.play.conc !== O.conjuro) return cerrarDialogo(dlg());
     const f = document.activeElement?.id === 'oyIn'; render(); if (f) $('#oyIn')?.focus({ preventScroll: true });
   });
 }

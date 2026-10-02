@@ -1,5 +1,5 @@
 // Animación de un golpe que se recibe o se cura, con el color y la forma del tipo de daño.
-import { burst, reducedMotion, alFrente } from './fx.js';
+import { chispas, movimientoReducido, alFrente } from './fx.js';
 import { runaSvg } from './magia.js';
 
 const VARIANTES = { dano: ['tajo', 'garras', 'impacto'], cura: ['brotes', 'ola', 'halo'], temp: ['egida', 'runas'], max: ['auge'], buff: ['destello'], debuff: ['sombra'] };
@@ -46,7 +46,7 @@ function pantalla(tipo, etiqueta, lema, fuerte) {
     const sh = document.getElementById('sheet');
     if (tipo === 'dano' && sh) { sh.classList.remove('gp-terremoto'); void sh.offsetWidth; sh.classList.add('gp-terremoto'); setTimeout(() => sh.classList.remove('gp-terremoto'), 900); }
     const x = innerWidth / 2, y = innerHeight * .45;
-    setTimeout(() => burst(x, y, tipo === 'dano' ? { color: COLOR.dano, n: 60, speed: 6.5, up: .8, life: 1100, size: 2.6, gravity: .08 } : { color: '#F4D27A', n: 46, speed: 3.5, up: 2.6, life: 1500, size: 2.2, gravity: -.03 }), 120);
+    setTimeout(() => chispas(x, y, tipo === 'dano' ? { color: COLOR.dano, n: 60, speed: 6.5, up: .8, life: 1100, size: 2.6, gravity: .08 } : { color: '#F4D27A', n: 46, speed: 3.5, up: 2.6, life: 1500, size: 2.2, gravity: -.03 }), 120);
   }
   setTimeout(() => el.remove(), fuerte ? 2200 : 900);
 }
@@ -54,7 +54,7 @@ function pantalla(tipo, etiqueta, lema, fuerte) {
 export function golpe(tipo, n = null, { max = 1, desde = null, hasta = null, cae = false } = {}) {
   const dianas = [...document.querySelectorAll('.pg-card, .cb-orbe, .vd-marcador')].filter(el => el.offsetParent);
   if (tipo === 'buff' || tipo === 'debuff') dianas.push(...[...document.querySelectorAll('.vt-estados')].filter(el => el.offsetParent));
-  if (reducedMotion()) return;
+  if (movimientoReducido()) return;
   const v = elegir(tipo), ratio = n ? Math.min(1, n / Math.max(1, max)) : 0;
   const nivel = tipo === 'dano' ? (cae || ratio >= .5 ? 'brutal' : ratio >= .3 ? 'fuerte' : ratio >= .15 ? 'medio' : 'leve')
     : tipo === 'cura' ? (ratio >= .5 ? 'plena' : ratio >= .25 ? 'media' : 'suave') : '';
@@ -66,11 +66,11 @@ export function golpe(tipo, n = null, { max = 1, desde = null, hasta = null, cae
     capaEn(el, tipo, v, n, etiqueta, nivel);
     contar(el.querySelector('.pg-cifra b, .vd-act'), desde, hasta);
     const r = el.getBoundingClientRect(), x = r.left + r.width * rnd(.35, .65), y = r.top + r.height * .5;
-    if (tipo === 'dano') burst(x, y, { color: COLOR.dano, n: 8 + Math.round(ratio * 40), speed: 2 + ratio * 5, up: .6, life: 700 + ratio * 400, size: 1.8 + ratio, gravity: .05 });
-    if (tipo === 'cura') burst(x, r.bottom - 8, { color: COLOR.cura, n: 10 + Math.round(ratio * 30), speed: 1.2 + ratio, up: 3.2 + ratio * 2, life: 1100 + ratio * 500, size: 1.9 + ratio * .8, gravity: -.04 });
-    if (tipo === 'temp') burst(x, y, { color: COLOR.temp, n: 16, speed: 2.4, up: 1, life: 900, size: 1.8, gravity: 0 });
-    if (tipo === 'max' || tipo === 'buff') burst(x, y, { color: COLOR.max, n: 14, speed: 2, up: 2, life: 1000, size: 1.8, gravity: -.03 });
-    if (tipo === 'debuff') burst(x, y, { color: COLOR.debuff, n: 12, speed: 1.4, up: -.4, life: 900, size: 2.2, gravity: .03 });
+    if (tipo === 'dano') chispas(x, y, { color: COLOR.dano, n: 8 + Math.round(ratio * 40), speed: 2 + ratio * 5, up: .6, life: 700 + ratio * 400, size: 1.8 + ratio, gravity: .05 });
+    if (tipo === 'cura') chispas(x, r.bottom - 8, { color: COLOR.cura, n: 10 + Math.round(ratio * 30), speed: 1.2 + ratio, up: 3.2 + ratio * 2, life: 1100 + ratio * 500, size: 1.9 + ratio * .8, gravity: -.04 });
+    if (tipo === 'temp') chispas(x, y, { color: COLOR.temp, n: 16, speed: 2.4, up: 1, life: 900, size: 1.8, gravity: 0 });
+    if (tipo === 'max' || tipo === 'buff') chispas(x, y, { color: COLOR.max, n: 14, speed: 2, up: 2, life: 1000, size: 1.8, gravity: -.03 });
+    if (tipo === 'debuff') chispas(x, y, { color: COLOR.debuff, n: 12, speed: 1.4, up: -.4, life: 900, size: 2.2, gravity: .03 });
   }
   if (n == null) return;
   if (tipo === 'dano' && (nivel === 'brutal' || nivel === 'fuerte')) pantalla('dano', etiqueta, cae ? 'Caes al suelo' : n >= max ? 'Golpe demoledor' : 'Golpe devastador', nivel === 'brutal');

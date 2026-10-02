@@ -1,11 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
 import { RASGOS_ESPECIE, visionOscuridad, resumenRasgoEspecie, aptitudEspecie } from '../../web/src/domain/origen/especies.js';
 import { rasgosEnJuego, agrupar } from '../../web/src/domain/clases/enJuego.js';
-import { parseEspecies } from '../../web/src/domain/libros/contenido.js';
+import { leerEspecies } from '../../web/src/domain/libros/contenido.js';
 import { reaccionesDano, alCaerA0, alGastarRecurso } from '../../web/src/domain/combate/automatismos.js';
-import { reglas, recState } from '../../web/src/domain/clases/rasgos.js';
+import { reglas, estadoRecurso } from '../../web/src/domain/clases/rasgos.js';
 import { aplicarDano, pgActuales, ponerEfecto } from '../../web/src/domain/combate/vida.js';
 import { modsTirada, EFECTO_DE_RECURSO } from '../../web/src/domain/combate/efectos.js';
 import { capacidadCarga, PREDEFINIDOS } from '../../web/src/domain/equipo/equipo.js';
@@ -16,8 +16,8 @@ import { normOpciones } from '../../web/src/domain/clases/opcionesRasgo.js';
 import { fuentesExtra } from '../../web/src/domain/personaje/creacion.js';
 
 const stats = { fue: 16, des: 12, con: 14, int: 10, sab: 13, car: 16 };
-const ch = o => normChar(blankChar({ stats, ...o }));
-const libres = (c, id) => { const r = reglas(c).find(x => x.id === id); return r.max - (recState(c, id).used || 0); };
+const ch = o => normPersonaje(personajeVacio({ stats, ...o }));
+const libres = (c, id) => { const r = reglas(c).find(x => x.id === id); return r.max - (estadoRecurso(c, id).used || 0); };
 const pjMulticlase = (clase, nivel, multiclase = [], extra = {}) => ({ clase, subclase: '', nivel, multiclase, stats: { fue: 14, des: 14, con: 14, int: 14, sab: 14, car: 14 }, play: { rec: {} }, rasgos: [], ...extra });
 const L = (s, y, h = 12) => ({ s, x: 50, y, h });
 const ESPECIE = [{ p: 1, cols: [[
@@ -39,7 +39,7 @@ describe('rasgos de especie por nivel', () => {
     assert.ok(!rasgosEnJuego(ch({ clase: 'Guerrero', nivel: 3, especie: 'Goliat' }), lib).some(r => r.nombre === 'Forma grande'));
     // El lector reconoce «A partir del nivel N de personaje»
     const L = (s, y, h = 12) => ({ s, x: 50, y, h });
-    const [e] = parseEspecies([{ p: 1, cols: [[L('ATRIBUTOS DE LOS GOLIATS', 900, 16), L('Tipo de criatura: humanoide', 880), L('Velocidad: 10,5 m', 866),
+    const [e] = leerEspecies([{ p: 1, cols: [[L('ATRIBUTOS DE LOS GOLIATS', 900, 16), L('Tipo de criatura: humanoide', 880), L('Velocidad: 10,5 m', 866),
       L('Como goliat, tienes estos atributos especiales:', 852),
       L('Constitución poderosa. Tienes ventaja para poner fin al estado de', 838), L('agarrado.', 826),
       L('Forma grande. A partir del nivel 5 de personaje, puedes cambiar de tamaño', 814), L('a Grande como acción adicional.', 802)], []] }]);
@@ -57,7 +57,7 @@ describe('rasgos de especie por nivel', () => {
   });
 
   test('atributos del libro (opciones dentro del atributo que las ofrece) y en juego por nivel', () => {
-    const [e] = parseEspecies(ESPECIE);
+    const [e] = leerEspecies(ESPECIE);
     assert.equal(e.nombre, 'Enano'); assert.equal(e.velocidad, '9 m');
     assert.deepEqual(e.rasgos.map(r => [r.nombre, r.nivel]), [['Piel de roca', 1], ['Sentido pétreo', 1], ['Legado de la forja', 3], ['Visión en la oscuridad', 1]]);
     assert.match(e.rasgos[2].texto, /\*\*Yunque\.\*\*/);

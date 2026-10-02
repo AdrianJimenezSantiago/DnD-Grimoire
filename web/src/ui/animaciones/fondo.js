@@ -1,6 +1,6 @@
 // Fondo animado de la app: elige la escena según la clase del personaje y la manda al motor (fondoMotor.js).
 import { tinteDe } from '../../domain/presentacion/paleta.js';
-import { reducedMotion } from './fx.js';
+import { movimientoReducido } from './fx.js';
 import FondoWorker from './fondoWorker.js?worker&inline';
 
 const ESCENA = {
@@ -48,7 +48,7 @@ function arrancarMotor() {
       // Si el worker falla, el lienzo transferido ya no sirve aquí: se cambia por uno nuevo y se dibuja en la página.
       worker.addEventListener('error', () => {
         worker.terminate(); const n = cv.cloneNode(); cv.replaceWith(n); cv = n;
-        cola = [['estado', [{ oculto: document.hidden, tapado, quieto, animar: !reducedMotion() }]], ['tamano', [W, innerHeight, ratio()]]];
+        cola = [['estado', [{ oculto: document.hidden, tapado, quieto, animar: !movimientoReducido() }]], ['tamano', [W, innerHeight, ratio()]]];
         if (E.nombre) cola.push(['escena', [E.nombre, E.h, E.s, E.dark]]);
         usarLocal();
       }, { once: true });
@@ -86,7 +86,7 @@ function desplazando() {
 
 let E = { nombre: '', h: 40, s: 78, dark: true };
 export function nexo(datos = {}) { motor('nexo', datos); }
-export function setEscena(t) {
+export function fijarEscena(t) {
   if (!cv) return;
   const nombre = escenaDe(t), dark = oscuro(), h = t?.h ?? 220, s = Math.round((t?.s ?? 8) * (0.45 + 0.55 * tinteDe(h)));
   if (nombre === E.nombre && h === E.h && dark === E.dark) return;
@@ -101,14 +101,14 @@ export function initFondo() {
   cv = document.createElement('canvas'); cv.className = 'fondo-vivo'; cv.setAttribute('aria-hidden', 'true');
   document.body.prepend(cv);
   arrancarMotor();
-  motor('estado', { oculto: document.hidden, animar: !reducedMotion() });
+  motor('estado', { oculto: document.hidden, animar: !movimientoReducido() });
   tamano();
   addEventListener('resize', () => { clearTimeout(tamano.t); tamano.t = setTimeout(tamano, 120); });
   document.addEventListener('scroll', desplazando, { capture: true, passive: true });
   document.addEventListener('visibilitychange', () => motor('estado', { oculto: document.hidden }));
   new MutationObserver(revisarTapado).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
-  const re = () => { const n = E.nombre; E.nombre = ''; setEscena({ h: E.h, s: E.s, icono: Object.keys(ESCENA).find(k => ESCENA[k] === n) }); };
+  const re = () => { const n = E.nombre; E.nombre = ''; fijarEscena({ h: E.h, s: E.s, icono: Object.keys(ESCENA).find(k => ESCENA[k] === n) }); };
   new MutationObserver(re).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', re); } catch {}
-  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => motor('estado', { animar: !reducedMotion() })); } catch {}
+  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => motor('estado', { animar: !movimientoReducido() })); } catch {}
 }

@@ -1,26 +1,26 @@
 // Gestión de personajes: la lista para abrir, editar, duplicar, exportar y borrar cada uno.
-// Se carga aparte (app/asistentes.js) junto con el asistente de creación, que inicia y del que reexporta openCharForm.
+// Se carga aparte (app/asistentes.js) junto con el asistente de creación, que inicia y del que reexporta abrirCreacion.
 import { clone, esc, uid } from '../../core/util.js';
-import { SCHEMA } from '../../domain/personaje/modelo.js';
+import { ESQUEMA } from '../../domain/personaje/modelo.js';
 import { $, on } from '../componentes/dom.js';
 import { claseLinea, origenLinea } from '../../domain/personaje/descripcion.js';
-import { openSheet, closeSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
-import { viewTransition } from '../animaciones/fx.js';
+import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
+import { transicionVista } from '../animaciones/fx.js';
 import { confirmar } from '../componentes/modal.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { temaDe, gi } from '../componentes/tema.js';
 import { estiloPaleta } from '../../domain/presentacion/paleta.js';
-import { fileStore, shareJson } from '../../platform/native.js';
-import { initCreacion, openCharForm } from './creacionPersonaje.js';
+import { archivos, compartirJson } from '../../platform/native.js';
+import { initCreacion, abrirCreacion } from './creacionPersonaje.js';
 
-export { openCharForm };
+export { abrirCreacion };
 let S;
 const charsDlg = () => $('#charsDlg');
 
-export function openCharacter(id) {
+export function abrirPersonaje(id) {
   if (!S.db.chars.some(c => c.id === id)) return;
-  viewTransition(() => { S.editing = false; S.edit(db => { db.activeId = id; }); window.scrollTo({ top: 0 }); document.dispatchEvent(new CustomEvent('grimorio:abierto')); });
+  transicionVista(() => { S.editing = false; S.edit(db => { db.activeId = id; }); window.scrollTo({ top: 0 }); document.dispatchEvent(new CustomEvent('grimorio:abierto')); });
 }
 
 function renderList() {
@@ -34,7 +34,7 @@ function renderList() {
     </div>`; }).join('') : '<p class="pempty">Todavía no hay personajes.</p>')
     + `<p class="credit">El catálogo compartido tiene ${n === 1 ? '1 conjuro' : n + ' conjuros'}. Lo que añadas a un personaje queda disponible para los demás.</p>`;
 }
-export function openChars() { renderList(); openSheet(charsDlg()); }
+export function abrirPersonajes() { renderList(); abrirDialogo(charsDlg()); }
 
 function duplicate(id) {
   const src = S.db.chars.find(c => c.id === id); if (!src) return;
@@ -43,34 +43,34 @@ function duplicate(id) {
     c.play = { used: {}, conc: '', rec: {}, log: [], onlyPrep: src.play.onlyPrep }; c.book.forEach(e => { e.used = false; }); c.diario = { sesiones: [] };
     db.chars.splice(db.chars.findIndex(x => x.id === id) + 1, 0, c);
   });
-  renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [undoBtn(S, h)]);
+  renderList(); toast(`Creada «${esc(src.nombre)} (copia)».`, [botonDeshacer(S, h)]);
 }
 export function paqueteDe(db, c) {
   const conjuros = Object.fromEntries(c.book.map(e => [e.sid, db.catalog[e.sid]]).filter(([, x]) => x));
-  return { tipo: 'grimorio-personaje', version: 1, schema: SCHEMA, fecha: new Date().toISOString(), personaje: clone(c), conjuros };
+  return { tipo: 'grimorio-personaje', version: 1, schema: ESQUEMA, fecha: new Date().toISOString(), personaje: clone(c), conjuros };
 }
 async function exportar(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
   const nombre = `${(c.nombre || 'personaje').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'personaje'}.grimorio.json`;
-  try { await shareJson(nombre, JSON.stringify(paqueteDe(S.db, c), null, 1)); toast(`<b>${esc(c.nombre)}</b> exportado. Se abre desde «Cargar copia» en cualquier grimorio.`); }
+  try { await compartirJson(nombre, JSON.stringify(paqueteDe(S.db, c), null, 1)); toast(`<b>${esc(c.nombre)}</b> exportado. Se abre desde «Cargar copia» en cualquier grimorio.`); }
   catch (e) { if (!/cancel/i.test(String(e?.message))) toast('No se pudo exportar el personaje.'); }
 }
 async function remove(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
   if (!(await confirmar({ titulo: `¿Borrar a ${c.nombre || 'este personaje'}?`, texto: 'Se borran su ficha, su libro y su historial. Los conjuros siguen en el catálogo para los demás personajes.', ok: 'Borrar personaje', peligro: true }))) return;
   const h = S.edit(db => { db.chars = db.chars.filter(x => x.id !== id); if (db.activeId === id) db.activeId = db.chars[0]?.id ?? null; });
-  fileStore.remove(`retrato-${id}.txt`);
-  renderList(); toast(`${esc(c.nombre || 'Personaje')} borrado.`, [undoBtn(S, h)]);
+  archivos.remove(`retrato-${id}.txt`);
+  renderList(); toast(`${esc(c.nombre || 'Personaje')} borrado.`, [botonDeshacer(S, h)]);
 }
 
 export function init(store, opciones) {
   S = store; initCreacion(store, opciones);
   S.subscribe(() => { if (charsDlg().open) renderList(); });
-  document.addEventListener('grimorio:creado', () => { if (charsDlg().open) closeSheet(charsDlg()); });
-  $('#charNew').addEventListener('click', () => openCharForm(null));
+  document.addEventListener('grimorio:creado', () => { if (charsDlg().open) cerrarDialogo(charsDlg()); });
+  $('#charNew').addEventListener('click', () => abrirCreacion(null));
   on($('#charList'), 'click', '[data-openc],[data-editc],[data-dupc],[data-delc],[data-expc]', (e, t) => {
-    if (t.dataset.openc) { closeSheet(charsDlg()); openCharacter(t.dataset.openc); return; }
-    if (t.dataset.editc) return openCharForm(t.dataset.editc);
+    if (t.dataset.openc) { cerrarDialogo(charsDlg()); abrirPersonaje(t.dataset.openc); return; }
+    if (t.dataset.editc) return abrirCreacion(t.dataset.editc);
     if (t.dataset.dupc) return duplicate(t.dataset.dupc);
     if (t.dataset.delc) return remove(t.dataset.delc);
     if (t.dataset.expc) return exportar(t.dataset.expc);

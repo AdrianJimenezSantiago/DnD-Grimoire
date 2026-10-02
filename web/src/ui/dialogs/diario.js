@@ -5,10 +5,10 @@ import { TIPOS, diarioDe, nuevaSesion, nuevaNota, paraRecordar, buscarDiario, fe
 import { $, on } from '../componentes/dom.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { icon } from '../componentes/icons.js';
-import { openSheet } from '../componentes/dialog.js';
-import { toast, undoBtn } from '../componentes/toast.js';
+import { abrirDialogo } from '../componentes/dialog.js';
+import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
-import { haptic } from '../../platform/native.js';
+import { vibrar } from '../../platform/native.js';
 import { gi } from '../componentes/tema.js';
 import { iconoDano } from './tiradas.js';
 import { tiradasConjuro } from '../../domain/conjuros/catalogo.js';
@@ -131,20 +131,20 @@ function ficha() {
 }
 const norm = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const render = () => ({ sesion, bestiario, criatura: ficha }[V.vista] || lista)();
-export function openBestiario(cid) { if (!ch()) return; V = { ...V, vista: cid ? 'criatura' : 'bestiario', cid: cid || null, bq: '' }; render(); openSheet(dlg()); }
-export function openDiario(sid) { if (!ch()) return; V = { ...V, vista: sid ? 'sesion' : 'lista', sid: sid || null, q: '' }; render(); openSheet(dlg()); }
+export function abrirBestiario(cid) { if (!ch()) return; V = { ...V, vista: cid ? 'criatura' : 'bestiario', cid: cid || null, bq: '' }; render(); abrirDialogo(dlg()); }
+export function abrirDiario(sid) { if (!ch()) return; V = { ...V, vista: sid ? 'sesion' : 'lista', sid: sid || null, q: '' }; render(); abrirDialogo(dlg()); }
 
 function anadir() {
   const inp = $('#diNota'), t = inp.value.trim(); if (!t) { inp.focus(); return; }
   const nt = nuevaNota(V.tipo, t);
-  S.edit(() => { ses().notas.unshift(nt); }); haptic();
+  S.edit(() => { ses().notas.unshift(nt); }); vibrar();
   sesion(); $('#diNota').focus(); marcarNota(nt.id, 'nueva');
 }
 export function accionNota(store, sid, nid, act) {
   let activa = false;
   store.edit((db, c) => { const s = diarioDe(c).sesiones.find(x => x.id === sid), n = s?.notas.find(x => x.id === nid); if (!n) return;
     if (act === 'tachar') activa = n.hecho = !n.hecho; if (act === 'subrayar') activa = n.fijada = !n.fijada; });
-  haptic(); if (activa) marcarNota(nid, act);
+  vibrar(); if (activa) marcarNota(nid, act);
 }
 export function init(store) {
   S = store;
@@ -156,10 +156,10 @@ export function init(store) {
     if (a === 'bestiario') { V.vista = 'bestiario'; bestiario(); root.querySelector('.dbody').scrollTop = 0; }
     if (a === 'nuevacr') { let c; const desde = V.vista === 'sesion' ? V.sid : null; S.edit((db, x) => { c = nuevaCriatura(x, '', desde); }); V.vista = 'criatura'; V.cid = c.id; ficha(); root.querySelector('.dbody').scrollTop = 0; $('#bxNom')?.focus(); }
     if (a === 'borrarcr') { const c = criatura(ch(), V.cid); if (!(await confirmar({ titulo: `¿Borrar ${c.nombre || 'esta criatura'}?`, texto: 'Se borra del bestiario con todo lo anotado. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
-      const h = S.edit((db, x) => { const b = bestiarioDe(x); b.criaturas = b.criaturas.filter(y => y.id !== c.id); }); V.vista = 'bestiario'; bestiario(); toast(`${esc(c.nombre || 'Criatura')} borrada del bestiario.`, [undoBtn(S, h)]); }
+      const h = S.edit((db, x) => { const b = bestiarioDe(x); b.criaturas = b.criaturas.filter(y => y.id !== c.id); }); V.vista = 'bestiario'; bestiario(); toast(`${esc(c.nombre || 'Criatura')} borrada del bestiario.`, [botonDeshacer(S, h)]); }
     if (a === 'anadir') anadir();
     if (a === 'borrar') { const s = ses(); if (!(await confirmar({ titulo: `¿Borrar la sesión ${s.n}?`, texto: 'Se borran su crónica y sus notas. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
-      const h = S.edit((db, c) => { const d = diarioDe(c); d.sesiones = d.sesiones.filter(x => x.id !== s.id); }); V.vista = 'lista'; lista(); toast(`Sesión ${s.n} borrada.`, [undoBtn(S, h)]); }
+      const h = S.edit((db, c) => { const d = diarioDe(c); d.sesiones = d.sesiones.filter(x => x.id !== s.id); }); V.vista = 'lista'; lista(); toast(`Sesión ${s.n} borrada.`, [botonDeshacer(S, h)]); }
   });
   on(root, 'click', '[data-bxperfil]', (e, b) => abrirCriatura(b.dataset.bxperfil));
   on(root, 'click', '[data-bxrellenar]', (e, b) => {
@@ -169,7 +169,7 @@ export function init(store) {
     toast(`${esc(pf.nombre)}: tipo, CA, PG, daños, estados y salvaciones rellenados con su perfil.`);
   });
   on(root, 'click', '[data-bx]', (e, b) => { V.vista = 'criatura'; V.cid = b.dataset.bx; ficha(); root.querySelector('.dbody').scrollTop = 0; });
-  const conCriatura = fn => { S.edit((db, c) => { const x = criatura(c, V.cid); if (x) fn(x); }); haptic(); const y = root.querySelector('.dbody').scrollTop; ficha(); root.querySelector('.dbody').scrollTop = y; };
+  const conCriatura = fn => { S.edit((db, c) => { const x = criatura(c, V.cid); if (x) fn(x); }); vibrar(); const y = root.querySelector('.dbody').scrollTop; ficha(); root.querySelector('.dbody').scrollTop = y; };
   on(root, 'click', '[data-bxdano]', (e, b) => conCriatura(x => { const d = b.dataset.bxdano, n = CICLO_DANO[x.danos[d] || '']; if (n) x.danos[d] = n; else delete x.danos[d]; }));
   on(root, 'click', '[data-bxest]', (e, b) => conCriatura(x => { const v = b.dataset.bxest; x.estados = x.estados.includes(v) ? x.estados.filter(y => y !== v) : [...x.estados, v]; }));
   on(root, 'click', '[data-bxsalv]', (e, b) => conCriatura(x => { const k = b.dataset.bxsalv, v = { '': 'debil', debil: 'fuerte', fuerte: '' }[x.salv[k] || '']; if (v) x.salv[k] = v; else delete x.salv[k]; }));
@@ -193,7 +193,7 @@ export function init(store) {
       if (a === 'subrayar') activa = n.fijada = !n.fijada;
       if (a === 'borrar') s.notas = s.notas.filter(x => x !== n);
     });
-    haptic(); render(); if (activa) marcarNota(id, a);
+    vibrar(); render(); if (activa) marcarNota(id, a);
   });
   root.addEventListener('keydown', e => { if (e.target.id === 'diNota' && e.key === 'Enter') { e.preventDefault(); anadir(); } });
   root.addEventListener('input', e => {
