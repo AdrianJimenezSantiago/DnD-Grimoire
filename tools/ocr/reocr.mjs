@@ -31,7 +31,23 @@ async function tesseract(pg) {
   fs.rmSync(base + '.png'); fs.rmSync(base + '.tsv');
 }
 
-const MOTORES = { tesseract };
+// PaddleOCR (PP-OCRv4, el modelo que trae rapidocr_onnxruntime): una caja por línea de texto
+async function paddle(pg) {
+  const base = path.join(tmp, nombreRef(pg).replace(/\.txt$/, '')), salida = path.join(destino, nombreRef(pg).replace(/\.txt$/, ''));
+  if (fs.existsSync(salida + '.json')) return;
+  await ejecutar('pdftoppm', ['-f', String(pg.pagina), '-l', String(pg.pagina), '-r', dpi, '-png', '-singlefile', archivoLibro(pg.libro), base]);
+  await ejecutar('python3', [path.join(DIR, 'paddle.py'), base + '.png', base + '.json'], { env: { ...process.env, OMP_NUM_THREADS: '1' }, maxBuffer: 1 << 26 });
+  const doc = await abrir(pg.libro), vp = (await doc.getPage(pg.pagina)).getViewport({ scale: 1 });
+  await doc.destroy();
+  const k = 72 / +dpi, H = vp.height, items = JSON.parse(fs.readFileSync(base + '.json', 'utf8')).map(({ caja, texto }) => {
+    const xs = caja.map(p => p[0]), ys = caja.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), fs_ = (y1 - y0) * k * 0.8;
+    return { str: texto, transform: [fs_, 0, 0, fs_, x0 * k, H - y1 * k + fs_ * 0.2], width: (x1 - x0) * k, height: fs_ };
+  });
+  fs.writeFileSync(salida + '.json', JSON.stringify({ w: vp.width, items }));
+  fs.rmSync(base + '.png'); fs.rmSync(base + '.json');
+}
+
+const MOTORES = { tesseract, paddle };
 if (!MOTORES[motor]) throw new Error(`Motor desconocido: ${motor}`);
 const cola = leerPaginas().filter(pg => (!soloLibro || pg.libro === soloLibro) && (!soloPagina || pg.pagina === +soloPagina));
 const t0 = Date.now();
