@@ -3,6 +3,7 @@
 //   node tools/ocr/medir.mjs --corregir      tras pasar el corrector (web/src/domain/corrector.js)
 //   node tools/ocr/medir.mjs --errores 40    además, las 40 confusiones de palabra más frecuentes
 //   node tools/ocr/medir.mjs --conjunto desarrollo|prueba
+//   node tools/ocr/medir.mjs --corregir --fusionar tess-fast   base del PDF fusionada con otro OCR (web/src/domain/fusion.js)
 //   node tools/ocr/medir.mjs --motor tess-best   texto de otro OCR (lo deja reocr.mjs en .cache/motores/<motor>/)
 // CER: distancia de edición entre caracteres / caracteres de la referencia.
 // WER: lo mismo contando palabras. Los saltos de línea cuentan como un espacio.
@@ -12,7 +13,7 @@ import { pageToColumns } from '../../web/src/domain/manualLineas.js';
 import { DIR, abrir, textoPagina, textoLibro, leerPaginas, nombreRef } from './comun.mjs';
 
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
-const motor = arg('--motor'), conCorrector = process.argv.includes('--corregir'), nErrores = +(arg('--errores') || 0), soloConjunto = arg('--conjunto');
+const motor = arg('--motor'), conFusion = arg('--fusionar'), conCorrector = process.argv.includes('--corregir'), nErrores = +(arg('--errores') || 0), soloConjunto = arg('--conjunto');
 let corregir = lineas => lineas;
 if (conCorrector) {
   // Vocabulario de los libros con texto: es lo que tendría la app con los libros incluidos
@@ -22,7 +23,10 @@ if (conCorrector) {
   if (process.argv.includes('--traza')) voc.traza = [];
   globalThis.__voc = voc;
   corregir = lineas => corregirLineas(lineas, voc);
+  if (conFusion) { const { fusionar } = await import('../../web/src/domain/fusion.js'); globalThis.__fusionar = (l, o) => fusionar(l, o, voc); }
 }
+const textoMotor = (m, pg) => { const { w, items } = JSON.parse(fs.readFileSync(path.join(DIR, '.cache/motores', m, nombreRef(pg).replace(/\.txt$/, '.json')), 'utf8'));
+  return pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n'); };
 const normal = t => corregir(t.split('\n')).join(' ').replace(/\s+/g, ' ').trim();
 
 function distancia(a, b) {
@@ -54,14 +58,15 @@ function sustituciones(a, b) {
   return out;
 }
 
-const paginas = leerPaginas().filter(pg => !soloConjunto || pg.conjunto === soloConjunto), docs = {}, filas = [], confusiones = new Map();
+const soloLibro = arg('--libro');
+const paginas = leerPaginas().filter(pg => (!soloConjunto || pg.conjunto === soloConjunto) && (!soloLibro || pg.libro === soloLibro)), docs = {}, filas = [], confusiones = new Map();
 for (const pg of paginas) {
   let crudo;
-  if (motor) {
-    const { w, items } = JSON.parse(fs.readFileSync(path.join(DIR, '.cache/motores', motor, nombreRef(pg).replace(/\.txt$/, '.json')), 'utf8'));
-    crudo = pageToColumns(items, w).map(col => col.map(l => l.s).join('\n')).filter(Boolean).join('\n\n');
-  } else crudo = await textoPagina(docs[pg.libro] ||= await abrir(pg.libro), pg.pagina);
-  const ocr = normal(crudo), ref = fs.readFileSync(path.join(DIR, 'referencia', nombreRef(pg)), 'utf8').replace(/\s+/g, ' ').trim();
+  if (motor) crudo = textoMotor(motor, pg);
+  else crudo = await textoPagina(docs[pg.libro] ||= await abrir(pg.libro), pg.pagina);
+  let fundida = null;
+  if (conFusion) { fundida = corregir(crudo.split('\n')); for (const m of conFusion.split(',')) fundida = globalThis.__fusionar(fundida, corregir(textoMotor(m, pg).split('\n')).join(' ')); }
+  const ocr = fundida ? fundida.join(' ').replace(/\s+/g, ' ').trim() : normal(crudo), ref = fs.readFileSync(path.join(DIR, 'referencia', nombreRef(pg)), 'utf8').replace(/\s+/g, ' ').trim();
   const po = ocr.split(' '), pr = ref.split(' ');
   filas.push({ ...pg, c: distancia(ocr, ref), nc: ref.length, w: distancia(po, pr), nw: pr.length });
   if (nErrores) for (const s of sustituciones(po, pr)) confusiones.set(s, (confusiones.get(s) || 0) + 1);

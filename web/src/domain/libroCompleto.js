@@ -6,6 +6,7 @@ import { parseObjetos } from './objetos.js';
 import { parseDotes, parseTrasfondos, parseSubclases, completarSubclases, parseSecciones, nombresTablaTrasfondos, nombrarTrasfondos, nombresDeTabla, corregirConTabla, frecuencias, parseRasgosClase, parseEspecies } from './contenido.js';
 import { parseCriaturas } from './monstruos.js';
 import { crearVocabulario, corregirLinea, corregirLineas } from './corrector.js';
+import { fusionar } from './fusion.js';
 
 const TIPO_OBJ = /(Objeto maravilloso|Anillo|Varita|Vara|Poci[oó]n|Arma|Armadura|Bast[oó]n|Pergamino)\b[^,]{0,70},\s*(com[uú]n|infrecuente|rar[oa]|muy rar[oa]|legendari[oa]|artefacto|rareza)/;
 function bloquesDe(nums, hueco = 3) { const b = []; for (const p of nums) { const u = b[b.length - 1]; if (u && p - u[1] <= hueco) u[1] = p; else b.push([p, p]); } return b; }
@@ -17,13 +18,24 @@ function corregirColumna(col, voc) {
   return col.map((l, i) => (limpias[i] ? { ...l, raw: l.s, s: limpias[i], cells: l.cells.map(c => ({ ...c, s: corregirLinea(c.s, voc) || c.s })) } : null)).filter(Boolean);
 }
 
-// vocabulario: frecuencias de partida ({ palabra: n }, como data/vocabulario.json) para corregir el OCR; sin él, solo cuenta el propio libro
-export function analizarLibro(paginas, aviso = () => {}, { vocabulario = {} } = {}) {
+// vocabulario: frecuencias de partida ({ palabra: n }, como data/vocabulario.json) para corregir el OCR; sin él, solo cuenta el propio libro.
+// segundaLectura: texto de cada página leído por otro OCR (tools/ocr/lecturas); donde la capa del PDF no forma palabras, se usa esa lectura
+export function analizarLibro(paginas, aviso = () => {}, { vocabulario = {}, segundaLectura = null } = {}) {
   const N = paginas.length;
   const texto = paginas.map(pg => pg.items.map(i => i.str).join(' '));
   const voc = crearVocabulario(texto, Object.entries(vocabulario));
   const colsMemo = new Map();
-  const cols = p => { if (!colsMemo.has(p)) { const pg = paginas[p - 1]; colsMemo.set(p, { p, cols: pageToColumns(pg.items, pg.w).map(col => corregirColumna(col, voc)) }); } return colsMemo.get(p); };
+  const cols = p => {
+    if (colsMemo.has(p)) return colsMemo.get(p);
+    const pg = paginas[p - 1], cs = pageToColumns(pg.items, pg.w).map(col => corregirColumna(col, voc)), otra = segundaLectura?.[p - 1];
+    if (otra) {
+      const fundidas = fusionar(cs.flat().map(l => l.s), corregirLineas(otra.split('\n'), voc).filter(Boolean).join(' '), voc);
+      let k = 0;
+      for (const col of cs) for (const l of col) l.s = fundidas[k++];
+    }
+    colsMemo.set(p, { p, cols: cs });
+    return colsMemo.get(p);
+  };
   const rango = (a, b) => { const out = []; for (let p = Math.max(1, a); p <= Math.min(N, b); p++) out.push(cols(p)); return out; };
   const grande = (p, re, min = 36) => paginas[p - 1].items.some(it => Math.abs(it.transform[3]) >= min && re.test(it.str));
 

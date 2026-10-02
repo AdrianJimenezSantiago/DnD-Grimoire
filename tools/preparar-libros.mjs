@@ -29,7 +29,17 @@ async function leer(archivo) {
     paginas.push({ p, w, items });
   }
   await doc.destroy();
-  return { titulo, ...analizarLibro(paginas, () => {}, { vocabulario }) };
+  // Segunda lectura OCR del mismo PDF (tools/ocr/segunda-lectura.mjs), si la hay: se reconoce por la huella del archivo
+  const h = crypto.createHash('sha256');
+  await new Promise((ok, mal) => fs.createReadStream(archivo).on('data', d => h.update(d)).on('end', ok).on('error', mal));
+  const segundaLectura = lecturas.get(h.digest('hex')) || null;
+  return { titulo, conLectura: !!segundaLectura, ...analizarLibro(paginas, () => {}, { vocabulario, segundaLectura }) };
+}
+
+const dirLecturas = path.join(RAIZ, 'tools/ocr/lecturas'), lecturas = new Map();
+for (const f of fs.existsSync(dirLecturas) ? fs.readdirSync(dirLecturas).filter(f => f.endsWith('.json')) : []) {
+  const l = JSON.parse(fs.readFileSync(path.join(dirLecturas, f), 'utf8'));
+  lecturas.set(l.sha256, l.paginas);
 }
 
 const vocabulario = JSON.parse(fs.readFileSync(path.join(RAIZ, 'web/public/data/vocabulario.json'), 'utf8'));
@@ -40,14 +50,14 @@ const indice = [];
 for (const nombre of fs.readdirSync(origen).filter(f => /\.pdf$/i.test(f)).sort()) {
   const archivo = path.join(origen, nombre), t0 = Date.now();
   if (!esPdf(archivo)) { console.log(`· ${nombre}: sin descargar (puntero de Git LFS), se salta`); continue; }
-  const r = await leer(archivo);
-  if (!r || !hayContenido(r)) { console.log(`· ${nombre}: sin texto que leer (PDF escaneado), se salta`); continue; }
+  const leido = await leer(archivo), { conLectura, ...r } = leido || {};
+  if (!leido || !hayContenido(r)) { console.log(`· ${nombre}: sin texto que leer (PDF escaneado), se salta`); continue; }
   const { lb, props } = componerLibro(r, 0), libro = aceptarPropuestas(lb, props);
   const json = JSON.stringify(libro), version = crypto.createHash('sha256').update(json).digest('hex').slice(0, 16), archivoJson = `${libro.id}.json`;
   fs.writeFileSync(path.join(destino, archivoJson), json);
   indice.push({ id: libro.id, titulo: libro.titulo, archivo: archivoJson, version });
   const n = (k, t) => (libro[k] || []).length ? `${libro[k].length} ${t}` : '';
-  console.log(`✓ ${nombre} → ${libro.titulo} (${Math.round((Date.now() - t0) / 1000)} s, ${(json.length / 1e6).toFixed(1)} MB): ${[
+  console.log(`✓ ${nombre} → ${libro.titulo}${conLectura ? ' con segunda lectura OCR' : ''} (${Math.round((Date.now() - t0) / 1000)} s, ${(json.length / 1e6).toFixed(1)} MB): ${[
     Object.keys(libro.textos).length ? `${Object.keys(libro.textos).length} conjuros` : '', n('glosario', 'reglas'), n('objetos', 'objetos'), n('dotes', 'dotes'),
     n('trasfondos', 'trasfondos'), n('subTextos', 'subclases'), n('especies', 'especies'), n('criaturas', 'criaturas')].filter(Boolean).join(', ')}`);
 }
