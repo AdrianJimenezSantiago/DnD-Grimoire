@@ -57,4 +57,4 @@ dos lecturas no mejoran lo bastante para compensar el tiempo.
 | Prueba (19 págs.) | 4,43 % | 6,45 % | 2,90 % | 2,68 % |
 
 Parte del error que queda no es de caracteres: texto de las ilustraciones, celdas de tablas desordenadas o números que el
-OCR leyó como otros números (705 en vez de 105). Arreglar eso queda para un OCR nuevo (paso 3).
+OCR leyó como otros números (705 en vez de 105), que ninguna de las dos lecturas tiene bien.
