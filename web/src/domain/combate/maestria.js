@@ -3,15 +3,14 @@ import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf, competencia, nivelTotal, dotesDe } from '../reglas/reglas2024.js';
 import { textoMaestria } from '../reglas/referencia.js';
+import { esSencilla } from '../reglas/competencias.js';
 
 // Maestría con armas (Manual del Jugador de 2024): cuántas armas por clase y nivel, y cuáles puede elegir
 export const CUPO_MAESTRIA = { 'Bárbaro': [[1, 2], [4, 3], [10, 4]], 'Guerrero': [[1, 3], [4, 4], [10, 5], [16, 6]], 'Paladín': [[1, 2]], 'Explorador': [[1, 2]], 'Pícaro': [[1, 2]] };
-export const SENCILLAS = ['Bastón', 'Daga', 'Garrote', 'Hacha de mano', 'Jabalina', 'Lanza', 'Maza', 'Hoz', 'Arco corto', 'Ballesta ligera'];
 const cupoClase = (clase, L) => (CUPO_MAESTRIA[clase] || []).reduce((n, [desde, v]) => (L >= desde ? v : n), 0);
 // Maestro de armas (dote) da una maestría más
 export const cupoMaestrias = ch => clasesDe(ch).reduce((n, c) => n + cupoClase(c.clase, c.nivel), 0) + dotesDe(ch).filter(d => norm(d.nombre) === 'maestro de armas').length;
 export const cupoEn = (clase, L) => cupoClase(clase, L);
-export const esSencilla = nombre => SENCILLAS.some(s => norm(s) === norm(nombre));
 
 // Qué armas puede dominar: el bárbaro, cuerpo a cuerpo; el pícaro, sencillas y marciales con Sutil o Ligera
 export function armaElegible(ch, arma) {
@@ -19,7 +18,7 @@ export function armaElegible(ch, arma) {
   return clasesDe(ch).some(c => {
     if (!cupoClase(c.clase, c.nivel)) return false;
     if (c.clase === 'Bárbaro') return !distancia;
-    if (c.clase === 'Pícaro') return esSencilla(arma.nombre) || props.includes('sutil') || props.includes('ligera');
+    if (c.clase === 'Pícaro') return esSencilla(arma) || props.includes('sutil') || props.includes('ligera');
     return true;
   });
 }

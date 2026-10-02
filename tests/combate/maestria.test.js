@@ -2,11 +2,27 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { arma } from '../helpers/fixtures.js';
 import { blankChar, normChar } from '../../web/src/domain/personaje/modelo.js';
+import { esSencilla } from '../../web/src/domain/reglas/competencias.js';
 import { cupoMaestrias, armaElegible, efectoMaestria, ataquesPorAccion, cupoEn } from '../../web/src/domain/combate/maestria.js';
 import { registrarAtaque, siguienteTurno, empezarCombate } from '../../web/src/domain/combate/combate.js';
 import { ataqueArma, anadirComun } from '../../web/src/domain/equipo/equipo.js';
 
 const pj = o => normChar(blankChar({ clase: 'Guerrero', nivel: 1, stats: { fue: 16, des: 14, con: 14, int: 8, sab: 10, car: 10 }, ...o }));
+
+describe('armaElegible', () => {
+  test('el pícaro domina cualquier arma sencilla, aunque no sea sutil ni ligera (Manual del Jugador 2024)', () => {
+    const picaro = pj({ clase: 'Pícaro' });
+    for (const n of ['Garrote grande', 'Honda', 'Martillo ligero', 'Dardo', 'Bastón']) assert.equal(armaElegible(picaro, arma(n)), true, n);
+    assert.equal(armaElegible(picaro, arma('Hacha a dos manos')), false);
+  });
+
+  test('las armas sencillas se reconocen también con bonificador o nombre de objeto mágico', () => {
+    assert.equal(esSencilla(arma('Garrote grande')), true);
+    assert.equal(esSencilla({ nombre: 'Honda +1' }), true);
+    assert.equal(esSencilla({ nombre: 'Martillo del trueno', arma: { base: 'Martillo ligero' } }), true);
+    assert.equal(esSencilla(arma('Espada larga')), false);
+  });
+});
 
 describe('cupo y efecto', () => {
   test('cupo de maestrías por clase y nivel', () => {
