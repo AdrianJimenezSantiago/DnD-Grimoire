@@ -79,3 +79,11 @@ test('las mazas y lanzas ya guardadas pasan a Debilitar', async () => {
   assert.equal(normObjeto({ nombre: 'Lanza +1', cat: 'arma', arma: { base: 'Lanza', maestria: 'Derribar' } }).arma.maestria, 'Debilitar');
   assert.equal(normObjeto({ nombre: 'Martillo', cat: 'arma', arma: { maestria: 'Irritar' } }).arma.maestria, 'Irritar');
 });
+
+test('glosario: las palabras partidas con guion al final de línea se unen', async () => {
+  const { juntar, sinCortes } = await import('../web/src/domain/glosario.js');
+  assert.equal(juntar('puede arrastrarte o trans-', 'portarte al moverse'), 'puede arrastrarte o transportarte al moverse');
+  assert.equal(juntar('Velocidad 0 -', 'Tu velocidad'), 'Velocidad 0 - Tu velocidad');
+  assert.equal(sinCortes('arrastrarte o trans- portarte'), 'arrastrarte o transportarte');
+  assert.equal(sinCortes('fuego y frío - en ambos'), 'fuego y frío - en ambos');
+});

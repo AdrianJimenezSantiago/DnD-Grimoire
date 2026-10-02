@@ -230,7 +230,7 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 
 /* Ficha de una regla */
 #fichaDlg.regla { --sh: 40; --ss: 60%; --c: hsl(var(--sh) var(--ss) var(--acc-l)); }
-#fichaDlg.regla .dhead { position: relative; overflow: hidden; background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent 85%); border-bottom-color: color-mix(in srgb, var(--c) 30%, var(--line-soft)); }
+#fichaDlg.regla .dhead { position: relative; overflow: hidden; flex: none; background: linear-gradient(180deg, hsl(var(--sh) var(--ss) 45% / .16), transparent 85%); border-bottom-color: color-mix(in srgb, var(--c) 30%, var(--line-soft)); }
 #fichaDlg.regla .dhead::after { content: ""; position: absolute; right: -40px; top: -60px; width: 200px; height: 200px; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle, hsl(var(--sh) var(--ss) 55% / .18), transparent 70%); }
 #fichaDlg.regla .fi-ico { color: var(--c); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .28), transparent 72%); box-shadow: inset 0 0 0 1px hsl(var(--sh) var(--ss) 55% / .35); }
@@ -260,8 +260,8 @@ dialog.ficha[class*="r-"] .dhead { background: linear-gradient(180deg, color-mix
 .rg-hoja button { min-height: 38px; border-radius: var(--r-pill); padding: 0 14px; }
 .rg-hoja button .gi { width: 17px; height: 17px; }
 .rg-h-txt { margin-top: 22px; }
-.rg-texto > p:first-child { display: flow-root; }
-.rg-texto > p:first-child::first-letter { font: 600 2.6em / .9 var(--display); float: left; margin: .06em .1em 0 0; color: var(--c); }
+/* Sin capitular (se leía mal en entradas cortas): el primer párrafo, la definición, va un punto más grande */
+.rg-texto > p:first-child { font-size: 1.06em; line-height: 1.55; }
 .rg-rel { margin-top: 22px; padding-top: 2px; }
 .rg-rel-l { display: flex; flex-wrap: wrap; gap: 6px; }
 .rg-chip { --c: hsl(var(--sh) var(--ss) var(--acc-l)); min-height: 34px; padding: 0 12px 0 9px; border-radius: var(--r-pill); font: 500 var(--fs-s) / 1 var(--sans); color: var(--ink);

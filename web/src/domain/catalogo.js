@@ -1,7 +1,7 @@
 import { esc, norm, uid } from '../core/util.js';
 import { tiradasDe, tieneTiradas } from './tiradas.js';
 import { tiradasBase, ajustarTiradas } from './tiradasBase.js';
-import { formasDeEstado } from './glosario.js';
+import { formasDeEstado, sinCortes } from './glosario.js';
 import { CLASES } from './reglas2024.js';
 import { claveNombre } from './manual.js';
 import { alcance, componentes, duracion, escuelaOficial } from './validar.js';
@@ -131,7 +131,7 @@ export const srdAsSpell = x => ({ es: x.es, en: x.en, level: x.l, escuela: x.esc
 
 let GLOS = null, RE_EST = null;
 export function setGlosario(lista) {
-  GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, e])) : null; RE_EST = null;
+  GLOS = lista && lista.length ? new Map(lista.map(e => [e.clave, { ...e, texto: sinCortes(e.texto) }])) : null; RE_EST = null;
 }
 export const glosario = () => (GLOS ? [...GLOS.values()] : []);
 export const termino = clave => GLOS?.get(clave) || null;
