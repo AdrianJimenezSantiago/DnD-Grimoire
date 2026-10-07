@@ -1,107 +1,99 @@
 /* Códice arcano: la última capa de estilo, la que da a la app su forma propia.
-   - Esquinas talladas: las piezas no se redondean; a cada esquina se le «muerde» un cuarto de círculo cóncavo con una
-     máscara, como a una placa grabada (el tamaño lo da --muesca). En botones y campos, un anillo del color del borde
-     recorre el mordisco para que el contorno no se corte.
-   - Remates: las piezas grandes llevan en cada esquina un arco, una gema y el arranque de un filete (--orn-*).
-   - Rúbricas: los títulos se separan con dos hilos que se afinan hacia fuera y una gema en el centro, que se traza al abrir.
-   - Capitular: la primera letra de cada ventana se ilumina en el color de la clase.
-   - Gemas: los espacios de conjuro son rombos tallados; los avisos, una filacteria con cola de golondrina.
-   Las máscaras y degradados se escriben en cada regla (no en variables de :root) para que --muesca y el color de la
-   clase se lean en cada elemento. Va después de las demás hojas, salvo movil.css, que solo aligera la GPU en táctiles. */
+   La forma dice cuánto importa cada pieza; por eso hay tres grados y el más vistoso se usa poco:
+   1. Tallado (cuarto de círculo cóncavo «mordido» en cada esquina, con su arco y su gema): solo lo ceremonial.
+      Las ventanas (páginas del códice), los menús flotantes, las tarjetas de personaje de la portada y el botón
+      principal (el sello de oro). Si algo está tallado, es porque abre, elige o confirma algo importante.
+   2. Esquinero (esquina recta con una gema y el arranque de un filete): las piezas grandes de la hoja que son
+      «páginas dentro de la página»: las listas de conjuros, los recursos y la tarjeta del tutorial.
+   3. Piedra lisa (radio de 3–4 px): todo lo demás. Placas, botones normales, campos, fichas, pestañas, barras.
+      Su carácter viene de la luz (bisel, resplandor desde abajo al pasar), no de la silueta.
+   Además: rúbricas con gema bajo los títulos de las ventanas, capitular en el color de la clase, espacios de
+   conjuro como gemas en rombo y avisos como filacteria con cola de golondrina.
+   Las máscaras y degradados del tallado se escriben en cada regla (no en variables de :root) para que --muesca y el
+   color de la clase se lean en cada elemento. Va después de las demás hojas, salvo movil.css. */
 :root {
   --orn-tl: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22none%22 stroke=%22%23000%22 stroke-linecap=%22round%22 transform=%22%22%3E%3Cpath d=%22M0 16.5A16.5 16.5 0 0 0 16.5 0%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M0 21.5A21.5 21.5 0 0 0 21.5 0%22 stroke-width=%22.7%22 stroke-dasharray=%221.2 2.4%22/%3E%3Cpath d=%22M11.7 7.9l3.8 3.8-3.8 3.8-3.8-3.8z%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Cpath d=%22M24 4h16M4 24v16%22 stroke-width=%22.9%22/%3E%3Ccircle cx=%2224%22 cy=%224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Ccircle cx=%224%22 cy=%2224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3C/g%3E%3C/svg%3E");
   --orn-tr: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22none%22 stroke=%22%23000%22 stroke-linecap=%22round%22 transform=%22translate(40 0) scale(-1 1)%22%3E%3Cpath d=%22M0 16.5A16.5 16.5 0 0 0 16.5 0%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M0 21.5A21.5 21.5 0 0 0 21.5 0%22 stroke-width=%22.7%22 stroke-dasharray=%221.2 2.4%22/%3E%3Cpath d=%22M11.7 7.9l3.8 3.8-3.8 3.8-3.8-3.8z%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Cpath d=%22M24 4h16M4 24v16%22 stroke-width=%22.9%22/%3E%3Ccircle cx=%2224%22 cy=%224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Ccircle cx=%224%22 cy=%2224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3C/g%3E%3C/svg%3E");
   --orn-bl: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22none%22 stroke=%22%23000%22 stroke-linecap=%22round%22 transform=%22translate(0 40) scale(1 -1)%22%3E%3Cpath d=%22M0 16.5A16.5 16.5 0 0 0 16.5 0%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M0 21.5A21.5 21.5 0 0 0 21.5 0%22 stroke-width=%22.7%22 stroke-dasharray=%221.2 2.4%22/%3E%3Cpath d=%22M11.7 7.9l3.8 3.8-3.8 3.8-3.8-3.8z%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Cpath d=%22M24 4h16M4 24v16%22 stroke-width=%22.9%22/%3E%3Ccircle cx=%2224%22 cy=%224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Ccircle cx=%224%22 cy=%2224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3C/g%3E%3C/svg%3E");
   --orn-br: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22none%22 stroke=%22%23000%22 stroke-linecap=%22round%22 transform=%22translate(40 40) scale(-1 -1)%22%3E%3Cpath d=%22M0 16.5A16.5 16.5 0 0 0 16.5 0%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M0 21.5A21.5 21.5 0 0 0 21.5 0%22 stroke-width=%22.7%22 stroke-dasharray=%221.2 2.4%22/%3E%3Cpath d=%22M11.7 7.9l3.8 3.8-3.8 3.8-3.8-3.8z%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Cpath d=%22M24 4h16M4 24v16%22 stroke-width=%22.9%22/%3E%3Ccircle cx=%2224%22 cy=%224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3Ccircle cx=%224%22 cy=%2224%22 r=%221.3%22 fill=%22%23000%22 stroke=%22none%22/%3E%3C/g%3E%3C/svg%3E");
+  --esq-tl: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22%23000%22 transform=%22%22%3E%3Cpath d=%22M7 2.2l4.8 4.8L7 11.8 2.2 7z%22/%3E%3Cpath d=%22M14 6.4h26v.9H14zM6.4 14h.9v26h-.9z%22 opacity=%22.55%22/%3E%3Ccircle cx=%2214%22 cy=%226.85%22 r=%221.1%22/%3E%3Ccircle cx=%226.85%22 cy=%2214%22 r=%221.1%22/%3E%3C/g%3E%3C/svg%3E");
+  --esq-tr: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22%23000%22 transform=%22translate(40 0) scale(-1 1)%22%3E%3Cpath d=%22M7 2.2l4.8 4.8L7 11.8 2.2 7z%22/%3E%3Cpath d=%22M14 6.4h26v.9H14zM6.4 14h.9v26h-.9z%22 opacity=%22.55%22/%3E%3Ccircle cx=%2214%22 cy=%226.85%22 r=%221.1%22/%3E%3Ccircle cx=%226.85%22 cy=%2214%22 r=%221.1%22/%3E%3C/g%3E%3C/svg%3E");
+  --esq-bl: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22%23000%22 transform=%22translate(0 40) scale(1 -1)%22%3E%3Cpath d=%22M7 2.2l4.8 4.8L7 11.8 2.2 7z%22/%3E%3Cpath d=%22M14 6.4h26v.9H14zM6.4 14h.9v26h-.9z%22 opacity=%22.55%22/%3E%3Ccircle cx=%2214%22 cy=%226.85%22 r=%221.1%22/%3E%3Ccircle cx=%226.85%22 cy=%2214%22 r=%221.1%22/%3E%3C/g%3E%3C/svg%3E");
+  --esq-br: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22%23000%22 transform=%22translate(40 40) scale(-1 -1)%22%3E%3Cpath d=%22M7 2.2l4.8 4.8L7 11.8 2.2 7z%22/%3E%3Cpath d=%22M14 6.4h26v.9H14zM6.4 14h.9v26h-.9z%22 opacity=%22.55%22/%3E%3Ccircle cx=%2214%22 cy=%226.85%22 r=%221.1%22/%3E%3Ccircle cx=%226.85%22 cy=%2214%22 r=%221.1%22/%3E%3C/g%3E%3C/svg%3E");
   --r-xs: 2px; --r-s: 3px; --r-m: 4px; --r-l: 4px; --r-pill: 4px;
   --muesca: 6px;
-  --bisel: inset 0 1px 0 rgba(255, 244, 220, .07), inset 0 -1px 0 rgba(0, 0, 0, .3);
-  --pozo: inset 0 2px 6px rgba(0, 0, 0, .32);
+  --bisel: inset 0 1px 0 rgba(255, 244, 220, .06), inset 0 -1px 0 rgba(0, 0, 0, .28);
+  --pozo: inset 0 2px 6px rgba(0, 0, 0, .3);
 }
-:root[data-theme="light"] { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .12); --pozo: inset 0 2px 4px rgba(80, 50, 20, .12); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .12); --pozo: inset 0 2px 4px rgba(80, 50, 20, .12); } }
+:root[data-theme="light"] { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .1); --pozo: inset 0 2px 4px rgba(80, 50, 20, .1); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .1); --pozo: inset 0 2px 4px rgba(80, 50, 20, .1); } }
 
 /* ——— Tipografía: rótulos grabados y capitulares ——— */
 h1, h2, h3, .lvl-title, .cname { font-kerning: normal; text-wrap: balance; }
 .dhead h2 { font: 600 clamp(21px, 5.4vw, 27px) / 1.12 var(--display); letter-spacing: .035em; }
-:is(.dhead h2, dialog.modal h2, .ej-head h2, .cr-head h2)::first-letter {
+:is(.dhead h2, dialog.modal h2)::first-letter {
   font-family: var(--display-deco); font-weight: 700; font-size: 1.34em; line-height: .8; color: var(--gold-2);
   text-shadow: 0 0 18px var(--glow), 0 1px 0 color-mix(in srgb, var(--gold) 40%, #000); }
-:root[data-theme="light"] :is(.dhead h2, dialog.modal h2, .ej-head h2, .cr-head h2)::first-letter { color: var(--gold); text-shadow: none; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(.dhead h2, dialog.modal h2, .ej-head h2, .cr-head h2)::first-letter { color: var(--gold); text-shadow: none; } }
+:root[data-theme="light"] :is(.dhead h2, dialog.modal h2)::first-letter { color: var(--gold); text-shadow: none; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(.dhead h2, dialog.modal h2)::first-letter { color: var(--gold); text-shadow: none; } }
 .dsub { font-family: var(--serif); font-style: italic; font-size: var(--fs-m); }
 
-/* ——— Piezas talladas ——— */
-:is(.dfoot, .row-btns, .cacts, .l-actions, .l-foot, .tour-btns, .act, .md-btns, .toast) button, button.gold, button.primary, button.danger, button.warn,
-.chip, .iconbtn, .who-chip, .seg, .conc, #moreMenu .mm-tile, .dock,
-.res, .list, .lcard, .menu, .tour-card, .stat, .ej-it, .ccard, .rec-card, .ses, .fsum, .ab, .obj-grid .obj, .inv-list > li, .gl-item,
-.cc-grupo, .cc-elige, .cc-opcion, .lv-estilo, .ej-eleccion, .ai-op, .bx-card, .bx-perfil, .rg-resumen, .rg-hoja, .dd-out, .cj-paso, .rl-save, .rl-out, .rl-efecto, .rec, .compose, .mc-row, .scp-card,
-.es-it, .vd-dg-it, .av-it, .efx-activos, .cb-pruebas, .cb-grupo, .cb-arma, .cb-rg, .cb-siempre, .cb-mods, .cb-ac, .cb-mando, .cb-salir, .cb-efx,
-#sheet :is(.vt-placa, .pg-card, .cr-car:not(.abierta), .vt-estados, .cr-otras),
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea {
-  -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; border-radius: 0; }
-.ab input, .stepper input, .pdie input, .slotgrid input, .who-chip input { -webkit-mask: none; mask: none; }
-.res, .stat, .ej-it, .ccard, .rec-card, .ses, .fsum, .ab, .obj-grid .obj, .inv-list > li, .gl-item, #sheet :is(.vt-placa, .pg-card, .cr-car, .vt-estados, .cr-otras) { --muesca: 7px; }
-.cc-grupo, .cc-elige, .cc-opcion, .lv-estilo, .ej-eleccion, .ai-op, .bx-card, .bx-perfil, .rg-resumen, .rg-hoja, .dd-out, .cj-paso, .rl-save, .rl-out, .rl-efecto, .rec, .compose, .mc-row, .scp-card, .es-it, .vd-dg-it, .av-it, .efx-activos, .cb-pruebas, .cb-grupo, .cb-arma, .cb-rg, .cb-siempre, .cb-mods, .cb-ac { --muesca: 7px; }
-.cb-grupo, .rg-hoja, .bx-perfil { --muesca: 10px; } .cb-mando { --muesca: 14px; }
-.list, .lcard { --muesca: 10px; --orn: 32px; } .res { --orn: 26px; } .menu { --muesca: 11px; --orn: 34px; } .tour-card { --muesca: 10px; --orn: 30px; }
-:is(.res, .list, .lcard, .menu, .tour-card)::before, :is(.res, .list)::after { inset: 0; }
-.res::after, .list::after, .lcard::before, .menu::before, .tour-card::before, dialog::before { opacity: .78; }
+/* ——— 1. Tallado: solo lo ceremonial ——— */
+dialog, .menu, .lcard, button.gold, button.primary { -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; border-radius: 0; }
+.lcard { --muesca: 10px; --orn: 32px; } .menu { --muesca: 11px; --orn: 34px; }
+.lcard::before, .menu::before { inset: 0; opacity: .78; }
 
-/* ——— Botones: tablillas de piedra ——— */
+/* ——— 2. Esquinero: páginas dentro de la página ——— */
+.res, .list, .tour-card { --orn-tl: var(--esq-tl); --orn-tr: var(--esq-tr); --orn-bl: var(--esq-bl); --orn-br: var(--esq-br); border-radius: var(--r-m); }
+.list { --orn: 30px; } .res { --orn: 24px; } .tour-card { --orn: 28px; }
+:is(.res, .list)::after, .tour-card::before { inset: 3px; opacity: .6; }
+
+/* ——— Botones normales: piedra lisa que se enciende desde abajo ——— */
 :where(button) { font-weight: 600; letter-spacing: .015em; }
 :is(.dfoot, .row-btns, .cacts, .act, .md-btns, .tour-btns) button:not(.gold):not(.primary):not(.danger):not(.ghost), .iconbtn, .chip:not(.gold), .who-chip {
-  --bc: color-mix(in srgb, var(--gold) 24%, var(--line)); border-color: var(--bc); background-origin: border-box;
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%),
-    linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--surface) 90%, #000)) border-box;
+  border-color: color-mix(in srgb, var(--gold) 22%, var(--line)); border-radius: var(--r-s);
+  background: radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--surface) 92%, #000));
   box-shadow: var(--bisel); }
 :is(.dfoot, .row-btns, .cacts, .act, .md-btns, .tour-btns) button:not(.gold):not(.primary):not(.danger):not(.ghost):hover:not(:disabled), .iconbtn:hover, .chip:not(.gold):hover, .who-chip:hover {
-  --bc: color-mix(in srgb, var(--gold) 65%, var(--line)); color: var(--ink);
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 30%, transparent), transparent 62%),
-    linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--surface) 90%, #000)) border-box;
-  box-shadow: var(--bisel), inset 0 -10px 18px -14px var(--glow); }
-:is(.dfoot, .row-btns, .cacts, .act, .md-btns, .tour-btns) button:active:not(:disabled), .iconbtn:active, .chip:active { box-shadow: inset 0 2px 7px rgba(0, 0, 0, .38); transform: translateY(1px) scale(.985); }
-.dfoot button { padding: 0 20px; font: 600 13px / 1 var(--display); letter-spacing: .08em; }
-.act button { font-family: var(--display); font-size: 13px; letter-spacing: .05em; }
-
-/* El botón principal es un sello de oro batido, con una línea grabada por dentro */
-button.gold, button.primary, .chip.gold {
-  --bc: color-mix(in srgb, var(--gold) 55%, #000); border: 1px solid var(--bc); color: var(--on-gold); background-origin: border-box;
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 88%, #fff), var(--gold) 55%, color-mix(in srgb, var(--gold) 74%, #000)) border-box;
-  text-shadow: 0 1px 0 color-mix(in srgb, var(--gold-2) 55%, transparent);
-  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--gold) 85%, transparent), inset 0 0 0 4px color-mix(in srgb, var(--on-gold) 35%, transparent), inset 0 2px 0 4px rgba(255, 255, 255, .14); }
-button.gold:hover:not(:disabled), button.primary:hover:not(:disabled), .chip.gold:hover {
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, radial-gradient(90% 120% at 50% 0%, rgba(255, 255, 255, .35), transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 80%, #fff), var(--gold-2) 50%, var(--gold)) border-box;
-  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--gold) 85%, transparent), inset 0 0 0 4px color-mix(in srgb, var(--on-gold) 45%, transparent), inset 0 0 26px rgba(255, 255, 255, .25); }
-:is(button.gold, button.primary, .chip.gold) :is(.icon, .gi) { color: inherit; }
-:root[data-theme="light"] :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--on-gold); text-shadow: 0 -1px 0 rgba(0, 0, 0, .25); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--on-gold); text-shadow: 0 -1px 0 rgba(0, 0, 0, .25); } }
-button.danger, button.warn:not(.ghost) { --bc: color-mix(in srgb, var(--danger) 50%, transparent); border-color: var(--bc); color: var(--danger); text-shadow: none; background-origin: border-box;
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--danger) 18%, var(--raised)), color-mix(in srgb, var(--danger) 7%, var(--raised))) border-box; box-shadow: var(--bisel); }
-button.danger:hover:not(:disabled), button.warn:not(.ghost):hover:not(:disabled) { --bc: var(--danger);
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--danger) 28%, var(--raised)), color-mix(in srgb, var(--danger) 12%, var(--raised))) border-box; }
-.dfoot :is(button.gold, button.primary, button.danger) { padding: 0 26px; }
-:is(.dfoot, .row-btns, .cacts, .l-actions, .tour-btns, .act, .md-btns) button:focus-visible, :is(button.gold, button.primary, .chip, .iconbtn, .who-chip, #moreMenu .mm-tile):focus-visible {
-  outline: 1.5px solid var(--gold); outline-offset: -5px; box-shadow: inset 0 0 0 6px var(--glow); }
-
-/* Botones de icono: losas cuadradas cuyo icono se inclina al pasar */
-.iconbtn { width: 44px; min-width: 44px; height: 44px; --muesca: 7px; }
+  border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); color: var(--ink);
+  background: radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 26%, transparent), transparent 62%),
+    linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--surface) 92%, #000));
+  box-shadow: var(--bisel), 0 0 0 3px color-mix(in srgb, var(--gold) 9%, transparent); }
+:is(.dfoot, .row-btns, .cacts, .act, .md-btns, .tour-btns) button:active:not(:disabled), .iconbtn:active, .chip:active { box-shadow: inset 0 2px 7px rgba(0, 0, 0, .35); transform: translateY(1px) scale(.985); }
+.dfoot button { padding: 0 20px; font: 600 13px / 1 var(--display); letter-spacing: .07em; }
+.act button { font-family: var(--display); font-size: 13px; letter-spacing: .04em; }
+.iconbtn { width: 44px; min-width: 44px; height: 44px; }
 .iconbtn :is(.icon, .gi) { transition: transform .45s var(--spring); }
 .iconbtn:hover :is(.icon, .gi) { transform: rotate(-12deg) scale(1.12); }
 
+/* El botón principal es un sello de oro batido, tallado, con una línea grabada por dentro */
+button.gold, button.primary, .chip.gold {
+  --bc: color-mix(in srgb, var(--gold) 55%, #000); border: 1px solid var(--bc); color: var(--on-gold);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 88%, #fff), var(--gold) 55%, color-mix(in srgb, var(--gold) 74%, #000));
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--gold-2) 55%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 85%, transparent), inset 0 0 0 3px color-mix(in srgb, var(--on-gold) 30%, transparent), inset 0 2px 0 3px rgba(255, 255, 255, .14); }
+button.gold, button.primary { --muesca: 6px; background-origin: border-box;
+  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 88%, #fff), var(--gold) 55%, color-mix(in srgb, var(--gold) 74%, #000)) border-box; }
+button.gold:hover:not(:disabled), button.primary:hover:not(:disabled) {
+  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, radial-gradient(90% 120% at 50% 0%, rgba(255, 255, 255, .32), transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 80%, #fff), var(--gold-2) 50%, var(--gold)) border-box;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 85%, transparent), inset 0 0 0 3px color-mix(in srgb, var(--on-gold) 40%, transparent), inset 0 0 24px rgba(255, 255, 255, .22); }
+.chip.gold { border-radius: var(--r-s); }
+:is(button.gold, button.primary, .chip.gold) :is(.icon, .gi) { color: inherit; }
+:root[data-theme="light"] :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--on-gold); text-shadow: 0 -1px 0 rgba(0, 0, 0, .25); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(button.gold, button.primary, .chip.gold) { --bt-ink: var(--on-gold); text-shadow: 0 -1px 0 rgba(0, 0, 0, .25); } }
+.dfoot :is(button.gold, button.primary) { padding: 0 26px; }
+:is(button.gold, button.primary):focus-visible { outline: 1.5px solid var(--on-gold); outline-offset: -6px; box-shadow: inset 0 0 0 7px var(--glow); }
+button.danger { border-radius: var(--r-s); }
+
 /* ——— Campos: pozos de tinta ——— */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea {
-  --muesca: 5px; --bc: var(--line); background-origin: border-box;
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--bg) 65%, var(--surface)), var(--surface)) border-box; box-shadow: var(--pozo); }
-select { background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, linear-gradient(45deg, transparent 50%, var(--gold) 50%) calc(100% - 17px) 55% / 5px 5px no-repeat, linear-gradient(-45deg, transparent 50%, var(--gold) 50%) calc(100% - 12px) 55% / 5px 5px no-repeat, linear-gradient(180deg, color-mix(in srgb, var(--bg) 65%, var(--surface)), var(--surface)) border-box; -webkit-appearance: none; appearance: none; padding-right: 30px; }
-:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):hover { --bc: color-mix(in srgb, var(--gold) 40%, var(--line)); border-color: var(--bc); }
-:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea):focus { --bc: var(--gold); border-color: var(--gold);
-  background: radial-gradient(circle at 0 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 calc(var(--muesca) - .3px), var(--bc) calc(var(--muesca) + .3px) calc(var(--muesca) + 1px), #0000 calc(var(--muesca) + 1.5px)) 100% 100% / 51% 51% no-repeat, var(--surface) border-box; box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 18px -6px var(--glow); }
-select:focus { --bc: var(--gold); border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  border-radius: var(--r-s); background-color: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); }
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):focus { background-color: var(--surface); box-shadow: var(--pozo), 0 0 0 3px var(--glow); }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 
 /* Interruptor: una palanca de latón en su ranura */
-.switch span { border-radius: 2px; background: color-mix(in srgb, var(--bg) 55%, var(--line)); box-shadow: var(--pozo); }
+.switch span { border-radius: 3px; background: color-mix(in srgb, var(--bg) 55%, var(--line)); box-shadow: var(--pozo); }
 .switch span::after { border-radius: 2px; transform: rotate(45deg) scale(.72); background: linear-gradient(135deg, var(--ink-2), var(--ink-3)); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3); }
 .switch input:checked + span { background: color-mix(in srgb, var(--gold) 32%, var(--bg)); box-shadow: var(--pozo), 0 0 12px -2px var(--glow); }
 .switch input:checked + span::after { transform: translateX(18px) rotate(45deg) scale(.72); background: linear-gradient(135deg, var(--gold-2), var(--gold)); box-shadow: 0 0 10px var(--glow); }
@@ -109,21 +101,20 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 /* ——— Fichas y pestañas ——— */
 .chip { font-weight: 600; letter-spacing: .02em; }
 .chip-n { border-radius: 2px; }
-.seg { --muesca: 7px; padding: 3px; gap: 3px; background: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); border-color: color-mix(in srgb, var(--gold) 18%, var(--line-soft)); }
-.seg button { border-radius: 0; }
+.seg { border-radius: var(--r-s); padding: 3px; gap: 3px; background: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); border-color: color-mix(in srgb, var(--gold) 16%, var(--line-soft)); }
+.seg button { border-radius: 2px; }
 .seg:not(.bib-tabs):not(.el-grupos) button { font-family: var(--display); font-weight: 600; letter-spacing: .04em; }
-.seg button[aria-checked="true"], .seg button[aria-selected="true"] { --muesca: 4px; -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 30%, var(--raised)), color-mix(in srgb, var(--gold) 12%, var(--raised)));
-  color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent), inset 0 -2px 0 var(--gold), 0 0 14px -4px var(--glow); }
+.seg button[aria-checked="true"], .seg button[aria-selected="true"] {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 28%, var(--raised)), color-mix(in srgb, var(--gold) 12%, var(--raised)));
+  color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent), inset 0 -2px 0 var(--gold), 0 0 14px -4px var(--glow); }
 .seg button:is([aria-checked="true"], [aria-selected="true"]) .gi { color: var(--gold-2); }
 
 /* ——— Ventanas: páginas del códice ——— */
-dialog { --muesca: 13px; -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; border-radius: 0; --orn: 38px;
-  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+dialog { --muesca: 13px; --orn: 38px; border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
   background: radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%),
     radial-gradient(70% 30% at 50% 100%, color-mix(in srgb, var(--gold) 5%, transparent), transparent 70%), var(--raised); }
 dialog.modal { --muesca: 12px; --orn: 34px; }
-dialog::before { inset: 0; }
+dialog::before { inset: 0; opacity: .78; }
 dialog::after { inset: 6px; border-color: color-mix(in srgb, var(--gold) 13%, transparent); border-radius: 0; --muesca: 16px; -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; }
 .dhead { background: none; padding-bottom: 18px; }
 .dhead::after { content: ""; position: absolute; left: 22px; right: 22px; bottom: 2px; height: 8px; pointer-events: none; background: linear-gradient(to bottom right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, var(--gold) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; }
@@ -131,8 +122,7 @@ dialog[open] .dhead::after { animation: rubrica .9s var(--ease-out) both .12s; }
 @keyframes rubrica { from { clip-path: inset(0 50%); opacity: 0; } 30% { opacity: 1; } }
 #spellDlg .dhead { background: none; }
 #spellDlg .dhead::after { background: linear-gradient(to bottom right, #0000 50%, var(--sc, var(--gold)) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, var(--sc, var(--gold)) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, var(--sc, var(--gold)) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, var(--sc, var(--gold)) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, var(--sc, var(--gold)) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, var(--sc, var(--gold)) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; }
-.dfoot { border-top: 0; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 30%, transparent) 15% 85%, transparent) 0 0 / 100% 1px no-repeat,
-  linear-gradient(90deg, transparent 8%, color-mix(in srgb, var(--gold) 12%, transparent) 30% 70%, transparent 92%) 0 4px / 100% 1px no-repeat,
+.dfoot { border-top: 0; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 28%, transparent) 15% 85%, transparent) 0 0 / 100% 1px no-repeat,
   linear-gradient(0deg, var(--raised) 70%, color-mix(in srgb, var(--raised) 0%, transparent)); }
 dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--backdrop) 55%, transparent), var(--backdrop) 72%); }
 @media (max-width: 700px) {
@@ -146,17 +136,15 @@ dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in 
   .dhead::after { left: 18px; right: 18px; }
 }
 
-/* ——— Placas de la hoja ——— */
-.stat.key::before { top: -3px; width: 10px; height: 10px; margin-left: -5px; }
-.lvl-num::before { border-radius: 0; }
+/* ——— Hoja ——— */
+.lvl-num::before { border-radius: 1px; }
 .lvl-head { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 60%, transparent), color-mix(in srgb, var(--gold) 22%, transparent) 30%, transparent 85%) left bottom / 100% 1px no-repeat; }
-:is(.ej-head, .cr-head) { position: relative; }
 
 /* ——— Barra superior: el dintel ——— */
 .appbar::after { height: 5px; bottom: -2px; opacity: 1;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 60%, transparent) 25% 75%, transparent) 0 0 / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 10%, color-mix(in srgb, var(--gold) 22%, transparent) 35% 65%, transparent 90%) 0 4px / 100% 1px no-repeat; }
-.who-chip { --muesca: 9px; padding-right: 14px; }
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 55%, transparent) 25% 75%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 10%, color-mix(in srgb, var(--gold) 18%, transparent) 35% 65%, transparent 90%) 0 4px / 100% 1px no-repeat; }
+.who-chip { padding-right: 14px; }
 .who-chip .nm { letter-spacing: .05em; }
 .who-cambiar { border-radius: 2px; }
 
@@ -171,9 +159,8 @@ dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in 
 body.sb-compacta .orb { width: 13px; height: 16px; }
 .sb-l > b { font-family: var(--display); }
 
-/* ——— Barra inferior del móvil: un cinto tallado con su gema en lo que está activo ——— */
-.dock { --muesca: 14px; border-radius: 0; padding: 7px 10px 6px; box-shadow: none;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, var(--bg)), var(--bg)); border-color: color-mix(in srgb, var(--gold) 38%, var(--line)); }
+/* ——— Barra inferior del móvil: un cinto, con una gema en lo que está activo ——— */
+.dock { border-radius: 6px; padding: 7px 10px 6px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, var(--bg)), var(--bg)); border-color: color-mix(in srgb, var(--gold) 34%, var(--line)); }
 .dock::before { left: 16px; right: 16px; top: 2px; height: 8px; background: linear-gradient(to bottom right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, var(--gold) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; opacity: .5; }
 .dockbtn { border-radius: 0; isolation: isolate; }
 .dockbtn[aria-pressed="true"], .dockbtn.on, .dockbtn.d-combate[aria-pressed="true"] { background: none; }
@@ -190,17 +177,12 @@ body.sb-compacta .orb { width: 13px; height: 16px; }
     linear-gradient(180deg, color-mix(in srgb, var(--gold) 22%, #17110c), #110c08 55%, color-mix(in srgb, var(--gold) 12%, #0c0806));
   box-shadow: none; }
 .toast::before, .toast::after { display: none; }
-.toast button { --muesca: 5px; }
 
 /* ——— Menús: el índice del libro ——— */
-.menu { border-radius: 0; background: radial-gradient(120% 50% at 50% 0, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%), var(--raised); }
-#moreMenu .mm-tile { --muesca: 8px; border-radius: 0; }
+.menu { background: radial-gradient(120% 50% at 50% 0, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%), var(--raised); }
+#moreMenu .mm-tile { border-radius: var(--r-m); }
 #moreMenu .mm-ico { border-radius: 2px; transform: rotate(45deg) scale(.86); }
 #moreMenu .mm-ico > * { transform: rotate(-45deg); }
-.menu > button:not(.mm-tile) { border-radius: 0; }
 
-/* ——— Movimiento: menos, pero con intención ——— */
 @media (prefers-reduced-motion: reduce) { dialog[open] .dhead::after { animation: none; } }
-@media print {
-  :is(dialog, .res, .list, .lcard, .menu, .stat, .ej-it, .chip, button, input, select, textarea, .dock, #sheet .vt-placa, #sheet .pg-card, #sheet .cr-car, #sheet .vt-estados, #sheet .cr-otras) { -webkit-mask: none !important; mask: none !important; }
-}
+@media print { :is(dialog, .menu, .lcard, button) { -webkit-mask: none !important; mask: none !important; } }
