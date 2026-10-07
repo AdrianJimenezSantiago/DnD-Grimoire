@@ -136,7 +136,7 @@ function efectosCombateHtml(ch) {
       <span class="cb-efx-sello">${gi(ico)}${n ? `<em>${n}</em>` : ''}</span>
       <span class="cb-efx-t"><b>${titulo}</b><small>${n ? esc(xs.map(e => e.nombre).join(' · ')) : vacio}</small></span>${icon('chevron')}</button>`;
   };
-  return `<div class="cb-efx" role="group" aria-label="Conjuros sobre ti">${boton(true, 'beneficios', 'Beneficios', 'Bendición, Acelerar, Escudo de la fe…', 'inspiracion')}${boton(false, 'perjuicios', 'Perjuicios', 'Perdición, Ralentizar, Maleficio…', 'esc_nig')}</div>`;
+  return `<div class="cb-efx" data-key="cb-efx" role="group" aria-label="Conjuros sobre ti">${boton(true, 'beneficios', 'Beneficios', 'Bendición, Acelerar, Escudo de la fe…', 'inspiracion')}${boton(false, 'perjuicios', 'Perjuicios', 'Perdición, Ralentizar, Maleficio…', 'esc_nig')}</div>`;
 }
 export function combateHtml(ch, db) {
   const c = combateDe(ch), P = perfil(ch), ag = penalizacionAgotamiento(ch), est = estadoVital(ch), incap = incapacitado(ch);
@@ -145,9 +145,9 @@ export function combateHtml(ch, db) {
       ${lineas.map(l => `<div class="cb-mod-l"><span>${esc(l.titulo)}</span>${l.piezas.map(p => `<b class="cb-mod ${p.mal ? 'mal' : 'bien'}" title="${esc(p.cond ? `Solo ${p.cond}` : p.fuente)}">${esc(p.texto)}<small>${esc(p.fuente)}${p.cond ? ' *' : ''}</small></b>`).join('')}</div>`).join('')}</section>` : '';
   const g = acciones(ch, db), pasivos = rasgosEnJuego(ch, biblioteca(), reglasVisibles(ch)).filter(r => r.grupo === 'pasivo');
   const eco = ECONOMIA.map(([k, t]) => `<button type="button" class="cb-eco-b e-${k} ${c.turno[k] || (incap.length && k !== 'movimiento') ? 'gastada' : ''}" data-eco="${k}" data-leer="eco:${k}" aria-pressed="${c.turno[k]}" aria-label="${t}${c.turno[k] ? ': gastada' : ''}" ${incap.length && k !== 'movimiento' ? 'disabled' : ''}><i aria-hidden="true"></i><span>${ECO_CORTO[k] ? `<em class="l-larga">${t}</em><em class="l-corta">${ECO_CORTO[k]}</em>` : t}</span></button>`).join('');
-  const conc = ch.play.conc ? `<div class="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b>${ch.play.concRondas != null ? `<small class="cb-conc-q">· quedan ${fmtRondas(ch.play.concRondas)}</small>` : ''}</span>
+  const conc = ch.play.conc ? `<div class="cb-conc" data-key="cb-conc"><span data-leer="conc">${gi('esc_adi')}Concentración en <b>${esc(ch.play.conc)}</b>${ch.play.concRondas != null ? `<small class="cb-conc-q">· quedan ${fmtRondas(ch.play.concRondas)}</small>` : ''}</span>
     <button type="button" data-cmd="tiraconc" aria-label="Salvación de concentración: te pedirá el daño recibido">Salvación ${sgn(bonoSalvacion(ch, 'con') - ag)}</button><button type="button" data-cmd="endconc">Terminar</button></div>` : '';
-  return `<section class="cb-mando" aria-label="Estado del combate">
+  return `<section class="cb-mando" data-key="cb-mando" aria-label="Estado del combate">
     ${orbeHtml(ch)}
     <header class="cb-m-cab">
       <span class="cb-emb">${runaSvg({ n: 12, lados: 5, cls: 'cb-runa', semillaInicial: 11 })}${gi('combate')}</span>
@@ -166,13 +166,13 @@ export function combateHtml(ch, db) {
     </div>
   </section>
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
-    ${conc}<section class="cb-cond">${estadosHtml(ch)}${modsHtml}</section>
+    ${conc}<section class="cb-cond" data-key="cb-cond">${estadosHtml(ch)}${modsHtml}</section>
     ${efectosCombateHtml(ch)}
     ${pruebasCombateHtml(ch)}
-    <div class="cb-ars-cab"><h3>${gi('combate')}Qué puedes hacer</h3><span class="cb-pista"><b>Toca</b> para usar · <b>mantén</b> para leer</span></div>
-    <div class="cb-ars">${grupoHtml(ch, P, c, 'accion', 'Acción', g.accion)}${grupoHtml(ch, P, c, 'adicional', 'Acción adicional', g.adicional)}${grupoHtml(ch, P, c, 'reaccion', 'Reacción', g.reaccion, '<span class="cb-g-nota">también en turnos ajenos</span>')}</div>
-    ${pasivos.length ? `<section class="cb-siempre"><h3>${gi('estrellas')}Siempre activo</h3><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}" data-leer="rasgo:${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(x => `<span class="ej-num">${esc(x.valor)}</span>`).join('')}</button>`).join('')}</div></section>` : ''}
-    <div class="cb-fin"><button type="button" class="cb-salir" data-cmd="combate">${gi('gloria')}Terminar combate</button></div>`;
+    <div class="cb-ars-cab" data-key="cb-ars-cab"><h3>${gi('combate')}Qué puedes hacer</h3><span class="cb-pista"><b>Toca</b> para usar · <b>mantén</b> para leer</span></div>
+    <div class="cb-ars" data-key="cb-ars">${grupoHtml(ch, P, c, 'accion', 'Acción', g.accion)}${grupoHtml(ch, P, c, 'adicional', 'Acción adicional', g.adicional)}${grupoHtml(ch, P, c, 'reaccion', 'Reacción', g.reaccion, '<span class="cb-g-nota">también en turnos ajenos</span>')}</div>
+    ${pasivos.length ? `<section class="cb-siempre" data-key="cb-siempre"><h3>${gi('estrellas')}Siempre activo</h3><div>${pasivos.map(r => `<button type="button" class="cb-pasivo" data-ejver="${esc(r.clave)}" data-leer="rasgo:${esc(r.clave)}"><b>${esc(r.nombre)}</b>${r.numeros.map(x => `<span class="ej-num">${esc(x.valor)}</span>`).join('')}</button>`).join('')}</div></section>` : ''}
+    <div class="cb-fin" data-key="cb-fin"><button type="button" class="cb-salir" data-cmd="combate">${gi('gloria')}Terminar combate</button></div>`;
 }
 
 export function transicion(tipo, origen, alCubrir, { ronda = 1 } = {}) {

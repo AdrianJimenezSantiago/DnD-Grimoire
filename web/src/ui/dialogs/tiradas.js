@@ -12,7 +12,7 @@ import { toast, botonDeshacer } from '../componentes/toast.js';
 import { golpe } from '../animaciones/golpes.js';
 import { botonYo } from '../componentes/avatar.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
-import { $, on, patch } from '../componentes/dom.js';
+import { $, on, patch, morph } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { abrirDialogo } from '../componentes/dialog.js';
 import { chispas, movimientoReducido } from '../animaciones/fx.js';
@@ -58,7 +58,7 @@ export function abrirTiradaObjeto({ sid, nivel = null, cd = null, atk = null, fu
   R = { bi: -1, ext: { sid, cd, atk, fuente }, sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivel || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  $('#rlCtl').replaceChildren(); // al abrir, cada bloque entra de nuevo con su animación
+  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = ''; // al abrir, cada bloque entra de nuevo con su animación
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 export function abrirTirada(bi, nivelEspacio) {
@@ -69,7 +69,7 @@ export function abrirTirada(bi, nivelEspacio) {
   if (s.level > 0 && !nivelEspacio) for (let L = s.level; L <= 9; L++) { const tot = P.slots?.[L] || 0; if (tot - Math.min(ch.play.used?.[L] || 0, tot) > 0) { R.nivel = L; break; } }
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  $('#rlCtl').replaceChildren(); // al abrir, cada bloque entra de nuevo con su animación
+  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = ''; // al abrir, cada bloque entra de nuevo con su animación
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 
@@ -81,8 +81,9 @@ function pintarCtl(tsAntes = R.ts) {
   const sub = R.ext ? `Lanzado desde ${R.ext.fuente}${s.level && R.nivel > s.level ? `, versión de nivel ${R.nivel}` : ''}`
     : s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   if ($('#rlSub').textContent !== sub) $('#rlSub').textContent = sub;
-  // Cada bloque lleva su clave: al repintar solo se toca el que cambia (ver pintarBloques)
-  const bloques = [], add = (k2, html) => bloques.push({ k: k2, html });
+  // Se arma por bloques con clave y se pinta con morph: al cambiar de opción solo se toca lo que cambia, y un bloque que
+  // aparece o desaparece (el de espacios, el de concentración) no descoloca a los demás
+  const bloques = [], add = (k2, html) => bloques.push(html.replace(/^\s*<[a-z]+/, m => `${m} data-key="cj-${k2}"`));
   const x = delCompendio(s);
   if (ch.play.conc === s.es && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d])) {
     add('obj', `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
@@ -144,33 +145,7 @@ function pintarCtl(tsAntes = R.ts) {
       ${t?.ataque && dados.some(dd => dd.via === 'ataque') ? `<label class="dd-crit"><input type="checkbox" id="rlCrit" ${R.critico ? 'checked' : ''}><span class="dd-sw" aria-hidden="true"></span><span><b>Crítico</b><small>Se tiran el doble de dados de daño del ataque. Con un 20 natural se marca solo.</small></span></label>` : ''}</section>`);
   }
   if (!t || (!t.ataque && !dados.length && !t.extras.length)) add('nota', `<p class="note">No encuentro dados de ataque ni de daño en el texto de este conjuro.${t?.salvacion ? '' : ' Importa tu manual para mejores resultados.'}</p>`);
-  pintarBloques($('#rlCtl'), bloques);
-}
-// Repinta una lista de bloques conservando el elemento de cada uno: el que no cambia no se toca (no repite su
-// animación de entrada ni pierde lo escrito), y el que cambia conserva su caja y solo renueva lo de dentro.
-function pintarBloques(root, bloques) {
-  const foco = document.activeElement, fk = root.contains(foco) && foco.closest('[data-ts], [data-modo], [data-rlnivel], [data-rlmod]');
-  const sel = fk && ['ts', 'modo', 'rlnivel', 'rlmod'].map(a => fk.dataset[a] != null && `[data-${a}="${fk.dataset[a]}"]`).find(Boolean);
-  const viejos = new Map([...root.children].map(n => [n.dataset.k, n]));
-  let prev = null;
-  for (const { k, html } of bloques) {
-    let el = viejos.get(k); viejos.delete(k);
-    if (!el || el.__html !== html) {
-      const t = document.createElement('template'); t.innerHTML = html.trim();
-      const nuevo = t.content.firstElementChild; nuevo.dataset.k = k;
-      if (el && el.tagName === nuevo.tagName) {
-        [...el.attributes].forEach(a => { if (!nuevo.hasAttribute(a.name)) el.removeAttribute(a.name); });
-        [...nuevo.attributes].forEach(a => { if (el.getAttribute(a.name) !== a.value) el.setAttribute(a.name, a.value); });
-        el.replaceChildren(...nuevo.childNodes);
-      } else { el?.remove(); el = nuevo; }
-      el.__html = html;
-    }
-    const sig = prev ? prev.nextElementSibling : root.firstElementChild;
-    if (el !== sig) root.insertBefore(el, sig);
-    prev = el;
-  }
-  viejos.forEach(n => n.remove());
-  if (sel && !root.contains(foco)) root.querySelector(sel)?.focus({ preventScroll: true });
+  morph($('#rlCtl'), bloques.join(''));
 }
 function botonDados({ roll, i, ico, clave, titulo, cond = '', nota, n, caras, bono, off = false, crit = false, mitad = false }) {
   const med = n * (caras + 1) / 2 + bono, visibles = Math.min(n, 8);

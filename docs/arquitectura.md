@@ -51,7 +51,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 
 | Carpeta | Contenido |
 |---|---|
-| `componentes/` | Piezas base reutilizables: DOM (`$`, `on`, `patch`), apertura de diálogos, modales, avisos (`toast`), iconos, tema por clase, tutorial |
+| `componentes/` | Piezas base reutilizables: DOM (`$`, `on`, `patch`, `morph`), apertura de diálogos, modales, avisos (`toast`), iconos, tema por clase, tutorial |
 | `pantallas/` | Lo que está siempre en pantalla: portada (`portada`), hoja (`hoja`, `vitales`), modo combate, fichas de lectura rápida y pantalla de luto |
 | `dialogs/` | Un módulo por diálogo de la app (conjuro, inventario, vida, dados, biblioteca, subir de nivel…) |
 | `selectores/` | Piezas de elección que usan varios diálogos: subclase, especie, dote, habilidades, maestrías, maniobras, «al impactar» |
@@ -104,6 +104,11 @@ export function init(store) {                // main.js lo llama una vez al arra
 
 El `<dialog>` está en `web/index.html`; el módulo lo rellena con HTML generado (`render`) y escucha sus eventos con delegación (`on`). Los botones de la hoja llevan `data-cmd="…"`, y `app/eventos.js` (`COMMANDS`) decide qué abre cada uno.
 
+Para pintar, `patch(el, html)` cambia todo el contenido si el HTML es distinto. Lo que se repinta mientras el usuario interactúa (la hoja, el modo combate, los diálogos de tiradas, vida, estados, beneficios, inventario y creación) usa `morph(el, html)`: compara con el DOM que ya hay y solo toca lo que cambia, así lo que sigue igual no repite su animación de entrada ni pierde el hover o el foco. Dos reglas al escribir HTML que se pinta con `morph`:
+
+- Los bloques que aparecen o desaparecen según el estado (una franja de «activos», un aviso de concentración) llevan `data-key`, para que los demás no se emparejen por posición con el bloque equivocado.
+- Un botón solo se reutiliza si sus `data-*` son iguales; si cambian, se crea uno nuevo. Así un clic que repinta a mitad del evento nunca convierte el botón pulsado en otro.
+
 ### Carga perezosa
 
 Los módulos pesados que no hacen falta al abrir la app (asistentes de personaje y de nivel, importación de PDF) se cargan con `import()` a través de `app/asistentes.js` o `core/cargar.js`.
@@ -112,7 +117,7 @@ Los módulos pesados que no hacen falta al abrir la app (asistentes de personaje
 
 - Archivos y funciones nuevas en castellano y en `camelCase` (`aplicarDano`, `libroCompleto.js`); constantes de datos en `MAYUSCULAS`.
 - Los verbos de las funciones también en castellano y siempre los mismos: `abrir…` para diálogos, `pintar…` para HTML, `fijar…` para guardar un estado del módulo, `leer…` para los lectores de libros, `norm…` para normalizar datos guardados.
-- Siguen en inglés, a propósito: los métodos del store (`S.act`, `S.edit`, `S.undo`…), las ayudas del DOM (`$`, `on`, `patch`), `toast` y los **campos de los datos guardados** (`ch.book`, `play.used`, `level`…). Cambiar esos campos obligaría a migrar los personajes guardados en cada dispositivo.
+- Siguen en inglés, a propósito: los métodos del store (`S.act`, `S.edit`, `S.undo`…), las ayudas del DOM (`$`, `on`, `patch`, `morph`), `toast` y los **campos de los datos guardados** (`ch.book`, `play.used`, `level`…). Cambiar esos campos obligaría a migrar los personajes guardados en cada dispositivo.
 - Un archivo de `ui/` puede llamarse igual que uno de `domain/` cuando es su interfaz (`domain/combate/alImpactar.js` y `ui/selectores/alImpactar.js`).
 
 ## Pruebas

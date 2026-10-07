@@ -2,7 +2,7 @@
 import { esc, norm } from '../../core/util.js';
 import { EFECTOS, efectosDe, fmtRondas, fmtMod } from '../../domain/combate/efectos.js';
 import { vidaDe, quitarMax, ESTADOS } from '../../domain/combate/vida.js';
-import { $, on } from '../componentes/dom.js';
+import { $, on, morph } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { abrirDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
@@ -53,7 +53,7 @@ function render() {
   $('#efxTabs').innerHTML = [[true, 'bueno', 'Beneficios', 'inspiracion'], [false, 'malo', 'Perjuicios', 'esc_nig']].map(([b, k, t, ico]) => `<button type="button" role="tab" class="efx-tab ${k}" data-eftab="${k}" aria-selected="${TAB === k}">${gi(ico)}${t}${cuenta(b) ? `<small>${cuenta(b)}</small>` : ''}</button>`).join('');
 
   const mios = activos.filter(e => !!e.bueno === bueno);
-  const franja = mios.length && !q ? `<section class="efx-activos" aria-label="Activos ahora"><h3>${gi('estrellas')}Activos ahora</h3><div class="efx-pills">${mios.map(e => `<span class="efx-pill ${e.rondas != null && e.rondas <= 1 ? 'acaba' : ''}">${gi(e.ico || 'inspiracion')}<b>${esc(e.nombre)}</b>${e.rondas != null ? `<small>${esc(fmtRondas(e.rondas))}</small>` : ''}${e.conc ? '<small class="c">conc.</small>' : ''}<button type="button" data-efquita="${esc(e.id)}" aria-label="Quitar ${esc(e.nombre)}"><span aria-hidden="true">×</span></button></span>`).join('')}</div></section>` : '';
+  const franja = mios.length && !q ? `<section class="efx-activos" data-key="efx-activos" aria-label="Activos ahora"><h3>${gi('estrellas')}Activos ahora</h3><div class="efx-pills">${mios.map(e => `<span class="efx-pill ${e.rondas != null && e.rondas <= 1 ? 'acaba' : ''}">${gi(e.ico || 'inspiracion')}<b>${esc(e.nombre)}</b>${e.rondas != null ? `<small>${esc(fmtRondas(e.rondas))}</small>` : ''}${e.conc ? '<small class="c">conc.</small>' : ''}<button type="button" data-efquita="${esc(e.id)}" aria-label="Quitar ${esc(e.nombre)}"><span aria-hidden="true">×</span></button></span>`).join('')}</div></section>` : '';
 
   const usados = new Set(), tarjeta = e => {
     const x = v.efectos.find(y => y.k === e.k), on = !!x, tags = etiquetas(e);
@@ -69,18 +69,18 @@ function render() {
   grupos[grupos.length - 1][2] = lista.filter(e => !usados.has(e.k));
   let n = 0;
   const cuerpo = grupos.map(([t, ico, xs]) => { const vis = xs.filter(e => ve([e.nombre, e.texto])); n += vis.length;
-    return vis.length ? `<section class="efx-grupo"><h4>${gi(ico)}${t}</h4><div class="efx-grid">${vis.map(tarjeta).join('')}</div></section>` : ''; }).join('');
+    return vis.length ? `<section class="efx-grupo" data-key="efx-${esc(t)}"><h4>${gi(ico)}${t}</h4><div class="efx-grid">${vis.map(tarjeta).join('')}</div></section>` : ''; }).join('');
 
   let estados = '';
   if (!bueno) {
     const xs = ESTADOS.filter(([k, nom, txt]) => ESTADOS_DE_CONJURO[k] && ve([nom, txt, ESTADOS_DE_CONJURO[k]])); n += xs.length;
-    if (xs.length) estados = `<section class="efx-grupo"><h4>${gi('estados')}Estados que imponen</h4><div class="efx-estados">${xs.map(([k, nom, txt]) => { const on = v.estados.includes(k);
+    if (xs.length) estados = `<section class="efx-grupo" data-key="efx-estados"><h4>${gi('estados')}Estados que imponen</h4><div class="efx-estados">${xs.map(([k, nom, txt]) => { const on = v.estados.includes(k);
       return `<button type="button" class="efx-est-b ${on ? 'on' : ''}" data-efest="${k}" aria-pressed="${on}" title="${esc(txt)}"><i class="efx-marca" aria-hidden="true"></i><span><b>${esc(nom)}</b><small>${esc(ESTADOS_DE_CONJURO[k])}</small></span></button>`; }).join('')}</div></section>`;
   }
   $('#efxCuenta').textContent = q ? (n ? `${n} coincidencias` : 'Sin coincidencias') : '';
-  $('#efxBody').innerHTML = q && !n ? `<p class="el-vacio">Nada coincide con «${esc(Q.trim())}». Prueba con el nombre del conjuro o con lo que hace, como «CA» o «velocidad».</p>`
+  morph($('#efxBody'), q && !n ? `<p class="el-vacio">Nada coincide con «${esc(Q.trim())}». Prueba con el nombre del conjuro o con lo que hace, como «CA» o «velocidad».</p>`
     : `${franja}${cuerpo}${estados}
-    <p class="hint efx-pie">La app suma sola cada efecto marcado a tus tiradas, tu CA y tu velocidad, y descuenta su duración al pasar de ronda.${bueno ? ' Los que dicen «tiras tú el dado» (Bendición, Guía…) te añaden el d4 a las tiradas que hagas mientras estés bajo el conjuro.' : ''} Las marcadas con * solo cuentan en algunos casos: la tirada te deja activarlas.</p>`;
+    <p class="hint efx-pie">La app suma sola cada efecto marcado a tus tiradas, tu CA y tu velocidad, y descuenta su duración al pasar de ronda.${bueno ? ' Los que dicen «tiras tú el dado» (Bendición, Guía…) te añaden el d4 a las tiradas que hagas mientras estés bajo el conjuro.' : ''} Las marcadas con * solo cuentan en algunos casos: la tirada te deja activarlas.</p>`);
 }
 
 export function init(store) {

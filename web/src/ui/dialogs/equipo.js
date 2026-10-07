@@ -12,7 +12,7 @@ import { reglas, usosGastados } from '../../domain/clases/rasgos.js';
 import { efectoDe, objetoActivo, bonoDeNombre, describirEfecto, statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
 import { armadurasDe, competenteConArma } from '../../domain/reglas/competencias.js';
 import { biblioteca } from '../../domain/libros/biblioteca.js';
-import { $, on } from '../componentes/dom.js';
+import { $, on, morph, patch } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { avatarHtml } from '../componentes/avatar.js';
@@ -359,8 +359,8 @@ function render() {
     if (alijo.length) h += `<section class="inv-zona inv-alijo" aria-label="Alijo"><h3>${gi('inv_alijo')}Alijo<small>${kg(pesoGuardado(ch))} · no cuenta en la carga</small></h3>
       <p class="note">Lo que dejas en la posada, el carro o el campamento. No lo llevas encima ni puedes usarlo hasta recogerlo.</p>${grupos(ch, alijo, R)}</section>`;
   }
-  $('#eqBody').innerHTML = h;
-  $('#eqFoot').innerHTML = `<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
+  morph($('#eqBody'), h);
+  patch($('#eqFoot'), `<span class="spacer"></span><button type="button" data-close>Cerrar</button>`);
   pintarInspector(ch);
   efectoPendiente();
 }

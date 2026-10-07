@@ -40,6 +40,7 @@
 #enjuego.fx-abre .ej-grupo:nth-of-type(2) { animation-delay: .04s; } #enjuego.fx-abre .ej-grupo:nth-of-type(3) { animation-delay: .08s; }
 #enjuego.fx-abre .ej-grupo:nth-of-type(4) { animation-delay: .12s; } #enjuego.fx-abre .ej-grupo:nth-of-type(n+5) { animation-delay: .16s; }
 #enjuego.fx-abre .ej-it { animation: ej-surge .55s var(--ease-out) both; animation-delay: calc(.06s + var(--i, 0) * 40ms); }
+#enjuego.fx-filtra .ej-it { animation: ej-surge .45s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 30ms); }
 @keyframes ej-surge { from { opacity: 0; transform: translateY(10px) scale(.985); filter: blur(3px); } }
 .dawn { position: fixed; inset: -20% 0; z-index: 55; pointer-events: none;
   background: linear-gradient(to top, transparent, rgba(255, 214, 140, .28) 40%, rgba(255, 240, 210, .35) 50%, rgba(255, 214, 140, .2) 60%, transparent);

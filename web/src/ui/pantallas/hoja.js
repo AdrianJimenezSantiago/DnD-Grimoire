@@ -3,7 +3,7 @@
 import { esc, norm } from '../../core/util.js';
 import { NOMBRE_CAR, perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
 import { escuelasAlLanzar, descDisparoLanzar, reglasVisibles, estadoRecurso, etiquetaRecarga, coincideEscuela, usosGastados } from '../../domain/clases/rasgos.js';
-import { $, patch, patchKeyed } from '../componentes/dom.js';
+import { $, patch, patchKeyed, morph } from '../componentes/dom.js';
 import { icon, ASTROLABE } from '../componentes/icons.js';
 import { pop } from '../animaciones/fx.js';
 import { runaSvg } from '../animaciones/magia.js';
@@ -289,12 +289,13 @@ export function pintarHoja(S) {
   patch($('#memorial'), actualizarLuto(ch) ? memorialHtml(ch) : '');
   const combate = combateDe(ch).activo;
   document.body.classList.toggle('combate', combate);
-  patch($('#combate'), combate ? combateHtml(ch, db) : '');
-  patch($('#vitales'), vitalesHtml(ch));
-  patch($('#caracs'), caracteristicasHtml(ch));
-  patch($('#stats'), statsHtml(db, ch, P));
-  patch($('#res'), resourcesHtml(db, ch, P));
-  patch($('#enjuego'), enJuegoHtml(ch, P));
+  // morph y no patch: al marcar una acción o gastar un uso solo cambia lo afectado, y el resto no repite su entrada
+  morph($('#combate'), combate ? combateHtml(ch, db) : '');
+  morph($('#vitales'), vitalesHtml(ch));
+  morph($('#caracs'), caracteristicasHtml(ch));
+  morph($('#stats'), statsHtml(db, ch, P));
+  morph($('#res'), resourcesHtml(db, ch, P));
+  morph($('#enjuego'), enJuegoHtml(ch, P));
   const lanza = conConjuros(ch, P);
   if (!lanza) {
     patch($('#legend'), ''); patchKeyed($('#levels'), []);

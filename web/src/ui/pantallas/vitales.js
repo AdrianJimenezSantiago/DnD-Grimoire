@@ -28,7 +28,7 @@ export function vigiliaHtml(ch) {
     muerto: ['Ha caído', 'Tres fallos. Solo la magia puede traerle de vuelta.'] }[est] || ['', ''];
   const acc = est === 'moribundo' ? `<button type="button" class="gold vg-tirar" data-cmd="salvmuerte">${gi('d20')}Tirar salvación</button><button type="button" data-cmd="estabilizar">Estabilizar</button>`
     : est === 'estable' ? '<button type="button" data-cmd="vida">Curar</button>' : '<button type="button" data-cmd="revivir">Traer de vuelta (1 PG)</button>';
-  return `<div class="vigilia ${est}">
+  return `<div class="vigilia ${est}" data-key="vigilia">
     <span class="vg-emb">${runaSvg({ n: 12, lados: 6, cls: 'vg-runa', semillaInicial: 13 })}${gi('muerte')}</span>
     <div class="vg-cuerpo"><b class="vg-tit">${txt[0]}</b><small>${txt[1]}</small>
       <div class="vg-pistas">${pista('exito', m.exitos, 'Éxitos')}${pista('fallo', m.fallos, 'Fallos')}</div></div>
@@ -108,7 +108,7 @@ let pruebasAbiertas = false;
 export const abrirPruebas = v => { pruebasAbiertas = v; };
 export function pruebasCombateHtml(ch) {
   const t = tablaCaracteristicas(ch);
-  return `<details class="cb-pruebas" ${pruebasAbiertas ? 'open' : ''}><summary>${gi('d20')}Pruebas y salvaciones<small>con tus estados y efectos</small>${icon('chevron')}</summary>
+  return `<details class="cb-pruebas" data-key="cb-pruebas" ${pruebasAbiertas ? 'open' : ''}><summary>${gi('d20')}Pruebas y salvaciones<small>con tus estados y efectos</small>${icon('chevron')}</summary>
     <div class="cb-pr-grid">${t.map(c => `<section class="cb-pr-car"><button type="button" class="cb-pr-cab" data-tirar="car:${c.k}" aria-label="Tirar prueba de ${esc(c.nombre)}">${(r => `<span class="cb-pr-n">${c.corto}<small>${c.valor}</small></span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b>`)(resumenTirada(ch, 'prueba', { ab: c.k }, c.prueba))}${gi('d20', 'cb-pr-d20')}</button>${filasCar(ch, c)}</section>`).join('')}</div></details>`;
 }
 export const enCombate = ch => !!combateDe(ch).activo;

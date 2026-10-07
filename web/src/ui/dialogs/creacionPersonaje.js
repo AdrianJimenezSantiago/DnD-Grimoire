@@ -5,7 +5,7 @@ import { CARACTERISTICAS, NOMBRE_CAR, CLASES, modOf, perfil, sgn, clasesDe, dote
 import { reglas } from '../../domain/clases/rasgos.js';
 import { diferenciaNivel, conjurosPendientes, anadirPendientes } from '../../domain/clases/progresion.js';
 import { personajeVacio, normPersonaje, THEO } from '../../domain/personaje/modelo.js';
-import { $, on } from '../componentes/dom.js';
+import { $, on, morph } from '../componentes/dom.js';
 import { icon } from '../componentes/icons.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
@@ -235,8 +235,8 @@ function conjurosDotesHtml(d) {
 }
 function pintarConj(d) {
   const c = cupoConjuros(d), P = c.P;
-  if (!CREANDO) { $('#f_conj').innerHTML = `<div class="cc-aviso">Tus conjuros se gestionan en el libro de la hoja, con «Editar conjuros». ${P.c ? `Preparas ${P.maxPrep} y sabes ${P.maxCant} trucos.` : ''}</div>`; return; }
-  if (!P.c) { $('#f_conj').innerHTML = `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>${conjurosDotesHtml(d)}`; return; }
+  if (!CREANDO) { morph($('#f_conj'), `<div class="cc-aviso">Tus conjuros se gestionan en el libro de la hoja, con «Editar conjuros». ${P.c ? `Preparas ${P.maxPrep} y sabes ${P.maxCant} trucos.` : ''}</div>`); return; }
+  if (!P.c) { morph($('#f_conj'), `<div class="cc-aviso">${esc(d.clase)} no lanza conjuros a nivel ${d.nivel}. Si tu especie te da alguno, añádelo desde la hoja: se marca como siempre preparado.</div>${conjurosDotesHtml(d)}`); return; }
   const lista = P.lista;
   let h = `<div class="cc-aviso ok">Lanzas conjuros de ${esc(lista.toLowerCase())} con ${esc(NOMBRE_CAR[P.apKey])}: CD ${P.cd}, ataque ${sgn(P.atk)}. Espacios hasta nivel ${P.maxSlot}.</div>`;
   if (c.trucos) h += chooser('trucos', c.trucos, it => it.l === 0 && filtroLista(it, lista), `Trucos (${c.trucos})`);
@@ -248,7 +248,7 @@ function pintarConj(d) {
   const auto = conjurosPendientes(S.db, d, compendio()).map(x => x.x.es);
   if (auto.length) h += `<p class="hint">Siempre preparados por tu clase o subclase: ${esc(joinY(auto))}.</p>`;
   h += conjurosDotesHtml(d);
-  $('#f_conj').innerHTML = h;
+  morph($('#f_conj'), h);
 }
 
 function pintarPasos(d) {
@@ -269,11 +269,11 @@ function pintarPasos(d) {
 }
 
 function pintarClases(d) {
-  $('#f_clases').innerHTML = Object.keys(CLASES).map(n => {
+  morph($('#f_clases'), Object.keys(CLASES).map(n => {
     const [h, s, ico] = TEMAS.clase[n] || [40, 50, 'libro'], on = n === d.clase;
     return `<button type="button" class="cc-clase ${on ? 'on' : ''}" role="radio" aria-checked="${on}" data-clase="${esc(n)}" style="--sh:${h};--ss:${s}%">
       <span class="cc-emb">${gi(ico)}</span><b>${esc(n)}</b><small>${esc(lineaClase(n))}</small></button>`;
-  }).join('') + `<p class="hint cc-verclase"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende ${esc(d.clase)} nivel a nivel</button></p>`;
+  }).join('') + `<p class="hint cc-verclase"><button type="button" class="linkish" data-verclase="#f_clase">Ver qué aprende ${esc(d.clase)} nivel a nivel</button></p>`);
 }
 
 function pintarOrigen(d) {
@@ -317,7 +317,7 @@ function pintarCar(d) {
       <p class="hint">${st.completo ? `${icon('sparkles')} Listo. Ninguna puntuación puede pasar de 20.` : CAR.heredado ? 'Si tus puntuaciones ya incluyen estos aumentos, déjalo así.' : `Te ${st.faltan === 1 ? 'queda' : 'quedan'} ${st.faltan} ${st.faltan === 1 ? 'punto' : 'puntos'} por repartir.`}
         <button type="button" class="linkish" data-bonosug>Sugerir para ${esc(d.clase)}</button></p></div>`;
   }
-  $('#f_car').innerHTML = h;
+  morph($('#f_car'), h);
 }
 
 function pintarComp(draft) {
@@ -329,12 +329,12 @@ function pintarComp(draft) {
     const etq = nv === 2 ? `pericia · ${ETQ[f] || ''}` : f ? ETQ[f] : enLista ? `de ${draft.clase}` : '';
     return `<button type="button" class="comp-h n${nv} ${f ? 'src-' + f : ''} ${elegible ? 'elegible' : ''}" data-hab="${k}" aria-label="${esc(n)}: ${['sin competencia', 'competencia', 'pericia'][nv]}${f === 'trasfondo' ? ', de tu trasfondo' : ''}"><i class="cr-m n${nv}" aria-hidden="true"></i><span>${esc(n)}${etq ? `<small>${esc(etq)}</small>` : ''}</span><b>${sgn(bonoHabilidad(draft, k))}</b></button>`;
   };
-  $('#f_comp').innerHTML = CARACTERISTICAS.map(([ab, nombre]) => {
+  morph($('#f_comp'), CARACTERISTICAS.map(([ab, nombre]) => {
     const on = comp.has(ab), salv = base.has(ab) ? `<span class="comp-s fija" title="De tu clase">Salvación</span>`
       : `<button type="button" class="comp-s ${on ? 'on' : ''}" data-salv="${ab}" aria-pressed="${on}" title="Competencia extra (dote o rasgo)">Salvación</button>`;
     const habs = HABILIDADES.filter(h => h[2] === ab);
     return `<section class="cc-grupo ${base.has(ab) ? 'salv' : ''}"><header><b>${nombre}</b><em>${draft.stats[ab]} · ${sgn(modOf(draft.stats[ab]))}</em>${salv}</header>${habs.map(boton).join('') || '<p class="cc-sinhab">Sin habilidades: solo su salvación.</p>'}</section>`;
-  }).join('');
+  }).join(''));
   const av = [];
   if (r.trasfondo.length) av.push(['ok', `<b>${esc(draft.trasfondo)}</b> te da ${esc(joinY(r.trasfondo.map(k => NOMBRE_HAB[k])))}.${r.faltanTrasfondo.length ? ' Márcalas: vienen con tu trasfondo.' : ''}`]);
   else if (!draft.trasfondo) av.push(['', `Sin trasfondo todavía: elígelo en <button type="button" class="linkish" data-irpaso="1">Origen</button> y sus dos habilidades se marcan solas.`]);
@@ -348,9 +348,9 @@ function pintarComp(draft) {
 
 function pintarDotes(d) {
   const origen = dotesDe({ ...d, dotes: [] }, lib().trasfondos)[0];
-  $('#f_dotes').innerHTML = (origen ? `<span class="dote-chip fija" title="Dote de origen de tu trasfondo">${esc(origen.detalle ? `${origen.nombre} (${origen.detalle})` : origen.nombre)}<small>${esc(d.trasfondo)}</small></span>` : '')
+  morph($('#f_dotes'), (origen ? `<span class="dote-chip fija" title="Dote de origen de tu trasfondo">${esc(origen.detalle ? `${origen.nombre} (${origen.detalle})` : origen.nombre)}<small>${esc(d.trasfondo)}</small></span>` : '')
     + DOTES.map((n, i) => `<button type="button" class="dote-chip ${estiloDe(n, lib().dotes) || esAlternativa(n) ? 'estilo' : ''}" data-dotedel="${i}" aria-label="Quitar la dote ${esc(n)}">${esc(n)}${estiloDe(n, lib().dotes) || esAlternativa(n) ? '<small>estilo</small>' : ''}<span aria-hidden="true">×</span></button>`).join('')
-    || '<span class="hint">Sin dotes todavía.</span>';
+    || '<span class="hint">Sin dotes todavía.</span>');
   const av = [], m = mejorasHasta(d);
   if (!d.trasfondo) av.push(['', 'Tu dote de origen depende del trasfondo: elígelo en <button type="button" class="linkish" data-irpaso="1">Origen</button>.']);
   else if (origen) av.push(['ok', `<b>${esc(d.trasfondo)}</b> te da <b>${esc(origen.nombre)}</b>. No hace falta añadirla.`]);

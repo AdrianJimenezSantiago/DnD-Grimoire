@@ -9,7 +9,7 @@ import { statsEfectivos } from '../../domain/equipo/objetosEfecto.js';
 import { glosario } from '../../domain/libros/terminos.js';
 import { rngCripto } from '../../domain/reglas/dados.js';
 import { combateDe } from '../../domain/combate/combate.js';
-import { $, on } from '../componentes/dom.js';
+import { $, on, morph } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 import { avatarHtml } from '../componentes/avatar.js';
@@ -54,7 +54,7 @@ function render() {
     ${v.maxExtra.length ? `<ul class="vd-mx">${v.maxExtra.map(m => `<li><b>+${m.n}</b><span>${esc(m.nombre)}</span><button type="button" data-vdmxq="${esc(m.id)}">Termina</button></li>`).join('')}</ul>` : ''}
     <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
     <p class="hint">No son PG temporales: suben tu máximo y tus PG actuales en la misma cantidad. Al terminar, el máximo vuelve a ${pgMaximoBase(c)} y tus PG se quedan como estén si caben. Tu máximo base se ajusta en «Editar personaje».</p></section>`;
-  $('#vdBody').innerHTML = h;
+  morph($('#vdBody'), h);
 }
 
 export function danar(S2, n, critico = false) {
@@ -146,7 +146,7 @@ function renderEstados() {
   const propios = v.efectos.filter(x => x.propio && ve([x.nombre])).map(x => `<div class="es-it on bueno"><div class="es-tog"><i class="es-marca" aria-hidden="true"></i><span><b>${marca(x.nombre, q)}</b><small>${esc(efectosDe(c).find(e => e.id === x.id)?.texto || '')}</small></span></div><button type="button" class="linkish es-regla" data-efq="${esc(x.id)}">Quitar</button></div>`).join('');
   const nada = q && !insp && !agoH && !estados.length && !efectos && !propios;
   $('#esCuenta').textContent = q ? (nada ? 'Sin coincidencias' : `${estados.length + (efectos.match(/data-efk/g) || []).length + (propios.match(/data-efq/g) || []).length + (insp ? 1 : 0) + (agoH ? 1 : 0)} coincidencias`) : '';
-  $('#esBody').innerHTML = nada ? `<p class="el-vacio">Nada coincide con «${esc(Q.trim())}». Prueba con parte del nombre o con lo que hace, como «velocidad» o «ventaja».</p>` : `${insp || agoH ? `<section class="es-top">${insp}${agoH}</section>` : ''}
+  morph($('#esBody'), nada ? `<p class="el-vacio">Nada coincide con «${esc(Q.trim())}». Prueba con parte del nombre o con lo que hace, como «velocidad» o «ventaja».</p>` : `${insp || agoH ? `<section class="es-top">${insp}${agoH}</section>` : ''}
     ${estados.length ? `${q ? `<h3 class="es-h">${gi('estados')}Estados</h3>` : ''}<section class="es-lista">${estados.join('')}</section>` : ''}
     ${!q && !glos.length ? '<p class="note">Resúmenes de la app. Importa el Manual del Jugador para leer cada regla completa.</p>' : ''}
     ${efectos || propios || !q ? `<h3 class="es-h">${gi('inspiracion')}Efectos sobre ti</h3>` : ''}
@@ -156,7 +156,7 @@ function renderEstados() {
     ${q ? '' : `<div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off">
       <label>CA<input id="efCa" inputmode="numeric" placeholder="+2"></label><label>Ataques<input id="efAt" placeholder="1d4 o +1"></label>
       <label>Salvaciones<input id="efSv" placeholder="+3"></label><label>Pruebas<input id="efPr" placeholder="1d4"></label><label>Velocidad (m)<input id="efVel" inputmode="decimal" placeholder="+3"></label><label>Rondas<input id="efRd" inputmode="numeric" placeholder="∞" title="Duración en rondas de combate (10 = 1 minuto). Vacío: hasta que lo quites."></label>
-      <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`}`;
+      <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`}`);
 }
 export async function alternarEfecto(S2, k) {
   const c = S2.cur(), v = vidaDe(c), ya = v.efectos.find(x => x.k === k), e = EFECTO[k];

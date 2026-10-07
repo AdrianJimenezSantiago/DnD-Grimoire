@@ -175,7 +175,8 @@ function back() {
 }
 
 let ejT = 0;
-function animarEnJuego() { const el = $('#enjuego'); pop(el, 'fx-abre'); clearTimeout(ejT); ejT = setTimeout(() => el.classList.remove('fx-abre'), 650); }
+// Al desplegar entra toda la sección; al cambiar de filtro solo entran las tarjetas (la barra y las cabeceras siguen donde estaban)
+function animarEnJuego(clase = 'fx-abre') { const el = $('#enjuego'); el.classList.remove('fx-abre', 'fx-filtra'); pop(el, clase); clearTimeout(ejT); ejT = setTimeout(() => el.classList.remove(clase), 650); }
 
 function bindSheet() {
   const sheet = $('#sheet'), bar = $('#sbar');
@@ -220,7 +221,7 @@ function bindSheet() {
     card.scrollIntoView({ behavior: movimientoReducido() ? 'auto' : 'smooth', block: 'center' });
     pop(card, 'fx-senala'); setTimeout(() => card.classList.remove('fx-senala'), 1600);
   });
-  on(sheet, 'click', '[data-ejfiltro]', (e, b) => { S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.filtro = b.dataset.ejfiltro; }); animarEnJuego(); });
+  on(sheet, 'click', '[data-ejfiltro]', (e, b) => { S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.filtro = b.dataset.ejfiltro; }); animarEnJuego('fx-filtra'); });
   on(sheet, 'click', '#res [data-ntact]', (e, b) => { const li = b.closest('[data-nt]'); accionNota(S, li.dataset.ses, li.dataset.nt, b.dataset.ntact); });
   const click = (root) => on(root, 'click', '[data-slotbtn],[data-prep],[data-used],[data-flag],[data-add],[data-del],[data-text],[data-cast],[data-rtick],[data-rstep],[data-rset],[data-recuse],[data-dused]', (e, t) => {
     const d = t.dataset;
