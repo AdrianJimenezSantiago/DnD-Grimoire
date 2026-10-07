@@ -12,7 +12,7 @@ import { toast, botonDeshacer } from '../componentes/toast.js';
 import { golpe } from '../animaciones/golpes.js';
 import { botonYo } from '../componentes/avatar.js';
 import { anadirObjetivos, quitarObjetivo, alternarYo } from '../../app/acciones.js';
-import { $, on } from '../componentes/dom.js';
+import { $, on, patch } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
 import { abrirDialogo } from '../componentes/dialog.js';
 import { chispas, movimientoReducido } from '../animaciones/fx.js';
@@ -58,6 +58,7 @@ export function abrirTiradaObjeto({ sid, nivel = null, cd = null, atk = null, fu
   R = { bi: -1, ext: { sid, cd, atk, fuente }, sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivel || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
+  $('#rlCtl').replaceChildren(); // al abrir, cada bloque entra de nuevo con su animación
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 export function abrirTirada(bi, nivelEspacio) {
@@ -68,6 +69,7 @@ export function abrirTirada(bi, nivelEspacio) {
   if (s.level > 0 && !nivelEspacio) for (let L = s.level; L <= 9; L++) { const tot = P.slots?.[L] || 0; if (tot - Math.min(ch.play.used?.[L] || 0, tot) > 0) { R.nivel = L; break; } }
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
+  $('#rlCtl').replaceChildren(); // al abrir, cada bloque entra de nuevo con su animación
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 
@@ -75,40 +77,42 @@ export function abrirTirada(bi, nivelEspacio) {
 function pintarCtl(tsAntes = R.ts) {
   const D = datos(), { ch, s, P, t } = D, dados = dadosActuales(D), conTS = conSalvacion(t, dados);
   const k = norm(s.escuela || '').slice(0, 3);
-  $('#rlTitle').innerHTML = `${gi(ESC_ICO[k] || 'd20', 'rl-d20 cj-esc-ico')} ${esc(s.es)}`;
-  $('#rlSub').textContent = R.ext ? `Lanzado desde ${R.ext.fuente}${s.level && R.nivel > s.level ? `, versión de nivel ${R.nivel}` : ''}`
+  patch($('#rlTitle'), `${gi(ESC_ICO[k] || 'd20', 'rl-d20 cj-esc-ico')} ${esc(s.es)}`);
+  const sub = R.ext ? `Lanzado desde ${R.ext.fuente}${s.level && R.nivel > s.level ? `, versión de nivel ${R.nivel}` : ''}`
     : s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
-  let h = '';
+  if ($('#rlSub').textContent !== sub) $('#rlSub').textContent = sub;
+  // Cada bloque lleva su clave: al repintar solo se toca el que cambia (ver pintarBloques)
+  const bloques = [], add = (k2, html) => bloques.push({ k: k2, html });
   const x = delCompendio(s);
   if (ch.play.conc === s.es && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d])) {
-    h += `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
-      <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`;
+    add('obj', `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
+      <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`);
   }
   const fichas = [s.escuela ? `<span class="cj-chip esc">${esc(s.escuela)}</span>` : '', t?.salvacion ? `<span class="cj-chip">CD <b>${P.cd ?? '—'}</b></span>` : '', t?.ataque ? `<span class="cj-chip">Ataque <b>${P.atk == null ? '—' : sgn(P.atk)}</b></span>` : ''].filter(Boolean);
-  if (fichas.length) h += `<div class="cj-fichas">${fichas.join('')}</div>`;
+  if (fichas.length) add('fichas', `<div class="cj-fichas">${fichas.join('')}</div>`);
   // Desde un objeto el nivel lo fijan sus cargas: no se elige espacio
   if ((t?.escala?.tipo === 'espacio' || (t?.veces?.desde)) && s.level > 0 && !R.ext) {
     const pills = []; for (let L = s.level; L <= 9; L++) {
       const tot = P.slots?.[L] || 0, libres = Math.max(0, tot - Math.min(ch.play.used?.[L] || 0, tot));
       pills.push(`<button type="button" role="radio" aria-checked="${L === R.nivel}" data-rlnivel="${L}" class="${tot ? '' : 'sin'}" title="${tot ? `${libres} de ${tot} libres` : 'No tienes espacios de este nivel'}"><b>${L}</b>${tot ? `<i class="${libres ? '' : 'agotado'}">${'●'.repeat(Math.min(libres, 4))}${libres > 4 ? '+' : ''}${libres ? '' : '○'}</i>` : ''}</button>`);
     }
-    h += `<div class="cj-espacios"><span class="cj-lbl">Espacio</span><div role="radiogroup" aria-label="Espacio de nivel">${pills.join('')}</div></div>`;
+    add('espacios', `<div class="cj-espacios"><span class="cj-lbl">Espacio</span><div role="radiogroup" aria-label="Espacio de nivel">${pills.join('')}</div></div>`);
   }
   if (t?.ataque) {
-    h += `<section class="cj-paso"><header>${gi('d20')}<span><b>Tirada de ataque</b><small>ataque de conjuro ${esc(t.ataque)}</small></span><em>${P.atk == null ? '' : sgn(P.atk)}</em></header>
+    add('ataque', `<section class="cj-paso"><header>${gi('d20')}<span><b>Tirada de ataque</b><small>ataque de conjuro ${esc(t.ataque)}</small></span><em>${P.atk == null ? '' : sgn(P.atk)}</em></header>
       ${R.mods.length ? `<div class="da-mods-ap"><span class="da-mods-t">Se aplica</span>${R.mods.map(m => `<button type="button" class="da-mod ${m.mal ? 'mal' : 'bien'} ${m.on ? '' : 'off'}" data-rlmod="${esc(m.id)}" aria-pressed="${m.on}"><b>${esc(fmtMod(m))}</b><span>${esc(m.fuente)}</span>${m.cond ? `<small>${esc(m.cond)}</small>` : ''}</button>`).join('')}</div>` : ''}
       <div class="dd-modo" role="radiogroup" aria-label="Tirada de ataque" data-modo="${R.modo}" style="--i:${idxDe(MODOS, R.modo)}">${MODOS.map(([m, tt, sub]) => `<button type="button" role="radio" aria-checked="${R.modo === m}" data-modo="${m}"><b>${tt}</b><small>${sub}</small></button>`).join('')}</div>
-      <button type="button" class="gold dd-tirar cj-tirar" data-roll="ataque">${gi('dados')}Tirar ataque</button></section>`;
+      <button type="button" class="gold dd-tirar cj-tirar" data-roll="ataque">${gi('dados')}Tirar ataque</button></section>`);
   }
   if (t?.salvacion) {
-    h += `<section class="cj-paso"><header>${gi('ojo')}<span><b>Salvación de ${esc(t.salvacion)}</b><small>el objetivo tira contra tu CD</small></span><em>CD ${P.cd ?? '—'}</em></header>`;
+    let sv = `<section class="cj-paso"><header>${gi('ojo')}<span><b>Salvación de ${esc(t.salvacion)}</b><small>el objetivo tira contra tu CD</small></span><em>CD ${P.cd ?? '—'}</em></header>`;
     if (conTS) {
-      h += `<div class="dd-modo cj-ts" role="radiogroup" aria-label="Resultado de la salvación" data-ts="${tsAntes || ''}" style="--i:${idxDe(TS, tsAntes)}">${TS.map(([k2, tt, sub]) => `<button type="button" role="radio" aria-checked="${tsAntes === k2}" data-ts="${k2}"><b>${tt}</b><small>${sub}</small></button>`).join('')}</div>`;
-      if (R.ts === 'falla') h += `<div class="rl-efecto falla cj-efecto"><b>Si falla</b>${t.falla ? md(t.falla) : '<p>Sufre el efecto completo del conjuro.</p>'}</div>`;
-      if (R.ts === 'supera') h += `<div class="rl-efecto supera cj-efecto"><b>Si supera</b>${t.supera ? md(t.supera) : `<p>${t.mitad ? 'Sufre la mitad del daño.' : 'El conjuro no le afecta.'}</p>`}</div>`;
-      if (R.ts === 'varios') h += `<div class="rl-efecto cj-efecto"><b>Varios objetivos</b><p>Tira el daño una vez: la app te da el total para quien falle${t.mitad ? ' y la mitad para quien la supere' : ' (quien la supere no sufre daño)'}.</p></div>`;
+      sv += `<div class="dd-modo cj-ts" role="radiogroup" aria-label="Resultado de la salvación" data-ts="${tsAntes || ''}" style="--i:${idxDe(TS, tsAntes)}">${TS.map(([k2, tt, sub]) => `<button type="button" role="radio" aria-checked="${tsAntes === k2}" data-ts="${k2}"><b>${tt}</b><small>${sub}</small></button>`).join('')}</div>`;
+      if (R.ts === 'falla') sv += `<div class="rl-efecto falla cj-efecto"><b>Si falla</b>${t.falla ? md(t.falla) : '<p>Sufre el efecto completo del conjuro.</p>'}</div>`;
+      if (R.ts === 'supera') sv += `<div class="rl-efecto supera cj-efecto"><b>Si supera</b>${t.supera ? md(t.supera) : `<p>${t.mitad ? 'Sufre la mitad del daño.' : 'El conjuro no le afecta.'}</p>`}</div>`;
+      if (R.ts === 'varios') sv += `<div class="rl-efecto cj-efecto"><b>Varios objetivos</b><p>Tira el daño una vez: la app te da el total para quien falle${t.mitad ? ' y la mitad para quien la supere' : ' (quien la supere no sufre daño)'}.</p></div>`;
     }
-    h += '</section>';
+    add('salvacion', sv + '</section>');
   }
   const ex = extrasDe(D, dados);
   const btns = dados.map((dd, i) => {
@@ -135,12 +139,38 @@ function pintarCtl(tsAntes = R.ts) {
   });
   if (btns.length) {
     const titulo = dados.length && dados.every(dd => dd.tipo === 'curación') ? 'Curación' : dados.length ? 'Daño' : 'Dados';
-    h += `<section class="cj-paso"><header>${gi(dados[0] ? claveDano(dados[0].tipo) : 'dados')}<span><b>${titulo}</b><small>${s.level && t?.escala?.tipo === 'espacio' ? 'cambia el espacio y los dados se ajustan' : dados.length ? 'toca para tirar' : 'otros dados del conjuro'}</small></span></header>
+    add('dados', `<section class="cj-paso"><header>${gi(dados[0] ? claveDano(dados[0].tipo) : 'dados')}<span><b>${titulo}</b><small>${s.level && t?.escala?.tipo === 'espacio' ? 'cambia el espacio y los dados se ajustan' : dados.length ? 'toca para tirar' : 'otros dados del conjuro'}</small></span></header>
       <div class="cj-btns">${btns.join('')}</div>
-      ${t?.ataque && dados.some(dd => dd.via === 'ataque') ? `<label class="dd-crit"><input type="checkbox" id="rlCrit" ${R.critico ? 'checked' : ''}><span class="dd-sw" aria-hidden="true"></span><span><b>Crítico</b><small>Se tiran el doble de dados de daño del ataque. Con un 20 natural se marca solo.</small></span></label>` : ''}</section>`;
+      ${t?.ataque && dados.some(dd => dd.via === 'ataque') ? `<label class="dd-crit"><input type="checkbox" id="rlCrit" ${R.critico ? 'checked' : ''}><span class="dd-sw" aria-hidden="true"></span><span><b>Crítico</b><small>Se tiran el doble de dados de daño del ataque. Con un 20 natural se marca solo.</small></span></label>` : ''}</section>`);
   }
-  if (!t || (!t.ataque && !dados.length && !t.extras.length)) h += `<p class="note">No encuentro dados de ataque ni de daño en el texto de este conjuro.${t?.salvacion ? '' : ' Importa tu manual para mejores resultados.'}</p>`;
-  $('#rlCtl').innerHTML = h;
+  if (!t || (!t.ataque && !dados.length && !t.extras.length)) add('nota', `<p class="note">No encuentro dados de ataque ni de daño en el texto de este conjuro.${t?.salvacion ? '' : ' Importa tu manual para mejores resultados.'}</p>`);
+  pintarBloques($('#rlCtl'), bloques);
+}
+// Repinta una lista de bloques conservando el elemento de cada uno: el que no cambia no se toca (no repite su
+// animación de entrada ni pierde lo escrito), y el que cambia conserva su caja y solo renueva lo de dentro.
+function pintarBloques(root, bloques) {
+  const foco = document.activeElement, fk = root.contains(foco) && foco.closest('[data-ts], [data-modo], [data-rlnivel], [data-rlmod]');
+  const sel = fk && ['ts', 'modo', 'rlnivel', 'rlmod'].map(a => fk.dataset[a] != null && `[data-${a}="${fk.dataset[a]}"]`).find(Boolean);
+  const viejos = new Map([...root.children].map(n => [n.dataset.k, n]));
+  let prev = null;
+  for (const { k, html } of bloques) {
+    let el = viejos.get(k); viejos.delete(k);
+    if (!el || el.__html !== html) {
+      const t = document.createElement('template'); t.innerHTML = html.trim();
+      const nuevo = t.content.firstElementChild; nuevo.dataset.k = k;
+      if (el && el.tagName === nuevo.tagName) {
+        [...el.attributes].forEach(a => { if (!nuevo.hasAttribute(a.name)) el.removeAttribute(a.name); });
+        [...nuevo.attributes].forEach(a => { if (el.getAttribute(a.name) !== a.value) el.setAttribute(a.name, a.value); });
+        el.replaceChildren(...nuevo.childNodes);
+      } else { el?.remove(); el = nuevo; }
+      el.__html = html;
+    }
+    const sig = prev ? prev.nextElementSibling : root.firstElementChild;
+    if (el !== sig) root.insertBefore(el, sig);
+    prev = el;
+  }
+  viejos.forEach(n => n.remove());
+  if (sel && !root.contains(foco)) root.querySelector(sel)?.focus({ preventScroll: true });
 }
 function botonDados({ roll, i, ico, clave, titulo, cond = '', nota, n, caras, bono, off = false, crit = false, mitad = false }) {
   const med = n * (caras + 1) / 2 + bono, visibles = Math.min(n, 8);
