@@ -18,7 +18,8 @@ import { abrirDialogo } from '../componentes/dialog.js';
 import { chispas, movimientoReducido } from '../animaciones/fx.js';
 import { fxImpacto, nivelImpacto } from '../animaciones/impacto.js';
 import { vibrar } from '../../platform/native.js';
-import { fmt, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../animaciones/dadosVista.js';
+import { fmt, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural, narracion, fraseHtml } from '../animaciones/dadosVista.js';
+import { categoriaTirada, tramoD20, tramoDano } from '../../domain/presentacion/frases.js';
 import { md } from './conjuro.js';
 
 let S, R = null, TOKEN = 0;
@@ -217,6 +218,11 @@ function reajustar() {
 // ---- Resultado ----
 function pintarOut(anim = false) {
   const el = $('#rlOut'), x = R.res, tok = ++TOKEN;
+  if (x && x.frase === undefined) { // una por tirada: repintar no la cambia
+    const ataque = x.tipo === 'ataque', n = x.crit ? 20 : x.pifia ? 1 : null;
+    x.tramo = ataque ? tramoD20({ nat: n, total: x.total, tipo: 'ataque' }) : tramoDano(x.bruto ?? x.total, x.dist);
+    x.frase = narracion(categoriaTirada(ataque ? { tipo: 'ataque', conjuro: true } : { tipo: x.tipo, clave: x.clave, cura: x.cura }), x.tramo);
+  }
   if (!x) { el.className = 'dd-out vacio'; el.innerHTML = `<div class="dd-espera">${dado(20, '?', { cls: 'flota' })}<p>Tira el ataque o el daño y el resultado aparecerá aquí.</p></div>`; return; }
   let clase = '', h = '';
   if (x.tipo === 'ataque') {
@@ -228,7 +234,7 @@ function pintarOut(anim = false) {
     for (const m of x.res.planos) partes.push(`${op(m.valor)}<span class="dd-fx ${m.mal ? 'mal' : 'bien'}"><span class="dd-bono">${Math.abs(m.valor)}</span><small>${esc(m.fuente)}</small></span>`);
     if (partes.length > 1) partes.push(`<span class="dd-igual"><i class="dd-op">=</i><b class="dd-res">${x.total}</b></span>`);
     const iDano = dadosActuales(datos()).findIndex(dd => dd.via === 'ataque');
-    h = `<div class="dd-hero">${sello(x.total, { n })}<div class="dd-lbl">${x.lbl}</div></div>
+    h = `<div class="dd-hero">${sello(x.total, { n })}<div class="dd-lbl">${x.lbl}</div></div>${fraseHtml(x.frase, x.tramo)}
       ${n ? `<div class="dd-nat n${n} dd-rev" style="--r:0"><b>${n === 20 ? '¡Crítico!' : '¡Pifia!'}</b><small>${n === 20 ? 'Impacto crítico: los dados de daño se tiran dos veces.' : 'Fallo automático, sea cual sea el total.'}</small></div>` : ''}
       <div class="dd-ec">${partes.join('')}</div>${probHtml(x.dist, x.total)}
       ${iDano >= 0 && !x.pifia ? `<button type="button" class="dd-sig dd-rev ${x.crit ? 'crit' : ''}" style="--r:3" data-roll="dano" data-i="${iDano}">${gi(claveDano(dadosActuales(datos())[iDano].tipo))}Tirar daño${x.crit ? ' crítico' : ''}</button>` : ''}`;
@@ -240,7 +246,7 @@ function pintarOut(anim = false) {
     const piezas = x.res.r.grupos.reduce((a, g) => a + g.vals.length, 0) + (x.res.r.bono ? 1 : 0);
     if (piezas > 1 || x.ts === 'supera') partes.push(`<span class="dd-igual"><i class="dd-op">=</i><b class="dd-res">${x.bruto ?? x.total}</b>${x.ts === 'supera' ? `<i class="dd-op">÷ 2 →</i><b class="dd-res">${x.total}</b>` : ''}</span>`);
     if (x.crit) partes.push('<span class="cj-tag crit">crítico · dados dobles</span>');
-    h = `<div class="dd-hero">${sello(x.total, { ico: dano ? gi(x.clave) : gi('dados') })}<div class="dd-lbl">${esc(x.lbl)}</div></div>
+    h = `<div class="dd-hero">${sello(x.total, { ico: dano ? gi(x.clave) : gi('dados') })}<div class="dd-lbl">${esc(x.lbl)}</div></div>${fraseHtml(x.frase, x.tramo)}
       ${x.ts === 'varios' ? `<div class="cj-split dd-rev" style="--r:0"><span class="falla"><small>Quien falle</small><b>${x.bruto}</b></span><span class="supera"><small>Quien supere</small><b>${x.mitad}</b></span></div>` : ''}
       <div class="dd-ec">${partes.join('')}</div>${x.cond ? `<p class="cj-cond">Solo si ${esc(x.cond)}.</p>` : ''}${probHtml(x.dist, x.bruto ?? x.total)}
       ${x.ctx ? `<div class="rl-ctx dd-rev" style="--r:2">${md(x.ctx)}</div>` : ''}

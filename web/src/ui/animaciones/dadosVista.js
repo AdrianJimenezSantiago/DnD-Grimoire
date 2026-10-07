@@ -2,6 +2,18 @@
 // histograma de probabilidades y animación de dados que ruedan hasta posarse.
 import { probMenor, probAlMenos, mediaDist, maxDist } from '../../domain/reglas/dados.js';
 import { chispas, movimientoReducido } from './fx.js';
+import { elegirFrase } from '../../domain/presentacion/frases.js';
+import { esc } from '../../core/util.js';
+
+// Frase que narra el resultado (ver domain/presentacion/frases.js), sin repetir la última de cada tipo de tirada
+const ULTIMA = new Map();
+export function narracion(cat, tramo) {
+  if (!cat) return '';
+  const f = elegirFrase(cat, tramo, { evitar: ULTIMA.get(cat) });
+  ULTIMA.set(cat, f);
+  return f;
+}
+export const fraseHtml = (f, tramo, r = 1) => (f ? `<p class="dd-frase t-${tramo} dd-rev" style="--r:${r}">${esc(f)}</p>` : '');
 
 export const fmt = v => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
 export const pct = x => { const n = x * 100; return `${n > 0 && n < 1 ? '<1' : n > 99 && n < 100 ? '>99' : Math.round(n)} %`; };

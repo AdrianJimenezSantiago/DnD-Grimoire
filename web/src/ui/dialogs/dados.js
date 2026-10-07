@@ -5,7 +5,8 @@ import { abDe } from '../../domain/reglas/habilidades.js';
 import { especieBase } from '../../domain/origen/especies.js';
 import { sgn } from '../../domain/reglas/reglas2024.js';
 import { parsear, texto, esD20Simple, media, rango, resolver, distribucion, maxDist, rngCripto } from '../../domain/reglas/dados.js';
-import { fmt, formaDe, forma, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural } from '../animaciones/dadosVista.js';
+import { fmt, formaDe, forma, dado, op, dadosDe, sello, probHtml, rodar, sellar, centro, fxNatural, narracion, fraseHtml } from '../animaciones/dadosVista.js';
+import { categoriaTirada, tramoD20, tramoDano } from '../../domain/presentacion/frases.js';
 import { modsTirada, resolverModo, falloAutomatico, fmtMod } from '../../domain/combate/efectos.js';
 import { $, on } from '../componentes/dom.js';
 import { gi } from '../componentes/tema.js';
@@ -37,7 +38,7 @@ export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = 
   const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab, motivo: motivo || (tipo === 'muerte' ? 'muerte' : '') }) : [];
   if (!minD20 && hab && tipo === 'prueba' && S.cur() && minimoD20Habilidad(S.cur(), hab)) { minD20 = minimoD20Habilidad(S.cur(), hab); minFuente = 'Talentos fiables'; }
   const minTotal = (tipo === 'prueba' || tipo === 'salvacion') && S.cur() ? totalMinimoFuerza(S.cur(), ab || (hab ? abDe(hab) : '')) : 0;
-  V = { minTotal, tipo, titulo, sub, bono, ab, hab, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, critMin, minD20, minFuente, res: null };
+  V = { minTotal, tipo, titulo, sub, bono, ab, hab, motivo, cd: tipo === 'muerte' ? 10 : cd, mods, modo: resolverModo(mods), modoAuto: true, alTirar, repetible, siguiente, impacto, critMin, minD20, minFuente, res: null };
   montar(); abrir(); lanzar();
 }
 const CLAVES = ['cortante', 'contundente', 'perforante', 'fuego', 'frio', 'relampago', 'trueno', 'acido', 'veneno', 'necrotico', 'radiante', 'psiquico', 'fuerza', 'curacion'];
@@ -199,11 +200,16 @@ function pintarOut(anim = false) {
       <button type="button" class="dd-falla" data-dafalla>${gi('muerte')}<span>Falla${rozar ? `<small>${esc(V.impacto.maestria.nombre)} se activa</small>` : ''}</span></button></div>`
     : V.siguiente && !x.falla && !x.decidido && !(V.tipo === 'ataque' && x.pifia)
     ? `<button type="button" class="dd-sig dd-rev ${x.crit ? 'crit' : ''}" style="--r:3" data-dasig>${gi('cortante')}${esc(V.siguiente.texto)}${x.crit ? ' crítico' : ''}</button>` : '';
+  if (x.frase === undefined) { // una por tirada: repintar no la cambia
+    const cat = categoriaTirada({ tipo: V.tipo, hab: V.hab, ab: V.ab, motivo: V.motivo, clave: V.clave || claveDe(V.sub), cura: /curaci/i.test(V.sub || '') });
+    x.tramo = V.tipo === 'dano' ? tramoDano(x.total, x.dist) : x.falla ? 'mal' : tramoD20({ nat: n, total: x.total, cd: x.cd, tipo: V.tipo });
+    x.frase = narracion(cat, x.tramo);
+  }
   const aviso = x.aviso || V.aviso ? `<div class="da-maes dd-rev" style="--r:1">${x.aviso || V.aviso}</div>` : '';
   el.className = `dd-out ${x.estado} ${n ? `n${n}` : ''} ${x.viejo ? 'viejo' : ''}`;
   el.innerHTML = `<div class="dd-hero">${sello(x.total, { n })}
       <div class="dd-lbl">${esc(x.lbl)}${cdTxt}</div></div>
-    ${nat}<div class="dd-ec">${ecuacion(x)}</div>${x.falla ? '' : probHtml(x.dist, x.tope ? x.res.total : x.total, { cd: x.cd })}
+    ${fraseHtml(x.frase, x.tramo)}${nat}<div class="dd-ec">${ecuacion(x)}</div>${x.falla ? '' : probHtml(x.dist, x.tope ? x.res.total : x.total, { cd: x.cd })}
     ${x.efecto ? `<div class="da-efecto dd-rev" style="--r:2">${x.efecto}</div>` : ''}${aviso}${sig}`;
   if (!anim) { sellar(el, x.total, false); asentar(el, x, false); return; }
   dlg().classList.add('rodando');

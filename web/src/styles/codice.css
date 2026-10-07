@@ -131,6 +131,21 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 .dd-modo button[aria-checked="true"], .dd-modo[data-modo] button[aria-checked="true"], .cj-ts[data-ts] button[aria-checked="true"] { color: color-mix(in srgb, var(--sel) 70%, var(--ink)); }
 .dd-modo button:hover:not([aria-checked="true"]) { color: var(--ink); }
 
+/* ——— Narración del resultado: una frase propia de cada tirada (domain/presentacion/frases.js) ———
+   Cursiva de manuscrito entre dos filetes con gema, teñida por el tramo: brasa en el 1 natural, tinta apagada si sale
+   mal, tinta plena si es normal, oro si sale bien y oro encendido en el 20 natural o el daño máximo. */
+.dd-frase { --fc: var(--ink); position: relative; margin: 2px auto 10px; padding: 10px 18px 12px; max-width: 46ch; text-align: center;
+  font: italic 400 var(--fs-l) / 1.4 var(--serif); color: var(--fc); text-wrap: balance;
+  background: linear-gradient(to bottom right, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, color-mix(in srgb, var(--fc) 55%, transparent) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, color-mix(in srgb, var(--fc) 55%, transparent) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; background-position: calc(50% - 2px) 0, calc(50% + 2px) 0, calc(50% - 2px) 4px, calc(50% + 2px) 4px, 0 4px; background-repeat: no-repeat; }
+.dd-frase::after { content: ""; position: absolute; left: 25%; right: 25%; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fc) 40%, transparent), transparent); }
+.dd-frase.t-muyMal { --fc: var(--danger); }
+.dd-frase.t-mal { --fc: var(--ink-2); }
+.dd-frase.t-bien { --fc: var(--gold-2); }
+.dd-frase.t-muyBien { --fc: var(--gold-2); font-weight: 500; text-shadow: 0 0 18px var(--glow), 0 0 2px color-mix(in srgb, var(--gold) 40%, transparent); }
+:root[data-theme="light"] .dd-frase.t-bien, :root[data-theme="light"] .dd-frase.t-muyBien { --fc: var(--gold); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(.dd-frase.t-bien, .dd-frase.t-muyBien) { --fc: var(--gold); } }
+@media (max-width: 560px) { .dd-frase { font-size: var(--fs-m); padding: 9px 8px 11px; } }
+
 /* ——— Ventanas: páginas del códice ——— */
 dialog { --muesca: 13px; --orn: 38px; border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
   background: radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%),
