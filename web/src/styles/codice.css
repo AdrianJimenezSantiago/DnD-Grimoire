@@ -109,6 +109,28 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent), inset 0 -2px 0 var(--gold), 0 0 14px -4px var(--glow); }
 .seg button:is([aria-checked="true"], [aria-selected="true"]) .gi { color: var(--gold-2); }
 
+/* ——— Selector deslizante de tiradas (Desventaja/Normal/Ventaja, Ha fallado/Ha superado/Varios) ———
+   Una placa de piedra que se desliza dentro de su ranura sin rebotar (el muelle la sacaba por los extremos de la
+   ventana), con el color de lo que significa: rojo brasa si falla o hay desventaja, verde si supera o hay ventaja,
+   y el color de la clase en lo neutro. Lleva su gema en el filo superior, como las placas clave de la hoja. */
+.dd-modo { --sel: var(--gold); overflow: hidden; border-radius: var(--r-s); background: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); }
+.dd-modo[data-modo="ventaja"], .cj-ts[data-ts="supera"] { --sel: var(--ok); }
+.dd-modo[data-modo="desventaja"], .cj-ts[data-ts="falla"] { --sel: var(--danger); }
+.dd-modo::before, .dd-modo[data-modo]::before, .cj-ts[data-ts]::before { border-radius: 2px;
+  background: radial-gradient(90% 120% at 50% 120%, color-mix(in srgb, var(--sel) 30%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--sel) 22%, var(--raised)), color-mix(in srgb, var(--sel) 8%, var(--raised)));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sel) 55%, transparent), inset 0 -2px 0 var(--sel), inset 0 0 18px -6px var(--sel);
+  transition: transform .45s var(--ease-out), background .35s var(--ease), box-shadow .35s var(--ease), opacity .25s; }
+.dd-modo::after { content: ""; position: absolute; z-index: -1; pointer-events: none; top: 4px; left: 4px; width: calc((100% - 16px) / 3); height: 5px;
+  transform: translateX(calc(var(--i, 1) * (100% + 4px))); transition: transform .45s var(--ease-out), opacity .25s;
+  background: linear-gradient(to top right, #0000 50%, var(--sel) 50%) calc(50% - 2.5px) 0 / 5px 5px no-repeat,
+    linear-gradient(to top left, #0000 50%, var(--sel) 50%) calc(50% + 2.5px) 0 / 5px 5px no-repeat;
+  filter: drop-shadow(0 0 3px var(--sel)); }
+.cj-ts[data-ts=""]::after { opacity: 0; }
+.dd-modo button { transition: color .3s var(--ease); }
+.dd-modo button[aria-checked="true"], .dd-modo[data-modo] button[aria-checked="true"], .cj-ts[data-ts] button[aria-checked="true"] { color: color-mix(in srgb, var(--sel) 70%, var(--ink)); }
+.dd-modo button:hover:not([aria-checked="true"]) { color: var(--ink); }
+
 /* ——— Ventanas: páginas del códice ——— */
 dialog { --muesca: 13px; --orn: 38px; border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
   background: radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%),
