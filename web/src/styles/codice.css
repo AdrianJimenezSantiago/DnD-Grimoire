@@ -170,13 +170,42 @@ body.sb-compacta .orb { width: 13px; height: 16px; }
 .dockbtn.d-combate[aria-pressed="true"]::before { border-color: color-mix(in srgb, var(--ember) 60%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--ember) 30%, transparent), transparent 72%); }
 .dockbtn[aria-pressed="true"]::after, .dockbtn.d-combate[aria-pressed="true"]::after { display: none; }
 
-/* ——— Avisos: una filacteria con cola de golondrina ——— */
-.toast { border: 0; border-radius: 0; padding-left: 36px; padding-right: 36px; clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 50%, 100% 100%, 0 100%, 18px 50%);
-  background: linear-gradient(90deg, transparent 18px, color-mix(in srgb, var(--gold) 75%, transparent) 18px calc(100% - 18px), transparent calc(100% - 18px)) 0 3px / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 18px, color-mix(in srgb, var(--gold) 75%, transparent) 18px calc(100% - 18px), transparent calc(100% - 18px)) 0 calc(100% - 3px) / 100% 1px no-repeat,
-    linear-gradient(180deg, color-mix(in srgb, var(--gold) 22%, #17110c), #110c08 55%, color-mix(in srgb, var(--gold) 12%, #0c0806));
-  box-shadow: none; }
-.toast::before, .toast::after { display: none; }
+/* ——— Avisos: una misiva sellada ———
+   Una placa de piedra oscura (con el tinte de la clase) y el mismo filete interior que las ventanas. A la izquierda,
+   el sello: una gema tallada que se enciende al llegar. Abajo, una mecha de luz que se consume mientras el aviso
+   sigue a la vista (--dura la pone toast.js) y avisa de cuánto queda para pulsar «Deshacer». */
+.toast { --tinta: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 9%);
+  border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: var(--r-m); overflow: hidden; clip-path: none;
+  padding: 12px 12px 14px 46px; min-height: 58px; gap: 8px 16px; color: #F1E8D6;
+  background: radial-gradient(70% 140% at 0% 50%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 60%),
+    linear-gradient(180deg, hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 13%), var(--tinta));
+  box-shadow: inset 0 0 0 3px var(--tinta), inset 0 0 0 4px color-mix(in srgb, var(--gold) 16%, transparent),
+    0 18px 44px -10px rgba(0, 0, 0, .6), 0 0 40px -14px var(--glow); }
+.toast.show { animation: misiva .5s var(--ease-out) both; }
+@keyframes misiva { from { opacity: 0; transform: translate(-50%, 18px) scale(.97); } }
+/* El sello */
+.toast::before { content: ""; display: block; position: absolute; left: 17px; top: 50%; bottom: auto; right: auto; width: 15px; height: 15px; margin-top: -9px; border-radius: 2px;
+  transform: rotate(45deg); background: conic-gradient(from 180deg, var(--candle-core) 0 25%, var(--gold-2) 0 50%, var(--gold) 0 75%, color-mix(in srgb, var(--gold) 55%, #000) 0);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 50%, #000), 0 0 14px var(--glow), 0 0 4px var(--gold); }
+.toast.show::before { animation: sello .6s var(--spring) both .12s; }
+@keyframes sello { from { transform: rotate(-135deg) scale(0); opacity: 0; } }
+/* La mecha */
+.toast::after { content: ""; display: block; position: absolute; left: 4px; right: 4px; top: auto; bottom: 4px; width: auto; height: 1.5px; border-radius: 1px; transform-origin: left center;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 30%, transparent), var(--gold-2) 85%, var(--candle-core));
+  box-shadow: 0 0 6px var(--glow); }
+.toast.arde::after { animation: mecha var(--dura, 3.2s) linear both; }
+@keyframes mecha { to { transform: scaleX(0); } }
+.toast b { color: hsl(var(--acc-h) calc(85% * var(--acc-k, 1)) 78%); font-weight: 700; }
+.toast .acts { gap: 6px; }
+.toast button { min-height: 36px; padding: 0 16px; border-radius: var(--r-s); color: #F1E8D6; font: 600 12.5px / 1 var(--display); letter-spacing: .07em;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, transparent);
+  background: radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 62%), rgba(255, 255, 255, .03);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 220, .06); }
+.toast button:hover { border-color: color-mix(in srgb, var(--gold) 70%, transparent); background: radial-gradient(120% 140% at 50% 150%, color-mix(in srgb, var(--gold) 34%, transparent), transparent 64%), rgba(255, 255, 255, .04); }
+.toast button.hl { color: var(--on-gold); border-color: color-mix(in srgb, var(--gold) 55%, #000);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 88%, #fff), var(--gold) 55%, color-mix(in srgb, var(--gold) 74%, #000)); }
+@media (max-width: 560px) { .toast { width: calc(100vw - 24px); padding-left: 44px; } }
+@media (prefers-reduced-motion: reduce) { .toast::after { display: none; } }
 
 /* ——— Menús: el índice del libro ——— */
 .menu { background: radial-gradient(120% 50% at 50% 0, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%), var(--raised); }

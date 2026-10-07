@@ -9,8 +9,11 @@ export function toast(msg, actions = []) {
     const b = document.createElement('button'); b.type = 'button'; b.textContent = a.label; if (a.hl) b.className = 'hl';
     b.addEventListener('click', () => { ocultarToast(); a.fn(); }); acts.appendChild(b);
   });
-  box.classList.add('show');
-  clearTimeout(timer); timer = setTimeout(ocultarToast, actions.length ? 7000 : 3200);
+  const dura = actions.length ? 7000 : 3200;
+  // La mecha de abajo se consume en lo que dura el aviso; se reinicia con cada aviso nuevo
+  box.style.setProperty('--dura', dura + 'ms');
+  box.classList.remove('arde'); void box.offsetWidth; box.classList.add('show', 'arde');
+  clearTimeout(timer); timer = setTimeout(ocultarToast, dura);
 }
 export const ocultarToast = () => $('#toast').classList.remove('show');
 export const toastAbierto = () => $('#toast').classList.contains('show');
