@@ -169,7 +169,7 @@ function enJuegoHtml(ch, P) {
 }
 function legendHtml(ch, P, schools) {
   const ritualTxt = P.ritualLibro ? 'se lanza desde el libro sin preparar (+10 min)' : 'si está preparado, sin gastar espacio (+10 min)';
-  return `<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las velas encendidas son espacios libres.</span>
+  return `<span class="howto"><b>Toca</b> un conjuro para lanzarlo. <b>Mantén pulsado</b> para leerlo y elegir nivel, ritual o uso gratis. Las gemas encendidas son espacios libres.</span>
     <details><summary>Símbolos de la hoja ${icon('chevron')}</summary><div class="keys">
       <span><b>◆</b> preparado</span><span><b style="color:var(--gold)">◆</b> siempre preparado, no cuenta</span>
       <span><b>R</b> ritual: ${ritualTxt}</span><span><b>C</b> concentración</span>
