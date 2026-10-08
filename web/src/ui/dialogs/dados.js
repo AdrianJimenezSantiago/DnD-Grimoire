@@ -1,5 +1,7 @@
 // Bandeja de dados: cualquier tirada con ventaja o desventaja, expresiones como «2d6+3» y las últimas tiradas.
 import { esc } from '../../core/util.js';
+import { motivoTirada } from '../../domain/validacion.js';
+import { rechazar } from '../componentes/validacion.js';
 import { minimoD20Habilidad, totalMinimoFuerza } from '../../domain/combate/automatismos.js';
 import { abDe } from '../../domain/reglas/habilidades.js';
 import { especieBase } from '../../domain/origen/especies.js';
@@ -68,7 +70,7 @@ function pintarCtl() {
   const libre = V.tipo === 'libre', p = parsear(exprActual());
   let h = '';
   if (libre) h += `<div class="dd-caras" role="group" aria-label="Añadir dados">${CARAS.map(c => `<button type="button" class="dd-cara" data-dacara="${c}"><span class="visually-hidden">Añadir </span>${forma(c)}<b>${c === 100 ? '<span aria-hidden="true">%</span><span class="visually-hidden">d100</span>' : `d${c}`}</b></button>`).join('')}</div>
-    <div class="dd-expr"><input id="daExpr" value="${esc(V.expr)}" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Tirada" aria-describedby="daInfo" placeholder="2d6+3">
+    <div class="dd-expr"><input id="daExpr" maxlength="60" value="${esc(V.expr)}" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Tirada" aria-describedby="daInfo" placeholder="2d6+3">
       <span class="dd-ajuste"><button type="button" data-damod="-1" aria-label="Restar 1">−1</button><button type="button" data-damod="1" aria-label="Sumar 1">+1</button><button type="button" data-dalimpiar aria-label="Vaciar">${icon('reset')}</button></span></div>
     <div class="dd-info" id="daInfo"></div>`;
   if (V.mods?.length) h += `<div class="da-mods-ap" role="group" aria-label="Lo que se aplica"><span class="da-mods-t">Se aplica</span>${V.mods.map(m => `<button type="button" class="da-mod ${m.mal ? 'mal' : 'bien'} ${m.on ? '' : 'off'}" data-damodt="${esc(m.id)}" aria-pressed="${m.on}" title="${m.cond ? `Solo ${esc(m.cond)}. Tócalo si no se aplica.` : 'Tócalo si no se aplica'}"><b>${esc(fmtMod(m))}</b><span>${esc(m.fuente)}</span>${m.cond ? `<small>${esc(m.cond)}</small>` : ''}</button>`).join('')}</div>`;
@@ -130,7 +132,7 @@ function distDe(p, modo, res) {
 
 function lanzar(nuevo = true) {
   const p = parsear(exprActual());
-  if (!p) { V.res = null; pintarOut(); actualizarBoton(); $('#daExpr')?.focus(); return; }
+  if (!p) { V.res = null; pintarOut(); actualizarBoton(); const m = motivoTirada(exprActual()); return rechazar($('#daExpr'), m === 'alto' ? 'alto' : m || 'formato', { tema: 'dados', campo: 'Tirada' }); }
   const modo = conModo(p) ? V.modo || 'normal' : 'normal', antes = V.res;
   const previo = !nuevo && antes && texto(antes.p) === texto(p) ? antes.res : null;
   let res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });

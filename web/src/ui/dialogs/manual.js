@@ -1,5 +1,6 @@
 // Libros y manuales: importar PDF, ver los libros cargados y aplicar los que vienen incluidos con la app.
 import { esc } from '../../core/util.js';
+import { rechazar } from '../componentes/validacion.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { oficializar, numTextosManual } from '../../domain/conjuros/catalogo.js';
 import { glosario } from '../../domain/libros/terminos.js';
@@ -104,6 +105,7 @@ function resumenBiblioteca(lb) {
   return b.length ? `<p>En la biblioteca: <b>${b.join('</b>, <b>')}</b>.</p>` : '';
 }
 async function importar(file) {
+  if (!(/\.pdf$/i.test(file.name) || file.type === 'application/pdf')) return rechazar(null, 'archivo', { tipo: 'un libro en PDF' });
   const bar = $('#mnProg'), msg = $('#mnMsg'), fill = $('#mnFill');
   bar.hidden = false; $('#mnRes').innerHTML = ''; $('#mnElegir').disabled = true;
   const t0 = performance.now();
@@ -132,8 +134,8 @@ function revisarNombres(lb) {
   const tr = lb.trasfondos.map((t, i) => [t, i]).filter(([t]) => t.revisar), sc = lb.subTextos.map((t, i) => [t, i]).filter(([t]) => t.revisar);
   if (!tr.length && !sc.length) return '';
   return `<p>El título de ${tr.length + sc.length === 1 ? 'esta entrada no se lee' : 'estas entradas no se lee'} en el PDF (está dentro de una ilustración). Escríbelo o déjalo en blanco para guardarla sin nombre:</p>
-    <div class="sc-list">${tr.map(([t, i]) => `<div class="sc rev"><span class="rev-k">${gi('trasfondo')}Trasfondo</span><input data-rvt="${i}" placeholder="Nombre del trasfondo" aria-label="Nombre del trasfondo"><small>${esc(t.caracteristicas)} · dote: ${esc(t.dote)}</small></div>`).join('')}
-    ${sc.map(([t, i]) => `<div class="sc rev"><span class="rev-k">${gi('subclase')}${esc(t.clase)}</span><input data-rvs="${i}" list="rvs${i}" placeholder="Nombre de la subclase" aria-label="Nombre de la subclase"><datalist id="rvs${i}">${(t.candidatas || []).map(n => `<option value="${esc(n)}">`).join('')}</datalist><small>Rasgos: ${t.rasgos.map(r => `${r.nivel}: ${esc(r.nombre)}`).join(', ')}</small></div>`).join('')}</div>`;
+    <div class="sc-list">${tr.map(([t, i]) => `<div class="sc rev"><span class="rev-k">${gi('trasfondo')}Trasfondo</span><input data-rvt="${i}" maxlength="80" placeholder="Nombre del trasfondo" aria-label="Nombre del trasfondo"><small>${esc(t.caracteristicas)} · dote: ${esc(t.dote)}</small></div>`).join('')}
+    ${sc.map(([t, i]) => `<div class="sc rev"><span class="rev-k">${gi('subclase')}${esc(t.clase)}</span><input data-rvs="${i}" maxlength="80" list="rvs${i}" placeholder="Nombre de la subclase" aria-label="Nombre de la subclase"><datalist id="rvs${i}">${(t.candidatas || []).map(n => `<option value="${esc(n)}">`).join('')}</datalist><small>Rasgos: ${t.rasgos.map(r => `${r.nivel}: ${esc(r.nombre)}`).join(', ')}</small></div>`).join('')}</div>`;
 }
 function pedirSubclases() {
   const { lb, props } = pendiente;
@@ -142,7 +144,7 @@ function pedirSubclases() {
     ${props.length ? '<p>He encontrado estas subclases que la app no conoce. Revisa los nombres y marca las que quieras añadir a las sugerencias de subclase:</p>' : ''}
     <div class="sc-list">${props.map((p, i) => `<div class="sc"><input type="checkbox" data-sc="${i}" ${p.ok ? 'checked' : ''} aria-label="Añadir">
       <select data-scc="${i}">${['', ...CLASES_ES].map(c => `<option ${c === p.clase ? 'selected' : ''} value="${c}">${c || 'Clase…'}</option>`).join('')}</select>
-      <input data-scn="${i}" value="${esc(p.nombre)}" aria-label="Nombre de la subclase"></div>`).join('')}</div>
+      <input data-scn="${i}" maxlength="80" value="${esc(p.nombre)}" aria-label="Nombre de la subclase"></div>`).join('')}</div>
     <div class="row-btns"><button type="button" class="gold" data-guardarlibro>Guardar libro</button></div></div>`;
 }
 export function init(store) {

@@ -1,5 +1,6 @@
 // Historia del personaje: documento con índice y búsqueda, editable o importado de un PDF o un texto.
 import { esc } from '../../core/util.js';
+import { rechazar, avisarCampo } from '../componentes/validacion.js';
 import { cargar, esVersionVieja, recargar } from '../../core/cargar.js';
 import { capitulos, textoAMarkdown, pdfAMarkdown } from '../../domain/personaje/historia.js';
 import { $, on } from '../componentes/dom.js';
@@ -39,6 +40,9 @@ export function abrirTrasfondo() { if (!ch()) return; V = { editando: false, q: 
 
 async function importar(file) {
   if (!file) return;
+  const pdf = /\.pdf$/i.test(file.name) || file.type === 'application/pdf', texto = /^text\//.test(file.type) || /\.(txt|md|markdown)$/i.test(file.name);
+  if (!pdf && !texto) return rechazar(null, 'archivo', { tipo: 'un PDF o un texto (.txt, .md)' });
+  if (file.size > 60e6) return avisarCampo(null, 'Ese archivo pesa más que la biblioteca de Candelero: elige uno de menos de 60 MB.');
   let md = '';
   try {
     if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {

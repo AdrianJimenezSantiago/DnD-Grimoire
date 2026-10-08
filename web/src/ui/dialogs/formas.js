@@ -1,5 +1,6 @@
 // Forma salvaje, familiares e invocaciones: perfiles de criatura que el personaje puede adoptar o convocar.
 import { esc, norm, uid } from '../../core/util.js';
+import { numeroDe, textoDe } from '../componentes/validacion.js';
 import { biblioteca } from '../../domain/libros/biblioteca.js';
 import { formasPosibles, limiteFormaSalvaje, vdTexto } from '../../domain/criaturas/monstruos.js';
 import { $, on } from '../componentes/dom.js';
@@ -23,10 +24,10 @@ const mano = ch => ch.formasMano || [];
 const numConocidas = ch => (ch.formas || []).length + mano(ch).length;
 function manoHtml(lim) {
   return `<details class="fm-mano" ${F.abrirMano ? 'open' : ''}><summary>${icon('quill')}Añadir una forma a mano</summary>
-    <div class="frow"><label class="f">Nombre<input id="fmmNom" placeholder="Por ejemplo: lobo" autocomplete="off"></label>
+    <div class="frow"><label class="f">Nombre<input id="fmmNom" placeholder="Por ejemplo: lobo" autocomplete="off" maxlength="60" data-campo="Nombre"></label>
       <label class="f" style="max-width:120px">VD<select id="fmmVd">${VDS.filter(v => v <= lim.vd).map(v => `<option value="${v}">${vdTexto(v)}</option>`).join('')}</select></label></div>
-    <div class="frow"><label class="f">CA<input id="fmmCa" inputmode="numeric" autocomplete="off"></label><label class="f">PG<input id="fmmPg" inputmode="numeric" autocomplete="off"></label>
-      <label class="f">Velocidad<input id="fmmVel" placeholder="12 m" autocomplete="off"></label></div>
+    <div class="frow"><label class="f">CA<input id="fmmCa" inputmode="numeric" autocomplete="off" data-campo="CA"></label><label class="f">PG<input id="fmmPg" inputmode="numeric" autocomplete="off" data-campo="PG"></label>
+      <label class="f">Velocidad<input id="fmmVel" placeholder="12 m" autocomplete="off" maxlength="40"></label></div>
     <button type="button" class="gold" id="fmmAdd">Añadir a mis formas</button></details>`;
 }
 function pintar() {
@@ -36,7 +37,7 @@ function pintar() {
   $('#fmSub').textContent = lim
     ? `${ch.nombre}, druida de nivel ${ch.nivel}${lim.luna ? ' (Círculo de la luna)' : ''}: VD ${vdTexto(lim.vd)} como máximo${lim.vuelo ? '' : ', sin velocidad volando'}. Conoces ${numConocidas(ch)} de ${lim.conocidas} formas.`
     : F.modo === 'polimorfar' ? 'Una bestia con un VD igual o inferior al del objetivo (o a su nivel).' : 'Cualquier criatura con un VD igual o inferior al nivel del objetivo.';
-  $('#fmTools').innerHTML = `<input type="search" id="fmQ" value="${esc(F.q)}" placeholder="Buscar una forma" aria-label="Buscar" autocomplete="off">
+  $('#fmTools').innerHTML = `<input type="search" maxlength="80" id="fmQ" value="${esc(F.q)}" placeholder="Buscar una forma" aria-label="Buscar" autocomplete="off">
     <div class="bib-sel una">${lim ? '' : `<select id="fmVd" aria-label="VD máximo">${VDS.map(v => `<option value="${v}" ${v === F.vd ? 'selected' : ''}>VD ${vdTexto(v)} o menos</option>`).join('')}</select>`}
       ${lim && todas.length ? `<button type="button" class="chip" id="fmSolo" aria-pressed="${F.solo}">${gi('dote')}Solo las que conozco</button>` : ''}</div>`;
   const q = norm(F.q.trim());
@@ -76,11 +77,12 @@ export function init(store) {
   });
   on(d, 'click', '[data-fmquitar]', (e, b) => { S.edit((db, c) => { c.formasMano = mano(c).filter(m => m.id !== b.dataset.fmquitar); }); repintar(); });
   on(d, 'click', '#fmmAdd', () => {
-    const ch = S.cur(), lim = limiteFormaSalvaje(ch), nom = $('#fmmNom').value.trim();
-    if (!nom) { $('#fmmNom').focus(); return; }
+    const ch = S.cur(), lim = limiteFormaSalvaje(ch), nom = textoDe($('#fmmNom'), { obligatorio: true, max: 60 });
+    if (nom == null) return;
     if (numConocidas(ch) >= lim.conocidas) return toast(`A nivel ${ch.nivel} conoces ${lim.conocidas} formas: olvida una antes de aprender otra (tras un descanso largo).`);
     if (mano(ch).some(m => norm(m.nombre) === norm(nom))) return toast(`${esc(nom)} ya está entre tus formas.`);
-    const ca = parseInt($('#fmmCa').value, 10), pg = parseInt($('#fmmPg').value, 10);
+    const ca = numeroDe($('#fmmCa'), { min: 1, max: 30, obligatorio: false, tema: 'ca' }); if (ca === null && $('#fmmCa').value.trim()) return;
+    const pg = numeroDe($('#fmmPg'), { min: 1, max: 999, obligatorio: false }); if (pg === null && $('#fmmPg').value.trim()) return;
     const m = { id: uid('fm'), nombre: nom, vd: +$('#fmmVd').value, ca: ca > 0 ? String(ca) : '', pg: pg > 0 ? String(pg) : '', vel: $('#fmmVel').value.trim() };
     S.edit((db, c) => { c.formasMano = [...mano(c), m]; });
     F.abrirMano = false; repintar(); toast(`${esc(nom)} añadida a tus formas.`);

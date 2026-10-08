@@ -129,7 +129,7 @@ function efectosHtml(ch) {
   if (!pl.conc && !pl.efectos.length && !sug.length) return '';
   const chips = (clave, lista, conYo) => lista.map((o, i) => `<button type="button" class="obj-chip ${conYo && esYo(ch, o) ? 'yo' : ''}" data-objdel="${clave}|${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('');
   const yo = (clave, nombre, lista) => (efectoDeConjuro(nombre)?.bueno ? botonYo(ch, lista, `data-objyo="${clave}"`) : '');
-  const entrada = (clave, ph) => `<input class="obj-in" data-objin="${clave}" placeholder="${ph}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo">`;
+  const entrada = (clave, ph) => `<input class="obj-in" maxlength="60" data-objin="${clave}" placeholder="${ph}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo">`;
   const fila = (clave, nombre, nota, lista, fin) => `<div class="ef-row"><div class="ef-h"><b>${esc(nombre)}</b>${nota ? `<small>${esc(nota)}</small>` : ''}${fin}</div>
     <div class="objt-list">${yo(clave, nombre, lista)}${chips(clave, lista, !!efectoDeConjuro(nombre)?.bueno)}${entrada(clave, lista.length ? 'Añadir otro…' : 'Sobre quién: escribe y pulsa Intro')}</div></div>`;
   let h = '';

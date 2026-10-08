@@ -151,6 +151,7 @@ dialog.tall { width: min(760px, 96vw); }
   padding: 12px 12px 12px 18px; border-radius: var(--r-m); color: #F3EEE2; background: rgba(16, 19, 31, .94);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(231, 184, 95, .25); box-shadow: 0 16px 50px rgba(0, 0, 0, .45);
   font: 400 var(--fs-m) / 1.4 var(--sans); transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--spring); }
+.toast:popover-open { top: auto; right: auto; margin: 0; overflow: visible; }
 .toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); pointer-events: auto; }
 .toast b { color: #F6D28A; font-weight: 700; }
 .toast .acts { display: flex; gap: 6px; flex-wrap: wrap; }

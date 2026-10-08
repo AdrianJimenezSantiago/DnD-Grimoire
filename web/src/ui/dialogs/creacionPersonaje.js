@@ -1,6 +1,8 @@
 // Asistente de creación y edición de personaje, por pasos en el orden del Manual del Jugador: clase, origen,
 // características, competencias, dotes, conjuros y equipo. Se carga aparte, con la gestión de personajes (app/asistentes.js).
 import { clamp, clone, esc, joinY, norm } from '../../core/util.js';
+import { leerTexto } from '../../domain/validacion.js';
+import { rechazar } from '../componentes/validacion.js';
 import { CARACTERISTICAS, NOMBRE_CAR, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase, nivelTotal } from '../../domain/reglas/reglas2024.js';
 import { reglas } from '../../domain/clases/rasgos.js';
 import { diferenciaNivel, conjurosPendientes, anadirPendientes } from '../../domain/clases/progresion.js';
@@ -62,7 +64,7 @@ export function abrirCreacion(id, { clase = '' } = {}) {
   const c = id ? S.db.chars.find(x => x.id === id) : personajeVacio({ campana: S.cur()?.campana || THEO.campana });
   $('#charTitle').textContent = id ? `Editar a ${c.nombre || 'personaje'}` : 'Nuevo personaje';
   $('#charErr').textContent = '';
-  const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(L => `<label class="f">Nv. ${L}<input type="number" inputmode="numeric" min="0" max="9" id="f_e${L}" value="${(c.espacios || {})[L] || ''}" placeholder="0"></label>`).join('');
+  const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(L => `<label class="f">Nv. ${L}<input type="number" inputmode="numeric" min="0" max="9" data-campo="Espacios de nivel ${L}" id="f_e${L}" value="${(c.espacios || {})[L] || ''}" placeholder="0"></label>`).join('');
   const paso = (k, intro, html) => `<div class="cc-paso" data-paso="${k}" role="tabpanel" hidden><p class="cc-intro">${intro}</p>${html}</div>`;
   $('#charForm').innerHTML =
   paso('clase', 'Empieza por la clase: marca tus dados de golpe, tus salvaciones y qué habilidades puedes aprender.', `
@@ -70,14 +72,14 @@ export function abrirCreacion(id, { clase = '' } = {}) {
     <div class="cc-clases" id="f_clases" role="radiogroup" aria-label="Clase"></div>
     <section class="fsec"><div class="frow">
       <div class="f">Subclase<span class="cc-subbloq" id="f_subLock">Se elige al llegar a nivel 3</span><span id="f_subWrap">${campoSubclase(c.clase, c.subclase, 'id="f_subclase" aria-label="Subclase"')}</span><span class="hint" id="h_sub"></span></div>
-      <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
+      <div class="f">Nivel<div class="stepper"><button type="button" data-step="-1" aria-label="Bajar nivel">−</button><input id="f_nivel" type="number" inputmode="numeric" min="1" max="20" data-tema="nivel" value="${c.nivel}" aria-label="Nivel"><button type="button" data-step="1" aria-label="Subir nivel">+</button></div></div></div>
       <div id="f_mc" class="mc-list"></div>
       <button type="button" class="ghost mc-add" id="f_mcAdd">${icon('plus')}Añadir otra clase (multiclase)</button>
       <p class="hint" id="h_mc" aria-live="polite"></p></section>
     <section class="fsec"><h3>Lo que te da la clase</h3><div id="f_claseExtra"></div></section>`)
   + paso('origen', 'Tu origen: quién eras antes de aventurar. El trasfondo te da tres características para mejorar, una dote de origen y dos habilidades.', `
     ${id ? `<div class="f-ret">${avatarHtml(c, 'lg')}<div><b>Retrato</b><p class="note">${c.retrato ? 'Puedes reencuadrarlo o cambiarlo cuando quieras.' : 'Añade una imagen de tu personaje: aparece en la portada, la hoja y la barra superior.'}</p><button type="button" data-retrato>${c.retrato ? 'Editar retrato' : 'Añadir retrato'}</button></div></div>` : ''}
-    <label class="f cc-nombre" id="w_nombre">Nombre<input id="f_nombre" value="${esc(c.nombre)}" autocomplete="off" required placeholder="¿Cómo se llama?"></label>
+    <label class="f cc-nombre" id="w_nombre">Nombre<input id="f_nombre" value="${esc(c.nombre)}" autocomplete="off" required maxlength="60" data-campo="Nombre" placeholder="¿Cómo se llama?"></label>
     <div class="frow cc-origen">
       <div class="f"><span>Especie</span>${campoElegible('id="f_especie" aria-label="Especie"', c.especie, 'especie', 'criatura', 'Elige o escribe')}<div class="cc-info" id="i_especie"></div></div>
       <div class="f"><span>Trasfondo</span>${campoElegible('id="f_trasfondo" aria-label="Trasfondo"', c.trasfondo, 'trasfondo', 'trasfondo', 'Elige o escribe')}<div class="cc-info" id="i_trasfondo"></div></div></div>
@@ -95,18 +97,18 @@ export function abrirCreacion(id, { clase = '' } = {}) {
     <p class="hint">Las que elijas aparecen en «En juego» con su texto si has importado el libro.</p>`)
   + paso('conj', 'Los conjuros que conoces al empezar: tus trucos y los que preparas cada día.', '<div id="f_conj"></div>')
   + paso('fin', 'Últimos toques. Todo esto puedes cambiarlo más adelante.', `
-    <section class="fsec"><h3>Puntos de golpe</h3><div class="frow"><label class="f">PG máximos<input id="f_pgmax" type="number" inputmode="numeric" min="1" value="${c.vida?.maxManual ?? ''}" placeholder=""><span class="hint" id="h_pgmax"></span></label></div></section>
+    <section class="fsec"><h3>Puntos de golpe</h3><div class="frow"><label class="f">PG máximos<input id="f_pgmax" type="number" inputmode="numeric" min="1" max="999" data-campo="PG máximos" value="${c.vida?.maxManual ?? ''}" placeholder=""><span class="hint" id="h_pgmax"></span></label></div></section>
     <button type="button" class="ghost conj-toggle" id="f_conjOpen" hidden>${icon('plus')}Opciones de conjuros (dotes, especie o multiclase)</button>
     <section class="fsec" id="f_secConj"><h3>Conjuros</h3><div class="frow">
       <label class="f">Característica para conjuros<select id="f_aptitud"></select><span class="hint">Cámbiala solo si la da una dote o especie.</span></label>
-      <label class="f">Bonificador extra a la CD<input id="f_extraCD" type="number" inputmode="numeric" value="${c.extraCD || 0}"><span class="hint">Objetos como un grimorio +1.</span></label>
-      <label class="f">Bonificador extra al ataque<input id="f_extraAtaque" type="number" inputmode="numeric" value="${c.extraAtaque || 0}"></label></div>
+      <label class="f">Bonificador extra a la CD<input id="f_extraCD" type="number" inputmode="numeric" min="-10" max="10" data-campo="Bonificador extra a la CD" value="${c.extraCD || 0}"><span class="hint">Objetos como un grimorio +1.</span></label>
+      <label class="f">Bonificador extra al ataque<input id="f_extraAtaque" type="number" inputmode="numeric" min="-10" max="10" data-campo="Bonificador extra al ataque" value="${c.extraAtaque || 0}"></label></div>
       <label class="chk-line"><input type="checkbox" id="f_manual" ${c.espaciosManuales ? 'checked' : ''}> Espacios de conjuro a mano (multiclase o reglas de la mesa)</label>
       <div class="slotgrid" id="f_slots" ${c.espaciosManuales ? '' : 'hidden'}>${slots}</div></section>
     <section class="fsec"><h3>En la hoja</h3><div class="frow">
-      <label class="f wide">Lema<textarea id="f_lema" class="serif" rows="2" placeholder="Una frase que acompañe al nombre">${esc(c.lema)}</textarea><span class="hint">Lo que escribas entre _guiones bajos_ aparece subrayado en dorado.</span></label>
-      <label class="f wide">Campaña<input id="f_campana" value="${esc(c.campana)}" autocomplete="off"></label>
-      <label class="f wide">Notas<textarea id="f_notas" rows="3" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
+      <label class="f wide">Lema<textarea id="f_lema" class="serif" rows="2" maxlength="200" placeholder="Una frase que acompañe al nombre">${esc(c.lema)}</textarea><span class="hint">Lo que escribas entre _guiones bajos_ aparece subrayado en dorado.</span></label>
+      <label class="f wide">Campaña<input id="f_campana" value="${esc(c.campana)}" autocomplete="off" maxlength="80"></label>
+      <label class="f wide">Notas<textarea id="f_notas" rows="3" maxlength="5000" placeholder="Rasgos de especie, idiomas, lo que quieras recordar">${esc(c.notas || '')}</textarea><span class="hint">Las subidas de nivel guiadas anotan aquí lo que eliges.</span></label></div></section>
     <section class="fsec"><h3>Resumen</h3><div id="f_pend"></div><div class="fsum" id="f_sum" aria-live="polite"></div></section>`);
   MC = clone(c.multiclase || []); DOTES = [...(c.dotes || [])]; ORD = { ...(c.ordenes || {}) }; HAB = { ...(c.habilidades || {}) }; SALV = [...(c.salvacionesExtra || [])]; CAR = cargarCar(c);
   VAR = { ...(c.variantes || {}) }; MAN = [...(c.maniobras || [])];
@@ -218,7 +220,7 @@ function chooser(key, n, filtro, titulo) {
   const items = all.filter(it => !otros.has(it.id) && filtro(it) && (!q || norm(it.es).includes(q) || norm(it.en || '').includes(q)))
     .sort((a, b) => (sel.includes(b.id) - sel.includes(a.id)) || a.l - b.l || a.es.localeCompare(b.es, 'es'));
   return `<section class="fsec cc-conj"><div class="ch-head"><h3>${titulo}</h3><b class="ch-count ${lleno ? 'ok' : ''}">${sel.length} de ${n}</b></div>
-    <input type="search" data-ccq="${key}" placeholder="Buscar" value="${esc(CQ[key] || '')}" aria-label="Buscar conjuro">
+    <input type="search" maxlength="80" data-ccq="${key}" placeholder="Buscar" value="${esc(CQ[key] || '')}" aria-label="Buscar conjuro">
     <div class="cc-lista">${items.length ? items.map(it => { const on = sel.includes(it.id);
       return `<div class="pitem ${on ? 'on' : ''}"><label class="pmain"><input type="checkbox" data-ccchk="${key}" value="${esc(it.id)}" ${on ? 'checked' : ''} ${!on && lleno ? 'disabled' : ''}>
         <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${metaItem(it)}</span></span></label>
@@ -300,7 +302,7 @@ function pintarCar(d) {
   h += `<div class="cc-abil">${CARACTERISTICAS.map(([k, n]) => {
     const b = CAR.base[k], mod = modOf(fin[k]);
     const val = CAR.metodo === 'compra' ? `<div class="cc-pm"><button type="button" data-pm="${k}|-1" aria-label="Bajar ${n}" ${b <= 8 ? 'disabled' : ''}>−</button><b>${b}</b><button type="button" data-pm="${k}|1" aria-label="Subir ${n}" ${b >= 15 || (COSTE[b + 1] - COSTE[b]) > resta ? 'disabled' : ''}>+</button></div><small class="cc-coste">coste ${COSTE[b] ?? '—'}</small>`
-      : CAR.metodo === 'libre' ? `<input type="number" inputmode="numeric" min="1" max="30" data-libre="${k}" value="${b}" aria-label="${n}">`
+      : CAR.metodo === 'libre' ? `<input type="number" inputmode="numeric" min="1" max="30" data-tema="caracteristica" data-libre="${k}" value="${b}" aria-label="${n}">`
       : `<button type="button" class="cc-val" data-swap="${k}" aria-pressed="${CAR.sel === k}" aria-label="${n}: ${sinTirar ? 'sin tirar' : b}. Toca para intercambiar" ${sinTirar ? 'disabled' : ''}>${sinTirar ? '?' : b}</button>`;
     return `<div class="cc-ab ${k === P.apKey || k === prio ? 'key' : ''} ${CAR.sel === k ? 'sel' : ''}" data-ab="${k}"><span class="cc-abn">${n}</span>${val}
       <span class="cc-fin">${bonos[k] ? `<em class="cc-bono">+${bonos[k]}</em>` : ''}<b id="t_${k}">${sinTirar ? '—' : fin[k]}</b><small id="m_${k}">${sinTirar ? '' : sgn(mod)}</small></span></div>`;
@@ -403,7 +405,7 @@ function pintarMulticlase() {
     const opts = Object.keys(CLASES).filter(k => k !== principal && (k === m.clase || !MC.some(x => x.clase === k)));
     return `<div class="frow mc-row"><div class="f"><span>Clase ${i + 2}</span>${campoClase(`data-mc="${i}|clase" aria-label="Clase ${i + 2}"`, m.clase, opts)}<span class="hint"><button type="button" class="linkish" data-verclase="${esc(m.clase)}">Ver qué aprende</button></span></div>
       <div class="f">Subclase<span class="cc-subbloq" data-mcsublock="${i}">Se elige al llegar a nivel 3</span><span data-mcsub="${i}">${campoSubclase(m.clase, m.subclase || '', `data-mc="${i}|subclase" aria-label="Subclase de ${esc(m.clase)}"`)}</span></div>
-      <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
+      <div class="f">Nivel<div class="stepper"><button type="button" data-mcstep="${i}|-1" aria-label="Bajar nivel de ${esc(m.clase)}">−</button><input data-mc="${i}|nivel" type="number" inputmode="numeric" min="1" max="19" data-tema="nivel" value="${m.nivel}" aria-label="Nivel de ${esc(m.clase)}"><button type="button" data-mcstep="${i}|1" aria-label="Subir nivel de ${esc(m.clase)}">+</button></div></div>
       <button type="button" class="iconbtn mc-del" data-mcdel="${i}" aria-label="Quitar ${esc(m.clase)}">×</button></div>`;
   }).join('');
   $('#f_mcAdd').hidden = MC.length >= 3;
@@ -480,7 +482,9 @@ function revisarFuentes(d) {
 }
 async function save() {
   const draft = readForm();
-  if (!draft.nombre) { irA(1); $('#charErr').textContent = 'Falta el nombre.'; $('#w_nombre').classList.add('bad'); $('#f_nombre').focus(); return; }
+  const nom = leerTexto(draft.nombre, { obligatorio: true, max: 60 });
+  if (!nom.ok) { irA(1); $('#charErr').textContent = nom.motivo === 'vacio' ? 'Falta el nombre.' : 'Ese nombre no vale.'; $('#w_nombre').classList.add('bad'); return rechazar($('#f_nombre'), nom.motivo, { max: 60 }); }
+  draft.nombre = nom.t;
   if (draft.nivel + (draft.multiclase || []).reduce((n, m) => n + (parseInt(m.nivel, 10) || 1), 0) > 20) { irA(0); $('#charErr').textContent = 'El nivel de personaje (la suma de las clases) no puede pasar de 20.'; return; }
   if (formId) {
     const oc = clone(S.db.chars.find(x => x.id === formId));

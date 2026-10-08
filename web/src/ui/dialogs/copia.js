@@ -1,5 +1,7 @@
 // Copia de seguridad: exportar e importar todos los personajes como JSON.
 import { esc } from '../../core/util.js';
+import { burla } from '../../domain/validacion.js';
+import { rechazar } from '../componentes/validacion.js';
 import { personajeDeV1, normBd, importarPersonaje, ESQUEMA } from '../../domain/personaje/modelo.js';
 import { enlazarCatalogo, invalidarItems } from '../../domain/conjuros/catalogo.js';
 import { $ } from '../componentes/dom.js';
@@ -13,6 +15,7 @@ const name = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); 
 export function abrirCopia() { $('#bkText').value = JSON.stringify(S.db); abrirDialogo($('#backupDlg')); }
 
 export function cargarCopia(text) {
+  if (!String(text ?? '').trim()) return rechazar($('#bkText'), 'vacio', { campo: 'Copia de seguridad' });
   let d; try { d = JSON.parse(text); } catch { d = null; }
   if (d?.schema === ESQUEMA && Array.isArray(d.chars) && d.catalog) {
     const db = normBd(d); enlazarCatalogo(db); invalidarItems();
@@ -34,7 +37,7 @@ export function cargarCopia(text) {
     invalidarItems(); cerrarDialogo($('#backupDlg'));
     toast(`Hoja antigua añadida como <b>${esc(nombre)}</b>.`, [botonDeshacer(S, h)]); return;
   }
-  avisar({ titulo: 'Esa copia no se puede leer', texto: 'No es una copia válida del grimorio. Usa el archivo o el texto completo tal como se guardó.', icono: 'save' });
+  avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo o el texto completo tal como se guardó.`, icono: 'save' });
 }
 export function init(store) {
   S = store;

@@ -93,7 +93,7 @@
 
 <dialog id="estadosDlg" class="tall" aria-labelledby="esTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="esTitle">Estados</h2><div class="dsub" id="esSub"></div>
-    <div class="es-busca"><input type="search" id="esQ" class="el-q" autocomplete="off" enterkeyhint="search" placeholder="Buscar un estado o efecto: derribado, velocidad, ventaja…" aria-label="Buscar estados y efectos"><small id="esCuenta" aria-live="polite"></small></div></div>
+    <div class="es-busca"><input type="search" maxlength="80" id="esQ" class="el-q" autocomplete="off" enterkeyhint="search" placeholder="Buscar un estado o efecto: derribado, velocidad, ventaja…" aria-label="Buscar estados y efectos"><small id="esCuenta" aria-live="polite"></small></div></div>
   <div class="dbody" id="esBody"></div>
   <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
@@ -107,14 +107,14 @@
 <dialog id="efectosDlg" class="tall" aria-labelledby="efxTitle"><div class="grip"></div>
   <div class="dhead efx-head"><h2 id="efxTitle">Beneficios</h2><div class="dsub" id="efxSub"></div>
     <div class="efx-tabs" id="efxTabs" role="tablist" aria-label="Tipo de efecto"></div>
-    <div class="es-busca"><input type="search" id="efxQ" class="el-q" autocomplete="off" enterkeyhint="search" placeholder="Buscar un conjuro: Bendición, CA, velocidad…" aria-label="Buscar conjuros"><small id="efxCuenta" aria-live="polite"></small></div></div>
+    <div class="es-busca"><input type="search" maxlength="80" id="efxQ" class="el-q" autocomplete="off" enterkeyhint="search" placeholder="Buscar un conjuro: Bendición, CA, velocidad…" aria-label="Buscar conjuros"><small id="efxCuenta" aria-live="polite"></small></div></div>
   <div class="dbody" id="efxBody"></div>
   <div class="dfoot"><button type="button" data-cmd="estados">Todos los estados</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
 <dialog id="buscarDlg" class="tall" aria-labelledby="bsTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="bsTitle">Buscar</h2><div class="dsub" id="bsSub">Conjuros, reglas, objetos, dotes, rasgos, criaturas, inventario y diario.</div>
-    <input type="search" id="bsQ" class="bs-q" placeholder="Escribe al menos dos letras" aria-label="Buscar" autocomplete="off" enterkeyhint="search"></div>
+    <input type="search" maxlength="80" id="bsQ" class="bs-q" placeholder="Escribe al menos dos letras" aria-label="Buscar" autocomplete="off" enterkeyhint="search"></div>
   <div class="dbody" id="bsBody"></div>
   <div class="dfoot"><span class="bs-teclas">↑ ↓ para moverte · Intro para abrir</span><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
@@ -126,7 +126,7 @@
 </dialog>
 <dialog id="elegirDlg" class="tall" aria-labelledby="elTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="elTitle"></h2><div class="dsub" id="elSub"></div>
-    <input type="search" id="elQ" class="el-q" autocomplete="off" enterkeyhint="done" aria-label="Buscar">
+    <input type="search" maxlength="80" id="elQ" class="el-q" autocomplete="off" enterkeyhint="done" aria-label="Buscar">
     <div class="seg el-grupos" role="tablist" aria-label="Grupos" id="elGrupos"></div></div>
   <div class="dbody" id="elBody"></div>
   <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cancelar</button></div>
@@ -171,7 +171,7 @@
 
 <dialog id="trasDlg" class="tall" aria-labelledby="trTitle"><div class="grip"></div>
   <div class="dhead dhead-av" id="trHead"></div>
-  <div class="tr-tools" id="trTools"><input type="search" id="trQ" placeholder="Buscar en la historia (nombres, lugares…)" aria-label="Buscar en la historia" autocomplete="off"><span class="tr-count" id="trCount"></span><div class="tr-toc" id="trToc"></div></div>
+  <div class="tr-tools" id="trTools"><input type="search" maxlength="80" id="trQ" placeholder="Buscar en la historia (nombres, lugares…)" aria-label="Buscar en la historia" autocomplete="off"><span class="tr-count" id="trCount"></span><div class="tr-toc" id="trToc"></div></div>
   <div class="dbody" id="trBody"></div>
   <input type="file" id="trFile" class="visually-hidden" accept=".pdf,.txt,.md,.markdown,application/pdf,text/plain,text/markdown" tabindex="-1" aria-hidden="true">
   <div class="dfoot" id="trFoot"></div>
@@ -205,7 +205,7 @@
 <dialog id="pickDlg" class="tall" aria-labelledby="pickTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="pickTitle">Añadir conjuro</h2><div class="dsub" id="pickSub"></div></div>
   <div class="pickbar">
-    <input type="search" id="pickQ" placeholder="Buscar en el catálogo y el compendio" aria-label="Buscar conjuro" autocomplete="off">
+    <input type="search" maxlength="80" id="pickQ" placeholder="Buscar en el catálogo y el compendio" aria-label="Buscar conjuro" autocomplete="off">
     <select id="pickCls" aria-label="Lista de clase"></select>
     <select id="pickEsc" aria-label="Escuela"></select>
     <select id="pickLvl" aria-label="Nivel"><option value="">Nivel</option><option value="0">Trucos</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>

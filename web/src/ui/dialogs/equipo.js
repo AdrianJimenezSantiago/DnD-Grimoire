@@ -1,5 +1,7 @@
 // Inventario: maniquí con lo equipado, mochila, monedas, carga, sintonía y acciones de cada objeto.
 import { campoElegible, ponerValor, elegirObjetoComun } from '../selectores/elecciones.js';
+import { leerDano } from '../../domain/validacion.js';
+import { numeroDe, textoDe, rechazar } from '../componentes/validacion.js';
 import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, equipar, desequipar, cambiarCantidad,
   quitarObjeto, anadirComun, normObjeto, pesoTotal, pesoGuardado, capacidadCarga, capacidadArrastre, valorMonedas, valorObjetos, claseArmadura, ataqueArma,
@@ -137,7 +139,7 @@ function bolsaMonedas(ch) {
   const eq = equipoDe(ch);
   return `<section class="inv-monedero" aria-label="Bolsa de monedas">
     <div class="inv-mons">${MONEDAS.map(([k, n, v]) => `<label class="inv-moneda m-${k}"><span class="mon" aria-hidden="true">${k}</span>
-      <span class="inv-mn-t"><small>${n}</small><input type="number" inputmode="numeric" min="0" data-moneda="${k}" value="${eq.monedas[k] || 0}" aria-label="Monedas de ${n.toLowerCase()}"></span>
+      <span class="inv-mn-t"><small>${n}</small><input type="number" inputmode="numeric" min="0" max="9999999" data-tema="monedas" data-moneda="${k}" value="${eq.monedas[k] || 0}" aria-label="Monedas de ${n.toLowerCase()}"></span>
       <em>${v >= 1 ? `${v} po` : `${v.toLocaleString('es-ES')} po`}</em></label>`).join('')}</div>
     <div class="inv-mon-acts"><button type="button" data-inv="pagar">${gi('inv_pagar')}Pagar</button><button type="button" data-inv="cobrar">${gi('inv_cobrar')}Cobrar</button>
       <button type="button" data-inv="juntar" title="Cambia el cobre, la plata y el electro por monedas más grandes">${gi('inv_juntar')}Juntar</button></div>
@@ -219,24 +221,24 @@ function formulario() {
   const catOpts = CATEGORIAS.map(([k, t]) => `<option value="${k}" ${k === cat ? 'selected' : ''}>${esc(t)}</option>`).join('');
   const arma = o.arma || {}, arm = o.armadura || {}, req = o.armadura ? requisitosArmadura(o) : { fue: 0, sigilo: false };
   return `<section class="inv-form" aria-label="${f.id ? 'Editar objeto' : 'Añadir objeto'}"><h3>${gi(f.id ? 'md_pluma' : 'cofre')}${f.id ? `Editar ${esc(o.nombre)}` : 'Añadir objeto'}</h3>
-    <div class="frow"><div class="f wide"><span>Nombre</span>${campoElegible('id="ivNom" aria-label="Nombre del objeto"', o.nombre, 'objeto', 'cofre', 'Escribe o elige: espada larga, raciones, cuerda…')}</div></div>
+    <div class="frow"><div class="f wide"><span>Nombre</span>${campoElegible('id="ivNom" aria-label="Nombre del objeto" maxlength="80"', o.nombre, 'objeto', 'cofre', 'Escribe o elige: espada larga, raciones, cuerda…')}</div></div>
     <div class="frow"><label class="f">Categoría<select id="ivCat">${catOpts}</select></label>
-      <label class="f">Cantidad<input id="ivCant" type="number" inputmode="numeric" min="0" value="${o.cantidad ?? 1}"></label>
-      <label class="f">Peso (kg, cada uno)<input id="ivPeso" inputmode="decimal" value="${o.peso ? String(o.peso).replace('.', ',') : ''}" placeholder="0"></label>
-      <label class="f">Valor<input id="ivValor" value="${esc(o.valor || '')}" placeholder="15 po" autocomplete="off"></label></div>
-    ${cat === 'arma' ? `<div class="frow"><label class="f">Daño<input id="ivDano" value="${esc(arma.dano || '')}" placeholder="1d8" autocomplete="off"></label>
-      <label class="f">Tipo de daño<input id="ivTipo" value="${esc(arma.tipo || '')}" placeholder="cortante" autocomplete="off"></label>
-      <label class="f">Bonificador mágico<input id="ivBonoA" type="number" inputmode="numeric" value="${arma.bono ?? bonoDeNombre(o.nombre)}"></label>
-      <label class="f wide">Propiedades<input id="ivProps" value="${esc((arma.props || []).join(', '))}" placeholder="Sutil, Ligera, Arrojadiza, Dos manos" autocomplete="off"></label>
-      <label class="f">Maestría<input id="ivMaes" value="${esc(arma.maestria || '')}" placeholder="Irritar" autocomplete="off"></label>
-      <label class="f">Alcance<input id="ivDist" value="${esc(arma.distancia || '')}" placeholder="24/96 m" autocomplete="off"></label></div>` : ''}
+      <label class="f">Cantidad<input id="ivCant" type="number" inputmode="numeric" min="0" max="9999" data-campo="Cantidad" value="${o.cantidad ?? 1}"></label>
+      <label class="f">Peso (kg, cada uno)<input id="ivPeso" inputmode="decimal" data-campo="Peso" value="${o.peso ? String(o.peso).replace('.', ',') : ''}" placeholder="0"></label>
+      <label class="f">Valor<input id="ivValor" value="${esc(o.valor || '')}" placeholder="15 po" autocomplete="off" maxlength="30"></label></div>
+    ${cat === 'arma' ? `<div class="frow"><label class="f">Daño<input id="ivDano" value="${esc(arma.dano || '')}" placeholder="1d8" autocomplete="off" maxlength="12" data-campo="Daño"></label>
+      <label class="f">Tipo de daño<input id="ivTipo" value="${esc(arma.tipo || '')}" placeholder="cortante" autocomplete="off" maxlength="30"></label>
+      <label class="f">Bonificador mágico<input id="ivBonoA" type="number" inputmode="numeric" min="-5" max="5" data-campo="Bonificador mágico" value="${arma.bono ?? bonoDeNombre(o.nombre)}"></label>
+      <label class="f wide">Propiedades<input id="ivProps" value="${esc((arma.props || []).join(', '))}" placeholder="Sutil, Ligera, Arrojadiza, Dos manos" autocomplete="off" maxlength="150"></label>
+      <label class="f">Maestría<input id="ivMaes" value="${esc(arma.maestria || '')}" placeholder="Irritar" autocomplete="off" maxlength="30"></label>
+      <label class="f">Alcance<input id="ivDist" value="${esc(arma.distancia || '')}" placeholder="24/96 m" autocomplete="off" maxlength="30"></label></div>` : ''}
     ${cat === 'armadura' ? `<div class="frow"><label class="f">Tipo<select id="ivArmT">${[['ligera', 'Ligera'], ['media', 'Media'], ['pesada', 'Pesada'], ['escudo', 'Escudo']].map(([k, t]) => `<option value="${k}" ${arm.tipo === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
-      <label class="f">${arm.tipo === 'escudo' ? 'Bonificador a la CA' : 'CA base'}<input id="ivBase" type="number" inputmode="numeric" value="${arm.base ?? (arm.tipo === 'escudo' ? 2 : 11)}"></label>
+      <label class="f">${arm.tipo === 'escudo' ? 'Bonificador a la CA' : 'CA base'}<input id="ivBase" type="number" inputmode="numeric" min="0" max="30" data-tema="ca" value="${arm.base ?? (arm.tipo === 'escudo' ? 2 : 11)}"></label>
       ${arm.tipo === 'escudo' ? '' : `<label class="f">Destreza<select id="ivDex">${[['todo', 'Suma toda'], ['max2', 'Máximo +2'], ['no', 'No suma']].map(([k, t]) => `<option value="${k}" ${arm.dex === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`}
-      <label class="f">Bonificador mágico<input id="ivBonoR" type="number" inputmode="numeric" value="${arm.bono ?? bonoDeNombre(o.nombre)}"></label>
-      ${arm.tipo === 'escudo' ? '' : `<label class="f">Fuerza mínima<input id="ivFue" type="number" inputmode="numeric" min="0" value="${req.fue || ''}" placeholder="—"></label>
+      <label class="f">Bonificador mágico<input id="ivBonoR" type="number" inputmode="numeric" min="-5" max="5" data-campo="Bonificador mágico" value="${arm.bono ?? bonoDeNombre(o.nombre)}"></label>
+      ${arm.tipo === 'escudo' ? '' : `<label class="f">Fuerza mínima<input id="ivFue" type="number" inputmode="numeric" min="0" max="30" data-tema="caracteristica" data-campo="Fuerza mínima" value="${req.fue || ''}" placeholder="—"></label>
       <label class="f inv-check"><input id="ivSig" type="checkbox" ${req.sigilo ? 'checked' : ''}><span>Desventaja en Sigilo</span></label>`}</div>` : ''}
-    <label class="f wide">Notas<input id="ivNotas" value="${esc(o.notas || '')}" placeholder="Dónde lo guarda, efectos, usos…" autocomplete="off"></label>
+    <label class="f wide">Notas<input id="ivNotas" value="${esc(o.notas || '')}" placeholder="Dónde lo guarda, efectos, usos…" autocomplete="off" maxlength="500"></label>
     <div class="inv-form-acts"><button type="button" data-inv="cancelar">Cancelar</button><span class="spacer"></span><button type="button" class="gold" data-inv="guardar">${f.id ? 'Guardar' : 'Añadir al inventario'}</button></div></section>`;
 }
 function leerFormulario() {
@@ -349,7 +351,7 @@ function render() {
   if (V.monedas) h += bolsaMonedas(ch);
   h += V.form ? formulario() : `<div class="inv-barra"><button type="button" class="gold" data-inv="nuevo">${icon('plus')}Añadir objeto</button><button type="button" data-eq="bib">${gi('biblioteca')}Objetos mágicos</button>
     <span class="spacer"></span>${eq.objetos.length ? `<span class="inv-vistas" role="group" aria-label="Vista"><button type="button" class="inv-vista" data-vista="rejilla" aria-pressed="${V.vista === 'rejilla'}" aria-label="Casillas" title="Casillas">${icon('grid')}</button><button type="button" class="inv-vista" data-vista="lista" aria-pressed="${V.vista === 'lista'}" aria-label="Lista" title="Lista">${icon('list')}</button></span>` : ''}</div>`;
-  if (eq.objetos.length) h += `<div class="inv-tools"><input type="search" id="ivQ" value="${esc(V.q)}" placeholder="Buscar en el inventario" aria-label="Buscar en el inventario" autocomplete="off">
+  if (eq.objetos.length) h += `<div class="inv-tools"><input type="search" maxlength="80" id="ivQ" value="${esc(V.q)}" placeholder="Buscar en el inventario" aria-label="Buscar en el inventario" autocomplete="off">
     ${hay.length > 1 ? `<div class="inv-cats" role="radiogroup" aria-label="Categoría"><button type="button" role="radio" aria-checked="${!V.cat}" data-invcat="">Todo</button>${hay.map(([k, t, ico]) => `<button type="button" role="radio" aria-checked="${V.cat === k}" data-invcat="${k}">${gi(ico)}${esc(t)}<small>${eq.objetos.filter(o => o.cat === k).length}</small></button>`).join('')}</div>` : ''}</div>`;
   if (!eq.objetos.length) h += `<div class="bib-empty">${gi('inv_bolsa')}<p>La mochila está vacía.</p><p class="note">Añade lo que lleva: elige de la lista de objetos comunes (con su peso y, en las armas y armaduras, su daño y su CA) o escríbelo a mano. Los objetos mágicos se añaden desde la biblioteca, con sus cargas.</p></div>`;
   else if (!encima.length && !alijo.length) h += '<p class="pempty">Nada coincide con la búsqueda.</p>';
@@ -447,7 +449,7 @@ async function monedasYa(que) {
     V.fx = { sel: '.inv-monedero', cls: 'fx-tintineo', chispas: false }; repintar();
     return toast(n ? `Monedas juntadas: <b>${n}</b> menos en la bolsa.` : 'Ya estaban juntas.', n ? [botonDeshacer(S, h)] : []);
   }
-  const v = await pedir({ titulo: que === 'pagar' ? 'Pagar' : 'Cobrar', texto: que === 'pagar' ? `¿Cuánto pagas, en piezas de oro? Tienes ${po(valorMonedas(S.cur()))}. Puedes escribir decimales: 0,5 son 5 pp.` : '¿Cuánto recibes, en piezas de oro? Entra como oro, plata y cobre.', tipo: 'text', ok: que === 'pagar' ? 'Pagar' : 'Cobrar' });
+  const v = await pedir({ titulo: que === 'pagar' ? 'Pagar' : 'Cobrar', texto: que === 'pagar' ? `¿Cuánto pagas, en piezas de oro? Tienes ${po(valorMonedas(S.cur()))}. Puedes escribir decimales: 0,5 son 5 pp.` : '¿Cuánto recibes, en piezas de oro? Entra como oro, plata y cobre.', tipo: 'text', numero: { min: 0.01, max: 1000000, decimal: true, tema: 'monedas' }, ok: que === 'pagar' ? 'Pagar' : 'Cobrar' });
   const x = parseFloat(String(v ?? '').replace(',', '.')); if (!(x > 0)) return;
   if (que === 'pagar' && enCobre(S.cur()) < Math.round(x * 100)) return toast(`No te llega: tienes ${po(valorMonedas(S.cur()))}.`);
   let r; const h = S.act(`${que === 'pagar' ? 'Paga' : 'Cobra'} ${po(x)}`, (db, ch) => { r = que === 'pagar' ? pagar(ch, x) : cobrar(ch, x); });
@@ -500,7 +502,11 @@ export function init(store) {
     if (a === 'nuevo') { V.form = { id: null, o: { cat: V.cat || 'equipo', cantidad: 1 } }; render(); return $('#ivNom')?.focus(); }
     if (a === 'cancelar') { V.form = null; return repintar(); }
     if (a === 'guardar') {
-      const o = leerFormulario(); if (!o.nombre) { $('#ivNom').focus(); return toast('Escribe el nombre del objeto.'); }
+      const o = leerFormulario();
+      // Nombre, peso y daño se escriben a mano: si algo no vale se marca y no se guarda
+      const nom = textoDe($('#ivNom'), { obligatorio: true, max: 80, campo: 'Nombre del objeto' }); if (nom == null) return; o.nombre = nom;
+      const peso = numeroDe($('#ivPeso'), { min: 0, max: 5000, decimal: true, obligatorio: false }); if (peso === null && $('#ivPeso').value.trim()) return; o.peso = peso ?? 0;
+      if ($('#ivDano')) { const d = leerDano($('#ivDano').value); if (!d.ok) return rechazar($('#ivDano'), d.motivo, { max: 20 }); o.arma.dano = d.t; }
       const id = V.form.id; let nuevo;
       const h = S.edit((db, ch) => { const eq = equipoDe(ch);
         if (id) { const i = eq.objetos.findIndex(x => x.id === id); if (i >= 0) eq.objetos[i] = normObjeto({ ...eq.objetos[i], ...o, id }); } else nuevo = anadirComun(ch, o); });

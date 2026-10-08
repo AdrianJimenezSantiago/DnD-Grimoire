@@ -9,6 +9,12 @@ body {
   transition: background-color var(--t-med) var(--ease), color var(--t-med) var(--ease);
 }
 /* El cielo va en una capa fija y no con background-attachment: fixed, que obliga al navegador a desplazar la página en el hilo principal. */
+/* Campo rechazado por la validación: borde de peligro y una sacudida corta */
+:is(input, textarea, select, [contenteditable]).invalido, :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--danger) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent) !important; }
+.invalido { animation: campo-no .42s var(--ease-out); }
+@keyframes campo-no { 20% { transform: translateX(-5px); } 45% { transform: translateX(4px); } 70% { transform: translateX(-2px); } }
+@media (prefers-reduced-motion: reduce) { .invalido { animation: none; } }
+.aviso-burla { font-style: italic; }
 /* Lo primero que se pinta mientras llega el código: el emblema sobre el fondo del tema. Se quita en cuanto la app está lista */
 .arranque { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: var(--bg); }
 .arranque svg { opacity: .9; animation: arranque-late 1.6s ease-in-out infinite; }

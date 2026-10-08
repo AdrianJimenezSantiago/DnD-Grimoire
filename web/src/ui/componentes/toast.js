@@ -1,5 +1,6 @@
 // Avisos breves en la parte inferior de la pantalla, con botones de acción como «Deshacer».
 import { $ } from './dom.js';
+import { alFrente } from '../animaciones/fx.js';
 let timer = null;
 export function toast(msg, actions = []) {
   const box = $('#toast');
@@ -12,6 +13,8 @@ export function toast(msg, actions = []) {
   const dura = actions.length ? 7000 : 3200;
   // La mecha de abajo se consume en lo que dura el aviso; se reinicia con cada aviso nuevo
   box.style.setProperty('--dura', dura + 'ms');
+  // Con una ventana abierta el aviso sube a la capa superior; si no, quedaría tapado por el <dialog> modal
+  if (document.querySelector('dialog[open]')) alFrente(box);
   box.classList.remove('arde'); void box.offsetWidth; box.classList.add('show', 'arde');
   clearTimeout(timer); timer = setTimeout(ocultarToast, dura);
 }

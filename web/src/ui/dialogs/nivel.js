@@ -151,7 +151,7 @@ function chooser(key, n, filterFn, hint) {
     .sort((a, b) => (chosen.includes(b.id) - chosen.includes(a.id)) || b.l - a.l || a.es.localeCompare(b.es, 'es'));
   const full = chosen.length >= n;
   return `<div class="chooser"><div class="ch-head"><span>${hint}</span><b class="ch-count ${full ? 'ok' : ''}">${chosen.length} de ${n}</b></div>
-    <input type="search" data-chq="${key}" placeholder="Buscar" value="${esc(LV.q[key] || '')}" aria-label="Buscar conjuro">
+    <input type="search" maxlength="80" data-chq="${key}" placeholder="Buscar" value="${esc(LV.q[key] || '')}" aria-label="Buscar conjuro">
     <div>${items.length ? items.map(it => { const onx = chosen.includes(it.id);
       return `<div class="pitem ${onx ? 'on' : ''}"><label class="pmain"><input type="checkbox" data-chk="${key}" value="${esc(it.id)}" ${onx ? 'checked' : ''} ${!onx && full ? 'disabled' : ''}>
         <span class="pl">${it.l}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${metaItem(it)}</span></span></label>
@@ -196,7 +196,7 @@ function render() {
   if (step === 'subclase') {
     h = `<p class="note">A nivel 3 eliges la subclase. Puedes escribir otra si tu mesa usa más manuales.</p>
       <div class="scp-grid" role="listbox" aria-label="Subclases de ${esc(o.clase)}">${tarjetasSubclase(o.clase, LV.subclase, 'data-lvsub')}</div>
-      <label class="f wide" style="margin-top:14px">Subclase<input id="lvSubIn" value="${esc(LV.subclase)}" autocomplete="off"></label>`;
+      <label class="f wide" style="margin-top:14px">Subclase<input id="lvSubIn" maxlength="60" value="${esc(LV.subclase)}" autocomplete="off"></label>`;
   }
   if (step === 'mejora') {
     const a = LV.asi, sel = (id, v, skip) => `<select id="${id}"><option value="">Elige</option>${CARACTERISTICAS.filter(([k]) => k !== skip).map(([k, n]) => `<option value="${k}" ${v === k ? 'selected' : ''} ${ch.stats[k] >= 20 ? 'disabled' : ''}>${n} (${ch.stats[k]})</option>`).join('')}</select>`;

@@ -1,5 +1,7 @@
 // Rasgos y recursos del personaje: plantillas de clase, rasgos propios, usos y lo que se recupera al descansar.
 import { clone, esc, uid } from '../../core/util.js';
+import { leerTexto } from '../../domain/validacion.js';
+import { rechazar } from '../componentes/validacion.js';
 import { CARACTERISTICAS, ESCUELAS, perfil, clasesDe, vistaClase } from '../../domain/reglas/reglas2024.js';
 import { dadoRecarga, maxDe, estadoRecurso, reglas, resumenRegla, TIPO_TXT } from '../../domain/clases/rasgos.js';
 import { conjurosAutomaticos, escalas, progresion, subclaseDe } from '../../domain/clases/clases2024.js';
@@ -65,18 +67,18 @@ const preview = () => ({ ...RD, max: maxDe(S.cur(), RD.tipo === 'dados' ? { ...R
 function renderForm() {
   const r = RD, opt = (v, c, t) => `<option value="${v}" ${String(v) === String(c) ? 'selected' : ''}>${t}</option>`;
   let h = `<div class="frow"><label class="f">Tipo<select data-rf="tipo">${Object.entries(TIPO_TXT).map(([k, t]) => opt(k, r.tipo, t)).join('')}</select></label>
-    <label class="f">Nombre<input data-rf="nombre" value="${esc(r.nombre)}" autocomplete="off" placeholder="${r.tipo === 'recurso' ? 'Cargas de la varita' : r.tipo === 'al_lanzar' ? 'Aviso de nigromancia' : 'Nombre del rasgo'}"></label></div>`;
+    <label class="f">Nombre<input data-rf="nombre" value="${esc(r.nombre)}" autocomplete="off" maxlength="60" data-campo="Nombre" placeholder="${r.tipo === 'recurso' ? 'Cargas de la varita' : r.tipo === 'al_lanzar' ? 'Aviso de nigromancia' : 'Nombre del rasgo'}"></label></div>`;
   if (r.tipo === 'recurso' || r.tipo === 'recuperar') {
     const bases = r.tipo === 'recurso'
       ? [['fijo', 'Número fijo'], ['nivel', 'Tu nivel'], ['nivelx', 'Tu nivel × N'], ['mitad', 'Mitad de tu nivel, redondeando arriba'], ['mod', 'Modificador de característica (mín. 1)'], ['comp', 'Bonificador de competencia']]
       : [['mitad', 'Mitad de tu nivel, redondeando arriba'], ['fijo', 'Número fijo']];
     h += `<div class="frow" style="margin-top:12px"><label class="f">${r.tipo === 'recurso' ? 'Usos máximos' : 'Niveles de espacios que recupera'}<select data-rf="maxBase">${bases.map(([k, t]) => opt(k, r.maxBase, t)).join('')}</select></label>
-      ${['fijo', 'nivelx'].includes(r.maxBase) ? `<label class="f">${r.maxBase === 'nivelx' ? 'N' : 'Número'}<input data-rf="maxN" type="number" inputmode="numeric" min="0" value="${esc(r.maxN)}"></label>` : ''}
+      ${['fijo', 'nivelx'].includes(r.maxBase) ? `<label class="f">${r.maxBase === 'nivelx' ? 'N' : 'Número'}<input data-rf="maxN" type="number" inputmode="numeric" min="0" max="99" value="${esc(r.maxN)}"></label>` : ''}
       ${r.maxBase === 'mod' ? `<label class="f">Característica<select data-rf="maxAb">${CARACTERISTICAS.map(([k, n]) => opt(k, r.maxAb, n)).join('')}</select></label>` : ''}</div>`;
     h += r.tipo === 'recurso'
       ? `<div class="frow" style="margin-top:12px"><label class="f wide">Se recuperan<select data-rf="recarga">${opt('largo', r.recarga, 'Todos con un descanso largo')}${opt('corto', r.recarga, 'Todos con un descanso corto o largo')}${opt('corto1', r.recarga, 'Uno con descanso corto; todos con uno largo')}${opt('dado', r.recarga, 'Tirando dados (p. ej. 1d3 cargas al amanecer)')}${opt('nunca', r.recarga, 'No se recuperan (consumible)')}</select></label></div>
-        ${r.recarga === 'dado' ? `<div class="frow" style="margin-top:12px"><label class="f">Dados<input data-rf="recDado" value="${esc(r.recDado || '1d3')}" placeholder="1d3" autocomplete="off"><span class="hint">Por ejemplo 1d3, 1d6 o 2d4.</span></label>
-          <label class="f">Suma<input data-rf="recBono" type="number" inputmode="numeric" value="${esc(r.recBono || 0)}"><span class="hint">1d6+1 → dados 1d6, suma 1.</span></label>
+        ${r.recarga === 'dado' ? `<div class="frow" style="margin-top:12px"><label class="f">Dados<input data-rf="recDado" value="${esc(r.recDado || '1d3')}" placeholder="1d3" autocomplete="off" maxlength="8" data-campo="Dados"><span class="hint">Por ejemplo 1d3, 1d6 o 2d4.</span></label>
+          <label class="f">Suma<input data-rf="recBono" type="number" inputmode="numeric" min="-20" max="20" value="${esc(r.recBono || 0)}"><span class="hint">1d6+1 → dados 1d6, suma 1.</span></label>
           <label class="f">Cuándo<select data-rf="recMomento">${opt('largo', r.recMomento, 'Al amanecer (descanso largo)')}${opt('corto', r.recMomento, 'Con cada descanso, corto o largo')}</select></label></div>` : ''}`
       : `<div class="frow" style="margin-top:12px"><label class="f">Nivel máximo de espacio<input data-rf="nivMax" type="number" inputmode="numeric" min="1" max="9" value="${esc(r.nivMax)}"></label></div>`;
   }
@@ -86,8 +88,8 @@ function renderForm() {
       <label class="f">Espacio mínimo<select data-rf="espacioMin">${opt(0, r.espacioMin, 'Cualquiera')}${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => opt(n, r.espacioMin, 'Nivel ' + n)).join('')}</select></label></div>
       <label class="chk-line"><input type="checkbox" data-rf="soloEspacio" ${r.soloEspacio ? 'checked' : ''}> Solo si gastas un espacio (no como ritual ni con usos gratis)</label>
       <div class="frow" style="margin-top:12px"><label class="f">Efecto<select data-rf="efecto">${opt('aviso', r.efecto, 'Mostrar un aviso')}${opt('recuperar', r.efecto, 'Recuperar un espacio de nivel inferior')}</select></label>
-      ${r.efecto === 'recuperar' ? `<label class="f">Hasta el nivel<input data-rf="efectoN" type="number" inputmode="numeric" min="1" max="8" value="${esc(r.efectoN)}"></label>` : `<label class="f wide">Texto del aviso<textarea data-rf="texto" rows="2">${esc(r.texto)}</textarea></label>`}</div>`;
-  if (r.tipo !== 'al_lanzar') h += `<div class="frow" style="margin-top:12px"><label class="f wide">Nota<input data-rf="nota" value="${esc(r.nota)}" autocomplete="off" placeholder="Opcional: cuándo se usa, qué dado…"></label></div>`;
+      ${r.efecto === 'recuperar' ? `<label class="f">Hasta el nivel<input data-rf="efectoN" type="number" inputmode="numeric" min="1" max="8" value="${esc(r.efectoN)}"></label>` : `<label class="f wide">Texto del aviso<textarea data-rf="texto" rows="2" maxlength="500">${esc(r.texto)}</textarea></label>`}</div>`;
+  if (r.tipo !== 'al_lanzar') h += `<div class="frow" style="margin-top:12px"><label class="f wide">Nota<input data-rf="nota" value="${esc(r.nota)}" autocomplete="off" maxlength="200" placeholder="Opcional: cuándo se usa, qué dado…"></label></div>`;
   h += `<div class="fsum" style="margin-top:16px"><p>${esc(resumenRegla(preview()))}</p></div>`;
   $('#ruleForm').innerHTML = h;
 }
@@ -102,12 +104,18 @@ export function errorRasgo(r) {
   return '';
 }
 function saveRule() {
-  RD.nombre = (RD.nombre || '').trim();
-  if (!RD.nombre) { $('#ruleErr').textContent = 'Falta el nombre.'; return; }
+  const nom = leerTexto(RD.nombre, { obligatorio: true, max: 60 });
+  if (!nom.ok) { $('#ruleErr').textContent = nom.motivo === 'vacio' ? 'Falta el nombre.' : 'Ese nombre no vale.'; return rechazar($('#ruleForm [data-rf="nombre"]'), nom.motivo, { max: 60 }); }
+  RD.nombre = nom.t;
   if (RD.tipo === 'dados') RD.maxBase = 'fijo';
   ['maxN', 'nivMax', 'espacioMin', 'efectoN'].forEach(k => { RD[k] = parseInt(RD[k], 10) || 0; });
   if (RD.tipo === 'recuperar' && !RD.nivMax) RD.nivMax = 5;
-  const err = errorRasgo(RD); if (err) { $('#ruleErr').textContent = err; return; }
+  const err = errorRasgo(RD);
+  if (err) { // El texto exacto queda bajo el formulario; la burla señala el campo culpable
+    $('#ruleErr').textContent = err;
+    const [k, motivo] = /recarga/.test(err) ? ['recDado', 'dado'] : /aviso/.test(err) ? ['texto', 'vacio'] : /al menos/.test(err) ? ['maxN', 'cero'] : /dados/.test(err) ? ['maxN', 'alto'] : /recupera/.test(err) ? ['efectoN', 'alto'] : ['nivMax', 'alto'];
+    return rechazar($(`#ruleForm [data-rf="${k}"]`), motivo, { min: 1, max: { maxN: 6, efectoN: 8, nivMax: 9 }[k] });
+  }
   const { _tpl: tpl, _nuevo: nuevo, ...rule } = RD;
   const h = S.edit((db, ch) => {
     const i = ch.rasgos.findIndex(x => x.id === rule.id);

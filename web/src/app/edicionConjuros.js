@@ -1,6 +1,8 @@
 // Edición del libro de conjuros en la hoja (modo edición): textos en línea, dados de los recursos, escuela,
 // componentes, nivel y «siempre preparado». Los cambios del catálogo afectan a todos los personajes que tienen el conjuro.
 import { esc } from '../core/util.js';
+import { rechazar, avisarCampo } from '../ui/componentes/validacion.js';
+import { burla } from '../domain/validacion.js';
 import { ESCUELAS } from '../domain/reglas/reglas2024.js';
 import { campo } from '../domain/conjuros/validar.js';
 import { claveEscuela } from '../domain/conjuros/espacios.js';
@@ -18,11 +20,16 @@ export function enlazarEdicion(S, sheet) {
     if (t.dataset.dv !== undefined) {
       const [id, i, sides] = t.dataset.dv.split('|'), max = +sides;
       const v = t.value.replace(/\D/g, '').slice(0, String(max).length), n = parseInt(v, 10);
+      // Lo que no cabe en el dado se corrige y se avisa: letras fuera, y del 1 a sus caras
+      const motivo = /\D/.test(t.value) ? 'letras' : v && n < 1 ? 'cero' : v && n > max ? 'alto' : '';
       t.value = v && (n < 1 || n > max) ? String(Math.min(max, Math.max(1, n))) : v;
+      if (motivo) rechazar(t, motivo, { min: 1, max, campo: `d${max}` });
       t.closest('.pdie')?.classList.remove('fresh');
       return A.fijarDado(S, id, +i, t.value);
     }
     if (t.dataset.k) {
+      const lim = ['es', 'en'].includes(t.dataset.k) ? 80 : 120;
+      if (t.textContent.length > lim) { t.textContent = t.textContent.slice(0, lim); rechazar(t, 'largo', { max: lim }); }
       const e2 = ch.book[+t.dataset.bi], val = t.textContent.trim();
       if (CAMPOS_LIBRO.includes(t.dataset.k)) e2[t.dataset.k] = val; else { S.db.catalog[e2.sid][t.dataset.k] = val; invalidarItems(); }
       S.touch();
@@ -39,7 +46,7 @@ export function enlazarEdicion(S, sheet) {
     if (rel) { e2[k] = final; if (k === 'gratis' && !final) e2.used = false; } else { S.db.catalog[e2.sid][k] = final; invalidarItems(); }
     if (t.textContent !== final) t.textContent = final;
     S.touch(); S.emit('edit'); previo = null;
-    if (aviso) toast(esc(aviso));
+    if (aviso) avisarCampo(t, `${k === 'es' ? burla('vacio', { campo: 'Nombre' }) : k === 'escuela' ? 'Esa escuela no la enseñan en ninguna academia.' : k === 'comp' ? 'Un conjuro sin componentes es un truco de feria.' : 'Corregido.'} ${aviso}`);
   });
   let escuelaBi = null;
   on(sheet, 'click', '[data-schoolpick]', (e, b) => {

@@ -1,6 +1,7 @@
 // Diario de campaña (sesiones y notas) y bestiario (lo que se sabe de cada criatura).
 import { campoElegible, ponerValor, elegirCriatura } from '../selectores/elecciones.js';
-import { esc } from '../../core/util.js';
+import { textoDe, rechazar } from '../componentes/validacion.js';
+import { esc, numLibre } from '../../core/util.js';
 import { TIPOS, diarioDe, nuevaSesion, nuevaNota, paraRecordar, buscarDiario, fechaLarga } from '../../domain/personaje/diario.js';
 import { $, on } from '../componentes/dom.js';
 import { avatarHtml } from '../componentes/avatar.js';
@@ -38,7 +39,7 @@ function lista() {
   $('#diHead').innerHTML = `${avatarHtml(c, 'md')}<div><h2 id="diTitle">Diario de ${esc(c.nombre)}</h2><div class="dsub">${d.sesiones.length ? `${d.sesiones.length} ${d.sesiones.length === 1 ? 'sesión' : 'sesiones'}` : 'Nombres, sucesos y pendientes de cada partida'}</div></div>`;
   let h = pestanas();
   if (rec.length && !V.q) h += `<section class="rec"><h3>${icon('star')} Para recordar</h3><ul class="nts">${rec.map(n => notaHtml(n, true)).join('')}</ul></section>`;
-  h += `<div class="di-bar"><input type="search" id="diQ" placeholder="Buscar en el diario" value="${esc(V.q)}" aria-label="Buscar en el diario"><button type="button" class="gold" data-di="nueva">${icon('plus')}Nueva sesión</button></div>`;
+  h += `<div class="di-bar"><input type="search" maxlength="80" id="diQ" placeholder="Buscar en el diario" value="${esc(V.q)}" aria-label="Buscar en el diario"><button type="button" class="gold" data-di="nueva">${icon('plus')}Nueva sesión</button></div>`;
   h += sesiones.length ? `<div class="ses-list">${sesiones.map(s => {
     const pend = s.notas.filter(n => !n.hecho && (n.tipo === 'pendiente' || n.fijada)).length;
     return `<button type="button" class="ses" data-abrir="${s.id}"><span class="ses-n">${s.n}</span><span class="ses-t"><b>${esc(s.titulo || 'Sesión ' + s.n)}</b>
@@ -59,13 +60,13 @@ function sesion() {
   const c = ch();
   $('#diHead').innerHTML = `<button type="button" class="iconbtn" data-di="volver" aria-label="Volver a las sesiones">‹</button><div><h2 id="diTitle">Sesión ${s.n}</h2><div class="dsub">${esc(fechaLarga(s.fecha))} · ${esc(c.nombre)}</div></div>`;
   $('#diBody').innerHTML = `<div class="frow">
-      <label class="f">Título<input id="diTit" value="${esc(s.titulo)}" placeholder="Por ejemplo: La subasta del mercado nuevo" autocomplete="off"></label>
+      <label class="f">Título<input id="diTit" value="${esc(s.titulo)}" placeholder="Por ejemplo: La subasta del mercado nuevo" autocomplete="off" maxlength="120"></label>
       <label class="f" style="max-width:190px">Fecha<input id="diFecha" type="date" value="${esc(s.fecha)}"></label></div>
     <section class="compose"><div class="tipos" role="radiogroup" aria-label="Tipo de nota">${Object.entries(TIPOS).map(([k, t]) => `<button type="button" role="radio" aria-checked="${V.tipo === k}" data-tipo="${k}">${icon(ICONO[k])}${t}</button>`).join('')}</div>
-      <div class="add"><input id="diNota" placeholder="${{ nombre: 'Maese Orrin, prestamista del puerto', suceso: 'Nos emboscaron en el camino del norte', pendiente: 'Preguntar a Magna por el sello', nota: 'Lo que quieras apuntar' }[V.tipo]}" autocomplete="off" aria-label="Texto de la nota"><button type="button" class="primary" data-di="anadir">Añadir</button></div></section>
+      <div class="add"><input id="diNota" placeholder="${{ nombre: 'Maese Orrin, prestamista del puerto', suceso: 'Nos emboscaron en el camino del norte', pendiente: 'Preguntar a Magna por el sello', nota: 'Lo que quieras apuntar' }[V.tipo]}" autocomplete="off" aria-label="Texto de la nota" maxlength="500"><button type="button" class="primary" data-di="anadir">Añadir</button></div></section>
     ${s.notas.length ? `<ul class="nts">${s.notas.map(n => notaHtml(n)).join('')}</ul>` : '<p class="note">Las notas aparecen aquí. Subraya (S) lo que no quieras olvidar y tacha (T) lo que ya esté resuelto.</p>'}
     ${criaturasSesion(s)}
-    <label class="f wide" style="margin-top:14px">Crónica de la sesión<textarea id="diTxt" rows="9" placeholder="Qué pasó, quién apareció, qué dijo el DJ…">${esc(s.texto)}</textarea></label>`;
+    <label class="f wide" style="margin-top:14px">Crónica de la sesión<textarea id="diTxt" rows="9" maxlength="50000" placeholder="Qué pasó, quién apareció, qué dijo el DJ…">${esc(s.texto)}</textarea></label>`;
   $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrar">Borrar sesión</button><span class="spacer"></span><button type="button" data-di="volver">Sesiones</button><button type="button" data-close>Cerrar</button>';
 }
 const pestanas = () => `<div class="seg di-seg" role="tablist" aria-label="Diario"><button type="button" role="tab" aria-selected="${V.vista === 'lista'}" data-di="lista">${icon('quill')}Sesiones</button>
@@ -80,7 +81,7 @@ function bestiario() {
   const c = ch(), todas = bestiarioDe(c).criaturas, lista = buscarCriaturas(c, V.bq, V.btipo).sort((a, b) => (a.estado === 'viva' ? 0 : 1) - (b.estado === 'viva' ? 0 : 1));
   $('#diHead').innerHTML = `${avatarHtml(c, 'md')}<div><h2 id="diTitle">Bestiario de ${esc(c.nombre)}</h2><div class="dsub">${todas.length ? `${todas.length} ${todas.length === 1 ? 'criatura' : 'criaturas'} anotadas` : 'Lo que sabes de lo que has encontrado'}</div></div>`;
   const tipos = [...new Set(todas.map(x => x.tipo).filter(Boolean))];
-  let h = pestanas() + `<div class="di-bar"><input type="search" id="bxQ" placeholder="Buscar criatura o táctica" value="${esc(V.bq)}" aria-label="Buscar en el bestiario">
+  let h = pestanas() + `<div class="di-bar"><input type="search" maxlength="80" id="bxQ" placeholder="Buscar criatura o táctica" value="${esc(V.bq)}" aria-label="Buscar en el bestiario">
     ${tipos.length > 1 ? `<select id="bxTipo" aria-label="Tipo de criatura"><option value="">Todos</option>${tipos.map(t => `<option ${V.btipo === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     <button type="button" class="gold" data-di="nuevacr">${icon('plus')}Criatura</button></div>`;
   h += lista.length ? `<div class="bx-list">${lista.map(tarjeta).join('')}</div>`
@@ -109,10 +110,10 @@ function ficha() {
       <button type="button" data-bxperfil="${esc(pf.clave)}">Ver perfil</button>${x.perfil === pf.clave ? '' : `<button type="button" class="gold" data-bxrellenar="${esc(pf.clave)}">Rellenar con su perfil</button>`}</div>`
     : perfiles.length ? '' : '<p class="note bx-sinperfil">Anota a mano lo que sepas. Con el Manual del Jugador importado, al escribir el nombre de una criatura de su apéndice la app rellena tipo, CA, PG, daños, estados y salvaciones.</p>';
   $('#diBody').innerHTML = `
-    <div class="frow">${perfiles.length ? `<div class="f"><span>Nombre</span>${campoElegible('id="bxNom" aria-label="Nombre de la criatura"', x.nombre, 'criatura', 'bestia', 'Por ejemplo: trol del puente')}</div>` : `<label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off"></label>`}
+    <div class="frow">${perfiles.length ? `<div class="f"><span>Nombre</span>${campoElegible('id="bxNom" aria-label="Nombre de la criatura" maxlength="60"', x.nombre, 'criatura', 'bestia', 'Por ejemplo: trol del puente')}</div>` : `<label class="f">Nombre<input id="bxNom" value="${esc(x.nombre)}" placeholder="Por ejemplo: trol del puente" autocomplete="off" maxlength="60"></label>`}
       <label class="f">Tipo<select id="bxTip"><option value="">Sin clasificar</option>${TIPOS_CRIATURA.map(t => `<option ${x.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
-    <div class="frow" style="margin-top:10px"><label class="f">CA aproximada<input id="bxCa" value="${esc(x.ca)}" inputmode="numeric" placeholder="¿?" autocomplete="off"></label>
-      <label class="f">Puntos de golpe aprox.<input id="bxPg" value="${esc(x.pg)}" placeholder="Aguantó unos 60" autocomplete="off"></label></div>
+    <div class="frow" style="margin-top:10px"><label class="f">CA aproximada<input id="bxCa" value="${esc(x.ca)}" inputmode="numeric" placeholder="¿?" autocomplete="off" maxlength="12" data-campo="CA aproximada"></label>
+      <label class="f">Puntos de golpe aprox.<input id="bxPg" value="${esc(x.pg)}" placeholder="Aguantó unos 60" autocomplete="off" maxlength="60"></label></div>
     ${perfilHtml}
     <div class="bx-sec"><h3>Amenaza</h3>${seg('amenaza', [['', 'Sin valorar'], ...AMENAZAS.map(a => [a, a])], x.amenaza)}</div>
     <div class="bx-sec"><h3>Situación</h3>${seg('estado', Object.entries(ESTADO_CRIATURA), x.estado)}</div>
@@ -124,8 +125,8 @@ function ficha() {
       ${utiles.length ? `${anotados.length ? `<ul class="bx-cjs">${anotados.map(conj).join('')}</ul>` : ''}
         <details class="bx-mas" ${anotados.length ? '' : 'open'}><summary>${anotados.length ? 'Anotar otro conjuro' : 'Anota cuáles funcionaron'}</summary><ul class="bx-cjs">${utiles.filter(u => !x.conjuros[u.s.id]).map(conj).join('')}</ul></details>`
         : '<p class="note">Los conjuros de daño o con salvación del libro aparecerán aquí para anotar si funcionaron.</p>'}</div>
-    <label class="f wide bx-sec">Tácticas y comportamiento<textarea id="bxTac" rows="4" placeholder="Cómo luchó, qué la hizo huir, qué funcionó…">${esc(x.tacticas)}</textarea></label>
-    <label class="f wide bx-sec">Notas<textarea id="bxNot" rows="3" placeholder="Dónde vive, quién la controla, qué dijo el DJ…">${esc(x.notas)}</textarea></label>
+    <label class="f wide bx-sec">Tácticas y comportamiento<textarea id="bxTac" rows="4" maxlength="5000" placeholder="Cómo luchó, qué la hizo huir, qué funcionó…">${esc(x.tacticas)}</textarea></label>
+    <label class="f wide bx-sec">Notas<textarea id="bxNot" rows="3" maxlength="5000" placeholder="Dónde vive, quién la controla, qué dijo el DJ…">${esc(x.notas)}</textarea></label>
     ${sesiones.length ? `<div class="bx-sec"><h3>Vista en</h3><div class="bx-est">${sesiones.map(s => `<button type="button" class="chip sm" data-abrir="${s.id}">Sesión ${s.n}${s.titulo ? ': ' + esc(s.titulo) : ''}</button>`).join('')}</div></div>` : ''}`;
   $('#diFoot').innerHTML = '<button type="button" class="warn" data-di="borrarcr">Borrar criatura</button><span class="spacer"></span><button type="button" data-di="bestiario">Bestiario</button><button type="button" data-close>Cerrar</button>';
 }
@@ -135,7 +136,7 @@ export function abrirBestiario(cid) { if (!ch()) return; V = { ...V, vista: cid 
 export function abrirDiario(sid) { if (!ch()) return; V = { ...V, vista: sid ? 'sesion' : 'lista', sid: sid || null, q: '' }; render(); abrirDialogo(dlg()); }
 
 function anadir() {
-  const inp = $('#diNota'), t = inp.value.trim(); if (!t) { inp.focus(); return; }
+  const inp = $('#diNota'), t = textoDe(inp, { obligatorio: true, max: 500, campo: 'Nota' }); if (t == null) return;
   const nt = nuevaNota(V.tipo, t);
   S.edit(() => { ses().notas.unshift(nt); }); vibrar();
   sesion(); $('#diNota').focus(); marcarNota(nt.id, 'nueva');
@@ -177,6 +178,7 @@ export function init(store) {
   on(root, 'click', '[data-bxcj]', (e, b) => conCriatura(x => { const k = b.dataset.bxcj; if (x.conjuros[k] === b.dataset.v) delete x.conjuros[k]; else x.conjuros[k] = b.dataset.v; }));
   on(root, 'click', '[data-elegir="criatura"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirCriatura(inp.value); if (v != null) ponerValor(inp, v); });
   root.addEventListener('change', e => {
+    if (e.target.id === 'bxCa') { const n = numLibre(e.target.value); if (n > 30 || n === 0) { rechazar(e.target, n ? 'alto' : 'cero', { min: 1, max: 30, tema: 'ca', valor: n }); e.target.value = ''; const x = criatura(ch(), V.cid); if (x) { x.ca = ''; S.touch(); } } }
     if (e.target.id === 'bxLink' && e.target.value) { const id = e.target.value; S.edit((db, c) => { const x = criatura(c, id); if (x && !x.sesiones.includes(V.sid)) x.sesiones.push(V.sid); }); sesion(); }
     if (e.target.id === 'bxTipo') { V.btipo = e.target.value; bestiario(); }
     if (e.target.id === 'bxNom' && V.vista === 'criatura') { const y = root.querySelector('.dbody').scrollTop; ficha(); root.querySelector('.dbody').scrollTop = y; }

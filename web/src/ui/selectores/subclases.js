@@ -28,7 +28,7 @@ export function campoSubclase(clase, valor, attrs) {
   const d = valor ? datos(clase, valor) : null, conocida = valor && subclasesDe(clase).some(n => norm(n) === norm(valor));
   return `<div class="scp" data-scp-clase="${esc(clase)}">
     <span class="scp-sello" ${conocida ? `style="--sh:${d.h};--ss:${d.s}%"` : ''} aria-hidden="true">${gi(conocida ? d.ico : 'subclase')}</span>
-    <input ${attrs} value="${esc(valor || '')}" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" placeholder="Elige o escribe una subclase">
+    <input ${attrs} value="${esc(valor || '')}" maxlength="60" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" placeholder="Elige o escribe una subclase">
     <button type="button" class="scp-abrir" tabindex="-1" aria-label="Ver subclases">${icon('chevron')}</button>
     <div class="scp-panel" role="listbox" hidden></div></div>`;
 }

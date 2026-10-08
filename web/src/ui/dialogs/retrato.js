@@ -1,5 +1,6 @@
 // Retrato del personaje: elegir una imagen y reencuadrarla.
 import { $ } from '../componentes/dom.js';
+import { rechazar, avisarCampo } from '../componentes/validacion.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
@@ -59,7 +60,9 @@ export async function abrirRetrato(id) {
   } else requestAnimationFrame(dibujar);
 }
 async function elegir(file) {
-  if (!file || !/^image\//.test(file.type)) { toast('Elige un archivo de imagen (JPG, PNG, WebP…).'); return; }
+  if (!file) return;
+  if (!/^image\//.test(file.type)) return rechazar(null, 'archivo', { tipo: 'una imagen (JPG, PNG, WebP…)' });
+  if (file.size > 30e6) return avisarCampo(null, 'Esa imagen pesa más que una armadura de placas: elige una de menos de 30 MB.');
   const url = URL.createObjectURL(file);
   try { const img = await cargarImg(url); E.dataOrig = reducir(img, MAXORIG); E.nueva = true; await usarFuente(E.dataOrig, null); }
   catch { toast('No se pudo leer esa imagen.'); }

@@ -1,6 +1,7 @@
 // Casos de uso del modo combate: entrar y salir, iniciativa, pasar de ronda, tiradas de ataque y daño con lo que se
 // añade al impactar, acciones comunes (Correr, Esquivar…) y daño o curación rápidos desde la vista de combate.
-import { esc, joinY, norm, numLibre } from '../core/util.js';
+import { esc, joinY, norm } from '../core/util.js';
+import { numeroDe } from '../ui/componentes/validacion.js';
 import { NOMBRE_CAR, modOf, clasesDe } from '../domain/reglas/reglas2024.js';
 import { reglas, usosGastados, estadoRecurso } from '../domain/clases/rasgos.js';
 import { $ } from '../ui/componentes/dom.js';
@@ -45,7 +46,7 @@ export async function iniciativaManual() {
   const ch = S.cur(); if (!ch) return;
   const c = combateDe(ch), alerta = (ch.dotes || []).some(d => /^alerta/i.test(d)) || /alerta/i.test(JSON.stringify(ch.trasfondo || ''));
   const r = await pedir({ titulo: 'Iniciativa a mano', texto: `Escribe tu iniciativa para este combate.${alerta ? ' Con la dote Alerta puedes intercambiarla con un aliado dispuesto: pon aquí la suya.' : ' Útil si la intercambias con un aliado o tu DJ la ajusta.'}`,
-    valor: c.iniciativa != null ? String(c.iniciativa) : '', tipo: 'number', min: -10, max: 60, ok: 'Guardar' });
+    valor: c.iniciativa != null ? String(c.iniciativa) : '', tipo: 'number', min: -10, max: 60, numero: { min: -10, max: 60, obligatorio: false }, ok: 'Guardar' });
   if (r == null || r === '') return;
   const n = parseInt(r, 10); if (!Number.isFinite(n)) return;
   const antes = c.iniciativa;
@@ -149,7 +150,7 @@ export const accionComun = (k, via, forzar = false) => {
   else if (a.tirar) extra.push(...a.tirar.slice(0, 3).map((hk, i) => ({ label: NOMBRE_HAB[hk], hl: i === 0, fn: () => tirarDesde(`hab:${hk}`) })));
   toast(`<b>${esc(a.nombre)}</b>: gasta ${esc(VIA_TXT[via])}. ${esc(a.texto)}`, [...extra, botonDeshacer(S, h)]);
 };
-export const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numLibre(i?.value); if (!(n > 0)) { i?.focus(); toast('Escribe primero cuántos puntos de golpe.'); return; }
+export const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numeroDe(i, { min: 1, max: 999, tema: tipo === 'dano' ? 'dano' : 'curacion', campo: 'PG' }); if (n == null) return;
   if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
 // Tirada de ataque con un arma; en combate cuenta el ataque en la economía del turno (acción, Mella, adicional)
 export function atacar(id) {

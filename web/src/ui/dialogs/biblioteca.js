@@ -68,7 +68,7 @@ function vacio(que, libro) {
     <button type="button" class="gold" data-cmd="manual">${gi('libro')}Importar un libro</button></div>`;
 }
 function herramientas() {
-  const q = `<input type="search" id="bibQ" value="${esc(V.q)}" placeholder="${{ reglas: 'Buscar una regla o un estado', objetos: 'Buscar un objeto mágico', dotes: 'Buscar una dote', trasfondos: 'Buscar un trasfondo', subclases: 'Buscar una subclase', criaturas: 'Buscar una criatura' }[V.tab]}" aria-label="Buscar" autocomplete="off">`;
+  const q = `<input type="search" maxlength="80" id="bibQ" value="${esc(V.q)}" placeholder="${{ reglas: 'Buscar una regla o un estado', objetos: 'Buscar un objeto mágico', dotes: 'Buscar una dote', trasfondos: 'Buscar un trasfondo', subclases: 'Buscar una subclase', criaturas: 'Buscar una criatura' }[V.tab]}" aria-label="Buscar" autocomplete="off">`;
   let f = '';
   if (V.tab === 'objetos') {
     f = `<div class="bib-rar" role="group" aria-label="Rareza">${RAREZAS.filter(r => r !== 'Varía').map(r => `<button type="button" class="rar-chip r-${RAR_K[r]}" aria-pressed="${V.rar === r}" data-rar="${r}">${r}</button>`).join('')}</div>

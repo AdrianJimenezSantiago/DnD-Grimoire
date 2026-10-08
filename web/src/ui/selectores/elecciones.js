@@ -13,7 +13,7 @@ import { esRepetible } from '../../domain/personaje/creacion.js';
 import { faltaRequisito } from '../../domain/origen/origen.js';
 import { opcionesEstilo } from '../../domain/clases/estilos.js';
 
-export const campoElegible = (attrs, valor, tipo, ico, placeholder = '') => `<div class="elg"><span class="elg-ico" aria-hidden="true">${gi(ico)}</span><input ${attrs} value="${esc(valor || '')}" autocomplete="off" placeholder="${esc(placeholder)}"><button type="button" class="elg-b" data-elegir="${tipo}" aria-label="Ver la lista">${gi('biblioteca')}<span>Lista</span></button></div>`;
+export const campoElegible = (attrs, valor, tipo, ico, placeholder = '') => `<div class="elg"><span class="elg-ico" aria-hidden="true">${gi(ico)}</span><input ${attrs}${/maxlength/.test(attrs) ? '' : ' maxlength="80"'} value="${esc(valor || '')}" autocomplete="off" placeholder="${esc(placeholder)}"><button type="button" class="elg-b" data-elegir="${tipo}" aria-label="Ver la lista">${gi('biblioteca')}<span>Lista</span></button></div>`;
 export function ponerValor(input, valor) {
   if (!input || valor == null) return;
   input.dataset.antes = input.value; input.value = valor;

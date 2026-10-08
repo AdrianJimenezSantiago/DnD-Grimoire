@@ -65,6 +65,7 @@ import * as buscar from './ui/dialogs/buscar.js';
 import * as elegir from './ui/dialogs/elegir.js';
 import * as aviso from './ui/dialogs/aviso.js';
 import { tour } from './ui/componentes/tour.js';
+import { vigilarCampos } from './ui/componentes/validacion.js';
 import { initFondo } from './ui/animaciones/fondo.js';
 import { initMagia } from './ui/animaciones/magia.js';
 
@@ -77,7 +78,7 @@ async function boot() {
   almacen.remove(PREF + '-theme');
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
   fijarBarras(eventos.esOscuro());
-  initFondo(); initMagia();
+  initFondo(); initMagia(); vigilarCampos();
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
   const { db, migrated } = cargarGuardado(v2, v1);

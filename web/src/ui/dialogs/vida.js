@@ -1,5 +1,7 @@
 // Vida y estados: daño, curación, PG temporales, salvaciones contra muerte, concentración y estados.
 import { esc, norm, numLibre } from '../../core/util.js';
+import { leerBono } from '../../domain/validacion.js';
+import { numeroDe, textoDe, rechazar } from '../componentes/validacion.js';
 import { rangoMuerte, reduccionArmaduraPesada, reaccionesDano, alCaerA0 } from '../../domain/combate/automatismos.js';
 import { sgn, modOf } from '../../domain/reglas/reglas2024.js';
 import { vidaDe, ponerEfecto, soltarConc, pgMaximo, pgMaximoBase, aumentarMax, quitarMax, pgActuales, aplicarDano, curar, ponerTemporales, dadosDeGolpe, gastarDadoGolpe, salvacionMuerte, estadoVital, marcarCaida, revivir as revivirDom, cdConcentracion, ESTADOS_INCAP,
@@ -52,7 +54,7 @@ function render() {
       : `<p class="hint vd-dg-nota">Solo se gastan durante un descanso corto: cada dado cura su tirada ${sgn(modOf(statsEfectivos(c).con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p>${combateDe(c).activo || est === 'muerto' ? '' : '<button type="button" class="ghost vd-dg-corto" data-cmd="short">Hacer un descanso corto</button>'}`}</section>`;
   h += `<section class="vd-max-sec"><h3>${gi('pg')}PG máximos aumentados</h3>
     ${v.maxExtra.length ? `<ul class="vd-mx">${v.maxExtra.map(m => `<li><b>+${m.n}</b><span>${esc(m.nombre)}</span><button type="button" data-vdmxq="${esc(m.id)}">Termina</button></li>`).join('')}</ul>` : ''}
-    <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
+    <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off" maxlength="40"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
     <p class="hint">No son PG temporales: suben tu máximo y tus PG actuales en la misma cantidad. Al terminar, el máximo vuelve a ${pgMaximoBase(c)} y tus PG se quedan como estén si caben. Tu máximo base se ajusta en «Editar personaje».</p></section>`;
   morph($('#vdBody'), h);
 }
@@ -102,7 +104,7 @@ export function tirarConcentracion(S2, dano) {
 export async function pedirConcentracion(S2) {
   const conj = S2.cur()?.play.conc; if (!conj) return;
   const r = await pedir({ titulo: `Concentración en ${conj}`, texto: '¿Cuánto daño has recibido? La CD es la mitad del daño (redondeando hacia abajo), mínimo 10 y máximo 30. Si el daño viene de varias fuentes, tira una salvación por cada una.',
-    tipo: 'number', min: 1, max: 999, ok: 'Tirar' });
+    tipo: 'number', min: 1, max: 999, numero: { min: 1, max: 999, tema: 'dano' }, ok: 'Tirar' });
   const n = numLibre(r); if (!(n > 0)) return;
   tirarConcentracion(S2, n);
 }
@@ -153,7 +155,7 @@ function renderEstados() {
     ${q ? '' : '<p class="hint">Conjuros y rasgos que te han lanzado (tú u otro). La hoja los suma sola a tus tiradas, a tu CA y a tu velocidad. Cada uno dura lo que dice su conjuro: en combate se descuenta al pasar de ronda y te avisa al terminar. También se quitan con un descanso largo o tocándolos.</p>'}
     ${efectos}
     ${propios || !q ? '<h4 class="es-sub">Propios</h4>' : ''}${propios}
-    ${q ? '' : `<div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off">
+    ${q ? '' : `<div class="ef-form"><input id="efNom" placeholder="Nombre: Aura del paladín, Anillo…" aria-label="Nombre del efecto" autocomplete="off" maxlength="60">
       <label>CA<input id="efCa" inputmode="numeric" placeholder="+2"></label><label>Ataques<input id="efAt" placeholder="1d4 o +1"></label>
       <label>Salvaciones<input id="efSv" placeholder="+3"></label><label>Pruebas<input id="efPr" placeholder="1d4"></label><label>Velocidad (m)<input id="efVel" inputmode="decimal" placeholder="+3"></label><label>Rondas<input id="efRd" inputmode="numeric" placeholder="∞" title="Duración en rondas de combate (10 = 1 minuto). Vacío: hasta que lo quites."></label>
       <button type="button" data-efadd>${icon('plus')}Añadir efecto</button></div>`}`);
@@ -162,7 +164,7 @@ export async function alternarEfecto(S2, k) {
   const c = S2.cur(), v = vidaDe(c), ya = v.efectos.find(x => x.k === k), e = EFECTO[k];
   if (ya) { S2.act(`Termina ${e.nombre}`, (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.k !== k); if (e.maxPg) quitarMax(x, ya.id); }); vibrar('light'); return; }
   let n = 0;
-  if (e.maxPg) { const r2 = await pedir({ titulo: e.nombre, texto: '¿Cuánto aumentan tus PG máximos? 5 con un espacio de nivel 2, y 5 más por cada nivel por encima.', valor: String(e.maxPg), tipo: 'number', min: 1, ok: 'Aplicar' }); n = parseInt(r2, 10); if (!(n > 0)) return; }
+  if (e.maxPg) { const r2 = await pedir({ titulo: e.nombre, texto: '¿Cuánto aumentan tus PG máximos? 5 con un espacio de nivel 2, y 5 más por cada nivel por encima.', valor: String(e.maxPg), tipo: 'number', min: 1, max: 999, ok: 'Aplicar' }); n = parseInt(r2, 10); if (!(n > 0)) return; }
   S2.act(`Efecto: ${e.nombre}`, (db, x) => { ponerEfecto(x, k, { n }); });
   if (n) golpeFx('max', n); else golpeFx(e.bueno ? 'buff' : 'debuff');
   vibrar('light');
@@ -178,15 +180,15 @@ export function alternarEstado(S2, k) {
 export function init(store) {
   S = store;
   const body = $('#vdBody');
-  const cant = () => { const n = numLibre($('#vdCant')?.value); if (!(n > 0)) { $('#vdCant')?.focus(); toast('Escribe primero una cantidad.'); return 0; } return n; };
+  const cant = tema => numeroDe($('#vdCant'), { min: 1, max: 999, tema, campo: 'Cantidad' }) || 0;
   on(body, 'click', '[data-vd]', (e, b) => {
     const a = b.dataset.vd;
-    if (a === 'dano') { const n = cant(); if (n) { danar(S, n, !!$('#vdCrit')?.checked); render(); } }
-    if (a === 'curar') { const n = cant(); if (n) { sanar(S, n); render(); } }
-    if (a === 'temp') { const n = cant(); if (n) { temporales(S, n); render(); } }
-    if (a === 'mxadd') { const n = numLibre($('#vdMxN').value), nom = $('#vdMxNom').value.trim() || 'Aumento'; if (!(n > 0)) { $('#vdMxN').focus(); return; }
-      const desde = pgActuales(S.cur()); S.act(`PG máximos +${n} (${nom})`, (db, x) => { aumentarMax(x, { nombre: nom, n }); }); render(); golpeFx('max', n, { desde, hasta: pgActuales(S.cur()) }); }
-    if (['dano', 'curar', 'temp'].includes(a) && $('#vdCant')) { $('#vdCant').value = ''; $('#vdCant').focus({ preventScroll: true }); }
+    if (a === 'dano') { const n = cant('dano'); if (n) { danar(S, n, !!$('#vdCrit')?.checked); render(); } }
+    if (a === 'curar') { const n = cant('curacion'); if (n) { sanar(S, n); render(); } }
+    if (a === 'temp') { const n = cant('curacion'); if (n) { temporales(S, n); render(); } }
+    if (a === 'mxadd') { const n = numeroDe($('#vdMxN'), { min: 1, max: 999, campo: 'Aumento de PG máximos' }); if (n == null) return; const nom = textoDe($('#vdMxNom'), { max: 40 }) ?? null; if (nom == null) return;
+      const desde = pgActuales(S.cur()); S.act(`PG máximos +${n} (${nom || 'Aumento'})`, (db, x) => { aumentarMax(x, { nombre: nom || 'Aumento', n }); }); render(); golpeFx('max', n, { desde, hasta: pgActuales(S.cur()) }); }
+    if (['dano', 'curar', 'temp'].includes(a) && $('#vdCant') && !$('#vdCant').hasAttribute('aria-invalid')) { $('#vdCant').value = ''; $('#vdCant').focus({ preventScroll: true }); }
   });
   on(body, 'click', '[data-vdmxq]', (e, b) => { const id = b.dataset.vdmxq; let m; const h = S.act('Termina un aumento de PG máximos', (db, x) => { m = quitarMax(x, id); x.vida.efectos = x.vida.efectos.filter(e2 => e2.id !== id); }); render(); if (m) toast(`${esc(m.nombre)} termina: tu máximo vuelve a ${pgMaximo(S.cur())}.`, [botonDeshacer(S, h)]); });
   on(body, 'click', '[data-vddg]', (e, b) => {
@@ -209,9 +211,17 @@ export function init(store) {
   on(eb, 'click', '[data-efk]', (e, b) => alternarEfecto(S, b.dataset.efk));
   on(eb, 'click', '[data-efq]', (e, b) => { const id = b.dataset.efq; S.act('Quita un efecto propio', (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.id !== id); }); });
   on(eb, 'click', '[data-efadd]', () => {
-    const val = id => $(id).value.trim(), nom = val('#efNom'), propio = { ca: val('#efCa'), ataque: val('#efAt'), salvacion: val('#efSv'), prueba: val('#efPr'), vel: val('#efVel') };
-    if (!nom) { $('#efNom').focus(); return toast('Ponle un nombre al efecto.'); }
-    S.act(`Efecto: ${nom}`, (db, x) => { const vv = vidaDe(x); vv.efectos = normEfectos([...vv.efectos, { nombre: nom, propio, rondas: parseInt(val('#efRd'), 10) || null }]); }); golpeFx('buff');
+    // Cada campo se comprueba por separado: el primero que no vale se marca y se explica
+    const nom = textoDe($('#efNom'), { obligatorio: true, max: 60, campo: 'Nombre del efecto' }); if (nom == null) return;
+    const ca = numeroDe($('#efCa'), { min: -10, max: 10, obligatorio: false, tema: 'ca', campo: 'CA' }); if (ca === null && $('#efCa').value.trim()) return;
+    const bono = (id, campo) => { const r = leerBono($(id).value, { max: 10 }); return r.ok ? r.t : rechazar($(id), r.motivo, { campo, max: 10 }); };
+    const ataque = bono('#efAt', 'Ataques'); if (ataque == null) return;
+    const salvacion = bono('#efSv', 'Salvaciones'); if (salvacion == null) return;
+    const prueba = bono('#efPr', 'Pruebas'); if (prueba == null) return;
+    const vel = numeroDe($('#efVel'), { min: -30, max: 30, decimal: true, obligatorio: false, campo: 'Velocidad' }); if (vel === null && $('#efVel').value.trim()) return;
+    const rondas = numeroDe($('#efRd'), { min: 1, max: 1000, obligatorio: false, tema: 'rondas', campo: 'Rondas' }); if (rondas === null && $('#efRd').value.trim()) return;
+    const propio = { ca: ca == null ? '' : String(ca), ataque, salvacion, prueba, vel: vel == null ? '' : String(vel) };
+    S.act(`Efecto: ${nom}`, (db, x) => { const vv = vidaDe(x); vv.efectos = normEfectos([...vv.efectos, { nombre: nom, propio, rondas: rondas || null }]); }); golpeFx('buff');
   });
   on(eb, 'click', '[data-esregla]', (e, b) => abrirTermino(b.dataset.esregla));
   on(eb, 'click', '[data-es="inspiracion"]', () => { const v = vidaDe(S.cur()); S.act(v.inspiracion ? 'Gasta la inspiración heroica' : 'Gana inspiración heroica', (db, x) => { vidaDe(x).inspiracion = !vidaDe(x).inspiracion; }); vibrar('light'); });

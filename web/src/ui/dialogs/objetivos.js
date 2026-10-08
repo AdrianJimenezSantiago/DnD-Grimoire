@@ -31,7 +31,7 @@ function render() {
       <span class="oy-sello" aria-hidden="true">${gi(ef?.ico || 'inspiracion')}</span></button>
     <p class="oy-lbl">${gi('criatura')}Otros objetivos <small>opcional</small></p>
     <div class="objt-list oy-lista">${otros.map(([o, i]) => `<button type="button" class="obj-chip" data-oydel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
-      <input class="obj-in" id="oyIn" placeholder="${otros.length ? 'Añadir otro…' : 'Nombre y pulsa Intro'}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo"></div>
+      <input class="obj-in" maxlength="60" id="oyIn" placeholder="${otros.length ? 'Añadir otro…' : 'Nombre y pulsa Intro'}" autocomplete="off" enterkeyhint="done" aria-label="Añadir objetivo"></div>
     <p class="hint">Si escribes «${esc(nombre.split(' ')[0])}» o «yo» también cuenta como tú. Puedes cambiarlo luego en «Efectos activos» de la hoja.</p>`;
 }
 const clave = () => { if (!O.clave) O.clave = claveObjetivos(S, O.conjuro); return O.clave; };

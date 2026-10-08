@@ -19,6 +19,8 @@ export function parsear(expr) {
       grupos.push(g);
     } else bono += signo * parseInt(x, 10);
   }
+  // Un bono de cuatro cifras o una pila de grupos ya no es una tirada de mesa
+  if (Math.abs(bono) > 1000 || grupos.length > 12) return null;
   return grupos.length || bono ? { grupos, bono } : null;
 }
 export const esD20Simple = p => !!p && p.grupos.length === 1 && p.grupos[0].n === 1 && p.grupos[0].caras === 20 && p.grupos[0].signo === 1 && !p.grupos[0].keep;

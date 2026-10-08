@@ -88,7 +88,7 @@ function pintarCtl(tsAntes = R.ts) {
   const x = delCompendio(s);
   if (ch.play.conc === s.es && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d])) {
     add('obj', `<section class="cj-paso cj-obj"><p class="rl-q">Concentración: ¿sobre quién?</p><div class="objt-list">${efectoDeConjuro(s.es)?.bueno ? botonYo(ch, ch.play.concObj, 'data-rlyo') : ''}${ch.play.concObj.map((o, i) => `<button type="button" class="obj-chip ${efectoDeConjuro(s.es)?.bueno && esYo(ch, o) ? 'yo' : ''}" data-rlobjdel="${i}" aria-label="Quitar ${esc(o)}">${esc(o)}<span aria-hidden="true">×</span></button>`).join('')}
-      <input class="obj-in" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`);
+      <input class="obj-in" maxlength="60" id="rlObj" placeholder="${ch.play.concObj.length ? 'Añadir otro…' : 'Escribe y pulsa Intro (opcional)'}" autocomplete="off" enterkeyhint="done" aria-label="Objetivo de la concentración"></div></section>`);
   }
   const fichas = [s.escuela ? `<span class="cj-chip esc">${esc(s.escuela)}</span>` : '', t?.salvacion ? `<span class="cj-chip">CD <b>${P.cd ?? '—'}</b></span>` : '', t?.ataque ? `<span class="cj-chip">Ataque <b>${P.atk == null ? '—' : sgn(P.atk)}</b></span>` : ''].filter(Boolean);
   if (fichas.length) add('fichas', `<div class="cj-fichas">${fichas.join('')}</div>`);
