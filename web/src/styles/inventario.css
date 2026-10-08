@@ -23,7 +23,7 @@
 .inv-ca { position: absolute; right: -4px; bottom: -2px; width: 46px; height: 50px; display: grid; place-items: center; color: var(--gold); filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .35)); }
 .inv-ca .gi { position: absolute; inset: 0; width: 100%; height: 100%; }
 .inv-ca b { position: relative; margin-top: -4px; font: 700 17px / 1 var(--display); color: var(--on-gold, #1b1406); }
-.inv-ca small { position: absolute; bottom: 7px; font: 700 8px / 1 var(--sans); letter-spacing: .12em; color: var(--on-gold, #1b1406); opacity: .75; }
+.inv-ca small { position: absolute; bottom: 7px; font: 700 9px / 1 var(--sans); letter-spacing: .1em; color: var(--on-gold, #1b1406); opacity: .75; }
 
 :where(.inv-hueco, .inv-gema, .inv-insp, .inv-op) { --rar: var(--gold); }
 :where(.inv-c, .inv-it) { --rar: var(--ink-3); }
@@ -316,7 +316,7 @@ button.inv-med { cursor: pointer; font: inherit; color: inherit; min-height: 0; 
   .inv-runa { -webkit-mask: radial-gradient(circle, transparent 44px, #000 45px 50px, transparent 51px); mask: radial-gradient(circle, transparent 44px, #000 45px 50px, transparent 51px); }
   .inv-ca { width: 40px; height: 44px; right: -6px; } .inv-ca b { font-size: 15px; }
   .inv-hueco { min-height: 112px; padding: 9px 6px 8px; } .inv-h-ico { width: 40px; height: 40px; } .inv-h-ico .gi { width: 22px; height: 22px; }
-  .inv-h-t b { font-size: var(--fs-s); } .inv-h-t small { font-size: 9px; letter-spacing: .07em; }
+  .inv-h-t b { font-size: var(--fs-s); } .inv-h-t small { font-size: 10px; letter-spacing: .07em; }
   .inv-medidores { grid-template-columns: 1fr; }
   .inv-rejilla { grid-template-columns: repeat(auto-fill, minmax(94px, 1fr)); gap: 6px; }
   .inv-c-b { min-height: 118px; padding: 10px 4px 8px; } .inv-c-ico { width: 46px; height: 46px; } .inv-c-ico .gi { width: 26px; height: 26px; }

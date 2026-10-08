@@ -101,4 +101,4 @@
 .mz-arma:active { transform: scale(.97); }
 .mz-arma:disabled { opacity: .45; }
 .mz-arma { position: relative; }
-.mz-lleva { position: absolute; top: 6px; right: 8px; font: 600 9.5px / 1 var(--sans); font-style: normal; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+.mz-lleva { position: absolute; top: 6px; right: 8px; font: 600 10px / 1 var(--sans); font-style: normal; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }

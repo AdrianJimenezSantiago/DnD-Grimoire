@@ -31,5 +31,13 @@ export const menuAbierto = () => openMenu;
 
 export function initMenus() {
   document.addEventListener('click', e => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('[data-cmd="more"],[data-cmd="rest"]')) cerrarMenu(); }, true);
+  // Flechas, Inicio y Fin recorren los botones del menú abierto, como en cualquier menú de escritorio
+  document.addEventListener('keydown', e => {
+    if (!openMenu || !['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+    const bs = [...openMenu.querySelectorAll('button:not([disabled])')]; if (!bs.length) return;
+    const i = bs.indexOf(document.activeElement), n = bs.length;
+    const j = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : /Down|Right/.test(e.key) ? (i + 1) % n : (i - 1 + n) % n;
+    e.preventDefault(); bs[j].focus();
+  });
   addEventListener('resize', cerrarMenu); addEventListener('scroll', () => { if (openMenu && Math.abs(scrollY - menuY) > 60) cerrarMenu(); }, { passive: true });
 }

@@ -86,10 +86,9 @@ function hueco(ch, k, o, extra = '') {
   const lleno = !!o, a = o?.arma ? ataqueArma(ch, o) : null;
   const sub = !o ? (k === 'armadura' ? 'Sin armadura' : 'Libre') : a ? `${a.ataque} · ${a.dano}` : claveCorta(ch, o);
   const ico = o ? icoDe(o) : k === 'armadura' ? 'o_armadura' : 'inv_mano';
-  return `<button type="button" class="inv-hueco h-${k} ${lleno ? 'lleno' : ''} ${o ? rarK(o) : ''} ${extra}" data-hueco="${k}" data-soltar="${k}" ${o ? `data-hid="${o.id}"` : ''}
-      aria-label="${HUECOS[k]}: ${o ? esc(o.nombre) : 'vacía'}">
+  return `<button type="button" class="inv-hueco h-${k} ${lleno ? 'lleno' : ''} ${o ? rarK(o) : ''} ${extra}" data-hueco="${k}" data-soltar="${k}" ${o ? `data-hid="${o.id}"` : ''}>
     <span class="inv-h-ico">${gi(ico)}</span>
-    <span class="inv-h-t"><small>${HUECOS[k]}</small><b>${o ? esc(o.nombre) : '—'}</b><em>${esc(sub)}</em></span></button>`;
+    <span class="inv-h-t"><small>${HUECOS[k]}<span class="visually-hidden">:</span></small><b>${o ? esc(o.nombre) : '<span aria-hidden="true">—</span><span class="visually-hidden">vacía</span>'}</b><em>${esc(sub)}</em></span></button>`;
 }
 function maniqui(ch) {
   const m = manos(ch), arm = armaduraPuesta(ch), ca = claseArmadura(ch), sin = sintonizados(ch);

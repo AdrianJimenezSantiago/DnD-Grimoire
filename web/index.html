@@ -6,17 +6,20 @@
 <meta name="theme-color" content="#0B0D14">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light dark">
+<meta name="description" content="Hoja de personaje y libro de conjuros de D&amp;D 2024: la app hace las cuentas, lleva la vida, los conjuros, el combate y los dados. Sin cuentas y sin conexión.">
 <title>Grimorio</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231E2740'/><path d='M40 16a16 16 0 1 0 0 30 13 13 0 1 1 0-30Z' fill='%23E2B75E'/><rect x='16' y='50' width='32' height='3' rx='1.5' fill='%23E2B75E'/></svg>">
 <script type="module" src="/src/main.js"></script>
 </head>
 <body>
+<noscript><style>.arranque { display: none; }</style><p style="padding:24px;font:16px/1.5 system-ui,sans-serif">Grimorio necesita JavaScript. Actívalo en el navegador para usar la app.</p></noscript>
+<div class="arranque" aria-hidden="true"><svg viewBox="0 0 64 64" width="72" height="72"><path d="M40 16a16 16 0 1 0 0 30 13 13 0 1 1 0-30Z" fill="#E2B75E"/><rect x="16" y="50" width="32" height="3" rx="1.5" fill="#E2B75E"/></svg></div>
 
 <section id="landing" class="landing paleta-local" hidden aria-label="Inicio"></section>
 
 <header class="appbar" id="appbar">
   <div class="bar">
-    <button type="button" class="who-chip" data-cmd="home" id="whoChip" aria-label="Cambiar de personaje" title="Cambiar de personaje"></button>
+    <button type="button" class="who-chip" data-cmd="home" id="whoChip" title="Cambiar de personaje"></button>
     <span class="spacer"></span>
     <span class="act">
       <button type="button" data-cmd="rest" id="bRest"></button>
@@ -26,9 +29,9 @@
       <button type="button" data-cmd="combate" id="bCombate" class="b-combate"></button>
     </span>
     <button type="button" class="iconbtn" data-cmd="buscar" id="btnBuscar" aria-label="Buscar" title="Buscar (Ctrl+K)"></button>
-    <button type="button" class="iconbtn" data-cmd="more" id="btnMore" aria-label="Más opciones" aria-haspopup="menu"></button>
+    <button type="button" class="iconbtn" data-cmd="more" id="btnMore" aria-label="Más opciones" aria-haspopup="dialog" aria-controls="moreMenu" aria-expanded="false"></button>
   </div>
-  <div class="slots-bar" id="sbar" aria-label="Espacios de conjuro"></div>
+  <div class="slots-bar" id="sbar" role="group" aria-label="Espacios de conjuro"></div>
   <div class="editbanner">Modo edición: toca cualquier texto para cambiarlo. R y C se activan tocándolas. Los datos del conjuro se comparten con los demás personajes que lo tengan.</div>
 </header>
 
@@ -59,7 +62,7 @@
 
 <div class="luto" aria-hidden="true"></div>
 
-<div class="menu" id="moreMenu" role="menu" hidden></div>
+<div class="menu" id="moreMenu" role="dialog" aria-label="Más opciones" hidden></div>
 <div class="menu" id="restMenu" role="menu" hidden></div>
 <div class="menu sch-menu" id="schoolMenu" role="menu" aria-label="Escuela de magia" hidden></div>
 
@@ -256,7 +259,7 @@
       <input type="file" id="bkFile" class="visually-hidden" accept=".json,application/json,text/plain" tabindex="-1" aria-hidden="true">
     </div>
     <p class="note">También puedes copiar el texto o pegar el de otra copia y pulsar «Cargar copia». Un personaje exportado suelto (desde «Gestionar personajes») o una copia de la hoja antigua se añaden como un personaje más, sin tocar los demás.</p>
-    <textarea id="bkText" spellcheck="false" rows="5" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
+    <textarea id="bkText" spellcheck="false" rows="5" aria-label="Texto de la copia de seguridad" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
   </div>
   <div class="dfoot"><button type="button" id="bkCopy">Copiar texto</button><button type="button" id="bkLoad">Cargar copia</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>

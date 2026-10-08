@@ -20,7 +20,7 @@
   --surface-2: color-mix(in oklab, #F2EAD8 92%, hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 60%));
   --raised: #FFFBF2;
   --line: #D3C5A8; --line-soft: #E4D9C2;
-  --ink: #2A2016; --ink-2: #5A4B3A; --ink-3: #6A5B48;
+  --ink: #2A2016; --ink-2: #54463A; --ink-3: #615241;
   --on-gold: #FFF8EC;
   --glass: color-mix(in oklab, rgba(238, 229, 210, .84) 90%, hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 55% / .84));
   --backdrop: rgba(42, 30, 16, .42);
@@ -34,7 +34,7 @@
     --bg: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 5%); --bg-2: hsl(var(--acc-h) calc(24% * var(--acc-k, 1)) 7%);
     --surface: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 9% / .95); --surface-2: hsl(var(--acc-h) calc(20% * var(--acc-k, 1)) 12.5%); --raised: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 10.5%);
     --line: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 22%); --line-soft: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 15%);
-    --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 65%);
+    --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 69%);
     --on-gold: hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 9%);
     --glass: hsl(var(--acc-h) calc(28% * var(--acc-k, 1)) 5% / .76);
     --backdrop: hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 2% / .66);
@@ -48,7 +48,7 @@
   --bg: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 5%); --bg-2: hsl(var(--acc-h) calc(24% * var(--acc-k, 1)) 7%);
   --surface: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 9% / .95); --surface-2: hsl(var(--acc-h) calc(20% * var(--acc-k, 1)) 12.5%); --raised: hsl(var(--acc-h) calc(22% * var(--acc-k, 1)) 10.5%);
   --line: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 22%); --line-soft: hsl(var(--acc-h) calc(18% * var(--acc-k, 1)) 15%);
-  --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 65%);
+  --ink: #F1E8D6; --ink-2: hsl(var(--acc-h) calc(14% * var(--acc-k, 1)) 75%); --ink-3: hsl(var(--acc-h) calc(10% * var(--acc-k, 1)) 69%);
     --on-gold: hsl(var(--acc-h) calc(60% * var(--acc-k, 1)) 9%);
   --glass: hsl(var(--acc-h) calc(28% * var(--acc-k, 1)) 5% / .76);
   --backdrop: hsl(var(--acc-h) calc(40% * var(--acc-k, 1)) 2% / .66);
@@ -311,7 +311,7 @@ dialog.modal.danger .md-icon .md-runa, dialog.modal.danger .md-icon > .gi { filt
 #moreMenu .mm-row { min-height: 38px; font-size: var(--fs-s); gap: 9px; padding: 0 8px; color: var(--ink-2); }
 #moreMenu .mm-row .icon { width: 17px; height: 17px; }
 #moreMenu .mm-row:hover { color: var(--ink); }
-#moreMenu .mm-row[aria-checked="true"] { color: var(--gold); }
+#moreMenu .mm-row[aria-pressed="true"] { color: var(--gold); }
 #moreMenu .mm-danger { align-self: center; min-height: 32px; font-size: var(--fs-xs); color: var(--danger); gap: 6px; padding: 0 12px; }
 #moreMenu .mm-danger .icon { width: 14px; height: 14px; color: var(--danger); }
 #moreMenu .mm-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
@@ -396,7 +396,7 @@ html.vt-portal::view-transition-new(root) { animation: portal .8s cubic-bezier(.
 .steps i { height: 3px; }
 .steps i.now::after { box-shadow: 0 0 10px var(--glow); }
 .tour-card { --orn: 22px; border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
-.tour-card h3 { font-family: var(--display); font-weight: 600; letter-spacing: .02em; }
+.tour-card h2 { font-family: var(--display); font-weight: 600; letter-spacing: .02em; }
 .avatar { box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px color-mix(in srgb, var(--gold) 20%, transparent), 0 0 16px var(--glow); }
 .avatar.xl { box-shadow: 0 0 0 2.5px var(--gold), 0 0 0 6px color-mix(in srgb, var(--gold) 16%, transparent), 0 0 30px var(--glow); }
 #fiTitle, .doc h2.doc-h, .doc h3.doc-h, .cname { font-family: var(--display); font-weight: 600; letter-spacing: .02em; }

@@ -150,7 +150,7 @@ function enJuegoHtml(ch, P) {
   const tarjeta = (r, i) => {
     const rec = r.recurso, left = rec ? rec.max - usosGastados(ch, rec) : 0, fijo = fij.includes(r.clave);
     return `<article class="ej-it f-${r.fuente} o-${r.origen} ${fijo ? 'fijo' : ''}" style="--i:${Math.min(i, 8)}">
-      <button type="button" class="ej-main" data-ejver="${esc(r.clave)}" aria-label="Leer ${esc(r.nombre)}"><b>${esc(r.nombre)}</b>
+      <button type="button" class="ej-main" data-ejver="${esc(r.clave)}"><span class="visually-hidden">Leer </span><b>${esc(r.nombre)}</b>
         <small>${gi(iconoFuente(r), 'ej-ico')}${esc(r.etiqueta)}</small>
         ${r.resumen ? `<span class="ej-res">${esc(r.resumen)}</span>` : ''}</button>
       <div class="ej-side">${r.eleccion && !r.eleccion.actual && r.eleccion.cambia !== 'uso' ? `<button type="button" class="ej-num ej-pend" data-ejver="${esc(r.clave)}" title="Elige cómo funciona ${esc(r.nombre)}">${r.eleccion?.id ? 'Elegir opción' : 'Elegir variante'}</button>`
@@ -196,8 +196,8 @@ function rowHtml(db, ch, P, e, s, bi, schools, editing) {
     : cell('c-comp', s.comp, 'comp');
   return `<div class="spell ${castable ? '' : 'dim'}" id="sp-${bi}" data-sc="${claveEscuela(s.escuela)}">
     <div class="c-prep">${prep}</div>
-    <div class="c-name"><div class="castzone" data-cast="${bi}" ${editing ? '' : 'role="button" tabindex="0"'} aria-label="${editing ? '' : 'Lanzar ' + esc(s.es)}">
-      <span class="nm ${e.gratis ? (e.used ? 'spentfree' : 'free') : ''}">${ce(s.es, `${k} data-k="es"`, editing)}</span><span class="badges">
+    <div class="c-name"><div class="castzone" data-cast="${bi}" ${editing ? '' : 'role="button" tabindex="0"'}>
+      ${editing ? '' : '<span class="visually-hidden">Lanzar </span>'}<span class="nm ${e.gratis ? (e.used ? 'spentfree' : 'free') : ''}">${ce(s.es, `${k} data-k="es"`, editing)}</span><span class="badges">
       <span class="bd ${s.ritual ? '' : 'off'}" data-flag="ritual" ${k} title="Ritual">R</span><span class="bd ${s.conc ? '' : 'off'}" data-flag="conc" ${k} title="Concentración">C</span></span>${dmg.map(x => iconoDano(x, 'sm')).join('')}
       <div class="en">${ce(s.en, `${k} data-k="en"`, editing)}</div></div>
       ${editing ? `<div class="flags edit-only"><label><input type="checkbox" data-always ${k} ${e.always ? 'checked' : ''}> ${L === 0 ? 'de otra fuente, no cuenta' : 'siempre preparado'}</label>${lvlSel}<button type="button" data-text="${bi}">Texto</button><button type="button" class="warn" data-del="${bi}">Quitar</button></div>` : ''}
@@ -238,7 +238,7 @@ export function pintarBarra(S) {
   patch($('#btnMore'), '<span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span>');
   $('#dAdd').hidden = !S.editing;
   $('#dCombate').hidden = $('#bCombate').hidden = $('#dDados').hidden = !ch;
-  if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span>`); patch($('#sbar'), ''); return; }
+  if (!ch) { aplicarTema(null); patch($('#whoChip'), `<span class="avatar av-chip">${gi('libro')}</span><span class="nm">Sin personaje</span><span class="visually-hidden">: cambiar de personaje</span>`); patch($('#sbar'), ''); return; }
   const P = perfil(ch);
   const conj = conConjuros(ch, P);
   $('#bAdd').hidden = !conj || combate;
@@ -247,7 +247,7 @@ export function pintarBarra(S) {
   if (combate) $('#dAdd').hidden = true;
   if (!conj) $('#dAdd').hidden = true;
   aplicarTema(ch);
-  patch($('#whoChip'), `${avatarHtml(ch, 'av-chip')}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" title="Cambiar de personaje">${icon('users')}</span>`);
+  patch($('#whoChip'), `${avatarHtml(ch, 'av-chip')}<span><span class="nm">${esc(ch.nombre)}</span><br><span class="lv">${esc(clasesTexto(ch))}</span></span><span class="who-cambiar" aria-hidden="true">${icon('users')}</span><span class="visually-hidden">: cambiar de personaje</span>`);
   let h = '';
   Object.keys(P.slots).map(Number).sort((a, b) => a - b).forEach(L => { h += `<span class="sb-l"><b data-jump="${L}" role="button" tabindex="0" aria-label="Ir a los conjuros de nivel ${L}">${L}</b>${candles(ch, P, L)}</span>`; });
   if (h) h = `<span class="sb-slots">${h}</span>`;

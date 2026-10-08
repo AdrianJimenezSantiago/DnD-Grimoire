@@ -8,7 +8,7 @@ let capa = null, estado = null;
 const visible = el => { if (!el) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
 function montar() {
   if (capa) return;
-  capa = document.createElement('div'); capa.className = 'tour'; capa.setAttribute('role', 'dialog'); capa.setAttribute('aria-modal', 'true');
+  capa = document.createElement('div'); capa.className = 'tour'; capa.setAttribute('role', 'dialog'); capa.setAttribute('aria-modal', 'true'); capa.setAttribute('aria-labelledby', 'tourTitulo');
   capa.innerHTML = '<div class="tour-hole"></div><div class="tour-card" role="document"></div>';
   document.body.appendChild(capa);
   capa.addEventListener('click', e => {
@@ -36,7 +36,7 @@ function colocar() {
     const cw = Math.min(380, innerWidth - 24);
     Object.assign(card.style, { width: `${cw}px`, left: `${(innerWidth - cw) / 2}px`, top: '30%', bottom: '' });
   }
-  card.innerHTML = `<div class="tour-step">${estado.i + 1} de ${pasos.length}</div><h3>${esc(p.titulo)}</h3><p>${p.texto}</p>
+  card.innerHTML = `<div class="tour-step">${estado.i + 1} de ${pasos.length}</div><h2 id="tourTitulo">${esc(p.titulo)}</h2><p>${p.texto}</p>
     <div class="tour-btns"><button type="button" class="ghost" data-tour="skip">${estado.i === pasos.length - 1 ? 'Cerrar' : 'Saltar'}</button><span></span>
     ${estado.i ? '<button type="button" data-tour="prev">Atrás</button>' : ''}<button type="button" class="gold" data-tour="${estado.i === pasos.length - 1 ? 'skip' : 'next'}">${estado.i === pasos.length - 1 ? 'Entendido' : 'Siguiente'}</button></div>`;
   card.classList.remove('in'); void card.offsetWidth; card.classList.add('in');

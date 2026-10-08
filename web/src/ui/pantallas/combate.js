@@ -121,12 +121,12 @@ function grupoHtml(ch, P, c, k, t, g, extra = '') {
 const ECO_CORTO = { adicional: 'Adicional', movimiento: 'Mover' };
 function orbeHtml(ch) {
   const v = vidaDe(ch), max = pgMaximo(ch), act = pgActuales(ch), est = estadoVital(ch), pct = pctVida(ch), temp = v.temp ? Math.min(100, Math.round(v.temp / max * 100)) : 0;
-  return `<button type="button" class="cb-orbe ${tonoVida(ch)} ${est}" data-cmd="vida" aria-label="Puntos de golpe: ${act} de ${max}${v.temp ? `, más ${v.temp} temporales` : ''}. Tocar para cambiarlos">
+  return `<button type="button" class="cb-orbe ${tonoVida(ch)} ${est}" data-cmd="vida" title="Tocar para cambiar los puntos de golpe">
     <svg class="cb-anillo" viewBox="0 0 120 120" aria-hidden="true"><circle class="a-marcas" cx="60" cy="60" r="44" pathLength="100"/><circle class="a-pista" cx="60" cy="60" r="52"/>
       <circle class="a-vida" cx="60" cy="60" r="52" pathLength="100" style="stroke-dasharray:${pct} 100"/>${temp ? `<circle class="a-temp" cx="60" cy="60" r="58" pathLength="100" style="stroke-dasharray:${temp} 100"/>` : ''}</svg>
     <span class="pg-cifra"><b>${act}</b><small>/ ${max}</small></span>
     <span class="cb-orbe-l">${act === 0 && est !== 'vivo' ? `${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'Moribundo'}` : 'Puntos de golpe'}</span>
-    ${v.temp ? `<span class="cb-orbe-t">+${v.temp}</span>` : ''}${act === 0 && est !== 'vivo' ? `<span class="cb-orbe-p">${pipsMuerte(ch)}</span>` : ''}</button>`;
+    ${v.temp ? `<span class="cb-orbe-t">+${v.temp}<span class="visually-hidden"> temporales</span></span>` : ''}${act === 0 && est !== 'vivo' ? `<span class="cb-orbe-p">${pipsMuerte(ch)}</span>` : ''}</button>`;
 }
 // Dos accesos rápidos para marcar lo que te han lanzado: beneficios y perjuicios
 function efectosCombateHtml(ch) {

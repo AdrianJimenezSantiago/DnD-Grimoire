@@ -31,7 +31,7 @@ export const formaDe = c => (FORMAS['d' + c] ? 'd' + c : 'dx');
 export const forma = c => `<svg viewBox="0 0 40 40" aria-hidden="true">${FORMAS[formaDe(c)]}</svg>`;
 export function dado(c, v, { fuera = false, fresco = false, cls = '' } = {}) {
   const k = [cls, v === c ? 'max' : v === 1 ? 'min' : '', fuera ? 'fuera' : '', fresco ? 'rueda' : ''].filter(Boolean).join(' ');
-  return `<span class="dd ${k}" data-f="${formaDe(c)}"${fresco ? ` data-v="${v}" data-c="${c}"` : ''} title="d${c}">${forma(c)}<b>${v}</b></span>`;
+  return `<span class="dd ${k}" data-f="${formaDe(c)}"${fresco ? ` data-v="${v}" data-c="${c}"` : ''}${cls.includes('flota') ? ' aria-hidden="true"' : ''} title="d${c}${fuera ? ', descartado' : ''}">${forma(c)}<b>${v}</b>${fuera ? '<span class="visually-hidden"> (descartado)</span>' : ''}</span>`;
 }
 export const op = s => `<i class="dd-op">${s < 0 ? '−' : '+'}</i>`;
 // Los dados de un resultado de tirar(): con ventaja, los dos d20 y el descartado tachado.
@@ -105,7 +105,8 @@ export function sellar(el, total, anim) {
   const num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
   if (num) num.textContent = total;
   hero?.classList.remove('girando');
-  el.querySelectorAll('.dd.rueda b').forEach(b => { b.textContent = b.parentElement.dataset.v; });
+  // Sin animación (movimiento reducido) los dados no pasan por el fotograma que los posa: se posan aquí para no quedarse atenuados
+  el.querySelectorAll('.dd.rueda').forEach(d => { d.querySelector('b').textContent = d.dataset.v; d.classList.add('posado'); });
   el.classList.add('listo'); if (anim) hero?.classList.add('sella');
 }
 export function centro(el) { const s = el?.getBoundingClientRect(); return s ? [s.left + s.width / 2, s.top + s.height / 2] : [0, 0]; }

@@ -49,4 +49,12 @@ for root,_,files in os.walk(RES):
     for fn in files:
         if fn=='splash.png': splash(os.path.join(root,fn))
 composite('square',512).save('tools/icon-512.png')
+
+# Iconos de la web (manifiesto e iOS). El «maskable» ocupa todo el lienzo y deja el motivo dentro de la zona segura.
+WEB='web/public/icons'; os.makedirs(WEB,exist_ok=True)
+for n in (192,512): composite('square',n).save(f'{WEB}/icon-{n}.png')
+def lleno(size, scale):
+    im=Image.new('RGBA',(S,S),INK+(255,)); im.alpha_composite(foreground(S,scale)); return im.convert('RGB').resize((size,size),Image.LANCZOS)
+lleno(512,0.95).save(f'{WEB}/maskable-512.png')
+lleno(180,1.1).save(f'{WEB}/apple-touch-icon.png')
 print('ok')

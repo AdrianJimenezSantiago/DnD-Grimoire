@@ -16,7 +16,7 @@ function lPara(h, s, objetivo, min, max) {
 const TINTE = [[15, 0.42], [35, 0.52], [70, 0.7], [165, 0.62], [200, 0.66], [255, 0.6], [292, 0.5], [345, 0.44], [360, 0.42]];
 export const tinteDe = h => { h = ((h % 360) + 360) % 360; return TINTE.find(([hasta]) => h < hasta)[1]; };
 
-const OBJ = { noche: [0.40, 0.58], dia: [0.085, 0.12] };
+const OBJ = { noche: [0.40, 0.58], dia: [0.075, 0.11] };
 const SAT_MAX = 72;
 
 export function paleta({ h, s }, neutro = false) {

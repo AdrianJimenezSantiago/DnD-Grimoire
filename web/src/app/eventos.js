@@ -56,8 +56,9 @@ function toggleTheme() {
 
 function moreMenuHtml() {
   const ch = S.cur(), dark = esOscuro();
-  const tile = (cmd, ico, label, full, i) => `<button type="button" role="menuitem" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}" aria-label="${esc(full || label)}"><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}</span></button>`;
-  const fila = (cmd, ico, label, extra = '') => `<button type="button" role="menuitem" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
+  // El nombre accesible empieza por la etiqueta visible; el detalle va oculto detrás («Diario: diario de sesión»)
+  const tile = (cmd, ico, label, full, i) => `<button type="button" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}"${full ? ` title="${esc(full)}"` : ''}><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}${full ? `<span class="visually-hidden">: ${esc(full)}</span>` : ''}</span></button>`;
+  const fila = (cmd, ico, label, extra = '') => `<button type="button" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
   let i = 0;
   const personaje = ch && estaMuerto(ch) ? tile('home', icon('users'), 'Personajes', 'Cambiar de personaje', i++) : ch ? [
     tile('rules', icon('sliders'), 'Rasgos', 'Rasgos: progresión y recursos', i++), tile('equipo', gi('cofre', 'icon'), 'Inventario', 'Inventario: objetos, monedas y carga', i++),
@@ -67,15 +68,15 @@ function moreMenuHtml() {
   const saber = [tile('biblioteca', gi('biblioteca', 'icon'), 'Biblioteca', '', i++), tile('manual', gi('libro', 'icon'), 'Libros', 'Libros y manuales', i++), tile('hist', icon('hourglass'), 'Historial', 'Historial de la sesión', i++)].join('');
   const util = [
     fila('backup', icon('save'), 'Copia de seguridad'),
-    NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `role="menuitemcheckbox" aria-checked="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
+    NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `aria-pressed="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
     fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
   ].join('');
   return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
       <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(clasesTexto(ch)) : 'Sin personaje abierto'}</small></span>
-      <button type="button" role="menuitem" class="mm-theme" data-mcmd="theme" aria-label="${dark ? 'Cambiar a tema de día' : 'Cambiar a tema de noche'}" title="${dark ? 'Tema de día' : 'Tema de noche'}"><span class="mm-sol">${icon('sun')}</span><span class="mm-luna">${icon('moon')}</span></button></div>
+      <button type="button" class="mm-theme" data-mcmd="theme" aria-label="${dark ? 'Cambiar a tema de día' : 'Cambiar a tema de noche'}" title="${dark ? 'Tema de día' : 'Tema de noche'}"><span class="mm-sol">${icon('sun')}</span><span class="mm-luna">${icon('moon')}</span></button></div>
     <div class="mm-grid">${personaje}</div><div class="mm-orla" aria-hidden="true"></div><div class="mm-grid">${saber}</div>
     <div class="mm-util">${util}</div>
-    <button type="button" role="menuitem" class="mm-danger" data-mcmd="reset">${icon('reset')}Borrar todos los datos</button>`;
+    <button type="button" class="mm-danger" data-mcmd="reset">${icon('reset')}Borrar todos los datos</button>`;
 }
 function restItems() {
   const ch = S.cur(); if (!ch) return [];

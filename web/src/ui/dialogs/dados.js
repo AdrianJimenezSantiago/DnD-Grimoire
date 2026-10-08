@@ -67,7 +67,7 @@ function montar() {
 function pintarCtl() {
   const libre = V.tipo === 'libre', p = parsear(exprActual());
   let h = '';
-  if (libre) h += `<div class="dd-caras" role="group" aria-label="Añadir dados">${CARAS.map(c => `<button type="button" class="dd-cara" data-dacara="${c}" aria-label="Añadir 1d${c}">${forma(c)}<b>${c === 100 ? '%' : `d${c}`}</b></button>`).join('')}</div>
+  if (libre) h += `<div class="dd-caras" role="group" aria-label="Añadir dados">${CARAS.map(c => `<button type="button" class="dd-cara" data-dacara="${c}"><span class="visually-hidden">Añadir </span>${forma(c)}<b>${c === 100 ? '<span aria-hidden="true">%</span><span class="visually-hidden">d100</span>' : `d${c}`}</b></button>`).join('')}</div>
     <div class="dd-expr"><input id="daExpr" value="${esc(V.expr)}" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Tirada" aria-describedby="daInfo" placeholder="2d6+3">
       <span class="dd-ajuste"><button type="button" data-damod="-1" aria-label="Restar 1">−1</button><button type="button" data-damod="1" aria-label="Sumar 1">+1</button><button type="button" data-dalimpiar aria-label="Vaciar">${icon('reset')}</button></span></div>
     <div class="dd-info" id="daInfo"></div>`;
@@ -251,9 +251,9 @@ function pintarHist(recien = false) {
   const vis = V.verTodo ? H : H.slice(0, VISIBLES), mismas = H.filter(h => h.titulo === H[0].titulo);
   const med = mismas.length >= 3 ? `<span class="dd-cron-med" title="Media de tus últimas tiradas de ${esc(H[0].titulo)}">${esc(H[0].titulo)}: media <b>${fmt(Math.round(mismas.reduce((s, h) => s + h.total, 0) / mismas.length * 10) / 10)}</b> en ${mismas.length}</span>` : '';
   el.innerHTML = `<header><h3>Crónica</h3><span class="dd-cron-n">${H.length}</span>${med}<button type="button" class="dd-cron-x" data-daborra>Borrar</button></header>
-    <ol>${vis.map((h, i) => `<li class="${h.estado} ${i === 0 && recien ? 'nuevo' : ''} ${V.res?.id === h.id ? 'actual' : ''}"><button type="button" data-dahist="${i}" aria-label="Repetir ${esc(h.titulo)}: salió ${h.total}">
-      ${h.nat != null ? dado(20, h.nat, { cls: 'mini' }) : `<span class="dd mini" data-f="${formaDe(h.caras)}">${forma(h.caras)}<b>${h.caras ? (h.caras === 100 ? '%' : 'd' + h.caras) : '±'}</b></span>`}
-      <span class="t"><b>${esc(h.titulo)}</b>${h.meta.length ? `<small>${h.meta.map(m => `<i class="${m === 'ventaja' || m === 'desventaja' ? m : ''}">${esc(m)}</i>`).join('')}</small>` : ''}</span>
+    <ol>${vis.map((h, i) => `<li class="${h.estado} ${i === 0 && recien ? 'nuevo' : ''} ${V.res?.id === h.id ? 'actual' : ''}"><button type="button" data-dahist="${i}">
+      <span class="dd-cron-dado" aria-hidden="true">${h.nat != null ? dado(20, h.nat, { cls: 'mini' }) : `<span class="dd mini" data-f="${formaDe(h.caras)}">${forma(h.caras)}<b>${h.caras ? (h.caras === 100 ? '%' : 'd' + h.caras) : '±'}</b></span>`}</span>
+      <span class="t"><span class="visually-hidden">Repetir </span><b>${esc(h.titulo)}</b>${h.meta.length ? `<small>${h.meta.map(m => `<i class="${m === 'ventaja' || m === 'desventaja' ? m : ''}">${esc(m)}</i>`).join('')}</small>` : ''}</span>
       <span class="v"><b>${h.total}</b><time>${hace(h.t)}</time></span></button></li>`).join('')}</ol>
     ${H.length > VISIBLES ? `<button type="button" class="dd-cron-mas" data-daver>${V.verTodo ? 'Ver menos' : `Ver las ${H.length}`}</button>` : ''}`;
 }

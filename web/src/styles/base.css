@@ -9,6 +9,12 @@ body {
   transition: background-color var(--t-med) var(--ease), color var(--t-med) var(--ease);
 }
 /* El cielo va en una capa fija y no con background-attachment: fixed, que obliga al navegador a desplazar la página en el hilo principal. */
+/* Lo primero que se pinta mientras llega el código: el emblema sobre el fondo del tema. Se quita en cuanto la app está lista */
+.arranque { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: var(--bg); }
+.arranque svg { opacity: .9; animation: arranque-late 1.6s ease-in-out infinite; }
+@keyframes arranque-late { 50% { opacity: .45; transform: scale(.96); } }
+@media (prefers-reduced-motion: reduce) { .arranque svg { animation: none; } }
+html.ready .arranque { display: none; }
 html::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: var(--sky) no-repeat; }
 body::after {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
@@ -35,13 +41,13 @@ button.primary { background: var(--ink); color: var(--surface); border-color: va
 button.gold { background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: #1b1406; border-color: transparent; box-shadow: 0 6px 20px var(--glow); }
 button.ghost { background: transparent; border-color: transparent; }
 button.warn { color: var(--danger); }
-button[aria-pressed="true"]:not(.dockbtn):not(.slotbtn):not(.tick):not(.vg-pip):not(.es-tog):not(.pip):not(.da-mod):not(.cb-eco-b):not(.es-insp):not(.hero-insp):not(.cb-g-estado):not(.mz-arma):not(.lv-estilo):not(.efx-card):not(.efx-est-b):not(.oy-yo):not(.obj-yo):not(.cb-ac):not(.inv-vista):not(.ej-star) { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+button[aria-pressed="true"]:not(.dockbtn):not(.slotbtn):not(.tick):not(.vg-pip):not(.es-tog):not(.pip):not(.da-mod):not(.cb-eco-b):not(.es-insp):not(.hero-insp):not(.cb-g-estado):not(.mz-arma):not(.lv-estilo):not(.efx-card):not(.efx-est-b):not(.oy-yo):not(.obj-yo):not(.cb-ac):not(.inv-vista):not(.ej-star):not(.mm-row) { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 input, select, textarea { font: 400 16px / 1.3 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-s); padding: 9px 12px; min-height: 44px; width: 100%; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--glow); }
-.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .note { font: 400 var(--fs-s) / 1.45 var(--sans); color: var(--ink-2); margin: var(--s2) 0; }
 .appbar { position: sticky; top: 0; z-index: 30; padding-top: var(--sat);
   background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);

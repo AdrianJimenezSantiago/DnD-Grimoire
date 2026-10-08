@@ -37,7 +37,7 @@ import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
 import { toast, botonDeshacer } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';
 import { confirmar } from './ui/componentes/modal.js';
-import { almacen, fijarBarras, alEventosApp } from './platform/native.js';
+import { almacen, fijarBarras, alEventosApp, NATIVO } from './platform/native.js';
 import { pintarBarra, pintarHoja } from './ui/pantallas/hoja.js';
 import * as eventos from './app/eventos.js';
 import * as asistentes from './app/asistentes.js';
@@ -169,4 +169,10 @@ async function boot() {
     idle(asistentes.precargar);
   });
 }
-boot();
+// Si el arranque falla, se quita igualmente la pantalla de carga para no tapar la página
+boot().catch(e => { document.documentElement.classList.add('ready'); throw e; });
+
+// En la web (no en la app de Android ni en el HTML de Windows) la app se guarda para abrirse sin conexión
+if (import.meta.env.PROD && import.meta.env.MODE !== 'windows' && !NATIVO && location.protocol === 'https:' && 'serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}

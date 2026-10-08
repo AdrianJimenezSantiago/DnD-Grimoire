@@ -20,7 +20,7 @@
 .dd.max b { color: var(--gold-2); }
 :root[data-theme="light"] .dd.max b { color: var(--gold); }
 .dd.min b { color: var(--ink-3); }
-.dd.fuera { opacity: .4; transition: opacity .3s .1s; }
+.dd.fuera { opacity: .62; transition: opacity .3s .1s; }
 .dd.fuera::after { content: ""; position: absolute; left: 8%; right: 8%; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--ink-2); transform: rotate(-38deg); }
 .dd.rueda { animation: dd-cae .5s var(--spring) var(--d, 0ms) both; }
 .dd.rueda svg { animation: dd-gira .5s var(--ease-out) var(--d, 0ms) both; }
@@ -33,7 +33,7 @@
 @keyframes dd-apaga { from { opacity: 1; } }
 @keyframes dd-tacha { from { transform: rotate(-38deg) scaleX(0); } }
 @keyframes dd-destello { 0% { filter: drop-shadow(0 0 0 transparent); } 30% { filter: drop-shadow(0 0 6px var(--glow)); } }
-.dd.flota { width: 54px; height: 54px; opacity: .55; animation: dd-flota 3.2s ease-in-out infinite; } .dd.flota b { font-size: 18px; color: var(--ink-3); }
+.dd.flota { width: 54px; height: 54px; opacity: .55; animation: dd-flota 3.2s ease-in-out infinite; } .dd.flota b { font-size: 18px; color: var(--ink-2); }
 @keyframes dd-flota { 50% { transform: translateY(-5px) rotate(8deg); } }
 
 /* --- Tirada libre --- */
@@ -186,7 +186,7 @@
 .dd-op { font: 600 var(--fs-m) / 1 var(--display); font-style: normal; color: var(--ink-3); padding: 0 1px; }
 .dd-bono { display: inline-grid; place-items: center; min-width: 30px; height: 28px; padding: 0 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font: 700 14px / 1 var(--display); }
 .dd-par { display: inline-flex; align-items: center; gap: 2px; padding: 2px 9px 2px 3px; border-radius: var(--r-pill); border: 1px dashed var(--line); }
-.dd-par small { margin-left: 3px; font: 700 9.5px / 1 var(--sans); letter-spacing: .09em; text-transform: uppercase; }
+.dd-par small { margin-left: 3px; font: 700 10.5px / 1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
 .dd-par.ventaja { border-color: color-mix(in srgb, var(--dd-ok) 55%, transparent); background: color-mix(in srgb, var(--dd-ok) 8%, transparent); } .dd-par.ventaja small { color: var(--dd-ok); }
 .dd-par.desventaja { border-color: color-mix(in srgb, var(--dd-ko) 55%, transparent); background: color-mix(in srgb, var(--dd-ko) 8%, transparent); } .dd-par.desventaja small { color: var(--dd-ko); }
 .dd-fx { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px 2px 3px; border-radius: var(--r-pill); }
@@ -211,7 +211,7 @@
 .crit .dd-prob rect.tu { fill: var(--dd-oro); } .exito .dd-prob rect.tu { fill: var(--dd-ok); } .fallo .dd-prob rect.tu, .pifia .dd-prob rect.tu { fill: var(--dd-ko); }
 .dd-prob line.cd { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }
 .dd-prob { position: relative; }
-.dd-cdmarca { position: absolute; top: -14px; transform: translateX(-50%); padding: 1px 5px; border-radius: 4px; background: var(--surface-2); font: 700 9.5px / 1.2 var(--sans); letter-spacing: .05em; color: var(--ink-2); white-space: nowrap; }
+.dd-cdmarca { position: absolute; top: -14px; transform: translateX(-50%); padding: 1px 5px; border-radius: 4px; background: var(--surface-2); font: 700 10px / 1.2 var(--sans); letter-spacing: .05em; color: var(--ink-2); white-space: nowrap; }
 @keyframes dd-barra { from { transform: scaleY(0); } }
 .dd-prob figcaption { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-top: 6px; font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .dd-prob figcaption .c { display: flex; flex-direction: column; gap: 2px; color: var(--ink-2); }
@@ -237,6 +237,7 @@
 .dd-cron ol { position: relative; display: grid; gap: 6px; margin: 0; padding: 0 0 0 16px; list-style: none; }
 .dd-cron ol::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: 12px; width: 1px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 55%, transparent), transparent); }
 .dd-cron li { position: relative; }
+.dd-cron-dado { display: contents; }
 .dd-cron li::before { content: ""; position: absolute; left: -15px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--surface-2); border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--line)); }
 .dd-cron li.crit::before { background: var(--dd-oro); border-color: var(--dd-oro); box-shadow: 0 0 8px var(--dd-oro); }
 .dd-cron li.pifia::before, .dd-cron li.fallo::before { background: var(--dd-ko); border-color: var(--dd-ko); }
