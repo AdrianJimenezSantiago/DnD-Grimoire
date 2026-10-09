@@ -2,9 +2,14 @@ apply plugin: 'com.android.application'
 
 // Firma fija: sin ella cada compilación tendría una firma distinta y Android
 // no dejaría actualizar la app sin desinstalarla (y perder los datos).
+// La clave nunca va en el repositorio: en GitHub Actions llega por secretos (variables
+// GRIMORIO_KEYSTORE_*) y en un ordenador propio, por un keystore.properties que git ignora.
 def keystorePropsFile = rootProject.file("keystore.properties")
 def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) { keystorePropsFile.withInputStream { keystoreProps.load(it) } }
+def firma = { String env, String prop -> System.getenv(env) ?: keystoreProps[prop] }
+def keystorePath = firma("GRIMORIO_KEYSTORE_FILE", "storeFile")
+def hayFirma = keystorePath && firma("GRIMORIO_KEYSTORE_PASSWORD", "storePassword") && firma("GRIMORIO_KEY_ALIAS", "keyAlias")
 
 // En GitHub Actions el número de versión sube solo con cada compilación.
 def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
@@ -27,17 +32,17 @@ android {
     }
     signingConfigs {
         release {
-            if (keystorePropsFile.exists()) {
-                storeFile file(keystoreProps['storeFile'])
-                storePassword keystoreProps['storePassword']
-                keyAlias keystoreProps['keyAlias']
-                keyPassword keystoreProps['keyPassword']
+            if (hayFirma) {
+                storeFile file(keystorePath)
+                storePassword firma("GRIMORIO_KEYSTORE_PASSWORD", "storePassword")
+                keyAlias firma("GRIMORIO_KEY_ALIAS", "keyAlias")
+                keyPassword firma("GRIMORIO_KEY_PASSWORD", "keyPassword") ?: firma("GRIMORIO_KEYSTORE_PASSWORD", "storePassword")
             }
         }
     }
     buildTypes {
         release {
-            signingConfig keystorePropsFile.exists() ? signingConfigs.release : signingConfigs.debug
+            signingConfig hayFirma ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -4,3 +4,8 @@ www/
 *.log
 tools/__pycache__/
 dist-windows/
+
+# Firma del APK: nunca en el repositorio (ver docs/auditoria-seguridad.md)
+*.keystore
+*.jks
+keystore.properties

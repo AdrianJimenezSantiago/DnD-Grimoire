@@ -17,6 +17,18 @@ export function nuevaCriatura(ch, nombre = '', sesion = null) {
     conjuros: {}, tacticas: '', notas: '', sesiones: sesion ? [sesion] : [], creada: Date.now() };
   bestiarioDe(ch).criaturas.unshift(c); return c;
 }
+// Una criatura que llega de una copia o de un personaje importado: cada campo con su tipo y solo los valores que
+// conoce la app (las marcas de daños, salvaciones y conjuros acaban en clases del HTML)
+const texto = v => (typeof v === 'string' || typeof v === 'number' ? String(v) : '');
+const soloDe = (o, valores) => Object.fromEntries(Object.entries(o && typeof o === 'object' && !Array.isArray(o) ? o : {}).filter(([, v]) => valores.includes(v)));
+export function normCriatura(c) {
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return null;
+  return { ...c, id: c.id ?? uid('bx'), nombre: texto(c.nombre), tipo: texto(c.tipo), amenaza: AMENAZAS.includes(c.amenaza) ? c.amenaza : '',
+    estado: ESTADO_CRIATURA[c.estado] ? c.estado : 'viva', ca: texto(c.ca), pg: texto(c.pg), perfil: texto(c.perfil),
+    danos: soloDe(c.danos, Object.keys(REL_DANO)), salv: soloDe(c.salv, ['debil', 'fuerte']), conjuros: soloDe(c.conjuros, Object.keys(REL_CONJ)),
+    estados: (Array.isArray(c.estados) ? c.estados : []).filter(e => typeof e === 'string'),
+    sesiones: (Array.isArray(c.sesiones) ? c.sesiones : []).filter(s => typeof s === 'string'), tacticas: texto(c.tacticas), notas: texto(c.notas) };
+}
 export const criatura = (ch, id) => bestiarioDe(ch).criaturas.find(c => c.id === id) || null;
 export function buscarCriaturas(ch, q = '', tipo = '') {
   const t = norm(q.trim());

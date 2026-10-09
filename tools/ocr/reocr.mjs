@@ -25,7 +25,7 @@ async function tesseract(pg) {
   await ejecutar('tesseract', [base + '.png', base, '-l', 'spa', '--psm', psm, '--dpi', dpi, ...(modelo ? ['--tessdata-dir', modelo] : []), 'tsv'],
     { env: { ...process.env, OMP_THREAD_LIMIT: '1' } });
   const doc = await abrir(pg.libro), vp = (await doc.getPage(pg.pagina)).getViewport({ scale: 1 });
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   const items = itemsDeTsv(fs.readFileSync(base + '.tsv', 'utf8'), +dpi, Math.round(vp.height * +dpi / 72));
   fs.writeFileSync(salida + '.json', JSON.stringify({ w: vp.width, items }));
   fs.rmSync(base + '.png'); fs.rmSync(base + '.tsv');
@@ -38,7 +38,7 @@ async function paddle(pg) {
   await ejecutar('pdftoppm', ['-f', String(pg.pagina), '-l', String(pg.pagina), '-r', dpi, '-png', '-singlefile', archivoLibro(pg.libro), base]);
   await ejecutar('python3', [path.join(DIR, 'paddle.py'), base + '.png', base + '.json'], { env: { ...process.env, OMP_NUM_THREADS: '1' }, maxBuffer: 1 << 26 });
   const doc = await abrir(pg.libro), vp = (await doc.getPage(pg.pagina)).getViewport({ scale: 1 });
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   const k = 72 / +dpi, H = vp.height, items = JSON.parse(fs.readFileSync(base + '.json', 'utf8')).map(({ caja, texto }) => {
     const xs = caja.map(p => p[0]), ys = caja.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), fs_ = (y1 - y0) * k * 0.8;
     return { str: texto, transform: [fs_, 0, 0, fs_, x0 * k, H - y1 * k + fs_ * 0.2], width: (x1 - x0) * k, height: fs_ };

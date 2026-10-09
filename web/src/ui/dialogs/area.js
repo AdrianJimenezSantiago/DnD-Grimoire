@@ -115,7 +115,7 @@ function pintar() {
     origen += `<g class="pt"><circle cx="${X(O[0])}" cy="${Y(O[1])}" r="${pr * 2.2}"/><circle class="c" cx="${X(O[0])}" cy="${Y(O[1])}" r="${pr}"/></g>`;
   }
   const retrato = ch?.retrato?.src, tr = Math.max(px * 0.46, 10), tc = [X(YO[0]), Y(YO[1])];
-  const token = `<rect class="yo" x="${X(0)}" y="${Y(0)}" width="${u(1)}" height="${u(1)}"/><g class="tok"><circle cx="${tc[0]}" cy="${tc[1]}" r="${tr}"/>${retrato ? `<clipPath id="arClip"><circle cx="${tc[0]}" cy="${tc[1]}" r="${tr * 0.9}"/></clipPath><image href="${retrato}" x="${tc[0] - tr * 0.9}" y="${tc[1] - tr * 0.9}" width="${tr * 1.8}" height="${tr * 1.8}" clip-path="url(#arClip)" preserveAspectRatio="xMidYMid slice"/>` : `<text class="tu" x="${tc[0]}" y="${tc[1]}" font-size="${tr * 0.78}">Tú</text>`}</g>`;
+  const token = `<rect class="yo" x="${X(0)}" y="${Y(0)}" width="${u(1)}" height="${u(1)}"/><g class="tok"><circle cx="${tc[0]}" cy="${tc[1]}" r="${tr}"/>${retrato ? `<clipPath id="arClip"><circle cx="${tc[0]}" cy="${tc[1]}" r="${tr * 0.9}"/></clipPath><image href="${esc(retrato)}" x="${tc[0] - tr * 0.9}" y="${tc[1] - tr * 0.9}" width="${tr * 1.8}" height="${tr * 1.8}" clip-path="url(#arClip)" preserveAspectRatio="xMidYMid slice"/>` : `<text class="tu" x="${tc[0]}" y="${tc[1]}" font-size="${tr * 0.78}">Tú</text>`}</g>`;
 
   const svg = $('#arSvg'), interactivo = situa || GIRAN.includes(f);
   svg.style.width = `${u(W)}px`; svg.style.height = `${u(H)}px`; svg.setAttribute('viewBox', `0 0 ${u(W)} ${u(H)}`);

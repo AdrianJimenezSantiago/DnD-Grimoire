@@ -10,7 +10,7 @@ async function preparar() {
 export async function abrirPdf(file) {
   await preparar();
   const data = new Uint8Array(await file.arrayBuffer());
-  return pdfjs.getDocument({ data, disableFontFace: true, isEvalSupported: false }).promise;
+  return pdfjs.getDocument({ data, disableFontFace: true }).promise;
 }
 export async function paginasSimples(file, onProgress = () => {}) {
   const doc = await abrirPdf(file), out = [];
@@ -19,6 +19,6 @@ export async function paginasSimples(file, onProgress = () => {}) {
     out.push({ items: tc.items.filter(i => i.str).map(i => ({ s: i.str, x: i.transform[4], y: i.transform[5], h: Math.abs(i.transform[3]) || i.height || 10, w: i.width || 0 })) });
     pg.cleanup(); onProgress(p, doc.numPages);
   }
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   return out;
 }

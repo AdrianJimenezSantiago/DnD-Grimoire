@@ -14,7 +14,7 @@ const MUESTRA = 40;
 const esPdf = f => { const b = Buffer.alloc(5), fd = fs.openSync(f, 'r'); fs.readSync(fd, b, 0, 5, 0); fs.closeSync(fd); return b.toString() === '%PDF-'; };
 
 async function leer(archivo) {
-  const doc = await pdfjs.getDocument({ url: archivo, disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise;
+  const doc = await pdfjs.getDocument({ url: archivo, disableFontFace: true, verbosity: 0 }).promise;
   let titulo = '';
   try { titulo = (await doc.getMetadata())?.info?.Title?.trim() || ''; } catch {}
   if (!titulo || /^(untitled|sin t[ií]tulo)$/i.test(titulo)) titulo = path.basename(archivo).replace(/\.pdf$/i, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -25,10 +25,10 @@ async function leer(archivo) {
     page.cleanup();
     const items = tc.items.filter(i => i.str).map(i => ({ str: i.str, transform: i.transform, width: i.width, height: i.height }));
     if (items.some(i => i.str.trim())) conTexto++;
-    if (p === MUESTRA && !conTexto) { await doc.destroy(); return null; }
+    if (p === MUESTRA && !conTexto) { await doc.loadingTask.destroy(); return null; }
     paginas.push({ p, w, items });
   }
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   // Segunda lectura OCR del mismo PDF (tools/ocr/segunda-lectura.mjs), si la hay: se reconoce por la huella del archivo
   const h = crypto.createHash('sha256');
   await new Promise((ok, mal) => fs.createReadStream(archivo).on('data', d => h.update(d)).on('end', ok).on('error', mal));

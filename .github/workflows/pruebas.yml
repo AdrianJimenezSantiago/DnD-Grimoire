@@ -7,6 +7,10 @@ on:
     branches: [main, development]
   workflow_dispatch:
 
+# Las pruebas solo leen el código: el token de GitHub no necesita más
+permissions:
+  contents: read
+
 jobs:
   pruebas:
     runs-on: ubuntu-latest
@@ -20,6 +24,9 @@ jobs:
 
       - name: Dependencias
         run: npm ci
+
+      - name: Dependencias sin vulnerabilidades conocidas (lo que va dentro de la app)
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Revisión del código (ESLint)
         run: npm run lint

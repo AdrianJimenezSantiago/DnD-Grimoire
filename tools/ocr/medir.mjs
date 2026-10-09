@@ -71,7 +71,7 @@ for (const pg of paginas) {
   filas.push({ ...pg, c: distancia(ocr, ref), nc: ref.length, w: distancia(po, pr), nw: pr.length });
   if (nErrores) for (const s of sustituciones(po, pr)) confusiones.set(s, (confusiones.get(s) || 0) + 1);
 }
-for (const d of Object.values(docs)) await d.destroy();
+for (const d of Object.values(docs)) await d.loadingTask.destroy();
 
 const pct = (a, b) => (100 * a / b).toFixed(2).padStart(6) + ' %';
 const resumen = (nombre, fs_) => {

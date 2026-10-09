@@ -1,5 +1,5 @@
 // Copia de seguridad: exportar e importar todos los personajes como JSON.
-import { esc } from '../../core/util.js';
+import { clone, esc } from '../../core/util.js';
 import { burla } from '../../domain/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
 import { personajeDeV1, normBd, importarPersonaje, ESQUEMA } from '../../domain/personaje/modelo.js';
@@ -17,27 +17,30 @@ export function abrirCopia() { $('#bkText').value = JSON.stringify(S.db); abrirD
 export function cargarCopia(text) {
   if (!String(text ?? '').trim()) return rechazar($('#bkText'), 'vacio', { campo: 'Copia de seguridad' });
   let d; try { d = JSON.parse(text); } catch { d = null; }
-  if (d?.schema === ESQUEMA && Array.isArray(d.chars) && d.catalog) {
-    const db = normBd(d); enlazarCatalogo(db); invalidarItems();
-    S.editing = false; const h = S.replace(db); cerrarDialogo($('#backupDlg'));
-    toast(`Copia cargada: ${d.chars.length === 1 ? '1 personaje' : d.chars.length + ' personajes'} y ${Object.keys(db.catalog).length} conjuros.`, [botonDeshacer(S, h)]); return;
+  // Todo se prepara sobre una copia: si el archivo viene roto o manipulado, falla aquí sin tocar lo que ya hay
+  let r = null;
+  try { r = leerCopia(d); } catch { r = null; }
+  if (!r) return avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo o el texto completo tal como se guardó.`, icono: 'save' });
+  invalidarItems(); S.editing = false; const h = S.replace(r.db); cerrarDialogo($('#backupDlg'));
+  if (r.abierto) document.dispatchEvent(new CustomEvent('grimorio:abierto'));
+  toast(r.msg, [botonDeshacer(S, h)]);
+}
+function leerCopia(d) {
+  if (d?.schema === ESQUEMA && Array.isArray(d.chars) && d.catalog && typeof d.catalog === 'object') {
+    const db = normBd(d); enlazarCatalogo(db);
+    return { db, msg: `Copia cargada: ${db.chars.length === 1 ? '1 personaje' : db.chars.length + ' personajes'} y ${Object.keys(db.catalog).length} conjuros.` };
   }
-  if (d?.tipo === 'grimorio-personaje' && d.personaje) {
-    let nombre = '';
-    const h = S.edit(db => {
-      nombre = importarPersonaje(db, d).nombre; normBd(db); enlazarCatalogo(db);
-    });
-    invalidarItems(); cerrarDialogo($('#backupDlg'));
-    document.dispatchEvent(new CustomEvent('grimorio:abierto'));
-    toast(`<b>${esc(nombre)}</b> añadido a tus personajes.`, [botonDeshacer(S, h)]); return;
+  if (d?.tipo === 'grimorio-personaje' && d.personaje && typeof d.personaje === 'object') {
+    const db = clone(S.db), nombre = importarPersonaje(db, d).nombre; normBd(db); enlazarCatalogo(db);
+    return { db, abierto: true, msg: `<b>${esc(nombre)}</b> añadido a tus personajes.` };
   }
   if (d?.levels && d?.meta) {
-    let nombre = '';
-    const h = S.edit(db => { const ch = personajeDeV1(db, d); if (db.chars.some(c => c.nombre === ch.nombre)) ch.nombre += ' (copia)'; nombre = ch.nombre; db.chars.push(ch); db.activeId = ch.id; normBd(db); enlazarCatalogo(db); });
-    invalidarItems(); cerrarDialogo($('#backupDlg'));
-    toast(`Hoja antigua añadida como <b>${esc(nombre)}</b>.`, [botonDeshacer(S, h)]); return;
+    const db = clone(S.db), ch = personajeDeV1(db, d);
+    if (db.chars.some(c => c.nombre === ch.nombre)) ch.nombre += ' (copia)';
+    db.chars.push(ch); db.activeId = ch.id; normBd(db); enlazarCatalogo(db);
+    return { db, msg: `Hoja antigua añadida como <b>${esc(ch.nombre)}</b>.` };
   }
-  avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo o el texto completo tal como se guardó.`, icono: 'save' });
+  return null;
 }
 export function init(store) {
   S = store;

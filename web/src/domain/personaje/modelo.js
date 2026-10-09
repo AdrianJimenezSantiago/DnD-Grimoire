@@ -7,6 +7,8 @@ import { limpiarConjuro, usoGratis } from '../conjuros/validar.js';
 import { normEquipo } from '../equipo/equipo.js';
 import { habilidadesTrasfondo, HABILIDADES } from '../reglas/habilidades.js';
 import { normVida } from '../combate/vida.js';
+import { normCriatura } from '../criaturas/bestiario.js';
+import { TIPOS as TIPOS_NOTA } from './diario.js';
 import { normCombate } from '../combate/combate.js';
 import { normOrdenes } from '../clases/ordenes.js';
 import { normVariantes } from '../clases/variantes.js';
@@ -25,6 +27,9 @@ const STATS0 = { fue: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 };
 const PLAY0 = () => ({ used: {}, conc: '', concObj: [], concRondas: null, efectos: [], rec: {}, log: [] });
 
 export const claveConjuro = s => `${((s.en || '').trim() || (s.es || '').trim()).toLowerCase()}|${s.level}`;
+
+const esObjeto = x => !!x && typeof x === 'object' && !Array.isArray(x);
+export const RETRATO_OK = /^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+=*$/;
 
 export function personajeVacio(over = {}) {
   return {
@@ -45,10 +50,13 @@ export function normPersonaje(c) {
   c.play = { ...PLAY0(), ...(c.play || {}) };
   c.play.used ||= {}; c.play.rec ||= {};
   if (!Array.isArray(c.play.concObj)) c.play.concObj = [];
-  if (!Array.isArray(c.play.efectos)) c.play.efectos = [];
+  c.play.concObj = c.play.concObj.filter(o => typeof o === 'string');
+  c.play.conc = typeof c.play.conc === 'string' ? c.play.conc : '';
+  c.play.efectos = (Array.isArray(c.play.efectos) ? c.play.efectos : []).filter(e => esObjeto(e) && e.id != null && typeof e.nombre === 'string')
+    .map(e => ({ ...e, nota: typeof e.nota === 'string' ? e.nota : '', objetivos: (Array.isArray(e.objetivos) ? e.objetivos : []).filter(o => typeof o === 'string') }));
   if (!c.play.conc) c.play.concObj = [];
   c.play.concRondas = c.play.conc && c.play.concRondas != null ? Math.max(1, parseInt(c.play.concRondas, 10) || 1) : null;
-  if (!Array.isArray(c.play.log)) c.play.log = [];
+  c.play.log = (Array.isArray(c.play.log) ? c.play.log : []).filter(esObjeto);
   if (!Array.isArray(c.rasgos)) c.rasgos = [];
   if (!Array.isArray(c.rasgosOff)) c.rasgosOff = [];
   if (sinOcultos) {
@@ -59,11 +67,14 @@ export function normPersonaje(c) {
   if (c.play.recupUsed && !c.play.rec['tpl:mago.recuperacion']) c.play.rec['tpl:mago.recuperacion'] = { used: 1, dice: [] };
   delete c.play.presagio; delete c.play.recupUsed; delete c.play.onlyPrep;
   if (!c.diario || !Array.isArray(c.diario.sesiones)) c.diario = { sesiones: [] };
+  c.diario.sesiones = c.diario.sesiones.filter(esObjeto).map((s, i) => ({ ...s, n: Math.max(1, parseInt(s.n, 10) || i + 1), fecha: String(s.fecha || ''), titulo: String(s.titulo || ''), texto: String(s.texto || ''),
+    notas: (Array.isArray(s.notas) ? s.notas : []).filter(esObjeto).map(nt => ({ ...nt, tipo: TIPOS_NOTA[nt.tipo] ? nt.tipo : 'nota', texto: String(nt.texto || ''), hecho: !!nt.hecho, fijada: !!nt.fijada })) }));
   if (typeof c.historia !== 'string') c.historia = '';
   if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
   normEquipo(c);
-  if (!c.bestiario || !Array.isArray(c.bestiario.criaturas)) c.bestiario = { criaturas: [] };
-  if (c.retrato && !c.retrato.src) c.retrato = null;
+  c.bestiario = { ...(esObjeto(c.bestiario) ? c.bestiario : {}), criaturas: (Array.isArray(c.bestiario?.criaturas) ? c.bestiario.criaturas : []).map(normCriatura).filter(Boolean) };
+  // El retrato solo puede ser una imagen incrustada (la que guarda la app); ni enlaces externos ni nada que no sea imagen
+  if (!esObjeto(c.retrato) || !RETRATO_OK.test(String(c.retrato.src || ''))) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
   c.multiclase = (Array.isArray(c.multiclase) ? c.multiclase : []).filter(m => m && m.clase && m.clase !== c.clase)
     .filter((m, i, a) => a.findIndex(x => x.clase === m.clase) === i).map(m => ({ clase: m.clase, subclase: String(m.subclase || ''), nivel: clamp(parseInt(m.nivel, 10) || 1, 1, 19) }));
@@ -91,14 +102,47 @@ function normCreacion(x) {
     tiradas: (Array.isArray(x.tiradas) ? x.tiradas : []).slice(0, 6).map(t => n(t, 3, 18, 10)) };
 }
 
+// Lo que llega de fuera (una copia, un personaje exportado, lo guardado) puede venir manipulado. Los identificadores
+// van en atributos del HTML y en nombres de archivo (retrato-<id>.txt), así que todo id con caracteres que podrían salirse
+// de un atributo o de la carpeta de la app (< > " ' ` & / \ o de control) se cambia por uno nuevo, el mismo en toda la
+// base para que las referencias sigan enlazando. Los ids que crea la app («s_…», «tpl:mago.recuperacion») no cambian.
+const ID_OK = /^[^<>"'`&\\/\u0000-\u001f]{1,120}$/;
+function sanearIds(d) {
+  const malos = new Map();
+  const recoger = o => {
+    if (Array.isArray(o)) return o.forEach(x => recoger(x));
+    if (!esObjeto(o)) return;
+    for (const [kk, v] of Object.entries(o)) {
+      if ((kk === 'id' || kk === 'sid') && typeof v === 'string' && !ID_OK.test(v) && !malos.has(v)) malos.set(v, uid('x'));
+      else if ((kk === 'id' || kk === 'sid') && v != null && typeof v !== 'string' && typeof v !== 'number') o[kk] = uid('x');
+      recoger(v);
+    }
+  };
+  for (const k of Object.keys(d.catalog)) if (!ID_OK.test(k) && !malos.has(k)) malos.set(k, uid('x'));
+  recoger(d.chars); recoger(d.catalog);
+  if (!malos.size) return;
+  const cambiar = o => {
+    if (Array.isArray(o)) { o.forEach((v, i) => { if (typeof v === 'string' && malos.has(v)) o[i] = malos.get(v); else cambiar(v); }); return; }
+    if (!esObjeto(o)) return;
+    for (const [k, v] of Object.entries(o)) { if (typeof v === 'string' && malos.has(v)) o[k] = malos.get(v); else cambiar(v); }
+  };
+  d.catalog = Object.fromEntries(Object.entries(d.catalog).map(([k, s]) => [malos.get(k) || k, s]));
+  cambiar(d.chars); cambiar(d.catalog);
+  if (typeof d.activeId === 'string' && malos.has(d.activeId)) d.activeId = malos.get(d.activeId);
+}
+
 export function normBd(d) {
-  d.schema = ESQUEMA; d.catalog ||= {};
+  d.schema = ESQUEMA;
+  if (!esObjeto(d.catalog)) d.catalog = {};
+  d.catalog = Object.fromEntries(Object.entries(d.catalog).filter(([, s]) => esObjeto(s)));
+  d.chars = (Array.isArray(d.chars) ? d.chars : []).filter(esObjeto);
+  sanearIds(d);
   Object.values(d.catalog).forEach(s => { CAMPOS_CATALOGO.forEach(f => { if (s[f] == null) s[f] = ''; }); limpiarConjuro(s); });
   Object.values(d.catalog).forEach(s => {
     if (s.es === 'Guía' && s.en === 'True Strike') { s.en = 'Guidance'; s.srd = 'srd-2024_guidance'; }
     else if (s.es === 'Impacto certero' && s.en === 'Guidance') { s.en = 'True Strike'; s.srd = 'srd-2024_true-strike'; }
   });
-  d.chars = (d.chars || []).map(normPersonaje);
+  d.chars = d.chars.map(normPersonaje);
   d.chars.forEach(c => c.book.forEach(e => { e.gratis = usoGratis(e.gratis); if (!e.gratis) e.used = false; }));
   d.chars.forEach(c => { c.book = c.book.filter(e => d.catalog[e.sid]); });
   if (!d.chars.some(c => c.id === d.activeId)) d.activeId = d.chars[0]?.id ?? null;
@@ -154,10 +198,12 @@ export function bdDeEjemplo() {
 }
 
 export function cargarGuardado(rawV2, rawV1) {
-  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === ESQUEMA) return { db: normBd(d), migrated: false }; } } catch {}
+  // Si lo guardado no se puede leer, se avisa con «fallo» para apartarlo antes de que el primer guardado lo pise
+  let fallo = false;
+  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === ESQUEMA) return { db: normBd(d), migrated: false }; fallo = true; } } catch { fallo = true; }
   try {
     if (rawV1) { const v1 = JSON.parse(rawV1);
-      if (v1?.levels) { const d = { schema: ESQUEMA, catalog: {}, chars: [] }; const ch = personajeDeV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normBd(d), migrated: true }; } }
+      if (v1?.levels) { const d = { schema: ESQUEMA, catalog: {}, chars: [] }; const ch = personajeDeV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normBd(d), migrated: true, fallo }; } }
   } catch {}
-  return { db: bdVacia(), migrated: false };
+  return { db: bdVacia(), migrated: false, fallo };
 }

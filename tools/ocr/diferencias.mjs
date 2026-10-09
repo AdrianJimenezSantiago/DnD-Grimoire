@@ -12,4 +12,4 @@ let c = corregirLineas(lineas, voc);
 const f = path.join(DIR, 'lecturas', `${id}.json`), otra = fs.existsSync(f) && JSON.parse(fs.readFileSync(f, 'utf8')).paginas[+p - 1];
 if (otra) { const vivas = c.map((l, i) => [l, i]).filter(([l]) => l), fund = fusionar(vivas.map(([l]) => l), corregirLineas(otra.split('\n'), voc).filter(Boolean).join(' '), voc); vivas.forEach(([, i], k) => { c[i] = fund[k]; }); }
 lineas.forEach((l, i) => { if (l !== c[i]) console.log(`- ${l}\n+ ${c[i]}`); });
-await doc.destroy();
+await doc.loadingTask.destroy();

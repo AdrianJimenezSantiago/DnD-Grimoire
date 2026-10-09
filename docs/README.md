@@ -11,4 +11,5 @@ Documentos de trabajo sobre cómo está hecha la app, cómo se ha contrastado co
 | [Auditoría del compendio de reglas](auditoria-reglas.md) | Glosario, acciones, estados, propiedades y maestrías contrastados con el manual de 2024. |
 | [Auditoría de objetos mágicos](auditoria-objetos.md) | Los 350 objetos de la Guía del DM: sintonía, cargas, usos, variantes y efectos. |
 | [Rendimiento en móvil](rendimiento-movil.md) | Mediciones de fluidez y las mejoras aplicadas. |
+| [Auditoría de seguridad](auditoria-seguridad.md) | Clave de firma, dependencias, datos importados, inyección de código, política de contenido, Android y compilación: qué se encontró, qué está arreglado y qué falta. |
 | [Auditoría de la interfaz](auditoria-interfaz.md) | Accesibilidad, contraste en los dos temas, legibilidad, SEO y uso sin conexión en la web, medidos con Lighthouse, axe-core y capturas. |

@@ -3,7 +3,8 @@
   "appName": "Grimorio",
   "webDir": "www",
   "android": {
-    "backgroundColor": "#E7EAF1"
+    "backgroundColor": "#E7EAF1",
+    "minWebViewVersion": 100
   },
   "plugins": {
     "SystemBars": {

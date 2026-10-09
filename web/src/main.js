@@ -82,7 +82,8 @@ async function boot() {
   initFondo(); initMagia(); vigilarCampos();
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
-  const { db, migrated } = cargarGuardado(v2, v1);
+  const { db, migrated, fallo } = cargarGuardado(v2, v1);
+  if (fallo) await almacen.set(`${KEY}-rescate-${Date.now()}`, v2);
   const S = crearEstado({ almacen, clave: KEY, db });
   S.subscribe(() => { pintarBarra(S); pintarHoja(S); });
 

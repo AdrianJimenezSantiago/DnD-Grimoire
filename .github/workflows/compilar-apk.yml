@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# Dos compilaciones a la vez de main podrían publicar releases cruzadas
+concurrency:
+  group: compilar-apk
+  cancel-in-progress: false
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -68,11 +73,32 @@ jobs:
       - name: Copiar la web al proyecto Android
         run: npx cap sync android
 
+      # La clave de firma vive en los secretos del repositorio, nunca en el código (ver docs/auditoria-seguridad.md).
+      # Sin ella se para: un APK con otra firma no se puede instalar encima del anterior sin perder los datos.
+      - name: Preparar la firma
+        env:
+          KEYSTORE_BASE64: ${{ secrets.GRIMORIO_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Falta el secreto GRIMORIO_KEYSTORE_BASE64. Sigue los pasos de docs/auditoria-seguridad.md."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/grimorio.keystore"
+
       - name: Compilar
         working-directory: android
+        env:
+          GRIMORIO_KEYSTORE_FILE: ${{ runner.temp }}/grimorio.keystore
+          GRIMORIO_KEYSTORE_PASSWORD: ${{ secrets.GRIMORIO_KEYSTORE_PASSWORD }}
+          GRIMORIO_KEY_ALIAS: ${{ secrets.GRIMORIO_KEY_ALIAS }}
+          GRIMORIO_KEY_PASSWORD: ${{ secrets.GRIMORIO_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Borrar la clave del runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/grimorio.keystore"
 
       - name: Renombrar
         run: cp android/app/build/outputs/apk/release/app-release.apk "grimorio-1.0.${{ github.run_number }}.apk"

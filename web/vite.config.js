@@ -40,9 +40,29 @@ self.addEventListener('fetch', e => {
   if (u.pathname.includes('/data/')) { e.respondWith(caches.match(r).then(x => { const red = fetch(r).then(res => guardar(r, res)); if (x) { e.waitUntil(red.catch(() => {})); return x; } return red; })); }
 });
 `;
+// Política de seguridad del contenido (web y APK; el HTML único de Windows lleva el código dentro y no puede usarla).
+// Solo se ejecuta el código de la propia app: ningún <script> ni atributo onerror/onclick que pudiera colarse en un
+// texto importado llega a correr, y la app no puede conectarse a ningún otro sitio. Los estilos en línea se permiten
+// porque la hoja los usa para colores y animaciones; no ejecutan código.
+export const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "script-src-attr 'none'",
+  "worker-src 'self' blob:",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "media-src 'none'",
+  "object-src 'none'",
+  "frame-src 'none'",
+  "base-uri 'none'",
+  "form-action 'none'",
+].join('; ');
 const appWeb = () => ({
   name: 'grimorio-app-web', apply: 'build',
   transformIndexHtml: () => [
+    { tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP }, injectTo: 'head-prepend' },
     { tag: 'link', attrs: { rel: 'manifest', href: 'manifest.webmanifest' }, injectTo: 'head' },
     { tag: 'link', attrs: { rel: 'apple-touch-icon', href: 'icons/apple-touch-icon.png' }, injectTo: 'head' },
   ],
