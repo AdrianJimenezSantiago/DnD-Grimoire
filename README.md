@@ -152,7 +152,10 @@ La guía de [arquitectura](docs/arquitectura.md) explica las capas, qué puede d
 
 **Ramas**
 
-- `main`: versión estable. Cada cambio compila el APK y la versión de Windows y los publica en [Releases](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases).
+- `main`: versión estable. Cada cambio compila el APK y la versión de Windows y los publica en [Releases](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases), con versionado semántico (`MAYOR.MENOR.PARCHE`):
+  - cada pull request fusionado sube el parche (2.3.0 → 2.3.1);
+  - `[menor]` en el título del pull request sube la versión menor (2.3.4 → 2.4.0), para funciones nuevas;
+  - `[mayor]` sube la mayor (2.4.1 → 3.0.0), para cambios grandes.
 - `development`: trabajo en curso. Cada cambio pasa las pruebas automáticamente.
 
 </details>
