@@ -11,8 +11,10 @@ def firma = { String env, String prop -> System.getenv(env) ?: keystoreProps[pro
 def keystorePath = firma("GRIMORIO_KEYSTORE_FILE", "storeFile")
 def hayFirma = keystorePath && firma("GRIMORIO_KEYSTORE_PASSWORD", "storePassword") && firma("GRIMORIO_KEY_ALIAS", "keyAlias")
 
-// En GitHub Actions el número de versión sube solo con cada compilación.
+// En GitHub Actions la versión sube sola con cada publicación (tools/siguiente-version.mjs).
+// versionCode es el número de compilación: Android solo deja actualizar si sube, y así siempre sube.
 def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+def versionApp = System.getenv("GRIMORIO_VERSION") ?: "0.0.0-local"
 
 android {
     namespace = "com.cronicasargos.grimorio"
@@ -22,7 +24,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode buildNumber
-        versionName "1.0." + buildNumber
+        versionName versionApp
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
