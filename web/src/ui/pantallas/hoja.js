@@ -1,7 +1,7 @@
 // Hoja de personaje: cabecera, estadísticas, barra de espacios, libro de conjuros y rasgos «En juego».
 // pintarHoja() y pintarBarra() repintan la hoja entera a partir del estado.
 import { esc, norm } from '../../core/util.js';
-import { NOMBRE_CAR, perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
+import { perfil, sgn, clasesDe, clasesTexto } from '../../domain/reglas/reglas2024.js';
 import { escuelasAlLanzar, descDisparoLanzar, reglasVisibles, estadoRecurso, etiquetaRecarga, coincideEscuela, usosGastados } from '../../domain/clases/rasgos.js';
 import { $, patch, patchKeyed, morph } from '../componentes/dom.js';
 import { icon, ASTROLABE } from '../componentes/icons.js';
@@ -21,10 +21,8 @@ import { vitalesHtml, caracteristicasHtml } from './vitales.js';
 import { combateHtml, escuelaIco } from './combate.js';
 import { combateDe } from '../../domain/combate/combate.js';
 import { vidaDe, esYo } from '../../domain/combate/vida.js';
-import { percepcionPasiva } from '../../domain/reglas/habilidades.js';
 import { actualizarLuto, memorialHtml } from './luto.js';
 import { espaciosDe, espaciosLibres, primerLibreDesde, estaPreparado, numPreparados, numTrucos, conConjuros, claveEscuela } from '../../domain/conjuros/espacios.js';
-import { origenLinea } from '../../domain/personaje/descripcion.js';
 
 const lemaHtml = t => esc(t).replace(/_(.+?)_/g, '<span class="u">$1</span>');
 
@@ -41,24 +39,29 @@ function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="t
 const inspHtml = ch => { const on = !!vidaDe(ch).inspiracion;
   return `<button type="button" class="hero-insp ${on ? 'on' : ''}" data-cmd="inspiracion" aria-pressed="${on}" title="${on ? 'Tienes inspiración heroica: gástala para repetir un d20' : 'Sin inspiración heroica: toca para marcarla'}" aria-label="Inspiración heroica: ${on ? 'la tienes' : 'no la tienes'}">
     <svg class="hi-marco" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L38 20 L20 38 L2 20 Z"/><path class="hi-in" d="M20 7 L33 20 L20 33 L7 20 Z"/></svg>${gi('inspiracion', 'hi-ico')}<i class="hi-chispa" aria-hidden="true"></i></button>`; };
+// Sello de lacre con el nivel: un círculo de borde ondulado (24 lóbulos) generado una vez
+const SELLO = (() => { let d = ''; for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2, r = i % 2 ? 19.6 : 21.4; d += `${i ? 'L' : 'M'}${(22 + r * Math.cos(a)).toFixed(2)} ${(22 + r * Math.sin(a)).toFixed(2)}`; } return `${d}Z`; })();
+const accion = (cmd, ico, lbl, extra = '', cls = '') => `<button type="button" class="es-gema ${cls}" data-cmd="${cmd}"><span class="es-gema-c" aria-hidden="true">${ico}</span><span class="es-gema-l">${lbl}</span>${extra}</button>`;
+// Cabecera de la hoja: un estandarte en arco con el cielo del color de la clase, el medallón, el nombre y la banderola
 function heroHtml(ch, P) {
-  const mods = `Competencia ${sgn(P.pb)}${P.apKey ? ` · ${NOMBRE_CAR[P.apKey]} ${sgn(P.mod)} para conjuros` : ''} · Percepción pasiva ${percepcionPasiva(ch)}`;
-  const t = temaDe(ch);
-  return `${ASTROLABE}${ch.retrato ? '' : gi(t.icono, 'emblem')}
-    <div class="hero-id"><span class="hero-retrato"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 16, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
-    ${inspHtml(ch)}</span>
-    <h1>${esc(ch.nombre)}<svg class="underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 60 3, 120 12, 180 7 S 270 5, 297 8"/></svg></h1></div>
-    <div class="clase">${clasesDe(ch).length > 1 ? `${clasesDe(ch).map(c => `${esc(c.clase)} ${c.nivel}${c.subclase ? ` <span class="sub">· ${esc(c.subclase)}</span>` : ''}`).join(' <span class="sub">/</span> ')}, <b>nivel ${P.lvl}</b>` : `${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}, nivel ${ch.nivel}`}${origenLinea(ch) ? `<span class="sub">. ${esc(origenLinea(ch))}</span>` : ''}</div>
-    <div class="mods">${mods}</div>
-    ${ch.lema ? `<div class="motto">${lemaHtml(ch.lema)}</div>` : ''}
-    <div class="chips">
-      <button type="button" class="chip" data-cmd="editchar">${icon('user')}Editar personaje</button>
-      <button type="button" class="chip" data-cmd="rules">${icon('sliders')}Rasgos</button>
-      <button type="button" class="chip" data-cmd="equipo">${gi('cofre')}Inventario${(ch.equipo?.objetos || []).length ? `<small class="chip-n">${ch.equipo.objetos.length}</small>` : ''}</button>
-      <button type="button" class="chip" data-cmd="historia">${gi('libro')}Historia</button>
-      <button type="button" class="chip" data-cmd="diario">${icon('quill')}Diario</button>
-      ${P.lvl < 20 ? `<button type="button" class="chip gold" data-cmd="levelup">${icon('star')}Subir a nivel ${P.lvl + 1}</button>` : ''}
-    </div>`;
+  const t = temaDe(ch), cs = clasesDe(ch), multi = cs.length > 1, n = (ch.equipo?.objetos || []).length;
+  const cinta = multi ? cs.map(c => `${esc(c.clase)} ${c.nivel}${c.subclase ? ` <span class="sub">· ${esc(c.subclase)}</span>` : ''}`).join('<i class="es-sep" aria-hidden="true">✦</i>')
+    : `${esc(ch.clase)}${ch.subclase ? ` <span class="sub">· ${esc(ch.subclase)}</span>` : ''}`;
+  const origen = [ch.especie, ch.trasfondo].filter(Boolean).map(esc);
+  return `<div class="es-arco">
+    <div class="es-cielo" aria-hidden="true"><span class="es-rayos"></span><span class="es-estrellas"></span>${ASTROLABE}${gi(t.icono, 'es-filigrana')}</div>
+    <div class="es-medallon"><span class="hero-retrato"><button type="button" class="hero-av" data-cmd="retrato" aria-label="${ch.retrato ? 'Cambiar' : 'Añadir'} retrato">${runaSvg({ n: 18, lados: t.icono === 'adivino' ? 6 : 5, cls: 'hero-runa', semillaInicial: (ch.nombre || 'x').length * 31 })}${avatarHtml(ch, 'xl')}<span class="av-edit">${icon('quill')}</span></button>
+      ${inspHtml(ch)}<span class="es-sello" title="Nivel de personaje ${P.lvl}"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="${SELLO}"/><circle cx="22" cy="22" r="15"/></svg><small>Niv.</small><b>${P.lvl}</b><span class="visually-hidden">Nivel ${P.lvl}</span></span></span></div>
+    <h1>${esc(ch.nombre)}</h1>
+    <svg class="underline es-filete" viewBox="0 0 240 16" aria-hidden="true"><path d="M4 8 C 40 8, 70 2, 104 8 M136 8 C 170 14, 200 8, 236 8"/><path class="es-rombo" d="M120 1 L127 8 L120 15 L113 8 Z"/></svg>
+    <div class="es-cinta clase"><span>${cinta}</span></div>
+    ${origen.length ? `<div class="es-origen">${origen.join('<i aria-hidden="true">✦</i>')}</div>` : ''}
+    ${ch.lema ? `<blockquote class="motto es-lema">${lemaHtml(ch.lema)}</blockquote>` : ''}
+  </div>
+  <nav class="es-gemas chips" aria-label="Acciones del personaje">
+    ${accion('editchar', icon('user'), 'Editar')}${accion('rules', icon('sliders'), 'Rasgos')}${accion('equipo', gi('cofre'), 'Inventario', n ? `<small class="chip-n" aria-label="${n} objetos">${n}</small>` : '')}${accion('historia', gi('libro'), 'Historia')}${accion('diario', icon('quill'), 'Diario')}
+    ${P.lvl < 20 ? accion('levelup', icon('star'), `Nivel ${P.lvl + 1}`, '<span class="visually-hidden">: subir de nivel</span>', 'es-sube') : ''}
+  </nav>`;
 }
 function statsHtml(db, ch, P) {
   const pc = numPreparados(db, ch), cc = numTrucos(db, ch);

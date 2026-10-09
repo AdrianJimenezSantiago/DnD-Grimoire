@@ -27,6 +27,7 @@ import './styles/creacion.css';
 import './styles/inventario.css';
 import './styles/impacto.css';
 import './styles/codice.css';
+import './styles/estandarte.css';
 import './styles/movil.css';
 
 import { crearEstado } from './core/store.js';

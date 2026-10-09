@@ -1,0 +1,121 @@
+/* ===== Estandarte: cabecera de la hoja =====
+   Un arco de catedral con el cielo del color de la clase, el medallón del retrato con su sello de nivel,
+   el nombre dorado, la banderola de la clase y un cinturón de gemas con las acciones.
+   Solo se animan transform y opacity (las estrellas y el anillo), para no repintar al desplazarse. */
+#hero.estandarte { padding: 22px 0 6px; text-align: center; }
+#hero.estandarte .astrolabe { right: 50%; top: 18px; width: 300px; height: 300px; margin-right: -150px; opacity: .14; }
+
+.es-arco { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; gap: 0;
+  max-width: 760px; margin: 0 auto; padding: 28px 18px 18px;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--line));
+  border-radius: 999px 999px var(--r-l) var(--r-l) / 210px 210px var(--r-l) var(--r-l);
+  background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
+              linear-gradient(180deg, color-mix(in srgb, var(--surface) 70%, transparent), color-mix(in srgb, var(--surface) 92%, transparent));
+  box-shadow: var(--shadow-1), inset 0 0 0 5px color-mix(in srgb, var(--surface) 55%, transparent), inset 0 0 0 6px color-mix(in srgb, var(--gold) 20%, transparent); }
+/* Dos filetes dorados que siguen el arco por dentro */
+.es-arco::before { content: ""; position: absolute; inset: 9px; z-index: -1; pointer-events: none; border-radius: inherit;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, transparent); }
+.es-arco::after { content: ""; position: absolute; left: 50%; top: -7px; width: 14px; height: 14px; margin-left: -7px; transform: rotate(45deg);
+  background: var(--gold); box-shadow: 0 0 12px var(--glow), 0 0 0 3px var(--bg); border-radius: 2px; }
+
+/* El cielo: rayos detrás del medallón, estrellas que titilan y el emblema de la clase como filigrana */
+.es-cielo { position: absolute; inset: 0; z-index: -2; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.es-rayos { position: absolute; left: 50%; top: 92px; width: 640px; height: 640px; margin: -320px 0 0 -320px;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--gold) 13%, transparent) 0 2.5deg, transparent 2.5deg 15deg);
+  -webkit-mask: radial-gradient(closest-side, #000 18%, transparent 72%); mask: radial-gradient(closest-side, #000 18%, transparent 72%); }
+.es-estrellas, .es-estrellas::after { position: absolute; inset: 0; }
+.es-estrellas { background:
+  radial-gradient(1.4px 1.4px at 12% 22%, var(--gold-2) 50%, transparent 51%), radial-gradient(1px 1px at 22% 58%, var(--ink) 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 30% 12%, var(--ink) 50%, transparent 51%), radial-gradient(1.6px 1.6px at 78% 18%, var(--gold-2) 50%, transparent 51%),
+  radial-gradient(1px 1px at 86% 46%, var(--ink) 50%, transparent 51%), radial-gradient(1.3px 1.3px at 68% 8%, var(--ink) 50%, transparent 51%),
+  radial-gradient(1px 1px at 92% 70%, var(--gold-2) 50%, transparent 51%), radial-gradient(1.2px 1.2px at 6% 74%, var(--ink) 50%, transparent 51%);
+  opacity: .55; }
+.es-estrellas::after { content: ""; background:
+  radial-gradient(1.8px 1.8px at 18% 36%, var(--gold-2) 50%, transparent 51%), radial-gradient(1.5px 1.5px at 82% 32%, var(--gold-2) 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 40% 6%, var(--ink) 50%, transparent 51%), radial-gradient(1.6px 1.6px at 62% 26%, var(--gold-2) 50%, transparent 51%),
+  radial-gradient(1.2px 1.2px at 9% 48%, var(--ink) 50%, transparent 51%), radial-gradient(1.4px 1.4px at 94% 56%, var(--gold-2) 50%, transparent 51%);
+  animation: es-titila 4.5s ease-in-out infinite; }
+@keyframes es-titila { 50% { opacity: .15; } }
+.es-filigrana { position: absolute; right: -26px; bottom: -34px; width: 190px; height: 190px; color: var(--gold); opacity: .07; transform: rotate(-12deg); }
+
+/* Medallón: retrato con anillo de runas, gema de inspiración a la derecha y sello de nivel a la izquierda */
+.es-medallon { position: relative; margin-bottom: 10px; }
+@media (max-width: 560px) { #hero.estandarte .avatar.xl { width: 92px; height: 92px; } #hero.estandarte .es-lema { font-size: var(--fs-m); margin-top: 10px; } .es-origen { margin-top: 10px; } }
+#hero.estandarte .avatar.xl { width: 104px; height: 104px; }
+#hero.estandarte .hero-runa { inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); opacity: .7; }
+#hero.estandarte .hero-insp { right: -16px; bottom: -6px; }
+#hero.estandarte .hero-retrato .av-edit { left: auto; right: -6px; top: -4px; bottom: auto; }
+.es-sello { position: absolute; left: -22px; bottom: -8px; z-index: 2; width: 48px; height: 48px; display: grid; place-content: center; justify-items: center; line-height: 1;
+  color: var(--on-gold, #1b1406); filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .4)); }
+.es-sello svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.es-sello path { fill: var(--gold); }
+.es-sello circle { fill: none; stroke: color-mix(in srgb, var(--on-gold, #000) 30%, transparent); stroke-width: 1; stroke-dasharray: 1.6 1.8; }
+.es-sello small, .es-sello b { position: relative; }
+.es-sello small { font: 700 7.5px / 1 var(--sans); letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.es-sello b { font: 700 18px / 1 var(--display); margin-top: 1px; }
+
+/* Nombre: oro viejo con un brillo que cruza una vez al entrar */
+#hero.estandarte h1 { position: relative; display: block; max-width: 100%; margin: 4px 0 0; padding: 0 .1em .04em; overflow-wrap: anywhere;
+  font: 700 clamp(34px, 9.4vw, 64px) / 1.02 var(--display-deco); letter-spacing: .02em;
+  background: linear-gradient(100deg, var(--gold) 0%, var(--gold-2) 22%, var(--ink) 42%, var(--gold-2) 58%, var(--gold) 78%, var(--gold-2) 100%);
+  background-size: 220% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .35)) drop-shadow(0 0 22px var(--glow)); }
+#hero.estandarte.fx-enter h1 { animation: es-brillo 1.8s var(--ease-out) both .2s; }
+@keyframes es-brillo { from { background-position: 0 0; } }
+.es-filete { width: min(240px, 70%); height: 16px; margin: 4px 0 10px; overflow: visible; }
+.es-filete path { fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-linecap: round; }
+.es-filete .es-rombo { fill: var(--gold); stroke: none; filter: drop-shadow(0 0 5px var(--glow)); }
+#hero.estandarte .underline path { stroke-dasharray: none; }
+
+/* Banderola de la clase, con las puntas cortadas en cola de golondrina */
+#hero.estandarte .es-cinta { position: relative; max-width: 100%; margin: 0; padding: 0 6px; font: inherit; }
+.es-cinta > span { display: inline-block; padding: 8px 30px 9px; font: 600 var(--fs-m) / 1.25 var(--sans); letter-spacing: .02em; color: var(--on-gold, #1b1406);
+  background: linear-gradient(180deg, var(--gold-2), var(--gold) 70%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%, 13px 50%); }
+#hero.estandarte .es-cinta .sub { color: inherit; font-weight: 500; opacity: .82; }
+.es-cinta .es-sep { margin: 0 8px; font-style: normal; opacity: .6; }
+.es-cinta::before, .es-cinta::after { content: ""; position: absolute; top: 50%; width: 22px; height: 1px; background: color-mix(in srgb, var(--gold) 60%, transparent); }
+.es-cinta::before { right: 100%; } .es-cinta::after { left: 100%; }
+
+.es-origen { margin-top: 12px; font: 500 var(--fs-m) / 1.3 var(--serif); color: var(--ink-2); letter-spacing: .02em; }
+.es-origen i { margin: 0 10px; font-style: normal; font-size: .7em; color: var(--gold); vertical-align: .15em; }
+#hero.estandarte .es-lema { position: relative; width: fit-content; max-width: min(46ch, 100%); margin: 14px auto 0; padding: 0 26px; font-size: var(--fs-l); }
+.es-lema::before, .es-lema::after { position: absolute; top: -.18em; font: 700 2em / 1 var(--display-deco); color: color-mix(in srgb, var(--gold) 55%, transparent); }
+.es-lema::before { content: "“"; left: 0; } .es-lema::after { content: "”"; right: 0; }
+
+/* Cinturón de gemas: una sola fila de acciones (se desplaza de lado si no cabe) */
+#hero.estandarte .es-gemas { display: flex; flex-wrap: nowrap; justify-content: center; gap: 4px; margin: 16px auto 0; padding: 4px 2px 6px; max-width: 760px;
+  overflow-x: auto; scrollbar-width: none; -webkit-mask: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); mask: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); }
+#hero.estandarte .es-gemas::-webkit-scrollbar { display: none; }
+.es-gema { position: relative; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 9px; width: 60px; min-height: 0; padding: 4px 0 2px;
+  border: 0; background: none; color: var(--ink-2); font: 600 11.5px / 1.1 var(--sans); letter-spacing: .02em; }
+.es-gema-c { position: relative; display: grid; place-items: center; width: 40px; height: 40px; margin-top: 6px; transform: rotate(45deg); border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); color: var(--gold);
+  background: radial-gradient(100% 100% at 30% 20%, color-mix(in srgb, var(--gold) 18%, var(--raised)), var(--surface)); box-shadow: var(--shadow-1);
+  transition: transform .35s var(--spring), border-color var(--t-fast); }
+.es-gema-c > * { width: 20px; height: 20px; transform: rotate(-45deg); }
+.es-gema:hover .es-gema-c { transform: rotate(45deg) scale(1.08); border-color: var(--gold); }
+.es-gema:active .es-gema-c { transform: rotate(45deg) scale(.94); }
+.es-gema:hover { color: var(--ink); }
+.es-gema .chip-n { position: absolute; top: 0; left: 50%; margin-left: 12px; z-index: 1; }
+/* Subir de nivel: la gema llena de oro, con un halo que late (en una capa aparte, solo opacidad) */
+.es-sube { color: var(--gold-2); }
+:root[data-theme="light"] .es-sube { color: var(--gold); }
+.es-sube .es-gema-c { color: var(--on-gold, #1b1406); border-color: var(--gold-2); background: linear-gradient(135deg, var(--gold-2), var(--gold)); }
+.es-sube .es-gema-c::after { content: ""; position: absolute; inset: -7px; border-radius: 15px; border: 1px solid var(--gold); box-shadow: 0 0 16px var(--glow); opacity: 0; animation: es-halo 2.6s ease-in-out infinite; }
+@keyframes es-halo { 50% { opacity: 1; } }
+
+/* Tema de día: pergamino iluminado; las estrellas se vuelven polvo de oro */
+:root[data-theme="light"] .es-arco { background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in srgb, var(--raised) 70%, transparent), var(--surface)); }
+:root[data-theme="light"] .es-estrellas { opacity: .35; }
+:root[data-theme="light"] #hero.estandarte h1 { filter: drop-shadow(0 1px 0 rgba(255, 250, 235, .8)); text-shadow: none; }
+:root[data-theme="light"] .es-sello { filter: drop-shadow(0 2px 3px rgba(60, 35, 10, .35)); }
+
+@media (min-width: 900px) {
+  .es-arco { padding: 36px 40px 26px; border-radius: 999px 999px var(--r-l) var(--r-l) / 240px 240px var(--r-l) var(--r-l); }
+  #hero.estandarte .avatar.xl { width: 118px; height: 118px; }
+  .es-gema { width: 84px; } .es-gema-c { width: 46px; height: 46px; }
+}
+@media (max-width: 380px) { .es-gema { width: 54px; } .es-gema-c { width: 36px; height: 36px; } .es-cinta > span { padding-left: 24px; padding-right: 24px; } }
+@media (prefers-reduced-motion: reduce) { .es-estrellas::after, .es-sube .es-gema-c::after, #hero.estandarte.fx-enter h1 { animation: none; } .es-sube .es-gema-c::after { opacity: .6; } }
+@media print { .es-cielo, .es-gemas { display: none !important; } .es-arco { border: 0; box-shadow: none; background: none; } #hero.estandarte h1 { background: none; color: #151a2d; -webkit-text-fill-color: #151a2d; filter: none; } }
