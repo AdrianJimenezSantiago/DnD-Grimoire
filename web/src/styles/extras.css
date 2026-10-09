@@ -196,19 +196,63 @@ dialog#retDlg { width: min(460px, 94vw); }
   linear-gradient(var(--gold-soft), var(--gold-soft)) 8px 8px / 14px 14px no-repeat,
   repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 7.5px), repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 7.5px);
   box-shadow: inset 0 0 0 1.5px var(--gold); }
-.ar-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 var(--fs-s) / 1.3 var(--sans); color: var(--ink-2); margin-bottom: 10px; }
-.ar-meta b { font: 700 var(--fs-l) / 1 var(--serif); color: var(--gold); }
-.ar-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
-.ar-tools button { width: 42px; min-height: 40px; padding: 0; border-radius: 10px; font-size: 20px; }
-.ar-tools .chk-line { margin: 0 0 0 6px; }
-.ar-wrap { overflow: auto; max-height: 62vh; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); padding: 4px; touch-action: pan-x pan-y; }
-.ar-svg { display: block; margin: auto; }
-.ar-svg .grid line { stroke: var(--line); stroke-width: 1; } .ar-svg .grid line.mj { stroke: color-mix(in srgb, var(--ink-3) 55%, transparent); }
-.ar-svg .cells rect { fill: color-mix(in srgb, var(--gold) 34%, transparent); stroke: color-mix(in srgb, var(--gold) 60%, transparent); stroke-width: 1; }
+.ar-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 12px; }
+.ar-cnt { display: flex; align-items: center; gap: 10px; }
+.ar-cnt b { font: 700 var(--fs-2xl) / 1 var(--serif); color: var(--gold); font-variant-numeric: tabular-nums; min-width: 1.2em; text-align: center; }
+.ar-cnt span { display: flex; flex-direction: column; font: 500 var(--fs-m) / 1.2 var(--sans); color: var(--ink); }
+.ar-cnt small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }
+.ar-datos { display: flex; flex-wrap: wrap; gap: 6px; }
+.ar-datos span { font: 400 var(--fs-xs) / 1 var(--sans); color: var(--ink-2); padding: 6px 10px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.ar-datos .az { color: var(--ink); border-color: color-mix(in srgb, var(--sc-abj) 50%, transparent); background: color-mix(in srgb, var(--sc-abj) 12%, transparent); }
+.ar-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; }
+.ar-grp { display: flex; align-items: center; gap: 2px; padding: 2px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.ar-grp button { width: 40px; min-height: 38px; padding: 0; border-radius: 9px; font-size: 19px; border-color: transparent; background: transparent; }
+.ar-rumbo { display: flex; align-items: center; gap: 6px; min-width: 104px; justify-content: center; font: 500 var(--fs-s) / 1 var(--sans); color: var(--ink); text-transform: capitalize; }
+.ar-rumbo i { display: inline-block; font-style: normal; color: var(--gold); font-size: 17px; transform: rotate(var(--g)); transition: transform var(--t-med) var(--ease-out); }
+.ar-chks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.ar-tools .chk-line { margin: 0; font-size: var(--fs-s); }
+.ar-wrap { overflow: auto; max-height: 62vh; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); padding: 6px; touch-action: pan-x pan-y; }
+/* Sin transición en el tamaño (ni con movimiento reducido): al hacer zoom se centra el área con el tamaño ya aplicado */
+.ar-svg { display: block; margin: auto; outline: none; transition-duration: 0s !important; }
+.ar-svg.mano { cursor: crosshair; } .ar-svg.arrastre { cursor: move; }
+.ar-svg:focus-visible { box-shadow: 0 0 0 2px var(--gold); border-radius: 4px; }
+.ar-svg .grid line { stroke: var(--line); stroke-width: 1; } .ar-svg .grid line.mj { stroke: color-mix(in srgb, var(--ink-3) 45%, transparent); }
+.ar-svg .fuera { fill: color-mix(in srgb, var(--bg) 62%, transparent); }
+.ar-svg .range { fill: none; stroke: var(--sc-abj); stroke-width: 2; stroke-dasharray: 7 5; }
+.ar-svg .env { fill: none; stroke: color-mix(in srgb, var(--gold) 55%, transparent); stroke-width: 1.5; stroke-dasharray: 2 4; }
+.ar-svg .fant rect { fill: color-mix(in srgb, var(--gold) 7%, transparent); stroke: color-mix(in srgb, var(--gold) 26%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+.ar-svg .roces rect { fill: none; stroke: color-mix(in srgb, var(--ink-2) 70%, transparent); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.ar-svg .cells rect { stroke: color-mix(in srgb, var(--gold) 75%, transparent); stroke-width: 1; }
+.ar-svg .cells .ll { fill: color-mix(in srgb, var(--gold) 46%, transparent); }
+.ar-svg .cells .pa { fill: color-mix(in srgb, var(--gold) 22%, transparent); }
+.ar-svg .rayas rect { fill: url(#arRay); pointer-events: none; }
+.ar-svg #arRay line { stroke: color-mix(in srgb, var(--gold) 70%, transparent); stroke-width: 1.4; }
+.ar-svg.anim .cells rect { transform-box: fill-box; transform-origin: center; animation: arIn .34s var(--ease-out) var(--d, 0ms) both; }
+@keyframes arIn { from { opacity: 0; transform: scale(.5); } }
 .ar-svg .shape > * { fill: none; stroke: var(--gold-2); stroke-width: 2.5; stroke-linejoin: round; filter: drop-shadow(0 0 6px var(--glow)); }
-.ar-svg .shape .pt { fill: var(--gold-2); }
-.ar-svg .range { fill: none; stroke: #7FA6FF; stroke-width: 2; stroke-dasharray: 6 6; opacity: .8; }
+.ar-svg .yo { fill: color-mix(in srgb, var(--sc-abj) 22%, transparent); stroke: var(--sc-abj); stroke-width: 1.5; }
 .ar-svg .tok circle { fill: var(--surface); stroke: var(--ink); stroke-width: 2.5; }
+.ar-svg .tok .tu { fill: var(--ink); font: 700 1em var(--sans); text-anchor: middle; dominant-baseline: central; }
+.ar-svg .lbl { fill: var(--ink); font-family: var(--sans); font-weight: 700; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+.ar-svg .lbl.azul { fill: var(--sc-abj); }
+.ar-svg .cota line { stroke: var(--ink); stroke-width: 1.5; }
+.ar-svg .dist line { stroke: var(--sc-abj); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.ar-svg .foco { fill: none; stroke: color-mix(in srgb, var(--gold-2) 45%, transparent); stroke-width: 2; animation: arFoco 2.4s var(--ease-out) infinite; transform-box: fill-box; transform-origin: center; pointer-events: none; }
+@keyframes arFoco { 0% { opacity: 0; transform: scale(.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.25); } }
+.ar-svg .pt circle { fill: color-mix(in srgb, var(--gold-2) 25%, transparent); stroke: var(--gold-2); stroke-width: 1.5; }
+.ar-svg .pt .c { fill: var(--gold-2); stroke: var(--surface); }
+.ar-ley { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 0; padding: 0; list-style: none; font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }
+.ar-ley li { display: flex; align-items: center; gap: 7px; }
+.ar-ley .sw { flex: none; width: 16px; height: 16px; border-radius: 3px; border: 1px solid transparent; }
+.ar-ley .ll { background: color-mix(in srgb, var(--gold) 46%, transparent); border-color: color-mix(in srgb, var(--gold) 75%, transparent); }
+.ar-ley .pa { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--gold) 70%, transparent) 0 1.4px, color-mix(in srgb, var(--gold) 22%, transparent) 1.4px 4.2px); border-color: color-mix(in srgb, var(--gold) 75%, transparent); }
+.ar-ley .ro { border: 1.2px dashed var(--ink-2); }
+.ar-ley .fa { background: color-mix(in srgb, var(--gold) 7%, transparent); border: 1px dashed color-mix(in srgb, var(--gold) 40%, transparent); }
+.ar-ley .yo { border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-abj) 45%, transparent); }
+.ar-ley .al { height: 0; border: 0; border-top: 2px dashed var(--sc-abj); border-radius: 0; }
+.ar-ley .en { height: 0; border: 0; border-top: 2px dotted color-mix(in srgb, var(--gold) 70%, transparent); border-radius: 0; }
+#arNota { margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { .ar-svg.anim .cells rect { animation: none; } .ar-svg .foco { animation: none; opacity: .8; } .ar-rumbo i { transition: none; } }
 .lb-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .lb { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
 .lb-t { flex: 1; display: flex; flex-direction: column; gap: 3px; } .lb-t b { font: 500 var(--fs-l) / 1.2 var(--serif); } .lb-t small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }

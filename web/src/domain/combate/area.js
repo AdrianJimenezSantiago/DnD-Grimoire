@@ -23,8 +23,9 @@ export function leerArea(texto = '', alcance = '') {
   if ((m = /(\d+)-foot Cube/i.exec(t))) return { forma: 'cubo', lado: ft(m[1]) };
   return null;
 }
+// Lo que va entre paréntesis es el tamaño del área, no el alcance: «Lanzador (cubo de 4,5 m)» no tiene alcance en metros
 export function alcanceMetros(a = '') {
-  const m = /(\d+(?:,\d+)?)\s*(km|m)\b/i.exec(a); if (!m) return null;
+  const m = /(\d+(?:,\d+)?)\s*(km|m)\b/i.exec(String(a).replace(/\(.*?\)/g, '')); if (!m) return null;
   return num(m[1]) * (m[2].toLowerCase() === 'km' ? 1000 : 1);
 }
 export const casillas = metros => Math.round(metros / CASILLA * 10) / 10;
@@ -77,8 +78,13 @@ export function celdasArea(a, dir = 0) {
   }
   function cubierta(x, y) { let n = 0; for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if (dentro(x + (i + 0.5) / 6, y + (j + 0.5) / 6)) n++; return n / 36; }
   function fin(origen, alcance) {
-    for (let x = Math.floor(min[0]) - 1; x <= Math.ceil(max[0]) + 1; x++) for (let y = Math.floor(min[1]) - 1; y <= Math.ceil(max[1]) + 1; y++)
-      if (cubierta(x, y) >= 0.5 && !(a.forma === 'emanacion' && x === 0 && y === 0)) out.push([x, y]);
-    return { celdas: out, origen, radio: alcance, dentro };
+    // cob: fracción cubierta de cada casilla afectada; roces: casillas que el área toca sin llegar a la mitad (no cuentan).
+    const cob = [], roces = [];
+    for (let x = Math.floor(min[0]) - 1; x <= Math.ceil(max[0]) + 1; x++) for (let y = Math.floor(min[1]) - 1; y <= Math.ceil(max[1]) + 1; y++) {
+      if (a.forma === 'emanacion' && x === 0 && y === 0) continue;
+      const c = cubierta(x, y);
+      if (c >= 0.5) { out.push([x, y]); cob.push(c); } else if (c > 0) roces.push([x, y]);
+    }
+    return { celdas: out, cob, roces, origen, radio: alcance, dentro };
   }
 }
