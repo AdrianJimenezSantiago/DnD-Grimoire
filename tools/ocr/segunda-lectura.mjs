@@ -19,7 +19,7 @@ for (const id of process.argv.slice(2)) {
   const sha256 = await huella(pdf), base = await textoLibro(id), doc = await abrir(id);
   const alturas = [];
   for (let p = 1; p <= doc.numPages; p++) alturas.push((await doc.getPage(p)).getViewport({ scale: 1 }));
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   let hecho = {};
   try { const c = JSON.parse(fs.readFileSync(parcial, 'utf8')); if (c.sha256 === sha256) hecho = c.paginas; } catch {}
   // Solo las páginas que tienen capa de texto: sin base no hay nada que fusionar

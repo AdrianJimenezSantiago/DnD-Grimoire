@@ -19,7 +19,7 @@ async function objetosDelLibro() {
   if (fs.existsSync(json)) return JSON.parse(fs.readFileSync(json, 'utf8')).objetos;
   const pdf = fs.readdirSync(path.join(RAIZ, 'tools/resources')).find(f => /DMG/i.test(f));
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'), { analizarLibro } = await import('../web/src/domain/libros/libroCompleto.js');
-  const doc = await pdfjs.getDocument({ url: path.join(RAIZ, 'tools/resources', pdf), disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise, paginas = [];
+  const doc = await pdfjs.getDocument({ url: path.join(RAIZ, 'tools/resources', pdf), disableFontFace: true, verbosity: 0 }).promise, paginas = [];
   for (let p = 1; p <= doc.numPages; p++) {
     const page = await doc.getPage(p), tc = await page.getTextContent(), w = page.getViewport({ scale: 1 }).width;
     paginas.push({ p, w, items: tc.items.filter(i => i.str).map(i => ({ str: i.str, transform: i.transform, width: i.width, height: i.height })) });

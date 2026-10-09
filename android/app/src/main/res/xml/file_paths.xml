@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Lo único que la app comparte con otras apps es la copia de seguridad, que se escribe en su caché.
+     Nada del almacenamiento externo ni de sus datos privados queda al alcance del FileProvider. -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="." />
-    <cache-path name="my_cache_images" path="." />
+    <cache-path name="copias" path="." />
 </paths>

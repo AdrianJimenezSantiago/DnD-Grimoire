@@ -69,6 +69,8 @@ export const equipoDe = ch => {
 };
 export const sintonizados = ch => equipoDe(ch).objetos.filter(o => o.sintonizado);
 export const tieneObjeto = (ch, clave) => equipoDe(ch).objetos.some(o => o.clave === clave);
+// Dados y bonos («1d8», «+2», «1d4+1»): lo que no tenga esa forma se descarta
+const corto = v => (/^[\w +\-.,]{0,40}$/.test(String(v ?? '')) ? String(v ?? '') : '');
 const num = (v, def = 0) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : def; };
 
 // Arma o armadura mágica con nombre de una normal («Espada larga +1», «Escudo +2», «Cota de mallas +1»): toma sus datos y el bonificador
@@ -88,6 +90,13 @@ export function normObjeto(o) {
   if (!out.sintonia) out.sintonizado = false;
   if (out.sintoniaCon != null) out.sintoniaCon = String(out.sintoniaCon || '');
   if (out.usos != null && !Array.isArray(out.usos)) delete out.usos;
+  // Arma y armadura con cada dato de su tipo: llegan de copias importadas y varios se pintan tal cual en la hoja
+  if (out.armadura && typeof out.armadura === 'object') { const a = out.armadura;
+    out.armadura = { ...a, base: num(a.base), bono: num(a.bono), fue: num(a.fue), tipo: String(a.tipo || ''), sigilo: !!a.sigilo, dex: a.dex == null || ['todo', 'max2', 'no'].includes(a.dex) ? a.dex : 'todo' }; }
+  else delete out.armadura;
+  if (out.arma && typeof out.arma === 'object') { const a = out.arma;
+    out.arma = { ...a, dano: corto(a.dano), tipo: String(a.tipo || ''), maestria: String(a.maestria || ''), distancia: String(a.distancia || ''), props: (Array.isArray(a.props) ? a.props : []).map(String), ...(a.bono != null ? { bono: typeof a.bono === 'number' ? a.bono : corto(a.bono) } : {}) }; }
+  else delete out.arma;
   if (!out.equipado) delete out.mano;
   // Maza y lanza llevaban una maestría que no es la del manual de 2024: se corrige en las que ya estaban en el inventario
   const mal = out.arma && MAESTRIA_CORREGIDA[norm(out.arma.base || out.nombre)];

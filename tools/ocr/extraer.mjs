@@ -28,4 +28,4 @@ for (const pg of paginas) {
         archivoLibro(pg.libro), `${base}-${k}`]);
   }
 }
-for (const d of Object.values(docs)) await d.destroy();
+for (const d of Object.values(docs)) await d.loadingTask.destroy();

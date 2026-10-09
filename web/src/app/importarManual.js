@@ -24,7 +24,7 @@ export async function leerLibro(file, onProgress = () => {}) {
     paginas.push({ p, w, items: tc.items.filter(i => i.str).map(i => ({ str: i.str, transform: i.transform, width: i.width, height: i.height })) });
     onProgress({ fase: 'leer', pagina: p, total: N });
   }
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   onProgress({ fase: 'analizar' });
   await new Promise(r => setTimeout(r, 30));
   return { titulo, ...analizarLibro(paginas, fase => onProgress({ fase }), { vocabulario: await vocabularioBase() }) };

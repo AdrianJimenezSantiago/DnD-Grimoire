@@ -167,7 +167,7 @@ export function init(store) {
     if (!(await confirmar({ titulo: `¿Quitar «${lb.titulo}»?`, texto: 'Se borran de este dispositivo sus descripciones, glosario, subclases y conjuros nuevos. Los conjuros que ya tengas en tu libro siguen ahí.', ok: 'Quitar', peligro: true }))) return;
     const L = libros().filter(l => l.id !== lb.id); await archivos.remove(archivo(lb.id)); await guardarTodo(L); fijarLibros(L);
     if (lb.incluido) await archivos.set(QUITADOS, JSON.stringify([...new Set([...(await quitados()), lb.id])]));
-    lista(); S.emit('manual'); toast(`«${lb.titulo}» quitado.`);
+    lista(); S.emit('manual'); toast(`«${esc(lb.titulo)}» quitado.`);
   });
   $('#mnSoloNombres').addEventListener('click', () => {
     let cambios = []; const h = S.edit(db => { cambios = oficializar(db); });

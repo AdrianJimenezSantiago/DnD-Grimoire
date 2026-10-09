@@ -23,7 +23,7 @@ export function archivoLibro(id) {
   return ruta;
 }
 
-export const abrir = id => pdfjs.getDocument({ url: archivoLibro(id), disableFontFace: true, isEvalSupported: false, verbosity: 0 }).promise;
+export const abrir = id => pdfjs.getDocument({ url: archivoLibro(id), disableFontFace: true, verbosity: 0 }).promise;
 
 // Texto de una página tal y como lo ve la app: líneas de cada columna (paginaAColumnas), columnas separadas por una línea en blanco
 export async function textoPagina(doc, p) {
@@ -42,7 +42,7 @@ export async function textoLibro(id) {
   try { const c = JSON.parse(fs.readFileSync(f, 'utf8')); if (c.clave === clave) return c.paginas; } catch {}
   const doc = await abrir(id), paginas = [];
   for (let p = 1; p <= doc.numPages; p++) paginas.push(await textoPagina(doc, p));
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(f, JSON.stringify({ clave, paginas }));
   return paginas;
