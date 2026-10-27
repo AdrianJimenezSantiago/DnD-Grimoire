@@ -28,7 +28,6 @@ describe('acciones de los objetos mágicos', () => {
     assert.equal(recursoDe(c, p, a).id, p.usos[0], 'gasta el uso que ya tenía, no crea otro');
     assert.match(motivoAccion(c, p, a), /amanecer/);
     assert.equal(usarAccion(c, p, a, { L: 1 }).ok, false);
-    // Al amanecer (descanso largo) el uso vuelve
     c.play.rec = {};
     assert.equal(motivoAccion(c, p, a), '');
     c.play.used = {};

@@ -32,7 +32,6 @@ const orbita = (p, cx, cy) => {
   const x = Math.cos(p.a) * p.R, y = Math.sin(p.a) * p.R * .4, c = Math.cos(-.2), s = Math.sin(-.2);
   return [cx + x * c - y * s, cy + x * s + y * c];
 };
-// Calidad que fija calidad.js: fotogramas por segundo y cuántas partículas hay por escena
 const Q = { fps: 30, densidad: 1 };
 const densidad = base => Math.max(1, Math.round(base * Q.densidad * Math.min(2.2, Math.max(.6, (W * H) / (390 * 844)))));
 const L = () => (E.dark ? 62 : 38);
@@ -315,8 +314,6 @@ function pintar(dt) {
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
 }
 
-// Con el fondo parado (pestaña oculta, ventana encima o dedo desplazando) el tiempo no se acumula, para que las
-// partículas no den un salto al volver.
 const F = { oculto: false, tapado: false, quieto: false, animar: true };
 const porFotograma = typeof requestAnimationFrame === 'function';
 const pedir = fn => (porFotograma ? requestAnimationFrame(fn) : setTimeout(() => fn(performance.now()), 1000 / 30));
@@ -338,7 +335,6 @@ export function iniciar(c) { cv = c; ctx = c.getContext('2d'); }
 export function tamano(w, h, d) {
   const antes = W;
   W = w; H = h; dpr = d; cv.width = W * dpr; cv.height = H * dpr;
-  // Si solo cambia el alto (la barra del navegador del móvil que aparece y desaparece al desplazarse) se conservan las partículas.
   if (W !== antes || !E.ps.length) ESCENAS[E.nombre]?.s();
   pintar(0);
 }

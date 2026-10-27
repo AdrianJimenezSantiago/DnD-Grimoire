@@ -23,20 +23,14 @@ describe('fusionar', () => {
   });
 
   test('no toca la base si ya está bien o si la otra lectura es peor o es otro texto', () => {
-    // Base correcta: se queda aunque la otra lectura diga otra cosa
     assert.deepEqual(fusionar(['la criatura tiene daño'], 'la criatnra tieue daño', voc), ['la criatura tiene daño']);
-    // Las dos mal: se queda la base
     assert.deepEqual(fusionar(['el uhjetivo'], 'el ubjetivo', voc), ['el uhjetivo']);
-    // La otra lectura no se parece: es otro trozo de la página (texto de una ilustración, columna desordenada)
     assert.deepEqual(fusionar(['el xqzv recibe daño'], 'el conjuro recibe daño', voc), ['el xqzv recibe daño']);
-    // Sin segunda lectura no cambia nada
     assert.deepEqual(fusionar(['el uhjetivo'], '', voc), ['el uhjetivo']);
   });
 
   test('nunca cambia cifras', () => {
-    // Con varias líneas parecidas, la alineación puede emparejar «BC+2)» con un «BC» de otra línea: no se pierde el «+2»
     assert.deepEqual(fusionar(['VD: 1/8 (25 PX; BC+2)'], 'VD: 1/8 (25 PX; BC)', voc), ['VD: 1/8 (25 PX; BC+2)']);
-    // Una cifra dentro de una palabra sí es una letra mal leída
     assert.deepEqual(fusionar(['la 1nteligencía'], 'la inteligencia', voc), ['la Inteligencia']);
   });
 });

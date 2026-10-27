@@ -20,7 +20,6 @@ export const initLeer = store => { S = store; };
 const delGlosario = nombre => glosario().find(e => norm(e.nombre) === norm(String(nombre).replace(/\s*\(.*$/, '')));
 const pills = xs => `<div class="fi-pills">${xs.filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
 const lista = xs => `<dl class="lr-lista">${xs.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${d}</dd></div>`).join('')}</dl>`;
-// Como lista(), pero el nombre enlaza a la regla completa si el manual importado la trae
 const listaReglas = xs => `<dl class="lr-lista">${xs.map(([t, d]) => { const g = delGlosario(t);
   return `<div><dt>${g ? `<button type="button" class="term" data-term="${g.clave}">${esc(t)}</button>` : esc(t)}</dt><dd>${d}</dd></div>`; }).join('')}</dl>`;
 const fmtM = m => `${String(Math.round(m * 10) / 10).replace('.', ',')}\u00a0m`;
@@ -51,7 +50,6 @@ function efecto(id) {
 function economia(k) {
   const x = ECONOMIA_INFO[k]; if (!x) return;
   const ch = S.cur(), g = delGlosario(x.titulo);
-  // Lo que cambia para este personaje: cuántos ataques da su acción de Ataque y qué acciones puede hacer como adicional
   const at = k === 'accion' ? ataquesPorAccion(ch) : 1, ads = k === 'adicional' ? accionesAdicionales(ch) : [];
   const tuyo = at > 1 ? `<aside class="rg-resumen"><span class="rg-lbl">${esc(ch.nombre)}</span><p>Tu acción de Atacar te da <b>${at} ataques</b>.</p></aside>`
     : ads.length ? `<aside class="rg-resumen"><span class="rg-lbl">${esc(ch.nombre)}</span><p>Como acción adicional también puedes: ${ads.map(a => `<b>${esc(ACCION_COMUN[a.k].nombre)}</b> <small>(${esc(a.rasgo)})</small>`).join(', ')}.</p></aside>` : '';
@@ -75,7 +73,6 @@ function conc() {
   if (bi >= 0) abrirConjuro(bi);
 }
 
-// Acciones de combate: la regla del manual importado si la hay; si no, el resumen de la app
 function accionComun(k) {
   const a = ACCION_COMUN[k]; if (!a) return;
   const g = glosario().find(e => [a.nombre, ...(a.alias || [])].some(n => norm(e.nombre) === norm(n) || norm(e.nombre) === norm(`${n} (acción)`)));

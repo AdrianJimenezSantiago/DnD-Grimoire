@@ -46,7 +46,6 @@ export function init(store) {
   body.addEventListener('focusout', e => { if (e.target.id === 'oyIn' && e.target.value.trim()) anotar(e.target); });
   S.subscribe(() => {
     if (!dlg().open || !O) return;
-    // Si se pierde la concentración mientras está abierto, ya no hay objetivos que marcar
     if (O.clave === 'conc' && S.cur()?.play.conc !== O.conjuro) return cerrarDialogo(dlg());
     const f = document.activeElement?.id === 'oyIn'; render(); if (f) $('#oyIn')?.focus({ preventScroll: true });
   });

@@ -21,7 +21,6 @@ for (const pg of paginas) {
     fs.mkdirSync(dirImg, { recursive: true });
     const vp = (await doc.getPage(pg.pagina)).getViewport({ scale: 1 }), r = Math.round(1640 * 72 / vp.width);
     const W = Math.round(vp.width * r / 72), H = Math.round(vp.height * r / 72), base = path.join(dirImg, nombreRef(pg).replace(/\.txt$/, ''));
-    // Cuartos solapados un poco para no cortar líneas: columna izquierda/derecha × mitad superior/inferior
     for (const [k, x, y] of [['a', 0, 0], ['b', 0, 1], ['c', 1, 0], ['d', 1, 1]])
       execFileSync('pdftoppm', ['-f', String(pg.pagina), '-l', String(pg.pagina), '-r', String(r), '-png', '-singlefile',
         '-x', String(x * Math.round(W / 2 - 20)), '-y', String(y * Math.round(H / 2 - 30)), '-W', String(Math.round(W / 2 + 20)), '-H', String(Math.round(H / 2 + 30)),

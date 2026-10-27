@@ -9,7 +9,6 @@ let E = null;
 const dlg = () => $('#elegirDlg');
 
 export function elegir({ titulo, sub = '', items, grupos = null, actual = '', libre = true, placeholder = 'Buscar', vacio = '', ico = 'dote', grupoInicial = '' }) {
-  // Si la elección anterior aún se está cerrando, se espera a que termine: si no, su cierre se llevaría también esta
   const libreYa = dlg().open ? new Promise(r => dlg().addEventListener('close', r, { once: true })) : Promise.resolve();
   return libreYa.then(() => new Promise(resolve => {
     const orden = grupos || [...new Set(items.map(i => i.grupo || ''))];

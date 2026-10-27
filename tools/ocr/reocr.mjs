@@ -31,7 +31,6 @@ async function tesseract(pg) {
   fs.rmSync(base + '.png'); fs.rmSync(base + '.tsv');
 }
 
-// PaddleOCR (PP-OCRv4, el modelo que trae rapidocr_onnxruntime): una caja por línea de texto
 async function paddle(pg) {
   const base = path.join(tmp, nombreRef(pg).replace(/\.txt$/, '')), salida = path.join(destino, nombreRef(pg).replace(/\.txt$/, ''));
   if (fs.existsSync(salida + '.json')) return;

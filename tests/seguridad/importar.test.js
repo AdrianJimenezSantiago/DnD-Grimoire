@@ -4,7 +4,6 @@ import fs from 'node:fs';
 import { normBd, cargarGuardado, bdDeEjemplo } from '../../web/src/domain/personaje/modelo.js';
 import { esc } from '../../web/src/core/util.js';
 
-// Una copia de seguridad o un personaje exportado puede venir de cualquiera: lo que llega se limpia antes de pintarse
 const CARGA = '"\'><img src=x onerror=alert(1)>';
 const hostil = () => ({
   schema: 2, activeId: '../../shared_prefs/x',

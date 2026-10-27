@@ -63,8 +63,8 @@ export function leerCaracteristicas(txt, filas = []) {
     const fila = pos?.[Math.floor(orden.indexOf(k) / 3)], g = fila?.length === 3 ? fila[orden.indexOf(k) % 3] : null;
     if (g) ({ v, mod, sv } = g);
     else if (m) { v = +digitos(m[1]); mod = m[2] != null ? +digitos(m[2].replace(/\s/g, '')) : null; sv = m[3] != null ? +digitos(m[3].replace(/\s/g, '')) : null; }
-    if (mod != null && (mod < -5 || mod > 10)) mod = null; // un modificador imposible es un resto del OCR («-30»)
-    if (v != null && (v < 1 || v > 30)) v = null; // y una puntuación imposible también («Fue 0»)
+    if (mod != null && (mod < -5 || mod > 10)) mod = null;
+    if (v != null && (v < 1 || v > 30)) v = null;
     if (v == null && mod == null) { avisos.push(`sin ${k}`); continue; }
     if (v == null) { v = 10 + 2 * mod; avisos.push(`${k}: sin puntuación → ${v}`); }
     if (mod != null && esperado(v) !== mod) {
@@ -92,7 +92,6 @@ function repartir(txt) {
 }
 
 export function leerCriaturas(pages) {
-  // «barra»: la línea empieza con el borde del recuadro del perfil (se mira en el texto antes de corregir el OCR)
   const L = aplanar(pages).map(l => ({ ...l, barra: /^\s*[^\p{L}\d¿(+\-−–\s]/u.test(l.raw ?? l.s), s: limpiaIni(l.s) })).filter(l => l.s);
   const inicios = [];
   for (let i = 1; i < L.length - 2; i++) {

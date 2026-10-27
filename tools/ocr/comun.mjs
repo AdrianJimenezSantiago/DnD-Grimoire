@@ -25,7 +25,6 @@ export function archivoLibro(id) {
 
 export const abrir = id => pdfjs.getDocument({ url: archivoLibro(id), disableFontFace: true, verbosity: 0 }).promise;
 
-// Texto de una página tal y como lo ve la app: líneas de cada columna (paginaAColumnas), columnas separadas por una línea en blanco
 export async function textoPagina(doc, p) {
   const page = await doc.getPage(p), tc = await page.getTextContent(), w = page.getViewport({ scale: 1 }).width;
   page.cleanup();
@@ -36,7 +35,6 @@ export async function textoPagina(doc, p) {
 export const leerPaginas = () => JSON.parse(fs.readFileSync(path.join(DIR, 'paginas.json'), 'utf8')).paginas;
 export const nombreRef = pg => `${pg.libro}-${String(pg.pagina).padStart(3, '0')}.txt`;
 
-// Texto de todas las páginas de un libro (para el vocabulario), guardado en .cache/ porque leer el PDF entero tarda
 export async function textoLibro(id) {
   const st = fs.statSync(archivoLibro(id)), dir = path.join(DIR, '.cache'), f = path.join(dir, `${id}.json`), clave = `${st.size}-${st.mtimeMs}`;
   try { const c = JSON.parse(fs.readFileSync(f, 'utf8')); if (c.clave === clave) return c.paginas; } catch {}
@@ -48,8 +46,6 @@ export async function textoLibro(id) {
   return paginas;
 }
 
-// Elementos de texto (como los de pdf.js) a partir de la salida TSV de Tesseract: las palabras de cada línea se agrupan en
-// frases y solo se cortan en huecos grandes (celdas de tabla), para que paginaAColumnas vea lo mismo que con un PDF normal
 export function itemsDeTsv(tsv, dpi, altoPx) {
   const k = 72 / dpi, lineas = new Map();
   for (const fila of tsv.split('\n').slice(1)) {

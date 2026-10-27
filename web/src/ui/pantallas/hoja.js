@@ -39,10 +39,8 @@ function ce(val, attrs, editing) { return `<span ${editing ? 'contenteditable="t
 const inspHtml = ch => { const on = !!vidaDe(ch).inspiracion;
   return `<button type="button" class="hero-insp ${on ? 'on' : ''}" data-cmd="inspiracion" aria-pressed="${on}" title="${on ? 'Tienes inspiración heroica: gástala para repetir un d20' : 'Sin inspiración heroica: toca para marcarla'}" aria-label="Inspiración heroica: ${on ? 'la tienes' : 'no la tienes'}">
     <svg class="hi-marco" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L38 20 L20 38 L2 20 Z"/><path class="hi-in" d="M20 7 L33 20 L20 33 L7 20 Z"/></svg>${gi('inspiracion', 'hi-ico')}<i class="hi-chispa" aria-hidden="true"></i></button>`; };
-// Sello de lacre con el nivel: un círculo de borde ondulado (24 lóbulos) generado una vez
 const SELLO = (() => { let d = ''; for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2, r = i % 2 ? 19.6 : 21.4; d += `${i ? 'L' : 'M'}${(22 + r * Math.cos(a)).toFixed(2)} ${(22 + r * Math.sin(a)).toFixed(2)}`; } return `${d}Z`; })();
 const accion = (cmd, ico, lbl, extra = '', cls = '') => `<button type="button" class="es-gema ${cls}" data-cmd="${cmd}"><span class="es-gema-c" aria-hidden="true">${ico}</span><span class="es-gema-l">${lbl}</span>${extra}</button>`;
-// Cabecera de la hoja: un estandarte en arco con el cielo del color de la clase, el medallón, el nombre y la banderola
 function heroHtml(ch, P) {
   const t = temaDe(ch), cs = clasesDe(ch), multi = cs.length > 1, n = (ch.equipo?.objetos || []).length;
   const cinta = multi ? cs.map(c => `${esc(c.clase)} ${c.nivel}${c.subclase ? ` <span class="sub">· ${esc(c.subclase)}</span>` : ''}`).join('<i class="es-sep" aria-hidden="true">✦</i>')
@@ -67,7 +65,6 @@ function statsHtml(db, ch, P) {
   const pc = numPreparados(db, ch), cc = numTrucos(db, ch);
   const st = (v, l, cls = '') => `<div class="stat ${cls} ${String(v).replace(/<[^>]*>|&[a-z]+;/g, 'x').length > 6 ? 'long' : ''}"><b>${v}</b><span>${l}</span></div>`;
   if (!P.c) {
-    // Sin clase lanzadora: la CD y el ataque de los conjuros de especie (linaje élfico o gnomo, legado infernal)
     const esp = !P.apKey && P.cds?.find(x => x.especie);
     const magia = P.apKey ? [{ nombre: 'CD de salvación', valor: String(P.cd) }, { nombre: 'Ataque de conjuro', valor: sgn(P.atk) }]
       : esp ? [{ nombre: 'CD de especie', valor: String(esp.cd) }, { nombre: 'Ataque de especie', valor: sgn(esp.atk) }] : [];
@@ -258,9 +255,6 @@ export function pintarBarra(S) {
   patch($('#sbar'), h);
   medirBarra();
 }
-// Las medidas de la barra se leen en el siguiente fotograma, cuando ya se ha pintado toda la hoja, y no a mitad del
-// render (eso forzaba un cálculo de estilos y de layout extra en cada acción). Solo se escribe --appbar-h si cambia,
-// porque tocar una variable de :root recalcula los estilos de todo el documento.
 let medida = 0, appbarH = '', vigilada = false;
 function medirBarra() {
   if (!vigilada && typeof ResizeObserver === 'function') { vigilada = true; new ResizeObserver(medirBarra).observe($('#appbar')); }
@@ -292,7 +286,6 @@ export function pintarHoja(S) {
   patch($('#memorial'), actualizarLuto(ch) ? memorialHtml(ch) : '');
   const combate = combateDe(ch).activo;
   document.body.classList.toggle('combate', combate);
-  // morph y no patch: al marcar una acción o gastar un uso solo cambia lo afectado, y el resto no repite su entrada
   morph($('#combate'), combate ? combateHtml(ch, db) : '');
   morph($('#vitales'), vitalesHtml(ch));
   morph($('#caracs'), caracteristicasHtml(ch));

@@ -27,7 +27,6 @@ async function objetosDelLibro() {
   return analizarLibro(paginas).objetos;
 }
 
-// Lo que la app no automatiza aunque el objeto tenga números: se dice para que nadie lo dé por hecho
 const NOTAS = {
   'Piedra ioun': 'Maestría (+1 a la competencia), Regeneración, Reserva, Sustento y Absorción se consultan; las de característica, Protección y Consciencia son automáticas.',
   Defensora: 'Pasar el bonificador del arma a la CA se anota a mano.',
@@ -56,7 +55,6 @@ for (const o of objetos) {
   const x = concretar(o, eleccion), c = normPersonaje(personajeVacio({ clase: 'Mago', nivel: 5 })), e = anadirObjeto(c, x, () => 1);
   if (e.sintonia) alternarSintonia(c, e.id);
   if (e.arma || e.armadura) equipar(c, e.id);
-  // Lo que cambia en la hoja: efecto por nombre (de cualquier variante), ataque o CA, uso al beber o leer
   const efs = new Set();
   for (const op of pasos.length ? pasos[pasos.length - 1].opciones : [null]) {
     const y = op ? concretar(o, { ...eleccion, [pasos[pasos.length - 1].id]: op.valor }) : x;
@@ -74,7 +72,6 @@ for (const o of objetos) {
   const cargas = rs.map(r => `${r.nombre.replace(`${e.nombre}: `, '').replace(`${o.nombre}: `, '').replace(e.nombre, '').replace(/^ \(|\)$/g, '') || 'uso'}: ${o.cargas?.dado && r.id === e.rasgo ? o.cargas.dado : r.max}, ${etiquetaRecarga(r).toLowerCase()}`).join('; ');
   const variantes = pasos.map(p => `${p.titulo}: ${p.opciones.length}`).join(', ');
   const sintonia = o.sintonia ? (o.sintoniaCon ? `Sí (${o.sintoniaCon.replace(/^parte de /, '')}; se comprueba)` : 'Sí') : '—';
-  // Acciones del objeto: recuperar espacios, curar, lanzar conjuros con cargas (se ejecutan desde el inventario o el contador de la hoja)
   const coste = a => (a.uso === 'diario' ? '1/día' : a.uso === 'largo' ? '1/descanso largo' : a.uso === 'libre' ? 'a voluntad' : a.porNivel ? '1 carga/nivel' : a.escala ? `${a.coste}–${a.coste + a.escala - 1} cargas` : a.coste ? `${a.coste} c.` : 'a voluntad');
   const acs = accionesDe(x);
   if (acs.length) hace.push(`usos: ${acs.map(a => `${a.tipo === 'conjuro' ? `${a.nombre}${a.nivel && !a.escala ? ` (${a.nivel})` : ''}${a.cd ? ` CD ${a.cd}` : ''}` : a.titulo} [${coste(a)}]`).join(', ')}`);

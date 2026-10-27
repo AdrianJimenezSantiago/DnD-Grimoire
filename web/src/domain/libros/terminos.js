@@ -16,7 +16,6 @@ const CURADOS = {
   'maltrecho': ['maltrecho', 'maltrecha', 'maltrechos', 'maltrechas'], 'teletransporte': ['teletransporte'], 'resistencia': ['resistencia'],
   'inmunidad': ['inmunidad'], 'esfera': ['esfera'], 'cubo': ['cubo'], 'cono': ['cono'], 'linea': ['línea'], 'emanacion': ['emanación'],
   'cilindro': ['cilindro'], 'area de efecto': ['área de efecto'], 'critico': ['crítico'], 'invisible': ['invisible', 'invisibles'],
-  // El glosario de 2024 trae también estos; solo se enlazan si el manual importado tiene la entrada
   'ataque de oportunidad': ['ataque de oportunidad', 'ataques de oportunidad'], 'descanso largo': ['descanso largo'], 'descanso corto': ['descanso corto'],
   'inspiracion heroica': ['inspiración heroica'], 'impacto critico': ['impacto crítico'], 'salvacion contra muerte': ['salvación contra muerte', 'salvaciones contra muerte'],
   'sorpresa': ['sorpresa'], 'accion adicional': ['acción adicional'], 'reaccion': ['reacción'],

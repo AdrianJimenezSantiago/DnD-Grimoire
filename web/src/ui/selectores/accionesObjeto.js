@@ -16,7 +16,6 @@ import { registrarGastoObjeto } from '../../app/acciones.js';
 
 const buscar = (ch, id) => equipoDe(ch).objetos.find(o => o.id === id) || null;
 const pl = (n, s, p = `${s}s`) => `${n} ${n === 1 ? s : p}`;
-// Lo que cuesta, para el botón
 export function costeTexto(a) {
   if (a.uso === 'diario') return 'una vez al día';
   if (a.uso === 'largo') return 'una vez por descanso largo';
@@ -27,7 +26,6 @@ export function costeTexto(a) {
 }
 export const conjuroDe = a => (a.tipo === 'conjuro' ? compendio().find(c => norm(c.es) === norm(a.nombre)) || null : null);
 
-// Hace una acción del objeto: pregunta lo que haga falta (cargas, espacio), la aplica y lo cuenta
 export async function accionObjeto(S, oid, aid) {
   const ch0 = S.cur(), o0 = buscar(ch0, oid), a = accionesDe(o0).find(x => x.id === aid); if (!a) return;
   const motivo = motivoAccion(ch0, o0, a); if (motivo) { toast(`<b>${esc(a.titulo)}</b>: ${esc(motivo)}`); return; }
@@ -75,7 +73,6 @@ export async function accionObjeto(S, oid, aid) {
   toast(`<b>${esc(o0.nombre)}</b>: ${partes.join(' ')}${quedan}`, [...botones, botonDeshacer(S, h)]);
 }
 
-// Gastar el contador de un objeto desde la hoja: si el objeto tiene acciones, se elige cuál (o solo gastar)
 registrarGastoObjeto(async (S, rid) => {
   const ch = S.cur(), r = (ch.rasgos || []).find(x => x.id === rid); if (!r?.objetoId) return false;
   const o = buscar(ch, r.objetoId); if (!o) return false;

@@ -1,7 +1,6 @@
 // Orden divina del clérigo y Orden primigenia del druida.
 import { norm } from '../../core/util.js';
 
-// Orden divina (clérigo) y Orden primigenia (druida), Manual del Jugador de 2024: se eligen a nivel 1 de la clase
 export const ORDENES = {
   'Clérigo': { rasgo: 'Orden divina', opciones: [
     { nombre: 'Protector', marciales: true, armadura: 'pesada', texto: 'Competencia con armas marciales y entrenamiento con armaduras pesadas.' },
@@ -22,5 +21,4 @@ export function normOrdenes(x) {
   return out;
 }
 export const ordenDe = (ch, clase) => ORDENES[clase]?.opciones.find(o => o.nombre === ch.ordenes?.[clase]) || null;
-// Clases del personaje que tienen orden y aún no la han elegido
 export const ordenesPendientes = (ch, clases) => clases.filter(c => ORDENES[c] && !ordenDe(ch, c));

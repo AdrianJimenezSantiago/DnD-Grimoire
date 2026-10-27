@@ -14,11 +14,9 @@ export const CATEGORIAS = [['arma', 'Armas', 'o_arma'], ['armadura', 'Armaduras 
 export const NOMBRE_CAT = Object.fromEntries(CATEGORIAS.map(([k, t]) => [k, t]));
 export const MONEDAS = [['ppt', 'Platino', 10], ['po', 'Oro', 1], ['pe', 'Electro', 0.5], ['pp', 'Plata', 0.1], ['pc', 'Cobre', 0.01]];
 const CAT_TIPO = { Arma: 'arma', Armadura: 'armadura', Escudo: 'armadura', 'Poción': 'consumible', Pergamino: 'consumible', 'Munición': 'consumible' };
-// Objetos maravillosos de un solo uso o con dosis: se gastan como las pociones
 const CONSUMIBLE_MAGICO = /^(polvo|ficha de pluma|gema elemental|perfume|ungüento|unguento|canica de fuerza|bolsa de judias|disolvente universal|pegamento soberano|aceite)\b/;
 
 const A = (nombre, dano, tipo, peso, valor, props = [], maestria = '', distancia = '') => ({ nombre, cat: 'arma', peso, valor, arma: { dano, tipo, props, maestria, distancia } });
-// fue: Fuerza mínima (si no llega, −3 m de velocidad); sigilo: desventaja en Destreza (Sigilo) al llevarla
 const R = (nombre, base, dex, tipo, peso, valor, fue = 0, sigilo = false) => ({ nombre, cat: 'armadura', peso, valor, armadura: { base, dex, tipo, bono: 0, fue, sigilo } });
 const E = (nombre, cat, peso, valor = '', extra = {}) => ({ nombre, cat, peso, valor, ...extra });
 export const PREDEFINIDOS = [
@@ -69,11 +67,9 @@ export const equipoDe = ch => {
 };
 export const sintonizados = ch => equipoDe(ch).objetos.filter(o => o.sintonizado);
 export const tieneObjeto = (ch, clave) => equipoDe(ch).objetos.some(o => o.clave === clave);
-// Dados y bonos («1d8», «+2», «1d4+1»): lo que no tenga esa forma se descarta
 const corto = v => (/^[\w +\-.,]{0,40}$/.test(String(v ?? '')) ? String(v ?? '') : '');
 const num = (v, def = 0) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : def; };
 
-// Arma o armadura mágica con nombre de una normal («Espada larga +1», «Escudo +2», «Cota de mallas +1»): toma sus datos y el bonificador
 const BASES = [...PREDEFINIDOS].filter(p => p.arma || p.armadura).sort((a, b) => b.nombre.length - a.nombre.length);
 export function baseMagica(nombre) {
   const n = norm(nombre || ''), p = BASES.find(x => n.includes(norm(x.nombre))); if (!p) return null;
@@ -90,7 +86,6 @@ export function normObjeto(o) {
   if (!out.sintonia) out.sintonizado = false;
   if (out.sintoniaCon != null) out.sintoniaCon = String(out.sintoniaCon || '');
   if (out.usos != null && !Array.isArray(out.usos)) delete out.usos;
-  // Arma y armadura con cada dato de su tipo: llegan de copias importadas y varios se pintan tal cual en la hoja
   if (out.armadura && typeof out.armadura === 'object') { const a = out.armadura;
     out.armadura = { ...a, base: num(a.base), bono: num(a.bono), fue: num(a.fue), tipo: String(a.tipo || ''), sigilo: !!a.sigilo, dex: a.dex == null || ['todo', 'max2', 'no'].includes(a.dex) ? a.dex : 'todo' }; }
   else delete out.armadura;
@@ -98,10 +93,8 @@ export function normObjeto(o) {
     out.arma = { ...a, dano: corto(a.dano), tipo: String(a.tipo || ''), maestria: String(a.maestria || ''), distancia: String(a.distancia || ''), props: (Array.isArray(a.props) ? a.props : []).map(String), ...(a.bono != null ? { bono: typeof a.bono === 'number' ? a.bono : corto(a.bono) } : {}) }; }
   else delete out.arma;
   if (!out.equipado) delete out.mano;
-  // Maza y lanza llevaban una maestría que no es la del manual de 2024: se corrige en las que ya estaban en el inventario
   const mal = out.arma && MAESTRIA_CORREGIDA[norm(out.arma.base || out.nombre)];
   if (mal && out.arma.maestria === mal[0]) out.arma = { ...out.arma, maestria: mal[1] };
-  // Las armas y armaduras mágicas del libro llegaban sin daño ni CA: se completan con la normal de su nombre
   if (out.magico && (cat === 'arma' || cat === 'armadura') && !out.arma && !out.armadura) {
     const b = baseMagica(out.nombre);
     if (b?.arma && cat === 'arma') { out.arma = b.arma; if (!out.peso) out.peso = b.peso; }
@@ -112,7 +105,6 @@ export function normObjeto(o) {
 export function normEquipo(ch) {
   const eq = equipoDe(ch);
   eq.objetos = eq.objetos.filter(Boolean).map(normObjeto);
-  // Partidas antiguas: los recursos de cargas no sabían de qué objeto eran
   for (const o of eq.objetos) for (const id of [o.rasgo, ...(o.usos || [])].filter(Boolean)) { const r = (ch.rasgos || []).find(x => x.id === id); if (r && !r.objetoId) r.objetoId = o.id; }
   for (const [k] of MONEDAS) eq.monedas[k] = Math.max(0, Math.round(num(eq.monedas[k])));
   ordenarManos(eq);
@@ -120,13 +112,11 @@ export function normEquipo(ch) {
 }
 
 const tirarDado = caras => 1 + Math.floor(Math.random() * caras);
-// «1d6+3», «2d4 + 2» o «5»: tira la expresión
 export function tirarCantidad(expr, tirar = tirarDado) {
   const m = /^(\d+)d(\d+)(?:\s*\+\s*(\d+))?$/.exec(String(expr || '').replace(/\s+/g, ''));
   if (!m) return parseInt(expr, 10) || 0;
   let t = +(m[3] || 0); for (let i = 0; i < +m[1]; i++) t += tirar(+m[2]); return t;
 }
-// Cargas del objeto como recurso de la hoja. max puede venir ya tirado (cargas de «1d3», cuentas de «1d6 + 3»)
 export function rasgoDeCargas(o, max = o.cargas?.max) {
   const c = o.cargas; if (!c || !max) return null;
   const m = /^(\d+d\d+)(?:\+(\d+))?$/.exec(c.recarga || '');
@@ -137,22 +127,18 @@ export function rasgoDeCargas(o, max = o.cargas?.max) {
   if (/^\d+$/.test(c.recarga || '')) return { ...base, recarga: 'dado', recDado: `${c.recarga}d1`, recBono: 0, recMomento: 'largo' };
   return { ...base, recarga: 'nunca' };
 }
-// Dosis o unidades con las que se encuentra: «1d4 + 1 dosis», «1d6 + 4 pizcas», «3d4 judías», «1d4 + 4 canicas de fuerza»
 export function dosisDe(t) {
   const m = /(\d+d\d+(?:\s*\+\s*\d+)?|\d+)\s+(dosis|pizcas|jud[ií]as|canicas)\b/i.exec(String(t || ''));
   return m ? m[1].replace(/\s+/g, '') : '';
 }
-// Añade un objeto de la biblioteca (ya concretado si tenía variantes): sus cargas y sus usos diarios pasan a la hoja como recursos
 export function anadirObjeto(ch, o, tirar = tirarDado) {
   const e = normObjeto({ clave: o.clave, nombre: o.nombre, tipo: o.tipo, rareza: o.rareza, sintonia: !!o.sintonia, sintoniaCon: o.sintoniaCon || '', magico: true, cantidad: 1, rasgo: null,
     ...(o.arma ? { arma: o.arma, cat: 'arma' } : {}), ...(o.armadura ? { armadura: o.armadura, cat: 'armadura' } : {}), ...(o.peso ? { peso: o.peso } : {}),
     ...(o.municion ? { municion: o.municion } : {}), ...(o.base ? { base: o.base } : {}) });
-  // Los bastones y varas que se empuñan como arma siguen siendo objetos mágicos en el inventario
   if (o.arma && o.tipo && !['Arma', 'Armadura'].includes(o.tipo)) e.cat = 'magico';
   const dosis = dosisDe(o.texto);
   if (dosis && e.cat === 'consumible') e.cantidad = Math.max(1, tirarCantidad(dosis, tirar));
   const eq = equipoDe(ch);
-  // Pociones y otros consumibles iguales se apilan
   const igual = e.cat === 'consumible' && !o.cargas && eq.objetos.find(x => x.clave === e.clave && norm(x.nombre) === norm(e.nombre) && !x.rasgo);
   if (igual) { igual.cantidad += e.cantidad; return igual; }
   const r = rasgoDeCargas(o, o.cargas?.dado ? tirarCantidad(o.cargas.dado, tirar) : o.cargas?.max);
@@ -176,7 +162,6 @@ export function quitarObjeto(ch, id) {
   for (const id of [e.rasgo, ...(e.usos || [])].filter(Boolean)) { ch.rasgos = (ch.rasgos || []).filter(r => r.id !== id); if (ch.play?.rec) delete ch.play.rec[id]; }
   return e;
 }
-// Requisitos de sintonización: «por parte de un brujo, hechicero o mago», «de un lanzador de conjuros», «de un enano»…
 const CLASES_REQ = { bardo: 'Bardo', brujo: 'Brujo', clerigo: 'Clérigo', druida: 'Druida', explorador: 'Explorador', guerrero: 'Guerrero', hechicero: 'Hechicero', mago: 'Mago', monje: 'Monje', paladin: 'Paladín', picaro: 'Pícaro', barbaro: 'Bárbaro' };
 export function requisitoSintonia(ch, o) {
   const req = norm(o?.sintoniaCon || ''); if (!req) return '';
@@ -189,7 +174,6 @@ export function requisitoSintonia(ch, o) {
   if (especie && norm(ch.especie || '').startsWith(especie)) return '';
   return `Solo puede sintonizarlo ${o.sintoniaCon.replace(/^parte de /, '')}.`;
 }
-// Por qué no se puede sintonizar ahora ('' si se puede)
 export function motivoSintonia(ch, id) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return 'No está en el inventario.';
   if (e.sintonizado) return '';
@@ -204,8 +188,6 @@ export function alternarSintonia(ch, id) {
   e.sintonizado = !e.sintonizado; return true;
 }
 
-// Manos: un arma a dos manos ocupa las dos; el escudo, la secundaria si no se dice otra; cada arma de una mano, una.
-// La armadura se lleva puesta aparte, y solo una. Equipar algo que no cabe suelta lo que estorba y lo devuelve a la mochila.
 export const MANOS = ['principal', 'secundaria'];
 export const aDosManos = o => (o?.arma?.props || []).some(p => norm(p) === 'dos manos');
 export const esEscudo = o => o?.armadura?.tipo === 'escudo';
@@ -219,7 +201,6 @@ export function manos(ch) {
   return out;
 }
 export const armaduraPuesta = ch => equipoDe(ch).objetos.find(o => o.equipado && o.armadura && !esEscudo(o)) || null;
-// Las partidas guardadas antes de las manos (o con más cosas en la mano de las que caben) se reparten aquí
 function ordenarManos(eq) {
   const libre = { principal: true, secundaria: true }, peso = o => (MANOS.includes(o.mano) || o.mano === 'ambas' ? 0 : esEscudo(o) ? 1 : aDosManos(o) ? 2 : 3);
   let cuerpo = false;
@@ -252,12 +233,10 @@ export function alternarEquipado(ch, id) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return null;
   return e.equipado ? (desequipar(ch, id), { o: e, quitados: [] }) : equipar(ch, id);
 }
-// Dos armas ligeras, una en cada mano: el ataque adicional de la propiedad Ligera
 export function dosArmasLigeras(ch) {
   const { principal: a, secundaria: b } = manos(ch), ligera = o => (o?.arma?.props || []).some(p => norm(p) === 'ligera');
   return !!(a && b && a !== b && ligera(a) && ligera(b));
 }
-// Fuerza mínima y desventaja en Sigilo (tabla de armaduras de 2024). Las de mithral no tienen ninguna de las dos.
 export function requisitosArmadura(o) {
   const a = o?.armadura; if (!a || esEscudo(o) || /mithral/.test(norm(o.nombre || ''))) return { fue: 0, sigilo: false };
   const b = a.fue == null || a.sigilo == null ? baseMagica(o.nombre)?.armadura : null;
@@ -269,7 +248,6 @@ export function penalizacionArmadura(ch) {
   return { armadura: a, fue: r.fue, lenta: r.fue && (statsEfectivos(ch).fue || 10) < r.fue ? 3 : 0, sigilo: r.sigilo };
 }
 
-// Mochila o alijo: lo guardado (en la posada, en el carro, en casa) no se lleva encima y no pesa
 export function alternarGuardado(ch, id) {
   const e = equipoDe(ch).objetos.find(x => x.id === id); if (!e) return null;
   if (!e.guardado) { e.equipado = false; delete e.mano; if (e.sintonizado) e.sintonizado = false; }
@@ -286,18 +264,13 @@ export function pesoTotal(ch) {
   return Math.round((pesoDe(equipoDe(ch).objetos.filter(o => !o.guardado)) + pesoMonedas(ch)) * 10) / 10;
 }
 export const pesoGuardado = ch => Math.round(pesoDe(equipoDe(ch).objetos.filter(o => o.guardado)) * 10) / 10;
-// Constitución poderosa (goliat): cuenta como un tamaño más (Grande, ×2); en Forma grande ya es Grande y cuenta como Enorme (×4)
 export const capacidadCarga = ch => (statsEfectivos(ch).fue || 10) * 7.5 * (/goliat/i.test(ch.especie || '') ? ((ch.vida?.efectos || []).some(e => e.k === 'formagrande') ? 4 : 2) : 1);
-// Empujar, arrastrar o levantar: hasta el doble de la capacidad de carga
 export const capacidadArrastre = ch => capacidadCarga(ch) * 2;
 export const valorMonedas = ch => Math.round(MONEDAS.reduce((s, [k, , v]) => s + (equipoDe(ch).monedas[k] || 0) * v, 0) * 100) / 100;
 
-// Monedas, contadas en piezas de cobre para no arrastrar decimales
 const PC = { ppt: 1000, po: 100, pe: 50, pp: 10, pc: 1 }, DE_MENOR = ['pc', 'pp', 'pe', 'po', 'ppt'];
 export const enCobre = ch => DE_MENOR.reduce((s, k) => s + (equipoDe(ch).monedas[k] || 0) * PC[k], 0);
-// El cambio se da en oro, plata y cobre, sin electro ni platino
 const desglose = pc => { const out = { po: 0, pp: 0, pc: 0 }; for (const k of ['po', 'pp', 'pc']) { out[k] = Math.floor(pc / PC[k]); pc -= out[k] * PC[k]; } return out; };
-// Paga primero con las monedas pequeñas; si no llega justo, rompe la más pequeña que quede y recibe el cambio
 export function pagar(ch, po) {
   const m = equipoDe(ch).monedas; let falta = Math.round(num(po) * 100);
   if (!(falta > 0) || enCobre(ch) < falta) return null;
@@ -313,7 +286,6 @@ export function cobrar(ch, po) {
   for (const [k, n] of Object.entries(d)) m[k] = (m[k] || 0) + n;
   return d;
 }
-// Junta el cobre, la plata y el electro en las monedas más grandes (sin tocar el platino): pesa menos y se cuenta mejor
 export function juntarMonedas(ch) {
   const m = equipoDe(ch).monedas, antes = DE_MENOR.reduce((s, k) => s + (m[k] || 0), 0);
   const d = desglose(['pc', 'pp', 'pe', 'po'].reduce((s, k) => s + (m[k] || 0) * PC[k], 0));
@@ -321,7 +293,6 @@ export function juntarMonedas(ch) {
   return antes - DE_MENOR.reduce((s, k) => s + (m[k] || 0), 0);
 }
 
-// Valor y venta. Lo normal se vende por la mitad de su precio; gemas, joyas y obras de arte, por su valor entero.
 export function valorEnPo(v) {
   const m = /(\d[\d.]*(?:,\d+)?)\s*(ppt|po|pe|pp|pc)\b/i.exec(String(v || '')); if (!m) return 0;
   return num(m[1].replace(/\.(?=\d{3}\b)/g, '')) * PC[m[2].toLowerCase()] / 100;
@@ -337,20 +308,16 @@ export function venderObjeto(ch, id, n = 1) {
   return { o: e, n, precio };
 }
 
-// La munición de cada arma: flechas para los arcos, virotes para las ballestas…
 const MUNICION = [[/\barco/, /flecha/], [/ballesta/, /virote/], [/honda/, /balas? de honda|^balas?$/], [/cerbatana/, /aguja/], [/mosquete|pistola/, /balas? de (arma de )?fuego|cartucho/]];
 export function municionDe(ch, o) {
   if (!(o?.arma?.props || []).some(p => norm(p).startsWith('municion'))) return null;
   const r = MUNICION.find(([a]) => a.test(norm(o.nombre))); if (!r) return null;
   const c = equipoDe(ch).objetos.filter(x => x !== o && !x.arma && !x.guardado && r[1].test(norm(x.nombre)));
-  // La munición mágica que se haya elegido para disparar va primero
   return c.find(x => x.cantidad > 0 && x.id === o.municionId) || c.find(x => x.cantidad > 0) || c[0] || null;
 }
-// Pociones de curación (Guía del Dungeon Master de 2024)
 const POCIONES = [[/suprema/, '10d4+20'], [/superior/, '8d4+8'], [/mayor/, '4d4+4'], [/./, '2d4+2']];
 export const curacionDe = o => { const n = norm(o?.nombre || ''); return /^pocion(es)? de curacion/.test(n) ? POCIONES.find(([r]) => r.test(n))[1] : /^ung(u|ü)ento de keoghtom/.test(n) ? '2d8+2' : ''; };
 
-// CA con los objetos mágicos puestos: Capa y Anillo de protección, Brazales de defensa, Ropajes del archimago…
 export function claseArmadura(ch) {
   const base = claseArmaduraBase(ch), eq = equipoDe(ch), act = objetosActivos(ch);
   const armadura = eq.objetos.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo'), escudo = eq.objetos.some(o => o.equipado && o.armadura?.tipo === 'escudo');
@@ -377,9 +344,7 @@ function claseArmaduraBase(ch) {
   const opciones = [{ ca: 10 + des + bonoEsc, detalle: `10 + Des${esc ? ', escudo' : ''}` }];
   if (clases.includes('Bárbaro')) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Defensa sin armadura (10 + Des + Con)${esc ? ', escudo' : ''}` });
   if (clases.includes('Monje') && !esc) opciones.push({ ca: 10 + des + modOf(st.sab), detalle: 'Defensa sin armadura (10 + Des + Sab)' });
-  // Esplendor del genio (juramento de los genios nobles 3): 10 + Des + Con sin armadura, con escudo
   if (clasesDe(ch).some(c => c.clase === 'Paladín' && /genios/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.con) + bonoEsc, detalle: `Esplendor del genio (10 + Des + Con)${esc ? ', escudo' : ''}` });
-  // Juego de pies deslumbrante (colegio de la danza 3): 10 + Des + Car sin armadura ni escudo
   if (!esc && clasesDe(ch).some(c => c.clase === 'Bardo' && /danza/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.car), detalle: 'Juego de pies deslumbrante (10 + Des + Car)' });
   if (clasesDe(ch).some(c => c.clase === 'Hechicero' && /drac[oó]n/i.test(c.subclase || '') && c.nivel >= 3)) opciones.push({ ca: 10 + des + modOf(st.car) + bonoEsc, detalle: `Resistencia dracónica (10 + Des + Car)${esc ? ', escudo' : ''}` });
   return opciones.sort((a, b) => b.ca - a.ca)[0];
@@ -390,22 +355,18 @@ export const DANO_FURIA = L => (L >= 16 ? 4 : L >= 9 ? 3 : 2);
 const efectoActivo = (ch, k) => (ch.vida?.efectos || []).some(e => e.k === k);
 const conArmadura = ch => equipoDe(ch).objetos.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo');
 const conEscudo = ch => equipoDe(ch).objetos.some(o => o.equipado && o.armadura?.tipo === 'escudo');
-// Artes marciales: armas sencillas cuerpo a cuerpo y marciales ligeras, sin armadura ni escudo
 function artesMarciales(ch, o, props, distancia) {
   const m = clasesDe(ch).find(c => c.clase === 'Monje'); if (!m || conArmadura(ch) || conEscudo(ch)) return null;
   if (!o.sinArmas && (distancia || (esMarcialArma(o) && !props.includes('ligera')))) return null;
   return DADO_ARTES(m.nivel);
 }
 
-// El golpe sin armas: 1 + Fuerza, o mejor con Artes marciales, Matón de taberna o el estilo Combate sin armas
 export const GOLPE_SIN_ARMAS = 'sinarmas';
 export function golpeSinArmas(ch) {
   const dotes = dotesDe(ch).map(d => norm(d.nombre));
   let dano = tieneEstilo(ch, 'sinarmas') ? '1d6' : dotes.includes('maton de taberna') ? '1d4' : '1', props = [];
-  // Daño bárdico (colegio de la danza 3): sin armadura ni escudo, dado de inspiración + Destreza
   const danza = clasesDe(ch).find(c => c.clase === 'Bardo' && c.nivel >= 3 && /danza/i.test(c.subclase || ''));
   if (danza && !conArmadura(ch) && !conEscudo(ch)) { const d = danza.nivel >= 15 ? '1d12' : danza.nivel >= 10 ? '1d10' : danza.nivel >= 5 ? '1d8' : '1d6'; if (MEDIA(d) > MEDIA(dano)) dano = d; props = ['Sutil']; }
-  // Armadura demoníaca: garras de 1d8 cortante con +1; Vendas de poder sin armas: +1, +2 o +3
   let tipo = 'contundente', bono = 0;
   const demonio = equipoDe(ch).objetos.find(o => o.equipado && o.armadura && /^armadura demoniaca/.test(norm(o.nombre)) && (!o.sintonia || o.sintonizado));
   if (demonio) { if (MEDIA('1d8') > MEDIA(dano)) dano = '1d8'; tipo = 'cortante'; bono += 1; }
@@ -421,12 +382,10 @@ export function ataqueArma(ch, o) {
   const distancia = props.some(p => p.startsWith('municion')), sutil = props.includes('sutil');
   const artes = artesMarciales(ch, o, props, distancia), cancion = efectoActivo(ch, 'cancion') && clasesDe(ch).some(c => c.clase === 'Mago' && /hojacantante|cantante/i.test(c.subclase || ''));
   let mod = distancia ? des : sutil || artes ? Math.max(fue, des) : fue;
-  // Brazales de arquería: competencia y +2 al daño con arcos cortos y largos
   const nombreBase = a.base || o.base || String(o.nombre || '').replace(/\s*\+\d+\s*$/, '').replace(/\s*\(.*\)\s*$/, ''), act = objetosActivos(ch);
   const arco = /^arco (corto|largo)$/.test(norm(nombreBase)), brazales = arco ? Math.max(0, ...act.map(({ e }) => e.danoArcos || 0)) : 0;
   const competente = !!o.sinArmas || !!brazales || competenteConArma(ch, o);
   if (cancion && competente && modOf(st.int) > mod) mod = modOf(st.int);
-  // Munición mágica (Flechas +1…): su bonificador se suma al del arma
   const mun = distancia ? municionDe(ch, o) : null, bonoMun = mun ? bonoDeNombre(mun.nombre) : 0;
   const pb = competencia(nivelTotal(ch)), bono = (parseInt(a.bono, 10) || 0) + bonoMun;
   const s = n => (n >= 0 ? `+${n}` : String(n)), dosManos = props.includes('dos manos'), estilos = [];
@@ -436,10 +395,8 @@ export function ataqueArma(ch, o) {
   if (!distancia && (dosManos || props.some(p => p.startsWith('versatil'))) && tieneEstilo(ch, 'grandes')) estilos.push('a dos manos, los 1 y 2 del daño cuentan como 3');
   if (props.includes('ligera') && tieneEstilo(ch, 'dosarmas')) estilos.push('el ataque adicional con arma ligera suma el modificador al daño');
   if (o.sinArmas && tieneEstilo(ch, 'sinarmas')) estilos.push('1d8 si no empuñas armas ni escudo');
-  // Furia: suma su daño a los ataques que usan la Fuerza
   const barb = clasesDe(ch).find(c => c.clase === 'Bárbaro'), furia = barb && efectoActivo(ch, 'furia') && mod === fue && !distancia ? DANO_FURIA(barb.nivel) : 0;
   if (furia) estilos.push(`Furia +${furia} al daño`);
-  // Maestro en armas pesadas: +competencia al daño con armas pesadas en la acción de Ataque
   const pesadas = props.includes('pesada') && dotesDe(ch).some(d => norm(d.nombre) === 'maestro en armas pesadas') ? pb : 0;
   if (pesadas) estilos.push(`Maestro en armas pesadas +${pesadas} al daño`);
   for (const g of golpeExtra(ch)) estilos.push(`${g.nombre}: una vez por turno, +${g.dado} ${g.tipos} al impactar`);
@@ -456,7 +413,6 @@ export function ataqueArma(ch, o) {
   const md = mod + bono + dmg + furia + pesadas + brazales;
   const plano = !/d/.test(dado), total = plano ? Math.max(0, (parseInt(dado, 10) || 0) + md) : 0;
   const expr = plano ? String(total) : `${dado}${md ? s(md) : ''}`;
-  // Versátil: empuñada a dos manos usa el dado mayor, y ya no cuenta para Duelo
   const dv = props.map(p => /^versatil \((\d+d\d+)\)/.exec(p)?.[1]).find(Boolean), mv = md - dmg;
   const versatil = dv && MEDIA(dv) > MEDIA(dado) ? { expr: `${dv}${mv ? s(mv) : ''}`, dano: `${dv}${mv ? ` ${s(mv).replace(/^([+-])/, '$1 ')}` : ''} ${a.tipo || ''}`.trim() } : null;
   return { mod: mod + bono, maestria: a.maestria || '', domina: (tieneMaestria(ch, o.nombre) || tieneMaestria(ch, nombreBase)) && !!a.maestria, ligera: props.includes('ligera'), expr, tipo: a.tipo || '', competente, notas, versatil,

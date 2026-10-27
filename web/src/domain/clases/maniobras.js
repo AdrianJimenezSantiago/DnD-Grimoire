@@ -3,8 +3,6 @@ import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, competencia, modOf, nivelTotal } from '../reglas/reglas2024.js';
 
-// Maniobras del Maestro del combate (guerrero, Manual del Jugador de 2024). «Dado» es un dado de supremacía.
-// El grupo dice cuándo se usa, como en «En juego».
 export const MANIOBRAS = [
   { nombre: 'Ataque amenazador', grupo: 'pasivo', texto: 'Cuando impactes a una criatura con una tirada de ataque, gastas un dado y lo sumas al daño. El objetivo hace una salvación de Sabiduría o queda asustado de ti hasta el final de tu siguiente turno.' },
   { nombre: 'Ataque con finta', grupo: 'adicional', texto: 'Como acción adicional, gastas un dado para tener ventaja en tu siguiente tirada de ataque este turno contra una criatura a 1,5 m o menos. Si impacta, sumas el dado al daño.' },
@@ -30,14 +28,11 @@ export const MANIOBRAS = [
 
 const MAESTRO = /maestro del combate|batalla|battle/i;
 const maestroDe = ch => clasesDe(ch).find(c => c.clase === 'Guerrero' && MAESTRO.test(c.subclase || '')) || null;
-// Tres maniobras a nivel 3 y dos más a niveles 7, 10 y 15
 export const cupoManiobrasEn = L => (L >= 15 ? 9 : L >= 10 ? 7 : L >= 7 ? 5 : L >= 3 ? 3 : 0);
 export function cupoManiobras(ch) { const c = maestroDe(ch); return c ? cupoManiobrasEn(c.nivel) : 0; }
 export const dadoSupremacia = L => (L >= 18 ? 'd12' : L >= 10 ? 'd10' : 'd8');
-// CD de las maniobras: 8 + Fuerza o Destreza (la mayor) + competencia
 export const cdManiobras = ch => 8 + competencia(nivelTotal(ch)) + Math.max(modOf(statsEfectivos(ch).fue), modOf(statsEfectivos(ch).des));
 export const maniobraDe = nombre => MANIOBRAS.find(m => norm(m.nombre) === norm(nombre)) || null;
-// Las que tiene el personaje, con su texto; las que no están en la lista (de otro manual) salen sin texto
 export function maniobrasDe(ch) {
   const c = maestroDe(ch); if (!c) return [];
   return (ch.maniobras || []).map(n => maniobraDe(n) || { nombre: n, grupo: 'pasivo', texto: '' });

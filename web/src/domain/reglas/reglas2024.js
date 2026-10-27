@@ -119,7 +119,6 @@ export function perfil(ch) {
     row.forEach((n, i) => { if (n) slots[i + 1] = n; });
     if (pact) slots[pact.level] = (slots[pact.level] || 0) + pact.n;
   }
-  // Hechicería innata activa: +1 a la CD de los conjuros de hechicero
   const innata = (ch.vida?.efectos || []).some(e => e.k === 'innata') ? 1 : 0;
   const cds = [];
   for (const { c: k, l } of lanzan) {
@@ -128,12 +127,10 @@ export function perfil(ch) {
     if (x) x.claves.push(...claves);
     else { const m = modOf(st[ap]); cds.push({ ap, mod: m, cd: 8 + pb + m + mo.cd + (parseInt(ch.extraCD, 10) || 0) + (k.clase === 'Hechicero' ? innata : 0), atk: pb + m + mo.atk + (parseInt(ch.extraAtaque, 10) || 0), claves }); }
   }
-  // Subclases sin lanzamiento que dan conjuros con su propia característica (monje, bárbaro del corazón salvaje, guerrero psiónico)
   for (const k of clases) {
     const x = SUB_APTITUD.find(a => a.clase === k.clase && a.re.test(norm(k.subclase || ''))); if (!x || cds.some(y => y.claves.includes(norm(k.subclase)))) continue;
     const m = modOf(st[x.ap]); cds.push({ ap: x.ap, mod: m, cd: 8 + pb + m + mo.cd, atk: pb + m + mo.atk, claves: [norm(k.subclase)] });
   }
-  // Conjuros de especie (linaje élfico o gnomo, legado infernal): su propia aptitud mágica
   const apEsp = aptitudEspecie(ch, st, prim?.l.cast.ap || '');
   if (apEsp) {
     const claves = FUENTES_APTITUD.map(norm), x = cds.find(y => y.ap === apEsp);

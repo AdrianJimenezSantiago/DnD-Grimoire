@@ -15,7 +15,6 @@ import { pgActuales, pgMaximo, vidaDe, aplicarDano } from '../../web/src/domain/
 
 const ch = (o = {}) => normPersonaje(personajeVacio({ clase: 'Mago', nivel: 5, stats: { fue: 10, des: 14, con: 12, int: 16, sab: 10, car: 10 }, ...o }));
 const uno = () => 1;
-// Objeto como llega de la biblioteca
 const lib = (nombre, tipo, extra = {}) => ({ clave: nombre.toLowerCase(), nombre, tipo, rareza: 'Raro', subtipo: '', linea: '', texto: '', cargas: null, sintonia: false, ...extra });
 
 describe('variantesObjeto', () => {
@@ -26,10 +25,8 @@ describe('variantesObjeto', () => {
     assert.equal(x.nombre, 'Espada larga +2'); assert.equal(x.rareza, 'Raro'); assert.equal(x.arma.dano, '1d8'); assert.equal(x.arma.bono, 2);
     const c = ch({ clase: 'Guerrero' }), e = anadirObjeto(c, x); equipar(c, e.id);
     assert.match(ataqueArma(c, e).dano, /^1d8 \+ 2 cortante/);
-    // Con nombre propio: base entre paréntesis y bonificador del texto
     const v = concretar(lib('Espada vorpal', 'Arma', { subtipo: 'cimitarra, espada larga, espadón o guja', texto: 'Recibes un bonificador de +3 a las tiradas de ataque y de daño que hagas con esta arma mágica.' }), { base: 'Guja' });
     assert.equal(v.nombre, 'Espada vorpal (guja)'); assert.equal(v.arma.bono, 3); assert.equal(v.arma.dano, '1d10');
-    // «Hacha de guerra» de la Guía es el hacha de batalla del Manual; «arco corto o largo» da los dos arcos
     assert.deepEqual(pasosVariante(lib('Hacha berserker', 'Arma', { subtipo: 'alabarda, hacha a dos manos o hacha de guerra' }))[0].opciones.map(x => x.nombre), ['Alabarda', 'Hacha a dos manos', 'Hacha de batalla']);
     assert.deepEqual(pasosVariante(lib('Arco juramentado', 'Arma', { subtipo: 'arco corto o largo' }))[0].opciones.map(x => x.nombre), ['Arco corto', 'Arco largo']);
   });
@@ -44,7 +41,6 @@ describe('variantesObjeto', () => {
     const esc = concretar(lib('Escudo +1, +2 o +3', 'Armadura', { subtipo: 'escudo', linea: 'Armadura (escudo), infrecuente (+1), rara (+2) o muy rara (+3)' }), { mas: 3 });
     assert.equal(esc.nombre, 'Escudo +3'); equipar(c, anadirObjeto(c, esc).id);
     assert.equal(claseArmadura(c).ca, 25);
-    // El bonificador condicional del escudo atrapaflechas no cuenta siempre
     assert.equal(concretar(lib('Escudo atrapaflechas', 'Armadura', { subtipo: 'escudo', texto: 'obtienes un bonificador de +2 a la clase de armadura contra las tiradas de ataque a distancia.' })).armadura.bono, 0);
   });
 
@@ -57,7 +53,6 @@ describe('variantesObjeto', () => {
     assert.deepEqual(pasosVariante(ioun)[0].opciones.map(x => x.nombre), ['Agilidad', 'Perspicacia', 'Protección']);
     assert.equal(concretar(ioun, { var: 'Perspicacia' }).nombre, 'Piedra ioun de perspicacia');
     assert.deepEqual(efectoDe('Piedra ioun de perspicacia').suma, { sab: 2 }, 'perspicacia es Sabiduría, no Inteligencia');
-    // Munición +2: se apila como consumible y suma al arco
     const c = ch({ clase: 'Guerrero' }), fl = anadirObjeto(c, concretar(lib('Munición +1, +2 o +3', 'Arma', { subtipo: 'cualquier munición', linea: 'Arma (cualquier munición), infrecuente (+1), rara (+2) o muy rara (+3)' }), { base: 'Flechas', mas: 2 }));
     assert.equal(fl.nombre, 'Flechas +2'); assert.equal(fl.cat, 'consumible');
     const arco = anadirComun(c, { nombre: 'Arco largo', cat: 'arma', arma: { dano: '1d8', tipo: 'perforante', props: ['Munición', 'Pesada', 'Dos manos'], distancia: '45/180 m' } });
@@ -81,7 +76,6 @@ describe('cargas', () => {
     const rv = reglas(c).find(x => x.id === v.rasgo);
     assert.match(rv.nota, /1d20/);
     assert.equal(recuperarEnDescanso(rv, 7, 'largo', uno).usados, 5, '1d6 + 1 al amanecer');
-    // Usos diarios de las propiedades
     const cetro = anadirObjeto(c, lib('Cetro de poder señorial', 'Vara', { usos: [{ nombre: 'Cetro de poder señorial: Paralizar', recarga: 'largo' }, { nombre: 'Cetro de poder señorial: Drenar vida', recarga: 'largo' }] }));
     assert.equal(cetro.usos.length, 2);
     quitarObjeto(c, cetro.id);
@@ -117,7 +111,6 @@ describe('efectos', () => {
     assert.ok(pasivosDe(c).some(p => p.nombre === 'Cinturón enano'));
     const g = ch({ especie: 'Enano' }); alternarSintonia(g, anadirObjeto(g, lib('Botas de zancadas y brincos', 'Objeto maravilloso', { sintonia: true })).id);
     assert.equal(velocidad(g), 9);
-    // Lo que se deja en el alijo deja de funcionar
     const guantes = c.equipo.objetos.find(o => o.nombre === 'Guantes de ladrón'); alternarGuardado(c, guantes.id);
     assert.equal(objetoActivo(guantes), false);
     assert.equal(bonoHabilidad(c, 'juegomanos'), s0 + 1);

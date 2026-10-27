@@ -19,17 +19,17 @@ describe('iniciativa', () => {
 describe('limiteEspacio', () => {
   test('un espacio de conjuro por turno (Manual del Jugador 2024): trucos y reacciones en otro turno sí', () => {
     const maga = pj({ clase: 'Mago', nivel: 5, stats: st({ int: 18 }) });
-    assert.equal(limiteEspacio(maga, 'Acción'), '');                     // fuera de combate no hay turnos
+    assert.equal(limiteEspacio(maga, 'Acción'), '');
     empezarCombate(maga);
     lanzarEnCombate(maga, { tiempo: 'Acción', conEspacio: true, nombre: 'Bola de fuego' });
     assert.equal(combateDe(maga).turno.accion, true);
-    assert.equal(limiteEspacio(maga, 'Acción adicional'), 'turno');      // Paso brumoso con espacio: no en el mismo turno
-    assert.equal(limiteEspacio(maga, 'Reacción'), 'reaccion');           // Escudo: solo si es en el turno de otra criatura
+    assert.equal(limiteEspacio(maga, 'Acción adicional'), 'turno');
+    assert.equal(limiteEspacio(maga, 'Reacción'), 'reaccion');
     lanzarEnCombate(maga, { tiempo: 'Reacción', conEspacio: true, nombre: 'Escudo' });
-    assert.equal(combateDe(maga).espacio, 'Bola de fuego');             // la reacción en otro turno no cuenta para el tuyo
+    assert.equal(combateDe(maga).espacio, 'Bola de fuego');
     siguienteTurno(maga);
-    assert.equal(limiteEspacio(maga, 'Acción adicional'), '');           // turno nuevo, espacio nuevo
-    lanzarEnCombate(maga, { tiempo: 'Acción adicional' });               // un truco o un conjuro sin espacio no marca nada
+    assert.equal(limiteEspacio(maga, 'Acción adicional'), '');
+    lanzarEnCombate(maga, { tiempo: 'Acción adicional' });
     assert.equal(limiteEspacio(maga, 'Acción'), '');
     lanzarEnCombate(maga, { tiempo: 'Acción', conEspacio: true, nombre: 'Relámpago' });
     terminarCombate(maga); assert.equal(combateDe(maga).espacio, '');

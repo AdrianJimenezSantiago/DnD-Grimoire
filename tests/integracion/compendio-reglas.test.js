@@ -13,7 +13,6 @@ const pj = o => normPersonaje(personajeVacio({ clase: 'Guerrero', nivel: 1, stat
 const conEstados = (...estados) => { const ch = pj(); ch.vida.estados = estados; return ch; };
 
 describe('armas: maestrías y propiedades', () => {
-  // Manual del Jugador 2024, tabla de armas
   test('maestrías de las armas sencillas según el manual de 2024', () => {
     const m = n => PREDEFINIDOS.find(p => p.nombre === n).arma.maestria;
     assert.equal(m('Maza'), 'Debilitar');
@@ -76,7 +75,6 @@ describe('estados', () => {
       const mods = modsTirada(conEstados(k), { sobre: 'iniciativa' });
       assert.ok(mods.some(x => x.efecto === 'desventaja'), k);
     }
-    // Sin duplicar el modificador si además está marcado incapacitado
     assert.equal(modsTirada(conEstados('aturdido', 'incapacitado'), { sobre: 'iniciativa' }).filter(x => x.efecto === 'desventaja').length, 1);
   });
 

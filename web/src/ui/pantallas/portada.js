@@ -15,7 +15,6 @@ import { nexo } from '../animaciones/fondo.js';
 let S, cbs, verPruebas = false;
 export const portadaVisible = () => document.body.classList.contains('on-landing');
 
-// La rueda de clases ordenada por tono (empieza en el dorado del clérigo, el color de la marca): recorrerla es dar la vuelta al círculo cromático
 const RUEDA = Object.entries(TEMAS.clase).map(([nombre, [h, s, icono]]) => ({ nombre, h, s, icono })).sort((a, b) => a.h - b.h);
 const TONOS = RUEDA.map(({ h, s }) => ({ h, s: Math.max(s, 42) }));
 const PILARES = [
@@ -30,8 +29,6 @@ const PASO = 4200;
 
 let giro = 1, activo = 1, hueAcum = RUEDA[1].h, fijo = null, timer = 0;
 
-// El tono de destino (--lnd-*) se pone solo en los bloques de la portada que no tienen paleta propia, nunca en el
-// contenedor: así cambiar de tono no recalcula los estilos de todas las tarjetas de personaje (ver portada.css).
 let tinte = {};
 function aplicarTinte() {
   const el = $('#landing'); if (!el) return;
@@ -149,7 +146,6 @@ export function init(store, callbacks) {
     if (!S.db.chars.some(x => x.prueba)) { verPruebas = true; cbs.cmd('pruebas'); } else { verPruebas = !verPruebas; render(); }
     if (verPruebas) setTimeout(() => $('#landing .l-pruebas-nota')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   });
-  // La portada toma el color de lo que miras: una clase de la rueda o la tarjeta de un personaje
   const mirar = e => {
     const c = e.target.closest?.('.lcard, .l-clase'); if (!c) return;
     if (c.matches('.l-clase')) { fijo = RUEDA.find(x => x.nombre === c.dataset.lclase); marcar([...L.querySelectorAll('.l-clase')].indexOf(c)); }

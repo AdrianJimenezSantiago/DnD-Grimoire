@@ -3,10 +3,8 @@ import { norm } from '../../core/util.js';
 import { clasesDe, dotesDe } from './reglas2024.js';
 import { ordenDe } from '../clases/ordenes.js';
 
-// Entrenamiento con armaduras y competencia con armas (Manual del Jugador de 2024, clases, multiclase, subclases, órdenes y dotes)
 const ARMADURAS = { 'Bárbaro': ['ligera', 'media', 'escudo'], 'Bardo': ['ligera'], 'Brujo': ['ligera'], 'Clérigo': ['ligera', 'media', 'escudo'], 'Druida': ['ligera', 'escudo'],
   'Explorador': ['ligera', 'media', 'escudo'], 'Guerrero': ['ligera', 'media', 'pesada', 'escudo'], 'Paladín': ['ligera', 'media', 'pesada', 'escudo'], 'Pícaro': ['ligera'] };
-// Lo que da una clase cuando no es la primera (tabla de multiclase)
 const ARMADURAS_MULTI = { 'Bárbaro': ['escudo'], 'Bardo': ['ligera'], 'Brujo': ['ligera'], 'Clérigo': ['ligera', 'media', 'escudo'], 'Druida': ['ligera', 'escudo'],
   'Explorador': ['ligera', 'media', 'escudo'], 'Guerrero': ['ligera', 'media', 'escudo'], 'Paladín': ['ligera', 'media', 'escudo'], 'Pícaro': ['ligera'] };
 const MARCIALES = ['Bárbaro', 'Guerrero', 'Paladín', 'Explorador'];
@@ -26,7 +24,6 @@ export function armadurasDe(ch) {
   return out;
 }
 
-// Qué armas marciales maneja: todas, o solo las que cumplen una condición de sus propiedades
 export function marcialesDe(ch) {
   const reglas = [];
   clasesDe(ch).forEach((c, i) => {
@@ -45,7 +42,6 @@ const base = nombre => norm(String(nombre || '').replace(/\s*\+\d+\s*$/, '').rep
 export const esMarcial = arma => MARCIALES_PHB.some(n => norm(n) === base(arma.nombre) || norm(n) === base(arma.arma?.base));
 export const esSencilla = arma => SENCILLAS.some(n => norm(n) === base(arma.nombre) || norm(n) === base(arma.arma?.base));
 
-// Todas tienen competencia con armas sencillas; las marciales dependen de la clase. Un arma desconocida (mágica, casera) se da por buena.
 export function competenteConArma(ch, arma) {
   if (!esMarcial(arma)) return true;
   const props = (arma.arma?.props || []).map(norm), cc = !props.some(p => p.startsWith('municion'));

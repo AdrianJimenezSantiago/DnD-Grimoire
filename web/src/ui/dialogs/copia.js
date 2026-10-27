@@ -17,7 +17,6 @@ export function abrirCopia() { $('#bkText').value = JSON.stringify(S.db); abrirD
 export function cargarCopia(text) {
   if (!String(text ?? '').trim()) return rechazar($('#bkText'), 'vacio', { campo: 'Copia de seguridad' });
   let d; try { d = JSON.parse(text); } catch { d = null; }
-  // Todo se prepara sobre una copia: si el archivo viene roto o manipulado, falla aquí sin tocar lo que ya hay
   let r = null;
   try { r = leerCopia(d); } catch { r = null; }
   if (!r) return avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo o el texto completo tal como se guardó.`, icono: 'save' });

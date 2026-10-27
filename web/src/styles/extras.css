@@ -212,7 +212,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ar-chks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .ar-tools .chk-line { margin: 0; font-size: var(--fs-s); }
 .ar-wrap { overflow: auto; max-height: 62vh; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); padding: 6px; touch-action: pan-x pan-y; }
-/* Sin transición en el tamaño (ni con movimiento reducido): al hacer zoom se centra el área con el tamaño ya aplicado */
 .ar-svg { display: block; margin: auto; outline: none; transition-duration: 0s !important; }
 .ar-svg.mano { cursor: crosshair; } .ar-svg.arrastre { cursor: move; }
 .ar-svg:focus-visible { box-shadow: 0 0 0 2px var(--gold); border-radius: 4px; }
@@ -364,8 +363,6 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ej-emb .gi { width: 24px; height: 24px; filter: drop-shadow(0 0 8px var(--glow)); }
 .ej-note { margin: 10px 2px 0; }
 .linkish { all: unset; cursor: pointer; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
-/* «En juego»: cada rasgo es una placa con el color de su fuente (--ejc): un filamento que brilla a la izquierda,
-   un halo en la esquina y los usos como gemas, igual que en las tarjetas de recursos. */
 .ej-it, .ej-filtro button { --ejc: var(--gold); }
 .ej-it.o-subclase { --ejc: hsl(var(--acc-h) var(--acc-s) 60%); }
 .ej-it.o-multiclase { --ejc: var(--gold-2); }
@@ -497,7 +494,6 @@ dialog#retDlg { width: min(460px, 94vw); }
   color: hsl(var(--sh) var(--ss) 70%); border: 1px solid hsl(var(--sh) var(--ss) 58% / .45); background: hsl(var(--sh) var(--ss) 40% / .14); }
 .scp-info:hover, .scp-info:focus-visible { background: hsl(var(--sh) var(--ss) 45% / .3); outline: none; }
 .scp-card.on + .scp-info { bottom: auto; }
-/* Las tarjetas de una misma fila miden lo mismo y «Ver» queda centrado dentro de la tarjeta */
 .scp-grid .scp-item, .scp-panel .scp-item { display: flex; }
 .scp-grid .scp-card, .scp-panel .scp-card { flex: 1; height: 100%; }
 .scp-info { top: 50%; bottom: auto; transform: translateY(-50%); }

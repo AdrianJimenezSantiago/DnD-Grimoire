@@ -14,7 +14,6 @@ function modulos(dir = SRC) {
   });
 }
 
-// Imports de un módulo: { spec, destino } con destino relativo a web/src (o null si es un paquete de npm)
 function importsDe(archivo) {
   const src = fs.readFileSync(archivo, 'utf8');
   return [...src.matchAll(/(?:\bfrom\s+|\bimport\s*\(\s*|^import\s+)'([^']+)'/gm)].map(([, spec]) => ({
@@ -28,14 +27,12 @@ const TODOS = modulos().map(f => ({ rel: path.relative(SRC, f), imports: imports
 const infracciones = (filtro, permitido) => TODOS.filter(m => filtro(m.rel)).flatMap(m =>
   m.imports.filter(i => !permitido(i)).map(i => `${m.rel} → ${i.spec}`));
 
-// Nombres que exporta un módulo: export const/function/class y listas export { a, b as c }
 function exportsDe(rel) {
   const src = fs.readFileSync(path.join(SRC, rel), 'utf8');
   const nombres = [...src.matchAll(/^export (?:const|let|function|async function|class) ([\w$]+)/gm)].map(m => m[1]);
   for (const [, lista] of src.matchAll(/^export \{([^}]*)\}/gm)) nombres.push(...lista.split(',').map(s => s.trim().split(/\s+as\s+/).pop()).filter(Boolean));
   return new Set(nombres);
 }
-// Lo que un módulo usa de cada import relativo: nombres de import { … } y miembros de import * as X (X.nombre)
 function usosDe(rel) {
   const src = fs.readFileSync(path.join(SRC, rel), 'utf8'), usos = [];
   const destino = spec => path.relative(SRC, path.resolve(path.dirname(path.join(SRC, rel)), spec));

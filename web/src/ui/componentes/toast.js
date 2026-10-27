@@ -11,14 +11,11 @@ export function toast(msg, actions = []) {
     b.addEventListener('click', () => { ocultarToast(); a.fn(); }); acts.appendChild(b);
   });
   const dura = actions.length ? 7000 : 3200;
-  // La mecha de abajo se consume en lo que dura el aviso; se reinicia con cada aviso nuevo
   box.style.setProperty('--dura', dura + 'ms');
-  // Con una ventana abierta el aviso sube a la capa superior; si no, quedaría tapado por el <dialog> modal
   if (document.querySelector('dialog[open]')) alFrente(box);
   box.classList.remove('arde'); void box.offsetWidth; box.classList.add('show', 'arde');
   clearTimeout(timer); timer = setTimeout(ocultarToast, dura);
 }
 export const ocultarToast = () => $('#toast').classList.remove('show');
 export const toastAbierto = () => $('#toast').classList.contains('show');
-// Botón «Deshacer» para un aviso: h es lo que devuelven S.act, S.edit o S.replace.
 export const botonDeshacer = (S, h) => ({ label: 'Deshacer', fn: () => S.undo(h) });

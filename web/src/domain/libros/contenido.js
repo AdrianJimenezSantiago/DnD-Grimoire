@@ -173,7 +173,6 @@ export function separarRasgos(L) {
       const w = resto[n].replace(/[.,:;]$/, ''), sig = resto[n + 1] || '';
       if (esMay(w) || (MENOR.test(w.toUpperCase()) && n > 0 && esMay(sig)) || (esCap(w) && esMay(sig.replace(/[.,:;]$/, '')))) n++; else break;
     }
-    // Encabezado solo en su línea con mayúsculas y minúsculas mezcladas por el OCR («NiveEL 1: Druípico», «EsTILO DE COMBATE»)
     if (!n && resto.length <= 4 && !/[.,;:!?]$/.test(l.s.trim()) && resto.every((w, k) => /^[A-ZÁÉÍÓÚÑ]/.test(w) || (k > 0 && MENOR.test(w.toUpperCase())))) n = resto.length;
     if (!n) { out.push(l); continue; }
     let nombre = resto.slice(0, n).join(' ');

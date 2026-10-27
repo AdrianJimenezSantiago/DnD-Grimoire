@@ -28,7 +28,6 @@
 .spell.fx-cast { background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 14%, transparent), transparent 70%); transition: background 1.2s var(--ease); }
 .prep.fx-pop { animation: diamond-pop .35s var(--spring); }
 .pdie.used::after { animation: strike .35s var(--ease-out) both; }
-/* Mismo resplandor que «breathe», pero animando la opacidad de una capa: no repinta cada fotograma. */
 .conc { position: relative; }
 .conc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 18px var(--glow); opacity: 0; animation: respira 3.6s ease-in-out infinite; }
 @keyframes respira { 50% { opacity: 1; } }

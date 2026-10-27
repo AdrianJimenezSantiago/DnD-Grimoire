@@ -16,7 +16,6 @@
   transition: border-color var(--t-med), box-shadow var(--t-med) var(--ease), transform .3s var(--ease-out); }
 #sheet .pg-card { background-size: 70% 1px, auto, auto; background-position: 0 0, 0 0, 0 0; }
 
-/* Destello al pasar por lo que se puede tocar, como en las tarjetas de rasgos */
 #sheet :is(.pg-card, button.vt-placa)::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: linear-gradient(105deg, transparent 38%, color-mix(in srgb, var(--pc) 12%, transparent) 50%, transparent 62%) -150% 0 / 250% 100% no-repeat;
   transition: background-position .9s var(--ease); }
@@ -28,11 +27,9 @@
 #sheet .pg-card .pg-barra { height: 5px; border-radius: 3px; }
 #sheet .pg-card .pg-barra i { border-radius: 3px; }
 
-/* La CD y el ataque (las cifras clave) cuelgan su gema del filamento */
 #sheet .stat.key b { text-shadow: 0 0 22px var(--glow); }
 #sheet .stat:not(.key) b { color: var(--ink); }
 
-/* Características: la columna con salvación competente se ilumina en oro; el resto queda en bronce apagado */
 #sheet .cr-car.salv .cr-mod { color: var(--gold-2); text-shadow: 0 0 18px var(--glow); }
 :root[data-theme="light"] #sheet .cr-car.salv .cr-mod { color: var(--gold); text-shadow: none; }
 #sheet .cr-cab { border-bottom-color: color-mix(in srgb, var(--pc) 14%, var(--line-soft)); }
@@ -41,14 +38,12 @@
 #sheet .cr-fila.cr-salv { border-bottom: 1px solid color-mix(in srgb, var(--pc) 14%, var(--line-soft)); }
 #sheet .cr-fila:hover { background: linear-gradient(90deg, var(--gold-soft), transparent 90%); }
 
-/* Estados: una ranura tranquila en lugar del recuadro discontinuo */
 #sheet .vt-estados { border: 1px solid color-mix(in srgb, var(--gold) 12%, var(--line-soft)); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 6%, transparent), transparent 55%);
   transition: border-color var(--t-med), background-color var(--t-med); }
 #sheet .vt-estados:hover { border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); background-color: color-mix(in srgb, var(--gold) 4%, transparent); }
 #sheet .vt-estados:hover .es-edit { color: var(--gold); }
 #sheet .vt-estados .es-vacio .gi { color: var(--gold); opacity: .7; }
 
-/* Entrenamiento, herramientas e idiomas: una placa más, con rótulos grabados */
 #sheet .cr-otras { gap: 0; padding: 2px 14px; border: 1px solid color-mix(in srgb, var(--gold) 12%, var(--line-soft));
   background: radial-gradient(60% 120% at 0% 0%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 70%), linear-gradient(180deg, var(--surface-2), var(--surface)); }
 #sheet .cr-otras div { padding: 8px 0; align-items: baseline; }
@@ -56,5 +51,4 @@
 #sheet .cr-otras dt { font: 600 11px / 1.6 var(--display); letter-spacing: .12em; color: var(--gold); }
 #sheet .cr-otras dd { color: var(--ink); }
 
-/* Leyenda de símbolos: más aire y alineada con la rejilla */
 #sheet .cr-leyenda { gap: 6px 18px; margin: 12px 2px 4px; }

@@ -96,7 +96,6 @@ export function tirarDesde(clave) {
 }
 
 const arma = id => { const ch = S.cur(), o = armaCombate(ch, id); return o ? { o, a: ataqueArma(ch, o) } : null; };
-// Al impactar pregunta por maniobras, Castigo divino, Ataque furtivo… y gasta lo elegido (con deshacer)
 const danoArma = async (x, critico = false, aviso = '') => {
   const ops = opcionesAlImpactar(S.cur(), x.o); let mas = [];
   if (ops.length) {
@@ -111,9 +110,7 @@ const danoArma = async (x, critico = false, aviso = '') => {
   tirarDano({ titulo: x.o.nombre, sub: `de daño ${x.a.tipo}`.trim(), expr: x.a.expr, critico, aviso, clave: norm(x.a.tipo || ''), extras: [...efectosDe(S.cur()).filter(e => e.danoArma).map(e => ({ fuente: e.nombre, valor: e.danoArma })), ...danoSiempre(S.cur(), x.o), ...mas] });
 };
 const TXT_ATAQUE = { mella: 'Mella: el ataque con arma ligera entra en tu acción de Ataque', adicional: 'Ataque con arma ligera: gasta tu acción adicional', agotado: 'Ya has gastado tu acción y tus ataques de este turno' };
-// Ataque de precisión: si conoces la maniobra y te quedan dados de supremacía, se ofrece al fallar
 const precisionDe = ch => {
-  // Golpe guiado (dominio de la guerra 3): al fallar, +10 a la tirada gastando Canalizar divinidad
   const guerra = clasesDe(ch).some(c => c.clase === 'Clérigo' && c.nivel >= 3 && /guerra/i.test(c.subclase || '')), cd = reglas(ch).find(x => x.id === 'tpl:clerigo.canalizar');
   const guiado = guerra && cd && cd.max - usosGastados(ch, cd) > 0 ? { nombre: 'Golpe guiado', fijo: 10, quedan: cd.max - usosGastados(ch, cd), texto: 'gasta Canalizar divinidad y suma +10 a la tirada',
     fn: () => { const h = S.act('Golpe guiado: gasta Canalizar divinidad', (db, c) => { estadoRecurso(c, cd.id).used = (estadoRecurso(c, cd.id).used || 0) + 1; }); toast('Golpe guiado: Canalizar divinidad gastado.', [botonDeshacer(S, h)]); } } : null;
@@ -128,7 +125,6 @@ const tirarAtaque = (x, eco = '') => {
   tirarPrueba({ titulo: x.o.nombre, sub: ['Tirada de ataque', eco, maestria ? `maestría: ${maestria.nombre}` : ''].filter(Boolean).join(' · '), bono: parseInt(x.a.ataque, 10) || 0, tipo: 'ataque', critMin: rangoCritico(S.cur()),
     impacto: { maestria, clave: norm(x.a.tipo || ''), precision: precisionDe(S.cur()) }, siguiente: x.a.expr ? { texto: 'Tirar daño', fn: (critico, aviso) => danoArma(x, critico, aviso) } : null });
 };
-// Correr, Destrabarse, Esquivar, Esconderse…: gastan la acción (o la adicional o la reacción) y dejan su efecto hasta tu siguiente turno
 const VIA_TXT = { accion: 'tu acción', adicional: 'tu acción adicional', reaccion: 'tu reacción' };
 export const accionComun = (k, via, forzar = false) => {
   const ch = S.cur(), a = ACCION_COMUN[k], c = combateDe(ch); if (!ch || !a) return;
@@ -152,7 +148,6 @@ export const accionComun = (k, via, forzar = false) => {
 };
 export const pgRapido = tipo => { const i = document.getElementById('cbCant'), n = numeroDe(i, { min: 1, max: 999, tema: tipo === 'dano' ? 'dano' : 'curacion', campo: 'PG' }); if (n == null) return;
   if (tipo === 'dano') danar(S, n); else sanar(S, n); const j = document.getElementById('cbCant'); if (j) j.value = ''; };
-// Tirada de ataque con un arma; en combate cuenta el ataque en la economía del turno (acción, Mella, adicional)
 export function atacar(id) {
   const x = arma(id); if (!x) return;
   let reg = null;
@@ -161,5 +156,4 @@ export function atacar(id) {
   if (reg?.tipo === 'agotado') toast(`${TXT_ATAQUE.agotado}. La tirada no se descuenta.`);
   tirarAtaque(x, eco);
 }
-// Tirada de daño de un arma (botón de daño de la vista de combate)
 export function danoCon(id) { const x = arma(id); if (x) danoArma(x); }

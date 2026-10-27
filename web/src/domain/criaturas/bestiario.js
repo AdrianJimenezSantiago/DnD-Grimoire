@@ -17,8 +17,6 @@ export function nuevaCriatura(ch, nombre = '', sesion = null) {
     conjuros: {}, tacticas: '', notas: '', sesiones: sesion ? [sesion] : [], creada: Date.now() };
   bestiarioDe(ch).criaturas.unshift(c); return c;
 }
-// Una criatura que llega de una copia o de un personaje importado: cada campo con su tipo y solo los valores que
-// conoce la app (las marcas de daños, salvaciones y conjuros acaban en clases del HTML)
 const texto = v => (typeof v === 'string' || typeof v === 'number' ? String(v) : '');
 const soloDe = (o, valores) => Object.fromEntries(Object.entries(o && typeof o === 'object' && !Array.isArray(o) ? o : {}).filter(([, v]) => valores.includes(v)));
 export function normCriatura(c) {

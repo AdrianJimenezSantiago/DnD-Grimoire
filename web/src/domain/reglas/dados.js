@@ -1,7 +1,6 @@
 // Expresiones de dados («2d6+3», «4d6kh3»): parsear, tirar, ventaja y desventaja, y distribución de probabilidad.
 export const rngCripto = caras => { const a = new Uint32Array(1); crypto.getRandomValues(a); return 1 + (a[0] % caras); };
 
-// Un término es «2d6», «4d6kh3» (se queda los 3 mayores), «2d20kl1» (el menor) o un número.
 const TERM = '(?:\\d*d\\d+(?:k[hl]?\\d+)?|\\d+)';
 const RE_EXPR = new RegExp(`^[+-]?${TERM}(?:[+-]${TERM})*$`);
 export function parsear(expr) {
@@ -19,7 +18,6 @@ export function parsear(expr) {
       grupos.push(g);
     } else bono += signo * parseInt(x, 10);
   }
-  // Un bono de cuatro cifras o una pila de grupos ya no es una tirada de mesa
   if (Math.abs(bono) > 1000 || grupos.length > 12) return null;
   return grupos.length || bono ? { grupos, bono } : null;
 }
@@ -29,7 +27,6 @@ export function texto(p) {
   const g = p.grupos.map((x, i) => `${i && x.signo > 0 ? '+' : x.signo < 0 ? '−' : ''}${x.n}d${x.caras}${x.keep ? `k${x.keep.alto ? 'h' : 'l'}${x.keep.n}` : ''}`).join('');
   return g + (p.bono ? `${p.bono > 0 ? (g ? '+' : '') : '−'}${Math.abs(p.bono)}` : '');
 }
-// Índices de los dados que se descartan en un grupo «kh/kl».
 function descartes(vals, keep) {
   if (!keep) return [];
   const orden = vals.map((v, i) => i).sort((a, b) => (keep.alto ? vals[b] - vals[a] : vals[a] - vals[b]) || a - b);
@@ -55,9 +52,6 @@ export function tirar(p, { modo = 'normal', critico = false, rng = rngCripto } =
   return { total, grupos, bono: p.bono, d20, natural };
 }
 
-// Generador que reutiliza los dados de una tirada anterior (por número de caras) y solo
-// tira de verdad los que faltan. Así, pasar a ventaja añade un segundo d20 en vez de
-// repetirlo todo, y marcar un crítico suma los dados nuevos a los que ya estaban.
 export function rngReusa(previas = [], base = rngCripto) {
   const pool = new Map(), log = [];
   const mete = (c, vs) => { if (!pool.has(c)) pool.set(c, []); pool.get(c).push(...vs); };
@@ -68,14 +62,11 @@ export function rngReusa(previas = [], base = rngCripto) {
   const rng = c => { const q = pool.get(c); if (q?.length) { log.push(false); return q.shift(); } log.push(true); return base(c); };
   return { rng, log };
 }
-// Qué dados salieron nuevos en esta tirada, con la misma forma que r.grupos[i].vals (o [a, b] con ventaja).
 function frescos(r, log) {
   if (r.d20) return [[log[0] !== false, log[1] !== false]];
   let i = 0; return r.grupos.map(g => g.vals.map(() => log[i++] !== false));
 }
 
-// Resuelve una tirada completa con sus modificadores (dados extra y bonos planos).
-// «previo» es la resolución anterior: sus dados se reutilizan en lugar de volver a tirar.
 export function resolver({ p, modo = 'normal', critico = false, mods = [], previo = null, rng = rngCripto }) {
   if (!p) return null;
   const principal = rngReusa(previo ? [previo.r] : [], rng);
@@ -92,8 +83,6 @@ export function resolver({ p, modo = 'normal', critico = false, mods = [], previ
   return { r, extras, planos, total, cache };
 }
 
-// ---- Probabilidades exactas ----
-// Una distribución es { min, p } con p[i] = probabilidad de que el total valga min + i.
 const LIMITE = 6000;
 function sumaUniforme(d, c, signo) {
   const n = d.p.length, out = new Float64Array(n + c - 1);
@@ -106,7 +95,6 @@ function convolucion(a, b) {
   for (let i = 0; i < a.p.length; i++) { const x = a.p[i]; if (x) for (let j = 0; j < b.p.length; j++) out[i + j] += x * b.p[j]; }
   return { min: a.min + b.min, p: out };
 }
-// Grupo «kh/kl»: se enumeran todas las combinaciones si son pocas.
 function distKeep(g) {
   const { n, caras: c, keep } = g;
   if (c ** n > 250000) return null;
@@ -136,7 +124,6 @@ function sumaExpr(d, p, { modo = 'normal', critico = false, signo = 1 } = {}) {
   }
   return { min: d.min + signo * p.bono, p: d.p };
 }
-// extras: [{ p, signo }] (dados de Bendición, Guía…); plano: suma de bonos fijos.
 export function distribucion(p, { modo = 'normal', critico = false, extras = [], plano = 0 } = {}) {
   if (!p) return null;
   let d = sumaExpr({ min: 0, p: Float64Array.of(1) }, p, { modo, critico });

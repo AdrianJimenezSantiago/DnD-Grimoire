@@ -26,8 +26,6 @@ const oscuro = () => {
   return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-// El dibujo se hace en un Worker con OffscreenCanvas cuando se puede; si no, el mismo motor corre en la página.
-// motor(op, ...args) llama a la función del motor esté donde esté (y guarda las órdenes mientras se carga).
 let cv = null, worker = null, local = null, cola = [];
 const motor = (op, ...args) => {
   if (worker) worker.postMessage({ op, args });
@@ -47,7 +45,6 @@ function arrancarMotor() {
       const off = cv.transferControlToOffscreen();
       worker = new FondoWorker();
       worker.postMessage({ op: 'iniciar', lienzo: off }, [off]);
-      // Si el worker falla, el lienzo transferido ya no sirve aquí: se cambia por uno nuevo y se dibuja en la página.
       worker.addEventListener('error', () => {
         worker.terminate(); const n = cv.cloneNode(); cv.replaceWith(n); cv = n;
         cola = [['calidad', [CALIDAD[nivelEfectos()] || CALIDAD[ALTO]]], ['estado', [{ oculto: document.hidden, tapado, quieto, animar: animar() }]], ['tamano', [W, innerHeight, ratio()]]];
@@ -60,8 +57,6 @@ function arrancarMotor() {
   usarLocal();
 }
 
-// En pantallas táctiles el lienzo va a menos resolución: son brillos difusos y así cada fotograma pesa un tercio menos.
-// Con efectos medios o bajos, a 1× y con menos partículas y fotogramas; en bajos el fondo se pinta una vez y se queda quieto.
 const tactil = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 const ratio = () => Math.min(nivelEfectos() < ALTO ? 1 : tactil ? 1.25 : 1.5, window.devicePixelRatio || 1);
 const CALIDAD = [{ fps: 20, densidad: .5 }, { fps: 24, densidad: .7 }, { fps: 30, densidad: 1 }];
@@ -73,7 +68,6 @@ function tamano() {
   revisarTapado();
 }
 
-// Con una ventana a pantalla completa (móvil) el fondo no se ve y se para. Se comprueba solo al abrir o cerrar ventanas.
 let dialogos = null, tapado = false;
 function revisarTapado() {
   dialogos ||= document.getElementsByTagName('dialog');
@@ -81,8 +75,6 @@ function revisarTapado() {
   if (W < 700) for (const d of dialogos) if (d.open && d.classList.contains('tall')) { t = true; break; }
   if (t !== tapado) { tapado = t; motor('estado', { tapado }); }
 }
-// Mientras se desplaza la página (o una ventana) el fondo se queda quieto y deja la GPU libre para el scroll;
-// sigue 180 ms después de que el dedo pare.
 let quieto = false, quietoT = 0;
 function desplazando() {
   if (!quieto) { quieto = true; motor('estado', { quieto }); }

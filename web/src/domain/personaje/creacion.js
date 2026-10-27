@@ -7,7 +7,6 @@ import { HABILIDADES, HAB_CLASE, habilidadesTrasfondo, periciasDisponibles } fro
 const KEYS = CARACTERISTICAS.map(([k]) => k);
 const TODAS = HABILIDADES.map(([k]) => k);
 
-// Puntuaciones de característica (Manual del Jugador 2024, capítulo 2)
 export const MATRIZ = [15, 14, 13, 12, 10, 8];
 export const COSTE = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
 export const PUNTOS = 27;
@@ -31,7 +30,6 @@ export function repartoSugerido(clase, valores = MATRIZ) {
   return Object.fromEntries(prioridad(clase).map((k, i) => [k, v[i] ?? 10]));
 }
 
-// Aumentos del trasfondo: +2 y +1, o +1 a las tres. Ninguna pasa de 20.
 const NOMBRES_AB = { fuerza: 'fue', destreza: 'des', constitucion: 'con', inteligencia: 'int', sabiduria: 'sab', carisma: 'car' };
 export function caracteristicasTrasfondo(trasfondo, lib = []) {
   if (!String(trasfondo || '').trim()) return [];
@@ -57,13 +55,9 @@ export function bonosSugeridos(clase, permitidas, modo = '21') {
 }
 export const conBonos = (base, bonos) => Object.fromEntries(KEYS.map(k => [k, Math.min(20, Math.max(1, (parseInt(base[k], 10) || 10) + (bonos?.[k] || 0)))]));
 
-// Competencias en habilidades: de dónde sale cada una y cuántas quedan por elegir.
-// pericia: las elegidas quedan con pericia; fijas: no se eligen, son todas las de la lista; herramientas: puede cambiarlas por herramientas.
 const DOTE_HAB = { habilidoso: [3, TODAS, { herramientas: true }], 'experto en habilidades': [1, TODAS], 'mente aguda': [1, ['arcanos', 'historia', 'investigacion', 'naturaleza', 'religion']],
   observador: [1, ['investigacion', 'percepcion', 'perspicacia']], 'aprendiz del dragon purpura': [1, ['interpretacion', 'perspicacia', 'persuasion']], 'don de la habilidad': [18, TODAS, { fijas: true }] };
-// Subclases que dan competencias en habilidades a nivel 3
 export const HAB_SUBCLASE = {
-  // Conocimiento primigenio (bárbaro 3, rasgo de clase): una habilidad más de la lista del bárbaro
   'Bárbaro': [{ re: /(?:)/, nombre: 'Conocimiento primigenio', n: 1, lista: HAB_CLASE['Bárbaro'][1] }],
   'Bardo': [{ re: /conocimiento/i, nombre: 'Competencias adicionales (bardo)', n: 3, lista: TODAS },
     { re: /luna/i, nombre: 'Conocimientos primigenios', n: 1, lista: ['medicina', 'naturaleza', 'percepcion', 'perspicacia', 'supervivencia', 'tratoanimales'] }],
@@ -119,7 +113,6 @@ export function completarHabilidades(ch) {
 }
 const abDe = k => HABILIDADES.find(h => h[0] === k)?.[2] || 'des';
 
-// Dotes: la de origen del trasfondo, la de Humano (Versátil) y las que no se pueden repetir
 export const DOTES_ORIGEN = ['Alerta', 'Afortunado', 'Atacante salvaje', 'Duro', 'Fabricante', 'Habilidoso', 'Iniciado en la magia', 'Matón de taberna', 'Músico', 'Sanador'];
 const REPETIBLES = ['iniciado en la magia', 'habilidoso', 'adepto elemental', 'versado en un elemento', 'mejora de caracteristica'];
 const baseDote = t => norm(String(t || '').replace(/\s*\([^)]*\)\s*$/, ''));

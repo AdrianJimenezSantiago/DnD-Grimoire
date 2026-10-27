@@ -223,8 +223,6 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   for (const [L, lista] of Object.entries(CONJUROS_CLASE[ch.clase] || {})) if (hasta >= +L) lista.forEach(([nombre, fuente, gratis]) => out.push({ nombre, nivel: +L, fuente, gratis, ritual: false }));
   if (sc?.conjuros) {
     const fuente = (sc.rasgos[3] || []).find(r => /^Conjuros/.test(r)) || sc.nombre;
-    // Círculo de la tierra: los del terreno elegido (Árido si aún no se ha elegido)
-    // Vástago de los Tres: el truco del dios elegido
     const lista0 = sc.terrenos ? sc.terrenos[opcionDe(ch, 'tierra.terreno')?.nombre] || sc.conjuros
       : sc.trucoOpcion ? { 3: [opcionDe(ch, sc.trucoOpcion)?.truco || sc.conjuros[3][0]] } : sc.conjuros;
     for (const [L, lista] of Object.entries(lista0)) if (hasta >= +L) lista.forEach(nombre => out.push({ nombre, nivel: +L, fuente, gratis: '', ritual: !!sc.ritual }));
@@ -232,7 +230,6 @@ export function conjurosAutomaticos(ch, hasta = nivelDe(ch)) {
   return out;
 }
 
-// Golpes benditos (clérigo) y Furia elemental (druida): lo que da la variante elegida
 function furiaOGolpes(ch, nombre, mejorado) {
   const v = varianteDe(ch, ch.clase), dado = mejorado ? '2d8' : '1d8';
   if (!v) return { nombre, valor: 'Sin elegir', nota: 'Elige la variante tocando el rasgo en «En juego»' };

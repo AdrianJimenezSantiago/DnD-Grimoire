@@ -1,12 +1,4 @@
-// Calidad de los efectos (altos, medios, bajos): cuánto adorno se permite según el dispositivo y cómo va la app.
-// - Nivel de partida: el que aprendió la última vez en este dispositivo o, la primera vez, una estimación con lo que el
-//   navegador cuenta del equipo (memoria, núcleos, gráfica y píxeles de pantalla).
-// - En automático mide de vez en cuando el ritmo de fotogramas (2 s cada 15 s, solo con la app a la vista) y baja un
-//   nivel si va a tirones o sube cuando lleva tiempo sobrada (domain/presentacion/rendimiento.js decide). Con la batería
-//   baja y sin cargar no pasa de medios.
-// - Publica el nivel en <html data-efectos="alto|medio|bajo"> para el CSS y avisa a quien se suscriba (fondo animado).
-//   Las chispas y los golpes preguntan al lanzarse con escalaEfectos().
-// - Desde el menú se puede fijar a mano: entonces no se mide nada.
+// Calidad de los efectos (alto, medio, bajo) según el dispositivo y el ritmo de fotogramas; se publica en <html data-efectos>.
 import { almacen } from '../../platform/native.js';
 import { NIVELES, MEDIO, ALTO, nivelPorEquipo, veredicto, ajustar, estadoInicial } from '../../domain/presentacion/rendimiento.js';
 
@@ -19,7 +11,6 @@ const subs = new Set();
 
 export const nivelEfectos = () => nivel;
 export const modoEfectos = () => modo;
-// Cuántas partículas o adornos de un efecto se pintan: todos en altos, algo más de la mitad en medios y un tercio en bajos
 export const escalaEfectos = n => Math.max(1, Math.round(n * ([0.35, 0.6, 1][nivel] ?? 1)));
 export function alCambiarEfectos(fn) { subs.add(fn); if (nivel >= 0) fn(nivel); }
 
@@ -35,7 +26,6 @@ function guardar() {
   if (v !== guardado) { guardado = v; almacen.set(APRENDIDO, v); }
 }
 
-// ===== Lo que se sabe del equipo =====
 function nombreGpu() {
   try {
     const gl = document.createElement('canvas').getContext('webgl');
@@ -55,7 +45,6 @@ export function equipo() {
   };
 }
 
-// ===== Muestreo de fotogramas =====
 let reloj = 0, cuadro = 0;
 function programar(ms = CADA) {
   clearTimeout(reloj); reloj = 0;
@@ -75,7 +64,6 @@ function muestrear() {
   };
   cuadro = requestAnimationFrame(paso);
 }
-// En segundo plano no hay fotogramas: la muestra a medias no vale
 function alVisibilidad() {
   if (cuadro) { cancelAnimationFrame(cuadro); cuadro = 0; }
   programar(document.hidden ? 0 : 3000);
@@ -92,7 +80,7 @@ export async function initEfectos() {
   const [m, aprendido] = await Promise.all([almacen.get(PREF), almacen.get(APRENDIDO)]);
   if (MODOS.includes(m)) modo = m;
   let previo = null;
-  try { previo = JSON.parse(aprendido || 'null'); } catch { /* dato viejo o roto: se vuelve a estimar */ }
+  try { previo = JSON.parse(aprendido || 'null'); } catch {}
   if (previo && NIVELES[previo.nivel]) { estado = estadoInicial(previo.nivel, previo.fallos); guardado = aprendido; }
   else { estado = estadoInicial(nivelPorEquipo(equipo())); guardar(); }
   aplicar();

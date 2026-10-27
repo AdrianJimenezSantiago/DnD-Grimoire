@@ -8,8 +8,6 @@ import { DADO_ARTES } from '../equipo/equipo.js';
 import { nivelHabilidad } from '../reglas/habilidades.js';
 import { linajeDe, linajeActual } from '../origen/especies.js';
 
-// Reglas de clase que la app aplica sola en momentos concretos (Manual del Jugador de 2024):
-// al tirar iniciativa, al empezar tu turno y al gastar un uso que cura o da puntos de golpe temporales.
 const tirarDado = caras => 1 + Math.floor(Math.random() * caras);
 export function tirarExpr(expr, tirar = tirarDado) {
   let total = 0; const partes = [];
@@ -25,16 +23,13 @@ const regla = (ch, id) => reglas(ch).find(r => r.id === id) || null;
 const libres = (ch, id) => { const r = regla(ch, id); return r ? r.max - usosGastados(ch, r) : 0; };
 const gastar = (ch, id, n = 1) => { const st = estadoRecurso(ch, id); st.used = (st.used || 0) + n; };
 
-// Al tirar iniciativa. Cambia la ficha y devuelve lo que ha pasado, para contarlo.
 export function alTirarIniciativa(ch, tirar = tirarDado) {
   const out = [];
-  // Furia persistente (bárbaro 15): recuperas todos los usos de Furia, una vez por descanso largo
   const furia = regla(ch, 'tpl:barbaro.furia');
   if (furia && usosGastados(ch, furia) > 0 && libres(ch, 'tpl:barbaro.persistente') > 0) {
     estadoRecurso(ch, furia.id).used = 0; gastar(ch, 'tpl:barbaro.persistente');
     out.push({ nombre: 'Furia persistente', texto: `Recuperas todos tus usos de Furia (${furia.max}).` });
   }
-  // Metabolismo asombroso (monje 2): recuperas los puntos de concentración y te curas nivel + dado de artes marciales
   const foco = regla(ch, 'tpl:monje.concentracion'), monje = nivelClase(ch, 'Monje');
   let metabolismo = false;
   if (foco && usosGastados(ch, foco) > 0 && libres(ch, 'tpl:monje.metabolismo') > 0) {
@@ -43,38 +38,30 @@ export function alTirarIniciativa(ch, tirar = tirarDado) {
     const ganado = estadoVital(ch) === 'muerto' ? 0 : curar(ch, monje + t);
     out.push({ nombre: 'Metabolismo asombroso', texto: `Recuperas tus ${foco.max} puntos de concentración y ${ganado} PG (${monje} + d${d}: ${t}).`, cura: ganado });
   }
-  // Concentración perfecta (monje 15): si no usas Metabolismo asombroso, recuperas puntos hasta tener 4
   if (foco && monje >= 15 && !metabolismo && foco.max - usosGastados(ch, foco) < 4) {
     estadoRecurso(ch, foco.id).used = Math.max(0, foco.max - 4);
     out.push({ nombre: 'Concentración perfecta', texto: 'Recuperas puntos de concentración hasta tener 4.' });
   }
-  // Inspiración superior (bardo 18): recuperas usos de Inspiración bárdica hasta tener 2
   const insp = regla(ch, 'tpl:bardo.inspiracion');
   if (insp && nivelClase(ch, 'Bardo') >= 18 && insp.max - usosGastados(ch, insp) < 2) {
     estadoRecurso(ch, insp.id).used = Math.max(0, insp.max - 2);
     out.push({ nombre: 'Inspiración superior', texto: 'Recuperas usos de Inspiración bárdica hasta tener 2.' });
   }
-  // Archidruida (druida 20), Forma salvaje perenne: si no te quedan usos de Forma salvaje, recuperas uno
   const forma = regla(ch, 'tpl:druida.forma');
   if (forma && nivelClase(ch, 'Druida') >= 20 && usosGastados(ch, forma) >= forma.max) { estadoRecurso(ch, forma.id).used = forma.max - 1; out.push({ nombre: 'Archidruida', texto: 'Recuperas un uso de Forma salvaje.' }); }
-  // Don del destino: se recupera al tirar iniciativa
   const destino = regla(ch, 'tpl:dote.destino');
   if (destino && usosGastados(ch, destino) > 0) { estadoRecurso(ch, destino.id).used = 0; out.push({ nombre: 'Don del destino', texto: 'Vuelves a tenerlo disponible.' }); }
   return out;
 }
 
-// Al empezar tu turno (al pasar de ronda en combate)
 export function alEmpezarTurno(ch) {
   const out = [], v = vidaDe(ch), g = subDe(ch, 'Guerrero', /campeon/);
   if (estadoVital(ch) !== 'vivo') return out;
-  // Heroísmo lanzado por ti mismo: PG temporales iguales a tu modificador de aptitud mágica al empezar cada turno
   if (v.efectos.some(e => e.k === 'heroismo') && norm(ch.play?.conc || '') === 'heroismo') {
     const m = perfilDe(ch).mod || 0; if (m > 0 && ponerTemporales(ch, m)) out.push({ nombre: 'Heroísmo', texto: `Tienes ${v.temp} PG temporales.` });
   }
   if (!g) return out;
-  // Guerrero heroico (campeón 10): ganas inspiración heroica si no la tienes
   if (g.nivel >= 10 && !v.inspiracion) { v.inspiracion = true; out.push({ nombre: 'Guerrero heroico', texto: 'Ganas inspiración heroica.' }); }
-  // Superviviente (campeón 18), Desafiar a la muerte: si estás maltrecho y te queda algún PG, recuperas 5 + Constitución
   const pg = pgActuales(ch), max = pgMaximo(ch);
   if (g.nivel >= 18 && pg > 0 && pg <= Math.floor(max / 2)) {
     const n = curar(ch, Math.max(0, 5 + modOf(statsEfectivos(ch).con)));
@@ -83,7 +70,6 @@ export function alEmpezarTurno(ch) {
   return out;
 }
 
-// Usos que curan o dan PG temporales al gastarse. solo: siempre sobre ti (se aplica solo); si no, se ofrece aplicártelo.
 export function curacionDeRecurso(ch, id) {
   const L = k => nivelClase(ch, k), m = k => Math.max(1, modOf(statsEfectivos(ch)[k])), pb = competencia(nivelTotal(ch));
   switch (id) {
@@ -98,33 +84,26 @@ export function curacionDeRecurso(ch, id) {
     default: return null;
   }
 }
-// Aplica la curación o los temporales de un uso recién gastado
 export function aplicarCuracion(ch, c, tirar = tirarDado) {
   const r = tirarExpr(c.expr, tirar);
   const n = c.tipo === 'temp' ? ponerTemporales(ch, r.total) : curar(ch, r.total);
   return { ...r, aplicado: n };
 }
 
-// Rango de crítico de tus ataques con arma: Crítico mejorado (campeón 3) y Crítico superior (campeón 15)
 export function rangoCritico(ch) {
   const g = subDe(ch, 'Guerrero', /campeon/);
   return !g || g.nivel < 3 ? 20 : g.nivel >= 15 ? 18 : 19;
 }
-// Talentos fiables (pícaro 7): en las pruebas de habilidad con competencia, un 9 o menos en el d20 cuenta como 10
 export const minimoD20Habilidad = (ch, hab) => (nivelClase(ch, 'Pícaro') >= 7 && nivelHabilidad(ch, hab) >= 1 ? 10 : 0);
 
-// Árbol del Mundo (bárbaro 3), Vitalidad del árbol: al entrar en furia ganas PG temporales iguales a tu nivel de bárbaro
 export function temporalesAlEnfurecer(ch) {
   const b = subDe(ch, 'Bárbaro', /arbol/); return b && b.nivel >= 3 ? b.nivel : 0;
 }
-// Poderío indómito (bárbaro 18): en pruebas y salvaciones de Fuerza, si el total es menor que tu Fuerza, usas tu Fuerza
 export const totalMinimoFuerza = (ch, ab) => (ab === 'fue' && nivelClase(ch, 'Bárbaro') >= 18 ? parseInt(statsEfectivos(ch).fue, 10) || 0 : 0);
 
-// Efectos de gastar un uso que cambian otros contadores de la ficha. Devuelve lo que ha pasado.
 export function alGastarRecurso(ch, id) {
   const out = [];
   const P = perfilDe(ch);
-  // Astucia mágica (brujo 2): recuperas espacios de pacto hasta la mitad del máximo (todos con Maestro sobrenatural, 20)
   if (id === 'tpl:brujo.astucia' && P.pact) {
     const L = P.pact.level, usados = Math.min(ch.play.used?.[L] || 0, P.pact.n), n = Math.min(usados, nivelClase(ch, 'Brujo') >= 20 ? P.pact.n : Math.ceil(P.pact.n / 2));
     if (n) { ch.play.used[L] = (ch.play.used[L] || 0) - n; out.push(`Recuperas ${n} ${n === 1 ? 'espacio' : 'espacios'} de pacto.`); }
@@ -132,14 +111,11 @@ export function alGastarRecurso(ch, id) {
     const celestial = subDe(ch, 'Brujo', /celestial/);
     if (celestial && celestial.nivel >= 10) { const t = celestial.nivel + modOf(statsEfectivos(ch).car); if (ponerTemporales(ch, t)) out.push(`Resiliencia celestial: ${t} PG temporales.`); }
   }
-  // Recuperación mágica (hechicero 5): recuperas puntos de hechicería hasta la mitad de tu nivel
   if (id === 'tpl:hechicero.recuperacion') {
     const r = regla(ch, 'tpl:hechicero.puntos');
     if (r) { const n = Math.min(usosGastados(ch, r), Math.floor(nivelClase(ch, 'Hechicero') / 2)); estadoRecurso(ch, r.id).used = usosGastados(ch, r) - n; out.push(`Recuperas ${n} puntos de hechicería.`); }
   }
-  // Ataque de aliento (dracónido): CD 8 + Con + competencia, 1d10 a 4d10 del tipo de su linaje
   if (id === 'tpl:especie.aliento') { const a = alientoDe(ch); out.push(`Salvación de Destreza CD ${a.cd}: ${a.dado}${a.tipo ? ` de ${a.tipo}` : ''}, mitad si la supera.`); }
-  // Revelación celestial (aasimar 3): lo que hace la opción elegida
   if (id === 'tpl:especie.revelacion') {
     const o = linajeDe(ch, 'especie.aasimar'), pb = competencia(nivelTotal(ch)), cd = 8 + modOf(statsEfectivos(ch).car) + pb;
     if (!o) out.push('Elige la transformación en «En juego» (Alas celestiales, Fulgor interior o Mortaja necrótica).');
@@ -148,9 +124,7 @@ export function alGastarRecurso(ch, id) {
     else out.push(`Mortaja necrótica: las criaturas a 3 m que no sean aliadas hacen una salvación de Carisma CD ${cd} o quedan asustadas hasta el final de tu siguiente turno.`);
     if (o) out.push(`Una vez por turno, +${pb} de daño ${o.tipo} a un ataque o conjuro.`);
   }
-  // Excursión de las nubes (goliat): teletransporte como acción adicional
   if (id === 'tpl:especie.gigante' && linajeActual(ch)?.nombre === 'Excursión de las nubes') out.push('Acción adicional: te teletransportas hasta 9 m a un espacio sin ocupar que veas.');
-  // Forma salvaje (druida 2): PG temporales iguales a tu nivel de druida (el triple con Formas del círculo, luna 3)
   if (id === 'tpl:druida.forma') {
     const L = nivelClase(ch, 'Druida'), luna = subDe(ch, 'Druida', /luna/), t = luna && luna.nivel >= 3 ? 3 * L : L;
     if (ponerTemporales(ch, t)) out.push(`Ganas ${t} PG temporales al transformarte.`);
@@ -158,8 +132,6 @@ export function alGastarRecurso(ch, id) {
   }
   return out;
 }
-// Armadura de Agathys: 5 PG temporales por nivel del espacio
-// Escarcha del cazador (caminante invernal 3): al lanzar Marca del cazador, 1d10 + nivel de explorador
 export function temporalesDeConjuro(nombre, L, ch = null, tirar = tirarDado) {
   const n = norm(nombre);
   if (n === 'armadura de agathys') return 5 * Math.max(1, L || 1);
@@ -167,22 +139,16 @@ export function temporalesDeConjuro(nombre, L, ch = null, tirar = tirarDado) {
   if (n === 'marca del cazador' && inv && inv.nivel >= 3) return tirar(10) + inv.nivel;
   return 0;
 }
-// Resiliencia celestial (celestial 10): al terminar un descanso corto o largo ganas nivel de brujo + Carisma PG temporales
 export function temporalesAlDescansar(ch) {
   const c = subDe(ch, 'Brujo', /celestial/), st = statsEfectivos(ch);
   const celestial = c && c.nivel >= 10 ? c.nivel + modOf(st.car) : 0;
-  // Líder inspirador (dote): nivel de personaje + Sabiduría o Carisma (el mayor) al terminar un descanso corto o largo
   const lider = dotesDe(ch).some(d => norm(d.nombre) === 'lider inspirador') ? nivelTotal(ch) + Math.max(modOf(st.sab), modOf(st.car)) : 0;
   return Math.max(celestial, lider);
 }
-// Don del recuerdo de conjuros: al gastar un espacio de nivel 1 a 4 tiras 1d4; si sale su nivel, no se gasta
 export const recuerdoDeConjuros = (ch, L, tirar = tirarDado) => (L >= 1 && L <= 4 && dotesDe(ch).some(d => norm(d.nombre) === 'don del recuerdo de conjuros') ? tirar(4) === L : false);
-// Maestro en armaduras pesadas: con armadura pesada, el daño contundente, cortante y perforante de un ataque se reduce en tu competencia
 export const reduccionArmaduraPesada = ch => (dotesDe(ch).some(d => norm(d.nombre) === 'maestro en armaduras pesadas') && (ch.equipo?.objetos || []).some(o => o.equipado && o.armadura?.tipo === 'pesada') ? competencia(nivelTotal(ch)) : 0);
 
-// Superviviente (campeón 18), Desafiar a la muerte: un 18-20 en la salvación contra muerte cuenta como un 20
 export const rangoMuerte = ch => { const g = subDe(ch, 'Guerrero', /campeon/); return g && g.nivel >= 18 ? 18 : 20; };
-// Mareas del caos (magia salvaje 3): se restablece al lanzar un conjuro de hechicero con espacio (y entonces tiras en la tabla de sobrecarga)
 export function alLanzarConEspacio(ch, fuente = '') {
   const out = [], r = regla(ch, 'tpl:salvaje.mareas');
   if (r && usosGastados(ch, r) > 0 && (!fuente || /hechicer|drac|salvaje/i.test(norm(fuente)) || !/mago|clerigo|druida|bardo|brujo|paladin|explorador|dote/.test(norm(fuente)))) {
@@ -196,8 +162,6 @@ export function alientoDe(ch) {
   return { cd: 8 + modOf(statsEfectivos(ch).con) + pb, dado: `${[1, 5, 11, 17].filter(x => L >= x).length}d10`, tipo };
 }
 
-// Reacciones que reducen el daño recibido de un ataque: se ofrecen al anotar el daño.
-// aplica(ch, n) gasta lo que toque y devuelve el daño que queda.
 export function reaccionesDano(ch, tirar = tirarDado) {
   const out = [], st = statsEfectivos(ch), pic = nivelClase(ch, 'Pícaro'), monje = nivelClase(ch, 'Monje');
   if (pic >= 5) out.push({ k: 'esquiva', label: 'Esquiva asombrosa: la mitad', aplica: (c, n) => Math.floor(n / 2) });
@@ -208,7 +172,6 @@ export function reaccionesDano(ch, tirar = tirarDado) {
   const sup = regla(ch, 'tpl:maestro.supremacia'), dados = sup ? sup.max - usosGastados(ch, sup) : 0;
   if (dados > 0 && (ch.maniobras || []).some(m => norm(m) === 'parada')) { const g = nivelClase(ch, 'Guerrero'), caras = g >= 18 ? 12 : g >= 10 ? 10 : 8, bono = Math.max(modOf(st.fue), modOf(st.des));
     out.push({ k: 'parada', label: `Parada: −1d${caras} + ${bono}`, aplica: (c, n) => { gastar(c, sup.id); return Math.max(0, n - (tirar(caras) + bono)); } }); }
-  // Linaje gigante del goliat (usos = competencia): Resistencia de la piedra reduce el daño; Trueno de la tormenta lo devuelve
   const gig = libres(ch, 'tpl:especie.gigante'), lin = gig > 0 ? linajeActual(ch)?.nombre : '';
   if (lin === 'Resistencia de la piedra') { const con = modOf(st.con);
     out.push({ k: 'piedra', label: `Resistencia de la piedra: −1d12 ${con < 0 ? '−' : '+'} ${Math.abs(con)}`, aplica: (c, n) => { gastar(c, 'tpl:especie.gigante'); return Math.max(0, n - Math.max(0, tirar(12) + con)); } }); }
@@ -217,7 +180,6 @@ export function reaccionesDano(ch, tirar = tirarDado) {
   return out;
 }
 
-// Al caer a 0 PG sin morir: Aguante incansable (orco) te deja a 1 PG, una vez por descanso largo
 export function alCaerA0(ch) {
   const out = [];
   if (libres(ch, 'tpl:especie.aguante') > 0) out.push({ k: 'aguante', label: 'Aguante incansable: te quedas a 1 PG', aplica: c => { gastar(c, 'tpl:especie.aguante'); fijarPg(c, 1); } });

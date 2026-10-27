@@ -2,7 +2,6 @@
 import { norm } from '../../core/util.js';
 import { clasesDe } from '../reglas/reglas2024.js';
 
-// Dotes de estilo de combate (Manual del Jugador de 2024) y sus alternativas de paladín y explorador
 export const ESTILOS = [
   { nombre: 'Tiro con arco', ef: 'arqueria', re: /arquer|archery|tiro con arco/, texto: 'Obtienes un bonificador de +2 a las tiradas de ataque que hagas con armas a distancia.' },
   { nombre: 'Lucha a ciegas', ef: 'ciegas', re: /ciegas|blind/, texto: 'Tienes vista ciega con un alcance de 3 m.' },
@@ -34,17 +33,14 @@ export const esAlternativa = nombre => Object.values(ALTERNATIVAS).find(a => bas
 export const estilosDe = (ch, lib = []) => (ch.dotes || []).map(d => estiloDe(d, lib)).filter(Boolean);
 export const tieneEstilo = (ch, ef) => estilosDe(ch).some(e => e.ef === ef);
 
-// Cuántos estilos da la clase (o su alternativa) y cuántos lleva el personaje
 export function estadoEstilo(ch, lib = []) {
   const fuentes = clasesDe(ch).filter(c => NIVEL_ESTILO[c.clase] && c.nivel >= NIVEL_ESTILO[c.clase]);
-  // Cada clase con el rasgo da un estilo, y el Campeón otro a nivel 7 (Estilo de combate adicional)
   const campeon = clasesDe(ch).some(c => c.clase === 'Guerrero' && /campe[oó]n/i.test(c.subclase || '') && c.nivel >= 7);
   const elegidos = estilosDe(ch, lib).length + (ch.dotes || []).filter(esAlternativa).length, total = fuentes.length + (campeon ? 1 : 0);
   return { fuentes: [...fuentes.map(c => c.clase), ...(campeon ? ['Campeón'] : [])], puede: fuentes.length > 0, faltan: Math.max(0, total - elegidos), total, elegidos };
 }
 export const trucosAlternativa = ch => (ch.dotes || []).map(esAlternativa).filter(Boolean);
 
-// Opciones para elegir: las del libro importado si las hay, si no las del manual
 export function opcionesEstilo(ch, lib = [], clase = '') {
   const tiene = new Set((ch.dotes || []).map(baseNombre));
   const delLibro = lib.filter(d => d.cat === 'Estilo de combate');

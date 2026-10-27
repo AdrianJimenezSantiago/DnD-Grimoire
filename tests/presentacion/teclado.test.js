@@ -4,13 +4,9 @@ import { tapaTeclado, tecladoAbierto, desplazamiento, repartir, UMBRAL_TECLADO }
 
 describe('teclado en pantalla', () => {
   test('lo que tapa el teclado sale de la zona visible frente a la ventana', () => {
-    // iPad en vertical: ventana de 1180, el teclado deja 780 visibles
     assert.equal(tapaTeclado({ alto: 1180, vvAlto: 780 }), 400);
-    // Safari ha desplazado la zona visible 120 px hacia abajo para enseñar el campo: el teclado tapa menos de la ventana
     assert.equal(tapaTeclado({ alto: 1180, vvAlto: 780, vvTop: 120 }), 280);
-    // App de Android o Chrome con resizes-content: la ventana ya se ha encogido y no queda nada tapado
     assert.equal(tapaTeclado({ alto: 800, vvAlto: 800 }), 0);
-    // Con zoom de pellizco la zona visible es pequeña por el zoom, no por el teclado
     assert.equal(tapaTeclado({ alto: 1180, vvAlto: 590, escala: 2 }), 0);
     assert.equal(tapaTeclado({ alto: 1180, vvAlto: 0 }), 0);
     assert.equal(tapaTeclado({ alto: 1180, vvAlto: 1200 }), 0);

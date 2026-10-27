@@ -22,7 +22,6 @@ export function abrirArea(s, textos) {
   $('#arSub').textContent = describir(area);
   abrirDialogo(dlg()); montar(); pintar();
 }
-// Lo que no cambia mientras el diálogo está abierto: barra de herramientas y huecos para el resto
 function montar() {
   const f = A.area.forma, situable = A.alcance && SITUABLES.includes(f);
   $('#arBody').innerHTML = `<div class="ar-meta" id="arMeta" role="status"></div>
@@ -34,14 +33,12 @@ function montar() {
     <ul class="ar-ley" id="arLey"></ul>
     <p class="note" id="arNota"></p>`;
 }
-// Ajusta un punto de origen a la cuadrícula (igual que el original) y lo mete dentro del alcance
 function ajustar(p, o, R) {
   const snap = q => [o[0] + Math.round(q[0] - o[0]), o[1] + Math.round(q[1] - o[1])], v = [p[0] - YO[0], p[1] - YO[1]], d = Math.hypot(...v);
   let k = d > R ? R / d : 1, q = snap([YO[0] + v[0] * k, YO[1] + v[1] * k]);
   while (Math.hypot(q[0] - YO[0], q[1] - YO[1]) > R + 1e-6 && k > 0) { k -= 0.02; q = snap([YO[0] + v[0] * k, YO[1] + v[1] * k]); }
   return q;
 }
-// Casillas que puede llegar a tocar el área si se gira en cualquiera de las 8 direcciones
 function fantasma() {
   if (!A.fant) { A.fant = new Set(); for (let d = 0; d < 360; d += 45) for (const [x, y] of celdasArea(A.area, d).celdas) A.fant.add(`${x},${y}`); }
   return A.fant;
@@ -57,7 +54,6 @@ function pintar() {
   const tomadas = new Set(celdas.map(c => c.join(',')));
   const fant = A.todas && !situa && DESDE_TI.includes(f) ? [...fantasma()].filter(k => !tomadas.has(k)).map(k => k.split(',').map(Number)) : [];
 
-  // Encuadre: el área, el lanzador y, con el alcance a la vista, el círculo hasta donde puede llegar el efecto
   const pts = [...celdas, ...roces, ...fant, [0, 0], [1, 1]], env = situa ? R + rArea : R;
   if (verAlc) pts.push([YO[0] - env, YO[1] - env], [YO[0] + env, YO[1] + env]);
   const x0 = Math.floor(Math.min(...pts.map(p => p[0]))) - 1, y0 = Math.floor(Math.min(...pts.map(p => p[1]))) - 1;
@@ -73,7 +69,6 @@ function pintar() {
   for (let y = 0; y <= H; y++) g += `<line x1="0" y1="${u(y)}" x2="${u(W)}" y2="${u(y)}"${(y + y0) % 2 ? '' : ' class="mj"'}/>`;
   const fs = Math.max(11, Math.min(15, px * 0.42)), txt = (p, t, cls = '') => `<text class="lbl ${cls}" x="${X(p[0])}" y="${Y(p[1])}" font-size="${fs}">${esc(t)}</text>`;
 
-  // Alcance: lo de fuera se apaga; el borde punteado lleva su medida
   let alc = '';
   if (verAlc) {
     const cx = X(YO[0]), cy = Y(YO[1]), r = u(R);
@@ -85,7 +80,6 @@ function pintar() {
   const parciales = celdas.filter((c, i) => res.cob[i] <= 0.98);
   const rect = c => `<rect x="${X(c[0])}" y="${Y(c[1])}" width="${u(1)}" height="${u(1)}"/>`;
 
-  // Contorno exacto de la plantilla
   let forma = '';
   if (f === 'emanacion') { const r = area.r / CASILLA; forma = `<rect x="${X(-r)}" y="${Y(-r)}" width="${u(1 + 2 * r)}" height="${u(1 + 2 * r)}" rx="${u(r)}"/>`; }
   else if (f === 'esfera' || f === 'cilindro') forma = `<circle cx="${X(O[0])}" cy="${Y(O[1])}" r="${u(area.r / CASILLA)}"/>`;
@@ -93,7 +87,6 @@ function pintar() {
   else if (f === 'linea') { const L = area.largo / CASILLA, w = area.ancho / CASILLA / 2, e = [O[0] + ux * L, O[1] + uy * L]; forma = `<polygon points="${P([O[0] - uy * w, O[1] + ux * w])} ${P([e[0] - uy * w, e[1] + ux * w])} ${P([e[0] + uy * w, e[1] - ux * w])} ${P([O[0] + uy * w, O[1] - ux * w])}"/>`; }
   else if (f === 'cubo') { const L = area.lado / CASILLA / 2; forma = `<polygon points="${[[L, L], [L, -L], [-L, -L], [-L, L]].map(([a, b]) => P([O[0] + a * ux - b * uy, O[1] + a * uy + b * ux])).join(' ')}"/>`; }
 
-  // Cota con la medida principal, en la dirección en que el área se aleja del lanzador
   const cota = (a, b, t) => {
     const n = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / n, ny = (b[0] - a[0]) / n, tk = 0.18, off = fs / px * 0.9;
     const m = [(a[0] + b[0]) / 2 + nx * off, (a[1] + b[1]) / 2 + ny * off];
@@ -106,7 +99,6 @@ function pintar() {
   else if (f === 'cono' || f === 'linea') { const L = area.largo / CASILLA; medida = cota(O, [O[0] + ux * L, O[1] + uy * L], `${mt(area.largo)} m`); }
   else if (f === 'cubo') { const L = area.lado / CASILLA / 2, s = L + 0.45; medida = cota([O[0] - ux * L + uy * s, O[1] - uy * L - ux * s], [O[0] + ux * L + uy * s, O[1] + uy * L - ux * s], `${mt(area.lado)} m`); }
 
-  // Punto de origen y, al colocarlo, la distancia hasta el lanzador
   const pr = Math.max(3.5, px * 0.14);
   let origen = '';
   if (situa || f === 'esfera' || f === 'cilindro') {
@@ -128,7 +120,6 @@ function pintar() {
     <g class="shape">${forma}</g>${token}${medida}${origen}`;
   A.anim = false;
 
-  // Cabecera con el recuento y los datos que importan para decidir
   const enteras = celdas.length - parciales.length, rumbo = RUMBOS[Math.round(A.dir / 45) % 8];
   $('#arMeta').innerHTML = `<div class="ar-cnt"><b>${celdas.length}</b><span>casillas afectadas${parciales.length && enteras ? `<small>${enteras} ${enteras === 1 ? 'entera' : 'enteras'} · ${parciales.length} a más de la mitad</small>` : ''}</span></div>
     <div class="ar-datos"><span>1 casilla = 1,5 m</span>${A.alcance ? `<span>Alcance ${mt(A.alcance)} m · ${casillas(A.alcance)} casillas</span>` : `<span>Alcance: ${esc(A.s.alcance || '—')}</span>`}${situa ? `<span class="az">Centro a ${mt(lejos * CASILLA)} m de ti</span>` : ''}</div>`;
@@ -148,7 +139,6 @@ function pintar() {
   if (A.centrar) { A.centrar = false; const c = situa ? O : [(Math.min(...celdas.map(p => p[0])) + Math.max(...celdas.map(p => p[0])) + 1) / 2, (Math.min(...celdas.map(p => p[1])) + Math.max(...celdas.map(p => p[1])) + 1) / 2];
     wrap.scrollTo({ left: X(c[0]) - wrap.clientWidth / 2, top: Y(c[1]) - wrap.clientHeight / 2 }); }
 }
-// Punto de la cuadrícula bajo el puntero
 function punto(e) {
   const r = $('#arSvg').getBoundingClientRect();
   return [(e.clientX - r.left) / A.px + A.x0, (e.clientY - r.top) / A.px + A.y0];
@@ -174,7 +164,6 @@ export function init(store) {
     if (e.target.id === 'arAlc') { A.conAlcance = e.target.checked; A.pt = null; A.zoom = 1; A.anim = true; A.centrar = true; pintar(); }
     if (e.target.id === 'arTodas') { A.todas = e.target.checked; pintar(); }
   });
-  // Tocar apunta o coloca; con ratón, además, se puede arrastrar el área para colocarla
   $('#arBody').addEventListener('click', e => { if (e.target.closest('#arSvg') && !A.arrastrado) tocar(e); A.arrastrado = false; });
   $('#arBody').addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button === 0 && e.target.closest('#arSvg.arrastre')) { A.drag = true; A.arrastrado = false; } });
   addEventListener('pointermove', e => { if (A?.drag && dlg().open) { A.arrastrado = true; tocar(e); } });

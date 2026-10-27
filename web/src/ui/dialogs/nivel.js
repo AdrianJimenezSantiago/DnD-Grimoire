@@ -38,11 +38,8 @@ const listaDe = (clase, subclase) => { const cls = CLASES[clase] || {}; return c
 const cambiosHtml = xs => xs.length ? `<section class="av-sec av-cambios lv-cambios"><h3>${gi('libro')}Al subir también puedes cambiar</h3><ul class="av-lista">${xs.map(i => `<li class="av-it">${gi(i.ico, 'av-it-ico')}<span class="av-it-t"><b>${esc(i.titulo)}${i.fuente ? `<small>${esc(i.fuente)}</small>` : ''}</b><span>${esc(i.texto)}</span></span></li>`).join('')}</ul></section>` : '';
 const doteLib = n => biblioteca().dotes.find(x => norm(x.nombre) === norm(String(n || '').replace(/\s*\([^)]*\)\s*$/, '')));
 const aumentosDote = n => { const x = doteLib(n); return (x && aumentoDeDote(x.texto)) || AUMENTO_DOTE[norm(String(n || '').replace(/\s*\([^)]*\)\s*$/, ''))] || null; };
-// Tope de la característica que sube una dote: 30 en los dones épicos, 20 en el resto
 const topeDote = n => { const x = doteLib(n); return (x ? x.cat === 'Don épico' || /m[aá]ximo de 30/i.test(x.texto) : /^don /i.test(String(n || '').trim())) ? 30 : 20; };
-// Dotes cuya característica elegida cambia algo más (Resiliente da la salvación): se guardan con ella entre paréntesis
 const conDetalle = (n, k) => /^resiliente$/i.test(norm(n)) && k ? `${n} (${NOMBRE_CAR[k]})` : n;
-// Nivel 20: Campeón primordial (bárbaro) y Cuerpo y mente (monje) suben dos características en 4, hasta 25
 const CUMBRE = { 'Bárbaro': ['fue', 'con'], 'Monje': ['des', 'sab'] };
 function draft(conDote = true) {
   const d = clone(char()), o = objetivo();
@@ -58,14 +55,12 @@ function draft(conDote = true) {
   if (LV.orden) d.ordenes = { ...(d.ordenes || {}), [o.clase]: LV.orden };
   const e = LV.estilo || {};
   if (e.nuevo) d.dotes = [...(d.dotes || []).filter(x => x !== e.quitar), e.nuevo];
-  // La dote elegida ya cuenta para lo que dé (Habilidoso pide habilidades, por ejemplo)
   if (conDote && (LV.steps?.includes('mejora') || esMejora(o.clase, LV.to) || LV.to === 19) && a.modo === 'dote' && a.dote) {
     const n = conDetalle(a.dote, a.c); if (!(d.dotes || []).includes(n)) d.dotes = [...(d.dotes || []), n]; }
   if (LV.variante) d.variantes = { ...(d.variantes || {}), [o.clase]: LV.variante };
   if (LV.man) d.maniobras = [...LV.man];
   return d;
 }
-// Habilidades tras lo elegido en el paso de habilidades (sin las pericias)
 function habTras() {
   let hab = { ...(char().habilidades || {}) };
   for (const f of LV.fuentes || []) hab = aplicarFuente(hab, f, LV.habSel[f.clave] || []);
@@ -90,20 +85,15 @@ function plan() {
   LV.cupoMaes = cupoMaestrias(d); if (!LV.maes) LV.maes = [...(ch.maestrias || [])];
   if (cupoEn(o.clase, to) > cupoEn(o.clase, to - 1)) steps.push('maestria');
   const nEst = NIVEL_ESTILO[o.clase], suyos = [...estilosDe(ch, biblioteca().dotes).map(x => (ch.dotes || []).find(n => norm(n).startsWith(norm(x.nombre))) || x.nombre), ...(ch.dotes || []).filter(esAlternativa)];
-  // El Campeón gana otro estilo de combate a nivel 7 (Estilo de combate adicional)
   LV.estiloGana = (!!nEst && to === nEst) || (o.clase === 'Guerrero' && /campe[oó]n/i.test(LV.subclase || '') && to === 7); LV.estiloSuyos = suyos;
   if (LV.estiloGana || (nEst && to > nEst && suyos.length)) steps.push('estilo');
-  // Golpes benditos (clérigo 7) y Furia elemental (druida 7): se elige variante al ganarlos, o después si quedó sin elegir
   const vdef = VARIANTES[o.clase]; if (vdef && to >= vdef.nivel && !varianteDe(ch, o.clase)) steps.push('variante');
-  // Maniobras del Maestro del combate: 3 a nivel 3 y 2 más a niveles 7, 10 y 15
   if (!LV.man) LV.man = [...(ch.maniobras || [])];
   LV.cupoMan = cupoManiobras(d);
   if (LV.cupoMan && (LV.cupoMan > cupoManiobras(ch) || LV.man.length < LV.cupoMan)) steps.push('maniobras');
-  // Habilidades nuevas: dote (Habilidoso…), subclase (Bendiciones del conocimiento…) o multiclase, y las pericias que ganas
   const cuenta = xs => xs.reduce((m, f) => m.set(f.nombre, (m.get(f.nombre) || 0) + 1), new Map()), antes = cuenta(fuentesExtra(ch)), vistas = new Map();
   LV.fuentes = fuentesExtra(d).map(f => { const k = (vistas.get(f.nombre) || 0) + 1; vistas.set(f.nombre, k); return { ...f, clave: `${f.nombre}#${k}`, nueva: k > (antes.get(f.nombre) || 0) }; }).filter(f => f.nueva);
   LV.nPer = Math.max(0, periciasDisponibles(d) - periciasDisponibles(ch) - LV.fuentes.filter(f => f.pericia).reduce((n, f) => n + f.n, 0));
-  // Lo que quedó sin elegir en niveles anteriores (por ejemplo, una subclase elegida antes de que la app lo pidiera): opcional
   const r0 = repartoHabilidades(ch), listaPend = [...new Set(r0.extra.fuentes.filter(f => !f.fijas).flatMap(f => f.lista))];
   if (r0.extra.faltan && listaPend.length) LV.fuentes.unshift({ nombre: 'Competencias que te faltan', n: r0.extra.faltan, lista: listaPend, clave: 'pendientes#1', opcional: true,
     nota: `Te las dan ${joinY(r0.extra.fuentes.filter(f => !f.fijas).map(f => f.nombre))} y aún no las has marcado.` });
@@ -122,7 +112,6 @@ function plan() {
     nTrucos: Math.max(0, B.maxCant - A.maxCant) });
   LV.nEstTrucos = alt ? 2 : 0; LV.estLista = alt?.lista || '';
   if (LV.nEstTrucos) steps.push('estiloTrucos');
-  // La dote elegida da conjuros (Iniciado en la magia, Influencia feérica…)
   const pd = /^(.+?)\s*(?:\(([^)]+)\))?\s*$/.exec(LV.asi.modo === 'dote' && steps.includes('mejora') ? LV.asi.dote || '' : '');
   LV.doteConj = pd && pd[1] ? conjurosDeDote({ nombre: pd[1], detalle: pd[2] || '' }) : null;
   if (LV.doteConj) { for (const e of LV.doteConj.elegir) LV[`dc:${e.k}`] = (LV[`dc:${e.k}`] || []).slice(0, e.n); steps.push('doteConj'); }
@@ -315,7 +304,6 @@ function apply() {
       for (const n of dc.fijos) { const it = all.find(x => norm(x.es) === norm(n)); if (it) add([it.id], { fuente: dc.fuente, always: true, prep: true }); } }
     if (LV.estilo.nuevo) c.dotes = d.dotes;
     if (LV.steps.includes('maestria')) c.maestrias = [...LV.maes];
-    // El mago prepara del libro: los conjuros nuevos quedan preparados mientras haya hueco
     const huecos = () => B.maxPrep - c.book.filter(e => e.prep && !e.always && (db.catalog[e.sid]?.level || 0) > 0).length;
     for (const id of picks.libro) add([id], { fuente: 'Libro', prep: o.clase === 'Mago' && huecos() > 0 });
     add(picks.savant, { fuente: `Experto en ${sch.toLowerCase()}` });

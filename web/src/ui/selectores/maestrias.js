@@ -7,7 +7,6 @@ import { textoMaestria } from '../../domain/reglas/referencia.js';
 import { gi } from '../componentes/tema.js';
 import { icon } from '../componentes/icons.js';
 
-// Rejilla para elegir las armas cuya maestría usas. `destacar`: armas que ya llevas.
 export function maestriasHtml(ch, sel, { attr = 'data-maes', cupo = cupoMaestrias(ch), destacar = [] } = {}) {
   const armas = PREDEFINIDOS.filter(p => p.arma?.maestria && armaElegible(ch, p)), lleno = sel.length >= cupo, lleva = new Set(destacar.map(norm));
   const grupo = (t, xs) => xs.length ? `<h5 class="mz-g">${t}</h5><div class="mz-grid">${xs.map(p => { const on = sel.some(x => norm(x) === norm(p.nombre));

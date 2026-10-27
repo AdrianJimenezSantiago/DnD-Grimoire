@@ -2,7 +2,6 @@
 import { abrirPdf } from '../platform/pdf.js';
 import { analizarLibro } from '../domain/libros/libroCompleto.js';
 
-// Frecuencias de palabras de los manuales para corregir el OCR; si no se puede cargar, se corrige solo con el propio libro
 async function vocabularioBase() {
   try {
     if (import.meta.env.MODE === 'windows') return (await import('../../public/data/vocabulario.json')).default;

@@ -7,7 +7,6 @@ export const avatarHtml = (ch, cls = '') => {
   return `<span class="avatar ${cls}">${gi(temaDe(ch).icono)}</span>`;
 };
 
-// Chip con tu retrato para marcarte o desmarcarte como objetivo (también en la hoja y en la tirada)
 export function botonYo(ch, lista, attrs) {
   const on = (lista || []).some(o => esYo(ch, o));
   return `<button type="button" class="obj-yo ${on ? 'on' : ''}" ${attrs} aria-pressed="${on}" title="${on ? 'Quitarte de los objetivos' : 'Incluirte entre los objetivos'}">${avatarHtml(ch, 'obj-yo-av')}<span>${on ? 'Tú' : 'Soy yo'}</span></button>`;

@@ -80,7 +80,6 @@ let abierta = null;
 export const mostrarCaracteristica = k => { abierta = k; };
 const marcaComp = n => `<i class="cr-m n${n}" aria-hidden="true" title="${['Sin competencia', 'Competencia', 'Pericia'][n]}"></i>`;
 const marcasTirada = r => `${r.falla ? '<i class="cr-v falla" title="Fallo automático">falla</i>' : r.modo !== 'normal' ? `<i class="cr-v ${r.modo}" title="${r.modo === 'ventaja' ? 'Ventaja' : 'Desventaja'}">${r.modo === 'ventaja' ? '▲' : '▼'}</i>` : ''}${r.dados.map(d => `<i class="cr-d">${esc(d)}</i>`).join('')}${r.cond ? '<i class="cr-cond" title="Hay modificadores que solo se aplican a veces: se eligen al tirar">*</i>' : ''}`;
-// sr: texto solo para lectores de pantalla antes y después del nombre visible («Tirar» … «de Destreza»), así el nombre accesible contiene lo que se ve
 export function filaTirada(ch, { tirar, sobre, ab = '', hab = '', nombre, bono, comp = 0, cls = '', sr = ['', ''] }) {
   const r = resumenTirada(ch, sobre, { ab, hab }, bono), cambia = r.total !== bono || r.modo !== 'normal' || r.dados.length || r.falla;
   return `<button type="button" class="cr-fila ${comp ? 'comp' : ''} ${cls} ${cambia ? 'mod' : ''}" data-tirar="${tirar}" ${r.fuentes.length ? `title="${esc(r.fuentes.join(', '))}"` : ''}>${marcaComp(comp)}<span>${sr[0] ? `<span class="visually-hidden">${esc(sr[0])}</span>` : ''}${esc(nombre)}${sr[1] ? `<span class="visually-hidden">${esc(sr[1])}</span>` : ''}</span><em class="cr-mk">${marcasTirada(r)}</em><b>${sgn(r.total)}</b></button>`;

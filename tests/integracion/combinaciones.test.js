@@ -29,7 +29,6 @@ function ejercitar(ch) {
   for (const sobre of ['ataque', 'salvacion', 'prueba', 'iniciativa']) modsTirada(ch, { sobre });
   for (const a of [...armas, golpeSinArmas(ch)]) { opcionesAlImpactar(ch, a); danoSiempre(ch, a); }
   opcionesIntercambio(ch, 'corto'); opcionesIntercambio(ch, 'largo'); opcionesIntercambio(ch, 'nivel');
-  // Gasta un uso de cada recurso y lo que dispara, recupera con descansos, y dispara iniciativa y turno
   for (const r of reglas(ch)) {
     if (r.tipo !== 'recurso') continue;
     estadoRecurso(ch, r.id).used = Math.min(r.max, 1); alGastarRecurso(ch, r.id); curacionDeRecurso(ch, r.id); canjesDe(ch, r.id);

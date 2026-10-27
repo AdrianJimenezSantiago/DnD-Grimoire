@@ -54,7 +54,6 @@ export function pgMaximoCalculado(ch) {
   if (tieneDote(ch, 'Duro')) pg += 2 * L;
   if (tieneDote(ch, 'Don de la fortaleza')) pg += 40;
   if (/^enan/.test(norm(ch.especie || ''))) pg += L;
-  // Resistencia dracónica: +3 a nivel 3 de hechicero y +1 por cada nivel de hechicero después
   const drac = cs.find(c => c.clase === 'Hechicero' && /drac[oó]n/i.test(c.subclase || '') && c.nivel >= 3); if (drac) pg += drac.nivel;
   return Math.max(1, pg);
 }
@@ -108,7 +107,6 @@ export function aplicarDano(ch, cantidad, { critico = false } = {}) {
     if (queda <= 0) { r.cayo = true; if (-queda >= max) { r.muerte = true; v.muerte = { exitos: 0, fallos: 3 }; marcarCaida(ch, 'masivo'); } else v.muerte = { exitos: 0, fallos: 0 }; v.estable = false; }
     v.pg = Math.max(0, queda);
   }
-  // Cazador implacable (explorador 13): el daño no rompe la concentración en Marca del cazador
   const implacable = norm(ch.play?.conc || '') === 'marca del cazador' && clasesDe(ch).some(c => c.clase === 'Explorador' && c.nivel >= 13);
   if (ch.play?.conc && n > 0 && !implacable) r.concentracion = { cd: cdConcentracion(n), conjuro: ch.play.conc };
   if (r.cayo || r.muerte) r.concentracion = r.concentracion ? { ...r.concentracion, perdida: true } : null;
@@ -123,7 +121,6 @@ export function curar(ch, cantidad) {
   return despues - antes;
 }
 export function ponerTemporales(ch, cantidad) {
-  // Don de la salud plena: +5 cada vez que ganas PG temporales
   const v = vidaDe(ch), n0 = Math.max(0, Math.floor(cantidad) || 0), n = n0 && tieneDote(ch, 'Don de la salud plena') ? n0 + 5 : n0;
   const antes = v.temp; v.temp = Math.max(v.temp, n); return v.temp - antes;
 }
@@ -156,7 +153,6 @@ export function gastarDadoGolpe(ch, dado, tirada) {
   const v = vidaDe(ch), d = dadosDeGolpe(ch).find(x => x.dado === dado);
   if (!d || !d.quedan) return null;
   v.dadosUsados[dado] = (v.dadosUsados[dado] || 0) + 1;
-  // Don de la salud plena: el dado de golpe da su máximo
   const plena = tieneDote(ch, 'Don de la salud plena'), valor = plena ? d.caras : tirada;
   const total = Math.max(1, valor + modOf(statsEfectivos(ch).con));
   const ganado = curar(ch, total);
@@ -223,7 +219,6 @@ export function cambiarConc(ch, nombre, rondas = null) {
   return fuera;
 }
 
-// Objetivos de un conjuro: si entre ellos estás tú (tu nombre, o «yo»), el efecto se te aplica solo
 const PALABRAS_YO = new Set(['yo', 'mi', 'mi mismo', 'mi misma', 'yo mismo', 'yo misma', 'tu', 'tu mismo', 'tu misma']);
 export function esYo(ch, texto) {
   const t = norm(texto).replace(/\(.*?\)/g, '').replace(/[.!¡¿?]/g, '').replace(/\s+/g, ' ').trim(); if (!t) return false;
@@ -233,8 +228,6 @@ export function esYo(ch, texto) {
 }
 export const listaObjetivos = (play, clave) => (clave === 'conc' ? play?.concObj : play?.efectos?.find(e => e.id === clave)?.objetivos);
 export const conjuroDeObjetivos = (play, clave) => (clave === 'conc' ? play?.conc : play?.efectos?.find(e => e.id === clave)?.nombre) || '';
-// Devuelve 'pone', 'quita' o '' según haya cambiado el efecto sobre ti
-// L: nivel del espacio, para los efectos que suben los PG máximos (Auxilio)
 export function sincronizarYo(ch, clave, { L } = {}) {
   const pl = ch.play, lista = listaObjetivos(pl, clave), nombre = conjuroDeObjetivos(pl, clave), ef = efectoDeConjuro(nombre);
   if (!lista || !ef) return '';

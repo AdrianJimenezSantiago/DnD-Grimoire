@@ -35,7 +35,6 @@ export const RAR_K = { 'Común': 'comun', Infrecuente: 'infrec', Raro: 'raro', '
 export const TIPO_I = { Arma: 'o_arma', Armadura: 'o_armadura', Anillo: 'o_anillo', 'Bastón': 'o_baston', 'Objeto maravilloso': 'o_maravilloso', Pergamino: 'o_pergamino', 'Poción': 'o_pocion', Vara: 'o_vara', Varita: 'o_varita' };
 const TABS = [['reglas', 'Reglas', 'glosario'], ['objetos', 'Objetos', 'cofre'], ['dotes', 'Dotes', 'dote'], ['trasfondos', 'Trasfondos', 'trasfondo'], ['subclases', 'Subclases', 'subclase'], ['criaturas', 'Criaturas', 'criatura']];
 const ORDEN_G = ['Estado', 'Acción', 'Área de efecto', 'Peligro', 'Actitud', '', 'Herramientas del DM', 'Objetos mágicos'];
-// Cada categoría del glosario con su color (tono, saturación), su icono y su título en plural
 export const CAT_REGLA = {
   Estado: { h: 8, s: 68, ico: 'estados', tit: 'Estados', corto: 'Estados' },
   'Acción': { h: 212, s: 62, ico: 'combate', tit: 'Acciones', corto: 'Acciones' },
@@ -49,7 +48,6 @@ export const CAT_REGLA = {
 export const catRegla = c => CAT_REGLA[c || ''] || CAT_REGLA[''];
 const TIT_G = Object.fromEntries(Object.entries(CAT_REGLA).map(([k, v]) => [k, v.tit]));
 const sinParen = t => String(t || '').replace(/\s*\(.*$/, '');
-// La primera frase de una regla, sin marcas, para la tarjeta de la lista
 const primeraFrase = t => {
   const p = String(t || '').split(/\n{2,}/).find(b => b.trim() && !/^(###|\|)/.test(b.trim())) || '';
   const x = p.replace(/[*_]/g, '').replace(/^•\s*/, '').replace(/\s+/g, ' ').trim(), m = /^(.{20,140}?[.:;])(\s|$)/.exec(x);
@@ -196,7 +194,6 @@ export function abrirBiblioteca(tab) {
 }
 
 let FICHA = null;
-// Fichas que se abren desde otra ficha (un término del glosario dentro de una regla, de un objeto…): «Volver» deja la anterior como estaba
 const PILA = [];
 const foto = () => { const d = $('#fichaDlg'); return { cls: d.className, estilo: d.getAttribute('style') || '', t: $('#fiTitle').innerHTML, nombre: $('#fiTitle').textContent.trim(), s: $('#fiSub').innerHTML, b: $('#fiBody').innerHTML, f: $('#fiFoot').innerHTML, y: $('#fiBody').scrollTop, FICHA }; };
 export function apilarFicha() { const d = $('#fichaDlg'); if (d.open) { PILA.push(foto()); if (PILA.length > 20) PILA.shift(); } }
@@ -227,7 +224,6 @@ export function abrirObjeto(clave) {
       ${o.cargas ? `<span>${esc(o.cargas.dado || String(o.cargas.max))} ${o.cargas.cuentas ? 'cuentas' : 'cargas'}${o.cargas.recarga ? ` · recupera ${esc(/todas|^la$/.test(o.cargas.recarga) ? 'todas' : o.cargas.recarga)} al ${esc(o.cargas.cuando || 'amanecer')}` : ''}</span>` : ''}
       ${(o.usos || []).length ? `<span>${o.usos.length === 1 ? 'Un uso' : `${o.usos.length} usos`} que se recupera${o.usos.length === 1 ? '' : 'n'}</span>` : ''}</div>`,
     cuerpo: `<section class="sp-text">${md(o.texto)}</section>${fuente(o.fuente)}`,
-    // Se puede tener más de uno: otra poción, otra piedra ioun, otra arma +1…
     pie: ch ? (ya ? `<span class="fi-ya">${icon('user')}${esc(ch.nombre)} ya lo lleva</span><button type="button" data-cmd="equipo">Ver sus objetos</button><button type="button" data-fi="anadir">${icon('plus')}Añadir otro</button>`
       : `<button type="button" class="gold" data-fi="anadir">${icon('plus')}Añadir a ${esc(ch.nombre)}</button>`) : '' });
 }
@@ -272,7 +268,6 @@ export function abrirResumen(clase, subclase = '') {
     pie: subclase ? `<button type="button" data-rzclase="${esc(clase)}">${gi(ico === 'subclase' ? 'libro' : TEMAS.clase[clase]?.[2] || 'libro')}Ver ${esc(clase)} completo</button>` : '', clase: 'rz' });
   const d = $('#fichaDlg'); d.style.setProperty('--sh', h); d.style.setProperty('--ss', sat + '%');
 }
-// Rasgos con dos variantes (Golpes benditos, Furia elemental): se eligen o cambian desde su ficha
 const eleccionHtml = r => {
   const e = r.eleccion; if (!e) return '';
   const nota = e.id
@@ -282,7 +277,6 @@ const eleccionHtml = r => {
   <div class="lv-estilos">${e.opciones.map(o => { const on = e.actual === o.nombre, dato = e.id ? `data-ejopc="${esc(e.id)}|${esc(o.nombre)}"` : `data-ejvar="${esc(e.clase)}|${esc(o.nombre)}"`;
     return `<button type="button" class="lv-estilo ${on ? 'on' : ''}" ${dato} aria-pressed="${on}"><span class="lv-estilo-ico">${gi(o.ef === 'golpe' || o.golpe ? 'ca' : 'libro')}</span><b>${esc(o.nombre)}</b><span class="sp-text">${esc(o.texto)}</span></button>`; }).join('')}</div></section>`;
 };
-// Rasgos que se activan y dejan un efecto sobre ti (Ataque temerario, Voto de enemistad, Arma sagrada…)
 const activarHtml = (ch, r) => {
   const a = EFECTO_DE_RASGO[norm(r.nombre)]; if (!a) return '';
   const rec = a.gasta ? reglas(ch).find(x => x.id === a.gasta) : null, quedan = rec ? rec.max - usosGastados(ch, rec) : null, activo = (ch.vida?.efectos || []).some(e => e.k === a.k);
@@ -290,7 +284,6 @@ const activarHtml = (ch, r) => {
   return `<section class="ej-eleccion"><p class="note">${activo ? `<b>${esc(EFECTO[a.k].nombre)}</b> está activo.` : esc(EFECTO[a.k].texto)}</p>
     <button type="button" class="gold" data-ejefecto="${esc(norm(r.nombre))}" ${activo || (rec && quedan < (a.n || 1)) ? 'disabled' : ''}>${gi('inspiracion')}Activar${esc(coste)}</button></section>`;
 };
-// Recuperar un uso gastando otra cosa (un espacio, un uso de Furia, puntos de hechicería…) y la Fuente de magia
 const canjesHtml = (ch, r) => {
   let h = '';
   const cs = r.recurso ? canjesDe(ch, r.recurso.id) : [];
@@ -310,7 +303,6 @@ export function abrirRasgoJuego(clave) {
     sub: `<div class="fi-pills"><span class="rar-pill">${esc(r.etiqueta)}</span>${r.numeros.map(n => `<span>${esc(n.nombre)}: ${esc(n.valor)}</span>`).join('')}</div>`,
     cuerpo: `${grupos}${eleccionHtml(r)}${r.eleccion2 ? eleccionHtml({ eleccion: r.eleccion2 }) : ''}${activarHtml(ch, r)}${canjesHtml(ch, r)}${r.texto ? `<section class="sp-text">${md(r.texto)}</section>${fuente(r.fuente)}` : `<p class="note">Aún no tienes el texto de este rasgo. Importa el libro que lo trae (el Manual del Jugador o una expansión) en Libros y manuales: se lee en este dispositivo.</p>`}` });
 }
-// Lo que la app sabe de una regla sin el manual: el resumen de un estado, de una acción, de una propiedad o maestría de arma
 const ESTADO_K = nombre => Object.keys(NOMBRE_ESTADO).find(k => norm(NOMBRE_ESTADO[k]) === norm(sinParen(nombre))) || '';
 function resumenRegla(nombre, cat = '') {
   const n = norm(sinParen(nombre));
@@ -320,7 +312,6 @@ function resumenRegla(nombre, cat = '') {
   const l = ECONOMIA_INFO.accion.lista.find(([t]) => norm(t) === n); if (l) return l[1];
   return textoMaestria(nombre) || textoPropiedad(nombre) || '';
 }
-// Cómo aplica la hoja un estado: lo que pasa sola al tirar y al moverte
 const SOBRE = { ataque: 'tus tiradas de ataque', prueba: 'tus pruebas de característica', salvacion: 'tus tiradas de salvación', iniciativa: 'la iniciativa' };
 const CAR_LARGA = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
 function automatismos(k) {
@@ -335,14 +326,12 @@ function automatismos(k) {
     out.push([x.efecto === 'ventaja' ? 'inspiracion' : 'd20', `${x.efecto === 'ventaja' ? 'Ventaja' : 'Desventaja'} en ${x.ab ? `${SOBRE[x.sobre].replace('tus tiradas de salvación', 'tus salvaciones')} de ${CAR_LARGA[x.ab]}` : SOBRE[x.sobre]}${x.cond ? ` ${x.cond}` : ''}.`]);
   return out;
 }
-// Términos del glosario que aparecen en el texto de otro, en el orden en que salen
 const palabras = t => ` ${norm(t).replace(/[^a-z0-9ñ]+/g, ' ').trim()} `;
 function relacionados(e) {
   const t = palabras(e.texto);
   return glosario().filter(x => x.clave !== e.clave && sinParen(x.nombre).length >= 4).map(x => [x, t.indexOf(palabras(sinParen(x.nombre)))])
     .filter(([, i]) => i >= 0).sort((a, b) => a[1] - b[1]).slice(0, 12).map(([x]) => x);
 }
-// Ficha de una regla: color de su categoría, el resumen de la app, qué hace la hoja con ella y el texto completo del manual
 function fichaRegla({ nombre, cat = '', texto = '', clave = '' }) {
   const k = catRegla(cat), ch = S.cur(), ek = cat === 'Estado' || !texto ? ESTADO_K(nombre) : '';
   const resumen = resumenRegla(nombre, cat), auto = ek ? automatismos(ek) : [];
@@ -354,7 +343,6 @@ function fichaRegla({ nombre, cat = '', texto = '', clave = '' }) {
   }
   const largo = texto.length > 2500, apartados = [...texto.matchAll(/^### (.+)$/gm)].map(m => m[1]);
   const indice = largo && apartados.length >= 3 ? `<nav class="fi-toc" aria-label="Apartados">${apartados.map((a, i) => `<a href="#ap-${i}">${esc(a)}</a>`).join('')}</nav>` : '';
-  // El término no se enlaza a sí mismo dentro de su propia regla
   let n = 0; const html = texto ? md(texto).replace(/<h4 class="md-h">/g, () => `<h4 class="md-h" id="ap-${n++}">`).replace(new RegExp(`<button type="button" class="term[^"]*" data-term="${clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">(.*?)</button>`, 'g'), '$1') : '';
   const rel = texto ? relacionados({ clave, texto }) : [];
   FICHA = { tipo: 'regla', clave, nombre, cat };
@@ -372,7 +360,6 @@ export function abrirTermino(clave, { apilar = false } = {}) {
   if (apilar) apilarFicha();
   fichaRegla({ nombre: e.nombre, cat: e.cat, texto: e.texto, clave: e.clave });
 }
-// Sin manual importado: la misma ficha con el resumen de la app
 export function abrirResumenRegla(nombre, cat = '') { fichaRegla({ nombre, cat }); }
 
 export function init(store) {
@@ -414,7 +401,6 @@ export function init(store) {
     let fuera = [], dentro = [];
     const h = S.act(`${v}`, (db, ch) => {
       ch.opciones = { ...(ch.opciones || {}), [id]: v };
-      // El terreno del Círculo de la tierra cambia los conjuros siempre preparados
       if (id === 'tierra.terreno' || id === 'vastago.lealtad' || /^especie\./.test(id)) { fuera = quitarSobrantes(db, ch); dentro = anadirPendientes(db, ch, conjurosPendientes(db, ch, compendio())); }
     });
     abrirRasgoJuego(k);
@@ -449,7 +435,6 @@ export function init(store) {
       return abrirCriatura(c.clave);
     }
     if (b.dataset.fi !== 'anadir' || FICHA?.tipo !== 'obj') return;
-    // Objetos con variantes (arma de base, +1/+2/+3, tipo de gigante, piedra ioun…): se concretan antes de añadirlos
     const o0 = FICHA.o, eleccion = {};
     for (const p of pasosVariante(o0)) {
       const v = await elegir({ titulo: `${o0.nombre}: ${p.titulo.toLowerCase()}`, sub: 'Elige la variante que tiene tu personaje', libre: false, ico: 'o_maravilloso',

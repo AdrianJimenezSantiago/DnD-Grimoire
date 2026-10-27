@@ -63,12 +63,8 @@ export function danar(S2, n, critico = false) {
   const c = S2.cur(), desde = pgActuales(c); let r;
   const h = S2.act(`Recibe ${n} de daño${critico ? ' (crítico)' : ''}`, (db, x) => { r = aplicarDano(x, n, { critico }); if (r.concentracion?.perdida) soltarConc(x); });
   const c2 = S2.cur(), acts = [botonDeshacer(S2, h)], res = resistenciasDe(c2);
-  // Resistencias: si el daño es de uno de esos tipos, rehace el golpe con la mitad
-  // Reacciones que reducen el daño: Esquiva asombrosa, Desviar ataques, Salvaguarda arcana, Parada
   for (const op of reaccionesDano(c2)) if (n > 0) acts.push({ label: op.label, fn: () => { S2.undo(h); let n2 = n; S2.act(op.label, (db, x) => { n2 = op.aplica(x, n); }); danar(S2, n2, critico);
-    // Trueno de la tormenta: no reduce el daño, se lo devuelves a quien te lo hizo
     if (op.tirada) tirarDano({ titulo: op.tirada.titulo, sub: `de daño ${op.tirada.tipo}`, expr: op.tirada.expr, clave: op.tirada.tipo }); } });
-  // Aguante incansable (orco): en vez de caer a 0 PG te quedas a 1 (sin perder la concentración: tiras la salvación)
   if (r.cayo && !r.muerte) for (const op of alCaerA0(c2)) acts.unshift({ label: op.label, hl: true, fn: () => {
     S2.undo(h); let r2 = null; const h2 = S2.act(op.label, (db, x) => { r2 = aplicarDano(x, n, { critico }); op.aplica(x); });
     golpeFx('cura', 1, { desde: 0, hasta: 1 }); vibrar('medium');
@@ -211,7 +207,6 @@ export function init(store) {
   on(eb, 'click', '[data-efk]', (e, b) => alternarEfecto(S, b.dataset.efk));
   on(eb, 'click', '[data-efq]', (e, b) => { const id = b.dataset.efq; S.act('Quita un efecto propio', (db, x) => { const vv = vidaDe(x); vv.efectos = vv.efectos.filter(y => y.id !== id); }); });
   on(eb, 'click', '[data-efadd]', () => {
-    // Cada campo se comprueba por separado: el primero que no vale se marca y se explica
     const nom = textoDe($('#efNom'), { obligatorio: true, max: 60, campo: 'Nombre del efecto' }); if (nom == null) return;
     const ca = numeroDe($('#efCa'), { min: -10, max: 10, obligatorio: false, tema: 'ca', campo: 'CA' }); if (ca === null && $('#efCa').value.trim()) return;
     const bono = (id, campo) => { const r = leerBono($(id).value, { max: 10 }); return r.ok ? r.t : rechazar($(id), r.motivo, { campo, max: 10 }); };

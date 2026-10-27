@@ -31,7 +31,6 @@ export const menuAbierto = () => openMenu;
 
 export function initMenus() {
   document.addEventListener('click', e => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('[data-cmd="more"],[data-cmd="rest"]')) cerrarMenu(); }, true);
-  // Flechas, Inicio y Fin recorren los botones del menú abierto, como en cualquier menú de escritorio
   document.addEventListener('keydown', e => {
     if (!openMenu || !['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
     const bs = [...openMenu.querySelectorAll('button:not([disabled])')]; if (!bs.length) return;

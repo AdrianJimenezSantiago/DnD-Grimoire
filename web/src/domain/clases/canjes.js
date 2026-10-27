@@ -2,9 +2,6 @@
 import { perfil } from '../reglas/reglas2024.js';
 import { reglas, estadoRecurso, usosGastados } from './rasgos.js';
 
-// Rasgos que «también puedes restablecer gastando…» (Manual del Jugador de 2024): un espacio de conjuro de cierto nivel,
-// un espacio de pacto, o usos de otro rasgo (Furia, Inspiración bárdica, puntos de hechicería…).
-//   espacio: nivel mínimo del espacio   pacto: solo un espacio de pacto   rec/n: otro contador y cuánto cuesta
 const C = (rec, coste) => ({ rec, ...coste });
 export const CANJES = [
   C('tpl:bardo.inspiracion', { espacio: 1, desde: ['Bardo', 5] }),
@@ -25,12 +22,10 @@ export const CANJES = [
   C('tpl:hechicero.innata', { rec2: 'tpl:hechicero.puntos', n: 2, desde: ['Hechicero', 7], agotado: true }),
   C('tpl:ilusionista.yo', { espacio: 2 }),
   C('tpl:paladin.cumbre', { espacio: 5 }),
-  // Salvaguarda arcana: un espacio como acción adicional le devuelve el doble de su nivel en PG
   C('tpl:abjurador.salvaguarda', { espacio: 1, porNivel: 2 }),
 ];
 const regla = (ch, id) => reglas(ch).find(r => r.id === id) || null;
 const nivelClase = (ch, clase) => perfil(ch).clases.find(c => c.clase === clase)?.nivel || 0;
-// Espacios libres por nivel (nivel mínimo), con el de pacto aparte
 function espaciosLibres(ch, min, soloPacto) {
   const P = perfil(ch), out = [];
   for (let L = Math.max(1, min); L <= 9; L++) {
@@ -40,7 +35,6 @@ function espaciosLibres(ch, min, soloPacto) {
   }
   return out;
 }
-// Formas de recuperar un uso de este rasgo ahora mismo
 export function canjesDe(ch, id) {
   const r = regla(ch, id); if (!r || usosGastados(ch, r) <= 0) return [];
   const c = CANJES.find(x => x.rec === id); if (!c) return [];
@@ -58,7 +52,6 @@ export function aplicarCanje(ch, id, canje) {
   if (canje.espacio) { ch.play.used ||= {}; ch.play.used[canje.espacio] = (ch.play.used[canje.espacio] || 0) + 1; }
 }
 
-// Fuente de magia (hechicero 2): convertir un espacio en puntos de hechicería y crear un espacio con puntos
 export const COSTE_ESPACIO = { 1: 2, 2: 3, 3: 5, 4: 6, 5: 7 };
 export function fuenteDeMagia(ch) {
   const r = regla(ch, 'tpl:hechicero.puntos'); if (!r) return null;

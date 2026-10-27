@@ -37,7 +37,6 @@ export function opcionesIntercambio(ch, momento, { clase = null, trasfondos = []
       if (k === 'Guerrero' && /maestro|battle/.test(sub)) add('o_arma', 'Cambiar una maniobra', 'Puedes sustituir una de las maniobras que conoces por otra.', subclase);
     }
   }
-  // Opciones de subclase que se cambian al descansar (Presa del cazador, Aspecto de lo salvaje, terreno del Círculo de la tierra…)
   if (momento === 'largo' || momento === 'corto') for (const d of opcionesCambiables(ch, momento)) {
     if (clase && d.clase !== clase) continue;
     const act = opcionDe(ch, d.id)?.nombre;

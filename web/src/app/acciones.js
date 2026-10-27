@@ -46,7 +46,6 @@ function castEffects(S, ch, P, s, mode, L) {
 
 export function lanzar(S, bi, mode, L, rec = null, { ajeno = null, forzar = false } = {}) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
-  // Un espacio de conjuro por turno (Manual del Jugador 2024)
   const lim = mode === 'slot' && !forzar ? limiteEspacio(ch, s.tiempo) : '';
   if (lim === 'turno') {
     const alt = [e.gratis && !e.used && { label: 'Usar su uso gratis', hl: true, fn: () => lanzar(S, bi, 'free') }, s.ritual && { label: 'Como ritual', fn: () => lanzar(S, bi, 'ritual') },
@@ -74,7 +73,6 @@ export function lanzar(S, bi, mode, L, rec = null, { ajeno = null, forzar = fals
   if (mode === 'slot' && /^abjur/i.test(s.escuela || '') && reglas(ch).some(r => r.id === 'tpl:abjurador.salvaguarda')) msg += ` <span class="tnote"><b>Salvaguarda arcana</b>: recupera ${2 * L} PG.</span>`;
     if (efectosDe(ch).some(x => x.k === 'furia')) msg += ' <span class="tnote"><b>Estás en Furia</b>: las reglas no te dejan lanzar conjuros ni concentrarte.</span>';
   const fx = castEffects(S, ch, P, s, mode, L), ef = mode !== 'ritual' ? efectoDeConjuro(s.es) : null;
-  // Conjuros que solo pueden afectarte a ti (alcance Lanzador): se activan solos al lanzarlos
   const solo = ef && (ef.k === 'escudo' ? combateDe(ch).activo : ef.k === 'pasarsinrastro' || (ef.bueno && soloSobreTi(s.alcance || delCompendio(s)?.a)));
   let fuera = [], tmpConj = 0; const extraConj = [];
   const concRondas = s.conc ? rondasDeDuracion(s.duracion || delCompendio(s)?.du) : null;
@@ -86,7 +84,6 @@ export function lanzar(S, bi, mode, L, rec = null, { ajeno = null, forzar = fals
     if (mode === 'recurso') estadoRecurso(c, rec.id).used = (estadoRecurso(c, rec.id).used || 0) + 1;
     if (mode === 'slot') { c.play.used[L] = gastadosDe(c, P, L) + 1; extraConj.push(...alLanzarConEspacio(c, e.fuente));
       if (recuerdoDeConjuros(c, L)) { c.play.used[L] -= 1; extraConj.push(`Don del recuerdo de conjuros: sale un ${L} en el d4 y el espacio no se gasta.`); } }
-    // Salvaguarda arcana (abjurador): lanzar abjuración con espacio le devuelve el doble del nivel del espacio
     if (mode === 'slot' && /^abjur/i.test(s.escuela || '')) { const w = reglas(c).find(r => r.id === 'tpl:abjurador.salvaguarda'); if (w) { const st = estadoRecurso(c, w.id); st.used = Math.max(0, Math.min(st.used || 0, w.max) - 2 * L); } }
     if (s.level > 0 && mode !== 'ritual') lanzarEnCombate(c, { tiempo: s.tiempo, conEspacio: mode === 'slot', nombre: s.es, enTuTurno: ajeno == null ? null : !ajeno });
     if (s.conc) fuera = cambiarConc(c, s.es, concRondas);
@@ -99,7 +96,6 @@ export function lanzar(S, bi, mode, L, rec = null, { ajeno = null, forzar = fals
   if (solo) setTimeout(() => golpe('buff'), 200);
   const extra = [...fx.extra];
   const x = delCompendio(s), apunta = s.conc && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d]);
-  // Conjuros que ayudan: se pregunta sobre quién con un selector donde marcarte a ti
   const pregunta = ef?.bueno && !solo && ef.k !== 'escudo';
   if (pregunta) setTimeout(() => preguntarObjetivos(S, s, mode === 'slot' ? L : s.level), 420);
   else if (!solo) extra.unshift(...botonAplicarme(S, ef, s, mode === 'slot' ? L : s.level));
@@ -135,7 +131,6 @@ export function lanzarRapido(S, bi, force) {
   const ch = S.cur(), e = ch.book[bi], s = S.db.catalog[e.sid], P = perfil(ch);
   if (s.level === 0) {
     const fx = castEffects(S, ch, P, s, 'truco', 0), ef = efectoDeConjuro(s.es), antes = ch.play.conc;
-    // Guía y Resistencia son trucos de concentración
     let fuera = [];
     const h = S.act(`${s.es} (truco)`, (db, c) => { lanzarEnCombate(c, { tiempo: s.tiempo }); if (s.conc) fuera = cambiarConc(c, s.es, rondasDeDuracion(s.duracion || delCompendio(s)?.du)); });
     fxLanzar(row(bi), colorEscuela(claveEscuela(s.escuela))); vibrar();
@@ -177,7 +172,6 @@ export function enfocarObjetivos(clave) {
   i.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => i.focus({ preventScroll: true }), 250);
 }
 const listaDe = listaObjetivos;
-// Si entre los objetivos estás tú, el efecto se te aplica; si te quitas, deja de afectarte
 function avisoYo(S, cambio, nombre) {
   const ef = efectoDeConjuro(nombre); if (!cambio || !ef) return;
   if (cambio === 'pone') { golpe(ef.bueno ? 'buff' : 'debuff'); toast(`<b>${esc(ef.nombre)}</b> también sobre ti: ${esc(ef.texto)}`); }
@@ -207,7 +201,6 @@ export function alternarYo(S, clave, { L } = {}) {
   });
   avisoYo(S, cambio, nombre);
 }
-// Conjuros sin concentración (Auxilio, Armadura de mago…): sus objetivos van en una entrada de «Efectos activos»
 export function claveObjetivos(S, nombre) {
   const ya = S.cur().play.efectos.find(e => e.nombre === nombre); if (ya) return ya.id;
   let id = ''; S.act(`${nombre}: objetivos`, (db, c) => { id = nuevoEfecto(c.play, nombre).id; });
@@ -271,7 +264,6 @@ export function descansoCorto(S, abrirRecuperacion, abrirVida) {
     reglas(c).forEach(r => { if (r.tipo !== 'recurso') return; const st = estadoRecurso(c, r.id);
       const x = recuperarEnDescanso(r, Math.min(st.used || 0, r.max), 'corto'); st.used = x.usados; if (x.tirada) bits.push(`${r.nombre} (${x.tirada})`); });
     const tmp = temporalesAlDescansar(c); if (tmp && ponerTemporales(c, tmp)) bits.push(`${tmp} PG temporales (Resiliencia celestial o Líder inspirador)`);
-    // Infatigable (explorador 10): el agotamiento baja un nivel al terminar un descanso corto
     const v = vidaDe(c);
     if (v.agotamiento > 0 && clasesDe(c).some(k => k.clase === 'Explorador' && k.nivel >= 10)) { v.agotamiento -= 1; bits.push('Infatigable: un nivel de agotamiento menos'); }
   });
@@ -293,8 +285,6 @@ export function descansoCorto(S, abrirRecuperacion, abrirVida) {
 }
 
 const ruleOf = (ch, id) => reglas(ch).find(x => x.id === id);
-// Furia y Canción de la hoja: al gastar el uso, el efecto queda puesto (la furia además rompe la concentración).
-// Acción súbita te devuelve la acción en combate; Tomar aliento y otros usos que curan se tiran y se aplican solos.
 function alGastar(c, id) {
   const out = { fuera: [], extra: [], cura: null };
   const k = EFECTO_DE_RECURSO[id];
@@ -325,7 +315,6 @@ function avisoGasto(S, id, h, g) {
     g.fuera.length ? 'Pierdes la concentración.' : '', pesada ? '<span class="tnote"><b>Llevas armadura pesada</b>: no puedes entrar en furia con ella.</span>' : '', armado ? '<span class="tnote"><b>Llevas armadura o escudo</b>: la Canción de la hoja no funciona con ellos.</span>' : ''].filter(Boolean).join(' ');
   toast(texto, [...extra, botonDeshacer(S, h)]);
 }
-// Gastar el contador de un objeto mágico puede hacer algo más (recuperar un espacio, lanzar un conjuro…): lo decide ui/selectores/accionesObjeto.js
 let gastoObjeto = null;
 export const registrarGastoObjeto = f => { gastoObjeto = f; };
 export async function marcarRecurso(S, id, i) {

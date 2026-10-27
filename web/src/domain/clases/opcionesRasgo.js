@@ -3,11 +3,6 @@ import { norm } from '../../core/util.js';
 import { clasesDe, nivelTotal } from '../reglas/reglas2024.js';
 import { LINAJES, linajeDe, especieBase, APTITUD_ESPECIE } from '../origen/especies.js';
 
-// Rasgos de subclase que obligan a escoger una opción entre varias (Manual del Jugador de 2024 y Héroes de Faerûn).
-// cambia: cuándo se puede cambiar la elección
-//   'largo'  al terminar un descanso largo           'corto' al terminar un descanso corto o largo
-//   'uso'    cada vez que usas el rasgo (Furia, Forma estelar): la elección es la de esta vez
-//   'fija'   se elige al aprender el rasgo
 const TIPOS_DANO = ['Ácido', 'Contundente', 'Cortante', 'Frío', 'Fuego', 'Necrótico', 'Perforante', 'Psíquico', 'Radiante', 'Relámpago', 'Trueno', 'Veneno'];
 const O = (nombre, texto, extra = {}) => ({ nombre, texto, ...extra });
 export const OPCIONES_RASGO = [
@@ -60,15 +55,10 @@ export function normOpciones(x) {
   }
   return out;
 }
-// Definiciones que el personaje ya tiene por clase, subclase y nivel
 export const opcionesDe = ch => [...OPCIONES_RASGO.filter(d => clasesDe(ch).some(c => c.clase === d.clase && d.sub.test(norm(c.subclase || '')) && c.nivel >= d.nivel)),
-  // Linajes y legados de la especie
   ...LINAJES.filter(d => especieBase(ch) === d.especie && nivelTotal(ch) >= (d.nivel || 1))];
 export const opcionDe = (ch, id) => { const d = OPCION_RASGO[id]; if (d?.especie) return linajeDe(ch, id); return d?.opciones.find(o => o.nombre === ch.opciones?.[id]) || null; };
 export const opcionDeRasgo = (ch, rasgo) => opcionesDe(ch).find(d => norm(d.rasgo) === norm(rasgo)) || null;
-// Las que faltan por elegir (las de «uso» se eligen al usarlas y no cuentan)
 export const opcionesPendientes = ch => opcionesDe(ch).filter(d => d.cambia !== 'uso' && !opcionDe(ch, d.id));
-// Lo que se puede cambiar al terminar un descanso
 export const opcionesCambiables = (ch, momento) => opcionesDe(ch).filter(d => d.cambia === 'corto' || (d.cambia === 'largo' && momento === 'largo'));
-// Dados extra al impactar que da una opción elegida (Asesino de colosos)
 export const golpesDeOpciones = ch => opcionesDe(ch).map(d => ({ d, o: opcionDe(ch, d.id) })).filter(x => x.o?.golpe).map(({ d, o }) => ({ nombre: o.nombre, rasgo: d.rasgo, ...o.golpe }));

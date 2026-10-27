@@ -1,22 +1,12 @@
 // Efectos pasivos de los objetos mágicos (CA, salvaciones, características fijadas, resistencias).
 import { norm } from '../../core/util.js';
 
-// Efectos de los objetos mágicos (Guía del Dungeon Master de 2024) que la hoja aplica sola.
-// Se reconocen por el nombre, así que valen igual los importados del libro que los escritos a mano.
-//   ca, salv, pruebas: bonificadores; fija: la característica pasa a ese valor si es menor;
-//   suma: +n a una característica hasta un máximo (20); cd/atk: CD y ataque de conjuro;
-//   sinArmadura: solo sin armadura ni escudo; caBase: CA base sin armadura (10 + Des pasa a caBase + Des);
-//   habs: +n a las pruebas de una habilidad; reglas: ventajas que se aplican solas a las tiradas (como los rasgos pasivos);
-//   res / inm: resistencias e inmunidades al daño; velMin: la velocidad pasa a ser al menos esa;
-//   danoArcos: daño extra con arcos cortos y largos; sinArmas: bonificador a los golpes sin armas;
-//   llevado: el arma da su efecto con solo llevarla y estar sintonizado, sin empuñarla.
 const R = (sobre, efecto, extra = {}) => ({ sobre, efecto, ...extra });
 const GIGANTE = [[/colinas?/, 21], [/escarcha|hielo/, 23], [/piedra/, 23], [/fuego/, 25], [/nubes?/, 27], [/tormentas?/, 29]];
 const IONIANA = [[/^fuerza/, 'fue'], [/^(agilidad|destreza)/, 'des'], [/^(fortaleza|constitucion)/, 'con'], [/^(intelecto|inteligencia)/, 'int'], [/^(perspicacia|sabiduria|intuicion)/, 'sab'], [/^(liderazgo|carisma)/, 'car']];
 const TIPOS = ['acido', 'frio', 'fuego', 'fuerza', 'necrotico', 'psiquico', 'radiante', 'relampago', 'trueno', 'veneno'];
 const TIPO_TXT = { acido: 'ácido', frio: 'frío', fuego: 'fuego', fuerza: 'fuerza', necrotico: 'necrótico', psiquico: 'psíquico', radiante: 'radiante', relampago: 'relámpago', trueno: 'trueno', veneno: 'veneno' };
 const DRAGON = { azul: 'relámpago', blanco: 'frío', bronce: 'relámpago', cobre: 'ácido', negro: 'ácido', oro: 'fuego', oropel: 'fuego', laton: 'fuego', plata: 'frío', rojo: 'fuego', verde: 'veneno' };
-// «Anillo de resistencia (fuego)», «Armadura de resistencia (cota de mallas, frío)»: el tipo de daño entre paréntesis
 const tipoEntre = n => { const p = /\(([^)]*)\)/.exec(n)?.[1] || ''; const t = TIPOS.find(x => new RegExp(`\\b${x}\\b`).test(p)); return t ? [TIPO_TXT[t]] : []; };
 const BPS = ['contundente', 'cortante', 'perforante'];
 const CONTRA_CONJUROS = R('salvacion', 'ventaja', { cond: 'contra conjuros' }), CONTRA_MAGIA = R('salvacion', 'ventaja', { cond: 'contra conjuros y otros efectos mágicos' });
@@ -48,7 +38,6 @@ export const OBJETOS_EFECTO = [
   { re: /^piedra (ioniana|ioun) de(l)? proteccion/, sintonia: true, ca: 1 },
   { re: /^piedra (ioniana|ioun) de (la )?(consciencia|conciencia)/, sintonia: true, reglas: ALERTA },
   { re: /^piedra (ioniana|ioun)/, sintonia: true, suma: n => { const x = IONIANA.find(([r]) => r.test(n.replace(/^piedra (ioniana|ioun) de(l)? (la )?/, ''))); return x ? { [x[1]]: 2 } : null; } },
-  // Focos de lanzamiento +1/+2/+3: ataque de conjuro y CD
   { re: /^(amuleto del devoto|grimorio arcano|vial de(l)? pozo de sangre|vial de sangre|hoz lunar|hoz de la luna|tambor del? (marca)?ritmos?|vara del pacto|vara del guardian del pacto|vara del guardian de pactos)\b/, sintonia: true, foco: true },
   { re: /^varita del mago de guerra/, sintonia: true, soloAtk: true },
   { re: /^vendas de poder sin armas/, sinArmasN: true },
@@ -105,7 +94,6 @@ export function efectoDe(nombre) {
   if (x.martillo) out.martillo = true;
   return out;
 }
-// Qué hace el efecto, en una lista corta para enseñarlo en el inventario
 const AB_N = { fue: 'Fuerza', des: 'Destreza', con: 'Constitución', int: 'Inteligencia', sab: 'Sabiduría', car: 'Carisma' };
 const HAB_N = { juegomanos: 'Juego de manos', atletismo: 'Atletismo', sigilo: 'Sigilo', percepcion: 'Percepción', investigacion: 'Investigación', acrobacias: 'Acrobacias', persuasion: 'Persuasión' };
 export function describirEfecto(e) {
@@ -129,29 +117,23 @@ export function describirEfecto(e) {
   return b;
 }
 
-// Disponible: se puede usar (sus cargas, por ejemplo): lo llevas encima, quedan y, si pide sintonía, estás sintonizado
 export const objetoDisponible = o => !!o && o.cantidad !== 0 && !o.guardado && (!o.sintonia || o.sintonizado);
-// Un objeto cuenta si está disponible y, si es arma o armadura, equipado (salvo los que actúan con solo llevarlos)
 export const objetoActivo = o => objetoDisponible(o) && (!(o.arma || o.armadura) || o.equipado || !!efectoDe(o.nombre)?.llevado);
 export function objetosActivos(ch) {
   const out = [];
   for (const o of ch?.equipo?.objetos || []) { if (!objetoActivo(o)) continue; const e = efectoDe(o.nombre); if (e) out.push({ o, e }); }
   return out;
 }
-// Pociones de fuerza de gigante bebidas: su efecto dura 1 hora
 export const POCION_FUERZA = { pfg21: 21, pfg23: 23, pfg25: 25, pfg27: 27, pfg29: 29 };
-// Características con los objetos puestos: Guanteletes de fuerza de ogro, Diadema de intelecto, Piedras ioun, Cinturón enano…
 export function statsEfectivos(ch) {
   const st = { ...(ch?.stats || {}) }, act = objetosActivos(ch);
   for (const { e } of act) for (const [k, v] of Object.entries(e.suma || {})) st[k] = Math.max(st[k] || 10, Math.min(20, (st[k] || 10) + v));
   let fijaFue = 0;
   for (const { e } of act) for (const [k, v] of Object.entries(e.fija || {})) { if (k === 'fue') fijaFue = Math.max(fijaFue, v); st[k] = Math.max(st[k] || 10, v); }
-  // Martillo de rayos: la Fuerza del cinturón de fuerza de gigante o de los guanteletes sube 4, hasta 30
   if (fijaFue && act.some(({ e }) => e.martillo)) st.fue = Math.max(st.fue, Math.min(30, fijaFue + 4));
   for (const ef of ch?.vida?.efectos || []) if (POCION_FUERZA[ef.k]) st.fue = Math.max(st.fue || 10, POCION_FUERZA[ef.k]);
   return st;
 }
-// De dónde sale cada característica cambiada, para enseñarlo en la hoja
 export function statsPorObjeto(ch) {
   const out = {};
   for (const { o, e } of objetosActivos(ch)) for (const k of Object.keys({ ...(e.fija || {}), ...(e.suma || {}), ...(e.martillo ? { fue: 1 } : {}) })) (out[k] ||= []).push(o.nombre);
@@ -164,10 +146,8 @@ export const bonoPruebasObjetos = ch => suma(ch, 'pruebas');
 export const bonoHabilidadObjetos = (ch, k) => objetosActivos(ch).reduce((s, { e }) => s + (e.habs?.[k] || 0), 0);
 export const bonoMagiaObjetos = ch => ({ cd: suma(ch, 'cd'), atk: suma(ch, 'atk') });
 export const fuentesDe = (ch, k) => objetosActivos(ch).filter(({ e }) => e[k]).map(({ o, e }) => `${o.nombre} ${e[k] > 0 ? '+' : ''}${e[k]}`);
-// Ventajas que dan los objetos, con el mismo formato que los rasgos pasivos
 export const pasivosObjetos = ch => objetosActivos(ch).filter(({ e }) => e.reglas?.length).map(({ o, e }) => ({ nombre: o.nombre, reglas: e.reglas }));
 export const resistenciasObjetos = ch => objetosActivos(ch).flatMap(({ o, e }) => [...(e.res || []).map(tipo => ({ tipo, fuente: o.nombre })), ...(e.inm || []).map(tipo => ({ tipo, fuente: `${o.nombre} (inmunidad)` }))]);
 export const velocidadMinimaObjetos = ch => Math.max(0, ...objetosActivos(ch).map(({ e }) => e.velMin || 0));
 
-// Armas y armaduras mágicas: «Espada larga +1», «Escudo +2», «Armadura de placas +3»…
 export const bonoDeNombre = nombre => masN(norm(nombre || ''));

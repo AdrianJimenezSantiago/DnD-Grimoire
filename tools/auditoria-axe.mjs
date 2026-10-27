@@ -60,10 +60,8 @@ for (const theme of ['dark', 'light']) for (const vp of [{ n: 'movil', width: 41
   for (const c of ['vida', 'estados']) {
     try { await page.click(`#sheet [data-cmd="${c}"]`); await wait(1200); await scan(page, `${tag} ${c}`); await closeDlg(page); } catch (e) { console.log('skip', c); await closeDlg(page); }
   }
-  // edición
   const ed = await page.$(vp.n === 'movil' ? '#dEdit' : '#bEdit'); if (ed && await ed.isVisible()) { await ed.click(); await wait(800); await skipTour(page); await scan(page, `${tag} edicion`); await ed.click(); await wait(500); }
   const cb = await page.$(vp.n === 'movil' ? '#dCombate' : '#bCombate'); if (cb && await cb.isVisible()) { await cb.click(); await wait(2500); await skipTour(page); await scan(page, `${tag} combate`); await closeDlg(page); await cb.click().catch(()=>{}); await wait(1500); }
-  // un conjuro: mantener pulsado = contextmenu
   const cz = await page.$('[data-leer]'); if (cz && await cz.isVisible()) { await cz.click({ button: 'right' }); await wait(1000); await scan(page, `${tag} leer`); await closeDlg(page); }
   } catch (e) { console.log('ERR', tag, e.message.split('\n')[0]); }
   if (vp.n === 'movil') { try { await page.click('#whoChip'); await wait(1500); await page.click('[data-lcmd="nuevo"]'); await wait(1500); await skipTour(page); await scan(page, `${tag} creacion`); } catch (e) { console.log('skip creacion', e.message.split('\n')[0]); } }

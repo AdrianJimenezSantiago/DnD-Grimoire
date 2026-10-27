@@ -111,7 +111,7 @@ function saveRule() {
   ['maxN', 'nivMax', 'espacioMin', 'efectoN'].forEach(k => { RD[k] = parseInt(RD[k], 10) || 0; });
   if (RD.tipo === 'recuperar' && !RD.nivMax) RD.nivMax = 5;
   const err = errorRasgo(RD);
-  if (err) { // El texto exacto queda bajo el formulario; la burla señala el campo culpable
+  if (err) {
     $('#ruleErr').textContent = err;
     const [k, motivo] = /recarga/.test(err) ? ['recDado', 'dado'] : /aviso/.test(err) ? ['texto', 'vacio'] : /al menos/.test(err) ? ['maxN', 'cero'] : /dados/.test(err) ? ['maxN', 'alto'] : /recupera/.test(err) ? ['efectoN', 'alto'] : ['nivMax', 'alto'];
     return rechazar($(`#ruleForm [data-rf="${k}"]`), motivo, { min: 1, max: { maxN: 6, efectoN: 8, nivMax: 9 }[k] });
@@ -155,7 +155,6 @@ function applyRecovery() {
   const txt = bits.length ? `${r.nombre}: recupera ${bits.join(' y ')}` : `${r.nombre}: usada`;
   const pick = { ...REC.pick }, id = REC.id;
   const h = S.act(txt, (db, c) => { Object.entries(pick).forEach(([L, n]) => { if (n) c.play.used[L] = gastadosDe(c, P, +L) - n; }); estadoRecurso(c, id).used = 1;
-    // Canción de la hoja: recuperas un uso al emplear Recuperación arcana
     if (id === 'tpl:mago.recuperacion') { const st = c.play.rec?.['tpl:hojacantante.cancion']; if (st?.used) st.used -= 1; } });
   cerrarDialogo($('#recDlg'));
   setTimeout(() => fxs.forEach(([L, i], k) => setTimeout(() => fxEspacio(L, i, 'ignite'), k * 90)), 150);

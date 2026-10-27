@@ -8,14 +8,11 @@ body {
   padding: 0 var(--sar) 0 var(--sal);
   transition: background-color var(--t-med) var(--ease), color var(--t-med) var(--ease);
 }
-/* El cielo va en una capa fija y no con background-attachment: fixed, que obliga al navegador a desplazar la página en el hilo principal. */
-/* Campo rechazado por la validación: borde de peligro y una sacudida corta */
 :is(input, textarea, select, [contenteditable]).invalido, :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--danger) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent) !important; }
 .invalido { animation: campo-no .42s var(--ease-out); }
 @keyframes campo-no { 20% { transform: translateX(-5px); } 45% { transform: translateX(4px); } 70% { transform: translateX(-2px); } }
 @media (prefers-reduced-motion: reduce) { .invalido { animation: none; } }
 .aviso-burla { font-style: italic; }
-/* Lo primero que se pinta mientras llega el código: el emblema sobre el fondo del tema. Se quita en cuanto la app está lista */
 .arranque { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: var(--bg); }
 .arranque svg { opacity: .9; animation: arranque-late 1.6s ease-in-out infinite; }
 @keyframes arranque-late { 50% { opacity: .45; transform: scale(.96); } }
@@ -118,7 +115,6 @@ html, body { overflow-x: clip; }
 .astrolabe > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .emblem { position: absolute; z-index: -1; right: 70px; top: 90px; width: 80px; height: 80px; color: var(--gold); opacity: .32; pointer-events: none; filter: drop-shadow(0 0 18px var(--glow)); }
 @media (max-width: 560px) { .emblem { right: 50px; top: 70px; width: 64px; height: 64px; } }
-/* El giro va sobre el <svg> entero y no sobre un <g> interior: así lo anima la GPU sin repintar cada fotograma. */
 .astrolabe .spin { animation: orrery 240s linear infinite; }
 .hero h1 { font: 500 var(--fs-display) / .95 var(--serif); letter-spacing: -.01em; margin: 0; position: relative; display: inline-block; }
 .hero h1 .underline { position: absolute; left: -2%; bottom: -10px; width: 104%; height: 14px; overflow: visible; }

@@ -4,7 +4,6 @@
 
 const limpiaNum = v => String(v ?? '').trim().replace(/\s+/g, '').replace(/[−–]/g, '-').replace(',', '.');
 
-// Número escrito a mano. Rechaza letras sueltas («abc»), mezclas («12 de daño»), decimales donde no caben y lo que se sale del rango.
 export function leerNumero(v, { min = -Infinity, max = Infinity, decimal = false, obligatorio = true } = {}) {
   const t = limpiaNum(v);
   if (!t) return obligatorio ? { ok: false, motivo: 'vacio' } : { ok: true, n: null };
@@ -17,7 +16,6 @@ export function leerNumero(v, { min = -Infinity, max = Infinity, decimal = false
   return { ok: true, n };
 }
 
-// Bono de un efecto o de un objeto: «+2», «-1» o un dado como «1d4» / «-1d6». Vacío = sin bono.
 export function leerBono(v, { max = 20, dados = true } = {}) {
   const t = limpiaNum(v).toLowerCase();
   if (!t) return { ok: true, t: '' };
@@ -28,7 +26,6 @@ export function leerBono(v, { max = 20, dados = true } = {}) {
   return { ok: false, motivo: /\d/.test(t) ? 'formato' : 'letras' };
 }
 
-// Daño de un arma: «1d8», «2d6», «1d10+2» o un número fijo («1»).
 export function leerDano(v) {
   const t = String(v ?? '').toLowerCase().replace(/\s+/g, '').replace(/[−–]/g, '-');
   if (!t) return { ok: true, t: '' };
@@ -40,7 +37,6 @@ export function leerDano(v) {
   return { ok: true, t: `${+m[1]}d${+m[2]}${m[3] || ''}` };
 }
 
-// Texto libre: se recortan espacios de más y caracteres de control. Rechaza lo vacío (si es obligatorio), lo larguísimo y lo que solo son símbolos.
 export function leerTexto(v, { max = 200, obligatorio = false } = {}) {
   const t = String(v ?? '').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').replace(/[ \t]+/g, ' ').trim();
   if (!t) return obligatorio ? { ok: false, motivo: 'vacio' } : { ok: true, t: '' };
@@ -49,7 +45,6 @@ export function leerTexto(v, { max = 200, obligatorio = false } = {}) {
   return { ok: true, t };
 }
 
-// Por qué no vale una tirada escrita («2d6+3», «4d6kh3», «1d20+5-1d4»). Devuelve '' si vale.
 export function motivoTirada(expr, { maxDados = 100, maxCaras = 1000, maxBono = 1000 } = {}) {
   const t = String(expr ?? '').toLowerCase().replace(/\s+/g, '').replace(/[−–]/g, '-');
   if (!t) return 'vacio';
@@ -63,8 +58,6 @@ export function motivoTirada(expr, { maxDados = 100, maxCaras = 1000, maxBono = 
   return '';
 }
 
-// ===== Burlas =====
-// Una por motivo, elegidas al azar sin repetir la anterior. ctx: { campo, min, max, tema }.
 const rango = c => (c.min != null && c.max != null && Number.isFinite(c.min) && Number.isFinite(c.max) ? `entre ${c.min} y ${c.max}` : c.max != null && Number.isFinite(c.max) ? `hasta ${c.max}` : c.min != null && Number.isFinite(c.min) ? `desde ${c.min}` : '');
 const de = c => (c.campo ? ` en «${c.campo}»` : '');
 const BURLAS = {
@@ -128,7 +121,6 @@ const BURLAS = {
     () => `Ese texto no es una copia válida. Pega la copia completa, sin cortar ni retocar.`,
   ],
 };
-// Temas que afinan la burla con algo más concreto: { tema: { motivo: [...] } }; «alto» es el más habitual
 const TEMAS = {
   dados: {
     letras: [() => `Eso no es una tirada, es un conjuro mal pronunciado. Prueba con «2d6+3» o «1d20».`],

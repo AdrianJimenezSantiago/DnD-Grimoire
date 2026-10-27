@@ -103,7 +103,6 @@ export const EFECTOS = [
     reglas: [R('prueba', 'desventaja', { cond: 'si es de la característica elegida' }), R('salvacion', 'desventaja', { cond: 'si es de la característica elegida' })] },
   { k: 'calentar', dur: 10, conjuro: /^calentar metal$/i, nombre: 'Calentar metal', bueno: false, ico: 'fuego', texto: 'Mientras sigas sosteniendo o llevando el objeto ardiente tienes desventaja en ataques y pruebas de característica.',
     reglas: [R('ataque', 'desventaja', { cond: 'si sigues con el objeto' }), R('prueba', 'desventaja', { cond: 'si sigues con el objeto' })] },
-  // Pociones (Guía del Dungeon Master de 2024)
   ...[21, 23, 25, 27, 29].map(f => ({ k: `pfg${f}`, dur: 600, pocion: true, nombre: `Fuerza de gigante (${f})`, bueno: true, ico: 'fuerza', texto: `Tu Fuerza es ${f} durante 1 hora (si no era ya igual o mayor).`, reglas: [] })),
   { k: 'invulnerable', dur: 10, pocion: true, nombre: 'Invulnerabilidad', bueno: true, ico: 'esc_abj', texto: 'Resistencia a todo el daño durante 1 minuto.', reglas: [] },
   { k: 'resistenciapocion', dur: 600, pocion: true, nombre: 'Poción de resistencia', bueno: true, ico: 'esc_abj', texto: 'Resistencia al tipo de daño de la poción durante 1 hora.', reglas: [] },
@@ -114,33 +113,27 @@ export const EFECTOS = [
   { k: 'confusion', dur: 10, conjuro: /^confusi[oó]n$/i, nombre: 'Confusión', bueno: false, ico: 'psiquico', texto: 'No puedes hacer reacciones y al empezar cada turno tiras 1d10 para ver qué haces. Repites la salvación al final de cada turno.', reglas: [] },
 ];
 export const EFECTO = Object.fromEntries(EFECTOS.map(e => [e.k, e]));
-// Rasgos con usos que, al gastarse, ponen un efecto sobre ti
 export const EFECTO_DE_RECURSO = { 'tpl:barbaro.furia': 'furia', 'tpl:hojacantante.cancion': 'cancion', 'tpl:hechicero.innata': 'innata',
   'tpl:especie.revelacion': 'revelacion', 'tpl:especie.grande': 'formagrande', 'tpl:especie.vuelo': 'vuelodraconico', 'tpl:especie.adrenalina': 'correr' };
-// Rasgos que se activan desde «En juego» y dejan un efecto sobre ti; gasta: el uso que consumen
 export const EFECTO_DE_RASGO = {
   'ataque temerario': { k: 'temerario' }, 'punteria certera': { k: 'punteria' },
   'voto de enemistad': { k: 'voto', gasta: 'tpl:paladin.canalizar' }, 'arma sagrada': { k: 'armasagrada', gasta: 'tpl:paladin.canalizar' },
   'atleta sin parangon': { k: 'atleta', gasta: 'tpl:paladin.canalizar' }, 'duelista defensivo': { k: 'parada' }, 'defensa superior': { k: 'defensasup', gasta: 'tpl:monje.concentracion', n: 3 },
 };
 
-// Ventajas pasivas de clase y especie que se aplican solas a las tiradas
 const INCAP_P = ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'];
 export function pasivosDe(ch) {
   const out = [], incap = (ch.vida?.estados || []).some(k => INCAP_P.includes(k)), especie = norm(ch.especie || '').split(/[\s(]/)[0];
   for (const c of clasesDe(ch)) {
     if (c.clase === 'Bárbaro' && c.nivel >= 2 && !incap) out.push({ nombre: 'Sentir el peligro', reglas: [R('salvacion', 'ventaja', { ab: 'des' })] });
     if (c.clase === 'Bárbaro' && c.nivel >= 7) out.push({ nombre: 'Instinto salvaje', reglas: [R('iniciativa', 'ventaja')] });
-    // Cazador preciso (explorador 17): ventaja contra la criatura marcada con Marca del cazador
     if (c.clase === 'Explorador' && c.nivel >= 17 && norm(ch.play?.conc || '') === 'marca del cazador') out.push({ nombre: 'Cazador preciso', reglas: [R('ataque', 'ventaja', { cond: 'contra la criatura marcada' })] });
     if (c.clase === 'Guerrero' && c.nivel >= 3 && /campe[oó]n/i.test(c.subclase || '')) out.push({ nombre: 'Atleta sobresaliente', reglas: [R('iniciativa', 'ventaja'), R('prueba', 'ventaja', { hab: 'atletismo' })] });
     if (c.clase === 'Pícaro' && c.nivel >= 3 && /asesin/i.test(c.subclase || '')) out.push({ nombre: 'Asesinar', reglas: [R('iniciativa', 'ventaja')] });
   }
-  // Armadura sin entrenamiento: desventaja en lo que use Fuerza o Destreza y no puedes lanzar conjuros
   const puestas = (ch.equipo?.objetos || []).filter(o => o.equipado && o.armadura).map(o => o.armadura.tipo), sabe = armadurasDe(ch), sin = puestas.filter(t => !sabe.has(t));
   if (sin.length) out.push({ nombre: `Sin entrenamiento (${sin.map(t => t === 'escudo' ? 'escudo' : `armadura ${t}`).join(', ')})`, mal: true,
     reglas: [R('ataque', 'desventaja'), ...['fue', 'des'].flatMap(ab => [R('prueba', 'desventaja', { ab }), R('salvacion', 'desventaja', { ab })])] });
-  // Armaduras ruidosas (acolchada, de escamas, media armadura y las pesadas): desventaja en Sigilo
   const pa = penalizacionArmadura(ch);
   if (pa.sigilo) out.push({ nombre: pa.armadura.nombre, mal: true, reglas: [R('prueba', 'desventaja', { hab: 'sigilo' })] });
   const dotes = (ch.dotes || []).map(d => norm(d).replace(/\s*\(.*$/, ''));
@@ -161,13 +154,11 @@ export function pasivosDe(ch) {
 }
 const sinTildes = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 export const efectoDeConjuro = nombre => { const n = sinTildes(nombre); return EFECTOS.find(e => e.conjuro && (e.conjuro.test(n) || e.conjuro.test(String(nombre || '').trim()))) || null; };
-// Bendición, Guía, Resistencia, Perdición…: el dado lo tira cada objetivo al hacer su tirada, no quien lanza el conjuro
 export function lanzadorTira(nombre, t) {
   if (!t) return false;
   if (t.ataque || t.danos?.length || t.curacion) return true;
   return !!t.extras?.length && !efectoDeConjuro(nombre)?.tiraObjetivo;
 }
-// Alcance «Lanzador» (Personal): el conjuro solo puede afectarte a ti
 export const soloSobreTi = alcance => /^(lanzador|personal|uno mismo|self)\b/i.test(sinTildes(alcance));
 export function fmtRondas(r) {
   if (r == null) return '';
@@ -197,8 +188,6 @@ export function efectosDe(ch) {
     texto: [e.propio?.ca && `CA ${e.propio.ca > 0 ? '+' : ''}${e.propio.ca}`, e.propio?.ataque && `ataques ${e.propio.ataque}`, e.propio?.salvacion && `salvaciones ${e.propio.salvacion}`, e.propio?.prueba && `pruebas ${e.propio.prueba}`, e.propio?.vel && `velocidad ${e.propio.vel > 0 ? '+' : ''}${e.propio.vel} m`].filter(Boolean).join(', ') || 'Efecto propio.',
     ca: e.propio?.ca || 0, vel: e.propio?.vel || 0, reglas: reglasPropias(e.propio || {}) }; });
 }
-// Estados a los que eres inmune ahora mismo: Aura de coraje (paladín 10), Aura de entrega (entrega 7), Furia irracional (berserker 6, en furia),
-// Heroísmo (asustado), Petrificado (envenenado)
 export function inmunidadesEstado(ch) {
   const out = new Map(), efs = (ch.vida?.efectos || []).map(e => e.k), ests = ch.vida?.estados || [];
   const incap = ests.some(k => ['incapacitado', 'aturdido', 'inconsciente', 'paralizado', 'petrificado'].includes(k));
@@ -218,7 +207,6 @@ export function inmunidadesEstado(ch) {
 const estadosActivos = ch => { const inm = inmunidadesEstado(ch); return (ch.vida?.estados || []).filter(k => REGLAS_ESTADO[k] && !inm.has(k)); };
 export const incapacitado = ch => estadosActivos(ch).filter(k => REGLAS_ESTADO[k].incap);
 
-// motivo: 'muerte' (salvación contra muerte) o 'concentracion' (mantener un conjuro); algunas reglas solo valen para eso
 export function modsTirada(ch, { sobre, ab = '', hab = '', motivo = '' }) {
   const abEf = ab || (hab ? abDe(hab) : sobre === 'iniciativa' ? 'des' : '');
   const aplica = r => {
@@ -229,10 +217,8 @@ export function modsTirada(ch, { sobre, ab = '', hab = '', motivo = '' }) {
     return r.sobre === 'prueba' && sobre === 'iniciativa';
   };
   const out = [];
-  // Aturdido, inconsciente, paralizado y petrificado incluyen el estado incapacitado (y su desventaja en la iniciativa)
   const activos = estadosActivos(ch), reglasDe = k => (REGLAS_ESTADO[k].incap && k !== 'incapacitado' && !activos.includes('incapacitado') ? [...REGLAS_ESTADO[k].reglas, ...REGLAS_ESTADO.incapacitado.reglas] : REGLAS_ESTADO[k].reglas);
   for (const k of activos) for (const r of reglasDe(k)) if (aplica(r)) out.push({ fuente: k.charAt(0).toUpperCase() + k.slice(1), mal: r.efecto !== 'ventaja', ...r });
-  // Esquivar se pierde si quedas incapacitado o tu velocidad es 0
   const sinEsquivar = () => incapacitado(ch).length > 0 || velocidadEfectiva(ch).m === 0;
   const conAb = r => (r.valorAb ? { ...r, valor: Math.max(1, modOf(statsEfectivos(ch)[r.valorAb])) } : r);
   for (const e of efectosDe(ch)) { if (e.k === 'esquivar' && sinEsquivar()) continue; for (const r of e.reglas) if (aplica(r)) out.push({ fuente: e.nombre, mal: !e.bueno, ...conAb(r) }); }
@@ -249,7 +235,6 @@ export const falloAutomatico = mods => mods.find(m => m.on && m.efecto === 'fall
 
 export function caEfectiva(ch) {
   const efs = efectosDe(ch), base = { ...claseArmadura(ch) };
-  // Armadura de mago: 13 + Des sin armadura (se queda con la mejor opción)
   const cb = Math.max(0, ...efs.map(e => e.caBase || 0)), objs = ch.equipo?.objetos || [];
   if (cb && !objs.some(o => o.equipado && o.armadura && o.armadura.tipo !== 'escudo')) {
     const esc = objs.find(o => o.equipado && o.armadura?.tipo === 'escudo'), alt = cb + modOf(statsEfectivos(ch).des) + (esc ? (esc.armadura.base || 2) + (esc.armadura.bono || 0) : 0);
@@ -297,7 +282,6 @@ export function resumenTirada(ch, sobre, { ab = '', hab = '' } = {}, bono = 0) {
     fuentes: [...new Set(todos.map(m => m.fuente))] };
 }
 
-// Resistencias al daño que tienes ahora mismo, con su origen (especie, clase, subclase, opciones elegidas y efectos)
 const BPS = ['contundente', 'cortante', 'perforante'];
 const TERRENO_RES = { 'Árido': 'fuego', Polar: 'frío', Templado: 'relámpago', Tropical: 'veneno' };
 const LEALTAD_RES = { Bhaal: 'veneno', Myrkul: 'necrótico', 'Perdición': 'psíquico' };
@@ -323,7 +307,6 @@ export function resistenciasDe(ch) {
     if (c.clase === 'Pícaro' && /vastago|tres/i.test(s) && L >= 3) { const o = opcionDe(ch, 'vastago.lealtad'); if (o) add(LEALTAD_RES[o.nombre], 'Lealtad aterradora'); }
     if (c.clase === 'Explorador' && /invernal/i.test(s) && L >= 3) add('frío', 'Explorador gélido');
   }
-  // Dotes: dones épicos y Dracoseñalado (tipos elegidos entre paréntesis: «Dracoseñalado (fuego)»)
   const TIPOS = ['ácido', 'contundente', 'cortante', 'frío', 'fuego', 'fuerza', 'necrótico', 'perforante', 'psíquico', 'radiante', 'relámpago', 'trueno', 'veneno'];
   for (const d of dotesDe(ch)) { const n = norm(d.nombre), det = norm(d.detalle || '');
     if (n === 'don de la absorcion de almas') add(['frío', 'necrótico'], d.nombre);
@@ -343,5 +326,4 @@ export function resistenciasDe(ch) {
   return [...out].map(([tipo, fuente]) => ({ tipo, fuente }));
 }
 
-// Maltrecho: con la mitad de tus PG máximos o menos (y aún en pie)
 function maltrecho(ch) { const max = pgMaximo(ch), pg = pgActuales(ch); return pg > 0 && pg <= Math.floor(max / 2); }

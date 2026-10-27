@@ -175,10 +175,8 @@ async function boot() {
     idle(asistentes.precargar);
   });
 }
-// Si el arranque falla, se quita igualmente la pantalla de carga para no tapar la página
 boot().catch(e => { document.documentElement.classList.add('ready'); throw e; });
 
-// En la web (no en la app de Android ni en el HTML de Windows) la app se guarda para abrirse sin conexión
 if (import.meta.env.PROD && import.meta.env.MODE !== 'windows' && !NATIVO && location.protocol === 'https:' && 'serviceWorker' in navigator) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }

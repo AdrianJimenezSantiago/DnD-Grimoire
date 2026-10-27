@@ -20,7 +20,6 @@ export const ECONOMIA_INFO = {
     ['Terreno difícil', 'Cada metro cuesta uno más.'], ['Levantarse', 'Cuesta la mitad de tu velocidad.'], ['Trepar, nadar, arrastrarse', 'Cada metro cuesta uno más si no tienes una velocidad propia para ello.'],
     ['Saltar', 'Largo: 30 cm por cada punto de Fuerza. Alto: 90 cm más 30 cm por cada punto de modificador de Fuerza. Con 3 m de carrerilla; sin ella, la mitad.']] },
 };
-// Salto con carrerilla en metros (1 pie = 30 cm): largo = Fuerza × 0,3; alto = (3 + mod. de Fuerza) × 0,3
 export const salto = fue => ({ largo: Math.max(0, fue) * 0.3, alto: Math.max(0, 3 + Math.floor((fue - 10) / 2)) * 0.3 });
 
 export const PROPIEDADES = {

@@ -2,7 +2,6 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { crearVocabulario, corregirLinea, corregirLineas, plausible } from '../../web/src/domain/libros/corrector.js';
 
-// Vocabulario de juguete: cada palabra repetida tantas veces como «aparece en el libro»
 const rep = (txt, n) => Array(n).fill(txt).join(' ');
 const voc = crearVocabulario([
   rep('el de la que y a en un una los las del se por con no su al lo como más', 60),
@@ -21,7 +20,6 @@ describe('corregirLinea', () => {
     assert.equal(c('17-20 55 (10410) 18'), '17-20 55 (10d10) 18');
     assert.equal(c('igual a 148 más tu modificador'), 'igual a 1d8 más tu modificador');
     assert.equal(c('Tira 1420 y consulta la tabla'), 'Tira 1d20 y consulta la tabla');
-    // Una media que no cuadra no se toca: puede ser un número de verdad
     assert.equal(c('cuesta 12 (2410) piezas'), 'cuesta 12 (2410) piezas');
   });
 
@@ -31,7 +29,6 @@ describe('corregirLinea', () => {
     assert.equal(c('NIVEL lL REPRESALIA'), 'NIVEL 11: REPRESALIA');
     assert.equal(c('NIVEL 15, ESPECTRO'), 'NIVEL 15: ESPECTRO');
     assert.equal(c('Como PERSONAJE MULTICLASE'), 'COMO PERSONAJE MULTICLASE');
-    // «Nivel» en una tabla normal se queda como está
     assert.equal(c('Nivel de clérigo Conjuros preparados'), 'Nivel de clérigo Conjuros preparados');
   });
 
@@ -66,7 +63,6 @@ describe('corregirLinea', () => {
     assert.equal(plausible('competentes', voc), true);
     assert.equal(plausible('crearlos', voc), true);
     assert.equal(plausible('iumunidad', voc), false);
-    // Nombres propios de D&D con signos raros
     assert.equal(c('todo Faerün y Faerfin'), 'todo Faerûn y Faerûn');
   });
 
@@ -75,7 +71,6 @@ describe('corregirLinea', () => {
     assert.equal(c('| CA: 13 Iniciativa: +3 (13)'), 'CA: 13 Iniciativa: +3 (13)');
     assert.equal(c('acción , lanzas'), 'acción, lanzas');
     assert.deepEqual(corregirLineas(['AAA AAA AAA.', 'E', 'cercano.', 'CHEF'], voc), ['', '', 'cercano.', 'CHEF']);
-    // «O» al principio de línea en mitad de una frase es la conjunción
     assert.deepEqual(corregirLineas(['las alas permanecen 1 hora', 'O hasta que las hagas desaparecer'], voc), ['las alas permanecen 1 hora', 'o hasta que las hagas desaparecer']);
   });
 

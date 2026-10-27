@@ -41,11 +41,9 @@ export function diferenciaNivel(a, b, chA, chB) {
 
 export function conjurosPendientes(db, ch, compendio) {
   const porNombre = new Map(); for (const x of compendio || []) if (!porNombre.has(norm(x.es))) porNombre.set(norm(x.es), x);
-  // Ya lo tiene si está como «siempre preparado»; si lo tenía preparado a mano, pasa a siempre preparado y deja libre su hueco
   const tiene = new Set(ch.book.filter(e => e.always).map(e => norm(db.catalog[e.sid]?.es)));
   return [...clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))), ...conjurosEspecie(ch, nivelTotal(ch))].filter(c => !tiene.has(norm(c.nombre))).map(c => ({ ...c, x: porNombre.get(norm(c.nombre)) })).filter(c => c.x);
 }
-// Conjuros «siempre preparados» de un rasgo que ya no toca (otro terreno del Círculo de la tierra, otra subclase…): dejan de estarlo
 export function sobrantesAutomaticos(db, ch) {
   const auto = [...clasesDe(ch).flatMap(c => conjurosAutomaticos(vistaClase(ch, c))), ...conjurosEspecie(ch, nivelTotal(ch))];
   const nombres = new Set(auto.map(c => norm(c.nombre))), fuentes = new Set(auto.map(c => norm(c.fuente)));

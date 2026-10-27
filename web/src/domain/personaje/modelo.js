@@ -73,7 +73,6 @@ export function normPersonaje(c) {
   if (!c.equipo || !Array.isArray(c.equipo.objetos)) c.equipo = { objetos: [] };
   normEquipo(c);
   c.bestiario = { ...(esObjeto(c.bestiario) ? c.bestiario : {}), criaturas: (Array.isArray(c.bestiario?.criaturas) ? c.bestiario.criaturas : []).map(normCriatura).filter(Boolean) };
-  // El retrato solo puede ser una imagen incrustada (la que guarda la app); ni enlaces externos ni nada que no sea imagen
   if (!esObjeto(c.retrato) || !RETRATO_OK.test(String(c.retrato.src || ''))) c.retrato = null;
   c.nivel = clamp(parseInt(c.nivel, 10) || 1, 1, 20);
   c.multiclase = (Array.isArray(c.multiclase) ? c.multiclase : []).filter(m => m && m.clase && m.clase !== c.clase)
@@ -102,10 +101,6 @@ function normCreacion(x) {
     tiradas: (Array.isArray(x.tiradas) ? x.tiradas : []).slice(0, 6).map(t => n(t, 3, 18, 10)) };
 }
 
-// Lo que llega de fuera (una copia, un personaje exportado, lo guardado) puede venir manipulado. Los identificadores
-// van en atributos del HTML y en nombres de archivo (retrato-<id>.txt), así que todo id con caracteres que podrían salirse
-// de un atributo o de la carpeta de la app (< > " ' ` & / \ o de control) se cambia por uno nuevo, el mismo en toda la
-// base para que las referencias sigan enlazando. Los ids que crea la app («s_…», «tpl:mago.recuperacion») no cambian.
 const ID_OK = /^[^<>"'`&\\/\u0000-\u001f]{1,120}$/;
 function sanearIds(d) {
   const malos = new Map();
@@ -198,7 +193,6 @@ export function bdDeEjemplo() {
 }
 
 export function cargarGuardado(rawV2, rawV1) {
-  // Si lo guardado no se puede leer, se avisa con «fallo» para apartarlo antes de que el primer guardado lo pise
   let fallo = false;
   try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === ESQUEMA) return { db: normBd(d), migrated: false }; fallo = true; } } catch { fallo = true; }
   try {

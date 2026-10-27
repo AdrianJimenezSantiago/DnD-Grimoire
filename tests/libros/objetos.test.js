@@ -28,7 +28,6 @@ describe('leerObjetos', () => {
     const c = leerCargas('De este collar cuelgan 1d6 + 3 cuentas.');
     assert.equal(c.dado, '1d6+3'); assert.ok(c.cuentas);
     assert.match(leerCargas('Esta varita tiene 7 cargas. Si gastas la última carga de la varita, tira 1d20. Con un 1, se convierte en cenizas.').ultima, /1d20/);
-    // Lo que dice una variante («Cabra de viaje… Tiene 24 cargas») no es del objeto común
     assert.equal(leerCargas('Texto común de la estatuilla.\n\nCabras de marfil (raras). Cabra de viaje. Tiene 24 cargas.'), null);
   });
 

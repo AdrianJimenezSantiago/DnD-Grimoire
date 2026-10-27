@@ -1,11 +1,8 @@
 // Especies: atributos por nivel, linajes y legados, conjuros de especie, visión y resistencias.
 import { norm } from '../../core/util.js';
 
-// Especies del Manual del Jugador de 2024: atributos por nivel de personaje, linajes y legados que se eligen,
-// conjuros de especie (siempre preparados; los de nivel 3 y 5 se lanzan una vez al día sin espacio) y resistencias.
 export const especieBase = ch => norm(ch?.especie || '').split(/[\s(]/)[0];
 
-// Atributos de cada especie (nombre del libro y nivel de personaje) para «En juego» aunque no se haya importado el manual
 export const RASGOS_ESPECIE = {
   aasimar: [[1, 'Manos curativas'], [1, 'Portador de luz'], [1, 'Resistencia celestial'], [1, 'Visión en la oscuridad'], [3, 'Revelación celestial']],
   draconido: [[1, 'Linaje dracónico'], [1, 'Ataque de aliento'], [1, 'Resistencia al daño'], [1, 'Visión en la oscuridad'], [5, 'Vuelo dracónico']],
@@ -19,14 +16,11 @@ export const RASGOS_ESPECIE = {
   tiefling: [[1, 'Legado infernal'], [1, 'Presencia sobrenatural'], [1, 'Visión en la oscuridad']],
 };
 
-// Nivel de personaje al que se gana cada atributo (para corregir lo que lea el libro: «A partir del nivel 5»)
 export const nivelRasgoEspecie = (ch, nombre) => (RASGOS_ESPECIE[especieBase(ch)] || []).find(([, n]) => norm(n) === norm(nombre))?.[0] || 1;
 
-// Visión en la oscuridad: 36 m el enano, el orco y el drow; 18 m el resto de especies que la tienen
 const VISION = { aasimar: 18, draconido: 18, elfo: 18, enano: 36, gnomo: 18, orco: 36, tiefling: 18 };
 export const visionOscuridad = ch => (linajeActual(ch)?.vision || VISION[especieBase(ch)] || 0);
 
-// Resumen de cada atributo (sin el manual importado, para que «En juego» no quede vacío)
 const RESUMEN = {
   'manos curativas': 'Acción de magia: tocas a una criatura y recupera tantos d4 como tu bonificador por competencia. Una vez por descanso largo.',
   'portador de luz': 'Conoces el truco luz (aptitud mágica: Carisma).',
@@ -68,7 +62,6 @@ export function resumenRasgoEspecie(ch, nombre) {
 
 const O = (nombre, texto, extra = {}) => ({ nombre, texto, ...extra });
 const DRAGONES = [['Azul', 'Relámpago'], ['Blanco', 'Frío'], ['Bronce', 'Relámpago'], ['Cobre', 'Ácido'], ['Negro', 'Ácido'], ['Oro', 'Fuego'], ['Oropel', 'Fuego'], ['Plata', 'Frío'], ['Rojo', 'Fuego'], ['Verde', 'Veneno']];
-// Linajes y legados: se eligen al crear el personaje (re: cómo reconocerlos en el nombre de la especie, «Elfo (drow)»)
 export const LINAJES = [
   { id: 'especie.elfo', especie: 'elfo', rasgo: 'Linaje élfico', cambia: 'fija', opciones: [
     O('Alto elfo', 'Truco prestidigitación (puedes cambiarlo por otro de mago tras un descanso largo); Detectar magia (nivel 3) y Paso brumoso (nivel 5).', { re: /alto|high/, trucos: ['Prestidigitación'], conjuros: { 3: 'Detectar magia', 5: 'Paso brumoso' } }),
@@ -96,7 +89,6 @@ export const LINAJES = [
     O('Mortaja necrótica', 'Salvación de Carisma o asustadas las criaturas a 3 m; +competencia de daño necrótico una vez por turno.', { tipo: 'necrótico' }) ] },
 ];
 
-// Opción de linaje: la elegida, o la que diga el nombre de la especie («Elfo (drow)», «Tiefling infernal»)
 export function linajeDe(ch, id) {
   const d = LINAJES.find(x => x.id === id); if (!d || especieBase(ch) !== d.especie) return null;
   const elegido = d.opciones.find(o => o.nombre === ch.opciones?.[id]); if (elegido) return elegido;
@@ -105,8 +97,6 @@ export function linajeDe(ch, id) {
 }
 export const linajeActual = ch => { const d = LINAJES.find(x => x.especie === especieBase(ch) && x.cambia !== 'uso'); return d ? linajeDe(ch, d.id) : null; };
 
-// Aptitud mágica de los conjuros de especie (elfo, gnomo y tiefling): Inteligencia, Sabiduría o Carisma, a elegir.
-// Sin elegir: la de tu clase si es una de esas tres; si no, la más alta.
 export const ESPECIES_APTITUD = { elfo: 'Linaje élfico', gnomo: 'Linaje gnomo', tiefling: 'Legado infernal' };
 export const APTITUD_ESPECIE = { id: 'especie.aptitud', rasgo: 'Aptitud mágica de especie', cambia: 'fija', opciones: [
   O('Inteligencia', 'Tus conjuros de especie usan la Inteligencia.', { ab: 'int' }), O('Sabiduría', 'Tus conjuros de especie usan la Sabiduría.', { ab: 'sab' }),
@@ -119,7 +109,6 @@ export function aptitudEspecie(ch, stats = ch.stats || {}, apClase = '') {
   return ['int', 'sab', 'car'].reduce((a, b) => ((parseInt(stats[b], 10) || 10) > (parseInt(stats[a], 10) || 10) ? b : a));
 }
 
-// Conjuros de especie: trucos y, a niveles 3 y 5, conjuros con un uso gratis al día
 export function conjurosEspecie(ch, nivel) {
   const out = [], e = especieBase(ch), L = nivel ?? 1;
   const add = (nombre, n, fuente, gratis = '') => { if (L >= n) out.push({ nombre, nivel: n, fuente, gratis, ritual: false }); };
@@ -133,7 +122,6 @@ export function conjurosEspecie(ch, nivel) {
   return out;
 }
 
-// Resistencias al daño de la especie
 export function resistenciasEspecie(ch) {
   const e = especieBase(ch), out = [], lin = linajeActual(ch);
   if (e === 'aasimar') out.push(['necrótico', 'Resistencia celestial'], ['radiante', 'Resistencia celestial']);

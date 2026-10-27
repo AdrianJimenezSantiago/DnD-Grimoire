@@ -7,7 +7,6 @@ import { FRASES_COMBATE } from './frases/combate.js';
 import { FRASES_DANO } from './frases/dano.js';
 import { probMenor, maxDist } from '../reglas/dados.js';
 
-// De peor a mejor: 1 natural (o el daño mínimo), malo, normal, bueno y 20 natural (o el daño máximo)
 export const TRAMOS = ['muyMal', 'mal', 'normal', 'bien', 'muyBien'];
 
 const pref = (o, p) => Object.fromEntries(Object.entries(o).map(([k, v]) => [p + k, v]));
@@ -16,7 +15,6 @@ export const FRASES = {
   ...FRASES_COMBATE, ...pref(FRASES_DANO, 'dano:'),
 };
 
-// Qué juego de frases corresponde a una tirada. Devuelve '' si no hay frases para ella (una tirada libre, por ejemplo).
 export function categoriaTirada({ tipo, hab = '', ab = '', motivo = '', clave = '', cura = false, conjuro = false } = {}) {
   let k = '';
   if (tipo === 'iniciativa' || tipo === 'muerte') k = tipo;
@@ -27,8 +25,6 @@ export function categoriaTirada({ tipo, hab = '', ab = '', motivo = '', clave = 
   return FRASES[k] ? k : '';
 }
 
-// Tramo de una tirada de d20. Con CD, cuenta si se supera y por cuánto; sin ella, la dificultad habitual
-// (10 fácil, 15 media). Los ataques sin CA conocida usan una CA típica (12 y 18).
 export function tramoD20({ nat = null, total, cd = null, tipo = '' }) {
   if (nat === 1) return 'muyMal';
   if (nat === 20) return 'muyBien';
@@ -37,8 +33,6 @@ export function tramoD20({ nat = null, total, cd = null, tipo = '' }) {
   return total < bajo ? 'mal' : total < alto ? 'normal' : 'bien';
 }
 
-// Tramo de una tirada de daño o curación según dónde cae dentro de lo posible: el mínimo y el máximo son los
-// extremos; el resto se reparte por el percentil (el tercio bajo, el central y el alto).
 export function tramoDano(total, dist) {
   if (!dist || !dist.p?.length) return 'normal';
   const min = dist.min, max = maxDist(dist);
@@ -49,7 +43,6 @@ export function tramoDano(total, dist) {
   return q < 0.3 ? 'mal' : q > 0.7 ? 'bien' : 'normal';
 }
 
-// Una frase al azar del tramo, distinta de la anterior si se puede
 export function elegirFrase(cat, tramo, { rng = Math.random, evitar = '' } = {}) {
   const xs = FRASES[cat]?.[tramo];
   if (!xs?.length) return '';

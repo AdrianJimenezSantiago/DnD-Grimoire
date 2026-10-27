@@ -27,15 +27,10 @@ const SOBRE = { prueba: 'prueba', salvacion: 'salvacion', muerte: 'salvacion', a
 const dlg = () => $('#dadosDlg');
 const cronica = () => { const k = S.cur()?.id ?? '_'; if (!CRONICA.has(k)) CRONICA.set(k, []); return CRONICA.get(k); };
 
-// ---- Entradas ----
 export function abrirDados() {
   V = { tipo: 'libre', expr: V?.tipo === 'libre' ? V.expr : '1d20', modo: 'normal', critico: false, res: null };
   montar(); abrir();
 }
-// cd: dificultad a superar (colorea el resultado y da la probabilidad de éxito).
-// alTirar: se llama una vez por tirada con el resultado. Si no es «repetible» (aplica cambios
-// en la ficha), cambiar ventaja o modificadores después no recalcula: vale para la siguiente.
-// siguiente: { texto, fn(critico) } para encadenar otra tirada, como el daño tras un ataque.
 export function tirarPrueba({ titulo, sub = '', bono = 0, tipo = 'prueba', ab = '', hab = '', cd = null, alTirar = null, repetible = false, siguiente = null, impacto = null, motivo = '', critMin = 20, minD20 = 0, minFuente = '' }) {
   const mods = S.cur() ? modsTirada(S.cur(), { sobre: SOBRE[tipo] || 'prueba', ab, hab, motivo: motivo || (tipo === 'muerte' ? 'muerte' : '') }) : [];
   if (!minD20 && hab && tipo === 'prueba' && S.cur() && minimoD20Habilidad(S.cur(), hab)) { minD20 = minimoD20Habilidad(S.cur(), hab); minFuente = 'Talentos fiables'; }
@@ -55,7 +50,6 @@ const esD20 = () => D20.includes(V.tipo);
 const exprActual = () => (esD20() ? `1d20${V.bono ? sgn(V.bono) : ''}` : V.expr);
 const conModo = p => esD20() || (V.tipo === 'libre' && esD20Simple(p));
 const fijo = () => !!V.alTirar && !V.repetible;
-// ---- Montaje ----
 function montar() {
   const libre = V.tipo === 'libre', body = $('#daBody');
   $('#daTitle').innerHTML = `${gi(libre ? 'cubilete' : V.tipo === 'muerte' ? 'muerte' : V.tipo === 'dano' ? 'dados' : 'd20', 'rl-d20')} ${esc(libre ? 'Dados' : V.titulo)}`;
@@ -91,7 +85,6 @@ function sincModo() {
   g.dataset.modo = V.modo; g.style.setProperty('--i', idxModo(V.modo));
   g.querySelectorAll('[data-damodo]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.damodo === V.modo)));
 }
-// Actualiza lo que depende de la expresión libre sin volver a pintar el campo (no pierde el cursor).
 function sincLibre(conValor = true) {
   const i = $('#daExpr'); if (!i) return;
   if (conValor) i.value = V.expr;
@@ -120,7 +113,6 @@ function actualizarBoton() {
 }
 const firmaMods = () => (V.mods || []).map(m => (m.on ? 1 : 0)).join('') + (V.critico ? 'c' : '');
 
-// ---- Tirar ----
 const DIST = new Map();
 function distDe(p, modo, res) {
   const extras = res.extras.map(x => ({ p: parsear(String(x.m.valor).replace(/^[+-]/, '')), signo: x.neg ? -1 : 1 })).filter(x => x.p);
@@ -136,16 +128,12 @@ function lanzar(nuevo = true) {
   const modo = conModo(p) ? V.modo || 'normal' : 'normal', antes = V.res;
   const previo = !nuevo && antes && texto(antes.p) === texto(p) ? antes.res : null;
   let res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [], previo });
-  // Fortuna (mediano): un 1 en una prueba con d20 se repite y vale el nuevo resultado
   let fortuna = !previo && conModo(p) && V.tipo !== 'dano' && V.tipo !== 'libre' && res.r.natural === 1 && S.cur() && especieBase(S.cur()) === 'mediano';
   if (fortuna) res = resolver({ p, modo, critico: !!V.critico, mods: V.mods || [] });
   else if (!!previo && antes?.fortuna) fortuna = true;
   const d20 = conModo(p), nat = res.r.natural, falla = falloAutomatico(V.mods || []);
-  // Crítico mejorado del campeón: el ataque es crítico con 19 o 18
   const crit = d20 && (nat === 20 || ((V.tipo === 'ataque' || V.tipo === 'muerte') && nat >= (V.critMin || 20))), pifia = d20 && nat === 1;
-  // Talentos fiables: un 9 o menos en el d20 cuenta como 10
   const fiable = d20 && V.minD20 && nat < V.minD20 ? V.minD20 - nat : 0;
-  // En una prueba de característica, un 20 natural no baja de 20 aunque los modificadores resten.
   const tope = V.tipo === 'prueba' && crit && res.total < 20, total0 = tope ? 20 : res.total + fiable, poderio = V.minTotal && total0 < V.minTotal, total = poderio ? V.minTotal : total0;
   let lbl = V.tipo === 'ataque' ? 'para impactar' : V.tipo === 'dano' ? V.sub || 'de daño' : V.tipo === 'iniciativa' ? 'de iniciativa' : V.tipo === 'libre' ? texto(p) : 'en la tirada';
   if (poderio) lbl = `${lbl} (Poderío indómito: usas tu Fuerza, ${V.minTotal})`;
@@ -156,7 +144,6 @@ function lanzar(nuevo = true) {
   let efecto = !nuevo && antes ? antes.efecto : '';
   if (nuevo || V.repetible) efecto = V.alTirar ? (V.tipo === 'muerte' ? V.alTirar(nat, total) : V.alTirar(total, nat)) || '' : '';
   const cd = V.cd ?? null;
-  // En pruebas y salvaciones con CD manda el total; en ataques y salvaciones contra muerte, el dado natural.
   const porDado = V.tipo === 'ataque' || V.tipo === 'muerte' || cd == null;
   const estado = falla ? 'pifia' : porDado && crit ? 'crit' : porDado && pifia ? 'pifia' : cd != null ? (total >= cd ? 'exito' : 'fallo') : '';
   V.res = { fortuna, p, res, total, tope, antes: antes && !nuevo ? antes.total : null, nat, crit, pifia, falla, lbl, efecto, cd, estado, modo, nuevo, firma: firmaMods(),
@@ -181,7 +168,6 @@ function registrar(nuevo) {
   V.logTxt = txt;
 }
 
-// ---- Resultado ----
 const NOTA_NAT = {
   20: { ataque: 'Impacto crítico: los dados de daño se tiran dos veces.', muerte: 'Recuperas 1 punto de golpe y vuelves en ti.', otro: 'El mejor resultado posible del dado. En pruebas y salvaciones no es un éxito automático: cuenta el total.' },
   1: { ataque: 'Fallo automático, sea cual sea el total.', muerte: 'Cuenta como dos fallos.', otro: 'El peor resultado posible del dado. En pruebas y salvaciones no es un fallo automático: cuenta el total.' },
@@ -202,7 +188,7 @@ function pintarOut(anim = false) {
       <button type="button" class="dd-falla" data-dafalla>${gi('muerte')}<span>Falla${rozar ? `<small>${esc(V.impacto.maestria.nombre)} se activa</small>` : ''}</span></button></div>`
     : V.siguiente && !x.falla && !x.decidido && !(V.tipo === 'ataque' && x.pifia)
     ? `<button type="button" class="dd-sig dd-rev ${x.crit ? 'crit' : ''}" style="--r:3" data-dasig>${gi('cortante')}${esc(V.siguiente.texto)}${x.crit ? ' crítico' : ''}</button>` : '';
-  if (x.frase === undefined) { // una por tirada: repintar no la cambia
+  if (x.frase === undefined) {
     const cat = categoriaTirada({ tipo: V.tipo, hab: V.hab, ab: V.ab, motivo: V.motivo, clave: V.clave || claveDe(V.sub), cura: /curaci/i.test(V.sub || '') });
     x.tramo = V.tipo === 'dano' ? tramoDano(x.total, x.dist) : x.falla ? 'mal' : tramoD20({ nat: n, total: x.total, cd: x.cd, tipo: V.tipo });
     x.frase = narracion(cat, x.tramo);
@@ -245,7 +231,6 @@ function asentar(el, x, anim) {
   chispas(cx, cy, { color: /^#/.test(col) ? col : '#E7B85F', n: max ? 40 : 12, speed: max ? 4 : 2, up: 1.2, life: max ? 1200 : 700, size: 1.7 });
 }
 
-// ---- Crónica ----
 const hace = t => { const s = (Date.now() - t) / 1000; return s < 45 ? 'ahora' : s < 3600 ? `hace ${Math.round(s / 60)} min` : new Date(t).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }); };
 function pintarHist(recien = false) {
   const el = $('#daHist'), H = cronica();
@@ -260,7 +245,6 @@ function pintarHist(recien = false) {
     ${H.length > VISIBLES ? `<button type="button" class="dd-cron-mas" data-daver>${V.verTodo ? 'Ver menos' : `Ver las ${H.length}`}</button>` : ''}`;
 }
 
-// ---- Agitar el móvil para tirar ----
 function armarAgitar() {
   if (agitar || typeof DeviceMotionEvent === 'undefined' || !matchMedia('(pointer: coarse)').matches) return;
   let ult = null, picos = [], espera = 0, visto = false;
@@ -349,7 +333,6 @@ export function init(store) {
   });
   on(body, 'click', '[data-dafalla]', () => {
     const m = V.impacto?.maestria, pr = V.impacto?.precision; V.impacto?.alFallar?.();
-    // Ataque de precisión (Maestro del combate): al fallar, un dado de supremacía se suma a la tirada
     const oferta = pr && !V.res.precision ? `<button type="button" class="dd-sig" data-daprec>${gi('dados')}<span>${esc(pr.nombre || 'Ataque de precisión')}<small>${esc(pr.texto || `gasta un dado de supremacía y suma 1${pr.dado} a la tirada`)} (${pr.quedan} ${pr.quedan === 1 ? 'queda' : 'quedan'})</small></span></button>` : '';
     V.res.decidido = true; V.res.aviso = (avisoMaes(m, m?.alFallar) || 'Fallo. El ataque no impacta.') + oferta; pintarOut();
     if (m?.alFallar) { const hero = $('#daOut .dd-hero'); fxImpacto(hero, { clave: V.impacto.clave, nivel: 'bueno' }); }
@@ -361,5 +344,4 @@ export function init(store) {
     if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) { e.preventDefault(); tirarBoton(); }
   });
 }
-// En la tirada libre, al cambiar la expresión el último resultado queda atenuado hasta volver a tirar.
 function caducar() { if (V.res && !V.res.viejo) { V.res.viejo = true; $('#daOut')?.classList.add('viejo'); } }

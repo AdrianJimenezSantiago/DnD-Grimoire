@@ -26,8 +26,6 @@ export function siguienteTurno(ch) {
   return c;
 }
 
-// Acción de Ataque: el primer ataque gasta la acción y abre tantos ataques como dé la clase.
-// Un ataque extra con arma Ligera tras atacar con otra Ligera gasta la acción adicional (o nada, con Mella).
 export function registrarAtaque(ch, { max = 1, ligera = false, mella = false } = {}) {
   const c = combateDe(ch), a = c.ataques;
   if (a && a.usados < a.max) { a.usados++; a.ligera ||= ligera; return { tipo: 'accion', n: a.usados, max: a.max }; }
@@ -42,15 +40,10 @@ export function registrarAtaque(ch, { max = 1, ligera = false, mella = false } =
 export function deshacerAtaques(ch) { const c = combateDe(ch); c.ataques = null; return c; }
 export function alternarEconomia(ch, k) { const c = combateDe(ch); if (k in c.turno) c.turno[k] = !c.turno[k]; if (k === 'accion' && !c.turno.accion) c.ataques = null; return c.turno[k]; }
 
-// Manual del Jugador 2024, «Un conjuro por cada espacio de conjuro y turno»: en un turno solo puedes gastar UN espacio
-// para lanzar un conjuro. Los trucos y lo que lances sin espacio (rasgos, dotes, rituales) no cuentan. Una reacción en el
-// turno de otra criatura es otro turno: puede gastar espacio aunque ya lo gastaras en el tuyo.
-// Devuelve '' si se puede, 'turno' si ya gastaste el espacio de tu turno, o 'reaccion' si es una reacción (vale solo fuera de tu turno).
 export function limiteEspacio(ch, tiempo) {
   const c = combateDe(ch); if (!c.activo || !c.espacio) return '';
   return economiaDeTiempo(tiempo) === 'reaccion' ? 'reaccion' : 'turno';
 }
-// Al lanzar en combate: marca la parte del turno que gasta y, si es con espacio en tu turno, el espacio del turno
 export function lanzarEnCombate(ch, { tiempo, conEspacio = false, nombre = '', enTuTurno = null } = {}) {
   const c = combateDe(ch); if (!c.activo) return;
   const eco = economiaDeTiempo(tiempo);
@@ -66,8 +59,6 @@ export function economiaDeTiempo(tiempo) {
   return 'otro';
 }
 
-// Acciones que cualquiera puede hacer en combate (Manual del Jugador 2024). efecto: el que te deja puesto hasta tu siguiente turno;
-// tirar: las habilidades de la prueba que suele acompañarla, la más habitual primero
 export const ACCIONES_COMUNES = [
   { k: 'correr', corto: 'Movimiento ×2', nombre: 'Correr', ico: 'velocidad', efecto: 'correr', texto: 'Ganas movimiento extra igual a tu velocidad durante este turno.' },
   { k: 'destrabarse', corto: 'Sin ataques de oportunidad', nombre: 'Destrabarse', ico: 'iniciativa', efecto: 'destrabarse', texto: 'Tu movimiento no provoca ataques de oportunidad durante el resto del turno.' },
@@ -82,19 +73,16 @@ export const ACCIONES_COMUNES = [
   { k: 'oportunidad', corto: 'Cuerpo a cuerpo', nombre: 'Ataque de oportunidad', ico: 'combate', via: 'reaccion', texto: 'Cuando una criatura que puedes ver sale de tu alcance, le haces un ataque cuerpo a cuerpo con tu reacción.' },
 ];
 export const ACCION_COMUN = Object.fromEntries(ACCIONES_COMUNES.map(a => [a.k, a]));
-// Rasgos que dejan hacer algunas de ellas como acción adicional
 export function accionesAdicionales(ch) {
   const out = [], c = Object.fromEntries(clasesDe(ch).map(x => [x.clase, x.nivel]));
   if ((c['Pícaro'] || 0) >= 2) for (const k of ['correr', 'destrabarse', 'esconderse']) out.push({ k, rasgo: 'Acción astuta' });
   if ((c['Monje'] || 0) >= 2) { out.push({ k: 'correr', rasgo: 'Paso del viento' }); out.push({ k: 'destrabarse', rasgo: 'Defensa paciente' }); }
-  // Dotes: Estudio rápido (Mente aguda), Búsqueda rápida (Observador), Artista escapista (Don de la velocidad)
   const dotes = dotesDe(ch).map(d => norm(d.nombre));
   if (dotes.includes('mente aguda')) out.push({ k: 'estudiar', rasgo: 'Mente aguda' });
   if (dotes.includes('observador')) out.push({ k: 'buscar', rasgo: 'Observador' });
   if (dotes.includes('don de la velocidad')) out.push({ k: 'destrabarse', rasgo: 'Don de la velocidad' });
   return out.filter((x, i) => out.findIndex(y => y.k === x.k) === i);
 }
-// Marca la acción común hecha y gasta la parte del turno que toca
 export function hacerAccionComun(ch, k, via = ACCION_COMUN[k]?.via || 'accion') {
   const c = combateDe(ch); if (!ACCION_COMUN[k]) return false;
   c.turno[via] = true; c.hechas = [...(c.hechas || []), { k, via }];

@@ -28,7 +28,6 @@
 :root[data-theme="light"] { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .1); --pozo: inset 0 2px 4px rgba(80, 50, 20, .1); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bisel: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(80, 50, 20, .1); --pozo: inset 0 2px 4px rgba(80, 50, 20, .1); } }
 
-/* ——— Tipografía: rótulos grabados y capitulares ——— */
 h1, h2, h3, .lvl-title, .cname { font-kerning: normal; text-wrap: balance; }
 .dhead h2 { font: 600 clamp(21px, 5.4vw, 27px) / 1.12 var(--display); letter-spacing: .035em; }
 :is(.dhead h2, dialog.modal h2)::first-letter {
@@ -38,17 +37,14 @@ h1, h2, h3, .lvl-title, .cname { font-kerning: normal; text-wrap: balance; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(.dhead h2, dialog.modal h2)::first-letter { color: var(--gold); text-shadow: none; } }
 .dsub { font-family: var(--serif); font-style: italic; font-size: var(--fs-m); }
 
-/* ——— 1. Tallado: solo lo ceremonial ——— */
 dialog, .menu, .lcard, button.gold, button.primary { -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; border-radius: 0; }
 .lcard { --muesca: 10px; --orn: 32px; } .menu { --muesca: 11px; --orn: 34px; }
 .lcard::before, .menu::before { inset: 0; opacity: .78; }
 
-/* ——— 2. Esquinero: páginas dentro de la página ——— */
 .res, .list, .tour-card { --orn-tl: var(--esq-tl); --orn-tr: var(--esq-tr); --orn-bl: var(--esq-bl); --orn-br: var(--esq-br); border-radius: var(--r-m); }
 .list { --orn: 30px; } .res { --orn: 24px; } .tour-card { --orn: 28px; }
 :is(.res, .list)::after, .tour-card::before { inset: 3px; opacity: .6; }
 
-/* ——— Botones normales: piedra lisa que se enciende desde abajo ——— */
 :where(button) { font-weight: 600; letter-spacing: .015em; }
 :is(.dfoot, .row-btns, .cacts, .act, .md-btns, .tour-btns) button:not(.gold):not(.primary):not(.danger):not(.ghost), .iconbtn, .chip:not(.gold), .who-chip {
   border-color: color-mix(in srgb, var(--gold) 22%, var(--line)); border-radius: var(--r-s);
@@ -67,7 +63,6 @@ dialog, .menu, .lcard, button.gold, button.primary { -webkit-mask: radial-gradie
 .iconbtn :is(.icon, .gi) { transition: transform .45s var(--spring); }
 .iconbtn:hover :is(.icon, .gi) { transform: rotate(-12deg) scale(1.12); }
 
-/* El botón principal es un sello de oro batido, tallado, con una línea grabada por dentro */
 button.gold, button.primary, .chip.gold {
   --bc: color-mix(in srgb, var(--gold) 55%, #000); border: 1px solid var(--bc); color: var(--on-gold);
   background: linear-gradient(180deg, color-mix(in srgb, var(--gold-2) 88%, #fff), var(--gold) 55%, color-mix(in srgb, var(--gold) 74%, #000));
@@ -86,19 +81,16 @@ button.gold:hover:not(:disabled), button.primary:hover:not(:disabled) {
 :is(button.gold, button.primary):focus-visible { outline: 1.5px solid var(--on-gold); outline-offset: -6px; box-shadow: inset 0 0 0 7px var(--glow); }
 button.danger { border-radius: var(--r-s); }
 
-/* ——— Campos: pozos de tinta ——— */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea {
   border-radius: var(--r-s); background-color: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); }
 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):focus { background-color: var(--surface); box-shadow: var(--pozo), 0 0 0 3px var(--glow); }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 
-/* Interruptor: una palanca de latón en su ranura */
 .switch span { border-radius: 3px; background: color-mix(in srgb, var(--bg) 55%, var(--line)); box-shadow: var(--pozo); }
 .switch span::after { border-radius: 2px; transform: rotate(45deg) scale(.72); background: linear-gradient(135deg, var(--ink-2), var(--ink-3)); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3); }
 .switch input:checked + span { background: color-mix(in srgb, var(--gold) 32%, var(--bg)); box-shadow: var(--pozo), 0 0 12px -2px var(--glow); }
 .switch input:checked + span::after { transform: translateX(18px) rotate(45deg) scale(.72); background: linear-gradient(135deg, var(--gold-2), var(--gold)); box-shadow: 0 0 10px var(--glow); }
 
-/* ——— Fichas y pestañas ——— */
 .chip { font-weight: 600; letter-spacing: .02em; }
 .chip-n { border-radius: 2px; }
 .seg { border-radius: var(--r-s); padding: 3px; gap: 3px; background: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); border-color: color-mix(in srgb, var(--gold) 16%, var(--line-soft)); }
@@ -109,10 +101,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent), inset 0 -2px 0 var(--gold), 0 0 14px -4px var(--glow); }
 .seg button:is([aria-checked="true"], [aria-selected="true"]) .gi { color: var(--gold-2); }
 
-/* ——— Selector deslizante de tiradas (Desventaja/Normal/Ventaja, Ha fallado/Ha superado/Varios) ———
-   Una placa de piedra que se desliza dentro de su ranura sin rebotar (el muelle la sacaba por los extremos de la
-   ventana), con el color de lo que significa: rojo brasa si falla o hay desventaja, verde si supera o hay ventaja,
-   y el color de la clase en lo neutro. Lleva su gema en el filo superior, como las placas clave de la hoja. */
 .dd-modo { --sel: var(--gold); overflow: hidden; border-radius: var(--r-s); background: color-mix(in srgb, var(--bg) 55%, var(--surface)); box-shadow: var(--pozo); }
 .dd-modo[data-modo="ventaja"], .cj-ts[data-ts="supera"] { --sel: var(--ok); }
 .dd-modo[data-modo="desventaja"], .cj-ts[data-ts="falla"] { --sel: var(--danger); }
@@ -131,9 +119,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 .dd-modo button[aria-checked="true"], .dd-modo[data-modo] button[aria-checked="true"], .cj-ts[data-ts] button[aria-checked="true"] { color: color-mix(in srgb, var(--sel) 70%, var(--ink)); }
 .dd-modo button:hover:not([aria-checked="true"]) { color: var(--ink); }
 
-/* ——— Narración del resultado: una frase propia de cada tirada (domain/presentacion/frases.js) ———
-   Cursiva de manuscrito entre dos filetes con gema, teñida por el tramo: brasa en el 1 natural, tinta apagada si sale
-   mal, tinta plena si es normal, oro si sale bien y oro encendido en el 20 natural o el daño máximo. */
 .dd-frase { --fc: var(--ink); position: relative; margin: 2px auto 10px; padding: 10px 18px 12px; max-width: 46ch; text-align: center;
   font: italic 400 var(--fs-l) / 1.4 var(--serif); color: var(--fc); text-wrap: balance;
   background: linear-gradient(to bottom right, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, color-mix(in srgb, var(--fc) 55%, transparent) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, color-mix(in srgb, var(--fc) 55%, transparent) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, color-mix(in srgb, var(--fc) 55%, transparent) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; background-position: calc(50% - 2px) 0, calc(50% + 2px) 0, calc(50% - 2px) 4px, calc(50% + 2px) 4px, 0 4px; background-repeat: no-repeat; }
@@ -146,7 +131,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) :is(.dd-frase.t-bien, .dd-frase.t-muyBien) { --fc: var(--gold); } }
 @media (max-width: 560px) { .dd-frase { font-size: var(--fs-m); padding: 9px 8px 11px; } }
 
-/* ——— Ventanas: páginas del códice ——— */
 dialog { --muesca: 13px; --orn: 38px; border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
   background: radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%),
     radial-gradient(70% 30% at 50% 100%, color-mix(in srgb, var(--gold) 5%, transparent), transparent 70%), var(--raised); }
@@ -166,18 +150,15 @@ dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in 
   dialog, dialog.tall { --muesca: 14px; -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 100% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 100% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 100% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 100% no-repeat; }
   dialog::after { -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 100% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 100% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 100% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 100% no-repeat; }
   dialog.modal, dialog.modal::after { -webkit-mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; mask: radial-gradient(circle at 0 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, #0000 var(--muesca), #000 calc(var(--muesca) + .6px)) 100% 100% / 51% 51% no-repeat; }
-  /* El asa es un marcapáginas: una cinta con cola de golondrina que cuelga del borde superior */
   .grip { width: 16px; height: 15px; margin-top: 0; border-radius: 0; background: linear-gradient(90deg, var(--gold), var(--gold-2) 50%, var(--gold));
     clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 68%, 0 100%); }
   .grip::after { display: none; }
   .dhead::after { left: 18px; right: 18px; }
 }
 
-/* ——— Hoja ——— */
 .lvl-num::before { border-radius: 1px; }
 .lvl-head { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 60%, transparent), color-mix(in srgb, var(--gold) 22%, transparent) 30%, transparent 85%) left bottom / 100% 1px no-repeat; }
 
-/* ——— Barra superior: el dintel ——— */
 .appbar::after { height: 5px; bottom: -2px; opacity: 1;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 55%, transparent) 25% 75%, transparent) 0 0 / 100% 1px no-repeat,
     linear-gradient(90deg, transparent 10%, color-mix(in srgb, var(--gold) 18%, transparent) 35% 65%, transparent 90%) 0 4px / 100% 1px no-repeat; }
@@ -185,7 +166,6 @@ dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in 
 .who-chip .nm { letter-spacing: .05em; }
 .who-cambiar { border-radius: 2px; }
 
-/* ——— Espacios de conjuro: gemas talladas en rombo ——— */
 .orb { border: 0; border-radius: 0; width: 19px; height: 24px; background: var(--gold); box-shadow: none; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .orb::before { inset: 2px; border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   background: conic-gradient(from 225deg at 50% 50%, var(--candle-core) 0 25%, var(--gold-2) 0 50%, var(--gold) 0 75%, color-mix(in srgb, var(--gold) 55%, #000) 0); }
@@ -196,7 +176,6 @@ dialog::backdrop { background: radial-gradient(ellipse at 50% 45%, color-mix(in 
 body.sb-compacta .orb { width: 13px; height: 16px; }
 .sb-l > b { font-family: var(--display); }
 
-/* ——— Barra inferior del móvil: un cinto, con una gema en lo que está activo ——— */
 .dock { border-radius: 6px; padding: 7px 10px 6px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, var(--bg)), var(--bg)); border-color: color-mix(in srgb, var(--gold) 34%, var(--line)); }
 .dock::before { left: 16px; right: 16px; top: 2px; height: 8px; background: linear-gradient(to bottom right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 0 / 4px 4px no-repeat, linear-gradient(to bottom left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 0 / 4px 4px no-repeat, linear-gradient(to top right, #0000 50%, var(--gold) 50%) calc(50% - 2px) 100% / 4px 4px no-repeat, linear-gradient(to top left, #0000 50%, var(--gold) 50%) calc(50% + 2px) 100% / 4px 4px no-repeat, linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 75%, transparent) calc(50% - 10px), transparent calc(50% - 10px) calc(50% + 10px), color-mix(in srgb, var(--gold) 75%, transparent) calc(50% + 10px), transparent) 0 50% / 100% 1px no-repeat; opacity: .5; }
 .dockbtn { border-radius: 0; isolation: isolate; }
@@ -207,10 +186,6 @@ body.sb-compacta .orb { width: 13px; height: 16px; }
 .dockbtn.d-combate[aria-pressed="true"]::before { border-color: color-mix(in srgb, var(--ember) 60%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--ember) 30%, transparent), transparent 72%); }
 .dockbtn[aria-pressed="true"]::after, .dockbtn.d-combate[aria-pressed="true"]::after { display: none; }
 
-/* ——— Avisos: una misiva sellada ———
-   Una placa de piedra oscura (con el tinte de la clase) y el mismo filete interior que las ventanas. A la izquierda,
-   el sello: una gema tallada que se enciende al llegar. Abajo, una mecha de luz que se consume mientras el aviso
-   sigue a la vista (--dura la pone toast.js) y avisa de cuánto queda para pulsar «Deshacer». */
 .toast { --tinta: hsl(var(--acc-h) calc(26% * var(--acc-k, 1)) 9%);
   border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: var(--r-m); overflow: hidden; clip-path: none;
   padding: 12px 12px 14px 46px; min-height: 58px; gap: 8px 16px; color: #F1E8D6;
@@ -220,13 +195,11 @@ body.sb-compacta .orb { width: 13px; height: 16px; }
     0 18px 44px -10px rgba(0, 0, 0, .6), 0 0 40px -14px var(--glow); }
 .toast.show { animation: misiva .5s var(--ease-out) both; }
 @keyframes misiva { from { opacity: 0; transform: translate(-50%, 18px) scale(.97); } }
-/* El sello */
 .toast::before { content: ""; display: block; position: absolute; left: 17px; top: 50%; bottom: auto; right: auto; width: 15px; height: 15px; margin-top: -9px; border-radius: 2px;
   transform: rotate(45deg); background: conic-gradient(from 180deg, var(--candle-core) 0 25%, var(--gold-2) 0 50%, var(--gold) 0 75%, color-mix(in srgb, var(--gold) 55%, #000) 0);
   box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 50%, #000), 0 0 14px var(--glow), 0 0 4px var(--gold); }
 .toast.show::before { animation: sello .6s var(--spring) both .12s; }
 @keyframes sello { from { transform: rotate(-135deg) scale(0); opacity: 0; } }
-/* La mecha */
 .toast::after { content: ""; display: block; position: absolute; left: 4px; right: 4px; top: auto; bottom: 4px; width: auto; height: 1.5px; border-radius: 1px; transform-origin: left center;
   background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 30%, transparent), var(--gold-2) 85%, var(--candle-core));
   box-shadow: 0 0 6px var(--glow); }
@@ -244,7 +217,6 @@ body.sb-compacta .orb { width: 13px; height: 16px; }
 @media (max-width: 560px) { .toast { width: calc(100vw - 24px); padding-left: 44px; } }
 @media (prefers-reduced-motion: reduce) { .toast::after { display: none; } }
 
-/* ——— Menús: el índice del libro ——— */
 .menu { background: radial-gradient(120% 50% at 50% 0, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%), var(--raised); }
 #moreMenu .mm-tile { border-radius: var(--r-m); }
 #moreMenu .mm-ico { border-radius: 2px; transform: rotate(45deg) scale(.86); }

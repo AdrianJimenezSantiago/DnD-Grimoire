@@ -46,7 +46,6 @@ export function elegirDote(ch, { titulo = 'Elegir dote', grupoInicial = '', excl
     sub: lib.length ? 'Toca una para leerla antes de elegirla. También puedes escribir otra.' : 'Sin libros importados solo salen las dotes de origen. Importa el Manual del Jugador para verlas todas, o escribe cualquier otra.' });
 }
 
-// Atributos de cada especie con los nombres del Manual del Jugador de 2024
 export const ESPECIE_BASE = {
   Aasimar: 'Manos curativas · Portador de luz · Resistencia celestial · Visión en la oscuridad · Revelación celestial (nivel 3)',
   'Dracónido': 'Linaje dracónico · Ataque de aliento · Resistencia al daño · Visión en la oscuridad · Vuelo dracónico (nivel 5)',

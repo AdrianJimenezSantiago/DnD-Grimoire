@@ -12,13 +12,11 @@
   background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
               linear-gradient(180deg, color-mix(in srgb, var(--surface) 70%, transparent), color-mix(in srgb, var(--surface) 92%, transparent));
   box-shadow: var(--shadow-1), inset 0 0 0 5px color-mix(in srgb, var(--surface) 55%, transparent), inset 0 0 0 6px color-mix(in srgb, var(--gold) 20%, transparent); }
-/* Dos filetes dorados que siguen el arco por dentro */
 .es-arco::before { content: ""; position: absolute; inset: 9px; z-index: -1; pointer-events: none; border-radius: inherit;
   border: 1px solid color-mix(in srgb, var(--gold) 22%, transparent); }
 .es-arco::after { content: ""; position: absolute; left: 50%; top: -7px; width: 14px; height: 14px; margin-left: -7px; transform: rotate(45deg);
   background: var(--gold); box-shadow: 0 0 12px var(--glow), 0 0 0 3px var(--bg); border-radius: 2px; }
 
-/* El cielo: rayos detrás del medallón, estrellas que titilan y el emblema de la clase como filigrana */
 .es-cielo { position: absolute; inset: 0; z-index: -2; overflow: hidden; border-radius: inherit; pointer-events: none; }
 .es-rayos { position: absolute; left: 50%; top: 92px; width: 640px; height: 640px; margin: -320px 0 0 -320px;
   background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--gold) 13%, transparent) 0 2.5deg, transparent 2.5deg 15deg);
@@ -38,7 +36,6 @@
 @keyframes es-titila { 50% { opacity: .15; } }
 .es-filigrana { position: absolute; right: -26px; bottom: -34px; width: 190px; height: 190px; color: var(--gold); opacity: .07; transform: rotate(-12deg); }
 
-/* Medallón: retrato con anillo de runas, gema de inspiración a la derecha y sello de nivel a la izquierda */
 .es-medallon { position: relative; margin-bottom: 10px; }
 @media (max-width: 560px) { #hero.estandarte .avatar.xl { width: 92px; height: 92px; } #hero.estandarte .es-lema { font-size: var(--fs-m); margin-top: 10px; } .es-origen { margin-top: 10px; } }
 #hero.estandarte .avatar.xl { width: 104px; height: 104px; }
@@ -54,7 +51,6 @@
 .es-sello small { font: 700 7.5px / 1 var(--sans); letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
 .es-sello b { font: 700 18px / 1 var(--display); margin-top: 1px; }
 
-/* Nombre: oro viejo con un brillo que cruza una vez al entrar */
 #hero.estandarte h1 { position: relative; display: block; max-width: 100%; margin: 4px 0 0; padding: 0 .1em .04em; overflow-wrap: anywhere;
   font: 700 clamp(34px, 9.4vw, 64px) / 1.02 var(--display-deco); letter-spacing: .02em;
   background: linear-gradient(100deg, var(--gold) 0%, var(--gold-2) 22%, var(--ink) 42%, var(--gold-2) 58%, var(--gold) 78%, var(--gold-2) 100%);
@@ -67,7 +63,6 @@
 .es-filete .es-rombo { fill: var(--gold); stroke: none; filter: drop-shadow(0 0 5px var(--glow)); }
 #hero.estandarte .underline path { stroke-dasharray: none; }
 
-/* Banderola de la clase, con las puntas cortadas en cola de golondrina */
 #hero.estandarte .es-cinta { position: relative; max-width: 100%; margin: 0; padding: 0 6px; font: inherit; }
 .es-cinta > span { display: inline-block; padding: 8px 30px 9px; font: 600 var(--fs-m) / 1.25 var(--sans); letter-spacing: .02em; color: var(--on-gold, #1b1406);
   background: linear-gradient(180deg, var(--gold-2), var(--gold) 70%);
@@ -83,7 +78,6 @@
 .es-lema::before, .es-lema::after { position: absolute; top: -.18em; font: 700 2em / 1 var(--display-deco); color: color-mix(in srgb, var(--gold) 55%, transparent); }
 .es-lema::before { content: "“"; left: 0; } .es-lema::after { content: "”"; right: 0; }
 
-/* Cinturón de gemas: una sola fila de acciones (se desplaza de lado si no cabe) */
 #hero.estandarte .es-gemas { display: flex; flex-wrap: nowrap; justify-content: center; gap: 4px; margin: 16px auto 0; padding: 4px 2px 6px; max-width: 760px;
   overflow-x: auto; scrollbar-width: none; -webkit-mask: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); mask: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); }
 #hero.estandarte .es-gemas::-webkit-scrollbar { display: none; }
@@ -98,14 +92,12 @@
 .es-gema:active .es-gema-c { transform: rotate(45deg) scale(.94); }
 .es-gema:hover { color: var(--ink); }
 .es-gema .chip-n { position: absolute; top: 0; left: 50%; margin-left: 12px; z-index: 1; }
-/* Subir de nivel: la gema llena de oro, con un halo que late (en una capa aparte, solo opacidad) */
 .es-sube { color: var(--gold-2); }
 :root[data-theme="light"] .es-sube { color: var(--gold); }
 .es-sube .es-gema-c { color: var(--on-gold, #1b1406); border-color: var(--gold-2); background: linear-gradient(135deg, var(--gold-2), var(--gold)); }
 .es-sube .es-gema-c::after { content: ""; position: absolute; inset: -7px; border-radius: 15px; border: 1px solid var(--gold); box-shadow: 0 0 16px var(--glow); opacity: 0; animation: es-halo 2.6s ease-in-out infinite; }
 @keyframes es-halo { 50% { opacity: 1; } }
 
-/* Tema de día: pergamino iluminado; las estrellas se vuelven polvo de oro */
 :root[data-theme="light"] .es-arco { background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in srgb, var(--raised) 70%, transparent), var(--surface)); }
 :root[data-theme="light"] .es-estrellas { opacity: .35; }
 :root[data-theme="light"] #hero.estandarte h1 { filter: drop-shadow(0 1px 0 rgba(255, 250, 235, .8)); text-shadow: none; }

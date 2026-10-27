@@ -20,7 +20,6 @@ export function enlazarEdicion(S, sheet) {
     if (t.dataset.dv !== undefined) {
       const [id, i, sides] = t.dataset.dv.split('|'), max = +sides;
       const v = t.value.replace(/\D/g, '').slice(0, String(max).length), n = parseInt(v, 10);
-      // Lo que no cabe en el dado se corrige y se avisa: letras fuera, y del 1 a sus caras
       const motivo = /\D/.test(t.value) ? 'letras' : v && n < 1 ? 'cero' : v && n > max ? 'alto' : '';
       t.value = v && (n < 1 || n > max) ? String(Math.min(max, Math.max(1, n))) : v;
       if (motivo) rechazar(t, motivo, { min: 1, max, campo: `d${max}` });

@@ -5,15 +5,6 @@ import { perfil } from '../reglas/reglas2024.js';
 import { curar } from '../combate/vida.js';
 import { tirarExpr } from '../combate/automatismos.js';
 
-// Lo que se puede HACER con un objeto mágico (Guía del Dungeon Master de 2024) y cuánto gasta:
-//   recuperar: recupera un espacio de conjuro gastado de nivel nivMax o inferior (Perla de poder, Vara del pacto)
-//   curar: recuperas puntos de golpe (Talismán de salud, Anillo de regeneración…)
-//   conjuro: lanzas un conjuro desde el objeto gastando cargas (0 = a voluntad); nivel: versión del conjuro;
-//            escala: hasta cuántas cargas, una más por nivel (varitas); porNivel: el coste es el nivel del conjuro (Bastón de curación);
-//            cd/atk: los del objeto (si no, los tuyos)
-//   tirada: gastas cargas para tirar unos dados (Bastón de impacto, Anillo del carnero)
-//   uso: 'cargas' (las del objeto), 'diario' (una vez hasta el amanecer, contador propio), 'largo' (hasta un descanso largo) o 'libre'
-// Revisado a mano contra el texto de la Guía: las tablas de los bastones salen del PDF con los costes mal leídos.
 const C = (nombre, coste = 1, extra = {}) => ({ tipo: 'conjuro', nombre, coste, ...extra });
 const DIA = (nombre, extra = {}) => C(nombre, 0, { uso: 'diario', ...extra });
 const LIBRE = (nombre, extra = {}) => C(nombre, 0, { uso: 'libre', ...extra });
@@ -74,7 +65,6 @@ export const ACCIONES = [
   [/^abanico del viento/, [LIBRE('Ráfaga de viento', { cd: 13, nota: 'Cada uso más antes del amanecer: 20 % acumulativo de que se rompa.' })]],
 ];
 
-// Acciones del objeto, con una clave estable y su título para el botón
 export function accionesDe(o) {
   const n = norm(o?.nombre || ''), x = ACCIONES.find(([re]) => re.test(n)); if (!x) return [];
   return x[1].map((a, i) => {
@@ -85,14 +75,12 @@ export function accionesDe(o) {
   });
 }
 
-// El contador que gasta la acción: las cargas del objeto o su uso diario (que se crea si el objeto aún no lo tenía)
 const diarias = acs => acs.filter(a => a.uso === 'diario' || a.uso === 'largo');
 export function recursoDe(ch, o, a, crear = false) {
   if (a.uso === 'libre') return null;
   if (a.uso === 'cargas') return o.rasgo ? reglas(ch).find(r => r.id === o.rasgo) || null : null;
   o.accionUso ||= {};
   let id = o.accionUso[a.id];
-  // Los usos que el lector ya creó (uno por propiedad) se adoptan en el mismo orden
   if (!id) { const ds = diarias(accionesDe(o)), i = ds.findIndex(d => d.id === a.id); if ((o.usos || []).length === ds.length && i >= 0) id = o.usos[i]; }
   let r = id ? reglas(ch).find(x => x.id === id) : null;
   if (!r && crear) {
@@ -105,14 +93,12 @@ export function recursoDe(ch, o, a, crear = false) {
 }
 export const libresDe = (ch, r) => (r ? r.max - usosGastados(ch, r) : Infinity);
 
-// Espacios gastados que se pueden recuperar: [nivel, gastados]
 export function espaciosRecuperables(ch, nivMax = 9) {
   const P = perfil(ch), out = [];
   for (let L = 1; L <= Math.min(9, nivMax); L++) { const tot = P.slots?.[L] || 0, u = Math.min(ch.play?.used?.[L] || 0, tot); if (u > 0) out.push([L, u]); }
   return out;
 }
 
-// ¿Se puede hacer ahora? '' si sí; si no, por qué
 export function motivoAccion(ch, o, a, n = a.coste) {
   if (!o || o.guardado) return 'Llévalo encima para usarlo.';
   if (o.sintonia && !o.sintonizado) return 'Tienes que estar sintonizado con él.';
@@ -125,7 +111,6 @@ export function motivoAccion(ch, o, a, n = a.coste) {
   return '';
 }
 
-// Opciones de una acción escalable: cuántas cargas y a qué nivel
 export function opcionesEscala(a) {
   if (a.escala && a.tipo === 'conjuro') return Array.from({ length: a.escala }, (_, i) => ({ cargas: a.coste + i, nivel: (a.nivel || 1) + i }));
   if (a.escala) return Array.from({ length: a.escala }, (_, i) => ({ cargas: i + 1, nivel: null }));
@@ -133,8 +118,6 @@ export function opcionesEscala(a) {
   return [{ cargas: a.coste, nivel: a.nivel || null }];
 }
 
-// Aplica la acción: gasta el contador y hace lo que la hoja puede hacer sola. Devuelve qué ha pasado.
-//   cargas: las que se gastan (opcionesEscala); L: nivel del espacio a recuperar; tirar: dado para las pruebas
 export function usarAccion(ch, o, a, { cargas = a.coste, L = null, tirar } = {}) {
   const motivo = motivoAccion(ch, o, a, cargas); if (motivo) return { ok: false, motivo };
   const r = recursoDe(ch, o, a, true);
@@ -144,7 +127,6 @@ export function usarAccion(ch, o, a, { cargas = a.coste, L = null, tirar } = {})
     const opciones = espaciosRecuperables(ch, a.nivMax), nivel = opciones.some(([x]) => x === L) ? L : opciones[opciones.length - 1][0];
     ch.play.used[nivel] = Math.max(0, (ch.play.used[nivel] || 0) - 1); out.nivel = nivel;
   }
-  // Curación: tira y la aplica; daño (Bastón de impacto, Anillo del carnero): tira los dados por carga
   if (a.tipo === 'curar') { out.tirada = tirarExpr(a.expr, tirar); out.curado = curar(ch, out.tirada.total); }
   if (a.tipo === 'tirada') { const m = /^(\d+)d(\d+)$/.exec(a.expr), n = a.escala ? cargas : 1; out.tirada = tirarExpr(m ? `${+m[1] * n}d${m[2]}` : a.expr, tirar); }
   return out;

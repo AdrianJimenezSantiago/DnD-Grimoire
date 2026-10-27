@@ -5,7 +5,6 @@ import { icon } from '../componentes/icons.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 
 const TODAS = HABILIDADES.length;
-// Qué pide una fuente de competencias (dote Habilidoso, subclase, multiclase…)
 export function textoFuente(f) {
   if (f.fijas) return `te da ${f.lista.length === TODAS ? 'competencia en todas las habilidades' : `competencia en ${f.lista.map(k => NOMBRE_HAB[k]).join(' y ')}`}.`;
   const cuantas = f.n === 1 ? 'una habilidad' : `${f.n} habilidades`;
@@ -13,11 +12,9 @@ export function textoFuente(f) {
     + (f.herramientas ? ' Puedes cambiar alguna por una herramienta: déjala sin marcar y anótala en la ficha.' : '')
     + (f.nota ? ` ${f.nota}` : '');
 }
-// Habilidades que aún se pueden coger de la lista (las que ya tienes no cuentan)
 export const disponibles = (f, hab, sel = []) => f.lista.filter(k => !(hab[k] >= 1) || sel.includes(k));
 export const faltanDe = (f, hab, sel = []) => (f.fijas ? 0 : Math.max(0, Math.min(f.n, disponibles(f, hab, sel).length) - sel.length));
 
-// Bloque para elegir las habilidades de una fuente. `hab`: niveles sin contar esta elección.
 export function fuenteHtml(f, { hab, sel = [], attr }) {
   if (f.fijas) return `<div class="cc-elige ok"><p>${icon('sparkles')}<b>${esc(f.nombre)}</b> ${esc(textoFuente(f))}</p></div>`;
   const lleno = sel.length >= f.n, falta = faltanDe(f, hab, sel);
@@ -27,7 +24,6 @@ export function fuenteHtml(f, { hab, sel = [], attr }) {
   }).join('');
   return `<div class="cc-elige ${falta ? 'falta' : 'ok'}"><p>${falta ? `<b class="cc-num">${falta}</b>` : icon('sparkles')}<b>${esc(f.nombre)}</b>: ${esc(textoFuente(f))} (${sel.length} de ${f.n})</p><div class="cc-pills">${pills}</div></div>`;
 }
-// Bloque para elegir pericias entre las habilidades en las que ya eres competente
 export function periciaHtml(n, { hab, sel = [], attr, titulo = 'Pericia' }) {
   const lista = HABILIDADES.map(([k]) => k).filter(k => hab[k] === 1 || sel.includes(k)), lleno = sel.length >= n, falta = Math.max(0, Math.min(n, lista.length) - sel.length);
   const pills = lista.map(k => { const on = sel.includes(k); return `<button type="button" class="cc-pill ${on ? 'on' : ''}" ${attr}="${k}" aria-pressed="${on}" ${!on && lleno ? 'disabled' : ''}>${esc(NOMBRE_HAB[k])}</button>`; }).join('');
@@ -35,14 +31,12 @@ export function periciaHtml(n, { hab, sel = [], attr, titulo = 'Pericia' }) {
     <div class="cc-pills">${pills || '<span class="hint">Aún no eres competente en ninguna habilidad sin pericia.</span>'}</div></div>`;
 }
 export const alternarHab = (sel, k, n) => (sel.includes(k) ? sel.filter(x => x !== k) : sel.length < n ? [...sel, k] : sel);
-// Aplica lo elegido a un mapa de habilidades: competencia, o pericia si la fuente la da
 export function aplicarFuente(hab, f, sel) {
   const out = { ...hab }, nivel = f.pericia ? 2 : 1;
   for (const k of f.fijas ? f.lista : sel) out[k] = Math.max(out[k] || 0, nivel);
   return out;
 }
 
-// Ventana que pregunta las habilidades de una o varias fuentes. Devuelve el mapa de habilidades nuevo, o null si se cancela.
 let dlg = null;
 export function preguntarHabilidades(fuentes, hab, { titulo = 'Elige tus habilidades' } = {}) {
   if (!dlg) { dlg = document.createElement('dialog'); dlg.className = 'modal hab-modal'; dlg.setAttribute('aria-labelledby', 'habTitle'); document.body.appendChild(dlg); }
@@ -69,7 +63,6 @@ export function preguntarHabilidades(fuentes, hab, { titulo = 'Elige tus habilid
   });
 }
 
-// Ventana para elegir una opción con su texto (la variante de Golpes benditos, por ejemplo). Devuelve el nombre o null.
 export function preguntarOpcion({ titulo, texto = '', opciones }) {
   if (!dlg) { dlg = document.createElement('dialog'); dlg.className = 'modal hab-modal'; dlg.setAttribute('aria-labelledby', 'habTitle'); document.body.appendChild(dlg); }
   const d = dlg;

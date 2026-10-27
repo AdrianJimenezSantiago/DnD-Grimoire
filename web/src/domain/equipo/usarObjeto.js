@@ -6,7 +6,6 @@ import { resistenciasDe } from '../combate/efectos.js';
 import { tirarExpr } from '../combate/automatismos.js';
 import { NOMBRE_CAR } from '../reglas/reglas2024.js';
 
-// Qué pasa al beber cada poción de la Guía del Dungeon Master de 2024 (las que la hoja puede aplicar)
 const GIGANTE = [[/colinas/, 21], [/escarcha|piedra/, 23], [/fuego/, 25], [/nubes/, 27], [/tormentas/, 29]];
 const POCIONES = [
   [/^pocion de heroismo/, { temp: 10, efecto: 'bendicion', rondas: 600, texto: '10 PG temporales y Bendición durante 1 hora, sin concentración.' }],
@@ -26,15 +25,12 @@ const POCIONES = [
   [/^elixir de salud/, { quitar: ['cegado', 'ensordecido', 'envenenado', 'paralizado'], texto: 'Curas las enfermedades mágicas y dejas de estar cegado, ensordecido, envenenado y paralizado.' }],
   [/^ung(u|ü)ento de keoghtom/, { quitar: ['envenenado'], texto: 'Dejas de estar envenenado.' }],
 ];
-// Manuales y tomos: +2 permanente a una característica, hasta 30; luego pierden su magia durante un siglo
 const LIBROS = [[/^manual de la salud corporal/, 'con'], [/^manual de rapidez de accion/, 'des'], [/^manual del ejercicio beneficioso/, 'fue'],
   [/^tomo de entendimiento/, 'sab'], [/^tomo de liderazgo e influencia/, 'car'], [/^tomo de pensamiento claro/, 'int']];
 export const libroDe = o => LIBROS.find(([r]) => r.test(norm(o?.nombre || '')))?.[1] || '';
 const pocionDe = o => POCIONES.find(([r]) => r.test(norm(o?.nombre || '')))?.[1] || null;
-// Lo que la hoja aplica sola al usarlo ('' si solo se gasta y el efecto se consulta)
 export const efectoAlUsar = o => (curacionDe(o) ? `cura ${curacionDe(o)}${pocionDe(o)?.texto ? `; ${pocionDe(o).texto}` : ''}` : pocionDe(o)?.texto || '');
 
-// Cómo se usa: beber (pociones y curación), leer (manuales) o gastar uno (consumibles); null si no se gasta
 export function usoDe(o) {
   if (!o || o.guardado) return null;
   const k = libroDe(o);
@@ -45,7 +41,6 @@ export function usoDe(o) {
   return null;
 }
 
-// Gasta el objeto y aplica lo que la hoja sabe aplicar. Devuelve qué ha pasado, para contarlo.
 export function usarObjeto(ch, id, tirar) {
   const o = equipoDe(ch).objetos.find(x => x.id === id); if (!o) return null;
   const uso = usoDe(o); if (!uso || (uso.accion !== 'leer' && !o.cantidad)) return null;

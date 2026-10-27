@@ -49,8 +49,6 @@ function pintarOnda(b, x, y) {
   caja.appendChild(i); b.appendChild(caja);
   setTimeout(() => caja.remove(), 650);
 }
-// Con el dedo, la onda espera un instante: si el gesto resulta ser un desplazamiento no se crea nada y el scroll
-// arranca sin tocar el DOM ni medir. Si es un toque, aparece igual (al soltar o a los 70 ms, lo que llegue antes).
 function onda(e) {
   if (movimientoReducido() || e.button > 0) return;
   const b = e.target.closest('button, .castzone, .ses, [role="button"]');

@@ -5,7 +5,6 @@ import { PREDEFINIDOS } from '../equipo/equipo.js';
 import { armadurasDe, marcialesDe } from '../reglas/competencias.js';
 import { biblioteca } from '../libros/biblioteca.js';
 
-// Herramientas, idiomas y equipo inicial del Manual del Jugador de 2024
 export const JUEGOS = ['Juego de dados', 'Juego de naipes', 'Ajedrez de dragones', 'Ante de los tres dragones'];
 export const INSTRUMENTOS = ['Chirimía', 'Cuerno', 'Dulcémele', 'Flauta', 'Flauta de pan', 'Gaita', 'Laúd', 'Lira', 'Tambor', 'Viola'];
 export const ARTESANO = ['Herramientas de albañil', 'Herramientas de alfarero', 'Herramientas de carpintero', 'Herramientas de cartógrafo', 'Herramientas de curtidor',
@@ -16,7 +15,6 @@ export const LISTAS_HERRAMIENTA = { juego: ['un juego', JUEGOS], instrumento: ['
 export const IDIOMAS = ['Común', 'Lenguaje de signos común', 'Dracónico', 'Enano', 'Élfico', 'Gigante', 'Gnomo', 'Goblin', 'Mediano', 'Orco'];
 export const IDIOMAS_RAROS = ['Abisal', 'Celestial', 'Dialecto de las profundidades', 'Druídico', 'Germanía de ladrones', 'Infernal', 'Primordial', 'Silvano', 'Infracomún'];
 
-// Cada trasfondo: herramienta (fija o «elige de una lista») y equipo A (objetos + oro) o B (50 po)
 const T = (herramienta, objetos, po) => ({ herramienta, opciones: [{ k: 'A', objetos, po }, { k: 'B', objetos: [], po: 50 }] });
 export const TRASFONDO_EXTRA = {
   'Acólito': T('Suministros de calígrafo', ['Suministros de calígrafo', 'Libro (oraciones)', 'Símbolo sagrado (amuleto)', ['Pergamino (hoja)', 10], 'Túnica'], 8),
@@ -37,7 +35,6 @@ export const TRASFONDO_EXTRA = {
   'Vagabundo': T('Herramientas de ladrón', [['Daga', 2], 'Herramientas de ladrón', { elige: 'juego' }, 'Saco de dormir', ['Bolsa', 2], 'Ropa de viaje'], 16),
 };
 
-// Clases: herramientas, armaduras y equipo inicial (A, B y a veces C), y el oro a tirar de las reglas de 2014 como variante
 const C = (herramientas, armaduras, opciones, tirada) => ({ herramientas, armaduras, opciones, tirada });
 const O = (k, objetos, po) => ({ k, objetos, po });
 export const CLASE_EXTRA = {
@@ -58,7 +55,6 @@ export const CLASE_EXTRA = {
 const clave = (mapa, n) => Object.keys(mapa).find(k => norm(k) === norm(n));
 export const extraTrasfondo = t => TRASFONDO_EXTRA[clave(TRASFONDO_EXTRA, t)] || extraDeLibro(t);
 
-// Trasfondos de otros libros (Héroes de Faerûn…): herramienta y equipo A/B leídos del texto importado
 const OTRAS_HERR = ['Herramientas de ladrón', 'Herramientas de navegante', 'Kit de falsificación', 'Kit de disfraz', 'Kit de herborista', 'Kit de envenenador'];
 const SINONIMOS = [[/^(utiles|kit) para disfrazarse$|^utiles de disfraz$/, 'Kit de disfraz'], [/^(utiles|kit) para falsificar$|^utiles de falsificacion$/, 'Kit de falsificación'],
   [/^(utiles|kit) de herborista$/, 'Kit de herborista'], [/^utiles de cocinero$/, 'Utensilios de cocinero'], [/^ropas? de viaje$/, 'Ropa de viaje'], [/^ropas? de calidad$|^ropa fina$/, 'Ropa fina'],
@@ -67,7 +63,6 @@ const CORTAS = new Set(['a', 'o', 'y', 'e', 'u', 'de', 'la', 'el', 'en', 'un', '
 let VOCAB = null;
 const vocab = () => VOCAB ||= new Set([...PREDEFINIDOS.map(x => x.nombre), ...ARTESANO, ...INSTRUMENTOS, ...JUEGOS, ...OTRAS_HERR, 'herramientas útiles suministros mochila petate cantimplora bolsa garfio escalada yesquero frascos flechas virotes tienda ropas calidad disfrazarse falsificar herborista cartógrafo símbolo sagrado esposas linterna manta pergamino tinta pluma libro']
   .flatMap(t => norm(t).split(/[^a-z]+/)).filter(w => w.length > 2));
-// Une palabras partidas por el OCR («herram ientas», «bo lsa», «d isfrazarse») si juntas forman una palabra conocida o un trozo es suelto
 export function sinCortes(t) {
   const ws = String(t || '').split(/\s+/).filter(Boolean), out = [], letras = w => norm(w).replace(/[^a-z]/g, '');
   const trozo = w => /^[a-záéíóúñ]{1,2}$/i.test(w) && !CORTAS.has(norm(w));
@@ -108,7 +103,6 @@ function extraDeLibro(nombre) {
 export const extraClase = c => CLASE_EXTRA[clase2(c)] || null;
 const clase2 = c => clave(CLASE_EXTRA, c);
 
-// Elecciones pendientes: cada { elige } en herramientas y equipo necesita un valor. Se guardan por clave estable.
 export function eleccionesHerramienta(ch) {
   const out = [], t = extraTrasfondo(ch.trasfondo), c = extraClase(ch.clase);
   if (t && typeof t.herramienta === 'object') out.push({ id: 't', lista: t.herramienta.elige, n: 1, de: ch.trasfondo });
@@ -135,10 +129,8 @@ export function equipoInicial(ch, { claseOpcion = 'A', trasfondoOpcion = 'A', el
 export const tirarOro = (clase, rnd = Math.random) => { const c = extraClase(clase); if (!c) return null;
   const [n, caras, x] = c.tirada, dados = Array.from({ length: n }, () => 1 + Math.floor(rnd() * caras)); return { dados, total: dados.reduce((a, b) => a + b, 0) * x, texto: `${n}d${caras}${x > 1 ? ` × ${x}` : ''}` }; };
 
-// Requisitos de las dotes: nivel, características, rasgos, armaduras, especie y trasfondo
 const AB = { fuerza: 'fue', destreza: 'des', constitucion: 'con', inteligencia: 'int', sabiduria: 'sab', carisma: 'car' };
 const ESTILO = { 'Guerrero': 1, 'Paladín': 2, 'Explorador': 2 };
-// El OCR de los manuales deja restos: «13 omás», «nivel4», «1nteligencia», «de/fuego», «Endave»
 export const limpiarRequisito = req => norm(req || '').replace(/^requ\W*i\W*\w*itos?\W*/, '').replace(/\b1(?=nteligen)/g, 'i').replace(/\/(?=\S)/g, ' ').replace(/(\d)\s*o\s*m[aáu]s/g, '$1 o mas')
   .replace(/nivel(\d)/g, 'nivel $1').replace(/!os\b/g, 'los').replace(/\s+/g, ' ').trim();
 const ARM = { ligera: 'ligera', ligeras: 'ligera', media: 'media', medias: 'media', pesada: 'pesada', pesadas: 'pesada', escudo: 'escudo', escudos: 'escudo' };
@@ -148,7 +140,6 @@ function parecida(a, b) {
   for (let i = 1; i <= a.length; i++) { const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
   return prev[b.length] <= 2;
 }
-// Un requisito suelto («dote X», «competencia con armas marciales», «rasgo Magia del pacto»…): devuelve qué falta o ''
 function faltaUno(r, ch) {
   if (/^dote /.test(r)) { const x = r.slice(5).trim(); return dotesDe(ch).some(d => parecida(norm(d.nombre), x) || parecida(norm(d.detalle ? `${d.nombre} ${d.detalle}` : d.nombre), x)) ? '' : `Pide la dote ${x}.`; }
   if (/armas marciales/.test(r)) return marcialesDe(ch).some(f => f([], true) && f(['dos manos', 'pesada'], true)) ? '' : 'Pide competencia con armas marciales.';
@@ -169,7 +160,6 @@ export function faltaRequisito(req, ch) {
   const car = /((?:fuerza|destreza|constitucion|inteligencia|sabiduria|carisma)(?:\s*(?:,|o|y)\s*(?:fuerza|destreza|constitucion|inteligencia|sabiduria|carisma))*)\s*(\d+)\s*o\s*mas/.exec(r);
   if (car) { const ks = car[1].split(/\s*(?:,|\so\s|\sy\s)\s*/).map(x => AB[x.trim()]).filter(Boolean), min = +car[2];
     if (ks.length && !ks.some(k => (ch.stats?.[k] || 0) >= min)) return `Pide ${car[1].replace(/\b(?!o\b|y\b)\w/g, m => m.toUpperCase())} ${min} o más.`; }
-  // El resto, por partes: «A o B» se cumple con cualquiera de las dos
   const resto = r.replace(/nivel\s*\d+\s*o\s*mas/g, '').replace(car ? car[0] : '\u0000', '');
   for (const parte of resto.split(/\s*[,;]\s*/).map(x => x.trim()).filter(Boolean)) {
     const alts = parte.split(/\s+o\s+(?=dote |rasgo |competencia |entrenamiento |especie |trasfondo )/).map(x => x.replace(/^rasgo\s+/, '').trim());
@@ -179,7 +169,6 @@ export function faltaRequisito(req, ch) {
   return '';
 }
 
-// Aumento de característica que da una dote («Aumenta tu Fuerza o Destreza en 1…»)
 const NOM = Object.fromEntries(CARACTERISTICAS.map(([k, n]) => [norm(n), k]));
 export function aumentoDeDote(texto) {
   const t = norm(texto || '').replace(/\b1nteligencia/g, 'inteligencia').replace(/\ben\s*[t\\|l!i]\s*[.,]?\s*(?=h?asta)/, 'en 1, '), m = /aumenta (?:en 1 )?(?:tu |una |la )?(?:puntuacion(?:es)? de )?(.{0,120}?)\s*(?:en 1\b|, hasta|hasta un maximo)/.exec(t);

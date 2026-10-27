@@ -5,7 +5,6 @@ import { chispas, movimientoReducido } from './fx.js';
 import { elegirFrase } from '../../domain/presentacion/frases.js';
 import { esc } from '../../core/util.js';
 
-// Frase que narra el resultado (ver domain/presentacion/frases.js), sin repetir la última de cada tipo de tirada
 const ULTIMA = new Map();
 export function narracion(cat, tramo) {
   if (!cat) return '';
@@ -34,7 +33,6 @@ export function dado(c, v, { fuera = false, fresco = false, cls = '' } = {}) {
   return `<span class="dd ${k}" data-f="${formaDe(c)}"${fresco ? ` data-v="${v}" data-c="${c}"` : ''}${cls.includes('flota') ? ' aria-hidden="true"' : ''} title="d${c}${fuera ? ', descartado' : ''}">${forma(c)}<b>${v}</b>${fuera ? '<span class="visually-hidden"> (descartado)</span>' : ''}</span>`;
 }
 export const op = s => `<i class="dd-op">${s < 0 ? '−' : '+'}</i>`;
-// Los dados de un resultado de tirar(): con ventaja, los dos d20 y el descartado tachado.
 export function dadosDe(r, modo = 'normal', cls = '') {
   if (r.d20) {
     const [fa, fb] = r.frescos?.[0] || [false, false], usaA = r.d20.usa === r.d20.a;
@@ -45,13 +43,10 @@ export function dadosDe(r, modo = 'normal', cls = '') {
 
 const MARCAS = Array.from({ length: 36 }, (_, i) => `<line x1="70" y1="3" x2="70" y2="${i % 3 ? 7 : 10}" transform="rotate(${i * 10} 70 70)"/>`).join('');
 const ROMBOS = Array.from({ length: 8 }, (_, i) => `<rect x="67.5" y="13.5" width="5" height="5" transform="rotate(${i * 45} 70 70) rotate(45 70 16)"/>`).join('');
-// Cada anillo que gira es un <svg> propio: así la GPU lo rota sin repintar el sello en cada fotograma.
 export const ANILLO = `<span class="dd-anillo" aria-hidden="true"><svg viewBox="0 0 140 140"><circle class="a1" cx="70" cy="70" r="66" pathLength="100"/><circle class="a3" cx="70" cy="70" r="46" pathLength="100"/></svg><svg class="gira-marcas" viewBox="0 0 140 140"><g class="a-marcas">${MARCAS}</g></svg><svg class="gira-rombos" viewBox="0 0 140 140"><g class="a-rombos">${ROMBOS}</g></svg><svg class="gira-a2" viewBox="0 0 140 140"><circle class="a2" cx="70" cy="70" r="54"/></svg></span>`;
 export const GRIETA = '<svg class="dd-grieta" viewBox="0 0 140 140" aria-hidden="true"><path d="M46 14 60 46 51 64 75 80 67 104 82 128" pathLength="1"/><path d="M60 46 38 54M75 80 99 88M67 104 52 112" pathLength="1"/></svg>';
-// Sello con el total: rayos para el 20 natural, grieta para el 1, y un icono opcional encima.
 export const sello = (total, { n = null, ico = '' } = {}) => `<div class="dd-sello">${n === 20 ? '<i class="dd-rayos" aria-hidden="true"></i>' : ''}${ANILLO}${ico ? `<span class="dd-ico" aria-hidden="true">${ico}</span>` : ''}<span class="dd-num" aria-hidden="true">${total}</span>${n === 1 ? GRIETA : ''}</div>`;
 
-// Histograma con la probabilidad de cada total; marca la tirada (t) y, si la hay, la CD.
 export function probHtml(d, t, { cd = null, r = 1 } = {}) {
   if (!d || d.p.length < 2) return '';
   const L = d.p.length, nb = Math.min(L, 44), w = L / nb, bins = [];
@@ -75,8 +70,6 @@ export function probHtml(d, t, { cd = null, r = 1 } = {}) {
     <figcaption><span>${d.min}</span><span class="c"><span>${frase}</span><small>${extra}</small></span><span>${mx}</span></figcaption></figure>`;
 }
 
-// Los dados nuevos ruedan y muestran caras al azar hasta posarse; el total se sella al final.
-// vivo(): false si otra tirada ha sustituido a esta. fin(): se llama una vez posado todo.
 export function rodar(el, { total, antes = null, lo = 1, hi = 20, nuevo = true, vivo = () => true, fin }) {
   if (movimientoReducido()) { sellar(el, total, false); fin?.(); return; }
   const dados = [...el.querySelectorAll('.dd.rueda')], num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
@@ -105,7 +98,6 @@ export function sellar(el, total, anim) {
   const num = el.querySelector('.dd-num'), hero = el.querySelector('.dd-hero');
   if (num) num.textContent = total;
   hero?.classList.remove('girando');
-  // Sin animación (movimiento reducido) los dados no pasan por el fotograma que los posa: se posan aquí para no quedarse atenuados
   el.querySelectorAll('.dd.rueda').forEach(d => { d.querySelector('b').textContent = d.dataset.v; d.classList.add('posado'); });
   el.classList.add('listo'); if (anim) hero?.classList.add('sella');
 }

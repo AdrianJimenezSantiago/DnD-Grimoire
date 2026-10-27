@@ -22,7 +22,6 @@ export function siguienteVersion({ base, etiquetas = [], mensajes = [] }) {
   return `${M}.${m}.${p + 1}`;
 }
 
-// Desde la línea de órdenes (GitHub Actions): mira las etiquetas del repositorio y los commits desde la última publicada
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const git = (...a) => execFileSync('git', a, { encoding: 'utf8' }).trim();
   const base = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;

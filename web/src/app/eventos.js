@@ -58,7 +58,6 @@ function toggleTheme() {
 
 function moreMenuHtml() {
   const ch = S.cur(), dark = esOscuro();
-  // El nombre accesible empieza por la etiqueta visible; el detalle va oculto detrás («Diario: diario de sesión»)
   const tile = (cmd, ico, label, full, i) => `<button type="button" class="mm-tile" data-mcmd="${cmd}" style="--i:${i}"${full ? ` title="${esc(full)}"` : ''}><span class="mm-ico">${ico}</span><span class="mm-lbl">${esc(label)}${full ? `<span class="visually-hidden">: ${esc(full)}</span>` : ''}</span></button>`;
   const fila = (cmd, ico, label, extra = '') => `<button type="button" class="mm-row" data-mcmd="${cmd}" ${extra}>${ico}<span>${esc(label)}</span></button>`;
   let i = 0;
@@ -81,7 +80,6 @@ function moreMenuHtml() {
     <div class="mm-util">${util}</div>
     <button type="button" class="mm-danger" data-mcmd="reset">${icon('reset')}Borrar todos los datos</button>`;
 }
-// Efectos visuales: automáticos (según cómo vaya el dispositivo) o fijados a mano
 const EFECTOS = { alto: 'altos', medio: 'medios', bajo: 'bajos' };
 const efectosTexto = () => (modoEfectos() === 'auto' ? `automáticos (${EFECTOS[NIVELES[nivelEfectos()]]})` : EFECTOS[modoEfectos()]);
 function efectosItems() {
@@ -196,7 +194,6 @@ function back() {
 }
 
 let ejT = 0;
-// Al desplegar entra toda la sección; al cambiar de filtro solo entran las tarjetas (la barra y las cabeceras siguen donde estaban)
 function animarEnJuego(clase = 'fx-abre') { const el = $('#enjuego'); el.classList.remove('fx-abre', 'fx-filtra'); pop(el, clase); clearTimeout(ejT); ejT = setTimeout(() => el.classList.remove(clase), 650); }
 
 function bindSheet() {
@@ -248,7 +245,6 @@ function bindSheet() {
     const d = t.dataset;
     if (d.slotbtn) { const [L, i] = d.slotbtn.split(':').map(Number); return A.alternarEspacio(S, L, i); }
     if (d.prep) { const bi = +d.prep, ch0 = S.cur(), P0 = perfil(ch0);
-      // No se puede preparar más de lo que permite la clase (los «siempre preparados» no cuentan)
       if (!ch0.book[bi].prep && P0.c && numPreparados(S.db, ch0) >= P0.maxPrep) {
         vibrar('medium');
         return toast(`Ya tienes <b>${P0.maxPrep} de ${P0.maxPrep}</b> conjuros preparados. Quita otro antes de preparar <b>${esc(S.db.catalog[ch0.book[bi].sid]?.es || 'este')}</b>.`); }

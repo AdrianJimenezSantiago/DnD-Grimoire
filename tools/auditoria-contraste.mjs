@@ -16,7 +16,6 @@ async function medir(page, name) {
   await wait(1200);
   const pausa = await page.addStyleTag({ content: 'canvas{visibility:hidden!important} *{animation-play-state:paused!important;transition:none!important}' });
   await wait(200);
-  // elementos con texto propio visible
   const els = await page.evaluate(() => {
     const out = []; let id = 0;
     const vw = innerWidth, vh = innerHeight;
@@ -29,9 +28,7 @@ async function medir(page, name) {
       const r = range.getBoundingClientRect();
       if (r.width < 2 || r.height < 4 || r.bottom <= 0 || r.right <= 0 || r.top >= vh || r.left >= vw) continue;
       const cs = getComputedStyle(el); if (cs.visibility === 'hidden') continue;
-      // Decoración (aria-hidden) y texto con degradado recortado (background-clip: text) no se pueden medir así
       if (el.closest('[aria-hidden="true"]') || cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') continue;
-      // ¿lo que hay en el centro es este elemento? (descarta lo tapado)
       const cx = Math.min(vw - 1, Math.max(0, r.left + r.width / 2)), cy = Math.min(vh - 1, Math.max(0, r.top + r.height / 2));
       const top = document.elementFromPoint(cx, cy); if (!top || !(el.contains(top) || top.contains(el) || top === el)) continue;
       const fs = parseFloat(cs.fontSize), fw = parseInt(cs.fontWeight) || 400;
@@ -59,7 +56,6 @@ async function medir(page, name) {
         if (d > 30) diffs.push([lum(A.data[i], A.data[i + 1], A.data[i + 2]), lb]);
       }
       if (diffs.length < 6) continue;
-      // contraste de cada píxel de texto con su propio fondo; percentil 90 (el núcleo del trazo, no el antialias)
       const cr = diffs.map(([lt, lb]) => (Math.max(lt, lb) + .05) / (Math.min(lt, lb) + .05)).sort((p, q) => p - q);
       const ratio = cr[Math.floor(cr.length * .9)];
       const big = e.fs >= 24 || (e.fs >= 18.66 && e.fw >= 700);

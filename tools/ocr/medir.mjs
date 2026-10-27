@@ -16,7 +16,6 @@ const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.arg
 const motor = arg('--motor'), conFusion = arg('--fusionar'), conCorrector = process.argv.includes('--corregir'), nErrores = +(arg('--errores') || 0), soloConjunto = arg('--conjunto');
 let corregir = lineas => lineas;
 if (conCorrector) {
-  // Vocabulario de los libros con texto: es lo que tendría la app con los libros incluidos
   const { crearVocabulario, corregirLineas } = await import('../../web/src/domain/libros/corrector.js'), textos = [];
   for (const id of ['phb', 'dmg', 'faerun']) textos.push(...await textoLibro(id));
   const voc = crearVocabulario(textos);
@@ -40,7 +39,6 @@ function distancia(a, b) {
   return prev[b.length];
 }
 
-// Alineación por palabras para listar sustituciones (ocr → referencia)
 function sustituciones(a, b) {
   const n = a.length, m = b.length, D = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
   for (let i = 0; i <= n; i++) D[i][0] = i;

@@ -52,7 +52,6 @@ function acciones(ch, db) {
   const nuevo = () => ({ armas: [], comunes: [], trucos: [], niveles: {}, rasgos: [] });
   const grupos = { accion: nuevo(), adicional: nuevo(), reaccion: nuevo() };
   let n = 0;
-  // Correr, Destrabarse, Esquivar…: se tocan para gastar la acción (o la adicional con Acción astuta, o la reacción)
   const cb = combateDe(ch), incap = incapacitado(ch).length > 0;
   const comun = (a, via, rasgo = '') => { const hecha = cb.hechas.some(h => h.k === a.k && h.via === via);
     return `<button type="button" class="cb-ac ${hecha ? 'hecha' : ''}" style="--i:${n++}" data-accom="${a.k}|${via}" data-leer="accom:${a.k}" aria-pressed="${hecha}" ${incap ? 'disabled' : ''} aria-label="${esc(a.nombre)}${rasgo ? ` (${esc(rasgo)})` : ''}${hecha ? ': hecha este turno' : ''}">
@@ -80,7 +79,6 @@ function acciones(ch, db) {
     const Pm = magiaPara(P, e.fuente), ico = escuelaIco(s.escuela), d = datosConjuro(ch, P, s, Pm, e.fuente);
     const rec = s.level > 0 && recupera.find(r => coincideEscuela(s, r.escuela));
     const gratis = e.gratis && !e.used, sinEsp = s.level > 0 && !gratis && !primerLibreDesde(ch, P, s.level);
-    // Un espacio por turno: tras gastarlo en tu turno, los conjuros de nivel solo valen gratis o como reacción en otro turno
     const turnoGastado = !sinEsp && s.level > 0 && !gratis && !!combateDe(ch).espacio && g !== 'reaccion';
     const flags = [s.conc ? '<i class="hz-f conc" title="Concentración">C</i>' : '', s.ritual ? '<i class="hz-f rit" title="Ritual">R</i>' : '', gratis ? '<i class="hz-f gratis" title="Uso gratis disponible">gratis</i>' : '',
       rec ? `<i class="hz-f rec" title="${esc(`${rec.nombre}: con un espacio de nivel ${rec.espacioMin || 1} o más recuperas un espacio gastado de nivel inferior (máximo ${rec.efectoN || 5}).`)}">${icon('reset')}espacio</i>` : ''].join('');
@@ -128,7 +126,6 @@ function orbeHtml(ch) {
     <span class="cb-orbe-l">${act === 0 && est !== 'vivo' ? `${est === 'estable' ? 'Estable' : est === 'muerto' ? 'Muerto' : 'Moribundo'}` : 'Puntos de golpe'}</span>
     ${v.temp ? `<span class="cb-orbe-t">+${v.temp}<span class="visually-hidden"> temporales</span></span>` : ''}${act === 0 && est !== 'vivo' ? `<span class="cb-orbe-p">${pipsMuerte(ch)}</span>` : ''}</button>`;
 }
-// Dos accesos rápidos para marcar lo que te han lanzado: beneficios y perjuicios
 function efectosCombateHtml(ch) {
   const efs = efectosDe(ch), boton = (bueno, cmd, titulo, vacio, ico) => {
     const xs = efs.filter(e => !!e.bueno === bueno), n = xs.length;

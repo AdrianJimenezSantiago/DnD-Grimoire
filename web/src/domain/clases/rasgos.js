@@ -208,7 +208,6 @@ export function maxDe(ch, r) {
   }
 }
 
-// Usos que dan la especie y las dotes (Manual del Jugador de 2024 y Héroes de Faerûn)
 export function plantillasOrigen(ch) {
   const L = nivelTotal(ch), pb = competencia(L), T = [], especie = norm(ch.especie || '').split(/[\s(]/)[0];
   const R = (id, nombre, max, recarga = 'largo', nota = '') => T.push({ id: 'tpl:' + id, tpl: true, tipo: 'recurso', nombre, max, recarga, nota });
@@ -229,7 +228,6 @@ export function plantillasOrigen(ch) {
   }
   return T;
 }
-// Dotes con usos (Manual del Jugador y Héroes de Faerûn): [id, nombre, máximo ('pb' = bonificador por competencia), recarga, nota]
 const USOS_DOTE = {
   afortunado: [['afortunado', 'Puntos de suerte', 'pb', 'largo', 'Gasta 1 para tener ventaja en una prueba con d20, o para imponer desventaja a un ataque contra ti.']],
   'azote de magos': [['azote', 'Mente robusta', 1, 'corto', 'Superas una salvación de Inteligencia, Sabiduría o Carisma que hayas fallado.']],
@@ -259,7 +257,6 @@ export function reglas(ch, todas = false) {
   const sust = new Set(ch.rasgosOff || []), ocultos = new Set(ch.rasgosOcultos || []);
   const list = [
     ...[...clasesDe(ch).flatMap(c => plantillas(vistaClase(ch, c))), ...plantillasOrigen(ch)].map(r => ({ ...r, sustituida: sust.has(r.id), oculto: ocultos.has(r.id) })),
-    // Las cargas y usos de un objeto mágico solo se ven mientras se puede usar: encima, y sintonizado si lo pide
     ...(ch.rasgos || []).map(r => ({ ...r, tpl: false, oculto: !!r.off || (!!r.objetoId && !objetoDisponible((ch.equipo?.objetos || []).find(o => o.id === r.objetoId))), max: maxDe(ch, r.tipo === 'dados' ? { ...r, maxBase: 'fijo' } : r) })),
   ];
   return todas ? list : list.filter(r => !r.sustituida);
@@ -286,19 +283,15 @@ export const escuelasAlLanzar = ch => reglas(ch).filter(r => r.tipo === 'al_lanz
 export const tieneDescansoCorto = (ch, P) => !!P.pact || (ch.clase === 'Brujo' && ch.espaciosManuales)
   || reglas(ch).some(r => (r.tipo === 'recurso' && ['corto', 'corto1'].includes(r.recarga)) || (r.recarga === 'dado' && r.recMomento === 'corto') || r.tipo === 'recuperar');
 
-// Conjuros que un rasgo o una dote deja lanzar sin gastar espacio: al tocarlos se gasta ese uso antes que un espacio
 export const RECURSO_DE_CONJURO = {
   'marca del cazador': ['tpl:explorador.enemigo'], 'castigo divino': ['tpl:paladin.castigo'], 'hallar corcel': ['tpl:paladin.corcel'],
   'paso brumoso': ['tpl:feerico.pasos', 'tpl:errante.brumoso'], 'saeta guia': ['tpl:estrellas.mapa'], 'invocar feerico': ['tpl:errante.refuerzos', 'tpl:ilusionista.criaturas'],
   'invocar bestia': ['tpl:ilusionista.criaturas'], 'contactar con otro plano': ['tpl:brujo.contactar'], 'telequinesis': ['tpl:psionico.maestro'], 'invocar dragon': ['tpl:draconica.companero'],
   'sentidos de la bestia': ['tpl:dote.enclave'], 'encontrar familiar': ['tpl:druida.forma'], 'baile irresistible de otto': ['tpl:dote.jolgorio'],
 };
-// Los conjuros que da una dote llevan su nombre como fuente: su uso gratis sale del contador de la dote
 const RECURSO_DE_FUENTE = [[/^iniciado en la magia(?: \((.+)\))?/, m => `tpl:dote.iniciado.${norm(m[1] || '')}`], [/^influencia feerica/, () => 'tpl:dote.feerica'],
   [/^influencia sombria/, () => 'tpl:dote.sombria'], [/^telepatico/, () => 'tpl:dote.telepatico'],
-  // Artes sombrías (monje de la sombra): Oscuridad cuesta 1 punto de concentración en lugar de un espacio
   [/^guerrero de la sombra/, () => 'tpl:monje.concentracion'],
-  // Gnomo de los bosques: Hablar con los animales gratis tantas veces como tu competencia
   [/^linaje gnomo/, () => 'tpl:especie.animales']];
 export function recursoParaConjuro(ch, nombre, fuente = '') {
   const f = norm(fuente), porFuente = RECURSO_DE_FUENTE.map(([re, id]) => { const m = re.exec(f); return m ? id(m) : null; }).filter(Boolean);

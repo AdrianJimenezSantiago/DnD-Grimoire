@@ -34,10 +34,8 @@ describe('rasgos de especie por nivel', () => {
     assert.deepEqual(RASGOS_ESPECIE.goliat.find(r => r[1] === 'Forma grande'), [5, 'Forma grande']);
     const nombres = L => rasgosEnJuego(ch({ clase: 'Guerrero', nivel: L, especie: 'Goliat' })).filter(r => r.fuente === 'especie').map(r => r.nombre);
     assert.ok(!nombres(4).includes('Forma grande')); assert.ok(nombres(5).includes('Forma grande'));
-    // Libro importado con el nivel mal leído (1): manda la tabla integrada
     const lib = { especies: [{ nombre: 'Goliat', rasgos: [{ nombre: 'Forma grande', nivel: 1, texto: 'A partir del nivel 5 de personaje, puedes…' }] }] };
     assert.ok(!rasgosEnJuego(ch({ clase: 'Guerrero', nivel: 3, especie: 'Goliat' }), lib).some(r => r.nombre === 'Forma grande'));
-    // El lector reconoce «A partir del nivel N de personaje»
     const L = (s, y, h = 12) => ({ s, x: 50, y, h });
     const [e] = leerEspecies([{ p: 1, cols: [[L('ATRIBUTOS DE LOS GOLIATS', 900, 16), L('Tipo de criatura: humanoide', 880), L('Velocidad: 10,5 m', 866),
       L('Como goliat, tienes estos atributos especiales:', 852),
@@ -111,11 +109,9 @@ describe('linajes y especies concretas', () => {
 
 describe('aptitudEspecie', () => {
   test('conjuros de especie con su propia aptitud mágica (Int, Sab o Car)', () => {
-    // Guerrero tiefling: sin clase lanzadora, usa su mejor característica mental (Car 16)
     const t = ch({ clase: 'Guerrero', nivel: 3, especie: 'Tiefling', opciones: { 'especie.tiefling': 'Infernal' } });
     const P = perfil(t); assert.equal(P.apEspecie, 'car');
     assert.equal(magiaPara(P, 'Legado infernal').cd, 8 + 2 + 3); assert.equal(magiaPara(P, 'Presencia sobrenatural').atk, 2 + 3);
-    // Mago elfo: por defecto la Inteligencia de su clase; si elige Carisma, sus conjuros de linaje usan el Carisma
     const e = ch({ clase: 'Mago', nivel: 3, especie: 'Elfo (drow)', stats: { ...stats, int: 16, car: 12 } });
     assert.equal(perfil(e).apEspecie, 'int'); assert.equal(perfil(e).cds.length, 1);
     e.opciones = normOpciones({ 'especie.elfo': 'Drow', 'especie.aptitud': 'Carisma' });

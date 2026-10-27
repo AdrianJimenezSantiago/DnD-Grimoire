@@ -10,7 +10,6 @@ let SRD = null, BASE = null, SRDK = {}, SRDN = {}, MANUAL = null;
 const ALIAS = { "leomund's tiny hut": 'tiny hut' };
 
 let DE_LIBROS = [], NOMBRES = null;
-// Los nombres en castellano de todos los conjuros conocidos (para marcarlos en cursiva en los textos)
 export const nombresConjuros = () => (NOMBRES ||= (SRD || []).map(x => x.es).filter(Boolean));
 function reindexar() {
   const extra = [], vistos = new Set((BASE || []).map(x => claveEs(x.es, x.l)));
@@ -20,7 +19,6 @@ function reindexar() {
   (SRD || []).forEach(x => { SRDK[x.k] = x; if (x.en) SRDN[norm(x.en) + '|' + x.l] = x; });
   itemsMemo = null; tirMemo.clear(); NOMBRES = null;
 }
-// Conjuros que traen los libros importados y no están en el compendio (los fija libros/biblioteca.js)
 export function fijarConjurosDeLibros(lista) { DE_LIBROS = lista || []; reindexar(); }
 const LIMPIOS = new WeakSet();
 function limpiarDatos(x) {
@@ -123,7 +121,6 @@ export function tiradasConjuro(s) {
   const k = `${s.id || s.es}|${man ? 1 : 0}|${(s.desc || '').length}`;
   if (tirMemo.has(k)) return tirMemo.get(k);
   let r = tiradasDe([[man?.d, man?.h], [s.desc, s.sup], [x?.dEs, x?.hEs], [x?.d, x?.h]]);
-  // Conjuros del manual que no están en el SRD: sus datos mecánicos mientras no se importe el libro
   if (!tieneTiradas(r) && !r?.salvacion) r = tiradasBase(s.en || x?.en) || r;
   r = ajustarTiradas(r, s.en || x?.en);
   tirMemo.set(k, r); return r;

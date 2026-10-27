@@ -25,7 +25,6 @@ function abrir({ titulo, texto, icono = 'info', peligro = false, campo = null, b
       ${texto ? `<p class="md-text">${esc(texto)}</p>` : ''}
       ${campo ? `<input id="mdInput" enterkeyhint="done" type="${campo.tipo || 'text'}" inputmode="${campo.tipo === 'number' ? 'numeric' : 'text'}" value="${esc(campo.valor ?? '')}" ${campo.min != null ? `min="${campo.min}"` : ''} ${campo.max != null ? `max="${campo.max}"` : ''} aria-label="${esc(titulo)}">` : ''}
       <div class="md-btns">${botones.map((b, i) => `<button type="button" data-i="${i}" class="${b.cls || ''}">${esc(b.label)}</button>`).join('')}</div>`;
-    // Un botón con «valida» no cierra la ventana hasta que lo escrito vale (la burla sale encima)
     const pulsar = b => { if (b.valida && !b.valida(d)) return; fin(b.valor(d)); };
     d.onclick = e => { const b = e.target.closest('[data-i]'); if (b) pulsar(botones[+b.dataset.i]); else if (e.target === d) fin(botones[0].valor(null)); };
     d.oncancel = e => { e.preventDefault(); fin(botones[0].valor(null)); };
@@ -41,7 +40,6 @@ export const confirmar = ({ titulo, texto, ok = 'Aceptar', cancelar = 'Cancelar'
     botones: [{ label: cancelar, valor: () => false }, { label: ok, cls: peligro ? 'danger' : 'primary', valor: () => true }] });
 export const avisar = ({ titulo, texto, ok = 'Entendido', icono = 'info' }) =>
   abrir({ titulo, texto, icono, botones: [{ label: ok, cls: 'primary', valor: () => true }] });
-// numero: { min, max, decimal, obligatorio, tema } para comprobar lo escrito; con tipo 'number' se deduce de min y max.
 export const pedir = ({ titulo, texto, valor = '', tipo = 'text', min, max, ok = 'Aceptar', numero = tipo === 'number' ? { min, max } : null }) =>
   abrir({ titulo, texto, icono: 'quill', campo: { valor, tipo, min, max },
     botones: [{ label: 'Cancelar', valor: () => null }, { label: ok, cls: 'primary', valor: d => (d ? d.querySelector('#mdInput').value : null),

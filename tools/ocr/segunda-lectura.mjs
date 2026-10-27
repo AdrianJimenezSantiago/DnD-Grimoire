@@ -22,7 +22,6 @@ for (const id of process.argv.slice(2)) {
   await doc.loadingTask.destroy();
   let hecho = {};
   try { const c = JSON.parse(fs.readFileSync(parcial, 'utf8')); if (c.sha256 === sha256) hecho = c.paginas; } catch {}
-  // Solo las páginas que tienen capa de texto: sin base no hay nada que fusionar
   const cola = base.map((t, i) => i + 1).filter(p => base[p - 1].trim().length > 40 && hecho[p] == null);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lectura-')), t0 = Date.now(), total = cola.length;
   let n = 0, guardado = Date.now();

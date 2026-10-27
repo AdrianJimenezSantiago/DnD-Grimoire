@@ -3,8 +3,6 @@ import { norm } from '../../core/util.js';
 import { statsEfectivos } from '../equipo/objetosEfecto.js';
 import { clasesDe, modOf } from '../reglas/reglas2024.js';
 
-// Rasgos de clase con dos variantes que se eligen al aprenderlos (Manual del Jugador de 2024):
-// Golpes benditos (clérigo 7) y Furia elemental (druida 7). La mejora de nivel 14/15 sigue a la variante elegida.
 export const VARIANTES = {
   'Clérigo': { rasgo: 'Golpes benditos', nivel: 7, mejora: 14, opciones: [
     { nombre: 'Golpe divino', ef: 'golpe', tipos: 'necrótico o radiante',
@@ -29,10 +27,8 @@ export function normVariantes(x) {
   return out;
 }
 export const varianteDe = (ch, clase) => VARIANTES[clase]?.opciones.find(o => o.nombre === ch.variantes?.[clase]) || null;
-// Clases del personaje que ya tienen el rasgo y aún no han elegido variante
 export const variantesPendientes = ch => clasesDe(ch).filter(c => VARIANTES[c.clase] && c.nivel >= VARIANTES[c.clase].nivel && !varianteDe(ch, c.clase)).map(c => c.clase);
 
-// Golpe divino / Golpe primigenio: el dado extra que se añade una vez por turno a los ataques con arma
 export function golpeExtra(ch) {
   const out = [];
   for (const c of clasesDe(ch)) {
@@ -43,8 +39,6 @@ export function golpeExtra(ch) {
   return out;
 }
 
-// Lanzamiento potente: suma la Sabiduría al daño de los trucos de esa clase.
-// Un truco es de la clase si su fuente la nombra o no nombra otra (dotes, especie u otra lista).
 const OTRAS = /bardo|brujo|pacto|hechicer|mago|libro|explorador|paladin|guerrero|picaro|caballero|embaucador|dote|iniciado|especie|estilo|guerrero bendito|guerrero druidico|elfo|gnomo|tiefling|aasimar|drac/;
 export function trucoPotente(ch, fuente = '') {
   const f = norm(fuente);

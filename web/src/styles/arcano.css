@@ -83,7 +83,6 @@ button.gold::before, button.primary::before, .chip.gold::before { content: ""; p
   background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--bt-ink, #fff) 22%, transparent) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat; transition: background-position .8s var(--ease); }
 button.gold:hover::before, button.primary:hover::before, .chip.gold:hover::before { background-position: 150% 0; }
 .chip.gold { animation: destello 7s ease-in-out 3s infinite; }
-/* El destello de las píldoras doradas es una banda que se desplaza con transform dentro del botón (overflow: hidden). */
 .chip.gold::before { animation: barrido 7s ease-in-out 3s infinite; right: auto; width: 250%; background-position: 0 0; background-size: 100% 100%; transform: translateX(90%); transition: none; }
 @keyframes barrido { 0%, 80% { transform: translateX(90%); } 92%, 100% { transform: translateX(-90%); } }
 @keyframes destello { 0%, 80%, 100% { box-shadow: 0 6px 20px -10px var(--glow); } 88% { box-shadow: 0 0 0 4px var(--glow), 0 6px 26px -6px var(--glow); } }

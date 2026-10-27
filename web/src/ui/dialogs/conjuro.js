@@ -29,7 +29,6 @@ const dlg = () => $('#spellDlg');
 const enlazar = h => { const e = estadosRegex(); return e ? porTexto(h, t => t.replace(e.re, (m, pre, w) => { const k = claveDeForma(w); return k ? `${pre}<button type="button" class="term${termino(k)?.cat === 'Estado' ? ' est' : ''}" data-term="${k}">${w}</button>` : m; })) : h; };
 export { porTexto };
 export const realzar = realzador({ icono: gi, conjuros: nombresConjuros });
-// Un texto corto de la app (sin markdown) con el mismo realce y los enlaces al glosario
 export const rico = t => enlazar(realzar(esc(t)));
 const cabecilla = t => t.replace(/^([A-ZÁÉÍÓÚÑ][^.:]{1,38}[.:])(\s)/, (m, a, sp) => (a.split(/\s+/).length <= 5 ? `<b class="lead">${a}</b>${sp}` : m));
 const DADO_CAB = /^(\d{0,2})d(\d{1,3})$/i;
@@ -47,7 +46,6 @@ function tablaHtml(lineas) {
     <thead><tr>${pad(cab).map((c, k) => td(c, k, true)).join('')}</tr></thead>
     <tbody>${cuerpo.map(f => `<tr${numerada && esRot(f[0]) ? ` data-rot="${esc(f[0].replace(/\.$/, ''))}"` : ''}>${pad(f).map((c, k) => td(c, k)).join('')}</tr>`).join('')}</tbody></table></div></figure>`;
 }
-// El mismo texto sin botones del glosario, para meterlo dentro de otro botón (una tarjeta que se elige)
 export const mdPlano = t => md(t).replace(/<button type="button" class="term[^"]*"[^>]*>(.*?)<\/button>/g, '<b class="term-plano">$1</b>');
 export function md(t) {
   const bloques = String(t || '').trim().split(/\n{2,}/).filter(b => b.trim());

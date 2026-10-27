@@ -3,8 +3,6 @@ import { esc } from '../../core/util.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { gi } from '../componentes/tema.js';
 
-// Pregunta qué añadir al daño al impactar (maniobra, Castigo divino, Ataque furtivo…). Devuelve las opciones elegidas,
-// [] para tirar sin nada, o null si se cierra sin tirar.
 let dlg = null;
 export function preguntarAlImpactar(ops, { arma = '' } = {}) {
   if (!dlg) { dlg = document.createElement('dialog'); dlg.className = 'modal hab-modal ai-modal'; dlg.setAttribute('aria-labelledby', 'aiTitle'); document.body.appendChild(dlg); }

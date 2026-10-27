@@ -4,8 +4,6 @@ import { escalaEfectos } from './calidad.js';
 import { mediaDist, maxDist } from '../../domain/reglas/dados.js';
 import { vibrar } from '../../platform/native.js';
 
-// Animación de impacto cuando una tirada de daño o curación sale por encima de la media.
-// La forma depende del tipo de daño (y así del arma o de la escuela del conjuro).
 const COLOR = { cortante: '#FF6B57', contundente: '#FFB36B', perforante: '#FFE08A', fuego: '#FF7A2E', frio: '#8FD8FF', relampago: '#9EC5FF', trueno: '#C7B8FF',
   acido: '#A6F05A', veneno: '#7BD66A', necrotico: '#A77BE0', radiante: '#FFE9A0', psiquico: '#F08BD8', fuerza: '#B59CFF', curacion: '#6EE0A0' };
 const LEMA = { cortante: 'Tajo brutal', contundente: 'Golpe demoledor', perforante: 'Estocada certera', fuego: 'Infierno', frio: 'Escarcha mortal', relampago: 'Descarga',

@@ -12,15 +12,11 @@ import { fusionar } from './fusion.js';
 const TIPO_OBJ = /(Objeto maravilloso|Anillo|Varita|Vara|Poci[oó]n|Arma|Armadura|Bast[oó]n|Pergamino)\b[^,]{0,70},\s*(com[uú]n|infrecuente|rar[oa]|muy rar[oa]|legendari[oa]|artefacto|rareza)/;
 function bloquesDe(nums, hueco = 3) { const b = []; for (const p of nums) { const u = b[b.length - 1]; if (u && p - u[1] <= hueco) u[1] = p; else b.push([p, p]); } return b; }
 
-// Corrige los restos del OCR de cada línea (y de sus celdas, que usan las tablas); las líneas de puro ruido desaparecen.
-// raw guarda la línea tal cual la leyó el OCR, por si un lector necesita su maquetación (los bordes «|» de los perfiles)
 function corregirColumna(col, voc) {
   const limpias = corregirLineas(col.map(l => l.s), voc);
   return col.map((l, i) => (limpias[i] ? { ...l, raw: l.s, s: limpias[i], cells: l.cells.map(c => ({ ...c, s: corregirLinea(c.s, voc) || c.s })) } : null)).filter(Boolean);
 }
 
-// vocabulario: frecuencias de partida ({ palabra: n }, como data/vocabulario.json) para corregir el OCR; sin él, solo cuenta el propio libro.
-// segundaLectura: texto de cada página leído por otro OCR (tools/ocr/lecturas); donde la capa del PDF no forma palabras, se usa esa lectura
 export function analizarLibro(paginas, aviso = () => {}, { vocabulario = {}, segundaLectura = null } = {}) {
   const N = paginas.length;
   const texto = paginas.map(pg => pg.items.map(i => i.str).join(' '));

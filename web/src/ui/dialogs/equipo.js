@@ -30,7 +30,6 @@ import { RAR_K, TIPO_I, abrirObjeto, abrirBiblioteca } from './biblioteca.js';
 let S;
 const PREF_VISTA = 'grimorio-inv-vista';
 const leerVista = () => { try { return localStorage.getItem(PREF_VISTA) === 'lista' ? 'lista' : 'rejilla'; } catch { return 'rejilla'; } };
-// sel: objeto abierto en el inspector; hueco: ranura del maniquí para la que se elige objeto; fx: efecto pendiente tras pintar
 const V = { cat: '', q: '', form: null, monedas: false, vista: leerVista(), sel: null, hueco: null, fx: null };
 const dlg = () => $('#equipoDlg');
 const kg = n => `${(Math.round((n || 0) * 100) / 100).toLocaleString('es-ES')} kg`;
@@ -40,7 +39,6 @@ const APILABLE = new Set(['consumible', 'comida', 'tesoro', 'equipo', 'otro', 'h
 const HUECOS = { principal: 'Mano principal', secundaria: 'Mano secundaria', armadura: 'Armadura' };
 const rarK = o => (o.rareza ? `r-${RAR_K[o.rareza] || 'varia'}` : '');
 const buscar = (ch, id) => equipoDe(ch).objetos.find(x => x.id === id) || null;
-// Iconos de los objetos comunes, por el nombre
 const ICONO_NOMBRE = [[/^antorcha/, 'it_antorcha'], [/^cuerda/, 'it_cuerda'], [/^tienda/, 'it_tienda'], [/^linterna/, 'it_linterna'], [/^palanca/, 'it_palanca'],
   [/^raciones?/, 'it_racion'], [/^pan\b/, 'it_pan'], [/^queso/, 'it_queso'], [/^vino/, 'it_vino'], [/^(agua\b(?! bendita)|odre)/, 'it_agua'], [/^(gema|joya|perla|diamante|rubi|zafiro|esmeralda)/, 'it_gema'],
   [/^agua bendita/, 'it_bendita'], [/^fuego de alquimista/, 'it_fuego'], [/^saco de dormir/, 'it_saco'], [/^manta/, 'it_manta'], [/^herramientas de ladron/, 'it_ganzuas'],
@@ -59,20 +57,17 @@ function icoDe(o) {
   const n = norm(o.nombre);
   return ICONO_NOMBRE.find(([r]) => r.test(n))?.[1] || icoCat(o.cat);
 }
-// Color en hexadecimal de una variable CSS, para las chispas del lienzo
 function hexDe(el, v = 'var(--gold)') {
   const t = document.createElement('i'); t.style.color = v; (el || document.body).appendChild(t);
   const m = getComputedStyle(t).color.match(/\d+(\.\d+)?/g); t.remove();
   return m ? '#' + m.slice(0, 3).map(n => Math.round(+n).toString(16).padStart(2, '0')).join('') : '#E7B85F';
 }
 
-// Lo que hace el objeto en la hoja, y si está funcionando
 function efectoTexto(o) {
   const b = describirEfecto(efectoDe(o.nombre)); if (!b.length) return '';
   const falta = o.guardado ? 'al llevarlo encima' : o.sintonia && !o.sintonizado ? 'al sintonizarlo' : 'al equiparlo';
   return objetoActivo(o) ? `<span class="obj-ef on">${esc(b.join(', '))}</span>` : `<span class="obj-ef">${esc(b.join(', '))} (${falta})</span>`;
 }
-// Una línea con lo esencial: ataque y daño, CA, curación o peso
 function claveCorta(ch, o) {
   if (o.arma) { const at = ataqueArma(ch, o); return `${at.ataque} · ${at.expr}`; }
   if (esEscudo(o)) return `+${(o.armadura.base || 2) + (o.armadura.bono || 0)} CA`;
@@ -83,7 +78,6 @@ function claveCorta(ch, o) {
 const enUso = (ch, o) => o.equipado || o.sintonizado;
 const donde = o => (o.mano === 'ambas' ? 'A dos manos' : o.mano === 'principal' ? 'Mano principal' : o.mano === 'secundaria' ? 'Mano secundaria' : o.armadura ? 'Puesta' : 'Equipado');
 
-// ——— Maniquí: manos, armadura y sintonía ———
 function hueco(ch, k, o, extra = '') {
   const lleno = !!o, a = o?.arma ? ataqueArma(ch, o) : null;
   const sub = !o ? (k === 'armadura' ? 'Sin armadura' : 'Libre') : a ? `${a.ataque} · ${a.dano}` : claveCorta(ch, o);
@@ -114,7 +108,6 @@ function maniqui(ch) {
   </section>`;
 }
 
-// ——— Carga y monedas ———
 function medidores(ch) {
   const eq = equipoDe(ch), peso = pesoTotal(ch), cap = capacidadCarga(ch), pct = Math.min(100, peso / cap * 100), alijo = pesoGuardado(ch);
   const nivel = peso > cap ? 'over' : pct >= 75 ? 'alto' : '';
@@ -147,7 +140,6 @@ function bolsaMonedas(ch) {
   </section>`;
 }
 
-// ——— Avisos de reglas: lo que el equipo puesto hace (o estropea) ———
 function avisos(ch) {
   const out = [], pa = penalizacionArmadura(ch), sabe = armadurasDe(ch), m = manos(ch);
   const puesta = equipoDe(ch).objetos.filter(o => o.equipado && o.armadura);
@@ -166,7 +158,6 @@ function avisos(ch) {
   return `<ul class="inv-avisos" aria-label="Avisos del equipo">${out.map(([t, ico, x]) => `<li class="${t}">${gi(ico)}<span>${esc(x)}</span></li>`).join('')}</ul>`;
 }
 
-// ——— Bolsa: casillas o lista ———
 function casilla(ch, o, i) {
   const r = o.rasgo && reglas(ch).find(x => x.id === o.rasgo), libres = r ? r.max - usosGastados(ch, r) : null;
   const marca = o.equipado ? `<span class="inv-c-marca" title="${donde(o)}">${gi(o.armadura && !esEscudo(o) ? 'o_armadura' : 'inv_mano')}</span>`
@@ -215,7 +206,6 @@ function grupos(ch, lista, R) {
   }).join('');
 }
 
-// ——— Formulario de añadir o editar ———
 function formulario() {
   const f = V.form, o = f.o, cat = o.cat;
   const catOpts = CATEGORIAS.map(([k, t]) => `<option value="${k}" ${k === cat ? 'selected' : ''}>${esc(t)}</option>`).join('');
@@ -253,7 +243,6 @@ function leerFormulario() {
   return o;
 }
 
-// ——— Inspector: la ficha del objeto con todo lo que se puede hacer con él ———
 const dato = (t, v, cls = '') => (v === '' || v == null ? '' : `<div class="inv-dato ${cls}"><small>${t}</small><b>${v}</b></div>`);
 function inspector(ch) {
   if (V.hueco) return selector(ch);
@@ -315,7 +304,6 @@ function inspector(ch) {
     </div>
   </section>`;
 }
-// Elegir qué va en una ranura del maniquí
 function selector(ch) {
   const k = V.hueco, eq = equipoDe(ch), m = manos(ch);
   const vale = o => !o.guardado && (k === 'armadura' ? o.armadura && !esEscudo(o) : k === 'sintonia' ? o.sintonia && !o.sintonizado : vaEnMano(o));
@@ -371,7 +359,6 @@ function pintarInspector(ch = S.cur()) {
   el.innerHTML = h; el.classList.toggle('abierto', !!h);
   if (nuevo) el.querySelector('.inv-insp')?.focus({ preventScroll: true });
 }
-// Los efectos se lanzan tras repintar, sobre el elemento nuevo
 function efectoPendiente() {
   const fx = V.fx; V.fx = null; if (!fx || movimientoReducido()) return;
   requestAnimationFrame(() => {
@@ -389,7 +376,6 @@ export function abrirEquipo(sel = null) {
   b.classList.add('fx-abre'); clearTimeout(b.__fxT); b.__fxT = setTimeout(() => b.classList.remove('fx-abre'), 900);
 }
 
-// ——— Acciones ———
 function soltarAviso(r) {
   const q = r?.quitados || []; if (!q.length) return '';
   return ` ${q.map(o => `<b>${esc(o.nombre)}</b>`).join(' y ')} ${q.length > 1 ? 'vuelven' : 'vuelve'} a la mochila.`;
@@ -468,7 +454,7 @@ export function init(store) {
   on(d, 'click', '[data-eq="bib"]', () => abrirBiblioteca('objetos'));
   on(d, 'click', '[data-eqver]', (e, b) => abrirObjeto(b.dataset.eqver));
   on(d, 'click', '[data-invcat]', (e, b) => { V.cat = b.dataset.invcat; repintar(); });
-  on(d, 'click', '[data-vista]', (e, b) => { V.vista = b.dataset.vista; try { localStorage.setItem(PREF_VISTA, V.vista); } catch { /* sin almacenamiento */ } repintar(); });
+  on(d, 'click', '[data-vista]', (e, b) => { V.vista = b.dataset.vista; try { localStorage.setItem(PREF_VISTA, V.vista); } catch {} repintar(); });
   on(d, 'click', '[data-inspec]', (e, b) => { V.sel = b.dataset.inspec; V.hueco = null; pintarInspector(); });
   on(d, 'click', '[data-hueco]', (e, b) => { if (b.dataset.hid) { V.sel = b.dataset.hid; V.hueco = null; } else { V.hueco = b.dataset.hueco; V.sel = null; } pintarInspector(); });
   on(d, 'click', '[data-elige]', (e, b) => (V.hueco === 'sintonia' ? sintonizarYa(b.dataset.elige) : equiparYa(b.dataset.elige, MANOS_DE[V.hueco])));
@@ -503,7 +489,6 @@ export function init(store) {
     if (a === 'cancelar') { V.form = null; return repintar(); }
     if (a === 'guardar') {
       const o = leerFormulario();
-      // Nombre, peso y daño se escriben a mano: si algo no vale se marca y no se guarda
       const nom = textoDe($('#ivNom'), { obligatorio: true, max: 80, campo: 'Nombre del objeto' }); if (nom == null) return; o.nombre = nom;
       const peso = numeroDe($('#ivPeso'), { min: 0, max: 5000, decimal: true, obligatorio: false }); if (peso === null && $('#ivPeso').value.trim()) return; o.peso = peso ?? 0;
       if ($('#ivDano')) { const d = leerDano($('#ivDano').value); if (!d.ok) return rechazar($('#ivDano'), d.motivo, { max: 20 }); o.arma.dano = d.t; }
@@ -526,7 +511,6 @@ export function init(store) {
     V.sel = null; repintar(); toast(`<b>${esc(o?.nombre || 'Objeto')}</b> quitado.`, [botonDeshacer(S, h)]);
   });
   on(d, 'click', '[data-elegir="objeto"]', async (e, b) => { const inp = b.closest('.elg').querySelector('input'), v = await elegirObjetoComun(); if (v != null) ponerValor(inp, v); });
-  // Arrastrar de la mochila al maniquí (con ratón)
   d.addEventListener('dragstart', e => { const t = e.target.closest?.('[data-arrastra]'); if (!t) return; e.dataTransfer.setData('text/x-objeto', t.dataset.arrastra); e.dataTransfer.effectAllowed = 'move'; d.classList.add('arrastrando'); });
   d.addEventListener('dragend', () => { d.classList.remove('arrastrando'); d.querySelectorAll('.sobre').forEach(x => x.classList.remove('sobre')); });
   d.addEventListener('dragover', e => { const t = e.target.closest?.('[data-soltar]'); if (!t || !e.dataTransfer.types.includes('text/x-objeto')) return; e.preventDefault(); t.classList.add('sobre'); });

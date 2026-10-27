@@ -37,7 +37,6 @@ export const TIRADAS_BASE = {
   "yolande's regal presence": T({ salvacion: 'Sabiduría', mitad: true, danos: [D(4, 6, 'psíquico', 'salvacion')] }),
   "jallarzi's storm of radiance": T({ salvacion: 'Constitución', mitad: true, danos: [D(2, 10, 'radiante', 'salvacion'), D(2, 10, 'trueno', 'salvacion')], escala: esp(1, 10, 5) }),
 };
-// Ajustes que el texto no deja leer: cuántos relámpagos lanza Relámpago en cadena, la curación fija de Curar
 const AJUSTES = {
   'chain lightning': r => ({ ...r, veces: { base: 4, desde: 6 } }),
   heal: r => ({ ...r, curacion: r.curacion || { n: 0, caras: 0, bono: 70, mod: false }, escala: { tipo: 'espacio', n: 0, caras: 0, bono: 0, porNivel: 10, desde: 6 } }),

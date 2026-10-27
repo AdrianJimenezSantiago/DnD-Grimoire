@@ -12,8 +12,6 @@ function ensure() {
   const size = () => { dpr = Math.min(1.5, window.devicePixelRatio || 1); vw = innerWidth; vh = innerHeight; cv.width = vw * dpr; cv.height = vh * dpr; };
   size(); addEventListener('resize', size);
 }
-// Cada chispa es un degradado radial; en vez de crearlo en cada fotograma para cada partícula se pinta una vez
-// por color en un lienzo pequeño y se estampa con drawImage. La transparencia de la vida va en globalAlpha.
 const sprites = new Map();
 function sprite(h, s, l) {
   const k = `${h}|${s}|${l}`;
@@ -30,11 +28,8 @@ let prev = 0;
 export function alFrente(el) {
   if (!el?.showPopover) return;
   if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
-  try { if (el.matches(':popover-open')) el.hidePopover(); el.showPopover(); } catch { /* sin top layer */ }
+  try { if (el.matches(':popover-open')) el.hidePopover(); el.showPopover(); } catch {}
 }
-// Se borra con el tamaño guardado: leer innerWidth dentro del fotograma puede forzar un layout.
-// La física está pensada a 60 fps: con pantallas de 90/120 Hz o un móvil que va justo, se escala por el tiempo real
-// del fotograma para que las chispas duren y vuelen lo mismo en cualquier dispositivo.
 function loop(t) {
   const f = prev ? Math.min(3, (t - prev) / 16.67) : 1; prev = t;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

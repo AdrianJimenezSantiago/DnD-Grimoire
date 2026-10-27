@@ -1,17 +1,13 @@
-// Fusión de dos lecturas OCR de la misma página. La base (la capa de texto del PDF) conserva líneas, columnas y orden;
-// la segunda lectura (otro motor) solo se usa donde las dos no coinciden, y solo si arregla palabras que en la base no
-// son palabras: «uua» → «una», «beoeficios» → «beneficios», «1nteligencía» → «Inteligencia».
-//   const lineas = fusionar(lineasBase, textoOtro, voc)
+// Fusión de dos lecturas OCR de una página: la base manda y la segunda lectura solo arregla lo que en la base no son palabras.
 import { plausible } from './corrector.js';
 
 const clave = t => t.toLowerCase().replace(/[^\p{L}\d]/gu, '');
 const sinSignos = t => t.replace(/^[^\p{L}\d]+|[^\p{L}\d]+$/gu, '');
-// ¿Es una palabra de verdad? Letras: el vocabulario la conoce o es una forma de una conocida. Cifras: un número o una tirada.
 function valida(t, voc) {
   const s = sinSignos(t);
   if (!s) return true;
   if (/\d/.test(s)) return /^(?:\d+(?:[.,]\d+)?|\d*d\d+|\d+[-–]\d+|[+-]\d+|\d+\/\d+)$/.test(s);
-  if (/^\p{Lu}(?:[,&/]\p{Lu}){1,3}$/u.test(s)) return true; // «C,M», «D&D», «C,R»
+  if (/^\p{Lu}(?:[,&/]\p{Lu}){1,3}$/u.test(s)) return true;
   return /^\p{L}+$/u.test(s) && plausible(s.toLowerCase(), voc);
 }
 function lev(a, b) {
@@ -20,7 +16,6 @@ function lev(a, b) {
   return prev[b.length];
 }
 
-// Alineación por palabras (programación dinámica): devuelve tramos [i0, i1, j0, j1] donde las dos lecturas difieren
 function tramos(a, b) {
   const n = a.length, m = b.length, D = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
   for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) D[i][j] = a[i] === b[j] ? D[i + 1][j + 1] + 1 : Math.max(D[i + 1][j], D[i][j + 1]);
@@ -45,12 +40,10 @@ export function fusionar(lineas, otro, voc) {
     if (!nb || !no || nb > 3 || no > 3) continue;
     const base = toks.slice(i0, i1), alt = otros.slice(j0, j1);
     if (base.every(x => valida(x.t, voc))) continue;
-    // Mismo número de palabras: se cambian una a una, solo las que en la base no son palabras («Dote: 1niciado» → «Dote: Iniciado»)
     if (nb === no && nb > 1) {
       base.forEach((x, k) => { if (!valida(x.t, voc) && valida(alt[k], voc)) cambiar([x], [alt[k]]); });
       continue;
     }
-    // Distinto número (palabras pegadas o partidas): solo si ninguna palabra de la base es válida
     if (base.some(x => valida(x.t, voc)) || !alt.every(t => valida(t, voc))) continue;
     cambiar(base, alt);
   }
@@ -58,19 +51,13 @@ export function fusionar(lineas, otro, voc) {
 
   function cambiar(base, alt) {
     const nb = base.length;
-    // Las dos lecturas tienen que parecerse: es el mismo texto mal leído, no otro trozo de la página
     const ka = base.map(x => clave(x.t)).join(''), kb = alt.map(clave).join('');
     if (!ka || lev(ka, kb) > Math.max(1, Math.round(Math.max(ka.length, kb.length) * 0.34))) return;
-    // Las cifras no se tocan: si no coinciden, la otra lectura está emparejada con otra línea («BC+2)» ≠ «BC»)
-    // (una cifra dentro de una palabra de letras es una letra mal leída: «1nteligencía», «competenci:1»)
     const cifras = ts => ts.filter(t => !(/\p{L}{3,}/u.test(t) && (t.match(/\d/g) || []).length <= 2)).join('').replace(/\D/g, '');
     if (cifras(base.map(x => x.t)) !== cifras(alt)) return;
-    // Palabras de dos letras: solo hacia palabras frecuentes («co» → «eo» no)
     if (kb.length <= 2 && voc.n(kb) < 50) return;
-    // Un tramo partido entre dos líneas no se toca (corte de palabra con guion, final de columna)
     if (base.some(x => x.li !== base[0].li)) return;
     const { li, ti } = base[0], pre = base[0].t.match(/^[^\p{L}\d]*/u)[0], suf = base[nb - 1].t.match(/[^\p{L}\d]*$/u)[0];
-    // Respeta las mayúsculas de la base: «MACIOS» → «MAGOS», «1nteligencía» → «Inteligencia»
     const letrasBase = base.map(x => x.t).join('').replace(/[^\p{L}]/gu, ''), mayus = letrasBase.length > 1 && letrasBase === letrasBase.toUpperCase();
     const capital = /^[^\p{L}]*(?:\p{Lu}|\d)/u.test(sinSignos(base[0].t));
     const forma = (t, k) => (mayus ? t.toUpperCase() : k === 0 && capital ? t.replace(/\p{L}/u, c => c.toUpperCase()) : t);

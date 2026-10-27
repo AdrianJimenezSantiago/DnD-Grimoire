@@ -25,7 +25,6 @@ const GRUPOS = {
     ['Movimiento y control', 'md_tiempo', ['ralentizar', 'escarcha', 'confusion']],
   ],
 };
-// Estados que suelen imponer los conjuros, con ejemplos para reconocerlos
 const ESTADOS_DE_CONJURO = {
   asustado: 'Terror', apresado: 'Telaraña, Enmarañar', cegado: 'Sordera/ceguera', ensordecido: 'Sordera/ceguera', derribado: 'Grasa, Orden imperiosa',
   encantado: 'Hechizar persona', envenenado: 'Rayo nauseabundo, Nube apestosa', incapacitado: 'Patrón hipnótico, Risa horrible', inconsciente: 'Dormir',

@@ -34,47 +34,40 @@ const ESC_ICO = { abj: 'esc_abj', adi: 'esc_adi', con: 'esc_con', enc: 'esc_enc'
 const MODOS = [['desventaja', 'Desventaja', 'el menor de 2d20'], ['normal', 'Normal', '1d20'], ['ventaja', 'Ventaja', 'el mayor de 2d20']];
 const TS = [['falla', 'Ha fallado', 'efecto completo'], ['supera', 'Ha superado', 'se libra o mitad'], ['varios', 'Varios', 'unos sí y otros no']];
 
-// El conjuro que se tira: una entrada del libro o uno lanzado desde un objeto mágico (con su CD y ataque, si los fija)
 const entrada = () => R.ext || S.cur().book[R.bi];
 const datos = () => { const ch = S.cur(), e = entrada(), s = S.db.catalog[e.sid]; let t = tiradasConjuro(s);
   if (t && s.level === 0 && t.salvacion && !t.mitad && t.danos.length && trucoPotenteEvocador(ch)) t = { ...t, mitad: true, supera: t.supera || 'Truco potente: sufre la mitad del daño.' };
   let P = magiaPara(perfil(ch), e.fuente);
   if (R.ext) P = { ...P, ...(R.ext.cd != null ? { cd: R.ext.cd } : {}), ...(R.ext.atk != null ? { atk: R.ext.atk } : {}) };
   return { ch, s, P, t }; };
-// Sanación suprema: la curación da el máximo de cada dado
 const exprLinea = (n, caras, bono, ex) => (ex?.maximo ? String(n * caras + bono) : exprDe(n, caras, bono));
 const dadosActuales = ({ ch, s, t }) => (t ? dadosPara(t, { nivelPj: nivelTotal(ch), nivelEspacio: s.level ? R.nivel : null, nivelConjuro: s.level }) : []);
 const conSalvacion = (t, dados) => !!t?.salvacion && (dados.some(x => x.via === 'salvacion') || t.falla || t.extras.length);
-// Lanzamiento potente (clérigo o druida 7) suma la Sabiduría al daño de sus trucos
 const bonoDe = (dd, t, P, ex = null) => dd.bono + ((dd.tipo === 'curación' && t.curacion?.mod) || dd.mod ? (P.mod || 0) : 0) + (ex?.bono || 0);
-// Lo que suman tus rasgos a cada línea de dados (Lanzamiento potente, Discípulo de la vida, Alma radiante…)
 const extrasDe = (D, dados) => bonosDeConjuro(D.ch, D.s, entrada().fuente, dados, D.s.level ? R.nivel : null);
 const exprDe = (n, caras, bono) => (n ? `${n}d${caras}${bono ? sgn(bono) : ''}` : String(bono || 0));
 const idxDe = (lista, k) => Math.max(0, lista.findIndex(m => m[0] === k));
 
-// Conjuro lanzado desde un objeto (varita, bastón…): nivel fijo y, si el objeto la da, su CD o su bonificador de ataque
 export function abrirTiradaObjeto({ sid, nivel = null, cd = null, atk = null, fuente = '' }) {
   const ch = S.cur(), s = S.db.catalog[sid]; if (!s) return;
   const mods = modsTirada(ch, { sobre: 'ataque' });
   R = { bi: -1, ext: { sid, cd, atk, fuente }, sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivel || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = ''; // al abrir, cada bloque entra de nuevo con su animación
+  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = '';
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 export function abrirTirada(bi, nivelEspacio) {
   const ch = S.cur(), s = S.db.catalog[ch.book[bi].sid], P = perfil(ch);
   const mods = modsTirada(ch, { sobre: 'ataque' });
   R = { bi, sid: ch.book[bi].sid, nivel: s.level === 0 ? 0 : Math.max(s.level, nivelEspacio || s.level), modo: resolverModo(mods), modoAuto: true, mods, critico: false, ts: null, res: null };
-  // Sin nivel pedido, el espacio más bajo que aún tenga huecos libres.
   if (s.level > 0 && !nivelEspacio) for (let L = s.level; L <= 9; L++) { const tot = P.slots?.[L] || 0; if (tot - Math.min(ch.play.used?.[L] || 0, tot) > 0) { R.nivel = L; break; } }
   const k = norm(s.escuela || '').slice(0, 3);
   dlg().style.setProperty('--esc', ESC_ICO[k] ? `var(--sc-${k})` : 'var(--gold)');
-  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = ''; // al abrir, cada bloque entra de nuevo con su animación
+  const ctl = $('#rlCtl'); ctl.replaceChildren(); ctl.__html = '';
   pintarCtl(); pintarOut(); pintarRecientes(); abrirDialogo(dlg());
 }
 
-// ---- Controles ----
 function pintarCtl(tsAntes = R.ts) {
   const D = datos(), { ch, s, P, t } = D, dados = dadosActuales(D), conTS = conSalvacion(t, dados);
   const k = norm(s.escuela || '').slice(0, 3);
@@ -82,8 +75,6 @@ function pintarCtl(tsAntes = R.ts) {
   const sub = R.ext ? `Lanzado desde ${R.ext.fuente}${s.level && R.nivel > s.level ? `, versión de nivel ${R.nivel}` : ''}`
     : s.level === 0 ? `Truco, nivel de personaje ${nivelTotal(ch)}` : `Conjuro de nivel ${s.level}${R.nivel > s.level ? `, lanzado con espacio de nivel ${R.nivel}` : ''}`;
   if ($('#rlSub').textContent !== sub) $('#rlSub').textContent = sub;
-  // Se arma por bloques con clave y se pinta con morph: al cambiar de opción solo se toca lo que cambia, y un bloque que
-  // aparece o desaparece (el de espacios, el de concentración) no descoloca a los demás
   const bloques = [], add = (k2, html) => bloques.push(html.replace(/^\s*<[a-z]+/, m => `${m} data-key="cj-${k2}"`));
   const x = delCompendio(s);
   if (ch.play.conc === s.es && conObjetivos(s, [textoManual(x)?.d, s.desc, x?.dEs, x?.d])) {
@@ -92,7 +83,6 @@ function pintarCtl(tsAntes = R.ts) {
   }
   const fichas = [s.escuela ? `<span class="cj-chip esc">${esc(s.escuela)}</span>` : '', t?.salvacion ? `<span class="cj-chip">CD <b>${P.cd ?? '—'}</b></span>` : '', t?.ataque ? `<span class="cj-chip">Ataque <b>${P.atk == null ? '—' : sgn(P.atk)}</b></span>` : ''].filter(Boolean);
   if (fichas.length) add('fichas', `<div class="cj-fichas">${fichas.join('')}</div>`);
-  // Desde un objeto el nivel lo fijan sus cargas: no se elige espacio
   if ((t?.escala?.tipo === 'espacio' || (t?.veces?.desde)) && s.level > 0 && !R.ext) {
     const pills = []; for (let L = s.level; L <= 9; L++) {
       const tot = P.slots?.[L] || 0, libres = Math.max(0, tot - Math.min(ch.play.used?.[L] || 0, tot));
@@ -162,7 +152,6 @@ function sincSeg(sel, lista, k, attr) {
   g.querySelectorAll(`[data-${attr}]`).forEach(b => b.setAttribute('aria-checked', String(b.dataset[attr] === k)));
 }
 
-// ---- Tirar ----
 const DIST = new Map();
 function distDe(p, { modo = 'normal', critico = false, res = null } = {}) {
   const extras = (res?.extras || []).map(x => ({ p: parsear(String(x.m.valor).replace(/^[+-]/, '')), signo: x.neg ? -1 : 1 })).filter(x => x.p);
@@ -171,7 +160,6 @@ function distDe(p, { modo = 'normal', critico = false, res = null } = {}) {
   if (!DIST.has(key)) { if (DIST.size > 40) DIST.clear(); DIST.set(key, distribucion(p, { modo, critico, extras, plano })); }
   return DIST.get(key);
 }
-// nuevo = false recalcula la última tirada conservando sus dados (cambio de ventaja, crítico, espacio o salvación).
 function tirar(tipo, i, nuevo = true) {
   const D = datos(), { s, P, t } = D, antes = R.res;
   const previo = !nuevo && antes?.tipo === tipo && antes.i === i ? antes.res : null;
@@ -208,17 +196,15 @@ function recordar(x, reemplaza = false) {
   const L = RECIENTES.get(R.sid), e = { total: x.total, tipo: x.tipo, clave: x.tipo === 'ataque' ? 'd20' : x.clave || 'dados', nat: x.nat, t: Date.now() };
   if (reemplaza && L.length) L[0] = e; else { L.unshift(e); if (L.length > MAX_RECIENTES) L.pop(); }
 }
-// Si el último resultado depende del estado (crítico, espacio o salvación), se recalcula con los mismos dados.
 function reajustar() {
   const x = R.res; if (!x || x.tipo === 'extra') return;
   if (x.tipo === 'dano' && dadosActuales(datos())[x.i]) tirar('dano', x.i, false);
   if (x.tipo === 'ataque') tirar('ataque', 0, false);
 }
 
-// ---- Resultado ----
 function pintarOut(anim = false) {
   const el = $('#rlOut'), x = R.res, tok = ++TOKEN;
-  if (x && x.frase === undefined) { // una por tirada: repintar no la cambia
+  if (x && x.frase === undefined) {
     const ataque = x.tipo === 'ataque', n = x.crit ? 20 : x.pifia ? 1 : null;
     x.tramo = ataque ? tramoD20({ nat: n, total: x.total, tipo: 'ataque' }) : tramoDano(x.bruto ?? x.total, x.dist);
     x.frase = narracion(categoriaTirada(ataque ? { tipo: 'ataque', conjuro: true } : { tipo: x.tipo, clave: x.clave, cura: x.cura }), x.tramo);
@@ -258,7 +244,6 @@ function pintarOut(anim = false) {
   dlg().classList.add('rodando');
   rodar(el, { total: x.total, antes: x.antes, lo: x.dist ? x.dist.min : 1, hi: x.dist ? maxDist(x.dist) : Math.max(20, x.total), nuevo: x.nuevo, vivo: () => tok === TOKEN, fin: () => asentar(el, x) });
 }
-// Partículas del tipo de daño al posarse el resultado.
 const FX_DANO = {
   fuego: [{ color: '#FF7A3D', n: 34, speed: 2.6, up: 2.4, gravity: -0.06, life: 1300, size: 2.2 }, { color: '#FFD27A', n: 14, speed: 1.6, up: 3, gravity: -0.08, life: 900, size: 1.4 }],
   frio: [{ color: '#A8DEFF', n: 30, speed: 2.4, up: 0.3, gravity: 0.02, life: 1800, size: 1.8 }, { color: '#FFFFFF', n: 10, speed: 1.2, up: 0.5, gravity: 0.01, life: 2000, size: 1.2 }],
@@ -326,7 +311,6 @@ export function init(store) {
     const h = S.act(`Sanador bendito: ${x.sanador} PG`, (db, c) => { n = curar(c, x.sanador); });
     b.disabled = true; golpe('cura', n); toast(`Sanador bendito: recuperas ${n} PG.`, [botonDeshacer(S, h)]);
   });
-  // Curación de un conjuro sobre ti
   on(body, 'click', '[data-rlcurarme]', (e, b) => {
     const x = R.res; if (!x?.cura) return; let n = 0;
     const h = S.act(`${S.db.catalog[R.sid]?.es || 'Conjuro'}: ${x.temp ? `${x.total} PG temporales` : `${x.total} PG`} sobre ti`, (db, c) => { n = x.temp ? ponerTemporales(c, x.total) : curar(c, x.total); });

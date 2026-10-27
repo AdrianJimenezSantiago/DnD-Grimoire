@@ -226,7 +226,6 @@ function chooser(key, n, filtro, titulo) {
         <span class="pl">${it.l || 'T'}</span><span><span class="pn">${esc(it.es)}</span><span class="pm">${metaItem(it)}</span></span></label>
         <button type="button" class="pview" data-ccver="${esc(it.id)}">Ver</button></div>`; }).join('') : '<p class="pempty">No hay conjuros que encajen.</p>'}</div></section>`;
 }
-// Conjuros de las dotes (Iniciado en la magia, Influencia feérica…): los fijos se añaden solos y el resto se eligen aquí
 function conjurosDotesHtml(d) {
   let h = '';
   for (const dc of dotesConConjuros(d, lib().trasfondos)) {
@@ -462,10 +461,8 @@ function sync(first, { sinCar = false } = {}) {
   if (attr && !charDlg().contains(a)) charDlg().querySelector(`[${attr}="${CSS.escape(val)}"]`)?.focus({ preventScroll: true });
   if (!first) revisarFuentes(draft);
 }
-// Competencias que da algo recién elegido (dote Habilidoso del trasfondo, subclase, multiclase…): se preguntan al momento
 const fuentesConClave = d => { const m = new Map(); return fuentesExtra(d).map(f => { const k = (m.get(f.nombre) || 0) + 1; m.set(f.nombre, k); return { ...f, clave: `${f.nombre}#${k}` }; }); };
 function revisarFuentes(d) {
-  // Al llegar a nivel 7 (clérigo o druida) se pregunta la variante de su rasgo
   const vars = variantesPendientes(d).filter(k => !VVISTAS.has(k));
   if (vars.length) { vars.forEach(k => VVISTAS.add(k)); setTimeout(async () => {
     for (const k of vars) { const def = VARIANTES[k], v = await preguntarOpcion({ titulo: `${def.rasgo} (${k.toLowerCase()} ${def.nivel})`, texto: 'Elige cómo funciona este rasgo. Podrás cambiarlo desde Dotes.', opciones: def.opciones }); if (v) VAR = { ...VAR, [k]: v }; }
@@ -628,7 +625,6 @@ export function initCreacion(store, { onNewCharacterAddSpells }) {
   on(form, 'click', '#f_doteAdd', anadirDote);
   on(form, 'click', '[data-orden]', (e, b) => { const [k, v] = b.dataset.orden.split('|'); ORD = { ...ORD, [k]: ORD[k] === v ? undefined : v }; if (!ORD[k]) delete ORD[k]; CONJ.trucos = CONJ.trucos.slice(0, cupoConjuros(readForm()).trucos); sync(false); });
   on(form, 'click', '[data-elegirestilo]', async () => {
-    // Si falta alguno (varias clases con el rasgo, o el Campeón a nivel 7) se añade; si no, se cambia el último
     const d = readForm(), est = estadoEstilo(d, lib().dotes), esEst = x => estiloDe(x, lib().dotes) || esAlternativa(x);
     const suyos = DOTES.filter(esEst), quedan = est.faltan ? suyos : suyos.slice(0, -1);
     const n = await elegirEstilo({ ...d, dotes: [...DOTES.filter(x => !esEst(x)), ...quedan] }, est.fuentes[0]); if (!n) return;

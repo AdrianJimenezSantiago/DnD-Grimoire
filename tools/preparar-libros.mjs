@@ -29,7 +29,6 @@ async function leer(archivo) {
     paginas.push({ p, w, items });
   }
   await doc.loadingTask.destroy();
-  // Segunda lectura OCR del mismo PDF (tools/ocr/segunda-lectura.mjs), si la hay: se reconoce por la huella del archivo
   const h = crypto.createHash('sha256');
   await new Promise((ok, mal) => fs.createReadStream(archivo).on('data', d => h.update(d)).on('end', ok).on('error', mal));
   const segundaLectura = lecturas.get(h.digest('hex')) || null;
