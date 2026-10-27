@@ -1,5 +1,6 @@
 // Efectos visuales cortos: chispas, destellos al lanzar conjuros y gastar espacios, pulsos y transiciones de vista.
-// Respetan «reducir movimiento».
+// Respetan «reducir movimiento» y la calidad de efectos (calidad.js): con menos, salen menos chispas.
+import { nivelEfectos, escalaEfectos } from './calidad.js';
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 export const movimientoReducido = () => mq.matches;
 
@@ -24,7 +25,7 @@ function sprite(h, s, l) {
   if (sprites.size > 80) sprites.clear();
   sprites.set(k, c); return c;
 }
-const MAX_PARTS = 500;
+const MAX_PARTS = [120, 260, 500];
 let prev = 0;
 export function alFrente(el) {
   if (!el?.showPopover) return;
@@ -63,7 +64,9 @@ export function chispas(x, y, { color = '#E7B85F', n = 22, speed = 3.2, up = 1.6
   if (movimientoReducido()) return;
   ensure(); if (document.querySelector('dialog[open]') || cv.matches?.(':popover-open')) alFrente(cv);
   const [h, s, l] = hslOf(color), S = Math.round(s), L = Math.round(l);
-  for (let i = 0; i < n && parts.length < MAX_PARTS; i++) {
+  n = escalaEfectos(n);
+  const max = MAX_PARTS[nivelEfectos()] ?? MAX_PARTS[2];
+  for (let i = 0; i < n && parts.length < max; i++) {
     const a = Math.random() * Math.PI * 2, v = (0.4 + Math.random()) * speed;
     parts.push({ x, y, vx: Math.cos(a) * v * spread, vy: Math.sin(a) * v * 0.6 - up * Math.random() * 2, drag: 0.94, g: gravity,
       r: size * (0.6 + Math.random()), life: life * (0.6 + Math.random() * 0.4), max: life, spr: sprite(Math.round((h + Math.random() * 16 - 8) / 4) * 4, S, L) });

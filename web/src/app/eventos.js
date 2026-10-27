@@ -15,6 +15,8 @@ import { NATIVO, vibrar, mantenerDespierta, minimizar, fijarBarras, almacen } fr
 import * as A from './acciones.js';
 import { initCombate, alternarCombate, iniciativaManual, nuevoTurno, tirarDesde, atacar, danoCon, accionComun, pgRapido } from './combate.js';
 import { abrirMenu, cerrarMenu, menuAbierto, initMenus } from '../ui/componentes/menu.js';
+import { MODOS, modoEfectos, nivelEfectos, fijarModoEfectos } from '../ui/animaciones/calidad.js';
+import { NIVELES } from '../domain/presentacion/rendimiento.js';
 import { enlazarEdicion } from './edicionConjuros.js';
 import { confirmar } from '../ui/componentes/modal.js';
 import { abrirPersonajes, abrirCreacion, abrirSubirNivel } from './asistentes.js';
@@ -69,6 +71,7 @@ function moreMenuHtml() {
   const util = [
     fila('backup', icon('save'), 'Copia de seguridad'),
     NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `aria-pressed="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
+    fila('efectos', icon('sparkles'), `Efectos: ${efectosTexto()}`, 'aria-haspopup="menu"'),
     fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
   ].join('');
   return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
@@ -77,6 +80,18 @@ function moreMenuHtml() {
     <div class="mm-grid">${personaje}</div><div class="mm-orla" aria-hidden="true"></div><div class="mm-grid">${saber}</div>
     <div class="mm-util">${util}</div>
     <button type="button" class="mm-danger" data-mcmd="reset">${icon('reset')}Borrar todos los datos</button>`;
+}
+// Efectos visuales: automáticos (según cómo vaya el dispositivo) o fijados a mano
+const EFECTOS = { alto: 'altos', medio: 'medios', bajo: 'bajos' };
+const efectosTexto = () => (modoEfectos() === 'auto' ? `automáticos (${EFECTOS[NIVELES[nivelEfectos()]]})` : EFECTOS[modoEfectos()]);
+function efectosItems() {
+  const m = modoEfectos();
+  return [
+    { cmd: 'efectos-auto', icon: 'sparkles', label: `Automáticos: según cómo vaya (ahora ${EFECTOS[NIVELES[nivelEfectos()]]})`, chk: m === 'auto' }, '-',
+    { cmd: 'efectos-alto', icon: 'star', label: 'Altos: todos los efectos', chk: m === 'alto' },
+    { cmd: 'efectos-medio', icon: 'contrast', label: 'Medios: sin desenfoques ni brillos continuos', chk: m === 'medio' },
+    { cmd: 'efectos-bajo', icon: 'candle', label: 'Bajos: fondo quieto y menos partículas', chk: m === 'bajo' },
+  ];
 }
 function restItems() {
   const ch = S.cur(); if (!ch) return [];
@@ -104,6 +119,7 @@ const COMMANDS = {
   edit: () => S.cur() && setEditing(!S.editing),
   rest: (el) => S.cur() && abrirMenu($('#restMenu'), el, restItems()),
   more: (el) => abrirMenu($('#moreMenu'), el, moreMenuHtml()),
+  efectos: () => abrirMenu($('#efMenu'), $('#btnMore'), efectosItems()),
   long: () => A.descansoLargo(S),
   short: () => A.descansoCorto(S, abrirRecuperacion, abrirVida),
   endconc: () => A.terminarConcentracion(S),
@@ -136,6 +152,10 @@ const COMMANDS = {
     const db = bdVacia(); invalidarItems(); S.editing = false;
     const h = S.replace(db); toast('Datos borrados.', [botonDeshacer(S, h)]);
   },
+};
+for (const m of MODOS) COMMANDS['efectos-' + m] = () => {
+  fijarModoEfectos(m);
+  toast(m === 'auto' ? 'Efectos automáticos: la app los ajusta según cómo vaya en este dispositivo.' : `Efectos ${EFECTOS[m]} en este dispositivo.`);
 };
 function lanzadoFx(el) {
   if (!el || movimientoReducido()) return;

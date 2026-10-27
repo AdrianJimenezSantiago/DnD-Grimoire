@@ -46,3 +46,22 @@ html.teclado .landing { top: var(--vv-top, 0px); bottom: var(--teclado, 0px); }
 html.teclado .dock { visibility: hidden; opacity: 0; pointer-events: none; }
 html.teclado .toast { bottom: calc(var(--teclado, 0px) + 14px); }
 @media (prefers-reduced-motion: reduce) { dialog:modal { transition: none; } }
+
+/* Calidad de los efectos (ui/animaciones/calidad.js): <html data-efectos="alto|medio|bajo">, automática según cómo vaya
+   el dispositivo o fijada desde el menú. En altos todo queda como está.
+   - Medios: sin desenfoques de fondo en ninguna pantalla (las superficies de cristal pasan a casi opacas, como en el
+     móvil) y sin los brillos continuos que repintan (box-shadow, background-position) ni los barridos dorados.
+   - Bajos: además se paran los adornos que giran o flotan sin parar. Los avisos que laten porque algo pide atención
+     (crítico, efecto que acaba, iniciativa pendiente) se conservan: son información, no adorno. */
+:root:is([data-efectos="medio"], [data-efectos="bajo"]) {
+  & :is(.appbar, .dock, .lvl-head::before, .obj-g, .el-g h3, .toast, .l-pilares li, .l-actions button) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  & .appbar { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+  & .dock { background: color-mix(in srgb, var(--bg) 93%, transparent); }
+  & .lvl-head::before { background: color-mix(in srgb, var(--bg) 95%, transparent); }
+  & :is(.obj-g, .el-g h3) { background: color-mix(in srgb, var(--raised) 97%, transparent); }
+  & dialog::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, .14); }
+  & :is(.chip.gold, .chip.gold::before, .l-actions button.gold::before, body.combate .appbar::after, .l-head h1 span, .cb-arma.maestra::after) { animation: none; }
+}
+:root[data-efectos="bajo"] :is(.md-icon .md-runa, .astrolabe .spin, .cc-anillo, .dd-anillo :is(.gira-marcas, .gira-rombos, .gira-a2), .listo .dd-rayos,
+  .listo .dd-ico, .dd.flota, .cb-runa, .cb-anuncio-runa, .vg-runa, .mm-runa, .cf-runa, .av-emb .av-runa, .oy-aura, .l-orbita, .l-clase > span,
+  .l-runa, .hero-insp.on .hi-chispa, .ar-svg .foco) { animation: none; }

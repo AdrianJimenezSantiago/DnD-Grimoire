@@ -1,5 +1,6 @@
 // Animación de un golpe que se recibe o se cura, con el color y la forma del tipo de daño.
 import { chispas, movimientoReducido, alFrente } from './fx.js';
+import { escalaEfectos } from './calidad.js';
 import { runaSvg } from './magia.js';
 
 const VARIANTES = { dano: ['tajo', 'garras', 'impacto'], cura: ['brotes', 'ola', 'halo'], temp: ['egida', 'runas'], max: ['auge'], buff: ['destello'], debuff: ['sombra'] };
@@ -18,7 +19,7 @@ function capaEn(el, tipo, v, n, etiqueta, nivel) {
   const c = document.createElement('div'); c.className = `gp-fx gp-${tipo} gp-${v} ${nivel ? `gp-n-${nivel}` : ''}`; c.setAttribute('aria-hidden', 'true');
   let h = '';
   if (tipo === 'dano') h = svgGolpe(v);
-  if (tipo === 'cura' && v === 'brotes') h = Array.from({ length: 10 }, () => `<i class="gp-mota" style="left:${rnd(8, 92)}%;animation-delay:${rnd(0, 260) | 0}ms;--s:${rnd(.6, 1.3)}"></i>`).join('');
+  if (tipo === 'cura' && v === 'brotes') h = Array.from({ length: escalaEfectos(10) }, () => `<i class="gp-mota" style="left:${rnd(8, 92)}%;animation-delay:${rnd(0, 260) | 0}ms;--s:${rnd(.6, 1.3)}"></i>`).join('');
   if (tipo === 'cura' && v === 'ola') h = '<i class="gp-ola"></i>';
   if (tipo === 'cura' && v === 'halo') h = '<i class="gp-halo"></i><i class="gp-halo b"></i>';
   if (tipo === 'temp') h = v === 'egida' ? '<i class="gp-egida"></i><i class="gp-brillo"></i>' : `<span class="gp-runa">${runaSvg({ n: 12, lados: 6, cls: '', semillaInicial: (Math.random() * 99) | 0 })}</span>`;
@@ -39,7 +40,7 @@ function pantalla(tipo, etiqueta, lema, fuerte) {
   const el = document.createElement('div'); el.className = `gp-pantalla gp-p-${tipo} ${fuerte ? 'epico' : 'suave'}`; el.setAttribute('aria-hidden', 'true');
   let h = '<i class="gp-p-velo"></i>';
   if (fuerte && tipo === 'dano') { const a = rnd(-20, 20); h += `<svg class="gp-p-grietas" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="transform:rotate(${a}deg)">${[0, 1, 2].map(i => `<path class="gp-trazo" style="animation-delay:${i * 60}ms" d="M${30 + i * 13} 8 Q ${46 + i * 13} 48 ${38 + i * 13} 92" pathLength="1"/>`).join('')}</svg>`; }
-  if (fuerte && tipo === 'cura') h += Array.from({ length: 26 }, () => `<i class="gp-mota" style="left:${rnd(2, 98)}%;animation-delay:${rnd(0, 700) | 0}ms;--s:${rnd(.8, 1.8)};--h:${rnd(40, 75) | 0}vh"></i>`).join('') + '<i class="gp-halo"></i><i class="gp-halo b"></i><i class="gp-halo c"></i>';
+  if (fuerte && tipo === 'cura') h += Array.from({ length: escalaEfectos(26) }, () => `<i class="gp-mota" style="left:${rnd(2, 98)}%;animation-delay:${rnd(0, 700) | 0}ms;--s:${rnd(.8, 1.8)};--h:${rnd(40, 75) | 0}vh"></i>`).join('') + '<i class="gp-halo"></i><i class="gp-halo b"></i><i class="gp-halo c"></i>';
   if (fuerte) h += `<div class="gp-p-centro"><b class="gp-p-num">${etiqueta}</b><span class="gp-p-lema">${lema}</span></div>`;
   el.innerHTML = h; document.body.appendChild(el); alFrente(el);
   if (fuerte) {

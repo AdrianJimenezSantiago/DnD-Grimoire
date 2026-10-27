@@ -1,6 +1,8 @@
 // Fondo animado de la app: elige la escena según la clase del personaje y la manda al motor (fondoMotor.js).
 import { tinteDe } from '../../domain/presentacion/paleta.js';
 import { movimientoReducido } from './fx.js';
+import { nivelEfectos, alCambiarEfectos } from './calidad.js';
+import { BAJO, ALTO } from '../../domain/presentacion/rendimiento.js';
 import FondoWorker from './fondoWorker.js?worker&inline';
 
 const ESCENA = {
@@ -48,7 +50,7 @@ function arrancarMotor() {
       // Si el worker falla, el lienzo transferido ya no sirve aquí: se cambia por uno nuevo y se dibuja en la página.
       worker.addEventListener('error', () => {
         worker.terminate(); const n = cv.cloneNode(); cv.replaceWith(n); cv = n;
-        cola = [['estado', [{ oculto: document.hidden, tapado, quieto, animar: !movimientoReducido() }]], ['tamano', [W, innerHeight, ratio()]]];
+        cola = [['calidad', [CALIDAD[nivelEfectos()] || CALIDAD[ALTO]]], ['estado', [{ oculto: document.hidden, tapado, quieto, animar: animar() }]], ['tamano', [W, innerHeight, ratio()]]];
         if (E.nombre) cola.push(['escena', [E.nombre, E.h, E.s, E.dark]]);
         usarLocal();
       }, { once: true });
@@ -59,8 +61,11 @@ function arrancarMotor() {
 }
 
 // En pantallas táctiles el lienzo va a menos resolución: son brillos difusos y así cada fotograma pesa un tercio menos.
+// Con efectos medios o bajos, a 1× y con menos partículas y fotogramas; en bajos el fondo se pinta una vez y se queda quieto.
 const tactil = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
-const ratio = () => Math.min(tactil ? 1.25 : 1.5, window.devicePixelRatio || 1);
+const ratio = () => Math.min(nivelEfectos() < ALTO ? 1 : tactil ? 1.25 : 1.5, window.devicePixelRatio || 1);
+const CALIDAD = [{ fps: 20, densidad: .5 }, { fps: 24, densidad: .7 }, { fps: 30, densidad: 1 }];
+const animar = () => !movimientoReducido() && nivelEfectos() !== BAJO;
 let W = 0;
 function tamano() {
   W = innerWidth;
@@ -101,8 +106,9 @@ export function initFondo() {
   cv = document.createElement('canvas'); cv.className = 'fondo-vivo'; cv.setAttribute('aria-hidden', 'true');
   document.body.prepend(cv);
   arrancarMotor();
-  motor('estado', { oculto: document.hidden, animar: !movimientoReducido() });
+  motor('estado', { oculto: document.hidden, animar: animar() });
   tamano();
+  alCambiarEfectos(n => { motor('calidad', CALIDAD[n]); motor('estado', { animar: animar() }); tamano(); });
   addEventListener('resize', () => { clearTimeout(tamano.t); tamano.t = setTimeout(tamano, 120); });
   document.addEventListener('scroll', desplazando, { capture: true, passive: true });
   document.addEventListener('visibilitychange', () => motor('estado', { oculto: document.hidden }));
@@ -110,5 +116,5 @@ export function initFondo() {
   const re = () => { const n = E.nombre; E.nombre = ''; fijarEscena({ h: E.h, s: E.s, icono: Object.keys(ESCENA).find(k => ESCENA[k] === n) }); };
   new MutationObserver(re).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', re); } catch {}
-  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => motor('estado', { animar: !movimientoReducido() })); } catch {}
+  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => motor('estado', { animar: animar() })); } catch {}
 }
