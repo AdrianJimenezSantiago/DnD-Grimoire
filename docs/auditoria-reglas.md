@@ -49,7 +49,7 @@ Destrabarse, Ataque de oportunidad; agotamiento (−2 por nivel a las pruebas d2
 - **Ficha de una regla**: cabecera con el color de su categoría; «En resumen» con el resumen de la app; «Lo que hace la hoja»
   para los estados; botón para poner o quitar el estado al personaje; la regla completa con capitular; «Ver también» con los
   términos que cita; y **Volver** para regresar a la ficha anterior al saltar de un término a otro.
-- **Realce del texto** en reglas, conjuros, rasgos, dotes, objetos y subclases (`web/src/domain/presentacion/realce.js`), siempre con el mismo significado:
+- <img src="img/conjuro.webp" alt="Ficha de Descarga de fuego con el texto realzado" width="240" align="right"> **Realce del texto** en reglas, conjuros, rasgos, dotes, objetos y subclases (`web/src/domain/presentacion/realce.js`), siempre con el mismo significado:
 
   | Qué | Cómo se ve |
   |---|---|

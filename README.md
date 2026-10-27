@@ -1,18 +1,28 @@
 <div align="center">
 
-<img src="tools/icon-512.png" alt="Grimorio" width="120">
+<img src="web/public/icons/icon-512.png" alt="Grimorio" width="110">
 
 # Grimorio
 
 **Tu hoja de personaje y libro de conjuros de Dungeons & Dragons, en el móvil o en el ordenador.**
 
-Con las reglas del Manual del Jugador de 2024 · Sin cuentas · Funciona sin conexión
+Reglas del Manual del Jugador de 2024 · Sin cuentas · Funciona sin conexión
 
 [![Última versión](https://img.shields.io/github/v/release/AdrianJimenezSantiago/DnD-Grimoire?label=%C3%BAltima%20versi%C3%B3n&color=e0b45c&labelColor=1e2740)](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest)
 [![Android](https://img.shields.io/badge/Android-APK-e0b45c?logo=android&logoColor=white&labelColor=1e2740)](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest)
+[![Windows](https://img.shields.io/badge/Windows-HTML-e0b45c?logo=windows&logoColor=white&labelColor=1e2740)](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest)
 [![Web](https://img.shields.io/badge/Web-abrir-e0b45c?logo=googlechrome&logoColor=white&labelColor=1e2740)](https://dnd-grimoire-five.vercel.app)
+[![Pruebas](https://img.shields.io/github/actions/workflow/status/AdrianJimenezSantiago/DnD-Grimoire/pruebas.yml?branch=development&label=pruebas&labelColor=1e2740)](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/actions/workflows/pruebas.yml)
 
 ### [⬇️ Descargar la última versión](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest) · [🌐 Usar en el navegador](https://dnd-grimoire-five.vercel.app)
+
+<br>
+
+<img src="docs/img/recorrido.webp" alt="Recorrido por la app: portada, hoja de Theo, lanzar Descarga de fuego y entrar en combate" width="280">
+&nbsp;&nbsp;&nbsp;
+<img src="docs/img/tirada.webp" alt="Tirada de 2d20 en el diálogo de dados" width="280">
+
+<sub>Abrir la hoja, lanzar un conjuro, entrar en combate · Tirar dados con su distribución</sub>
 
 </div>
 
@@ -23,6 +33,37 @@ Con las reglas del Manual del Jugador de 2024 · Sin cuentas · Funciona sin con
 Grimorio sustituye a la hoja de papel. Creas a tu personaje y la app **hace las cuentas por ti**: clase de armadura, bonificadores, CD de conjuros, espacios, recursos de clase, carga… Durante la partida lanzas conjuros con un toque, apuntas el daño, gastas usos y descansas; la app recupera lo que toca en cada descanso.
 
 No hace falta saberse las reglas de memoria ni tener cuenta en ningún sitio. **Todo se guarda en tu propio dispositivo.**
+
+## 🖼️ Así se ve
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/img/portada.webp" alt="Portada con los personajes" width="230"><br><b>Tus personajes</b><br><sub>Cada uno con el color y el emblema de su clase</sub></td>
+    <td align="center" width="33%"><img src="docs/img/hoja.webp" alt="Hoja de Theo, mago de nivel 6" width="230"><br><b>La hoja</b><br><sub>Vida, CA, espacios y rasgos a la vista</sub></td>
+    <td align="center" width="33%"><img src="docs/img/combate.webp" alt="Modo combate" width="230"><br><b>Modo combate</b><br><sub>Ronda, iniciativa y qué te queda del turno</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/img/conjuros.webp" alt="Libro de conjuros" width="230"><br><b>Libro de conjuros</b><br><sub>Toca para lanzar, mantén pulsado para leer</sub></td>
+    <td align="center"><img src="docs/img/conjuro.webp" alt="Ficha de Descarga de fuego" width="230"><br><b>Cada conjuro</b><br><sub>Dados, salvaciones y daño resaltados</sub></td>
+    <td align="center"><img src="docs/img/iniciativa.webp" alt="Tirada de iniciativa" width="230"><br><b>Tiradas con historia</b><br><sub>Cada resultado con su frase y su probabilidad</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/img/creacion.webp" alt="Creación de personaje" width="230"><br><b>Creación guiada</b><br><sub>Clase, origen, características y dotes</sub></td>
+    <td align="center"><img src="docs/img/inventario.webp" alt="Inventario" width="230"><br><b>Inventario</b><br><sub>Manos, armadura, sintonía, carga y monedas</sub></td>
+    <td align="center"><img src="docs/img/vida.webp" alt="Puntos de golpe" width="230"><br><b>Vida</b><br><sub>Daño, curación, temporales y dados de golpe</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary><b>💻 En el ordenador, de noche y de día</b></summary>
+<br>
+
+| Noche | Día |
+|:---:|:---:|
+| <img src="docs/img/pc-hoja-noche.webp" alt="Hoja en el ordenador, tema de noche"> | <img src="docs/img/pc-hoja-dia.webp" alt="Hoja en el ordenador, tema de día"> |
+
+<img src="docs/img/pc-portada.webp" alt="Portada en el ordenador">
+</details>
 
 ## ✨ Qué puedes hacer
 
@@ -43,16 +84,20 @@ No hace falta saberse las reglas de memoria ni tener cuenta en ningún sitio. **
 
 Elige la opción que mejor te venga. Todas son gratuitas.
 
-### 📱 En Android (recomendado)
+<details open>
+<summary><b>📱 En Android (recomendado)</b></summary>
 
 1. Desde el móvil, abre **[la última versión](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest)**.
 2. Baja hasta el apartado **Assets** y toca el archivo que empieza por **`grimorio-`** y termina en **`.apk`**.
 3. Cuando termine la descarga, ábrelo. Si el móvil pide permiso para *instalar apps desconocidas*, acéptalo.
 4. Si aparece un aviso de **Play Protect**, toca **Más detalles → Instalar de todos modos**. Sale porque la app no viene de la Play Store; es normal.
 
-> **Para actualizar:** repite los mismos pasos con la versión nueva. Se instala encima y **tus personajes se conservan**.
+> [!TIP]
+> **Para actualizar**, repite los mismos pasos con la versión nueva. Se instala encima y **tus personajes se conservan**.
+</details>
 
-### 🌐 En el navegador (iPhone, iPad o cualquier dispositivo)
+<details>
+<summary><b>🌐 En el navegador (iPhone, iPad o cualquier dispositivo)</b></summary>
 
 Abre **<https://dnd-grimoire-five.vercel.app>** y listo.
 
@@ -60,14 +105,18 @@ Abre **<https://dnd-grimoire-five.vercel.app>** y listo.
 - En **Android** (Chrome): menú ⋮ → **Añadir a pantalla de inicio**.
 
 Los personajes se guardan en ese navegador, en ese dispositivo.
+</details>
 
-### 💻 En Windows (sin conexión)
+<details>
+<summary><b>💻 En Windows (sin conexión)</b></summary>
 
 1. Abre **[la última versión](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases/latest)** y descarga el archivo **`grimorio-windows-….html`**.
 2. Guárdalo en una carpeta fija (por ejemplo, *Documentos*).
 3. Ábrelo con doble clic. Mejor con **Edge** o **Chrome**.
 
-> **Para actualizar:** sustituye el archivo por el nuevo, **con el mismo nombre y en la misma carpeta**, para no perder tus datos.
+> [!IMPORTANT]
+> **Para actualizar**, sustituye el archivo por el nuevo **con el mismo nombre y en la misma carpeta**, para no perder tus datos.
+</details>
 
 ## 🚀 Primeros pasos
 
@@ -96,7 +145,7 @@ Haz una copia de seguridad en el dispositivo de origen, envíate el archivo y re
 <details>
 <summary><b>¿Necesito Internet?</b></summary>
 
-No. La versión de Android y la de Windows funcionan sin conexión. La versión web solo necesita conexión para abrirse.
+No. La versión de Android y la de Windows funcionan sin conexión. La versión web solo necesita conexión la primera vez; después también abre sin ella.
 </details>
 
 <details>
@@ -127,7 +176,7 @@ Aplicación web en JavaScript (Vite) empaquetada para Android con Capacitor. Hac
 ```bash
 npm install
 npm run dev            # la app en local, con recarga
-npm test               # pruebas de reglas y estado
+npm test               # pruebas de reglas y estado (node --test)
 npm run lint           # revisión del código con ESLint
 npm run build          # web en www/
 npm run build:windows  # versión de Windows en un solo HTML
@@ -135,22 +184,25 @@ npm run build:windows  # versión de Windows en un solo HTML
 
 **Estructura**
 
-| Carpeta | Contenido |
-|---|---|
-| `web/src/domain` | Reglas del juego, por áreas: `reglas`, `clases`, `origen`, `personaje`, `combate`, `conjuros`, `equipo`, `criaturas`, `libros` |
-| `web/src/ui` | Interfaz: `pantallas`, `dialogs`, `selectores`, `componentes` y `animaciones` |
-| `web/src/app` | Casos de uso que unen reglas e interfaz (lanzar, descansar, importar un libro) |
-| `web/src/core` | Estado, guardado y utilidades |
-| `web/src/platform` | Android (Capacitor), almacenamiento y lectura de PDF |
-| `web/public/data` | Compendio de conjuros del SRD |
-| `android/` | Proyecto Android (Capacitor) |
-| `tests/` | Pruebas automáticas (`node --test`), con la misma estructura que `web/src/domain` |
-| `tools/` | Scripts para iconos, compendio y lectura de libros |
-| `docs/` | Arquitectura, notas técnicas y auditorías de reglas |
+```text
+web/src/
+├── domain/      reglas del juego, funciones puras: reglas, clases, origen, personaje,
+│                combate, conjuros, equipo, criaturas, libros, presentacion
+├── app/         casos de uso que unen reglas e interfaz (lanzar, descansar, importar)
+├── ui/          pantallas, dialogs, selectores, componentes y animaciones
+├── core/        estado, guardado y utilidades
+├── platform/    Android (Capacitor), almacenamiento y lectura de PDF
+└── styles/      un CSS por área y tokens.css
+web/public/data/ compendio de conjuros del SRD y vocabulario del OCR
+tests/           pruebas con la misma estructura que web/src/domain, más integracion/
+tools/           auditorias/, compendio/, iconos/, ocr/, capturas y publicación
+docs/            arquitectura, auditorías y capturas (docs/img)
+android/         proyecto Android de Capacitor
+```
 
-La guía de [arquitectura](docs/arquitectura.md) explica las capas, qué puede depender de qué, los patrones que sigue el código y dónde va cada cosa nueva.
+La guía de [arquitectura](docs/arquitectura.md) explica las capas, qué puede depender de qué, los patrones del código y dónde va cada cosa nueva. En [docs/](docs/README.md) están también las auditorías de reglas, interfaz, rendimiento y seguridad.
 
-**Ramas**
+**Ramas y versiones**
 
 - `main`: versión estable. Cada cambio compila el APK y la versión de Windows y los publica en [Releases](https://github.com/AdrianJimenezSantiago/DnD-Grimoire/releases), con versionado semántico (`MAYOR.MENOR.PARCHE`):
   - cada pull request fusionado sube el parche (2.3.0 → 2.3.1);

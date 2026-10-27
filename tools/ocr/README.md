@@ -43,7 +43,7 @@ comprimida con JBIG2, que a veces cambia unas letras por otras dentro de la prop
 Aun así, Tesseract (5.3, español, 300 ppp) se equivoca en sitios distintos que la capa original. `web/src/domain/libros/fusion.js`
 toma la capa del PDF como base y, donde sus palabras no son palabras y las de la otra lectura sí (y se parecen), usa las
 de la otra lectura. `tools/ocr/lecturas/` guarda esa segunda lectura de los tres libros (con la huella del PDF), y
-`preparar-libros.mjs` la usa al generar los libros incluidos. El modelo «best» de Tesseract, los 600 ppp o fusionar
+`tools/preparar-libros.mjs` la usa al generar los libros incluidos. El modelo «best» de Tesseract, los 600 ppp o fusionar
 dos lecturas no mejoran lo bastante para compensar el tiempo.
 
 PaddleOCR también está probado (`reocr.mjs --motor paddle`, con el modelo PP-OCRv4 que trae `rapidocr_onnxruntime`; los

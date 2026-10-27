@@ -125,7 +125,7 @@ Generado por \`tools/auditorias/clases.mjs\`. Cada rasgo, nivel a nivel, con lo 
 **Automático** (la app lo aplica, gasta o recupera sola), **En parte** (la app lleva el contador o el número y tú decides cuándo) y
 **Se consulta** (rasgos narrativos o de decisión en mesa: su texto sale en «En juego» si importas el manual).
 
-Las pruebas \`tests/auditoria-*.test.js\` recorren todas las clases y subclases de nivel 1 a 20 y todas las multiclases de dos clases.
+Las pruebas de \`tests/integracion/\` recorren todas las clases y subclases de nivel 1 a 20 y todas las multiclases de dos clases.
 `;
 const cuenta = { A: 0, P: 0, T: 0 };
 for (const [clase, info] of Object.entries(CLASES_INFO)) {

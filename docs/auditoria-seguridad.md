@@ -2,6 +2,9 @@
 
 Revisión de octubre de 2026 de la web, la APK de Android, la versión de Windows, el repositorio y la compilación en GitHub Actions. La pregunta era una: ¿puede alguien hacer daño a quien usa Grimorio? Este documento recoge lo que se encontró, lo que ya está arreglado y lo que solo puede hacer el dueño del repositorio.
 
+> [!IMPORTANT]
+> Dos puntos dependen del dueño del repositorio: los pasos pendientes con la clave de firma del APK (punto 1) y qué hacer con los PDF de los manuales (punto 12).
+
 ## Resumen
 
 | # | Gravedad | Hallazgo | Estado |

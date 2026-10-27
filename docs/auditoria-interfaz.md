@@ -2,6 +2,16 @@
 
 Objetivo: que la app se lea bien en los dos temas y con cualquier color de clase, que funcione con lector de pantalla y teclado, y que la web cargue y se pueda instalar como app.
 
+<table>
+  <tr>
+    <td align="center"><img src="img/pc-hoja-noche.webp" alt="Hoja en tema de noche" width="420"><br><sub>Tema de noche</sub></td>
+    <td align="center"><img src="img/pc-hoja-dia.webp" alt="Hoja en tema de día" width="420"><br><sub>Tema de día</sub></td>
+  </tr>
+</table>
+
+> [!NOTE]
+> **En resumen:** Lighthouse da 100 en accesibilidad, buenas prácticas y SEO en móvil y escritorio; axe-core no encuentra ningún fallo en 78 vistas, y los 7.425 textos medidos en píxeles pasan el contraste AA.
+
 ## Herramientas
 
 - **Lighthouse 13**, sobre la build de producción (`PERSONAJES_PRUEBA=0 npm run build` + `vite preview`), en móvil (CPU ×4, 4G lenta simulada) y en escritorio.
@@ -64,7 +74,7 @@ Había textos de 8–9,5 px: etiquetas del combate («manteniendo», iniciativa,
 
 ### 7. SEO, instalación y uso sin conexión en la web
 - `meta description` y `robots.txt`. Antes, la ruta comodín de Vercel devolvía el HTML de la app como `robots.txt`.
-- **Manifiesto web** con iconos de 192 y 512 px, uno *maskable* y otro para iOS (`apple-touch-icon`). Así, «Añadir a pantalla de inicio» crea una app de verdad, con icono y a pantalla completa. Los iconos salen de `tools/make_icons.py`.
+- **Manifiesto web** con iconos de 192 y 512 px, uno *maskable* y otro para iOS (`apple-touch-icon`). Así, «Añadir a pantalla de inicio» crea una app de verdad, con icono y a pantalla completa. Los iconos salen de `tools/iconos/make_icons.py`.
 - **Service worker** (solo en la web por `https`, nunca en la APK ni en el HTML de Windows). Lo genera Vite en cada build con la lista exacta de ficheros. Al instalarse guarda la app, las fuentes y el compendio; el lector de PDF solo si se usa. Las páginas siempre van primero a la red y la caché solo responde sin conexión, así que nunca se queda servida una versión vieja. Al publicar otra versión, la caché anterior se borra. Así la web funciona sin conexión, como promete el README, también en iPhone.
 
 ### 8. Pantalla de arranque

@@ -2,6 +2,11 @@
 
 Objetivo: que moverse por la app en el móvil sea fluido sin renunciar a las animaciones.
 
+<p align="center"><img src="img/recorrido.webp" alt="Recorrido por la hoja y el combate en el móvil" width="260"></p>
+
+> [!NOTE]
+> **En resumen:** en un móvil de gama media simulado (CPU ×4), la hoja y el combate pasan de 16–28 fps a 55–60 fps sin quitar animaciones, y la app baja sola la calidad de los efectos si el dispositivo no llega.
+
 ## Cómo se ha medido
 
 - Build de producción (`npm run build`) servida en local y abierta en Chromium con emulación de móvil: 412×915, DPR 2,625, táctil y **CPU ralentizada ×4**, que se parece a un Android de gama media.

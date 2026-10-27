@@ -1,23 +1,28 @@
 # Arquitectura
 
-Guía para orientarse en el código de Grimorio: cómo está organizado, qué puede depender de qué y dónde va cada cosa nueva. Cada archivo de `web/src` empieza con un comentario que dice qué contiene; este documento da el mapa de conjunto.
+Guía para orientarse en el código de Grimorio: cómo está organizado, qué puede depender de qué y dónde va cada cosa nueva. Cada archivo de `web/src` empieza con una línea que dice qué contiene; este documento da el mapa de conjunto.
+
+> [!TIP]
+> Si vas con prisa: las reglas están en `domain/` y se prueban sin navegador; la interfaz solo las llama. `tests/arquitectura/capas.test.js` avisa si algo cae en la capa equivocada.
 
 ## Capas
 
-```
-                 main.js  (arranque: crea el store e inicia cada pieza)
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-      app/  ◄──────────────►   ui/          casos de uso  ·  pantallas, diálogos y componentes
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-                 domain/                     reglas de D&D 2024: funciones puras, sin DOM
-                    │
-                    ▼
-                  core/                      estado (store) y utilidades
-   platform/  ◄── la usan app/ y ui/         Capacitor, almacenamiento, pdf.js
+```mermaid
+flowchart TD
+  main["main.js<br><sub>arranque: crea el store e inicia cada pieza</sub>"]
+  app["app/<br><sub>casos de uso</sub>"]
+  ui["ui/<br><sub>pantallas, diálogos y componentes</sub>"]
+  domain["domain/<br><sub>reglas de 2024: funciones puras, sin DOM</sub>"]
+  core["core/<br><sub>estado (store) y utilidades</sub>"]
+  platform["platform/<br><sub>Capacitor, almacenamiento, pdf.js</sub>"]
+  main --> app & ui
+  app <--> ui
+  app & ui --> domain
+  app & ui --> platform
+  domain --> core
+  platform --> core
+  classDef reglas fill:#3a2f14,stroke:#e0b45c,color:#f3e6c4
+  class domain reglas
 ```
 
 | Capa | Qué hay | Puede importar |
@@ -45,7 +50,7 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `equipo/` | Inventario, armas y armaduras, monedas y carga, objetos mágicos (efectos, variantes, acciones, consumibles) | `equipo.js` |
 | `criaturas/` | Bestiario de la campaña, perfiles para invocar o transformarse y lector de perfiles de los libros | `bestiario.js` |
 | `libros/` | Importación de PDF (corrección del OCR, columnas, tablas y un lector por tipo de contenido) y lo ya importado: libros cargados y glosario | `libroCompleto.js` (`analizarLibro`), `biblioteca.js` (`fijarLibros`), `terminos.js` |
-| `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, paleta de colores, geometría del teclado en pantalla, calidad de los efectos según el dispositivo | — |
+| `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, frases de las tiradas, paleta de colores, validación de lo que se escribe a mano, geometría del teclado en pantalla, calidad de los efectos según el dispositivo | — |
 
 ### `web/src/ui/` — interfaz
 
@@ -65,7 +70,11 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `web/src/styles/` | Un CSS por área (`sheet.css`, `dialogs.css`, `inventario.css`…) y `tokens.css` con los colores y medidas |
 | `web/public/data/` | Compendio de conjuros del SRD y vocabulario para corregir el OCR |
 | `tests/` | Pruebas automáticas (ver más abajo) |
-| `tools/` | Scripts: compendio, iconos, preparación de libros, auditorías que generan los documentos de `docs/`, y `tools/ocr/` para medir el OCR |
+| `tools/auditorias/` | Scripts que generan las auditorías de `docs/` (clases, conjuros, origen, objetos) y las de accesibilidad y contraste |
+| `tools/compendio/` | Compendio de conjuros del SRD (`npm run srd`): datos de Open5e, nombres y traducciones |
+| `tools/iconos/` | Icono de la app y pantallas de carga (`npm run icons`) y los iconos de game-icons.net |
+| `tools/ocr/` | Medición y corrección del OCR de los manuales ([README](../tools/ocr/README.md)) |
+| `tools/*.mjs` | Publicación (`siguiente-version`, `preparar-libros`, `renombrar-windows`) y capturas de `docs/img` (`capturas`) |
 | `android/` | Proyecto Android de Capacitor |
 
 ## Patrones
@@ -120,6 +129,10 @@ Los módulos pesados que no hacen falta al abrir la app (asistentes de personaje
 - Siguen en inglés, a propósito: los métodos del store (`S.act`, `S.edit`, `S.undo`…), las ayudas del DOM (`$`, `on`, `patch`, `morph`), `toast` y los **campos de los datos guardados** (`ch.book`, `play.used`, `level`…). Cambiar esos campos obligaría a migrar los personajes guardados en cada dispositivo.
 - Un archivo de `ui/` puede llamarse igual que uno de `domain/` cuando es su interfaz (`domain/combate/alImpactar.js` y `ui/selectores/alImpactar.js`).
 
+### Comentarios
+
+Cada archivo lleva **una línea de cabecera** que dice qué contiene, y nada más: el código se explica con nombres claros y con sus pruebas. Lo que hace falta saber de una regla del manual (de qué rasgo sale, a qué nivel, por qué se aplica así) va en el título de su prueba y en las auditorías de `docs/`, no en comentarios que se quedan viejos. Las únicas excepciones son las directivas que leen las herramientas (`/* global … */` para ESLint).
+
 ## Pruebas
 
 ```bash
@@ -133,7 +146,10 @@ node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contie
 |---|---|
 | `tests/<área>/<módulo>.test.js` | Un módulo de `web/src/domain/<área>/`. `tests/combate/vida.test.js` prueba `domain/combate/vida.js` |
 | `tests/core/` | El store y las utilidades |
+| `tests/presentacion/` | Búsqueda, realce, frases, paleta, validación, teclado y calidad de efectos |
 | `tests/ui/` | Lógica pura de la interfaz que se puede probar sin navegador |
+| `tests/seguridad/` | Lo que llega de fuera (copias y personajes importados) y la configuración segura de la web y la APK |
+| `tests/tools/` | Los scripts de publicación (la versión de cada release) |
 | `tests/integracion/` | Pruebas que cruzan varios módulos: auditorías contra el Manual, todas las combinaciones de clase y especie, un combate simulado |
 | `tests/arquitectura/` | Las reglas de dependencia entre capas y que todo lo importado exista |
 | `tests/helpers/fixtures.js` | Utilidades comunes: leer el compendio, copiar un arma predefinida, leer un archivo del repositorio |
