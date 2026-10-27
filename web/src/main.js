@@ -67,8 +67,10 @@ import * as elegir from './ui/dialogs/elegir.js';
 import * as aviso from './ui/dialogs/aviso.js';
 import { tour } from './ui/componentes/tour.js';
 import { vigilarCampos } from './ui/componentes/validacion.js';
+import { initTeclado } from './ui/componentes/teclado.js';
 import { initFondo } from './ui/animaciones/fondo.js';
 import { initMagia } from './ui/animaciones/magia.js';
+import { initEfectos } from './ui/animaciones/calidad.js';
 
 const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
 const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
@@ -79,7 +81,8 @@ async function boot() {
   almacen.remove(PREF + '-theme');
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
   fijarBarras(eventos.esOscuro());
-  initFondo(); initMagia(); vigilarCampos();
+  await initEfectos();
+  initFondo(); initMagia(); vigilarCampos(); initTeclado();
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
   const { db, migrated, fallo } = cargarGuardado(v2, v1);

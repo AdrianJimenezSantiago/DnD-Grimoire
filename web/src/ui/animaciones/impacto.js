@@ -1,5 +1,6 @@
 // Animación de impacto de las tiradas de daño y curación, más intensa cuanto más supera la media.
 import { chispas, movimientoReducido } from './fx.js';
+import { escalaEfectos } from './calidad.js';
 import { mediaDist, maxDist } from '../../domain/reglas/dados.js';
 import { vibrar } from '../../platform/native.js';
 
@@ -30,9 +31,9 @@ function forma(clave) {
       return `<i class="ip-onda"></i><i class="ip-onda b"></i><i class="ip-onda c"></i>${clave === 'contundente' ? S(Array.from({ length: 6 }, (_, i) => { const a = i / 6 * 6.283 + r(-.3, .3); return `<path class="ip-trazo fino" d="M50 50 L${50 + Math.cos(a) * 46} ${50 + Math.sin(a) * 46}" pathLength="1"/>`; }).join(''), 'grietas') : ''}`;
     case 'radiante': return `<i class="ip-rayos"></i><i class="ip-onda"></i>`;
     case 'frio': return Array.from({ length: 9 }, (_, i) => `<i class="ip-cristal" style="--a:${i * 40 + r(-12, 12)}deg;--d:${r(40, 80) | 0}px;animation-delay:${i * 25}ms"></i>`).join('');
-    case 'acido': case 'veneno': return Array.from({ length: 8 }, () => `<i class="ip-gota" style="left:${r(15, 85)}%;animation-delay:${r(0, 250) | 0}ms"></i>`).join('');
+    case 'acido': case 'veneno': return Array.from({ length: escalaEfectos(8) }, () => `<i class="ip-gota" style="left:${r(15, 85)}%;animation-delay:${r(0, 250) | 0}ms"></i>`).join('');
     case 'necrotico': return `<i class="ip-sombra"></i><i class="ip-onda inversa"></i>`;
-    case 'curacion': return `<i class="ip-halo"></i>${Array.from({ length: 12 }, () => `<i class="ip-mota" style="left:${r(10, 90)}%;animation-delay:${r(0, 400) | 0}ms"></i>`).join('')}`;
+    case 'curacion': return `<i class="ip-halo"></i>${Array.from({ length: escalaEfectos(12) }, () => `<i class="ip-mota" style="left:${r(10, 90)}%;animation-delay:${r(0, 400) | 0}ms"></i>`).join('')}`;
     default: return `<i class="ip-onda"></i>`;
   }
 }

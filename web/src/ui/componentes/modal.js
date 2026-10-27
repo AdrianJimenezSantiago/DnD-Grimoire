@@ -23,7 +23,7 @@ function abrir({ titulo, texto, icono = 'info', peligro = false, campo = null, b
     d.classList.toggle('danger', peligro);
     d.innerHTML = `<div class="md-icon">${runaSvg({ n: 14, lados: peligro ? 5 : 6, cls: 'md-runa', semillaInicial: titulo.length * 7 })}${gi(EMBLEMA[icono] || 'glosario')}</div><h2 id="mdTitle">${esc(titulo)}</h2>
       ${texto ? `<p class="md-text">${esc(texto)}</p>` : ''}
-      ${campo ? `<input id="mdInput" type="${campo.tipo || 'text'}" inputmode="${campo.tipo === 'number' ? 'numeric' : 'text'}" value="${esc(campo.valor ?? '')}" ${campo.min != null ? `min="${campo.min}"` : ''} ${campo.max != null ? `max="${campo.max}"` : ''} aria-label="${esc(titulo)}">` : ''}
+      ${campo ? `<input id="mdInput" enterkeyhint="done" type="${campo.tipo || 'text'}" inputmode="${campo.tipo === 'number' ? 'numeric' : 'text'}" value="${esc(campo.valor ?? '')}" ${campo.min != null ? `min="${campo.min}"` : ''} ${campo.max != null ? `max="${campo.max}"` : ''} aria-label="${esc(titulo)}">` : ''}
       <div class="md-btns">${botones.map((b, i) => `<button type="button" data-i="${i}" class="${b.cls || ''}">${esc(b.label)}</button>`).join('')}</div>`;
     // Un botón con «valida» no cierra la ventana hasta que lo escrito vale (la burla sale encima)
     const pulsar = b => { if (b.valida && !b.valida(d)) return; fin(b.valor(d)); };

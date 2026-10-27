@@ -32,7 +32,9 @@ const orbita = (p, cx, cy) => {
   const x = Math.cos(p.a) * p.R, y = Math.sin(p.a) * p.R * .4, c = Math.cos(-.2), s = Math.sin(-.2);
   return [cx + x * c - y * s, cy + x * s + y * c];
 };
-const densidad = base => Math.round(base * Math.min(2.2, Math.max(.6, (W * H) / (390 * 844))));
+// Calidad que fija calidad.js: fotogramas por segundo y cuántas partículas hay por escena
+const Q = { fps: 30, densidad: 1 };
+const densidad = base => Math.max(1, Math.round(base * Q.densidad * Math.min(2.2, Math.max(.6, (W * H) / (390 * 844)))));
 const L = () => (E.dark ? 62 : 38);
 
 const ESCENAS = {
@@ -322,7 +324,7 @@ const cancelar = id => (porFotograma ? cancelAnimationFrame(id) : clearTimeout(i
 function bucle(t) {
   raf = pedir(bucle);
   const dt = Math.min(.1, (t - (last || t)) / 1000); last = t; acc += dt;
-  if (acc < 1 / 30) return;
+  if (acc < 1 / Q.fps) return;
   if (F.oculto || F.tapado || F.quieto) { acc = 0; return; }
   pintar(Math.min(acc, .1)); acc = 0;
 }
@@ -345,6 +347,10 @@ export function escena(nombre, h, s, dark) {
   Object.assign(E, { nombre, h, s, dark });
   if (cambia) { E.t = 0; ESCENAS[nombre].s(); }
   arrancar();
+}
+export function calidad(q) {
+  const antes = Q.densidad; Object.assign(Q, q);
+  if (Q.densidad !== antes && E.nombre && cv) { ESCENAS[E.nombre].s(); pintar(0); }
 }
 export function estado(x) {
   const animaba = F.animar; Object.assign(F, x);

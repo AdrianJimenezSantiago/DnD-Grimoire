@@ -54,7 +54,7 @@ function render() {
       : `<p class="hint vd-dg-nota">Solo se gastan durante un descanso corto: cada dado cura su tirada ${sgn(modOf(statsEfectivos(c).con))} (Con), mínimo 1. Con un descanso largo se recuperan todos.</p>${combateDe(c).activo || est === 'muerto' ? '' : '<button type="button" class="ghost vd-dg-corto" data-cmd="short">Hacer un descanso corto</button>'}`}</section>`;
   h += `<section class="vd-max-sec"><h3>${gi('pg')}PG máximos aumentados</h3>
     ${v.maxExtra.length ? `<ul class="vd-mx">${v.maxExtra.map(m => `<li><b>+${m.n}</b><span>${esc(m.nombre)}</span><button type="button" data-vdmxq="${esc(m.id)}">Termina</button></li>`).join('')}</ul>` : ''}
-    <div class="vd-mx-add"><input id="vdMxN" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off" maxlength="40"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
+    <div class="vd-mx-add"><input id="vdMxN" enterkeyhint="done" type="text" inputmode="tel" autocomplete="off" placeholder="+5" aria-label="Aumento de PG máximos"><input id="vdMxNom" enterkeyhint="done" placeholder="Auxilio, Festín de héroes…" aria-label="Origen" autocomplete="off" maxlength="40"><button type="button" data-vd="mxadd">${icon('plus')}Aumentar</button></div>
     <p class="hint">No son PG temporales: suben tu máximo y tus PG actuales en la misma cantidad. Al terminar, el máximo vuelve a ${pgMaximoBase(c)} y tus PG se quedan como estén si caben. Tu máximo base se ajusta en «Editar personaje».</p></section>`;
   morph($('#vdBody'), h);
 }

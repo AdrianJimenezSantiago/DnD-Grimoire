@@ -129,3 +129,19 @@ Un pequeño plugin de PostCSS en `web/vite.config.js` envuelve en el build cada 
 1. Conecta el móvil por USB con la depuración activada, abre `chrome://inspect` en el ordenador e inspecciona la WebView del Grimorio.
 2. En **Rendering**, activa *Frame Rendering Stats*, *Paint flashing* y *Layer borders*. Al desplazarte no debería parpadear en verde nada más que lo que cambia de verdad.
 3. En **Performance**, graba un desplazamiento largo por la hoja y la entrada al combate. Busca tareas rojas de más de 50 ms y bloques morados de *Recalculate Style*.
+
+## Calidad de efectos según el dispositivo
+
+Además de lo anterior, la app ajusta sola cuántos efectos pinta (`ui/animaciones/calidad.js`, con la lógica pura en `domain/presentacion/rendimiento.js`). Hay tres niveles, publicados en `<html data-efectos="alto|medio|bajo">`:
+
+| Nivel | Fondo animado | Chispas y golpes | CSS |
+|---|---|---|---|
+| Altos | 30 fps, todas las partículas, lienzo a 1,25× en táctil (1,5× con ratón) | Todas (hasta 500) | Como siempre |
+| Medios | 24 fps, 70 % de partículas, lienzo a 1× | 60 % (hasta 260) | Sin desenfoques de fondo en ninguna pantalla y sin brillos continuos ni barridos dorados |
+| Bajos | Se pinta una vez y queda quieto | 35 % (hasta 120) | Además se paran los adornos que giran o flotan. Los latidos que avisan de algo (crítico, efecto que acaba, iniciativa pendiente) se conservan |
+
+**Nivel de partida.** La primera vez se estima con lo que el navegador cuenta del equipo: memoria (`navigator.deviceMemory`, en Chrome y Android), núcleos, nombre de la gráfica (WebGL; se clasifican Adreno, Mali, PowerVR, Apple…) y píxeles físicos de pantalla. Después se usa el nivel aprendido en ese dispositivo.
+
+**Ajuste en marcha.** En automático, con la app a la vista, se miden 2 s de fotogramas cada 15 s. El ritmo normal es la mediana de la muestra, así vale igual para pantallas de 60, 90 o 120 Hz y para el modo ahorro que limita a 30. Dos muestras seguidas a tirones bajan un nivel; para subir hacen falta 6 buenas seguidas (el doble si ese nivel ya falló) y un nivel que ha fallado dos veces no se vuelve a probar. Con la batería al 20 % o menos y sin cargar no pasa de medios. Medir cuesta poco: no toca el DOM y deja la app 13 de cada 15 s sin fotogramas propios.
+
+**A mano.** En *Más → Efectos* se puede elegir automáticos, altos, medios o bajos. Con un nivel fijado no se mide nada. «Reducir movimiento» del sistema sigue mandando por encima de todo.

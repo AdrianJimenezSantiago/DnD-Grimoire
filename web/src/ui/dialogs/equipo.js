@@ -220,7 +220,7 @@ function formulario() {
   const f = V.form, o = f.o, cat = o.cat;
   const catOpts = CATEGORIAS.map(([k, t]) => `<option value="${k}" ${k === cat ? 'selected' : ''}>${esc(t)}</option>`).join('');
   const arma = o.arma || {}, arm = o.armadura || {}, req = o.armadura ? requisitosArmadura(o) : { fue: 0, sigilo: false };
-  return `<section class="inv-form" aria-label="${f.id ? 'Editar objeto' : 'Añadir objeto'}"><h3>${gi(f.id ? 'md_pluma' : 'cofre')}${f.id ? `Editar ${esc(o.nombre)}` : 'Añadir objeto'}</h3>
+  return `<section class="inv-form" data-intro="done" aria-label="${f.id ? 'Editar objeto' : 'Añadir objeto'}"><h3>${gi(f.id ? 'md_pluma' : 'cofre')}${f.id ? `Editar ${esc(o.nombre)}` : 'Añadir objeto'}</h3>
     <div class="frow"><div class="f wide"><span>Nombre</span>${campoElegible('id="ivNom" aria-label="Nombre del objeto" maxlength="80"', o.nombre, 'objeto', 'cofre', 'Escribe o elige: espada larga, raciones, cuerda…')}</div></div>
     <div class="frow"><label class="f">Categoría<select id="ivCat">${catOpts}</select></label>
       <label class="f">Cantidad<input id="ivCant" type="number" inputmode="numeric" min="0" max="9999" data-campo="Cantidad" value="${o.cantidad ?? 1}"></label>

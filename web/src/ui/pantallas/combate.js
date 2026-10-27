@@ -158,7 +158,7 @@ export function combateHtml(ch, db) {
     </header>
     <div class="cb-eco" role="group" aria-label="Lo que has usado este turno">${eco}</div>
     <div class="cb-base">
-      <div class="cb-rapido"><input id="cbCant" type="text" inputmode="tel" autocomplete="off" placeholder="PG" aria-label="Cantidad de puntos de golpe">
+      <div class="cb-rapido"><input id="cbCant" enterkeyhint="go" type="text" inputmode="tel" autocomplete="off" placeholder="PG" aria-label="Cantidad de puntos de golpe">
         <button type="button" class="danger" data-cbpg="dano" aria-label="Daño">${gi('pg')}<span>Daño</span></button><button type="button" class="vd-cura" data-cbpg="curar" aria-label="Curar">${gi('curacion')}<span>Curar</span></button></div>
       <div class="cb-sellos">${placaCa(ch, 'CA', 'data-leer="ca" aria-label="Clase de armadura: mantén pulsado para ver el desglose"')}
         ${placaVel(ch, 'Velocidad', 'data-leer="vel"')}
