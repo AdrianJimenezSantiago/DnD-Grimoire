@@ -45,13 +45,13 @@ Guía para orientarse en el código de Grimorio: cómo está organizado, qué pu
 | `equipo/` | Inventario, armas y armaduras, monedas y carga, objetos mágicos (efectos, variantes, acciones, consumibles) | `equipo.js` |
 | `criaturas/` | Bestiario de la campaña, perfiles para invocar o transformarse y lector de perfiles de los libros | `bestiario.js` |
 | `libros/` | Importación de PDF (corrección del OCR, columnas, tablas y un lector por tipo de contenido) y lo ya importado: libros cargados y glosario | `libroCompleto.js` (`analizarLibro`), `biblioteca.js` (`fijarLibros`), `terminos.js` |
-| `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, paleta de colores | — |
+| `presentacion/` | Lógica pura de presentación que se prueba sin navegador: búsqueda, realce de texto, paleta de colores, geometría del teclado en pantalla | — |
 
 ### `web/src/ui/` — interfaz
 
 | Carpeta | Contenido |
 |---|---|
-| `componentes/` | Piezas base reutilizables: DOM (`$`, `on`, `patch`, `morph`), apertura de diálogos, modales, avisos (`toast`), iconos, tema por clase, tutorial |
+| `componentes/` | Piezas base reutilizables: DOM (`$`, `on`, `patch`, `morph`), apertura de diálogos, modales, avisos (`toast`), iconos, tema por clase, tutorial, teclado en pantalla (`teclado.js`: ningún campo queda debajo del teclado) |
 | `pantallas/` | Lo que está siempre en pantalla: portada (`portada`), hoja (`hoja`, `vitales`), modo combate, fichas de lectura rápida y pantalla de luto |
 | `dialogs/` | Un módulo por diálogo de la app (conjuro, inventario, vida, dados, biblioteca, subir de nivel…) |
 | `selectores/` | Piezas de elección que usan varios diálogos: subclase, especie, dote, habilidades, maestrías, maniobras, «al impactar» |

@@ -1,5 +1,5 @@
 dialog { color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: var(--r-l); padding: 0;
-  width: min(560px, 94vw); max-height: calc(100dvh - 32px - var(--sat) - var(--sab)); box-shadow: var(--shadow-2); overflow: hidden; }
+  width: min(560px, 94vw); max-height: calc(var(--alto-util, 100dvh) - 32px - var(--sat) - var(--sab)); box-shadow: var(--shadow-2); overflow: hidden; }
 dialog[open] { display: flex; flex-direction: column; animation: sheet-in var(--t-med) var(--ease-out); }
 dialog.closing { animation: sheet-out .18s var(--ease) forwards; }
 dialog::backdrop { background: var(--backdrop); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade-in var(--t-med) var(--ease); }
@@ -17,8 +17,8 @@ dialog.tall { width: min(760px, 96vw); }
 
 @media (max-width: 700px) {
   dialog, dialog.tall { width: 100vw; max-width: 100vw; margin: auto 0 0; border-radius: var(--r-l) var(--r-l) 0 0; border-bottom: 0;
-    max-height: calc(100dvh - var(--sat) - 18px); }
-  dialog.tall[open] { height: calc(100dvh - var(--sat) - 18px); }
+    max-height: calc(var(--alto-util, 100dvh) - var(--sat) - 18px); }
+  dialog.tall[open] { height: calc(var(--alto-util, 100dvh) - var(--sat) - 18px); }
   dialog[open] { animation: sheet-up var(--t-med) var(--ease-out); }
   dialog.closing { animation: sheet-down .2s var(--ease) forwards; }
   .grip { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
