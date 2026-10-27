@@ -48,7 +48,6 @@ def splash(path):
 for root,_,files in os.walk(RES):
     for fn in files:
         if fn=='splash.png': splash(os.path.join(root,fn))
-composite('square',512).save('tools/icon-512.png')
 
 WEB='web/public/icons'; os.makedirs(WEB,exist_ok=True)
 for n in (192,512): composite('square',n).save(f'{WEB}/icon-{n}.png')

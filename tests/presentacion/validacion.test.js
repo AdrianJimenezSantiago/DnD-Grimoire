@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leerNumero, leerBono, leerDano, leerTexto, motivoTirada, burla } from '../../web/src/domain/validacion.js';
+import { leerNumero, leerBono, leerDano, leerTexto, motivoTirada, burla } from '../../web/src/domain/presentacion/validacion.js';
 
 describe('validación de lo que se escribe a mano', () => {
   test('números: acepta cifras limpias y rechaza letras, mezclas, decimales y rangos', () => {

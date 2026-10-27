@@ -97,7 +97,7 @@ Si el navegador no admite `OffscreenCanvas` o el Worker falla, el mismo motor co
 El de crear o editar personaje (51 kB) y el de subir de nivel (24 kB) van en trozos aparte. Ya no se analizan al arrancar: se cargan en un momento libre después del arranque o, como tarde, al abrirlos.
 
 ### 14. Iconos con `JSON.parse`
-`gameIcons.js` (190 kB, casi una cuarta parte del JS) se genera como `JSON.parse("…")` en lugar de un objeto literal: V8 lo analiza bastante más rápido. Lo hace `tools/iconos.mjs`.
+`gameIcons.js` (190 kB, casi una cuarta parte del JS) se genera como `JSON.parse("…")` en lugar de un objeto literal: V8 lo analiza bastante más rápido. Lo hace `tools/iconos/game-icons.mjs`.
 
 ### 15. Deshacer sin clonar toda la base de datos (`core/store.js`)
 Las acciones de juego solo modifican al personaje activo y, al subir de nivel, añaden conjuros al catálogo. La instantánea para deshacer copia ese personaje y el índice del catálogo, y comparte el resto. Las ediciones siguen guardando una copia completa. Hay un test nuevo para esto.

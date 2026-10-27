@@ -1,6 +1,6 @@
 # Auditoría de objetos mágicos (Guía del Dungeon Master de 2024)
 
-Generado por `tools/auditoria-objetos.mjs` con los 350 objetos que el lector saca del PDF de la Guía. Para cada uno:
+Generado por `tools/auditorias/objetos.mjs` con los 350 objetos que el lector saca del PDF de la Guía. Para cada uno:
 si pide sintonización (y quién puede), las cargas y usos que pasan a la hoja como contadores con su recarga, las variantes que la app
 pide elegir al añadirlo, y lo que la hoja aplica sola.
 

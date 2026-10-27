@@ -17,8 +17,9 @@ describe('texto', () => {
     assert.equal(norm('Ácido ÑANDÚ'), 'acido nandu'); assert.equal(norm(null), '');
   });
 
-  test('esc escapa el HTML', () => {
+  test('esc escapa el HTML, también la comilla simple', () => {
     assert.equal(esc('<b a="1">&</b>'), '&lt;b a=&quot;1&quot;&gt;&amp;&lt;/b&gt;');
+    assert.equal(esc(`<a href='x'>"&`), '&lt;a href=&#39;x&#39;&gt;&quot;&amp;');
   });
 
   test('joinY y plural', () => {

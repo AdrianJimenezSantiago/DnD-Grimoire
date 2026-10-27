@@ -1,6 +1,6 @@
 // Copia de seguridad: exportar e importar todos los personajes como JSON.
 import { clone, esc } from '../../core/util.js';
-import { burla } from '../../domain/validacion.js';
+import { burla } from '../../domain/presentacion/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
 import { personajeDeV1, normBd, importarPersonaje, ESQUEMA } from '../../domain/personaje/modelo.js';
 import { enlazarCatalogo, invalidarItems } from '../../domain/conjuros/catalogo.js';

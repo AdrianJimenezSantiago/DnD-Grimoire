@@ -1,6 +1,6 @@
 # Auditoría de especies y dotes (reglas de 2024)
 
-Generado por `tools/auditoria-origen.mjs`, contrastado con el Manual del Jugador de 2024 y Héroes de Faerûn.
+Generado por `tools/auditorias/origen.mjs`, contrastado con el Manual del Jugador de 2024 y Héroes de Faerûn.
 
 ## Especies
 

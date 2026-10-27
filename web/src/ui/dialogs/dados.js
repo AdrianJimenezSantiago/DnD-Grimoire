@@ -1,6 +1,6 @@
 // Bandeja de dados: cualquier tirada con ventaja o desventaja, expresiones como «2d6+3» y las últimas tiradas.
 import { esc } from '../../core/util.js';
-import { motivoTirada } from '../../domain/validacion.js';
+import { motivoTirada } from '../../domain/presentacion/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
 import { minimoD20Habilidad, totalMinimoFuerza } from '../../domain/combate/automatismos.js';
 import { abDe } from '../../domain/reglas/habilidades.js';

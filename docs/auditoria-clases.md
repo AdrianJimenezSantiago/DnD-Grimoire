@@ -1,6 +1,6 @@
 # Auditoría de clases y subclases (reglas de 2024)
 
-Generado por `tools/auditoria-clases.mjs`. Cada rasgo, nivel a nivel, con lo que hace la app:
+Generado por `tools/auditorias/clases.mjs`. Cada rasgo, nivel a nivel, con lo que hace la app:
 **Automático** (la app lo aplica, gasta o recupera sola), **En parte** (la app lleva el contador o el número y tú decides cuándo) y
 **Se consulta** (rasgos narrativos o de decisión en mesa: su texto sale en «En juego» si importas el manual).
 

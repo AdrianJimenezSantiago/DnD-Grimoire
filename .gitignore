@@ -2,7 +2,7 @@ node_modules/
 www/
 .DS_Store
 *.log
-tools/__pycache__/
+__pycache__/
 dist-windows/
 
 # Firma del APK: nunca en el repositorio (ver docs/auditoria-seguridad.md)

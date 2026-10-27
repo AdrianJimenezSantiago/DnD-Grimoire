@@ -1,24 +1,24 @@
 // Genera docs/auditoria-objetos.md: todos los objetos mágicos de la Guía del Dungeon Master (2024) con lo que hace la app con cada uno.
-// Uso: node tools/auditoria-objetos.mjs [libro.json]
+// Uso: node tools/auditorias/objetos.mjs [libro.json]
 //   Sin argumento lee www/libros/guia-del-dungeon-master-2024.json (lo deja `node tools/preparar-libros.mjs`)
 //   o, si no está, el PDF de tools/resources (descargado con Git LFS).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { personajeVacio, normPersonaje } from '../web/src/domain/personaje/modelo.js';
-import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../web/src/domain/equipo/equipo.js';
-import { pasosVariante, concretar } from '../web/src/domain/equipo/variantesObjeto.js';
-import { efectoDe, describirEfecto } from '../web/src/domain/equipo/objetosEfecto.js';
-import { usoDe, efectoAlUsar } from '../web/src/domain/equipo/usarObjeto.js';
-import { accionesDe } from '../web/src/domain/equipo/accionesObjeto.js';
-import { reglas, etiquetaRecarga } from '../web/src/domain/clases/rasgos.js';
+import { personajeVacio, normPersonaje } from '../../web/src/domain/personaje/modelo.js';
+import { anadirObjeto, equipar, alternarSintonia, claseArmadura } from '../../web/src/domain/equipo/equipo.js';
+import { pasosVariante, concretar } from '../../web/src/domain/equipo/variantesObjeto.js';
+import { efectoDe, describirEfecto } from '../../web/src/domain/equipo/objetosEfecto.js';
+import { usoDe, efectoAlUsar } from '../../web/src/domain/equipo/usarObjeto.js';
+import { accionesDe } from '../../web/src/domain/equipo/accionesObjeto.js';
+import { reglas, etiquetaRecarga } from '../../web/src/domain/clases/rasgos.js';
 
-const RAIZ = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 async function objetosDelLibro() {
   const json = process.argv[2] || path.join(RAIZ, 'www/libros/guia-del-dungeon-master-2024.json');
   if (fs.existsSync(json)) return JSON.parse(fs.readFileSync(json, 'utf8')).objetos;
   const pdf = fs.readdirSync(path.join(RAIZ, 'tools/resources')).find(f => /DMG/i.test(f));
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'), { analizarLibro } = await import('../web/src/domain/libros/libroCompleto.js');
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'), { analizarLibro } = await import('../../web/src/domain/libros/libroCompleto.js');
   const doc = await pdfjs.getDocument({ url: path.join(RAIZ, 'tools/resources', pdf), disableFontFace: true, verbosity: 0 }).promise, paginas = [];
   for (let p = 1; p <= doc.numPages; p++) {
     const page = await doc.getPage(p), tc = await page.getTextContent(), w = page.getViewport({ scale: 1 }).width;
@@ -84,7 +84,7 @@ for (const o of objetos) {
 
 const md = `# Auditoría de objetos mágicos (Guía del Dungeon Master de 2024)
 
-Generado por \`tools/auditoria-objetos.mjs\` con los ${objetos.length} objetos que el lector saca del PDF de la Guía. Para cada uno:
+Generado por \`tools/auditorias/objetos.mjs\` con los ${objetos.length} objetos que el lector saca del PDF de la Guía. Para cada uno:
 si pide sintonización (y quién puede), las cargas y usos que pasan a la hoja como contadores con su recarga, las variantes que la app
 pide elegir al añadirlo, y lo que la hoja aplica sola.
 

@@ -37,7 +37,7 @@ const USO = {
 };
 const out = {};
 for (const [k, n] of Object.entries(USO)) { if (!ic.icons[n]) throw new Error('No existe ' + n); out[k] = ic.icons[n].body; }
-fs.writeFileSync(new URL('../web/src/ui/componentes/gameIcons.js', import.meta.url),
-  '// Iconos de game-icons.net usados por la app. Generado por tools/iconos.mjs: no editar a mano.\n' +
+fs.writeFileSync(new URL('../../web/src/ui/componentes/gameIcons.js', import.meta.url),
+  '// Iconos de game-icons.net usados por la app. Generado por tools/iconos/game-icons.mjs: no editar a mano.\n' +
   `export const GI = JSON.parse(${JSON.stringify(JSON.stringify(out))});\n`);
-console.log(Object.keys(out).length, 'iconos,', Math.round(fs.statSync(new URL('../web/src/ui/componentes/gameIcons.js', import.meta.url)).size / 1024), 'kB');
+console.log(Object.keys(out).length, 'iconos,', Math.round(fs.statSync(new URL('../../web/src/ui/componentes/gameIcons.js', import.meta.url)).size / 1024), 'kB');

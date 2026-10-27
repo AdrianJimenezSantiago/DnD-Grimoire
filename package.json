@@ -9,8 +9,8 @@
     "preview": "vite preview --config web/vite.config.js",
     "test": "node --test \"tests/**/*.test.js\"",
     "sync": "npm run build && cap sync android",
-    "icons": "python3 tools/make_icons.py",
-    "srd": "python3 tools/build_compendio.py",
+    "icons": "python3 tools/iconos/make_icons.py",
+    "srd": "python3 tools/compendio/build_compendio.py",
     "build:windows": "vite build --config web/vite.config.js --mode windows && node tools/renombrar-windows.mjs",
     "lint": "eslint ."
   },

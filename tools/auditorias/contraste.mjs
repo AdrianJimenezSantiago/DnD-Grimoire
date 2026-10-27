@@ -1,7 +1,7 @@
 // Contraste medido en píxeles, para lo que axe no puede calcular (degradados, velos, pseudoelementos, opacidad heredada).
 // Hace dos capturas, con el texto y con el texto transparente: la segunda da el fondo real de cada letra.
 // El contraste de un texto es el percentil 90 de sus píxeles (el núcleo del trazo, no el suavizado). Umbral AA: 4,5 (3 en texto grande).
-// Uso (con la app en marcha): npm i --no-save playwright-core && node tools/auditoria-contraste.mjs http://localhost:5173/ contraste.json
+// Uso (con la app en marcha): npm i --no-save playwright-core && node tools/auditorias/contraste.mjs http://localhost:5173/ contraste.json
 // TEMAS=dark,light · CARDS=1,4,8 (abre esos personajes de la portada) · NSC=6 (pantallas de desplazamiento por vista)
 /* global document, localStorage, innerWidth, innerHeight, NodeFilter, getComputedStyle, Image, OffscreenCanvas, scrollY, scrollBy, scrollTo */
 import { chromium } from 'playwright-core';

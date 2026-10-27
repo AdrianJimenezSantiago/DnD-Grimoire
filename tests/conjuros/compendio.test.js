@@ -13,14 +13,10 @@ describe('datos del compendio de conjuros', () => {
     assert.deepEqual(porNivel, { 0: 34, 1: 64, 2: 63, 3: 52, 4: 41, 5: 48, 6: 34, 7: 21, 8: 18, 9: 16 });
   });
 
-  test('nombres oficiales de los conjuros de Theo', () => {
+  test('nombres oficiales en castellano', () => {
     const es = en => conjuros.find(c => c.en === en)?.es;
     assert.equal(es('Counterspell'), 'Contrahechizo'); assert.equal(es('Mind Sliver'), 'Fragmento mental');
     assert.equal(es('Toll the Dead'), 'Tañido por los muertos'); assert.equal(es('Tiny Hut'), 'Pequeña choza de Leomund');
-  });
-
-  test('Guía es Guidance e Impacto certero es True Strike', () => {
-    const es = en => conjuros.find(c => c.en === en)?.es;
     assert.equal(es('Guidance'), 'Guía'); assert.equal(es('True Strike'), 'Impacto certero');
   });
 });

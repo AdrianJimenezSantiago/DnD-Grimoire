@@ -1,6 +1,6 @@
 // Rasgos y recursos del personaje: plantillas de clase, rasgos propios, usos y lo que se recupera al descansar.
 import { clone, esc, uid } from '../../core/util.js';
-import { leerTexto } from '../../domain/validacion.js';
+import { leerTexto } from '../../domain/presentacion/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
 import { CARACTERISTICAS, ESCUELAS, perfil, clasesDe, vistaClase } from '../../domain/reglas/reglas2024.js';
 import { dadoRecarga, maxDe, estadoRecurso, reglas, resumenRegla, TIPO_TXT } from '../../domain/clases/rasgos.js';

@@ -2,7 +2,6 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { normBd, cargarGuardado, bdDeEjemplo } from '../../web/src/domain/personaje/modelo.js';
-import { esc } from '../../web/src/core/util.js';
 
 const CARGA = '"\'><img src=x onerror=alert(1)>';
 const hostil = () => ({
@@ -58,9 +57,6 @@ describe('importar datos de fuera', () => {
     assert.equal(cargarGuardado('{roto', null).fallo, true);
     assert.equal(cargarGuardado(JSON.stringify(bdDeEjemplo()), null).fallo, undefined);
     assert.equal(cargarGuardado(null, null).fallo, false);
-  });
-  test('esc escapa también la comilla simple', () => {
-    assert.equal(esc(`<a href='x'>"&`), '&lt;a href=&#39;x&#39;&gt;&quot;&amp;');
   });
 });
 

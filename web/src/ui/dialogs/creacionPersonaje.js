@@ -1,7 +1,7 @@
 // Asistente de creación y edición de personaje, por pasos en el orden del Manual del Jugador: clase, origen,
 // características, competencias, dotes, conjuros y equipo. Se carga aparte, con la gestión de personajes (app/asistentes.js).
 import { clamp, clone, esc, joinY, norm } from '../../core/util.js';
-import { leerTexto } from '../../domain/validacion.js';
+import { leerTexto } from '../../domain/presentacion/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
 import { CARACTERISTICAS, NOMBRE_CAR, CLASES, modOf, perfil, sgn, clasesDe, dotesDe, requisitosMulticlase, nivelTotal } from '../../domain/reglas/reglas2024.js';
 import { reglas } from '../../domain/clases/rasgos.js';

@@ -2,7 +2,7 @@
 // componentes, nivel y «siempre preparado». Los cambios del catálogo afectan a todos los personajes que tienen el conjuro.
 import { esc } from '../core/util.js';
 import { rechazar, avisarCampo } from '../ui/componentes/validacion.js';
-import { burla } from '../domain/validacion.js';
+import { burla } from '../domain/presentacion/validacion.js';
 import { ESCUELAS } from '../domain/reglas/reglas2024.js';
 import { campo } from '../domain/conjuros/validar.js';
 import { claveEscuela } from '../domain/conjuros/espacios.js';

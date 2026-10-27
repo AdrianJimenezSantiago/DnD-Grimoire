@@ -1,7 +1,7 @@
 // Genera docs/auditoria-clases.md: cada rasgo de cada clase y subclase (2024) con lo que hace la app.
-// Uso: node tools/auditoria-clases.mjs
+// Uso: node tools/auditorias/clases.mjs
 import fs from 'node:fs';
-import { CLASES_INFO, SUBCLASES } from '../web/src/domain/clases/clases2024.js';
+import { CLASES_INFO, SUBCLASES } from '../../web/src/domain/clases/clases2024.js';
 
 const E = {
   'Mejora de característica': ['A', 'Asistente de subida de nivel: +2/+1 o dote.'], 'Don épico': ['A', 'Asistente de subida de nivel.'],
@@ -121,7 +121,7 @@ const fila = (L, n) => { const [e, nota] = E[n] || (/^Conjuros? /.test(n) ? ['A'
   return `| ${L} | ${n} | ${TXT[e]} | ${nota || 'La app muestra su texto en «En juego» (con el manual importado) para aplicarlo a mano.'} |`; };
 let md = `# Auditoría de clases y subclases (reglas de 2024)
 
-Generado por \`tools/auditoria-clases.mjs\`. Cada rasgo, nivel a nivel, con lo que hace la app:
+Generado por \`tools/auditorias/clases.mjs\`. Cada rasgo, nivel a nivel, con lo que hace la app:
 **Automático** (la app lo aplica, gasta o recupera sola), **En parte** (la app lleva el contador o el número y tú decides cuándo) y
 **Se consulta** (rasgos narrativos o de decisión en mesa: su texto sale en «En juego» si importas el manual).
 
@@ -139,5 +139,5 @@ for (const [clase, info] of Object.entries(CLASES_INFO)) {
   }
 }
 md = md.replace('\n## ', `\nRecuento: ${cuenta.A} automáticos, ${cuenta.P} en parte y ${cuenta.T} de consulta.\n\n## `);
-fs.writeFileSync(new URL('../docs/auditoria-clases.md', import.meta.url), md);
+fs.writeFileSync(new URL('../../docs/auditoria-clases.md', import.meta.url), md);
 console.log(cuenta);

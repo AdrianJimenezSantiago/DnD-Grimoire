@@ -3,7 +3,7 @@ import { esc } from '../../core/util.js';
 import { gi } from './tema.js';
 import { runaSvg } from '../animaciones/magia.js';
 import { abrirDialogo, cerrarDialogo } from './dialog.js';
-import { leerNumero } from '../../domain/validacion.js';
+import { leerNumero } from '../../domain/presentacion/validacion.js';
 import { rechazar } from './validacion.js';
 
 let dlg = null;

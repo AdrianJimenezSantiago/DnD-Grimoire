@@ -1,7 +1,7 @@
 // Rechazo visible de lo que no vale: marca el campo (borde, sacudida, aria-invalid), vibra y suelta la burla en el aviso.
 // vigilarCampos() protege todos los <input type="number"> y los textos con maxlength de la app sin tocar cada formulario.
 import { esc } from '../../core/util.js';
-import { leerNumero, leerTexto, burla } from '../../domain/validacion.js';
+import { leerNumero, leerTexto, burla } from '../../domain/presentacion/validacion.js';
 import { toast } from './toast.js';
 import { vibrar } from '../../platform/native.js';
 

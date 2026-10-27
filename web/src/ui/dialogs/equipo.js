@@ -1,6 +1,6 @@
 // Inventario: maniquí con lo equipado, mochila, monedas, carga, sintonía y acciones de cada objeto.
 import { campoElegible, ponerValor, elegirObjetoComun } from '../selectores/elecciones.js';
-import { leerDano } from '../../domain/validacion.js';
+import { leerDano } from '../../domain/presentacion/validacion.js';
 import { numeroDe, textoDe, rechazar } from '../componentes/validacion.js';
 import { esc, norm } from '../../core/util.js';
 import { CATEGORIAS, MONEDAS, PREDEFINIDOS, MAX_SINTONIA, equipoDe, sintonizados, alternarSintonia, equipar, desequipar, cambiarCantidad,

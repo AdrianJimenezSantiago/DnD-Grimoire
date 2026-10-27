@@ -1,7 +1,7 @@
 // Auditoría de accesibilidad con axe-core: abre la app en Chromium y revisa cada pantalla y ventana en tema de noche y de día, en móvil y en PC.
 // Uso (con la app en marcha, p. ej. `npm run dev`):
 //   npm i --no-save playwright-core axe-core
-//   node tools/auditoria-axe.mjs http://localhost:5173/ axe.json
+//   node tools/auditorias/axe.mjs http://localhost:5173/ axe.json
 // CHROMIUM=/ruta/a/chrome si Playwright no encuentra el navegador.
 /* global document, localStorage, axe */
 import { chromium } from 'playwright-core';

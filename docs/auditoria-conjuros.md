@@ -1,6 +1,6 @@
 # Auditoría de conjuros (compendio del SRD 5.2 y Manual del Jugador de 2024)
 
-Generado por `tools/auditoria-conjuros.mjs`. Para cada conjuro: lo que la app lee de su texto (ataque, salvación, dados y
+Generado por `tools/auditorias/conjuros.mjs`. Para cada conjuro: lo que la app lee de su texto (ataque, salvación, dados y
 escalado) para tirarlo con un toque, el efecto que te aplica sola cuando te lo lanzas o te lo lanzan, y si algún rasgo o dote
 permite lanzarlo sin gastar espacio. «Respaldo» indica que el SRD no trae su texto y la app usa sus datos mecánicos de 2024
 hasta que importes el manual. Con el manual importado, la app lee el texto en español.

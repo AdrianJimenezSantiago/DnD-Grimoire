@@ -1,7 +1,7 @@
 """Genera web/public/data/compendio.json:
- - nombres oficiales y datos técnicos del Manual del Jugador 2024 (tools/manual_datos.json: solo datos, sin textos),
+ - nombres oficiales y datos técnicos del Manual del Jugador 2024 (tools/compendio/manual_datos.json: solo datos, sin textos),
  - texto en inglés del SRD 5.2 (CC-BY 4.0, vía Open5e) cuando existe,
- - traducciones propias de tools/srd_traducciones.py.
+ - traducciones propias de tools/compendio/srd_traducciones.py.
 """
 import json, re, sys, unicodedata, difflib
 sys.path.insert(0, 'tools')
@@ -9,8 +9,8 @@ from srd_nombres import N
 from srd_traducciones import T
 
 def n(s): return re.sub(r'[^a-z0-9]+', ' ', unicodedata.normalize('NFD', s.lower()).encode('ascii', 'ignore').decode()).strip()
-facts = json.load(open('tools/manual_datos.json'))
-srd = json.load(open('tools/srd52-spells-open5e.json'))
+facts = json.load(open('tools/compendio/manual_datos.json'))
+srd = json.load(open('tools/compendio/srd52-spells-open5e.json'))
 CLS = {'wizard':'Mago','sorcerer':'Hechicero','bard':'Bardo','druid':'Druida','cleric':'Clérigo','warlock':'Brujo','ranger':'Explorador','paladin':'Paladín'}
 ESC = {'abjuration':'Abjuración','conjuration':'Conjuración','divination':'Adivinación','enchantment':'Encantamiento','evocation':'Evocación','illusion':'Ilusionismo','necromancy':'Nigromancia','transmutation':'Transmutación'}
 FORZADOS = {'Shillelagh':'Shillelagh','Guidance':'Guía','True Strike':'Impacto certero','Mending':'Reparar','Enthrall':'Embelesar','Zone of Truth':'Zona de la verdad','Blink':'Desplazamiento',

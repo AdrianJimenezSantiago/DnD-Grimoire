@@ -1,8 +1,8 @@
 // Genera docs/auditoria-origen.md: atributos de especie y dotes (Manual del Jugador 2024 y Héroes de Faerûn) con lo que hace la app.
-// Uso: node tools/auditoria-origen.mjs
+// Uso: node tools/auditorias/origen.mjs
 import fs from 'node:fs';
-import { RASGOS_ESPECIE, LINAJES } from '../web/src/domain/origen/especies.js';
-import { AUMENTO_DOTE } from '../web/src/domain/origen/dotesDatos.js';
+import { RASGOS_ESPECIE, LINAJES } from '../../web/src/domain/origen/especies.js';
+import { AUMENTO_DOTE } from '../../web/src/domain/origen/dotesDatos.js';
 
 const TXT = { A: 'Automático', P: 'En parte', T: 'Se consulta' };
 const ESP = {
@@ -41,7 +41,7 @@ const DOT = {
   'don del terror': ['A', 'Inmune a asustado; contador.'], 'don del jolgorio': ['A', 'Baile irresistible de Otto gratis.'], 'don de las formas fluidas': ['A', 'Contador.'], 'don del fulgor exquisito': ['A', 'Contador.'],
   'determinacion senorial': ['A', 'Contador.'],
 };
-let md = '# Auditoría de especies y dotes (reglas de 2024)\n\nGenerado por `tools/auditoria-origen.mjs`, contrastado con el Manual del Jugador de 2024 y Héroes de Faerûn.\n\n## Especies\n';
+let md = '# Auditoría de especies y dotes (reglas de 2024)\n\nGenerado por `tools/auditorias/origen.mjs`, contrastado con el Manual del Jugador de 2024 y Héroes de Faerûn.\n\n## Especies\n';
 for (const [esp, rs] of Object.entries(RASGOS_ESPECIE)) {
   md += `\n### ${esp.charAt(0).toUpperCase() + esp.slice(1)}\n\n| Nivel | Atributo | Estado | Cómo lo aplica la app |\n|---|---|---|---|\n`;
   for (const [L, r] of rs) { const [e, t] = ESP[r] || ['T', '']; md += `| ${L} | ${r} | ${TXT[e]} | ${t || 'Texto en «En juego» con el manual importado.'} |\n`; }
@@ -50,5 +50,5 @@ for (const [esp, rs] of Object.entries(RASGOS_ESPECIE)) {
 md += '\n## Dotes\n\nTodas las dotes generales y dones épicos suben su característica al elegirlas en la subida de nivel (tabla integrada, sin necesidad del libro).\n\n| Dote | Aumento | Estado | Cómo lo aplica la app |\n|---|---|---|---|\n';
 const nombres = [...new Set([...Object.keys(AUMENTO_DOTE), ...Object.keys(DOT)])].sort();
 for (const k of nombres) { const [e, t] = DOT[k] || ['T', '']; md += `| ${k} | ${(AUMENTO_DOTE[k] || []).join(', ') || '—'} | ${TXT[e]} | ${t || 'Texto en «En juego» con el libro importado.'} |\n`; }
-fs.writeFileSync(new URL('../docs/auditoria-origen.md', import.meta.url), md);
+fs.writeFileSync(new URL('../../docs/auditoria-origen.md', import.meta.url), md);
 console.log('ok');
