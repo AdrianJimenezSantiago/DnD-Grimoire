@@ -4,7 +4,7 @@ dialog.modal[open] { display: block; animation: pop-in var(--t-med) var(--spring
 .md-icon .icon { width: 26px; height: 26px; }
 dialog.modal.danger .md-icon { color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--danger) 7%, transparent); }
 dialog.modal h2 { font: 500 var(--fs-xl) / 1.2 var(--serif); margin: 0 0 8px; }
-.md-text { font: 400 var(--fs-m) / 1.5 var(--sans); color: var(--ink-2); margin: 0 0 16px; }
+.md-text { font: 400 var(--fs-m) / 1.5 var(--sans); color: var(--ink-2); margin: 0 0 16px; white-space: pre-line; }
 dialog.modal input { margin-bottom: 16px; text-align: center; font: 700 22px / 1 var(--serif); }
 .md-btns { display: flex; gap: 10px; }
 .md-btns button { flex: 1; min-height: 46px; border-radius: var(--r-pill); font-size: var(--fs-m); }

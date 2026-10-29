@@ -29,6 +29,7 @@ import './styles/impacto.css';
 import './styles/codice.css';
 import './styles/estandarte.css';
 import './styles/movil.css';
+import './styles/impresion.css';
 
 import { crearEstado } from './core/store.js';
 import { cargarGuardado } from './domain/personaje/modelo.js';
@@ -65,6 +66,7 @@ import * as dados from './ui/dialogs/dados.js';
 import * as buscar from './ui/dialogs/buscar.js';
 import * as elegir from './ui/dialogs/elegir.js';
 import * as aviso from './ui/dialogs/aviso.js';
+import * as impresion from './ui/pantallas/impresion.js';
 import { tour } from './ui/componentes/tour.js';
 import { vigilarCampos } from './ui/componentes/validacion.js';
 import { initTeclado } from './ui/componentes/teclado.js';
@@ -72,7 +74,7 @@ import { initFondo } from './ui/animaciones/fondo.js';
 import { initMagia } from './ui/animaciones/magia.js';
 import { initEfectos } from './ui/animaciones/calidad.js';
 
-const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
+const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1', DESHACER = 'deshacer.json';
 const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
@@ -97,11 +99,15 @@ async function boot() {
   };
   const S = crearEstado({ almacen, clave: KEY, db, alFallar, alRecuperar: () => toast('Cambios guardados de nuevo.') });
   S.subscribe(() => { pintarBarra(S); pintarHoja(S); });
+  try { S.recuperarHistorial(JSON.parse((await archivos.get(DESHACER)) || '[]')); } catch {}
+  let tDeshacer = null;
+  const guardarDeshacer = () => { clearTimeout(tDeshacer); archivos.set(DESHACER, JSON.stringify(S.historialGuardable())).catch(() => {}); };
+  S.subscribe((_, r) => { if (r === 'act' || r === 'undo' || r === 'replace') { clearTimeout(tDeshacer); tDeshacer = setTimeout(guardarDeshacer, 2500); } });
 
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.abrirBuscador(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
+  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init(); impresion.init(S);
   app = await eventos.init(S);
 
   const TOUR_INICIO = [
@@ -166,9 +172,9 @@ async function boot() {
   if (migrated) S.save();
   document.documentElement.classList.add('ready');
 
-  alEventosApp({ back: app.back, pause: () => S.flush(), resume: app.resume });
+  alEventosApp({ back: app.back, pause: () => { S.flush(); guardarDeshacer(); }, resume: app.resume });
   addEventListener('pagehide', () => S.flush());
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') S.flush(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { S.flush(); guardarDeshacer(); } });
 
   idle(async () => {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
@@ -190,5 +196,11 @@ async function boot() {
 boot().catch(e => { document.documentElement.classList.add('ready'); throw e; });
 
 if (import.meta.env.PROD && import.meta.env.MODE !== 'windows' && !NATIVO && location.protocol === 'https:' && 'serviceWorker' in navigator) {
-  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(reg => {
+    const habia = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (habia) toast('Hay una versión nueva de Grimorio lista.', [{ label: 'Actualizar', hl: true, fn: () => location.reload() }]);
+    }, { once: true });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(() => {}));
 }

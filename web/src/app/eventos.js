@@ -18,7 +18,7 @@ import { abrirMenu, cerrarMenu, menuAbierto, initMenus } from '../ui/componentes
 import { MODOS, modoEfectos, nivelEfectos, fijarModoEfectos } from '../ui/animaciones/calidad.js';
 import { NIVELES } from '../domain/presentacion/rendimiento.js';
 import { enlazarEdicion } from './edicionConjuros.js';
-import { confirmar } from '../ui/componentes/modal.js';
+import { confirmar, avisar } from '../ui/componentes/modal.js';
 import { abrirPersonajes, abrirCreacion, abrirSubirNivel } from './asistentes.js';
 import { abrirBuscador } from '../ui/dialogs/buscador.js';
 import { abrirConjuro } from '../ui/dialogs/conjuro.js';
@@ -45,6 +45,7 @@ import { mostrarCaracteristica, abrirPruebas } from '../ui/pantallas/vitales.js'
 import { leer, initLeer } from '../ui/pantallas/leer.js';
 import { combateDe, alternarEconomia } from '../domain/combate/combate.js';
 import { vidaDe } from '../domain/combate/vida.js';
+import { ordenDeTecla, textoAtajos } from '../domain/presentacion/atajos.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -71,7 +72,7 @@ function moreMenuHtml() {
     fila('backup', icon('save'), 'Copia de seguridad'),
     NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `aria-pressed="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
     fila('efectos', icon('sparkles'), `Efectos: ${efectosTexto()}`, 'aria-haspopup="menu"'),
-    fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
+    fila('tutorial', icon('star'), 'Ver tutorial'), ...(!NATIVO && matchMedia('(hover: hover) and (pointer: fine)').matches ? [fila('atajos', icon('list'), 'Atajos de teclado')] : []), fila('about', icon('info'), 'Acerca de'),
   ].join('');
   return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
       <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(clasesTexto(ch)) : 'Sin personaje abierto'}</small></span>
@@ -145,6 +146,13 @@ const COMMANDS = {
   theme: () => toggleTheme(),
   awake: () => { awake = !awake; almacen.set(PREF + '-awake', awake ? '1' : '0'); mantenerDespierta(awake); toast(awake ? 'La pantalla no se apagará mientras la hoja esté abierta.' : 'La pantalla se apagará como de costumbre.'); },
   about: () => abrirDialogo($('#aboutDlg')),
+  deshacer: () => {
+    const h = S.history().at(-1);
+    if (!h) return toast('No hay nada que deshacer en esta sesión.');
+    const x = S.cur()?.play.log.find(l => l.id === h.id)?.x;
+    S.undo(h); toast(x ? `Deshecho: ${esc(x)}.` : 'Última acción deshecha.');
+  },
+  atajos: () => avisar({ titulo: 'Atajos de teclado', icono: 'info', texto: textoAtajos() }),
   reset: async () => {
     if (!(await confirmar({ titulo: '¿Borrar todos los datos?', texto: 'Se borran todos los personajes, el catálogo y el historial de este dispositivo. Justo después podrás deshacerlo.', ok: 'Borrar todo', peligro: true }))) return;
     const db = bdVacia(); invalidarItems(); S.editing = false;
@@ -299,6 +307,15 @@ export async function init(store) {
   on(document, 'click', '[data-mcmd]', (e, b) => run(b.dataset.mcmd, b));
   on(document, 'click', 'dialog [data-close]', (e, b) => cerrarDialogo(b.closest('dialog')));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarMenu(); ocultarToast(); } });
+  document.addEventListener('keydown', e => {
+    if (e.defaultPrevented || e.repeat || e.isComposing || enTour() || menuAbierto()) return;
+    const a = document.activeElement, escribiendo = /input|textarea|select/i.test(a?.tagName || '') || !!a?.isContentEditable;
+    const cmd = ordenDeTecla({ key: e.key, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey, shift: e.shiftKey },
+      { escribiendo, dialogo: !!document.querySelector('dialog[open]'), enHoja: !!S.cur() && !portadaVisible() && !S.editing });
+    if (!cmd) return;
+    e.preventDefault();
+    run(cmd, cmd === 'rest' ? [...document.querySelectorAll('#bRest, #dRest')].find(b => b.offsetParent) : undefined);
+  });
   initMenus();
   let sbT = 0; addEventListener('scroll', () => { if (sbT) return; sbT = requestAnimationFrame(() => { sbT = 0; document.body.classList.toggle('sb-compacta', scrollY > 320); }); }, { passive: true });
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) cerrarDialogo(d); }));

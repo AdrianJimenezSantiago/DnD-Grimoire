@@ -1,9 +1,10 @@
 // Estado de la app: la base de datos de personajes, suscripción a cambios, guardado diferido y deshacer.
 // act() para acciones de juego (van al historial del personaje), edit() para ediciones, replace() para restaurar copias.
 // Si el guardado falla (almacenamiento lleno o bloqueado) se avisa con alFallar y se reintenta en el siguiente cambio.
+// Las últimas acciones se pueden guardar aparte (historialGuardable) para deshacerlas también tras cerrar la app.
 import { clone, uid } from './util.js';
 
-const MAX_HIST = 60, MAX_LOG = 120;
+const MAX_HIST = 60, MAX_LOG = 120, MAX_GUARDABLE = 10;
 const instantanea = (db, ch) => (ch ? { ...db, chars: db.chars.map(c => (c === ch ? clone(c) : c)), catalog: { ...db.catalog } } : clone(db));
 const enReposo = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 1000 }) : fn());
 
@@ -37,7 +38,7 @@ export function crearEstado({ almacen, clave, db, alFallar = null, alRecuperar =
         target.play.log.push({ id, t: Date.now(), x: String(text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() });
         if (target.play.log.length > MAX_LOG) target.play.log.splice(0, target.play.log.length - MAX_LOG);
       }
-      hist.push({ id, before }); if (hist.length > MAX_HIST) hist.shift();
+      hist.push({ id, before, chId: ch?.id ?? null }); if (hist.length > MAX_HIST) hist.shift();
       S.save(); S.emit('act');
       return { id, before };
     },
@@ -52,9 +53,20 @@ export function crearEstado({ almacen, clave, db, alFallar = null, alRecuperar =
     replace(db) { const before = clone(S.db); S.db = db; S.save(); S.emit('replace'); return { id: null, before }; },
 
     undo(h) {
-      const i = hist.findIndex(x => x.before === h.before);
+      const i = hist.findIndex(x => (h.id && x.id === h.id) || (h.before && x.before === h.before));
+      const e = i >= 0 ? hist[i] : h;
       if (i >= 0) hist.length = i;
-      S.db = h.before; S.save(); S.emit('undo');
+      S.db = e.ch ? { ...S.db, chars: S.db.chars.map(c => (c.id === e.chId ? e.ch : c)) } : e.before;
+      S.save(); S.emit('undo');
+    },
+    historialGuardable(n = MAX_GUARDABLE) {
+      return hist.slice(-n).map(x => ({ id: x.id, chId: x.chId, ch: x.ch || x.before?.chars?.find(c => c.id === x.chId) })).filter(x => x.chId && x.ch);
+    },
+    recuperarHistorial(lista) {
+      const ids = new Set(S.db.chars.map(c => c.id)), log = new Set(S.db.chars.flatMap(c => c.play?.log?.map(l => l.id) || []));
+      const validas = (Array.isArray(lista) ? lista : []).filter(x => x && typeof x.id === 'string' && ids.has(x.chId) && log.has(x.id) && x.ch && typeof x.ch === 'object' && x.ch.id === x.chId);
+      hist.unshift(...validas.slice(-MAX_GUARDABLE).map(x => ({ id: x.id, chId: x.chId, ch: x.ch })));
+      return validas.length;
     },
     history: () => hist,
     undoable: id => hist.some(h => h.id === id),
