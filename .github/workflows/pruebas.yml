@@ -31,11 +31,17 @@ jobs:
       - name: Revisión del código (ESLint)
         run: npm run lint
 
-      - name: Pruebas de reglas, clases y estado
-        run: npm test
+      - name: Pruebas de reglas, clases y estado (con cobertura mínima)
+        run: npm run test:cobertura
 
       - name: Compilar la web (Vite)
         run: npm run build
 
       - name: Compilar la versión de Windows (un solo HTML)
         run: npm run build:windows
+
+      - name: Navegador para las pruebas de extremo a extremo
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Pruebas de extremo a extremo (la app real en Chromium)
+        run: npm run e2e

@@ -9,7 +9,7 @@ export default [
     languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: { ...globals.browser, ...globals.worker, __PERSONAJES_PRUEBA__: 'readonly', __RAMA__: 'readonly' } },
   },
   {
-    files: ['tests/**/*.js', 'tools/**/*.mjs', 'eslint.config.js', 'web/vite.config.js'],
+    files: ['tests/**/*.js', 'e2e/**/*.js', 'tools/**/*.mjs', 'eslint.config.js', 'web/vite.config.js'],
     languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: globals.node },
   },
   {
