@@ -13,7 +13,7 @@ import { cerrarDialogo, abrirDialogo, dialogoSuperior } from '../ui/componentes/
 import { pop, transicionVista, movimientoReducido, chispas } from '../ui/animaciones/fx.js';
 import { NATIVO, vibrar, mantenerDespierta, minimizar, fijarBarras, almacen } from '../platform/native.js';
 import * as A from './acciones.js';
-import { initCombate, alternarCombate, iniciativaManual, nuevoTurno, tirarDesde, atacar, danoCon, accionComun, pgRapido } from './combate.js';
+import { initCombate, alternarCombate, iniciativaManual, nuevoTurno, tirarDesde, atacar, danoCon, accionComun, pgRapido, accionOrden } from './combate.js';
 import { abrirMenu, cerrarMenu, menuAbierto, initMenus } from '../ui/componentes/menu.js';
 import { MODOS, modoEfectos, nivelEfectos, fijarModoEfectos } from '../ui/animaciones/calidad.js';
 import { NIVELES } from '../domain/presentacion/rendimiento.js';
@@ -234,6 +234,7 @@ function bindSheet() {
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
   on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
   on(sheet, 'click', '[data-cbini]', () => iniciativaManual());
+  on(sheet, 'click', '[data-cbord]', (e, b) => accionOrden(b.dataset.cbord, b.dataset.id));
   sheet.addEventListener('toggle', e => { if (e.target.classList?.contains('cb-pruebas')) abrirPruebas(e.target.open); }, true);
   on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } vibrar('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); vibrar('light'); });

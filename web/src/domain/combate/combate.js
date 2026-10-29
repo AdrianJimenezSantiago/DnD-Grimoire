@@ -1,9 +1,10 @@
 // Estado del combate: ronda, iniciativa, economía del turno, ataques hechos y acciones comunes.
 import { norm } from '../../core/util.js';
 import { clasesDe, dotesDe } from '../reglas/reglas2024.js';
+import { normOrden, alEmpezarTuTurno, aliadosParaOtroCombate } from './orden.js';
 
 export const ECONOMIA = [['accion', 'Acción'], ['adicional', 'Acción adicional'], ['reaccion', 'Reacción'], ['movimiento', 'Movimiento']];
-export const COMBATE0 = () => ({ activo: false, ronda: 1, iniciativa: null, iniManual: false, turno: { accion: false, adicional: false, reaccion: false, movimiento: false }, ataques: null, espacio: '', hechas: [], unaVez: [] });
+export const COMBATE0 = () => ({ activo: false, ronda: 1, iniciativa: null, iniManual: false, turno: { accion: false, adicional: false, reaccion: false, movimiento: false }, ataques: null, espacio: '', hechas: [], unaVez: [], orden: [], turnoDe: null, jugado: false });
 export function normCombate(c) {
   const x = { ...COMBATE0(), ...(c && typeof c === 'object' ? c : {}) };
   x.activo = !!x.activo; x.ronda = Math.max(1, parseInt(x.ronda, 10) || 1);
@@ -14,15 +15,16 @@ export function normCombate(c) {
   x.hechas = Array.isArray(x.hechas) ? x.hechas.filter(h => h && ACCION_COMUN[h.k] && ['accion', 'adicional', 'reaccion'].includes(h.via)).map(h => ({ k: h.k, via: h.via })) : [];
   x.unaVez = x.activo && Array.isArray(x.unaVez) ? x.unaVez.filter(k => typeof k === 'string') : [];
   const a = x.ataques; x.ataques = a && typeof a === 'object' ? { usados: Math.max(0, parseInt(a.usados, 10) || 0), max: Math.max(1, parseInt(a.max, 10) || 1), ligera: !!a.ligera, mella: !!a.mella, extra: !!a.extra } : null;
-  return x;
+  return normOrden(x);
 }
 export const combateDe = ch => (ch.combate && ch.combate.turno ? ch.combate : (ch.combate = normCombate(ch.combate)));
 
-export function empezarCombate(ch) { const c = combateDe(ch); Object.assign(c, COMBATE0(), { activo: true }); return c; }
-export function terminarCombate(ch) { const c = combateDe(ch); Object.assign(c, COMBATE0()); return c; }
+export function empezarCombate(ch) { const c = combateDe(ch), aliados = aliadosParaOtroCombate(c); Object.assign(c, COMBATE0(), { activo: true, orden: aliados }); return c; }
+export function terminarCombate(ch) { const c = combateDe(ch), aliados = aliadosParaOtroCombate(c); Object.assign(c, COMBATE0(), { orden: aliados }); return c; }
 export function siguienteTurno(ch) {
   const c = combateDe(ch); c.ronda += 1;
   c.turno = { accion: false, adicional: false, reaccion: false, movimiento: false }; c.ataques = null; c.espacio = ''; c.hechas = []; c.unaVez = [];
+  alEmpezarTuTurno(c);
   return c;
 }
 

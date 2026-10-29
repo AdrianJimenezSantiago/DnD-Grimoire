@@ -26,6 +26,9 @@ import { pasarRonda, vidaDe, ponerEfecto } from '../domain/combate/vida.js';
 import { golpe } from '../ui/animaciones/golpes.js';
 import { avisar } from '../ui/dialogs/aviso.js';
 import { alTirarIniciativa, alEmpezarTurno, rangoCritico } from '../domain/combate/automatismos.js';
+import { anadirCombatientes, avanzarTurno, quitarCombatiente, fijarIniciativa, cambiarPg, combatiente, YO } from '../domain/combate/orden.js';
+import { rngCripto } from '../domain/reglas/dados.js';
+import { pedirCombatientes } from '../ui/dialogs/orden.js';
 
 let S;
 export const initCombate = store => { S = store; };
@@ -157,3 +160,51 @@ export function atacar(id) {
   tirarAtaque(x, eco);
 }
 export function danoCon(id) { const x = arma(id); if (x) danoArma(x); }
+
+const yoDe = ch => ({ nombre: ch.nombre || 'Tú' });
+const tuTurnoLlega = r => { if (r?.tuTurno) { toast('Te toca: empieza tu turno.'); nuevoTurno(); } };
+export async function accionOrden(accion, id) {
+  const ch = S.cur(); if (!ch) return;
+  const c = combateDe(ch), x = id ? combatiente(c, id) : null;
+  if (accion === 'anadir') {
+    const sugerencias = [...(ch.bestiario?.criaturas || []).map(k => k.nombre), ...S.db.chars.filter(o => o.id !== ch.id).map(o => o.nombre)].filter(Boolean);
+    const datos = await pedirCombatientes({ sugerencias });
+    if (!datos) return;
+    let nuevos = [];
+    const h = S.act(`Entra${datos.cantidad > 1 ? 'n' : ''} en combate: ${datos.nombre}${datos.cantidad > 1 ? ` ×${datos.cantidad}` : ''}`, (db, y) => { nuevos = anadirCombatientes(combateDe(y), datos, () => rngCripto(20)); });
+    toast(nuevos.map(n => `<b>${esc(n.nombre)}</b>${n.ini != null ? ` (${n.ini})` : ''}`).join(', ') + ` ${nuevos.length === 1 ? 'entra' : 'entran'} en el orden.`, [botonDeshacer(S, h)]);
+    return;
+  }
+  if (accion === 'siguiente') {
+    if (c.iniciativa == null && !c.orden.some(o => o.ini != null)) return;
+    let r = null;
+    S.edit((db, y) => { r = avanzarTurno(combateDe(y), yoDe(y)); });
+    if (r && !r.tuTurno && r.actual.id !== YO) vibrar('light');
+    tuTurnoLlega(r);
+    return;
+  }
+  if (!x) return;
+  if (accion === 'quitar') {
+    let r = null;
+    const h = S.act(`Sale del combate: ${x.nombre}`, (db, y) => { r = quitarCombatiente(combateDe(y), id, yoDe(y)); });
+    toast(`<b>${esc(x.nombre)}</b> sale del orden.`, [botonDeshacer(S, h)]);
+    tuTurnoLlega(r);
+    return;
+  }
+  if (accion === 'ini') {
+    const v = await pedir({ titulo: `Iniciativa de ${x.nombre}`, valor: x.ini ?? '', tipo: 'number', min: -10, max: 60, ok: 'Guardar' });
+    if (v == null || v === '') return;
+    S.edit((db, y) => { fijarIniciativa(combateDe(y), id, v); });
+    return;
+  }
+  if (accion === 'pg') {
+    const v = await pedir({ titulo: `${x.nombre}: ${x.pg} / ${x.pgMax} PG`, texto: 'Escribe el daño que recibe. Para curarle, ponle un + delante (por ejemplo, +5).', ok: 'Anotar' });
+    if (v == null) return;
+    const t = String(v).trim(), m = /^([+-]?)\s*(\d{1,4})$/.exec(t);
+    if (!m) { toast('Escribe solo un número: el daño, o +N para curar.'); return; }
+    const delta = m[1] === '+' ? +m[2] : -m[2];
+    let y2 = null;
+    const h = S.act(`${x.nombre}: ${delta < 0 ? `${-delta} de daño` : `cura ${delta}`}`, (db, y) => { y2 = cambiarPg(combateDe(y), id, delta); });
+    if (y2) toast(y2.fuera ? `<b>${esc(y2.nombre)}</b> cae: queda fuera de combate.` : `<b>${esc(y2.nombre)}</b>: ${y2.pg} / ${y2.pgMax} PG.`, [botonDeshacer(S, h)]);
+  }
+}

@@ -251,6 +251,23 @@
   <div class="dfoot"><button type="button" class="warn" id="histClear">Borrar historial</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>
 
+<dialog id="ordenDlg" aria-labelledby="orTitle"><div class="grip"></div>
+  <div class="dhead"><h2 id="orTitle">Añadir al combate</h2><div class="dsub">Aliados y enemigos para llevar el orden de los turnos.</div></div>
+  <div class="dbody or-form">
+    <div class="seg" role="radiogroup" aria-label="Bando" id="orTipo"><button type="button" role="radio" aria-checked="true" data-ortipo="enemigo">Enemigo</button><button type="button" role="radio" aria-checked="false" data-ortipo="aliado">Aliado</button></div>
+    <label class="f wide">Nombre<input id="orNombre" type="text" maxlength="40" autocomplete="off" enterkeyhint="next" list="orSugerencias" placeholder="Goblin, Mira, Lobo terrible…"></label>
+    <datalist id="orSugerencias"></datalist>
+    <div class="or-fila">
+      <label class="f">Iniciativa<input id="orIni" type="number" inputmode="numeric" min="-10" max="60" placeholder="Tirar"></label>
+      <label class="f">Mod. de Des<input id="orMod" type="number" inputmode="numeric" min="-10" max="20" value="0"></label>
+      <label class="f">Cuántos<input id="orCant" type="number" inputmode="numeric" min="1" max="12" value="1"></label>
+      <label class="f">PG <span class="hint">(opcional)</span><input id="orPg" type="number" inputmode="numeric" min="1" max="9999"></label>
+    </div>
+    <p class="note">Deja la iniciativa vacía y la app tira d20 + el modificador para cada uno. Con PG, puedes llevar su vida desde la lista.</p>
+  </div>
+  <div class="dfoot"><span class="spacer"></span><button type="button" data-close>Cancelar</button><button type="button" class="gold" id="orOk">Añadir</button></div>
+</dialog>
+
 <dialog id="backupDlg" aria-labelledby="bkTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="bkTitle">Copia de seguridad</h2><div class="dsub">Incluye todos los personajes y el catálogo de conjuros.</div></div>
   <div class="dbody">
