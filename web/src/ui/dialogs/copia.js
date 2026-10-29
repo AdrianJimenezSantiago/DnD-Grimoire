@@ -10,6 +10,7 @@ import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
 import { compartirJson, almacen, archivos, espacioUsado, pedirPersistencia } from '../../platform/native.js';
 import { avisar, confirmar } from '../componentes/modal.js';
+import { esCodigo, decodificar } from '../../domain/personaje/codigo.js';
 import { diaDe, leerIndice, planAutomatica, recordatorioCopia, textoHace, formatoBytes, hayPersonajesPropios, MAX_AUTOMATICAS } from '../../domain/personaje/copias.js';
 
 let S;
@@ -71,12 +72,12 @@ export async function recordarCopia() {
   if (si) abrirCopia(); else almacen.set(APLAZADA, String(Date.now()));
 }
 
-export function cargarCopia(text) {
+export async function cargarCopia(text) {
   if (!String(text ?? '').trim()) return rechazar($('#bkText'), 'vacio', { campo: 'Copia de seguridad' });
-  let d; try { d = JSON.parse(text); } catch { d = null; }
+  let d; try { d = esCodigo(text) ? await decodificar(text) : JSON.parse(text); } catch { d = null; }
   let r = null;
   try { r = leerCopia(d); } catch { r = null; }
-  if (!r) return avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo o el texto completo tal como se guardó.`, icono: 'save' });
+  if (!r) return avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo, el texto completo o el código de personaje tal como se guardó.`, icono: 'save' });
   invalidarItems(); S.editing = false; const h = S.replace(r.db); cerrarDialogo($('#backupDlg'));
   if (r.abierto) document.dispatchEvent(new CustomEvent('grimorio:abierto'));
   toast(r.msg, [botonDeshacer(S, h)]);

@@ -26,17 +26,26 @@ export function vibrar(kind = 'light') {
   try { navigator.vibrate?.(kind === 'heavy' ? 24 : 12); } catch {}
 }
 
-export async function compartirJson(name, json) {
+const tactil = () => { try { return matchMedia('(pointer: coarse)').matches; } catch { return false; } };
+export async function compartirArchivo(name, contenido, tipo = 'application/json', titulo = 'Copia del grimorio') {
   if (NATIVO) {
     const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');
-    const w = await Filesystem.writeFile({ path: name, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 });
-    await Share.share({ title: 'Copia del grimorio', dialogTitle: 'Guardar la copia en…', files: [w.uri] });
+    const w = await Filesystem.writeFile({ path: name, data: contenido, directory: Directory.Cache, encoding: Encoding.UTF8 });
+    await Share.share({ title: titulo, dialogTitle: 'Guardar en…', files: [w.uri] });
     return;
   }
+  const archivo = typeof File === 'function' ? new File([contenido], name, { type: tipo }) : null;
+  if (archivo && tactil() && navigator.canShare?.({ files: [archivo] })) { await navigator.share({ files: [archivo], title: name }); return; }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = name;
+  a.href = URL.createObjectURL(new Blob([contenido], { type: tipo })); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+export const compartirJson = (name, json) => compartirArchivo(name, json);
+export async function compartirTexto(titulo, texto) {
+  if (NATIVO) { const { Share } = await import('@capacitor/share'); await Share.share({ title: titulo, dialogTitle: titulo, text: texto }); return 'compartido'; }
+  if (tactil() && navigator.share) { await navigator.share({ title: titulo, text: texto }); return 'compartido'; }
+  await navigator.clipboard.writeText(texto); return 'copiado';
 }
 
 export async function mantenerDespierta(on) {

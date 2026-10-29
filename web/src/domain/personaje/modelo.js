@@ -13,6 +13,7 @@ import { normCombate } from '../combate/combate.js';
 import { normOrdenes } from '../clases/ordenes.js';
 import { normVariantes } from '../clases/variantes.js';
 import { normOpciones } from '../clases/opcionesRasgo.js';
+import { normFavoritas } from '../reglas/favoritas.js';
 
 export const ESQUEMA = 2;
 export const CAMPOS_CATALOGO = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
@@ -38,7 +39,7 @@ export function personajeVacio(over = {}) {
     espaciosManuales: false, espacios: {}, lema: '', campana: '', notas: '',
     book: [], rasgos: [], rasgosOff: [], rasgosOcultos: [], play: PLAY0(), multiclase: [], dotes: [],
     retrato: null, historia: '', diario: { sesiones: [] }, equipo: { objetos: [] }, bestiario: { criaturas: [] },
-    habilidades: null, salvacionesExtra: [], vida: null, combate: null, creacion: null, herramientas: [], idiomas: [], maestrias: [], maniobras: [], ordenes: {}, variantes: {}, opciones: {},
+    habilidades: null, salvacionesExtra: [], vida: null, combate: null, creacion: null, herramientas: [], idiomas: [], maestrias: [], maniobras: [], ordenes: {}, variantes: {}, opciones: {}, tiradasFav: [],
     ...clone(over),
   };
 }
@@ -89,6 +90,7 @@ export function normPersonaje(c) {
   c.variantes = normVariantes(c.variantes);
   c.opciones = normOpciones(c.opciones);
   c.combate = normCombate(c.combate);
+  c.tiradasFav = normFavoritas(c.tiradasFav);
   return c;
 }
 

@@ -17,6 +17,9 @@ import { abrirDialogo } from '../componentes/dialog.js';
 import { chispas, movimientoReducido } from '../animaciones/fx.js';
 import { fxImpacto, nivelImpacto } from '../animaciones/impacto.js';
 import { vibrar } from '../../platform/native.js';
+import { anadirFavorita, quitarFavorita, MAX_FAVORITAS } from '../../domain/reglas/favoritas.js';
+import { pedir } from '../componentes/modal.js';
+import { toast } from '../componentes/toast.js';
 
 let S, V = null, SEQ = 0, TOKEN = 0, agitar = null;
 const CRONICA = new Map(), MAX_CRONICA = 30, VISIBLES = 5;
@@ -66,7 +69,7 @@ function pintarCtl() {
   if (libre) h += `<div class="dd-caras" role="group" aria-label="Añadir dados">${CARAS.map(c => `<button type="button" class="dd-cara" data-dacara="${c}"><span class="visually-hidden">Añadir </span>${forma(c)}<b>${c === 100 ? '<span aria-hidden="true">%</span><span class="visually-hidden">d100</span>' : `d${c}`}</b></button>`).join('')}</div>
     <div class="dd-expr"><input id="daExpr" enterkeyhint="go" maxlength="60" value="${esc(V.expr)}" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Tirada" aria-describedby="daInfo" placeholder="2d6+3">
       <span class="dd-ajuste"><button type="button" data-damod="-1" aria-label="Restar 1">−1</button><button type="button" data-damod="1" aria-label="Sumar 1">+1</button><button type="button" data-dalimpiar aria-label="Vaciar">${icon('reset')}</button></span></div>
-    <div class="dd-info" id="daInfo"></div>`;
+    <div class="dd-info" id="daInfo"></div><div class="dd-favs" id="daFavs" role="group" aria-label="Tiradas favoritas"></div>`;
   if (V.mods?.length) h += `<div class="da-mods-ap" role="group" aria-label="Lo que se aplica"><span class="da-mods-t">Se aplica</span>${V.mods.map(m => `<button type="button" class="da-mod ${m.mal ? 'mal' : 'bien'} ${m.on ? '' : 'off'}" data-damodt="${esc(m.id)}" aria-pressed="${m.on}" title="${m.cond ? `Solo ${esc(m.cond)}. Tócalo si no se aplica.` : 'Tócalo si no se aplica'}"><b>${esc(fmtMod(m))}</b><span>${esc(m.fuente)}</span>${m.cond ? `<small>${esc(m.cond)}</small>` : ''}</button>`).join('')}</div>`;
   const falla = V.mods && falloAutomatico(V.mods);
   if (falla) h += `<p class="da-falla">${gi('muerte')}Por <b>${esc(falla.fuente.toLowerCase())}</b> fallas esta salvación automáticamente.</p>`;
@@ -102,6 +105,15 @@ function sincLibre(conValor = true) {
        <button type="button" class="dd-ficha atajo" data-daexpr="4d6kh3">4d6, sin el menor<small>característica</small></button>`;
   const slot = $('#daModoSlot'), quiere = conModo(p);
   if (slot && quiere !== !!slot.firstElementChild) slot.innerHTML = quiere ? modoHtml() : '';
+  pintarFavs(p);
+}
+const exprLimpia = p => (p ? texto(p).replace(/−/g, '-') : '');
+function pintarFavs(p = parsear(V.expr)) {
+  const el = $('#daFavs'), ch = S.cur(); if (!el) return;
+  const L = ch?.tiradasFav || [], e = exprLimpia(p), guardable = ch && p?.grupos.length && !L.some(f => f.expr === e);
+  el.innerHTML = `${L.map((f, i) => `<span class="dd-fav"><button type="button" class="dd-ficha" data-dafav="${i}" title="Tirar ${esc(f.expr)}"><b>${esc(f.nombre)}</b>${f.nombre !== f.expr ? `<small>${esc(f.expr)}</small>` : ''}</button><button type="button" class="dd-fav-x" data-dafavx="${i}" aria-label="Quitar ${esc(f.nombre)} de favoritas">×</button></span>`).join('')}
+    ${guardable && L.length < MAX_FAVORITAS ? `<button type="button" class="dd-fav-mas" data-dafavmas>${icon('star')}<span>Guardar ${esc(e)}</span></button>` : ''}`;
+  el.hidden = !el.innerHTML.trim();
 }
 function actualizarBoton() {
   const t = $('#daTirarT'); if (!t) return;
@@ -154,7 +166,7 @@ function lanzar(nuevo = true) {
 
 function registrar(nuevo) {
   const x = V.res, { r } = x.res, act = (V.mods || []).filter(m => m.on), H = cronica();
-  const titulo = V.tipo === 'libre' ? texto(x.p) : V.titulo;
+  const titulo = V.tipo === 'libre' ? (V.fav && V.fav.expr === exprLimpia(x.p) ? V.fav.nombre : texto(x.p)) : V.titulo;
   const meta = [...(V.tipo !== 'libre' && V.tipo !== 'dano' && (V.bono || V.tipo !== 'muerte') ? [sgn(V.bono || 0)] : []), ...(r.d20 ? [x.modo] : []), ...act.map(m => m.fuente), ...(V.critico ? ['crítico'] : []), ...(x.falla ? ['fallo automático'] : [])];
   const e = { id: x.id, titulo, meta, total: x.total, nat: conModo(x.p) ? x.nat : null, caras: x.p.grupos[0]?.caras || 0, estado: x.estado, t: Date.now(),
     conf: { ...V, res: null, mods: V.mods?.map(m => ({ ...m })), alTirar: V.repetible ? V.alTirar : null } };
@@ -305,6 +317,15 @@ export function init(store) {
     const p = parsear($('#daExpr').value); if (!p) return; const g = p.grupos[+b.dataset.daquita]; if (!g) return;
     if (g.n > 1 && !(g.keep && g.keep.n >= g.n - 1)) g.n--; else if (g.n > 1) { g.n--; delete g.keep; } else p.grupos.splice(+b.dataset.daquita, 1);
     V.expr = texto(p).replace(/−/g, '-'); caducar(); sincLibre(); vibrar('light');
+  });
+  on(body, 'click', '[data-dafav]', (e, b) => { const f = S.cur()?.tiradasFav?.[+b.dataset.dafav]; if (!f) return; V.expr = f.expr; V.fav = f; caducar(); sincLibre(); lanzar(true); });
+  on(body, 'click', '[data-dafavx]', (e, b) => { let f = null; S.edit((db, ch) => { f = quitarFavorita(ch, +b.dataset.dafavx); }); pintarFavs(); if (f) toast(`<b>${esc(f.nombre)}</b> ya no está en tus favoritas.`); });
+  on(body, 'click', '[data-dafavmas]', async () => {
+    const p = parsear(V.expr); if (!p?.grupos.length || !S.cur()) return;
+    const nombre = await pedir({ titulo: 'Guardar como favorita', texto: `Ponle un nombre a ${exprLimpia(p)} para tenerla a mano, como «Bola de fuego» o «Espada larga».`, valor: '', ok: 'Guardar' });
+    if (nombre == null) return;
+    let f = null; S.edit((db, ch) => { f = anadirFavorita(ch, { nombre, expr: exprLimpia(p) }); });
+    if (f) { V.fav = f; pintarFavs(); toast(`<b>${esc(f.nombre)}</b> guardada en tus favoritas.`); }
   });
   on(body, 'click', '[data-daexpr]', (e, b) => { V.expr = b.dataset.daexpr; caducar(); sincLibre(); lanzar(true); });
   on(body, 'click', '[data-damod]', (e, b) => { const p = parsear($('#daExpr').value) || { grupos: [], bono: 0 }; p.bono += +b.dataset.damod; V.expr = texto(p).replace(/−/g, '-') || '0'; caducar(); sincLibre(); });

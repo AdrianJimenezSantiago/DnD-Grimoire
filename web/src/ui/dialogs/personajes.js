@@ -7,11 +7,12 @@ import { claseLinea, origenLinea } from '../../domain/personaje/descripcion.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
 import { transicionVista } from '../animaciones/fx.js';
-import { confirmar } from '../componentes/modal.js';
+import { confirmar, escoger } from '../componentes/modal.js';
 import { avatarHtml } from '../componentes/avatar.js';
 import { temaDe, gi } from '../componentes/tema.js';
 import { estiloPaleta } from '../../domain/presentacion/paleta.js';
-import { archivos, compartirJson } from '../../platform/native.js';
+import { archivos, compartirJson, compartirTexto } from '../../platform/native.js';
+import { codificar } from '../../domain/personaje/codigo.js';
 import { initCreacion, abrirCreacion } from './creacionPersonaje.js';
 
 export { abrirCreacion };
@@ -51,6 +52,17 @@ export function paqueteDe(db, c) {
 }
 async function exportar(id) {
   const c = S.db.chars.find(x => x.id === id); if (!c) return;
+  const como = await escoger({ titulo: `Exportar a ${c.nombre || 'este personaje'}`, icono: 'save',
+    texto: 'Como archivo, para guardarlo o mandarlo por correo. Como código de texto, para pegarlo en un chat (WhatsApp, Telegram, Discord…): quien lo reciba lo pega en «Copia de seguridad → Cargar copia».',
+    opciones: [{ label: 'Código de texto', valor: 'codigo' }, { label: 'Archivo', valor: 'archivo' }] });
+  if (!como) return;
+  if (como === 'codigo') {
+    try {
+      const r = await compartirTexto(`Personaje de Grimorio: ${c.nombre}`, await codificar(paqueteDe(S.db, c)));
+      toast(r === 'copiado' ? `Código de <b>${esc(c.nombre)}</b> copiado. Pégalo en el chat.` : `<b>${esc(c.nombre)}</b> compartido como código.`);
+    } catch (e) { if (!/cancel|abort/i.test(String(e?.message || e?.name))) toast('No se pudo crear el código. Prueba a exportarlo como archivo.'); }
+    return;
+  }
   const nombre = `${(c.nombre || 'personaje').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'personaje'}.grimorio.json`;
   try { await compartirJson(nombre, JSON.stringify(paqueteDe(S.db, c), null, 1)); toast(`<b>${esc(c.nombre)}</b> exportado. Se abre desde «Cargar copia» en cualquier grimorio.`); }
   catch (e) { if (!/cancel/i.test(String(e?.message))) toast('No se pudo exportar el personaje.'); }

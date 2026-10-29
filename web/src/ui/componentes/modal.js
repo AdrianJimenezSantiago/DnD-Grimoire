@@ -44,3 +44,5 @@ export const pedir = ({ titulo, texto, valor = '', tipo = 'text', min, max, ok =
   abrir({ titulo, texto, icono: 'quill', campo: { valor, tipo, min, max },
     botones: [{ label: 'Cancelar', valor: () => null }, { label: ok, cls: 'primary', valor: d => (d ? d.querySelector('#mdInput').value : null),
       valida: numero && (d => { const i = d.querySelector('#mdInput'), r = leerNumero(i.value, numero); if (!r.ok) rechazar(i, r.motivo, { ...numero, campo: titulo, valor: i.value.trim() }); return r.ok; }) }] });
+export const escoger = ({ titulo, texto, opciones, icono = 'info' }) =>
+  abrir({ titulo, texto, icono, botones: [{ label: 'Cancelar', valor: () => null }, ...opciones.map((o, i) => ({ label: o.label, cls: i === opciones.length - 1 ? 'primary' : '', valor: () => o.valor }))] });
