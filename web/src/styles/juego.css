@@ -1244,7 +1244,8 @@ button.vt-placa[data-leer] { cursor: help; }
 .cb-or.t-enemigo { --tono: var(--enemigo); }
 .cb-or.actual { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 16px -6px var(--gold); }
 .cb-or.actual .cb-or-n b::before { content: '▸ '; color: var(--gold); }
-.cb-or.fuera { opacity: .5; }
+.cb-or.fuera { --tono: var(--line); background: transparent; }
+.cb-or.fuera .cb-or-n b, .cb-or.fuera .cb-or-pg, .cb-or.fuera .cb-or-ini { color: var(--ink-2); }
 .cb-or.fuera .cb-or-n b { text-decoration: line-through; }
 .cb-or-ini { flex: none; display: grid; place-items: center; width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--tono) 50%, var(--line-soft)); font: 700 var(--fs-m) / 1 var(--sans); background: var(--surface); }
 .cb-or-n { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }

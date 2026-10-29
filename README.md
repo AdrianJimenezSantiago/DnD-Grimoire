@@ -73,12 +73,14 @@ No hace falta saberse las reglas de memoria ni tener cuenta en ningún sitio. **
 | ⬆️ **Subir de nivel sin líos** | Un asistente te dice qué ganas en cada nivel y qué tienes que elegir. |
 | ❤️ **Llevar la vida y el estado** | Daño, curación, puntos temporales, dados de golpe, salvaciones contra muerte, estados y agotamiento. |
 | ✨ **Lanzar conjuros** | Libro de conjuros con filtros, rituales y concentración. Toca para lanzar, mantén pulsado para leer. |
-| ⚔️ **Modo combate** | Una pantalla solo para la pelea: iniciativa, ronda, qué te queda del turno y tus ataques, conjuros y rasgos ordenados por acción. |
-| 🎲 **Tirar dados** | Para cualquier tirada, con ventaja y desventaja. Las pruebas y salvaciones se tiran tocándolas. |
+| ⚔️ **Modo combate** | Una pantalla solo para la pelea: iniciativa, ronda, qué te queda del turno y tus ataques, conjuros y rasgos ordenados por acción. Con orden de iniciativa opcional para aliados y enemigos, y la vida de cada enemigo. |
+| 🎲 **Tirar dados** | Para cualquier tirada, con ventaja y desventaja. Las pruebas y salvaciones se tiran tocándolas. Guarda tus tiradas favoritas con nombre. |
 | 🎒 **Inventario** | Equipo en las manos y puesto, mochila, monedas con cambio, munición, pociones y objetos mágicos con sintonización. |
-| 📜 **Diario y bestiario** | Apunta lo que pasa en cada sesión y lo que sabéis de cada criatura. |
+| 📜 **Diario y bestiario** | Apunta lo que pasa en cada sesión y lo que sabéis de cada criatura. Expórtalo en Markdown para el grupo. |
+| 🖨️ **Imprimir** | Una ficha limpia en blanco y negro para papel o PDF. |
 | 📚 **Tus libros dentro** | Si tienes el PDF del Manual del Jugador u otro libro, impórtalo y verás las descripciones completas. Se lee en tu dispositivo y no sale de él. |
-| 👥 **Varios personajes** | Cada uno con el color y el emblema de su clase. Puedes pasárselos a otro dispositivo o al DJ. |
+| 👥 **Varios personajes** | Cada uno con el color y el emblema de su clase. Pásaselos al DJ como archivo o como código de texto por un chat; el DJ los ve todos juntos en la **vista de grupo**. |
+| 💾 **Tus datos a salvo** | Copia automática diaria en el dispositivo, recordatorio para guardar una copia fuera y aviso si el dispositivo no deja guardar. |
 
 ## ⬇️ Cómo instalarla
 
@@ -126,20 +128,22 @@ Los personajes se guardan en ese navegador, en ese dispositivo.
 4. Si tienes los libros en PDF, impórtalos desde **Más → Libros**.
 5. De vez en cuando, haz una **copia de seguridad** desde **Más → Copia de seguridad**.
 
-¿Perdido? La app trae un tutorial que puedes repetir cuando quieras desde **Más → Ver tutorial**.
+¿Perdido? La app trae un tutorial que puedes repetir cuando quieras desde **Más → Ver tutorial**. En el ordenador, pulsa **?** para ver los atajos de teclado (D dados, C combate, Ctrl+Z deshacer…).
 
 ## ❓ Preguntas frecuentes
 
 <details>
 <summary><b>¿Puedo perder a mi personaje?</b></summary>
 
-Los datos viven solo en tu dispositivo. Si borras la app, los datos del navegador o cambias de móvil, se pierden **salvo que tengas una copia de seguridad**. Hazla de vez en cuando desde **Más → Copia de seguridad** y guarda el archivo en un sitio seguro (Drive, correo, WhatsApp…).
+Los datos viven solo en tu dispositivo. Si borras la app, los datos del navegador o cambias de móvil, se pierden **salvo que tengas una copia de seguridad**. Hazla de vez en cuando desde **Más → Copia de seguridad** y guarda el archivo en un sitio seguro (Drive, correo, WhatsApp…). La app te lo recuerda si pasan dos semanas sin copia.
+
+Además, cada día que juegas guarda una copia automática en el propio dispositivo (las cinco últimas), que puedes restaurar desde la misma pantalla si algo sale mal.
 </details>
 
 <details>
 <summary><b>¿Cómo paso mi personaje del móvil al ordenador (o a otro móvil)?</b></summary>
 
-Haz una copia de seguridad en el dispositivo de origen, envíate el archivo y restáurala en el otro desde **Más → Copia de seguridad**. También puedes exportar un solo personaje para mandárselo al DJ.
+Haz una copia de seguridad en el dispositivo de origen, envíate el archivo y restáurala en el otro desde **Más → Copia de seguridad**. También puedes exportar un solo personaje para mandárselo al DJ, como archivo o como **código de texto** para pegarlo en un chat: quien lo reciba lo pega en **Copia de seguridad → Cargar copia**.
 </details>
 
 <details>
@@ -177,6 +181,8 @@ Aplicación web en JavaScript (Vite) empaquetada para Android con Capacitor. Hac
 npm install
 npm run dev            # la app en local, con recarga
 npm test               # pruebas de reglas y estado (node --test)
+npm run test:cobertura # las mismas, con cobertura mínima de domain/ y core/
+npm run e2e            # la app compilada, recorrida en Chromium (playwright-core)
 npm run lint           # revisión del código con ESLint
 npm run build          # web en www/
 npm run build:windows  # versión de Windows en un solo HTML
@@ -195,6 +201,7 @@ web/src/
 └── styles/      un CSS por área y tokens.css
 web/public/data/ compendio de conjuros del SRD y vocabulario del OCR
 tests/           pruebas con la misma estructura que web/src/domain, más integracion/
+e2e/             pruebas de extremo a extremo en Chromium
 tools/           auditorias/, compendio/, iconos/, ocr/, capturas y publicación
 docs/            arquitectura, auditorías y capturas (docs/img)
 android/         proyecto Android de Capacitor
