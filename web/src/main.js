@@ -38,7 +38,7 @@ import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
 import { toast, botonDeshacer } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';
 import { confirmar } from './ui/componentes/modal.js';
-import { almacen, fijarBarras, alEventosApp, NATIVO } from './platform/native.js';
+import { almacen, archivos, fijarBarras, alEventosApp, pedirPersistencia, NATIVO } from './platform/native.js';
 import { pintarBarra, pintarHoja } from './ui/pantallas/hoja.js';
 import * as eventos from './app/eventos.js';
 import * as asistentes from './app/asistentes.js';
@@ -86,15 +86,23 @@ async function boot() {
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
   const { db, migrated, fallo } = cargarGuardado(v2, v1);
-  if (fallo) await almacen.set(`${KEY}-rescate-${Date.now()}`, v2);
-  const S = crearEstado({ almacen, clave: KEY, db });
+  if (fallo) await archivos.set(`rescate-${Date.now()}.json`, v2).catch(() => almacen.set(`${KEY}-rescate-${Date.now()}`, v2));
+  let app = null;
+  const alFallar = (e, { primero }) => {
+    console.warn('No se pudo guardar', e);
+    if (!primero) return toast('Sigue sin poder guardarse. Haz una copia de seguridad.', [{ label: 'Copia', hl: true, fn: () => app?.run('backup') }]);
+    confirmar({ titulo: 'No se ha podido guardar', icono: 'save', ok: 'Hacer copia ahora', cancelar: 'Seguir',
+      texto: 'El dispositivo no ha dejado guardar los últimos cambios: puede que el almacenamiento esté lleno o bloqueado. La app lo reintentará con cada cambio, pero haz ya una copia de seguridad para no perder nada.' })
+      .then(si => { if (si) app?.run('backup'); });
+  };
+  const S = crearEstado({ almacen, clave: KEY, db, alFallar, alRecuperar: () => toast('Cambios guardados de nuevo.') });
   S.subscribe(() => { pintarBarra(S); pintarHoja(S); });
 
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.abrirBuscador(''); } });
   buscador.init(S, { startEditing });
   conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
-  const app = await eventos.init(S);
+  app = await eventos.init(S);
 
   const TOUR_INICIO = [
     { titulo: 'Bienvenido al grimorio', texto: 'Tu compañero de mesa para D&amp;D 2024: hoja de personaje, libro de conjuros, modo combate, dados, diario de campaña y las descripciones de tus manuales, en el móvil o en el PC.' },
@@ -150,7 +158,7 @@ async function boot() {
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
   app.COMMANDS._tutorial = () => (document.body.classList.contains('on-landing') ? tour('inicio', TOUR_INICIO, { forzar: true }) : tourHoja(true));
-  document.addEventListener('grimorio:creado', () => { if (portada.portadaVisible()) portada.ocultarPortada(); tourHoja(false); });
+  document.addEventListener('grimorio:creado', () => { if (portada.portadaVisible()) portada.ocultarPortada(); tourHoja(false); pedirPersistencia(); });
   document.addEventListener('grimorio:abierto', () => { if (portada.portadaVisible()) portada.ocultarPortada(); });
 
   S.emit('boot');
@@ -173,6 +181,10 @@ async function boot() {
     if (ok && enlazarCatalogo(S.db)) S.save();
     S.emit('srd');
     idle(asistentes.precargar);
+    await archivos.migrar();
+    await copia.copiaAutomatica();
+    if (S.db.chars.length) pedirPersistencia();
+    setTimeout(() => copia.recordarCopia(), 6000);
   });
 }
 boot().catch(e => { document.documentElement.classList.add('ready'); throw e; });

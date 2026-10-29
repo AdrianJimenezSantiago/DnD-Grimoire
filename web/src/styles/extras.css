@@ -534,3 +534,9 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ccp .scp-panel { min-width: min(360px, calc(100vw - 48px)); }
 .ccp .scp-emb { color: hsl(var(--sh) var(--ss) 66%); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .3), transparent 72%); border-color: hsl(var(--sh) var(--ss) 58% / .5); }
 .warn-txt { color: var(--warn, #c9793b); }
+
+.bk-estado { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.bk-ultima { margin: 0; padding: 10px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); font: 400 var(--fs-m) / 1.35 var(--sans); }
+.bk-ultima.tarde { border-color: var(--danger); }
+.bk-espacio { margin: 0; }
+.bk-h { margin: 18px 0 4px; font: 600 var(--fs-m) / 1.2 var(--serif); }

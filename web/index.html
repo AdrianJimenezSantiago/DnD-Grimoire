@@ -253,6 +253,7 @@
 <dialog id="backupDlg" aria-labelledby="bkTitle"><div class="grip"></div>
   <div class="dhead"><h2 id="bkTitle">Copia de seguridad</h2><div class="dsub">Incluye todos los personajes y el catálogo de conjuros.</div></div>
   <div class="dbody">
+    <div class="bk-estado" id="bkEstado" aria-live="polite"></div>
     <p class="note">Guárdala en un archivo y mándala a Drive, a tu correo o a otro dispositivo. Para recuperarla, abre ese archivo.</p>
     <div class="row-btns" style="justify-content:flex-start">
       <button type="button" class="primary" id="bkSave">Guardar en archivo</button>
@@ -261,6 +262,7 @@
     </div>
     <p class="note">También puedes copiar el texto o pegar el de otra copia y pulsar «Cargar copia». Un personaje exportado suelto (desde «Gestionar personajes») o una copia de la hoja antigua se añaden como un personaje más, sin tocar los demás.</p>
     <textarea id="bkText" spellcheck="false" rows="5" aria-label="Texto de la copia de seguridad" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
+    <div id="bkAuto"></div>
   </div>
   <div class="dfoot"><button type="button" id="bkCopy">Copiar texto</button><button type="button" id="bkLoad">Cargar copia</button><span class="spacer"></span><button type="button" data-close>Cerrar</button></div>
 </dialog>

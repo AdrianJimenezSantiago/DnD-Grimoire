@@ -65,3 +65,25 @@ describe('cargarGuardado: carga de datos guardados', () => {
     assert.equal(cargarGuardado(null, null).db.chars.length, 0);
   });
 });
+
+describe('crearEstado: fallos al guardar', () => {
+  const lleno = () => { let falla = true; return { arreglar: () => { falla = false; }, guardado: null, async guardar(k, v) { if (falla) throw new Error('QuotaExceededError'); this.guardado = v; }, set: async () => {} }; };
+
+  test('si el guardado falla avisa una vez, reintenta en el siguiente cambio y avisa al recuperarse', async () => {
+    const st = lleno(), avisos = [];
+    const S = crearEstado({ almacen: st, clave: 'k', db: bdDeEjemplo(), alFallar: (e, x) => avisos.push(x.primero ? 'primero' : 'otra vez'), alRecuperar: () => avisos.push('recuperado') });
+    S.edit((db, ch) => { ch.lema = 'uno'; }); await S.flush();
+    assert.deepEqual(avisos, ['primero']); assert.ok(S.guardadoFallando());
+    await S.flush();
+    assert.deepEqual(avisos, ['primero', 'otra vez'], 'sigue pendiente aunque no haya cambios nuevos');
+    st.arreglar(); S.edit((db, ch) => { ch.lema = 'dos'; }); await S.flush();
+    assert.deepEqual(avisos, ['primero', 'otra vez', 'recuperado']);
+    assert.equal(JSON.parse(st.guardado).chars[0].lema, 'dos'); assert.ok(!S.guardadoFallando());
+  });
+
+  test('con un almacén que solo tiene set (como antes) sigue funcionando', async () => {
+    const st = mem(), S = crearEstado({ almacen: st, clave: 'k', db: bdDeEjemplo() });
+    S.edit((db, ch) => { ch.lema = 'x'; }); await S.flush();
+    assert.equal(JSON.parse(st.m.get('k')).chars[0].lema, 'x');
+  });
+});
