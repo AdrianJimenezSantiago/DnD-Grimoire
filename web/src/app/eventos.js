@@ -25,6 +25,7 @@ import { abrirConjuro } from '../ui/dialogs/conjuro.js';
 import { abrirRasgos, abrirRecuperacion } from '../ui/dialogs/rasgos.js';
 import { abrirHistorial } from '../ui/dialogs/historial.js';
 import { abrirCopia } from '../ui/dialogs/copia.js';
+import { abrirGrupo } from '../ui/dialogs/grupo.js';
 import { abrirManual } from '../ui/dialogs/manual.js';
 import { abrirBiblioteca, abrirRasgoJuego } from '../ui/dialogs/biblioteca.js';
 import { abrirEquipo } from '../ui/dialogs/equipo.js';
@@ -70,6 +71,7 @@ function moreMenuHtml() {
   const saber = [tile('biblioteca', gi('biblioteca', 'icon'), 'Biblioteca', '', i++), tile('manual', gi('libro', 'icon'), 'Libros', 'Libros y manuales', i++), tile('hist', icon('hourglass'), 'Historial', 'Historial de la sesión', i++)].join('');
   const util = [
     fila('backup', icon('save'), 'Copia de seguridad'),
+    ...(S.db.chars.filter(c => !c.prueba).length > 1 ? [fila('grupo', icon('grid'), 'Vista de grupo')] : []),
     NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `aria-pressed="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
     fila('efectos', icon('sparkles'), `Efectos: ${efectosTexto()}`, 'aria-haspopup="menu"'),
     fila('tutorial', icon('star'), 'Ver tutorial'), ...(!NATIVO && matchMedia('(hover: hover) and (pointer: fine)').matches ? [fila('atajos', icon('list'), 'Atajos de teclado')] : []), fila('about', icon('info'), 'Acerca de'),
@@ -127,6 +129,7 @@ const COMMANDS = {
   formas: () => S.cur() && abrirFormas('salvaje'),
   verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
   backup: () => abrirCopia(),
+  grupo: () => abrirGrupo(),
   vida: () => S.cur() && abrirVida(),
   inspiracion: () => alternarInspiracion(),
   estados: () => S.cur() && abrirEstados(),

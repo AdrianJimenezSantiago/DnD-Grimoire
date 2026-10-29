@@ -54,3 +54,20 @@ describe('imprimir', () => {
     await ctx.close();
   });
 });
+
+describe('vista de grupo', () => {
+  test('con dos personajes aparece en la portada, resume a cada uno y abre su hoja', async () => {
+    const { semilla } = await import('./entorno.js');
+    const db = semilla(), mira = { ...structuredClone(db.chars[0]), id: 'c-mira', nombre: 'Mira' };
+    db.chars.push(mira);
+    const { ctx, page, errores } = await abrir({ db, movil: false });
+    await page.click('[data-lcmd="grupo"]'); await page.waitForSelector('#grupoDlg[open]');
+    assert.equal(await page.$$eval('.gr-card', e => e.length), 2);
+    assert.match(await page.textContent('#grBody'), /Percepción/);
+    await page.click('[data-grabrir="c-mira"]'); await espera(900);
+    assert.equal((await guardado(page)).activeId, 'c-mira');
+    assert.equal(await page.isVisible('#landing'), false);
+    assert.deepEqual(errores, []);
+    await ctx.close();
+  });
+});

@@ -105,6 +105,7 @@ function render() {
       <button type="button" data-lcmd="biblioteca">${gi('biblioteca')}Biblioteca</button>
       <button type="button" data-lcmd="manual">${gi('libro')}Libros y manuales</button>
       ${chars.length ? `<button type="button" data-lcmd="gestionar">${icon('users')}Gestionar personajes</button>` : ''}
+      ${chars.filter(c => !c.prueba).length > 1 ? `<button type="button" data-lcmd="grupo">${icon('grid')}Vista de grupo</button>` : ''}
     </div>
     ${hayLista ? '' : pilares}
     <footer class="l-foot paleta-local"><button type="button" class="ghost" data-lcmd="tutorial">${icon('info')}Ver tutorial</button>

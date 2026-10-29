@@ -67,6 +67,7 @@ import * as buscar from './ui/dialogs/buscar.js';
 import * as elegir from './ui/dialogs/elegir.js';
 import * as aviso from './ui/dialogs/aviso.js';
 import * as ordenDlg from './ui/dialogs/orden.js';
+import * as grupo from './ui/dialogs/grupo.js';
 import * as impresion from './ui/pantallas/impresion.js';
 import { tour } from './ui/componentes/tour.js';
 import { vigilarCampos } from './ui/componentes/validacion.js';
@@ -108,7 +109,7 @@ async function boot() {
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.abrirBuscador(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init(); ordenDlg.init(); impresion.init(S);
+  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init(); ordenDlg.init(); grupo.init(S); impresion.init(S);
   app = await eventos.init(S);
 
   const TOUR_INICIO = [
@@ -160,7 +161,7 @@ async function boot() {
   };
   portada.init(S, {
     pruebasAuto: PRUEBAS,
-    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.abrirCreacion(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.abrirCreacion(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), grupo: () => app.run('grupo'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
