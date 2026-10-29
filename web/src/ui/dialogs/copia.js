@@ -3,7 +3,7 @@
 import { clone, esc } from '../../core/util.js';
 import { burla } from '../../domain/presentacion/validacion.js';
 import { rechazar } from '../componentes/validacion.js';
-import { personajeDeV1, normBd, importarPersonaje, ESQUEMA } from '../../domain/personaje/modelo.js';
+import { personajeDeV1, normBd, importarPersonaje, migrarBd, esDeVersionNueva } from '../../domain/personaje/modelo.js';
 import { enlazarCatalogo, invalidarItems } from '../../domain/conjuros/catalogo.js';
 import { $ } from '../componentes/dom.js';
 import { abrirDialogo, cerrarDialogo } from '../componentes/dialog.js';
@@ -77,14 +77,17 @@ export async function cargarCopia(text) {
   let d; try { d = esCodigo(text) ? await decodificar(text) : JSON.parse(text); } catch { d = null; }
   let r = null;
   try { r = leerCopia(d); } catch { r = null; }
+  if (r?.error) return avisar({ titulo: 'Copia de una versión más nueva', texto: r.error, icono: 'save' });
   if (!r) return avisar({ titulo: 'Esa copia no se puede leer', texto: `${burla('copia')} Usa el archivo, el texto completo o el código de personaje tal como se guardó.`, icono: 'save' });
   invalidarItems(); S.editing = false; const h = S.replace(r.db); cerrarDialogo($('#backupDlg'));
   if (r.abierto) document.dispatchEvent(new CustomEvent('grimorio:abierto'));
   toast(r.msg, [botonDeshacer(S, h)]);
 }
 function leerCopia(d) {
-  if (d?.schema === ESQUEMA && Array.isArray(d.chars) && d.catalog && typeof d.catalog === 'object') {
-    const db = normBd(d); enlazarCatalogo(db);
+  if (esDeVersionNueva(d)) return { error: 'Esta copia se hizo con una versión más nueva de Grimorio. Actualiza la app en este dispositivo y vuelve a cargarla.' };
+  const m = d?.schema != null ? migrarBd(d) : null;
+  if (m && Array.isArray(m.chars) && m.catalog && typeof m.catalog === 'object') {
+    const db = normBd(m); enlazarCatalogo(db);
     return { db, msg: `Copia cargada: ${db.chars.length === 1 ? '1 personaje' : db.chars.length + ' personajes'} y ${Object.keys(db.catalog).length} conjuros.` };
   }
   if (d?.tipo === 'grimorio-personaje' && d.personaje && typeof d.personaje === 'object') {

@@ -89,7 +89,7 @@ async function boot() {
   initFondo(); initMagia(); vigilarCampos(); initTeclado();
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
-  const { db, migrated, fallo } = cargarGuardado(v2, v1);
+  const { db, migrated, fallo, versionNueva } = cargarGuardado(v2, v1);
   if (fallo) await archivos.set(`rescate-${Date.now()}.json`, v2).catch(() => almacen.set(`${KEY}-rescate-${Date.now()}`, v2));
   let app = null;
   const alFallar = (e, { primero }) => {
@@ -172,6 +172,9 @@ async function boot() {
   S.emit('boot');
   portada.mostrarPortada();
   if (migrated) S.save();
+  if (versionNueva) confirmar({ titulo: 'Datos de una versión más nueva', icono: 'save', ok: 'Entendido', cancelar: 'Hacer copia',
+    texto: 'Tus personajes se guardaron con una versión más nueva de Grimorio que esta. Se ha guardado una copia intacta en el dispositivo, pero lo mejor es actualizar la app antes de seguir jugando.' })
+    .then(ok => { if (!ok) app.run('backup'); });
   document.documentElement.classList.add('ready');
 
   alEventosApp({ back: app.back, pause: () => { S.flush(); guardarDeshacer(); }, resume: app.resume });

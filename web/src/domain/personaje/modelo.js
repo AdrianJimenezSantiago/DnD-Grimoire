@@ -16,6 +16,17 @@ import { normOpciones } from '../clases/opcionesRasgo.js';
 import { normFavoritas } from '../reglas/favoritas.js';
 
 export const ESQUEMA = 2;
+export const MIGRACIONES = {};
+export function migrarBd(d, migraciones = MIGRACIONES, hasta = ESQUEMA) {
+  let v = parseInt(d?.schema, 10);
+  if (!Number.isInteger(v) || v < 2 || v > hasta) return null;
+  while (v < hasta) {
+    const f = migraciones[v]; if (typeof f !== 'function') return null;
+    d = f(d) || d; v += 1; d.schema = v;
+  }
+  return d;
+}
+export const esDeVersionNueva = d => Number.isInteger(parseInt(d?.schema, 10)) && parseInt(d.schema, 10) > ESQUEMA;
 export const CAMPOS_CATALOGO = ['es', 'en', 'escuela', 'tiempo', 'alcance', 'duracion', 'comp', 'coste', 'efecto', 'desc', 'sup'];
 export const CAMPOS_LIBRO = ['fuente', 'gratis'];
 export const THEO = {
@@ -196,7 +207,15 @@ export function bdDeEjemplo() {
 
 export function cargarGuardado(rawV2, rawV1) {
   let fallo = false;
-  try { if (rawV2) { const d = JSON.parse(rawV2); if (d?.schema === ESQUEMA) return { db: normBd(d), migrated: false }; fallo = true; } } catch { fallo = true; }
+  try {
+    if (rawV2) {
+      const d = JSON.parse(rawV2);
+      if (esDeVersionNueva(d) && Array.isArray(d.chars)) return { db: normBd(d), migrated: false, fallo: true, versionNueva: true };
+      const antes = d?.schema, m = migrarBd(d);
+      if (m) return { db: normBd(m), migrated: antes !== ESQUEMA };
+      fallo = true;
+    }
+  } catch { fallo = true; }
   try {
     if (rawV1) { const v1 = JSON.parse(rawV1);
       if (v1?.levels) { const d = { schema: ESQUEMA, catalog: {}, chars: [] }; const ch = personajeDeV1(d, v1); d.chars.push(ch); d.activeId = ch.id; return { db: normBd(d), migrated: true, fallo }; } }
