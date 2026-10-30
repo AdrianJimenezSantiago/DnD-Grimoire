@@ -61,7 +61,7 @@ jobs:
 
       - name: Libros incluidos (caché)
         id: libros
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: libros-generados
           key: libros-${{ hashFiles('tools/resources/*.pdf', 'tools/preparar-libros.mjs', 'web/src/domain/**', 'web/public/data/compendio.json', 'web/public/data/vocabulario.json', 'tools/ocr/lecturas/*.json') }}
