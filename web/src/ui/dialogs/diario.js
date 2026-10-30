@@ -9,7 +9,8 @@ import { icon } from '../componentes/icons.js';
 import { abrirDialogo } from '../componentes/dialog.js';
 import { toast, botonDeshacer } from '../componentes/toast.js';
 import { confirmar } from '../componentes/modal.js';
-import { vibrar } from '../../platform/native.js';
+import { vibrar, compartirArchivo } from '../../platform/native.js';
+import { diarioMarkdown } from '../../domain/personaje/diarioTexto.js';
 import { gi } from '../componentes/tema.js';
 import { iconoDano } from './tiradas.js';
 import { tiradasConjuro } from '../../domain/conjuros/catalogo.js';
@@ -47,7 +48,7 @@ function lista() {
       ${s.texto ? `<span class="ses-x">${esc(s.texto.slice(0, 120))}${s.texto.length > 120 ? '…' : ''}</span>` : ''}</span></button>`; }).join('')}</div>`
     : `<p class="pempty">${V.q ? 'Nada coincide con la búsqueda.' : 'Aún no hay sesiones. Crea la primera al empezar la partida y ve apuntando nombres, sucesos y pendientes.'}</p>`;
   $('#diBody').innerHTML = h;
-  $('#diFoot').innerHTML = '<span class="spacer"></span><button type="button" data-close>Cerrar</button>';
+  $('#diFoot').innerHTML = `${diarioDe(c).sesiones.length || bestiarioDe(c).criaturas.length ? '<button type="button" data-di="exportar">Exportar</button>' : ''}<span class="spacer"></span><button type="button" data-close>Cerrar</button>`;
 }
 function criaturasSesion(s) {
   const todas = bestiarioDe(ch()).criaturas, aqui = todas.filter(c => c.sesiones.includes(s.id)), otras = todas.filter(c => !c.sesiones.includes(s.id));
@@ -159,6 +160,11 @@ export function init(store) {
     if (a === 'borrarcr') { const c = criatura(ch(), V.cid); if (!(await confirmar({ titulo: `¿Borrar ${c.nombre || 'esta criatura'}?`, texto: 'Se borra del bestiario con todo lo anotado. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
       const h = S.edit((db, x) => { const b = bestiarioDe(x); b.criaturas = b.criaturas.filter(y => y.id !== c.id); }); V.vista = 'bestiario'; bestiario(); toast(`${esc(c.nombre || 'Criatura')} borrada del bestiario.`, [botonDeshacer(S, h)]); }
     if (a === 'anadir') anadir();
+    if (a === 'exportar') {
+      const c = ch(), nombre = `diario-${(c.nombre || 'personaje').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'personaje'}.md`;
+      try { await compartirArchivo(nombre, diarioMarkdown(c), 'text/markdown', `Diario de ${c.nombre}`); toast('Diario exportado en Markdown: se lee en cualquier editor de notas, Discord u Obsidian.'); }
+      catch (err) { if (!/cancel|abort/i.test(String(err?.message || err?.name))) toast('No se pudo exportar el diario.'); }
+    }
     if (a === 'borrar') { const s = ses(); if (!(await confirmar({ titulo: `¿Borrar la sesión ${s.n}?`, texto: 'Se borran su crónica y sus notas. Podrás deshacerlo justo después.', ok: 'Borrar', peligro: true }))) return;
       const h = S.edit((db, c) => { const d = diarioDe(c); d.sesiones = d.sesiones.filter(x => x.id !== s.id); }); V.vista = 'lista'; lista(); toast(`Sesión ${s.n} borrada.`, [botonDeshacer(S, h)]); }
   });

@@ -4,7 +4,7 @@ dialog.modal[open] { display: block; animation: pop-in var(--t-med) var(--spring
 .md-icon .icon { width: 26px; height: 26px; }
 dialog.modal.danger .md-icon { color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--danger) 7%, transparent); }
 dialog.modal h2 { font: 500 var(--fs-xl) / 1.2 var(--serif); margin: 0 0 8px; }
-.md-text { font: 400 var(--fs-m) / 1.5 var(--sans); color: var(--ink-2); margin: 0 0 16px; }
+.md-text { font: 400 var(--fs-m) / 1.5 var(--sans); color: var(--ink-2); margin: 0 0 16px; white-space: pre-line; }
 dialog.modal input { margin-bottom: 16px; text-align: center; font: 700 22px / 1 var(--serif); }
 .md-btns { display: flex; gap: 10px; }
 .md-btns button { flex: 1; min-height: 46px; border-radius: var(--r-pill); font-size: var(--fs-m); }
@@ -534,3 +534,31 @@ dialog#retDlg { width: min(460px, 94vw); }
 .ccp .scp-panel { min-width: min(360px, calc(100vw - 48px)); }
 .ccp .scp-emb { color: hsl(var(--sh) var(--ss) 66%); background: radial-gradient(circle, hsl(var(--sh) var(--ss) 50% / .3), transparent 72%); border-color: hsl(var(--sh) var(--ss) 58% / .5); }
 .warn-txt { color: var(--warn, #c9793b); }
+
+.bk-estado { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.bk-ultima { margin: 0; padding: 10px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); font: 400 var(--fs-m) / 1.35 var(--sans); }
+.bk-ultima.tarde { border-color: var(--danger); }
+.bk-espacio { margin: 0; }
+.bk-h { margin: 18px 0 4px; font: 600 var(--fs-m) / 1.2 var(--serif); }
+
+@media (min-width: 701px) { dialog.ancho { width: min(980px, 94vw); } }
+.gr-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.gr-card { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.gr-card.moribundo, .gr-card.muerto { border-color: var(--danger); }
+.gr-card header { display: flex; align-items: flex-start; gap: 10px; }
+.gr-card header div { flex: 1; min-width: 0; }
+.gr-card h3 { margin: 0; font: 600 var(--fs-l) / 1.2 var(--serif); }
+.gr-card header small { font: 400 var(--fs-xs) / 1.3 var(--sans); color: var(--ink-2); }
+.gr-card header button { min-height: 32px; font-size: var(--fs-xs); }
+.gr-vit, .gr-pasivas, .gr-salv { display: flex; flex-wrap: wrap; gap: 6px; }
+.gr-vit span, .gr-pas { flex: 1 1 0; min-width: 52px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 4px; border-radius: var(--r-s); background: var(--surface); border: 1px solid var(--line-soft); }
+.gr-vit small, .gr-pas small, .gr-salv small { font: 500 10.5px / 1 var(--sans); color: var(--ink-2); text-transform: uppercase; letter-spacing: .03em; }
+.gr-vit b, .gr-pas b { font: 700 var(--fs-l) / 1.1 var(--sans); }
+.gr-vit i { font-style: normal; font-size: var(--fs-xs); color: var(--ink-2); }
+.gr-pg em { font: 500 var(--fs-xs) / 1 var(--sans); color: var(--ok); font-style: normal; }
+.gr-pas.mejor { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.gr-salv span { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font: 600 var(--fs-s) / 1 var(--sans); padding: 4px 0; border-radius: var(--r-s); }
+.gr-salv span.comp { background: var(--gold-soft); }
+.gr-est { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.gr-est .mal { border-color: var(--danger); }
+.gr-est .bien { border-color: var(--ok); }

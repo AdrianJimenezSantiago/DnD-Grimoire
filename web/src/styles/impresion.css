@@ -1,0 +1,50 @@
+/* Ficha impresa: solo existe en papel. Blanco y negro, A4, sin fondos ni animaciones. */
+.impresion { display: none; }
+
+@media print {
+  @page { size: A4; margin: 12mm 11mm; }
+  html.con-ficha, html.con-ficha body { background: #fff !important; color: #000 !important; }
+  html.con-ficha body > :not(#impresion) { display: none !important; }
+  html.con-ficha body::before, html.con-ficha body::after { display: none !important; }
+  html.con-ficha .impresion { display: block !important; color: #000; font: 9.5pt / 1.3 'Alegreya Sans', system-ui, sans-serif; }
+  .impresion * { color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; animation: none !important; }
+  .impresion h1 { margin: 0; font: 700 22pt / 1.1 'Cinzel', serif; letter-spacing: .02em; }
+  .impresion h2 { margin: 10pt 0 4pt; padding-bottom: 2pt; border-bottom: 1.2pt solid #000; font: 700 11pt / 1.2 'Cinzel', serif; break-after: avoid; }
+  .impresion h3 { margin: 7pt 0 3pt; font: 700 10pt / 1.2 'Alegreya', serif; break-after: avoid; }
+  .impresion h3 small { font-weight: 400; }
+  .im-cab { border-bottom: 2pt solid #000; padding-bottom: 4pt; margin-bottom: 7pt; }
+  .im-cab p { margin: 2pt 0 0; font-size: 10.5pt; }
+  .im-cab .im-camp { font-style: italic; font-size: 9pt; }
+  .im-vit { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4pt; margin-bottom: 7pt; }
+  .im-caja { border: 1pt solid #000; border-radius: 4pt; padding: 3pt 4pt; text-align: center; break-inside: avoid; }
+  .im-caja small { display: block; font-size: 7pt; text-transform: uppercase; letter-spacing: .04em; }
+  .im-caja b { display: block; font-size: 13pt; }
+  .im-caja em { display: block; font-size: 7pt; font-style: normal; }
+  .im-cols { display: grid; grid-template-columns: 38% 1fr; gap: 9pt; }
+  .im-ab { display: flex; gap: 5pt; margin-bottom: 4pt; break-inside: avoid; }
+  .im-ab-c { flex: 0 0 46pt; border: 1pt solid #000; border-radius: 4pt; text-align: center; padding: 2pt 0; align-self: flex-start; }
+  .im-ab-c small { display: block; font-size: 6.5pt; text-transform: uppercase; }
+  .im-ab-c b { display: block; font-size: 14pt; line-height: 1.1; }
+  .im-ab-c span { display: inline-block; font-size: 8pt; border: .8pt solid #000; border-radius: 6pt; padding: 0 5pt; }
+  .im-ab ul { list-style: none; margin: 0; padding: 0; flex: 1; }
+  .im-ab li { display: flex; align-items: center; gap: 4pt; font-size: 8.5pt; border-bottom: .4pt dotted #888; }
+  .im-ab li span { flex: 1; }
+  .im-ab .im-salv { font-weight: 700; }
+  .im-c { display: inline-block; width: 6.5pt; height: 6.5pt; border: .8pt solid #000; border-radius: 50%; flex: none; }
+  .im-c.on { background: #000 !important; }
+  .im-c.doble { box-shadow: 0 0 0 1.4pt #fff, 0 0 0 2.2pt #000 !important; }
+  .im-pas { margin: 4pt 0; font-size: 8.5pt; }
+  .im-t { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  .im-t th { text-align: left; font-size: 7pt; text-transform: uppercase; border-bottom: 1pt solid #000; padding: 1pt 3pt; }
+  .im-t td { border-bottom: .4pt solid #999; padding: 2pt 3pt; vertical-align: top; }
+  .im-t tr { break-inside: avoid; }
+  .im-conj td:first-child { width: 9pt; }
+  .im-rasgos { margin: 0; padding-left: 10pt; font-size: 8.5pt; }
+  .im-rasgos li { margin-bottom: 2pt; break-inside: avoid; }
+  .im-dl { display: grid; grid-template-columns: auto 1fr; gap: 1pt 6pt; margin: 0; font-size: 8.5pt; }
+  .im-dl dt { font-weight: 700; } .im-dl dd { margin: 0; }
+  .im-magia { break-before: auto; }
+  .im-obj { columns: 3; column-gap: 12pt; margin: 0; padding-left: 10pt; font-size: 8.5pt; }
+  .im-notas { white-space: pre-wrap; font-size: 9pt; }
+  .im-pie { margin-top: 10pt; font-size: 7pt; text-align: right; }
+}

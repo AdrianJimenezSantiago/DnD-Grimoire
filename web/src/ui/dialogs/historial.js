@@ -18,7 +18,7 @@ function render() {
     const d = fmtDay(e.t); if (d !== day) { day = d; h += `<h3 class="hday">${esc(d)}</h3>`; }
     h += `<div class="hrow ${/^Descanso/.test(e.x) ? 'rest' : ''}"><time>${fmtT(e.t)}</time><span class="hx">${esc(e.x)}</span>${S.undoable(e.id) ? `<button type="button" data-hundo="${e.id}">Deshacer</button>` : ''}</div>`;
   });
-  $('#histBody').innerHTML = h + '<p class="note" style="margin-top:14px">«Deshacer» devuelve la hoja a como estaba justo antes de esa acción, así que también deshace todo lo posterior. Solo se puede mientras la app sigue abierta.</p>';
+  $('#histBody').innerHTML = h + '<p class="note" style="margin-top:14px">«Deshacer» devuelve la hoja a como estaba justo antes de esa acción, así que también deshace todo lo posterior. Las 10 últimas se pueden deshacer aunque cierres la app; las de antes, solo mientras sigue abierta.</p>';
 }
 export function abrirHistorial() { render(); abrirDialogo($('#histDlg')); }
 export function init(store) {

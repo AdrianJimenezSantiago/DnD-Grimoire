@@ -29,6 +29,7 @@ import './styles/impacto.css';
 import './styles/codice.css';
 import './styles/estandarte.css';
 import './styles/movil.css';
+import './styles/impresion.css';
 
 import { crearEstado } from './core/store.js';
 import { cargarGuardado } from './domain/personaje/modelo.js';
@@ -38,7 +39,7 @@ import { hayPruebas, sembrarPruebas } from './domain/personaje/pruebas.js';
 import { toast, botonDeshacer } from './ui/componentes/toast.js';
 import { esc } from './core/util.js';
 import { confirmar } from './ui/componentes/modal.js';
-import { almacen, fijarBarras, alEventosApp, NATIVO } from './platform/native.js';
+import { almacen, archivos, fijarBarras, alEventosApp, pedirPersistencia, NATIVO } from './platform/native.js';
 import { pintarBarra, pintarHoja } from './ui/pantallas/hoja.js';
 import * as eventos from './app/eventos.js';
 import * as asistentes from './app/asistentes.js';
@@ -65,6 +66,9 @@ import * as dados from './ui/dialogs/dados.js';
 import * as buscar from './ui/dialogs/buscar.js';
 import * as elegir from './ui/dialogs/elegir.js';
 import * as aviso from './ui/dialogs/aviso.js';
+import * as ordenDlg from './ui/dialogs/orden.js';
+import * as grupo from './ui/dialogs/grupo.js';
+import * as impresion from './ui/pantallas/impresion.js';
 import { tour } from './ui/componentes/tour.js';
 import { vigilarCampos } from './ui/componentes/validacion.js';
 import { initTeclado } from './ui/componentes/teclado.js';
@@ -72,7 +76,7 @@ import { initFondo } from './ui/animaciones/fondo.js';
 import { initMagia } from './ui/animaciones/magia.js';
 import { initEfectos } from './ui/animaciones/calidad.js';
 
-const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1';
+const KEY = 'grimorio-v2', KEY_V1 = 'theo-grimorio-v1', PREF = 'theo-grimorio-v1', DESHACER = 'deshacer.json';
 const PRUEBAS = typeof __PERSONAJES_PRUEBA__ !== 'undefined' && __PERSONAJES_PRUEBA__;
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 300));
 
@@ -85,16 +89,28 @@ async function boot() {
   initFondo(); initMagia(); vigilarCampos(); initTeclado();
 
   const [v2, v1] = await Promise.all([almacen.get(KEY), almacen.get(KEY_V1)]);
-  const { db, migrated, fallo } = cargarGuardado(v2, v1);
-  if (fallo) await almacen.set(`${KEY}-rescate-${Date.now()}`, v2);
-  const S = crearEstado({ almacen, clave: KEY, db });
+  const { db, migrated, fallo, versionNueva } = cargarGuardado(v2, v1);
+  if (fallo) await archivos.set(`rescate-${Date.now()}.json`, v2).catch(() => almacen.set(`${KEY}-rescate-${Date.now()}`, v2));
+  let app = null;
+  const alFallar = (e, { primero }) => {
+    console.warn('No se pudo guardar', e);
+    if (!primero) return toast('Sigue sin poder guardarse. Haz una copia de seguridad.', [{ label: 'Copia', hl: true, fn: () => app?.run('backup') }]);
+    confirmar({ titulo: 'No se ha podido guardar', icono: 'save', ok: 'Hacer copia ahora', cancelar: 'Seguir',
+      texto: 'El dispositivo no ha dejado guardar los últimos cambios: puede que el almacenamiento esté lleno o bloqueado. La app lo reintentará con cada cambio, pero haz ya una copia de seguridad para no perder nada.' })
+      .then(si => { if (si) app?.run('backup'); });
+  };
+  const S = crearEstado({ almacen, clave: KEY, db, alFallar, alRecuperar: () => toast('Cambios guardados de nuevo.') });
   S.subscribe(() => { pintarBarra(S); pintarHoja(S); });
+  try { S.recuperarHistorial(JSON.parse((await archivos.get(DESHACER)) || '[]')); } catch {}
+  let tDeshacer = null;
+  const guardarDeshacer = () => { clearTimeout(tDeshacer); archivos.set(DESHACER, JSON.stringify(S.historialGuardable())).catch(() => {}); };
+  S.subscribe((_, r) => { if (r === 'act' || r === 'undo' || r === 'replace') { clearTimeout(tDeshacer); tDeshacer = setTimeout(guardarDeshacer, 2500); } });
 
   const startEditing = () => { if (!S.editing) { S.editing = true; S.emit('ui'); } };
   asistentes.configurar(S, { onNewCharacterAddSpells: () => { startEditing(); buscador.abrirBuscador(''); } });
   buscador.init(S, { startEditing });
-  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init();
-  const app = await eventos.init(S);
+  conjuro.init(S); rasgos.init(S); historial.init(S); copia.init(S); manual.init(S); tiradas.init(S); glos.init(); retrato.init(S); trasfondo.init(S); diario.init(S); area.init(S); biblioteca.init(S); equipo.init(S); formas.init(S); vida.init(S); efectosDlg.init(S); objetivosDlg.init(S); dados.init(S); buscar.init(S); elegir.init(); aviso.init(); ordenDlg.init(); grupo.init(S); impresion.init(S);
+  app = await eventos.init(S);
 
   const TOUR_INICIO = [
     { titulo: 'Bienvenido al grimorio', texto: 'Tu compañero de mesa para D&amp;D 2024: hoja de personaje, libro de conjuros, modo combate, dados, diario de campaña y las descripciones de tus manuales, en el móvil o en el PC.' },
@@ -145,22 +161,25 @@ async function boot() {
   };
   portada.init(S, {
     pruebasAuto: PRUEBAS,
-    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.abrirCreacion(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
+    cmd: (c, arg) => ({ pruebas: regenerarPruebas, quitarPruebas, nuevo: () => (arg ? asistentes.abrirCreacion(null, { clase: arg }) : app.run('newchar')), copia: () => app.run('backup'), grupo: () => app.run('grupo'), manual: () => app.run('manual'), biblioteca: () => app.run('biblioteca'), gestionar: () => app.run('chars'), tutorial: () => tour('inicio', TOUR_INICIO, { forzar: true }) }[c]?.()),
     onOpen: () => tourHoja(false),
     onShow: () => setTimeout(() => tour('inicio', TOUR_INICIO, { alTerminar: () => setTimeout(ofrecerLibros, 250) }), 500),
   });
   app.COMMANDS._tutorial = () => (document.body.classList.contains('on-landing') ? tour('inicio', TOUR_INICIO, { forzar: true }) : tourHoja(true));
-  document.addEventListener('grimorio:creado', () => { if (portada.portadaVisible()) portada.ocultarPortada(); tourHoja(false); });
+  document.addEventListener('grimorio:creado', () => { if (portada.portadaVisible()) portada.ocultarPortada(); tourHoja(false); pedirPersistencia(); });
   document.addEventListener('grimorio:abierto', () => { if (portada.portadaVisible()) portada.ocultarPortada(); });
 
   S.emit('boot');
   portada.mostrarPortada();
   if (migrated) S.save();
+  if (versionNueva) confirmar({ titulo: 'Datos de una versión más nueva', icono: 'save', ok: 'Entendido', cancelar: 'Hacer copia',
+    texto: 'Tus personajes se guardaron con una versión más nueva de Grimorio que esta. Se ha guardado una copia intacta en el dispositivo, pero lo mejor es actualizar la app antes de seguir jugando.' })
+    .then(ok => { if (!ok) app.run('backup'); });
   document.documentElement.classList.add('ready');
 
-  alEventosApp({ back: app.back, pause: () => S.flush(), resume: app.resume });
+  alEventosApp({ back: app.back, pause: () => { S.flush(); guardarDeshacer(); }, resume: app.resume });
   addEventListener('pagehide', () => S.flush());
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') S.flush(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { S.flush(); guardarDeshacer(); } });
 
   idle(async () => {
     const fuente = import.meta.env.MODE === 'windows' ? import('../public/data/compendio.json').then(m => m.default) : 'data/compendio.json';
@@ -173,10 +192,20 @@ async function boot() {
     if (ok && enlazarCatalogo(S.db)) S.save();
     S.emit('srd');
     idle(asistentes.precargar);
+    await archivos.migrar();
+    await copia.copiaAutomatica();
+    if (S.db.chars.length) pedirPersistencia();
+    setTimeout(() => copia.recordarCopia(), 6000);
   });
 }
 boot().catch(e => { document.documentElement.classList.add('ready'); throw e; });
 
 if (import.meta.env.PROD && import.meta.env.MODE !== 'windows' && !NATIVO && location.protocol === 'https:' && 'serviceWorker' in navigator) {
-  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(reg => {
+    const habia = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (habia) toast('Hay una versión nueva de Grimorio lista.', [{ label: 'Actualizar', hl: true, fn: () => location.reload() }]);
+    }, { once: true });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(() => {}));
 }

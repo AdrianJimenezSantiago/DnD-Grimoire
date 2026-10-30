@@ -13,18 +13,19 @@ import { cerrarDialogo, abrirDialogo, dialogoSuperior } from '../ui/componentes/
 import { pop, transicionVista, movimientoReducido, chispas } from '../ui/animaciones/fx.js';
 import { NATIVO, vibrar, mantenerDespierta, minimizar, fijarBarras, almacen } from '../platform/native.js';
 import * as A from './acciones.js';
-import { initCombate, alternarCombate, iniciativaManual, nuevoTurno, tirarDesde, atacar, danoCon, accionComun, pgRapido } from './combate.js';
+import { initCombate, alternarCombate, iniciativaManual, nuevoTurno, tirarDesde, atacar, danoCon, accionComun, pgRapido, accionOrden } from './combate.js';
 import { abrirMenu, cerrarMenu, menuAbierto, initMenus } from '../ui/componentes/menu.js';
 import { MODOS, modoEfectos, nivelEfectos, fijarModoEfectos } from '../ui/animaciones/calidad.js';
 import { NIVELES } from '../domain/presentacion/rendimiento.js';
 import { enlazarEdicion } from './edicionConjuros.js';
-import { confirmar } from '../ui/componentes/modal.js';
+import { confirmar, avisar } from '../ui/componentes/modal.js';
 import { abrirPersonajes, abrirCreacion, abrirSubirNivel } from './asistentes.js';
 import { abrirBuscador } from '../ui/dialogs/buscador.js';
 import { abrirConjuro } from '../ui/dialogs/conjuro.js';
 import { abrirRasgos, abrirRecuperacion } from '../ui/dialogs/rasgos.js';
 import { abrirHistorial } from '../ui/dialogs/historial.js';
 import { abrirCopia } from '../ui/dialogs/copia.js';
+import { abrirGrupo } from '../ui/dialogs/grupo.js';
 import { abrirManual } from '../ui/dialogs/manual.js';
 import { abrirBiblioteca, abrirRasgoJuego } from '../ui/dialogs/biblioteca.js';
 import { abrirEquipo } from '../ui/dialogs/equipo.js';
@@ -45,6 +46,7 @@ import { mostrarCaracteristica, abrirPruebas } from '../ui/pantallas/vitales.js'
 import { leer, initLeer } from '../ui/pantallas/leer.js';
 import { combateDe, alternarEconomia } from '../domain/combate/combate.js';
 import { vidaDe } from '../domain/combate/vida.js';
+import { ordenDeTecla, textoAtajos } from '../domain/presentacion/atajos.js';
 
 const PREF = 'theo-grimorio-v1';
 let S, awake = false;
@@ -69,9 +71,10 @@ function moreMenuHtml() {
   const saber = [tile('biblioteca', gi('biblioteca', 'icon'), 'Biblioteca', '', i++), tile('manual', gi('libro', 'icon'), 'Libros', 'Libros y manuales', i++), tile('hist', icon('hourglass'), 'Historial', 'Historial de la sesión', i++)].join('');
   const util = [
     fila('backup', icon('save'), 'Copia de seguridad'),
+    ...(S.db.chars.filter(c => !c.prueba).length > 1 ? [fila('grupo', icon('grid'), 'Vista de grupo')] : []),
     NATIVO ? fila('awake', icon('eye'), 'Pantalla encendida', `aria-pressed="${awake}"`) : fila('print', icon('print'), 'Imprimir'),
     fila('efectos', icon('sparkles'), `Efectos: ${efectosTexto()}`, 'aria-haspopup="menu"'),
-    fila('tutorial', icon('star'), 'Ver tutorial'), fila('about', icon('info'), 'Acerca de'),
+    fila('tutorial', icon('star'), 'Ver tutorial'), ...(!NATIVO && matchMedia('(hover: hover) and (pointer: fine)').matches ? [fila('atajos', icon('list'), 'Atajos de teclado')] : []), fila('about', icon('info'), 'Acerca de'),
   ].join('');
   return `<div class="mm-head">${ch ? avatarHtml(ch, 'md') : `<span class="avatar md">${gi('libro')}</span>`}
       <span class="mm-who"><b>${esc(ch?.nombre || 'Grimorio')}</b><small>${ch ? esc(clasesTexto(ch)) : 'Sin personaje abierto'}</small></span>
@@ -126,6 +129,7 @@ const COMMANDS = {
   formas: () => S.cur() && abrirFormas('salvaje'),
   verConjuros: () => S.cur() && S.edit((db, ch) => { ch.enJuego ||= {}; ch.enJuego.conjuros = !ch.enJuego.conjuros; }),
   backup: () => abrirCopia(),
+  grupo: () => abrirGrupo(),
   vida: () => S.cur() && abrirVida(),
   inspiracion: () => alternarInspiracion(),
   estados: () => S.cur() && abrirEstados(),
@@ -145,6 +149,13 @@ const COMMANDS = {
   theme: () => toggleTheme(),
   awake: () => { awake = !awake; almacen.set(PREF + '-awake', awake ? '1' : '0'); mantenerDespierta(awake); toast(awake ? 'La pantalla no se apagará mientras la hoja esté abierta.' : 'La pantalla se apagará como de costumbre.'); },
   about: () => abrirDialogo($('#aboutDlg')),
+  deshacer: () => {
+    const h = S.history().at(-1);
+    if (!h) return toast('No hay nada que deshacer en esta sesión.');
+    const x = S.cur()?.play.log.find(l => l.id === h.id)?.x;
+    S.undo(h); toast(x ? `Deshecho: ${esc(x)}.` : 'Última acción deshecha.');
+  },
+  atajos: () => avisar({ titulo: 'Atajos de teclado', icono: 'info', texto: textoAtajos() }),
   reset: async () => {
     if (!(await confirmar({ titulo: '¿Borrar todos los datos?', texto: 'Se borran todos los personajes, el catálogo y el historial de este dispositivo. Justo después podrás deshacerlo.', ok: 'Borrar todo', peligro: true }))) return;
     const db = bdVacia(); invalidarItems(); S.editing = false;
@@ -226,6 +237,7 @@ function bindSheet() {
   on(sheet, 'click', '[data-ejver]', (e, b) => abrirRasgoJuego(b.dataset.ejver));
   on(sheet, 'click', '[data-tirar]', (e, b) => tirarDesde(b.dataset.tirar));
   on(sheet, 'click', '[data-cbini]', () => iniciativaManual());
+  on(sheet, 'click', '[data-cbord]', (e, b) => accionOrden(b.dataset.cbord, b.dataset.id));
   sheet.addEventListener('toggle', e => { if (e.target.classList?.contains('cb-pruebas')) abrirPruebas(e.target.open); }, true);
   on(sheet, 'click', '[data-crab]', (e, b) => { const k = b.dataset.crab; if (matchMedia('(max-width: 899px)').matches) { mostrarCaracteristica(k); S.emit('ui'); } vibrar('light'); tirarDesde(`car:${k}`); });
   on(sheet, 'click', '[data-eco]', (e, b) => { const k = b.dataset.eco; S.edit((db, x) => { alternarEconomia(x, k); }); vibrar('light'); });
@@ -299,6 +311,15 @@ export async function init(store) {
   on(document, 'click', '[data-mcmd]', (e, b) => run(b.dataset.mcmd, b));
   on(document, 'click', 'dialog [data-close]', (e, b) => cerrarDialogo(b.closest('dialog')));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarMenu(); ocultarToast(); } });
+  document.addEventListener('keydown', e => {
+    if (e.defaultPrevented || e.repeat || e.isComposing || enTour() || menuAbierto()) return;
+    const a = document.activeElement, escribiendo = /input|textarea|select/i.test(a?.tagName || '') || !!a?.isContentEditable;
+    const cmd = ordenDeTecla({ key: e.key, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey, shift: e.shiftKey },
+      { escribiendo, dialogo: !!document.querySelector('dialog[open]'), enHoja: !!S.cur() && !portadaVisible() && !S.editing });
+    if (!cmd) return;
+    e.preventDefault();
+    run(cmd, cmd === 'rest' ? [...document.querySelectorAll('#bRest, #dRest')].find(b => b.offsetParent) : undefined);
+  });
   initMenus();
   let sbT = 0; addEventListener('scroll', () => { if (sbT) return; sbT = requestAnimationFrame(() => { sbT = 0; document.body.classList.toggle('sb-compacta', scrollY > 320); }); }, { passive: true });
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) cerrarDialogo(d); }));

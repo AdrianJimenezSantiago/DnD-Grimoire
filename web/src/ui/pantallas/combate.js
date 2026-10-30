@@ -11,6 +11,7 @@ import { trucoPotente } from '../../domain/clases/variantes.js';
 import { espaciosDe, espaciosLibres, primerLibreDesde } from '../../domain/conjuros/espacios.js';
 import { armasCombate, ataqueArma } from '../../domain/equipo/equipo.js';
 import { combateDe, ECONOMIA, economiaDeTiempo, ACCIONES_COMUNES, ACCION_COMUN, accionesAdicionales } from '../../domain/combate/combate.js';
+import { listaIniciativa, turnoActual, YO, TIPOS } from '../../domain/combate/orden.js';
 import { iniciativa, penalizacionAgotamiento, bonoSalvacion } from '../../domain/reglas/habilidades.js';
 import { pgActuales, pgMaximo, estadoVital, vidaDe, NOMBRE_ESTADO } from '../../domain/combate/vida.js';
 import { gi } from '../componentes/tema.js';
@@ -135,6 +136,23 @@ function efectosCombateHtml(ch) {
   };
   return `<div class="cb-efx" data-key="cb-efx" role="group" aria-label="Conjuros sobre ti">${boton(true, 'beneficios', 'Beneficios', 'Bendición, Acelerar, Escudo de la fe…', 'inspiracion')}${boton(false, 'perjuicios', 'Perjuicios', 'Perdición, Ralentizar, Maleficio…', 'esc_nig')}</div>`;
 }
+function ordenHtml(ch) {
+  const c = combateDe(ch), L = listaIniciativa(c, { nombre: ch.nombre || 'Tú' }), actual = turnoActual(c, { nombre: ch.nombre || 'Tú' });
+  const con = c.orden.length > 0;
+  const fila = x => {
+    const yo = x.id === YO, es = actual && actual.id === x.id && con;
+    return `<li class="cb-or t-${x.tipo}${es ? ' actual' : ''}${x.fuera ? ' fuera' : ''}" data-key="or-${esc(x.id)}"${es ? ' aria-current="step"' : ''}>
+      ${yo ? `<span class="cb-or-ini">${x.ini}</span>` : `<button type="button" class="cb-or-ini" data-cbord="ini" data-id="${esc(x.id)}" aria-label="Iniciativa de ${esc(x.nombre)}: ${x.ini ?? 'sin tirar'}. Tocar para cambiarla">${x.ini ?? '—'}</button>`}
+      <span class="cb-or-n"><b>${esc(x.nombre)}</b><small>${yo ? 'Tú' : TIPOS[x.tipo]}${x.fuera ? ' · fuera de combate' : ''}</small></span>
+      ${x.pgMax != null ? `<button type="button" class="cb-or-pg" data-cbord="pg" data-id="${esc(x.id)}" aria-label="PG de ${esc(x.nombre)}: ${x.pg} de ${x.pgMax}. Tocar para anotar daño o curación"><b>${x.pg}</b><small>/${x.pgMax}</small></button>` : ''}
+      ${yo ? '' : `<button type="button" class="cb-or-x" data-cbord="quitar" data-id="${esc(x.id)}" aria-label="Quitar a ${esc(x.nombre)}">×</button>`}</li>`;
+  };
+  return `<section class="cb-orden${con ? '' : ' vacio'}" data-key="cb-orden" aria-label="Orden de iniciativa">
+    <header class="cb-or-cab"><h3>${gi('iniciativa')}Orden de iniciativa</h3>
+      <button type="button" data-cbord="anadir">${icon('plus')}<span>Añadir</span></button>
+      ${con && L.some(x => x.ini != null) ? `<button type="button" class="gold" data-cbord="siguiente">Pasar turno</button>` : ''}</header>
+    ${con ? `<ol class="cb-or-l">${L.map(fila).join('')}</ol>` : '<p class="cb-vacio">Opcional: añade a tus aliados y enemigos para llevar el orden de los turnos y la vida de los enemigos.</p>'}</section>`;
+}
 export function combateHtml(ch, db) {
   const c = combateDe(ch), P = perfil(ch), ag = penalizacionAgotamiento(ch), est = estadoVital(ch), incap = incapacitado(ch);
   const lineas = resumenMods(ch), modsHtml = lineas.length || incap.length ? `<section class="cb-mods" aria-label="Lo que te afecta">
@@ -162,6 +180,7 @@ export function combateHtml(ch, db) {
         ${P.cd != null ? `<div class="vt-placa cd">${gi('ojo', 'vt-ico')}<b>${P.cd}</b><span>CD · ataque ${sgn(P.atk)}</span></div>` : ''}</div>
     </div>
   </section>
+    ${ordenHtml(ch)}
     ${est !== 'vivo' && pgActuales(ch) === 0 ? vigiliaHtml(ch) : ''}
     ${conc}<section class="cb-cond" data-key="cb-cond">${estadosHtml(ch)}${modsHtml}</section>
     ${efectosCombateHtml(ch)}

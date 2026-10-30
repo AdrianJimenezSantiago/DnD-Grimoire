@@ -365,3 +365,12 @@
 .cj-rec.crit b { color: var(--dd-oro); } .cj-rec.pifia b { color: var(--dd-ko); }
 .cj-rec.nuevo { animation: pop-in .35s var(--spring); }
 @media (max-width: 420px) { .cj-btns { grid-template-columns: 1fr; } }
+
+.dd-favs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 2px 12px; }
+.dd-favs[hidden] { display: none; }
+.dd-fav { display: inline-flex; align-items: center; }
+.dd-fav .dd-ficha { min-height: 32px; padding: 0 10px; border-top-right-radius: 0; border-bottom-right-radius: 0; flex-direction: column; justify-content: center; gap: 1px; }
+.dd-fav .dd-ficha b { font: 600 var(--fs-xs) / 1.1 var(--display); }
+.dd-fav-x { min-height: 32px; width: 28px; padding: 0; border-radius: 0 var(--r-pill) var(--r-pill) 0; border-left: 0; font-size: 16px; line-height: 1; color: var(--ink-2); }
+.dd-fav-mas { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: var(--r-pill); border-style: dashed; font: 500 var(--fs-xs) / 1 var(--sans); }
+.dd-fav-mas svg { width: 14px; height: 14px; color: var(--gold); }

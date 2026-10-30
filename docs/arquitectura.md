@@ -97,6 +97,14 @@ toast('Hecho.', [botonDeshacer(S, h)]);                                       //
 
 Cada cambio emite un evento; `main.js` vuelve a pintar la hoja y cada diálogo abierto se repinta con `S.subscribe`.
 
+### Guardado y datos del usuario
+
+- **Personajes**: `S.flush()` escribe toda la base de datos con `almacen.guardar` (localStorage en la web y Windows, `Preferences` en Android) 200 ms después del último cambio y al salir. Si falla (almacenamiento lleno o bloqueado) no se calla: `crearEstado({ alFallar, alRecuperar })` avisa, el cambio queda pendiente y se reintenta con el siguiente.
+- **Archivos grandes** (libros importados, retratos originales, copias automáticas, deshacer guardado): `archivos` de `platform/native.js`. En Android van a `Filesystem`; en la web y Windows, a IndexedDB (`platform/archivosWeb.js`), que pasa solo lo que hubiera en localStorage con el prefijo `file:` de versiones anteriores y vuelve a localStorage si IndexedDB no se puede abrir.
+- **Copias automáticas**: una al día en el dispositivo, las 5 últimas (`domain/personaje/copias.js` decide cuándo y cuáles se borran; `ui/dialogs/copia.js` las guarda y las restaura).
+- **Deshacer tras reiniciar**: `S.historialGuardable()` da las 10 últimas acciones con su personaje de antes, y `S.recuperarHistorial()` las vuelve a cargar al arrancar.
+- **Esquema**: `ESQUEMA` en `domain/personaje/modelo.js`. Si cambia la forma de los datos guardados, se sube `ESQUEMA` y se añade `MIGRACIONES[n]` (del esquema `n` al `n + 1`) con su prueba; `migrarBd` las encadena al cargar y al abrir una copia. Los datos de una versión más nueva se cargan como se puede, guardando antes el original intacto.
+
 ### Diálogos (`ui/dialogs/`)
 
 Todos siguen la misma forma:
@@ -137,6 +145,8 @@ Cada archivo lleva **una línea de cabecera** que dice qué contiene, y nada má
 
 ```bash
 npm test                                   # todas
+npm run test:cobertura                     # las mismas, con la cobertura de domain/ y core/ y sus mínimos
+npm run e2e                                # compila la web y la recorre en Chromium (e2e/)
 npm run lint                               # ESLint: variables sin declarar e imports sin usar
 node --test tests/combate/vida.test.js     # un archivo
 node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contienen una palabra
@@ -152,7 +162,11 @@ node --test --test-name-pattern="muerte" "tests/**/*.test.js"   # las que contie
 | `tests/tools/` | Los scripts de publicación (la versión de cada release) |
 | `tests/integracion/` | Pruebas que cruzan varios módulos: auditorías contra el Manual, todas las combinaciones de clase y especie, un combate simulado |
 | `tests/arquitectura/` | Las reglas de dependencia entre capas y que todo lo importado exista |
+| `tests/platform/` | La parte de `platform/` que no depende del dispositivo (archivos en IndexedDB con paso desde localStorage) |
 | `tests/helpers/fixtures.js` | Utilidades comunes: leer el compendio, copiar un arma predefinida, leer un archivo del repositorio |
+| `e2e/*.e2e.js` | La app compilada en Chromium con `playwright-core`: guardado y copias, hoja (atajos, deshacer, imprimir, vista de grupo), combate y compartir. `e2e/entorno.js` sirve `www/` y siembra los personajes |
+
+Las pruebas de extremo a extremo buscan la versión de Chromium de `playwright-core`; si no la tienes, `npx playwright-core install chromium` (o `CHROMIUM=/ruta/a/chrome npm run e2e`). La CI de los pull requests pasa las tres: unitarias con cobertura mínima, extremo a extremo y lint.
 
 Dentro de cada archivo, cada `describe` agrupa las pruebas de una función o de una regla (`describe('salvaciones contra muerte', …)`), y el título de cada `test` dice qué comportamiento comprueba. Los personajes de ejemplo se crean con `normPersonaje(personajeVacio({ … }))` en un auxiliar al principio del archivo.
 

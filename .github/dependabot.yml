@@ -1,0 +1,20 @@
+# Avisos de versiones nuevas de las dependencias y de las acciones de GitHub, agrupados una vez por semana.
+# Cada pull request pasa las pruebas (unitarias, de extremo a extremo y la auditoría de npm); fusionarlo en main publica versión.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      capacitor:
+        patterns: ["@capacitor/*", "@capacitor-community/*"]
+      fuentes:
+        patterns: ["@fontsource/*"]
+      desarrollo:
+        dependency-type: development
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

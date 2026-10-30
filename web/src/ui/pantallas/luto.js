@@ -10,7 +10,7 @@ import { cerrarDialogo } from '../componentes/dialog.js';
 import { ocultarToast } from '../componentes/toast.js';
 
 export const estaMuerto = ch => !!ch && estadoVital(ch) === 'muerto';
-const PERMITIDOS = new Set(['home', 'more', 'chars', 'theme', 'backup', 'manual', 'biblioteca', 'glosario', 'about', 'tutorial', 'awake', 'reset', 'revivido', 'newchar', 'hist', 'print', 'efectos', 'efectos-auto', 'efectos-alto', 'efectos-medio', 'efectos-bajo']);
+const PERMITIDOS = new Set(['home', 'more', 'chars', 'theme', 'backup', 'manual', 'biblioteca', 'glosario', 'about', 'tutorial', 'awake', 'reset', 'revivido', 'newchar', 'hist', 'grupo', 'deshacer', 'atajos', 'print', 'efectos', 'efectos-auto', 'efectos-alto', 'efectos-medio', 'efectos-bajo']);
 export const ordenPermitida = cmd => PERMITIDOS.has(cmd);
 
 const fecha = t => { try { return new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } };
